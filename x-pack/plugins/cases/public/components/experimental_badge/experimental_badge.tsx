@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiBetaBadgeProps } from '@elastic/eui';
 import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
-import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../../common/translations';
+import { EXPERIMENTAL_LABEL, EXPERIMENTAL_DESC } from '../../common/translations';
 
 interface Props {
   icon?: boolean;

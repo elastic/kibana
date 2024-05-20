@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { act, cleanup, fireEvent } from '@testing-library/react';
 import React from 'react';
 import type { AppContextTestRender } from '../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../mock/endpoint';
 import { useNavigateByRouterEventHandler } from './use_navigate_by_router_event_handler';
+import { act, fireEvent, cleanup } from '@testing-library/react';
 
 type ClickHandlerMock<Return = void> = jest.Mock<
   Return,

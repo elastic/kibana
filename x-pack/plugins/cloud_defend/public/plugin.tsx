@@ -8,16 +8,16 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { lazy, Suspense } from 'react';
-import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
 import type { CloudDefendRouterProps } from './application/router';
-import { SetupContext } from './application/setup_context';
-import { LoadingState } from './components/loading_state';
 import {
   CloudDefendPluginSetup,
-  CloudDefendPluginSetupDeps,
   CloudDefendPluginStart,
   CloudDefendPluginStartDeps,
+  CloudDefendPluginSetupDeps,
 } from './types';
+import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
+import { LoadingState } from './components/loading_state';
+import { SetupContext } from './application/setup_context';
 
 const LazyPolicyReplaceDefineStepExtension = lazy(
   () => import('./components/fleet_extensions/package_policy_replace_define_step_extension')

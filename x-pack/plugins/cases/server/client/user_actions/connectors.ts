@@ -7,33 +7,33 @@
 
 import { isEqual } from 'lodash';
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionResult, ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { CasesClientArgs } from '..';
 import type {
   GetCaseConnectorsPushDetails,
   GetCaseConnectorsResponse,
 } from '../../../common/types/api';
 import { GetCaseConnectorsResponseRt } from '../../../common/types/api';
+import { decodeOrThrow } from '../../common/runtime_types';
+import {
+  isConnectorUserAction,
+  isCreateCaseUserAction,
+  isPushedUserAction,
+} from '../../../common/utils/user_actions';
+import { createCaseError } from '../../common/error';
+import type { CasesClientArgs } from '..';
+import type { Authorization, OwnerEntity } from '../../authorization';
+import { Operations } from '../../authorization';
+import type { GetConnectorsRequest } from './types';
+import type { CaseConnectorActivity } from '../../services/user_actions/types';
+import type { CaseUserActionService } from '../../services';
 import type {
   CaseConnector,
   ExternalService,
   UserActionAttributes,
 } from '../../../common/types/domain';
 import { ConnectorTypes } from '../../../common/types/domain';
-import {
-  isConnectorUserAction,
-  isCreateCaseUserAction,
-  isPushedUserAction,
-} from '../../../common/utils/user_actions';
-import type { Authorization, OwnerEntity } from '../../authorization';
-import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
-import { decodeOrThrow } from '../../common/runtime_types';
-import type { CaseUserActionService } from '../../services';
-import type { CaseConnectorActivity } from '../../services/user_actions/types';
-import type { GetConnectorsRequest } from './types';
 
 export const getConnectors = async (
   { caseId }: GetConnectorsRequest,

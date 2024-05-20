@@ -10,9 +10,9 @@ import { DatasetQualityApiClientKey } from '../../common/config';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   CustomIntegration,
-  IntegrationPackage,
   installCustomIntegration,
   installPackage,
+  IntegrationPackage,
   uninstallPackage,
 } from './package_utils';
 

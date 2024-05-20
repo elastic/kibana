@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import React, { useMemo, useEffect, HTMLAttributes } from 'react';
 import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useEffect, HTMLAttributes } from 'react';
-import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
-import { DATA_FORMATTERS, TSVB_METRIC_TYPES } from '../../../../common/enums';
-import type { Metric, Panel, SanitizedFieldType, Series } from '../../../../common/types';
-import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
-import type { DragHandleProps } from '../../../types';
 // @ts-ignore
 import { aggToComponent } from '../lib/agg_to_component';
+import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
+import { getInvalidAggComponent } from './invalid_agg';
+import { seriesChangeHandler } from '../lib/series_change_handler';
 import { checkIfNumericMetric } from '../lib/check_if_numeric_metric';
 import { getFormatterType } from '../lib/get_formatter_type';
-import { seriesChangeHandler } from '../lib/series_change_handler';
-import { getInvalidAggComponent } from './invalid_agg';
+import { DATA_FORMATTERS, TSVB_METRIC_TYPES } from '../../../../common/enums';
+import type { Metric, Panel, Series, SanitizedFieldType } from '../../../../common/types';
+import type { DragHandleProps } from '../../../types';
+import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
 interface AggProps extends HTMLAttributes<HTMLElement> {
   disableDelete: boolean;

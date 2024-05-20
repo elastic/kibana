@@ -7,8 +7,8 @@
  */
 
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { RecoveredActionGroupId, DefaultActionGroupId } from './builtin_action_groups_types';
 import { ActionGroup } from './action_group_types';
-import type { DefaultActionGroupId, RecoveredActionGroupId } from './builtin_action_groups_types';
 
 interface ConsumerPrivileges {
   read: boolean;
@@ -25,7 +25,7 @@ export interface ActionVariable {
 
 export interface RuleType<
   ActionGroupIds extends Exclude<string, RecoveredActionGroupId> = DefaultActionGroupId,
-  RecoveryActionGroupId extends string = RecoveredActionGroupId,
+  RecoveryActionGroupId extends string = RecoveredActionGroupId
 > {
   id: string;
   name: string;
@@ -51,5 +51,5 @@ export interface RuleType<
 export type ActionGroupIdsOf<T> = T extends ActionGroup<infer groups>
   ? groups
   : T extends Readonly<ActionGroup<infer groups>>
-    ? groups
-    : never;
+  ? groups
+  : never;

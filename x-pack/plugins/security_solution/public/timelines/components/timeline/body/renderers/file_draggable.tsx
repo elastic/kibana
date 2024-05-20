@@ -9,7 +9,7 @@ import React from 'react';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
 
-import { TokensFlexItem, isNillEmptyOrNotFinite } from './helpers';
+import { isNillEmptyOrNotFinite, TokensFlexItem } from './helpers';
 import * as i18n from './translations';
 
 interface Props {

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import { TableListView } from '@kbn/content-management-table-list-view';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { TableListView } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import numeral from '@elastic/numeral';
+import type { FileJSON } from '@kbn/files-plugin/common';
 
-import { DiagnosticsFlyout, EmptyPrompt, FileFlyout } from './components';
 import { useFilesManagementContext } from './context';
 import { i18nTexts } from './i18n_texts';
+import { EmptyPrompt, DiagnosticsFlyout, FileFlyout } from './components';
 
 type FilesUserContentSchema = Omit<UserContentCommonSchema, 'attributes'> & {
   attributes: {
@@ -80,8 +80,7 @@ export const App: FunctionComponent = () => {
         listingLimit={1000}
         getOnClickTitle={({ attributes }) =>
           () =>
-            setSelectedFile(attributes as unknown as FileJSON)
-          }
+            setSelectedFile(attributes as unknown as FileJSON)}
         deleteItems={async (items) => {
           await filesClient.bulkDelete({ ids: items.map(({ id }) => id) });
         }}

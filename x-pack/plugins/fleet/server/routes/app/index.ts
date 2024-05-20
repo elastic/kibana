@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler, RouteValidationResultFactory } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
 
-import { API_VERSIONS } from '../../../common/constants';
 import { APP_API_ROUTES } from '../../constants';
+import { API_VERSIONS } from '../../../common/constants';
 
-import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
-import { GenerateServiceTokenError, defaultFleetErrorHandler } from '../../errors';
 import { appContextService } from '../../services';
+import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common/types';
+import { defaultFleetErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetRequestHandler, GenerateServiceTokenRequestSchema } from '../../types';
 import { CheckPermissionsRequestSchema } from '../../types';
 

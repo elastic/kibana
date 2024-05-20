@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { stringToObjectFormatter } from './formatting_utils';
 import { ConfigKey } from '../../../../common/runtime_types';
 import { secondsToCronFormatter } from '../formatting_utils';
-import { stringToObjectFormatter } from './formatting_utils';
 
 describe('common formatters', () => {
   it.each([

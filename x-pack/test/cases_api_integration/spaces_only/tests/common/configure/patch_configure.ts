@@ -9,13 +9,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
-  createConfiguration,
-  deleteConfiguration,
-  getAuthWithSuperUser,
-  getConfigurationOutput,
   getConfigurationRequest,
   removeServerGeneratedPropertiesFromSavedObject,
+  getConfigurationOutput,
+  deleteConfiguration,
+  createConfiguration,
   updateConfiguration,
+  getAuthWithSuperUser,
 } from '../../../../common/lib/api';
 import { nullUser } from '../../../../common/lib/mock';
 

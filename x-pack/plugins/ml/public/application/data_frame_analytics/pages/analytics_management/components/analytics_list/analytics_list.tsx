@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiCallOut,
@@ -14,33 +17,30 @@ import {
   EuiSearchBar,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   ANALYSIS_CONFIG_TYPE,
   DATA_FRAME_TASK_STATE,
   type DataFrameAnalyticsId,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { useRefreshAnalyticsList } from '../../../../common';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { useNavigateToPath } from '../../../../../contexts/kibana';
-import { useRefreshAnalyticsList } from '../../../../common';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
-import type { ListingPageUrlState } from '../../../../../../../common/types/common';
-import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
-import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
-import { StatsBar } from '../../../../../components/stats_bar';
-import { useRefresh } from '../../../../../routing/use_refresh';
-import { filterAnalytics } from '../../../../common/search_bar_filters';
-import { getAnalyticsFactory } from '../../services/analytics_service';
-import { CreateAnalyticsButton } from '../create_analytics_button';
-import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import type { DataFrameAnalyticsListRow, ItemIdToExpandedRowMap } from './common';
 import { DataFrameAnalyticsListColumn } from './common';
-import { ExpandedRow } from './expanded_row';
+import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getJobTypeBadge, getTaskStateBadge, useColumns } from './use_columns';
+import { ExpandedRow } from './expanded_row';
+import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import { StatsBar } from '../../../../../components/stats_bar';
+import { CreateAnalyticsButton } from '../create_analytics_button';
+import { filterAnalytics } from '../../../../common/search_bar_filters';
+import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
+import type { ListingPageUrlState } from '../../../../../../../common/types/common';
+import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { useRefresh } from '../../../../../routing/use_refresh';
 
 const filters: EuiSearchBarProps['filters'] = [
   {

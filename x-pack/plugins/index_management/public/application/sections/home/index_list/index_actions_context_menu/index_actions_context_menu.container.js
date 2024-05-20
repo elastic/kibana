@@ -6,6 +6,7 @@
  */
 
 import { connect } from 'react-redux';
+import { IndexActionsContextMenu as PresentationComponent } from './index_actions_context_menu';
 import {
   clearCacheIndices,
   closeIndices,
@@ -13,12 +14,11 @@ import {
   flushIndices,
   forcemergeIndices,
   openIndices,
-  performExtensionAction,
   refreshIndices,
+  performExtensionAction,
   reloadIndices,
   unfreezeIndices,
 } from '../../../../store/actions';
-import { IndexActionsContextMenu as PresentationComponent } from './index_actions_context_menu';
 
 import { getIndexStatusByIndexName, getIndicesByName } from '../../../../store/selectors';
 

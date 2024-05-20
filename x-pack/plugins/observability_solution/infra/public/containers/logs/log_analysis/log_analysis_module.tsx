@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useCallback, useMemo } from 'react';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useLogMlJobIdFormatsShimContext } from '../../../pages/logs/shared/use_log_ml_job_id_formats_shim';
 import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useLogMlJobIdFormatsShimContext } from '../../../pages/logs/shared/use_log_ml_job_id_formats_shim';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';

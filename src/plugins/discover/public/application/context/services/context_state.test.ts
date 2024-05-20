@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { Filter } from '@kbn/es-query';
-import { History, createBrowserHistory } from 'history';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { getState } from './context_state';
+import { createBrowserHistory, History } from 'history';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import { discoverServiceMock } from '../../../__mocks__/services';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 discoverServiceMock.data.query.filterManager.getAppFilters = jest.fn(() => []);
 discoverServiceMock.data.query.filterManager.getGlobalFilters = jest.fn(() => []);

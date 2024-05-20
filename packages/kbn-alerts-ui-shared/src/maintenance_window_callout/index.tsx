@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import { MaintenanceWindowStatus, KibanaServices } from './types';
+import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
 import {
   MAINTENANCE_WINDOW_NO_CATEGORY_TITLE,
   MAINTENANCE_WINDOW_RUNNING_DESCRIPTION,
 } from './translations';
-import { KibanaServices, MaintenanceWindowStatus } from './types';
-import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
 
 const maintenanceWindowTwoCategoryNames = (names: string[]) =>
   i18n.translate('alertsUIShared.maintenanceWindowCallout.maintenanceWindowTwoCategoryNames', {
@@ -101,10 +101,10 @@ export function MaintenanceWindowCallout({
     return activeCategories.length === 0
       ? null
       : activeCategories.length === 1
-        ? `${activeCategories}`
-        : activeCategories.length === 2
-          ? maintenanceWindowTwoCategoryNames(activeCategories)
-          : maintenanceWindowMultipleCategoryNames(activeCategories);
+      ? `${activeCategories}`
+      : activeCategories.length === 2
+      ? maintenanceWindowTwoCategoryNames(activeCategories)
+      : maintenanceWindowMultipleCategoryNames(activeCategories);
   }, [activeMaintenanceWindows, categories]);
 
   if (isMaintenanceWindowDisabled) {

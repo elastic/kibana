@@ -10,16 +10,16 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
+import { alertRenderer } from './alert_renderer';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { alertRenderer } from './alert_renderer';
 
 import { defaultRowRenderers } from '.';
-import { TimelineId } from '../../../../../../common/types/timeline';
 import { getRowRenderer } from './get_row_renderer';
+import { TimelineId } from '../../../../../../common/types/timeline';
 
 // EuiIcons coming from .testenv render the icon's aria-label as a span
 // extractEuiIcon removes the aria-label before checking for equality

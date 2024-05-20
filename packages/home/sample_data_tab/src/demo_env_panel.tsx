@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  EuiButton,
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
-  EuiPanel,
+  EuiButton,
   EuiText,
+  EuiImage,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
 
 import { DATA_TEST_SUBJ_DEMO_ENV_BUTTON } from './constants';
 

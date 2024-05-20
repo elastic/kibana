@@ -10,8 +10,8 @@ import type { IncomingHttpHeaders } from 'http';
 import {
   Transport,
   type TransportOptions,
-  type TransportRequestOptions,
   type TransportRequestParams,
+  type TransportRequestOptions,
   type TransportResult,
 } from '@elastic/elasticsearch';
 import { isUnauthorizedError } from '@kbn/es-errors';

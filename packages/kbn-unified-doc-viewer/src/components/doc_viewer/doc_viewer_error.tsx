@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
+import { EuiErrorBoundary } from '@elastic/eui';
 
 interface Props {
   error: Error | string;

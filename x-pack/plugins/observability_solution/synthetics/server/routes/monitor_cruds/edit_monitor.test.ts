@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { syncEditedMonitor } from './edit_monitor';
+import { SavedObject, SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
 import {
   EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { SyntheticsServerSetup } from '../../types';
-import { syncEditedMonitor } from './edit_monitor';
 
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),

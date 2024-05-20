@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { hostDetailsTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
-import { AssetDetails } from '../../../../../components/asset_details';
 import { useSourceContext } from '../../../../../containers/metrics_source';
-import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
+import type { HostNodeRow } from '../../hooks/use_hosts_table';
+import { AssetDetails } from '../../../../../components/asset_details';
+import { hostDetailsTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 
 export interface Props {
   node: HostNodeRow;

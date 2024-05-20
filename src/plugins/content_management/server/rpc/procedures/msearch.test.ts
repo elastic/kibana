@@ -9,11 +9,11 @@
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { MSearchIn, MSearchQuery } from '../../../common';
-import { EventBus } from '../../core/event_bus';
-import { createMockedStorage } from '../../core/mocks';
-import { MSearchService } from '../../core/msearch';
+import { validate, disableTransformsCache } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
-import { disableTransformsCache, validate } from '../../utils';
+import { createMockedStorage } from '../../core/mocks';
+import { EventBus } from '../../core/event_bus';
+import { MSearchService } from '../../core/msearch';
 import { mSearch } from './msearch';
 
 disableTransformsCache();

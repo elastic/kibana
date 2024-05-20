@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../helpers/aggregation_options';
-import { Option, createOptionsFromFields } from '../../helpers/create_options';
+import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
 

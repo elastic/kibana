@@ -7,23 +7,23 @@
 
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React from 'react';
 
-import type { FilterOptions } from '../../containers/types';
-import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { CaseDetailsLink } from '../links';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
-import { MarkdownRenderer } from '../markdown_editor';
-import { TruncatedText } from '../truncated_text';
 import { IconWithCount } from './icon_with_count';
+import * as i18n from './translations';
+import { CaseDetailsLink } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
-import * as i18n from './translations';
+import type { FilterOptions } from '../../containers/types';
+import { TruncatedText } from '../truncated_text';
+import { MarkdownRenderer } from '../markdown_editor';
+import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
 import type { FilterMode as RecentCasesFilterMode } from './types';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const getMarkdownContainerCss = (euiTheme: EuiThemeComputed<{}>) => css`
   max-height: 150px;

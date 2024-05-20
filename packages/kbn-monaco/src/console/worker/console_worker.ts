@@ -8,8 +8,8 @@
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { ConsoleParserResult, ConsoleWorkerDefinition, ConsoleParser } from '../types';
 import { createParser } from '../parser';
-import { ConsoleParser, ConsoleParserResult, ConsoleWorkerDefinition } from '../types';
 
 export class ConsoleWorker implements ConsoleWorkerDefinition {
   private parser: ConsoleParser | undefined;

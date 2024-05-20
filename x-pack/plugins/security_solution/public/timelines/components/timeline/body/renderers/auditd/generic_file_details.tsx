@@ -13,12 +13,12 @@ import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 
-import { Args } from '../args';
-import { Details, TokensFlexItem } from '../helpers';
-import { NetflowRenderer } from '../netflow';
-import { ProcessDraggable } from '../process_draggable';
-import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
 import * as i18n from './translations';
+import { NetflowRenderer } from '../netflow';
+import { TokensFlexItem, Details } from '../helpers';
+import { ProcessDraggable } from '../process_draggable';
+import { Args } from '../args';
+import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
 
 interface Props {
   id: string;

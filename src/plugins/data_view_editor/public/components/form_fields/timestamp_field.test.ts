@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TimestampOption } from '../../types';
 import { requireTimestampOptionValidator } from './timestamp_field';
+import { TimestampOption } from '../../types';
 
 const noOptions: TimestampOption[] = [];
 const options: TimestampOption[] = [

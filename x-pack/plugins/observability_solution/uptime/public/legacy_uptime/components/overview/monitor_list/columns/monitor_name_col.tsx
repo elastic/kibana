@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState, useMemo } from 'react';
-import { MonitorSummary } from '../../../../../../common/runtime_types/monitor';
-import { useGetUrlParams } from '../../../../hooks';
-import { useFilterUpdate } from '../../../../hooks/use_filter_update';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { stringifyUrlParams } from '../../../../lib/helper/url_params/stringify_url_params';
 import { MonitorPageLink } from '../../../common/monitor_page_link';
+import { useGetUrlParams } from '../../../../hooks';
+import { MonitorSummary } from '../../../../../../common/runtime_types/monitor';
+import { useFilterUpdate } from '../../../../hooks/use_filter_update';
 
 interface Props {
   summary: MonitorSummary;

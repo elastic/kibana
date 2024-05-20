@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../../../common/constants';
-import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
 import {
-  getDeleteAsPostBulkRequest,
-  getDeleteAsPostBulkRequestById,
+  getEmptyFindResult,
+  getFindResultWithSingleHit,
   getDeleteBulkRequest,
   getDeleteBulkRequestById,
-  getEmptyFindResult,
+  getDeleteAsPostBulkRequest,
+  getDeleteAsPostBulkRequestById,
   getEmptySavedObjectsResponse,
-  getFindResultWithSingleHit,
 } from '../../../../routes/__mocks__/request_responses';
+import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { bulkDeleteRulesRoute } from './route';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('Bulk delete rules route', () => {
   let server: ReturnType<typeof serverMock.create>;

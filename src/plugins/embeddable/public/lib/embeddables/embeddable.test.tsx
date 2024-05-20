@@ -9,14 +9,14 @@
 /* eslint-disable max-classes-per-file */
 
 import { skip, take } from 'rxjs';
+import { Embeddable } from './embeddable';
+import { EmbeddableOutput, EmbeddableInput } from './i_embeddable';
+import { ViewMode } from '../types';
 import { ContactCardEmbeddable } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
 import {
-  FilterableEmbeddable,
   MockFilter,
+  FilterableEmbeddable,
 } from '../test_samples/embeddables/filterable_embeddable';
-import { ViewMode } from '../types';
-import { Embeddable } from './embeddable';
-import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 
 class TestClass {
   constructor() {}

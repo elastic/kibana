@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
-import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useProfilingFunctionsData } from '../../hooks/use_profiling_functions_data';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
-import { EmptyDataPrompt } from './empty_data_prompt';
 import { ErrorPrompt } from './error_prompt';
 import { ProfilingLinks } from './profiling_links';
+import { EmptyDataPrompt } from './empty_data_prompt';
 
 interface Props {
   kuery: string;

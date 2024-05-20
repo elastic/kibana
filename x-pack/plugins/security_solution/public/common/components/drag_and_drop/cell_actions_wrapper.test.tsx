@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { type DataProvider, TimelineId } from '../../../../common/types';
-import { CellActionsMode, SecurityCellActionType } from '../cell_actions';
+import { render } from '@testing-library/react';
 import { CellActionsWrapper } from './cell_actions_wrapper';
+import { CellActionsMode, SecurityCellActionType } from '../cell_actions';
+import { TimelineId, type DataProvider } from '../../../../common/types';
 
 const MockSecurityCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
   <div data-test-subj="mockSecurityCellActions">{children}</div>

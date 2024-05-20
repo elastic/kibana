@@ -85,7 +85,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"serverlessObservability\""],
+        "signature": [
+          "\"serverlessObservability\""
+        ],
         "path": "x-pack/plugins/serverless_observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -98,7 +100,9 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": ["\"serverlessObservability\""],
+        "signature": [
+          "\"serverlessObservability\""
+        ],
         "path": "x-pack/plugins/serverless_observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

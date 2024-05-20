@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from '@kbn/core/public';
 import { action } from '@storybook/addon-actions';
 import { of } from 'rxjs';
+import type { ApplicationStart } from '@kbn/core/public';
 import { getDefaultCapabilities } from './capabilities';
 
 export const getDefaultServicesApplication = (

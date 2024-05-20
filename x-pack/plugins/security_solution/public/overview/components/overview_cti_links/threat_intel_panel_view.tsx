@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
 import { SecuritySolutionLinkButton } from '../../../common/components/links';
 
-import { shortenCountIntoString } from '../../../common/utils/shorten_count_into_string';
-import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_ti_data_sources';
+import * as i18n from './translations';
 import type { LinkPanelListItem } from '../link_panel';
 import { LinkPanel } from '../link_panel';
-import { Link } from '../link_panel/link';
 import type { LinkPanelViewProps } from '../link_panel/types';
-import * as i18n from './translations';
+import { shortenCountIntoString } from '../../../common/utils/shorten_count_into_string';
+import { Link } from '../link_panel/link';
+import { ID as CTIEventCountQueryId } from '../../containers/overview_cti_links/use_ti_data_sources';
 
 const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   { name: 'Name', field: 'title', sortable: true, truncateText: true, width: '100%' },

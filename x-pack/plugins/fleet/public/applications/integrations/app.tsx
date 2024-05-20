@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiPortal } from '@elastic/eui';
+import React, { memo } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { EuiPortal } from '@elastic/eui';
+import type { History } from 'history';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import type { History } from 'history';
-import React, { memo } from 'react';
-import { Redirect } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
@@ -32,15 +32,15 @@ import {
 
 import { FleetServerFlyout } from '../fleet/components';
 
-import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
+import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
 import type { UIExtensionsStorage } from './types';
 
-import { AgentEnrollmentFlyout } from './components';
-import { IntegrationsHeader } from './components/header';
-import { FlyoutContextProvider, PackageInstallProvider, UIExtensionsContext } from './hooks';
 import { EPMApp } from './sections/epm';
+import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
+import { IntegrationsHeader } from './components/header';
+import { AgentEnrollmentFlyout } from './components';
 
 const queryClient = new QueryClient();
 

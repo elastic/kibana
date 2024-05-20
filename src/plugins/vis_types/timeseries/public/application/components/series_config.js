@@ -1,13 +1,3 @@
-import {
-  EuiCode,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiHorizontalRule,
-  htmlIdGenerator,
-  useEuiTheme,
-} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -16,18 +6,28 @@ import {
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { last } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React, { useMemo, useCallback } from 'react';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiFormRow,
+  EuiCode,
+  EuiHorizontalRule,
+  useEuiTheme,
+} from '@elastic/eui';
+import { DataFormatPicker } from './data_format_picker';
+import { createTextHandler } from './lib/create_text_handler';
+import { checkIfNumericMetric } from './lib/check_if_numeric_metric';
+import { YesNo } from './yes_no';
+import { IndexPattern } from './index_pattern';
+import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from './series_config_query_bar_with_ignore_global_filter';
 import { DATA_FORMATTERS } from '../../../common/enums';
 import { tsvbEditorRowStyles } from '../styles/common.styles';
-import { DataFormatPicker } from './data_format_picker';
-import { IndexPattern } from './index_pattern';
-import { checkIfNumericMetric } from './lib/check_if_numeric_metric';
-import { createTextHandler } from './lib/create_text_handler';
-import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from './series_config_query_bar_with_ignore_global_filter';
-import { YesNo } from './yes_no';
 
 export const SeriesConfig = (props) => {
   const defaults = { offset_time: '', value_template: '{{value}}' };

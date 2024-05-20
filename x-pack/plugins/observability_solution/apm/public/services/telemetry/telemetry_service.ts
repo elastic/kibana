@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { TelemetryClient } from './telemetry_client';
+import { TelemetryServiceSetupParams, ITelemetryClient, TelemetryEventParams } from './types';
 import { apmTelemetryEventBasedTypes } from './telemetry_events';
-import { ITelemetryClient, TelemetryEventParams, TelemetryServiceSetupParams } from './types';
+import { TelemetryClient } from './telemetry_client';
 
 /**
  * Service that interacts with the Core's analytics module

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiLink, EuiSkeletonRectangle } from '@elastic/eui';
+import { EuiSkeletonRectangle, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import React from 'react';
-import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { _IGNORED } from '../../../../common/es_fields';
 import { useLinkToLogsExplorer } from '../../../hooks';
 import { QualityPercentageIndicator } from '../../quality_indicator';
+import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 
 export const DegradedDocsPercentageLink = ({
   isLoading,

@@ -7,36 +7,36 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import {
-  AppMountParameters,
-  Capabilities,
   ChromeStart,
   CoreStart,
-  IUiSettingsClient,
-  OverlayStart,
   PluginInitializerContext,
-  ScopedHistory,
   ToastsStart,
+  OverlayStart,
+  AppMountParameters,
+  IUiSettingsClient,
+  Capabilities,
+  ScopedHistory,
 } from '@kbn/core/public';
+import ReactDOM from 'react-dom';
+import React from 'react';
 import { DataPlugin, DataViewsContract } from '@kbn/data-plugin/public';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 
 import './index.scss';
-import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
-import { checkLicense } from '../common/check_license';
-import { graphRouter } from './router';
+import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { GraphSavePolicy } from './types';
+import { graphRouter } from './router';
+import { checkLicense } from '../common/check_license';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies

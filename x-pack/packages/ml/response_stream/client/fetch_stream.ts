@@ -8,7 +8,7 @@
 import { startsWith } from 'lodash';
 import type { Reducer, ReducerAction } from 'react';
 
-import type { HttpFetchOptions, HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 
 type GeneratorError = string | null;
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Annotation } from '../../../../../common/types/vis_data';
 import { filterAnnotations } from './filter';
+import type { Annotation } from '../../../../../common/types/vis_data';
 
 describe('filterAnnotations', () => {
   test('should filter annotations by passed value correctly', () => {

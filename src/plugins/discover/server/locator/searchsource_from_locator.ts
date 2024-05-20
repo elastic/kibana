@@ -8,10 +8,10 @@
 
 import { SearchSource, TimeRange } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { LocatorServicesDeps } from '.';
 import { DiscoverAppLocatorParams } from '../../common';
 import { getSortForSearchSource } from '../../common/utils/sorting';
@@ -50,8 +50,8 @@ const getFilters = (
     const timeRange = params.timeRange
       ? params.timeRange
       : savedSearch.timeRange
-        ? (savedSearch.timeRange as TimeRange)
-        : null;
+      ? (savedSearch.timeRange as TimeRange)
+      : null;
 
     if (timeRange) {
       filters.push({

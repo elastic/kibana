@@ -7,7 +7,15 @@
     "id": "urlDrilldown",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["embeddable", "uiActionsEnhanced"],
-    "requiredBundles": ["kibanaUtils", "kibanaReact", "imageEmbeddable", "uiActions"]
+    "requiredPlugins": [
+      "embeddable",
+      "uiActionsEnhanced"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
+      "imageEmbeddable",
+      "uiActions"
+    ]
   }
 }

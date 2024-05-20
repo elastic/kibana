@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
-import { act, waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
-import type { QueryBarComponentProps } from '.';
-import { QueryBar } from '.';
+import { act, waitFor } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import type { QueryBarComponentProps } from '.';
+import { QueryBar } from '.';
 
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';

@@ -8,12 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
-import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { TraceList } from './trace_list';
+import { useFallbackToTransactionsFetcher } from '../../../hooks/use_fallback_to_transactions_fetcher';
+import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 
 export function TopTracesOverview() {
   const {

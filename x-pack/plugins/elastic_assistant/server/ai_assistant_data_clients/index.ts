@@ -7,13 +7,13 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { estypes } from '@elastic/elasticsearch';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
-import { DocumentsDataWriter } from '../lib/data_stream/documents_data_writer';
-import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
+import { estypes } from '@elastic/elasticsearch';
 import { IIndexPatternString } from '../types';
+import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
+import { DocumentsDataWriter } from '../lib/data_stream/documents_data_writer';
 import { FindResponse, findDocuments } from './find';
 
 export interface AIAssistantDataClientParams {

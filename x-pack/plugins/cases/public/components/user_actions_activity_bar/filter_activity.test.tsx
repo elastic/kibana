@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
+import { waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { CaseUserActionsStats } from '../../containers/types';
 
 import { FilterActivity } from './filter_activity';

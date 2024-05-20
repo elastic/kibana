@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { createRecursiveSerializer } from '@kbn/jest-serializers';
 import { ToolingLog } from '@kbn/tooling-log';
+import { createRecursiveSerializer } from '@kbn/jest-serializers';
 
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
 import { Progress } from '../progress';
-import { createStats } from '../stats';
 import { createIndexDocRecordsStream } from './index_doc_records_stream';
+import { createStats } from '../stats';
 
 const AT_LINE_RE = /^\s+at /m;
 

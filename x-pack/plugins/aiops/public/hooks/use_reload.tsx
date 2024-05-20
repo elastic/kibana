@@ -7,8 +7,8 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useContext } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { type Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 
 export interface ReloadContextValue {
   refreshTimestamp: number;

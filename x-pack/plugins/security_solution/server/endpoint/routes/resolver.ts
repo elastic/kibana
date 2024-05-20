@@ -5,17 +5,17 @@
  * 2.0.
  */
 import type { StartServicesAccessor } from '@kbn/core/server';
+import type { SecuritySolutionPluginRouter } from '../../types';
+import type { StartPlugins } from '../../plugin';
+import type { ConfigType } from '../../config';
 import {
-  validateEntities,
   validateEvents,
+  validateEntities,
   validateTree,
 } from '../../../common/endpoint/schema/resolver';
-import type { ConfigType } from '../../config';
-import type { StartPlugins } from '../../plugin';
-import type { SecuritySolutionPluginRouter } from '../../types';
+import { handleTree } from './resolver/tree/handler';
 import { handleEntities } from './resolver/entity/handler';
 import { handleEvents } from './resolver/events';
-import { handleTree } from './resolver/tree/handler';
 
 export const registerResolverRoutes = (
   router: SecuritySolutionPluginRouter,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SearchRequest } from '@kbn/data-plugin/common';
-import type { ESFilter } from '@kbn/es-types';
 import moment from 'moment';
-import { parseRelativeDate } from '../../../../../common/lib/get_histogram_interval';
+import type { ESFilter } from '@kbn/es-types';
+import type { SearchRequest } from '@kbn/data-plugin/common';
+import type { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 import { UptimeEsClient } from '../../lib';
-import type { CursorPagination } from './types';
+import { parseRelativeDate } from '../../../../../common/lib/get_histogram_interval';
 
 export class QueryContext {
   callES: UptimeEsClient;

@@ -8,14 +8,14 @@
 
 import moment from 'moment';
 
+import { take } from 'rxjs';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { take } from 'rxjs';
-import { MetricsService } from './metrics_service';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
+import { MetricsService } from './metrics_service';
 import { OpsMetricsCollector } from './ops_metrics_collector';
 
 const testInterval = 100;

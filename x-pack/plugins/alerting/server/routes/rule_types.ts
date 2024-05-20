@@ -6,10 +6,10 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { RegistryAlertTypeWithAuth } from '../authorization';
 import { ILicenseState } from '../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { RegistryAlertTypeWithAuth } from '../authorization';
 import { verifyAccessAndContext } from './lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
 
 const rewriteBodyRes = (results: RegistryAlertTypeWithAuth[]) => {
   return results.map(

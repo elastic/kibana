@@ -13,8 +13,8 @@ import type { SignalSourceHit } from '../../types';
 import { getThreatListItemMock } from './build_threat_mapping_filter.mock';
 import {
   buildEnrichments,
-  enrichSignalThreatMatchesFromSignalsMap,
   groupAndMergeSignalMatches,
+  enrichSignalThreatMatchesFromSignalsMap,
 } from './enrich_signal_threat_matches';
 import { getNamedQueryMock, getSignalHitMock } from './enrich_signal_threat_matches.mock';
 import type { ThreatListItem, ThreatMatchNamedQuery } from './types';

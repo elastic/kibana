@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CSSObject } from '@emotion/react';
 import React from 'react';
+import { CSSObject } from '@emotion/react';
 
 const css: CSSObject = {
   width: '6px',

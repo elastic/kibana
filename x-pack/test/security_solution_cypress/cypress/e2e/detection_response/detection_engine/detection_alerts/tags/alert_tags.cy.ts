@@ -7,23 +7,23 @@
 
 import { getNewRule } from '../../../../../objects/rule';
 import {
-  ALERTS_TABLE_ROW_LOADER,
-  MIXED_ALERT_TAG,
-  SELECTED_ALERT_TAG,
-  UNSELECTED_ALERT_TAG,
-} from '../../../../../screens/alerts';
-import {
   clickAlertTag,
   openAlertTaggingBulkActionMenu,
   selectNumberOfAlerts,
   updateAlertTags,
 } from '../../../../../tasks/alerts';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
+import {
+  ALERTS_TABLE_ROW_LOADER,
+  MIXED_ALERT_TAG,
+  SELECTED_ALERT_TAG,
+  UNSELECTED_ALERT_TAG,
+} from '../../../../../screens/alerts';
 
 describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {

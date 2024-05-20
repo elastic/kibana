@@ -1,7 +1,8 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
+    "aliases": {
+    },
     "index": "ft_module_sample_ecommerce",
     "mappings": {
       "properties": {

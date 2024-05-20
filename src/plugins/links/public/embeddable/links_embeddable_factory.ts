@@ -7,8 +7,8 @@
  */
 
 import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
-import { IProvidesLegacyPanelPlacementSettings } from '@kbn/dashboard-plugin/public';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { IProvidesLegacyPanelPlacementSettings } from '@kbn/dashboard-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   EmbeddableFactory,

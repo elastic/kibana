@@ -28,7 +28,7 @@ import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/componen
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { CaseDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import type { GetAppUrl, NavigateTo } from '../../../../common/lib/kibana';
+import type { NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import { useNavigation } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
 import { StatusBadge } from './status_badge';

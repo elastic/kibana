@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { generateUniqueKey } from '../../../lib/get_test_data';
 import { ObjectRemover } from '../../../lib/object_remover';
+import { generateUniqueKey } from '../../../lib/get_test_data';
 import {
-  createRuleWithActionsAndParams,
-  createSlackConnector,
-  createSlackConnectorAndObjectRemover,
-  getAlertSummary,
   getConnectorByName,
+  createSlackConnectorAndObjectRemover,
+  createSlackConnector,
+  createRuleWithActionsAndParams,
+  getAlertSummary,
 } from './utils';
 
 export default ({ getPageObjects, getPageObject, getService }: FtrProviderContext) => {

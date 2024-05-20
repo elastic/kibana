@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFilePicker,
-  EuiFormRow,
-  EuiIconTip,
-  EuiRadioGroup,
-  EuiSpacer,
-} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, useState } from 'react';
+import {
+  EuiSpacer,
+  EuiFilePicker,
+  EuiButton,
+  EuiFormRow,
+  EuiIconTip,
+  EuiRadioGroup,
+} from '@elastic/eui';
 
-import { FieldCopyAction } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
+import { FieldCopyAction } from '../../../../common/types';
 
 interface Props {
   actionOptions: FieldCopyAction[];

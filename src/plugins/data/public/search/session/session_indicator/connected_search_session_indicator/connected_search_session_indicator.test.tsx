@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React, { ReactNode } from 'react';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
+import { render, waitFor, screen, act } from '@testing-library/react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { dataPluginMock } from '../../../../mocks';
+import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
 import {
@@ -22,10 +21,11 @@ import {
   SearchUsageCollector,
   TimefilterContract,
 } from '../../../..';
-import { dataPluginMock } from '../../../../mocks';
-import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
-import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
+import { coreMock } from '@kbn/core/public/mocks';
 import { TOUR_RESTORE_STEP_KEY, TOUR_TAKING_TOO_LONG_STEP_KEY } from './search_session_tour';
+import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
 
 const coreStart = coreMock.createStart();
 const application = coreStart.application;

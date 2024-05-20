@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useState } from 'react';
 import { XJsonMode } from '@kbn/ace';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { useState } from 'react';
 import type { StepDefineExposedState } from '../common';
 
 const { useXJsonMode } = XJson;

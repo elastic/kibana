@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { KeyValuePairsField, Pair } from './key_value_field';
 

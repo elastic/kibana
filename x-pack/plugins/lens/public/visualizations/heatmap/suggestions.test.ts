@@ -8,9 +8,9 @@
 import { Position } from '@elastic/charts';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
 import { getSuggestions } from './suggestions';
 import type { HeatmapVisualizationState } from './types';
+import { HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
 
 describe('heatmap suggestions', () => {
   describe('rejects suggestions', () => {

@@ -6,14 +6,14 @@
  */
 
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { textService } from '../text';
 import {
   linkToHome,
-  linkToPolicies,
-  linkToRepositories,
-  linkToRestoreStatus,
   linkToSnapshots,
+  linkToRepositories,
+  linkToPolicies,
+  linkToRestoreStatus,
 } from '.';
-import { textService } from '../text';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 

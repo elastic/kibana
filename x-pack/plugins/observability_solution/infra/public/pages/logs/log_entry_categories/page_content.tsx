@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect } from 'react';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { isJobStatusWithResults, logEntryCategoriesJobType } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -24,9 +24,9 @@ import { SubscriptionSplashPage } from '../../../components/subscription_splash_
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { LogsPageTemplate } from '../shared/page_template';
-import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
+import { useLogMlJobIdFormatsShimContext } from '../shared/use_log_ml_job_id_formats_shim';
 
 const logCategoriesTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
   defaultMessage: 'Categories',

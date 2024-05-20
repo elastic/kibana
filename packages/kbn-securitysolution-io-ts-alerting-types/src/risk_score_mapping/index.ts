@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { operator } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { operator } from '@kbn/securitysolution-io-ts-types';
 import { RiskScore } from '../risk_score';
 
 export type RiskScoreMappingItem = t.TypeOf<typeof RiskScoreMappingItem>;

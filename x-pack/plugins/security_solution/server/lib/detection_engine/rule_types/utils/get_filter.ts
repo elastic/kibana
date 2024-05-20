@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import type {
+  Type,
+  LanguageOrUndefined,
+  Language,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { DataViewFieldBase, Filter } from '@kbn/es-query';
-import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import type {
-  Language,
-  LanguageOrUndefined,
-  Type,
-} from '@kbn/securitysolution-io-ts-alerting-types';
-import type { SavedIdOrUndefined } from '../../../../../common/api/detection_engine';
+import type { Filter, DataViewFieldBase } from '@kbn/es-query';
+import { assertUnreachable } from '../../../../../common/utility_types';
 import type {
   IndexPatternArray,
   RuleQuery,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { assertUnreachable } from '../../../../../common/utility_types';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { SavedIdOrUndefined } from '../../../../../common/api/detection_engine';
 import type { PartialFilter } from '../../types';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { getQueryFilter } from './get_query_filter';
 
 export interface GetFilterArgs {

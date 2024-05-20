@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import * as Either from 'fp-ts/lib/Either';
+import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import * as Either from 'fp-ts/lib/Either';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { checkForUnknownDocs } from './check_for_unknown_docs';
 import { createAggregateTypesSearchResponse } from './check_for_unknown_docs.mocks';
 

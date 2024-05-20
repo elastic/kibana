@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CONTAINER_FIELD, HOST_FIELD, POD_FIELD } from '../constants';
-import { awsEC2 } from './aws_ec2';
-import { awsRDS } from './aws_rds';
-import { awsS3 } from './aws_s3';
-import { awsSQS } from './aws_sqs';
-import { container } from './container';
+import { POD_FIELD, HOST_FIELD, CONTAINER_FIELD } from '../constants';
 import { host } from './host';
 import { pod } from './kubernetes/pod';
+import { awsEC2 } from './aws_ec2';
+import { awsS3 } from './aws_s3';
+import { awsRDS } from './aws_rds';
+import { awsSQS } from './aws_sqs';
+import { container } from './container';
 import { InventoryItemType } from './types';
 export { metrics } from './metrics';
 
@@ -29,7 +29,7 @@ const catalog = {
 
 export const inventoryModels = Object.values(catalog);
 
-type InventoryModels<T extends InventoryItemType> = (typeof catalog)[T];
+type InventoryModels<T extends InventoryItemType> = typeof catalog[T];
 
 export const findInventoryModel = <T extends InventoryItemType>(type: T): InventoryModels<T> => {
   const model = inventoryModels.find((m) => m.id === type);

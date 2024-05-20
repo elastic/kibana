@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiProgress, EuiText } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { EuiText, EuiProgress } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FieldList } from './field_list';
 
 describe('UnifiedFieldList <FieldList />', () => {

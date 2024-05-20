@@ -7,7 +7,6 @@
 
 import { Readable } from 'stream';
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   BulkErrorSchema,
   ImportExceptionListItemSchema,
@@ -17,14 +16,15 @@ import {
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createPromiseFromStreams } from '@kbn/utils';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { chunk } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 
-import { createExceptionsStreamFromNdjson } from './utils/import/create_exceptions_stream_logic';
-import { getTupleErrorsAndUniqueExceptionListItems } from './utils/import/dedupe_incoming_items';
-import { getTupleErrorsAndUniqueExceptionLists } from './utils/import/dedupe_incoming_lists';
-import { importExceptionListItems } from './utils/import/import_exception_list_items';
 import { importExceptionLists } from './utils/import/import_exception_lists';
+import { importExceptionListItems } from './utils/import/import_exception_list_items';
+import { getTupleErrorsAndUniqueExceptionLists } from './utils/import/dedupe_incoming_lists';
+import { getTupleErrorsAndUniqueExceptionListItems } from './utils/import/dedupe_incoming_items';
+import { createExceptionsStreamFromNdjson } from './utils/import/create_exceptions_stream_logic';
 
 export interface PromiseFromStreams {
   lists: Array<ImportExceptionListSchemaDecoded | Error>;

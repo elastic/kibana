@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { debounce } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 
 import { LogViewReference } from '../../../../common';
-import { LogEntriesSummaryHighlightsResponse } from '../../../../common/http_api';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { useBucketSize } from '../log_summary/bucket_size';
 import { fetchLogSummaryHighlights } from './api/fetch_log_summary_highlights';
+import { LogEntriesSummaryHighlightsResponse } from '../../../../common/http_api';
+import { useBucketSize } from '../log_summary/bucket_size';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const useLogSummaryHighlights = (
   logViewReference: LogViewReference,

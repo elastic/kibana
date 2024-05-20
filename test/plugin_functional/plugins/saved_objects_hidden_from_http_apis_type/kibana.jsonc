@@ -6,6 +6,8 @@
     "id": "savedObjectsHiddenFromHttpApisType",
     "server": true,
     "browser": false,
-    "configPath": ["saved_objects_hidden_from_http_apis_type"]
+    "configPath": [
+      "saved_objects_hidden_from_http_apis_type"
+    ]
   }
 }

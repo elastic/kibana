@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiSpacer,
-  EuiTextArea,
-} from '@elastic/eui';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageSection,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiTextArea,
+  EuiFlexItem,
+  EuiButton,
+  EuiFlexGroup,
+} from '@elastic/eui';
 
 import type { CoreStart } from '@kbn/core/public';
-import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput, FormulaPublicApi } from '@kbn/lens-plugin/public';
 
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { LensConfig, LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { LensConfig, LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { StartDependencies } from './plugin';
 
 export const App = (props: {

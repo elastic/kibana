@@ -6,6 +6,8 @@
     "id": "uiSettingsPlugin",
     "server": true,
     "browser": false,
-    "configPath": ["ui_settings_plugin"]
+    "configPath": [
+      "ui_settings_plugin"
+    ]
   }
 }

@@ -6,9 +6,9 @@
  */
 
 import {
+  RULE_EXECUTION_STATUS_BADGE,
   EXECUTION_STATUS_FILTER_BUTTON,
   EXECUTION_STATUS_FILTER_OPTION,
-  RULE_EXECUTION_STATUS_BADGE,
 } from '../screens/alerts_detection_rules';
 
 export const expectRulesWithExecutionStatus = (expectedCount: number, status: string) => {

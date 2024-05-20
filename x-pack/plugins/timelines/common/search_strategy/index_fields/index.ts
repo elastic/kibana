@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { IFieldSubType } from '@kbn/es-query';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
-import type { IFieldSubType } from '@kbn/es-query';
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 
 import type { Maybe } from '../common';
 

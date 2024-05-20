@@ -7,10 +7,8 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
-import { convertToStandartDeviationColumn } from './std_deviation';
+import { Metric } from '../../../../common/types';
 import {
   AvgColumn,
   CardinalityColumn,
@@ -22,6 +20,8 @@ import {
   StandardDeviationColumn,
   SumColumn,
 } from './types';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { convertToStandartDeviationColumn } from './std_deviation';
 
 describe('convertToStandartDeviationColumn', () => {
   const series = createSeries();
@@ -46,7 +46,7 @@ describe('convertToStandartDeviationColumn', () => {
         | MinColumn
         | SumColumn
         | StandardDeviationColumn
-      > | null> | null,
+      > | null> | null
     ]
   >([
     ['null if field is not provided', [{ series, metrics: [metric], dataView }], null],

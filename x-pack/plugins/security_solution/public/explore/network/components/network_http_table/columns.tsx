@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import numeral from '@elastic/numeral';
 import React from 'react';
+import numeral from '@elastic/numeral';
 import type {
   NetworkHttpEdges,
   NetworkHttpItem,
@@ -17,8 +17,8 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import type { Columns } from '../../../components/paginated_table';
 
-import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import * as i18n from './translations';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 export type NetworkHttpColumns = [
   Columns<NetworkHttpEdges>,
   Columns<NetworkHttpEdges>,
@@ -26,7 +26,7 @@ export type NetworkHttpColumns = [
   Columns<NetworkHttpEdges>,
   Columns<NetworkHttpEdges>,
   Columns<NetworkHttpEdges>,
-  Columns<NetworkHttpItem['requestCount']>,
+  Columns<NetworkHttpItem['requestCount']>
 ];
 
 export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [

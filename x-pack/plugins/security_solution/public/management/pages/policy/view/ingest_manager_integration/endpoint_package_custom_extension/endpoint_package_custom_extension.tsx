@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import type { ReactElement } from 'react';
 import React, { memo, useMemo } from 'react';
-import { NoPrivileges } from '../../../../../../common/components/no_privileges';
+import { EuiSpacer, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { NoPrivileges } from '../../../../../../common/components/no_privileges';
+import { useCanAccessSomeArtifacts } from '../hooks/use_can_access_some_artifacts';
 import { useHttp } from '../../../../../../common/lib/kibana';
+import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
+import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { BlocklistsApiClient } from '../../../../blocklist/services';
+import { FleetArtifactsCard } from './components/fleet_artifacts_card';
 import {
   getBlocklistsListPath,
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
   getTrustedAppsListPath,
 } from '../../../../../common/routing';
-import { BlocklistsApiClient } from '../../../../blocklist/services';
-import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
-import { HostIsolationExceptionsApiClient } from '../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { TrustedAppsApiClient } from '../../../../trusted_apps/service/api_client';
-import { useCanAccessSomeArtifacts } from '../hooks/use_can_access_some_artifacts';
-import { FleetArtifactsCard } from './components/fleet_artifacts_card';
 import {
   BLOCKLISTS_LABELS,
   EVENT_FILTERS_LABELS,

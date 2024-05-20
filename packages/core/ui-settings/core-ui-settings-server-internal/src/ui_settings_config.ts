@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ConfigDeprecationProvider } from '@kbn/config';
-import { TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
+import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { ConfigDeprecationProvider } from '@kbn/config';
 
 const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
   unused('enabled', { level: 'warning' }),

@@ -6,6 +6,8 @@
     "id": "taskManagerPerformance",
     "server": true,
     "browser": false,
-    "requiredPlugins": ["taskManager"]
+    "requiredPlugins": [
+      "taskManager"
+    ]
   }
 }

@@ -1,5 +1,3 @@
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { ViewMode } from '@kbn/embeddable-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import type { ViewMode } from '@kbn/embeddable-plugin/public';
  * Side Public License, v 1.
  */
 import type { PropsWithChildren } from 'react';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DashboardApplicationService } from '../services/application/types';
 
 export type DashboardListingProps = PropsWithChildren<{

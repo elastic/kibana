@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import {
   EuiCard,
+  EuiIcon,
+  EuiTextColor,
+  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiText,
-  EuiTextColor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const LockedPolicyDiv = styled.div`

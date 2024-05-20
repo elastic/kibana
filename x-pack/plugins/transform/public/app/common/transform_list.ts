@@ -6,9 +6,9 @@
  */
 
 import type { EuiTableActionsColumnType } from '@elastic/eui';
-import type { TransformHealthAlertRule } from '../../../common/types/alerting';
 import type { TransformConfigUnion, TransformId } from '../../../common/types/transform';
 import type { TransformStats } from '../../../common/types/transform_stats';
+import type { TransformHealthAlertRule } from '../../../common/types/alerting';
 
 // Used to pass on attribute names to table columns
 export enum TRANSFORM_LIST_COLUMN {

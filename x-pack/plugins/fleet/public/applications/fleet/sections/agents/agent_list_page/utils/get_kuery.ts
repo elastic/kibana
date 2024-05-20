@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AGENTS_PREFIX } from '../../../../constants';
 import { AgentStatusKueryHelper } from '../../../../services';
+import { AGENTS_PREFIX } from '../../../../constants';
 
 export const getKuery = ({
   search,

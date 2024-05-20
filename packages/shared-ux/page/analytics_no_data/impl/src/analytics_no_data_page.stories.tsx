@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { AnalyticsNoDataPageStorybookMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 import type { AnalyticsNoDataPageStorybookParams } from '@kbn/shared-ux-page-analytics-no-data-mocks';
-import React from 'react';
 
-import mdx from '../README.mdx';
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page';
 import { AnalyticsNoDataPageProvider } from './services';
+import mdx from '../README.mdx';
 
 const mock = new AnalyticsNoDataPageStorybookMock();
 

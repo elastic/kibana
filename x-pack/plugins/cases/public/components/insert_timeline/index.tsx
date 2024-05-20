@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useCallback } from 'react';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 
 type InsertFields = 'comment' | 'description';

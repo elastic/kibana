@@ -1,4 +1,3 @@
-import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
  * Side Public License, v 1.
  */
 import type { Scope } from 'eslint';
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 
 export function checkNodeForExistingDataTestSubjProp(
   node: TSESTree.JSXOpeningElement,

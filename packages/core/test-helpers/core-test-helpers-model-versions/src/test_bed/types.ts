@@ -7,11 +7,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type {
   ISavedObjectsRepository,
   SavedObjectsBulkCreateObject,
 } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 /**
  * A testbed that can be used for model version integration tests.

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
 import {
-  EuiButtonIcon,
   EuiCheckbox,
-  EuiDataGridControlColumn,
+  EuiButtonIcon,
+  EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
+  EuiDataGridControlColumn,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 
 const SelectionHeaderCell = () => {
   return (

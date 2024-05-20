@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useSuggestUsers } from './use_suggest_users';
 
+import * as api from './api';
+import { mockUserProfiles } from './mock';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
 import { TestProviders } from '../../mock';
-import * as api from './api';
-import { mockUserProfiles } from './mock';
 
 jest.mock('./api');
 jest.mock('../../hooks/use_app_toasts');

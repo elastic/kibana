@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { LEGACY_RULE_DETAILS, RULE_NODES_CHANGED } from '../../common/constants';
-import { AlertSeverity } from '../../common/enums';
-import {
-  AlertCluster,
-  AlertClusterStatsNode,
-  AlertClusterStatsNodes,
-  AlertData,
-  AlertInstanceState,
-  AlertMessage,
-  AlertNodesChangedState,
-  AlertState,
-  CommonAlertParams,
-} from '../../common/types/alerts';
-import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
-import { AlertingDefaults } from './alert_helpers';
 import { BaseRule } from './base_rule';
+import {
+  AlertData,
+  AlertCluster,
+  AlertState,
+  AlertMessage,
+  AlertClusterStatsNodes,
+  AlertClusterStatsNode,
+  CommonAlertParams,
+  AlertInstanceState,
+  AlertNodesChangedState,
+} from '../../common/types/alerts';
+import { RULE_NODES_CHANGED, LEGACY_RULE_DETAILS } from '../../common/constants';
+import { AlertingDefaults } from './alert_helpers';
+import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
+import { AlertSeverity } from '../../common/enums';
 interface AlertNodesChangedStates {
   removed: AlertClusterStatsNode[];
   added: AlertClusterStatsNode[];

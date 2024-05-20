@@ -8,8 +8,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../mock/test_providers/test_providers';
 import { EmptyPromptBody } from './empty_prompt_body';
+import { TestProviders } from '../../mock/test_providers/test_providers';
 
 describe('EmptyPromptBody', () => {
   const content = 'foo bar baz @baz';

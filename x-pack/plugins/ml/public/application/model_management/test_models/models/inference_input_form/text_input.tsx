@@ -9,13 +9,13 @@ import type { FC, FormEventHandler } from 'react';
 import React, { useState, useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { EuiFlexGroup, EuiForm, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, EuiTabs, EuiTab, EuiForm } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import type { InferrerType } from '..';
 import { ErrorMessage } from '../../inference_error';
+import type { InferrerType } from '..';
 import { OutputLoadingContent } from '../../output_loading';
 import { RUNNING_STATE } from '../inference_base';
 import { RawOutput } from '../raw_output';

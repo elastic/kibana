@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
+import useMountedState from 'react-use/lib/useMountedState';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
-import { i18n } from '@kbn/i18n';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import { isEqual } from 'lodash';
-import React, { useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
 import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
 
 interface Props {

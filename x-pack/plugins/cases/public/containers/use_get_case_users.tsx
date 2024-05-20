@@ -6,10 +6,10 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useCasesToast } from '../common/use_cases_toast';
-import type { ServerError } from '../types';
-import { getCaseUsers } from './api';
 import { casesQueriesKeys } from './constants';
+import type { ServerError } from '../types';
+import { useCasesToast } from '../common/use_cases_toast';
+import { getCaseUsers } from './api';
 import * as i18n from './translations';
 import type { CaseUsers } from './types';
 

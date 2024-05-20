@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import type { FC } from 'react';
 import React from 'react';
+import { pick } from 'lodash';
 
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { parse } from 'query-string';
 import { useLocation } from 'react-router-dom';
-import { getCoreStart, getPluginsStart } from '../../kibana_services';
-import { DataSourceContext } from '../common/hooks/data_source_context';
-import { DV_STORAGE_KEYS } from '../index_data_visualizer/types/storage';
-import { DataDriftPage } from './data_drift_page';
+import { parse } from 'query-string';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { InitialSettings } from './use_data_drift_result';
 import {
   DataDriftStateManagerContext,
   defaultSearchQuery,
   useDataDriftStateManager,
 } from './use_state_manager';
+import { DV_STORAGE_KEYS } from '../index_data_visualizer/types/storage';
+import { getCoreStart, getPluginsStart } from '../../kibana_services';
+import { DataDriftPage } from './data_drift_page';
+import { DataSourceContext } from '../common/hooks/data_source_context';
 
 const localStorage = new Storage(window.localStorage);
 

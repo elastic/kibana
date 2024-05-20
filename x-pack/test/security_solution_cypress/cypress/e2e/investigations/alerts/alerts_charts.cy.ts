@@ -7,11 +7,6 @@
 
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT } from '../../../screens/alerts';
-import { TOASTER } from '../../../screens/alerts_detection_rules';
-import {
-  GLOBAL_SEARCH_BAR_FILTER_ITEM,
-  GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE,
-} from '../../../screens/search_bar';
 import {
   clickAlertsHistogramLegend,
   clickAlertsHistogramLegendAddToTimeline,
@@ -19,11 +14,16 @@ import {
   clickAlertsHistogramLegendFilterOut,
   selectAlertsHistogram,
 } from '../../../tasks/alerts';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { createRule } from '../../../tasks/api_calls/rules';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
+import {
+  GLOBAL_SEARCH_BAR_FILTER_ITEM,
+  GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE,
+} from '../../../screens/search_bar';
+import { TOASTER } from '../../../screens/alerts_detection_rules';
 
 describe('Histogram legend hover actions', { tags: ['@ess', '@serverless'] }, () => {
   const ruleConfigs = getNewRule();

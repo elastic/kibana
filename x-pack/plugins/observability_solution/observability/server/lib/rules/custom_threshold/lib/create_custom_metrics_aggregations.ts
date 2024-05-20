@@ -11,7 +11,7 @@ import {
   Aggregators,
   CustomThresholdExpressionMetric,
 } from '../../../../../common/custom_threshold_rule/types';
-import { createRateAggsBucketScript, createRateAggsBuckets } from './create_rate_aggregation';
+import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 
 export const createCustomMetricsAggregations = (
   id: string,

@@ -5,38 +5,38 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
-  EuiBasicTable,
-  EuiButton,
-  EuiEmptyPrompt,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiBasicTable,
   EuiLink,
-  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
-import { AgentPolicySummaryLine } from '../../../../../components';
-import { SearchBar } from '../../../components';
+import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   useAuthz,
-  useBreadcrumbs,
-  useConfig,
-  useGetAgentPoliciesQuery,
-  useLink,
   usePagination,
   useSorting,
+  useLink,
+  useConfig,
   useUrlParams,
+  useBreadcrumbs,
+  useGetAgentPoliciesQuery,
 } from '../../../hooks';
-import type { AgentPolicy } from '../../../types';
-import { AgentPolicyActionMenu, LinkedAgentCount } from '../components';
+import { SearchBar } from '../../../components';
+import { AgentPolicySummaryLine } from '../../../../../components';
+import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
 import { CreateAgentPolicyFlyout } from './components';
 

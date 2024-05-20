@@ -6,8 +6,15 @@
     "id": "inspector",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["share"],
-    "requiredBundles": ["kibanaReact"],
-    "extraPublicDirs": ["common", "common/adapters/request"]
+    "requiredPlugins": [
+      "share"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "common",
+      "common/adapters/request"
+    ]
   }
 }

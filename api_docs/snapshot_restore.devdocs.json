@@ -42,7 +42,9 @@
         "tags": [],
         "label": "API_BASE_PATH",
         "description": [],
-        "signature": ["\"/api/snapshot_restore/\""],
+        "signature": [
+          "\"/api/snapshot_restore/\""
+        ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -55,7 +57,9 @@
         "tags": [],
         "label": "APP_REQUIRED_CLUSTER_PRIVILEGES",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -68,7 +72,9 @@
         "tags": [],
         "label": "APP_RESTORE_INDEX_PRIVILEGES",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -81,7 +87,9 @@
         "tags": [],
         "label": "APP_SLM_CLUSTER_PRIVILEGES",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -94,7 +102,9 @@
         "tags": [],
         "label": "FEATURE_STATES_NONE_OPTION",
         "description": [],
-        "signature": ["\"none\""],
+        "signature": [
+          "\"none\""
+        ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -107,7 +117,9 @@
         "tags": [],
         "label": "MAJOR_VERSION",
         "description": [],
-        "signature": ["\"8.0.0\""],
+        "signature": [
+          "\"8.0.0\""
+        ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -120,7 +132,10 @@
         "tags": [],
         "label": "MODULE_REPOSITORY_TYPES",
         "description": [],
-        "signature": ["RepositoryType", "[]"],
+        "signature": [
+          "RepositoryType",
+          "[]"
+        ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -133,7 +148,10 @@
         "tags": [],
         "label": "ON_PREM_REPOSITORY_TYPES",
         "description": [],
-        "signature": ["RepositoryType", "[]"],
+        "signature": [
+          "RepositoryType",
+          "[]"
+        ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -146,7 +164,10 @@
         "tags": [],
         "label": "PLUGIN_REPOSITORY_TYPES",
         "description": [],
-        "signature": ["RepositoryType", "[]"],
+        "signature": [
+          "RepositoryType",
+          "[]"
+        ],
         "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -183,7 +204,9 @@
             "tags": [],
             "label": "minimumLicenseType",
             "description": [],
-            "signature": ["\"basic\""],
+            "signature": [
+              "\"basic\""
+            ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -195,7 +218,9 @@
             "tags": [],
             "label": "getI18nName",
             "description": [],
-            "signature": ["(i18n: any) => string"],
+            "signature": [
+              "(i18n: any) => string"
+            ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -207,7 +232,9 @@
                 "tags": [],
                 "label": "i18n",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -272,7 +299,9 @@
             "tags": [],
             "label": "DAY",
             "description": [],
-            "signature": ["\"d\""],
+            "signature": [
+              "\"d\""
+            ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -284,7 +313,9 @@
             "tags": [],
             "label": "HOUR",
             "description": [],
-            "signature": ["\"h\""],
+            "signature": [
+              "\"h\""
+            ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -296,7 +327,9 @@
             "tags": [],
             "label": "MINUTE",
             "description": [],
-            "signature": ["\"m\""],
+            "signature": [
+              "\"m\""
+            ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -308,7 +341,9 @@
             "tags": [],
             "label": "SECOND",
             "description": [],
-            "signature": ["\"s\""],
+            "signature": [
+              "\"s\""
+            ],
             "path": "x-pack/plugins/snapshot_restore/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false

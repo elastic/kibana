@@ -13,10 +13,10 @@ import {
 import { omit, pick } from 'lodash';
 import { AdHocRunSO } from '../../data/ad_hoc_run/types';
 import {
-  AD_HOC_RUN_SAVED_OBJECT_TYPE,
-  AdHocRunAttributesIncludedInAAD,
   AdHocRunAttributesNotPartiallyUpdatable,
   AdHocRunAttributesToEncrypt,
+  AdHocRunAttributesIncludedInAAD,
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
 } from '../../saved_objects';
 
 export type PartiallyUpdateableAdHocRunAttributes = Partial<

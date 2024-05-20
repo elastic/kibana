@@ -10,10 +10,10 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { MatrixHistogram } from '.';
-import { useQueryToggle } from '../../containers/query_toggle';
-import { mockRuntimeMappings } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
+import { mockRuntimeMappings } from '../../containers/source/mock';
 import { getDnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
+import { useQueryToggle } from '../../containers/query_toggle';
 
 jest.mock('../../containers/query_toggle');
 

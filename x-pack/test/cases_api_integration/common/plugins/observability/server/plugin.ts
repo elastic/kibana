@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;

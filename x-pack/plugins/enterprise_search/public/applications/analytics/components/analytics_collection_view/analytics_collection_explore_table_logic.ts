@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { DataView, TimeRange, isRunningResponse } from '@kbn/data-plugin/common';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import { DataView, isRunningResponse, TimeRange } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
@@ -25,14 +25,14 @@ import {
   getTotalCountRequestParams,
 } from './analytics_collection_explore_table_formulas';
 import {
-  ClickedTable,
   ExploreTableColumns,
   ExploreTableItem,
   ExploreTables,
-  LocationsTable,
-  ReferrersTable,
   SearchTermsTable,
+  ClickedTable,
+  ReferrersTable,
   WorsePerformersTable,
+  LocationsTable,
 } from './analytics_collection_explore_table_types';
 import {
   AnalyticsCollectionToolbarLogic,

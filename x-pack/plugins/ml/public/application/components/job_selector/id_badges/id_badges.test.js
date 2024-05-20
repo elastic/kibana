@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react'; // eslint-disable-line import/no-extraneous-dependencies
 import React from 'react';
+import { render } from '@testing-library/react'; // eslint-disable-line import/no-extraneous-dependencies
 import { IdBadges } from './id_badges';
 
 const props = {

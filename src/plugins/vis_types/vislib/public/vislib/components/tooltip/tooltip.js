@@ -7,12 +7,12 @@
  */
 
 import d3 from 'd3';
-import $ from 'jquery';
 import _ from 'lodash';
+import $ from 'jquery';
 
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { Binder } from '../../lib/binder';
 import { positionTooltip } from './position_tooltip';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 
 let allContents = [];
 

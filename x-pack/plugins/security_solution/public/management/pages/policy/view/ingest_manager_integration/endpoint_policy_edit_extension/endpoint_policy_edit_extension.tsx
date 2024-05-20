@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
-import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { cloneDeep } from 'lodash';
 import React, { memo, useCallback } from 'react';
-import type { NewPolicyData } from '../../../../../../../common/endpoint/types';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { cloneDeep } from 'lodash';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { PolicySettingsForm } from '../../policy_settings_form';
 import type { PolicySettingsFormProps } from '../../policy_settings_form/policy_settings_form';
+import type { NewPolicyData } from '../../../../../../../common/endpoint/types';
 import { EndpointPolicyArtifactCards } from './components/endpoint_policy_artifact_cards';
+import { PolicySettingsForm } from '../../policy_settings_form';
 
 /**
  * Exports Endpoint-specific package policy instructions

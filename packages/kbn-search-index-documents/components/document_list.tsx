@@ -17,10 +17,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPagination,
-  EuiPopover,
   EuiProgress,
-  EuiSpacer,
+  EuiPopover,
   EuiText,
+  EuiSpacer,
   Pagination,
 } from '@elastic/eui';
 

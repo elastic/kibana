@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
-import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
-import { getPosturePolicy } from '../utils';
 import {
-  GCPSetupInfoContent,
   GcpFormProps,
+  GCPSetupInfoContent,
   GcpInputVarFields,
   gcpField,
   getInputVarsFields,
 } from './gcp_credential_form';
+import { getPosturePolicy } from '../utils';
+import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
+import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 
 export const GcpCredentialsFormAgentless = ({
   input,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createExtensionPointStorageMock } from './extension_point_storage.mock';
-import { ExtensionPointStorageClient } from './extension_point_storage_client';
 import {
   ExceptionsListPreCreateItemServerExtension,
   ExtensionPointStorageInterface,
 } from './types';
+import { createExtensionPointStorageMock } from './extension_point_storage.mock';
+import { ExtensionPointStorageClient } from './extension_point_storage_client';
 
 describe('When using ExtensionPointStorage', () => {
   let storageService: ExtensionPointStorageInterface;

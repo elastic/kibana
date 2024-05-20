@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
-import { SERVICE_NODE_NAME_MISSING, getServiceNodeName } from '../../../../../common/service_nodes';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import { asDynamicBytes, asInteger, asPercent } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { truncate, unit } from '../../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/links/apm/service_node_metric_overview_link';
@@ -57,7 +57,7 @@ export function JvmMetricsOverview() {
   );
 
   const items = data?.serviceNodes ?? [];
-  const columns: Array<ITableColumn<(typeof items)[0]>> = [
+  const columns: Array<ITableColumn<typeof items[0]>> = [
     {
       name: (
         <EuiToolTip

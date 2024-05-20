@@ -7,9 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
-import { ServiceAnomalyStats, getSeverity } from '../../../../../common/anomaly_detection';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { getSeverity, ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 import {
   getServiceHealthStatus,
   getServiceHealthStatusColor,

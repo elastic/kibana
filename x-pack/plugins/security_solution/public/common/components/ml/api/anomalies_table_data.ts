@@ -6,8 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Anomalies, InfluencerInput, CriteriaFields } from '../types';
 import { KibanaServices } from '../../../lib/kibana';
-import type { Anomalies, CriteriaFields, InfluencerInput } from '../types';
 
 export interface Body {
   jobIds: string[];

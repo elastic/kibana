@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiTextColor,
-  EuiToolTip,
-} from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import React, { useState, Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, Fragment, useMemo } from 'react';
+import {
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiLink,
+  EuiIcon,
+  EuiToolTip,
+  EuiTextColor,
+} from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
 
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
-import { DataStream } from '../../../../../../common/types';
-import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
-import { DataHealth } from '../../../../components';
+import { DataStream } from '../../../../../../common/types';
 import { getLifecycleValue } from '../../../../lib/data_streams';
-import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
+import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
-import { DataStreamsBadges } from '../data_stream_badges';
-import { ConditionalWrap } from '../data_stream_detail_panel';
+import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
+import { DataStreamsBadges } from '../data_stream_badges';
+import { ConditionalWrap } from '../data_stream_detail_panel';
+import { isDataStreamFullyManagedByILM } from '../../../../lib/data_streams';
 
 interface TableDataStream extends DataStream {
   isDataStreamFullyManagedByILM: boolean;

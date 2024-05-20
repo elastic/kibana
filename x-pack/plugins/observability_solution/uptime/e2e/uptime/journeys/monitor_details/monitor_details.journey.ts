@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Page, before, journey, step } from '@elastic/synthetics';
-import { recordVideo } from '../../../helpers/record_video';
+import { journey, step, before, Page } from '@elastic/synthetics';
 import { byTestId } from '../../../helpers/utils';
+import { recordVideo } from '../../../helpers/record_video';
 import { monitorDetailsPageProvider } from '../../page_objects/monitor_details';
 
 const dateRangeStart = '2019-09-10T12:40:08.078Z';

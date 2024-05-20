@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["GET"],
-    "patterns": ["_nodes/{node_id}/_repositories_metering"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_nodes/{node_id}/_repositories_metering"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-repositories-metering-api.html",
     "availability": {
       "stack": true,

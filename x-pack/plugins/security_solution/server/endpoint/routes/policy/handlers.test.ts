@@ -5,20 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import type { Agent } from '@kbn/fleet-plugin/common/types/models';
-import type { AgentClient } from '@kbn/fleet-plugin/server/services';
-import { get } from 'lodash';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
-import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContext,
@@ -26,7 +12,21 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { getAgentPolicySummaryHandler, getHostPolicyResponseHandler } from './handlers';
+import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
+import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
+import type { Agent } from '@kbn/fleet-plugin/common/types/models';
+import type { AgentClient } from '@kbn/fleet-plugin/server/services';
+import { get } from 'lodash';
+import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;

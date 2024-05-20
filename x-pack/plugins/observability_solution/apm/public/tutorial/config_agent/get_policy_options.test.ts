@@ -1,4 +1,3 @@
-import { APIReturnType } from '../../services/rest/create_call_apm_api';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { APIReturnType } from '../../services/rest/create_call_apm_api';
  * 2.0.
  */
 import { getPolicyOptions } from './get_policy_options';
+import { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;
 

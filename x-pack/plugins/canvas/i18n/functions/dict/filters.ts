@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { filtersFunctionFactory } from '../../../public/functions/filters';
-import { FunctionFactory } from '../../../types';
 import { FunctionHelp } from '../function_help';
+import { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<ReturnType<typeof filtersFunctionFactory>>> = {
   help: i18n.translate('xpack.canvas.functions.filtersHelpText', {

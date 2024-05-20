@@ -1,4 +1,3 @@
-import type { AggregateQuery } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import type { AggregateQuery } from '@kbn/es-query';
  * 2.0.
  */
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { VisualizeEditorContext } from '../../types';
 

@@ -6,21 +6,21 @@
  */
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState, useCallback } from 'react';
-import { SLO_ERROR_BUDGET_ID } from '../../../embeddable/slo/error_budget/constants';
-import { ChartData } from '../../../typings/slo';
-import { useKibana } from '../../../utils/kibana_react';
+import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import { TimeBounds } from '../types';
+import { SloTabId } from './slo_details';
+import { useKibana } from '../../../utils/kibana_react';
+import { ChartData } from '../../../typings/slo';
 import { ErrorBudgetChart } from './error_budget_chart';
 import { ErrorBudgetHeader } from './error_budget_header';
-import { SloTabId } from './slo_details';
+import { SLO_ERROR_BUDGET_ID } from '../../../embeddable/slo/error_budget/constants';
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   data: ChartData[];

@@ -6,11 +6,11 @@
  */
 import expect from '@kbn/expect';
 import { ROLES as SERVERLESS_USERNAMES } from '@kbn/security-solution-plugin/common/test';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   assetCriticalityRouteHelpersFactoryNoAuth,
   enableAssetCriticalityAdvancedSetting,
 } from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { usersAndRolesFactory } from '../../utils/users_and_roles';
 
 const USER_PASSWORD = 'changeme';

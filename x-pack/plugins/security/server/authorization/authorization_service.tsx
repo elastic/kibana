@@ -33,11 +33,6 @@ import type {
   CheckUserProfilesPrivileges,
 } from '@kbn/security-plugin-types-server';
 
-import type { AuthenticatedUser, SecurityLicense } from '../../common';
-import { APPLICATION_PREFIX } from '../../common/constants';
-import { canRedirectRequest } from '../authentication';
-import type { OnlineStatusRetryScheduler } from '../elasticsearch';
-import type { SpacesService } from '../plugin';
 import { Actions } from './actions';
 import { initAPIAuthorization } from './api_authorization';
 import { initAppAuthorization } from './app_authorization';
@@ -52,6 +47,11 @@ import { registerPrivilegesWithCluster } from './register_privileges_with_cluste
 import { ResetSessionPage } from './reset_session_page';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
+import type { AuthenticatedUser, SecurityLicense } from '../../common';
+import { APPLICATION_PREFIX } from '../../common/constants';
+import { canRedirectRequest } from '../authentication';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import type { SpacesService } from '../plugin';
 
 export { Actions } from './actions';
 

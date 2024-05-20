@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
+import { networkActions, networkModel, networkSelectors } from '../../store';
 import type { Direction, NetworkTlsEdges, SortField } from '../../../../../common/search_strategy';
 import { NetworkTlsFields } from '../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { Criteria, ItemsPerRow, SortingBasicTable } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
-import { networkActions, networkModel, networkSelectors } from '../../store';
 import { getTlsColumns } from './columns';
 import * as i18n from './translations';
 

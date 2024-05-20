@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { BooleanRelation } from '@kbn/es-query';
-import { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { RowClickContext, Trigger } from '@kbn/ui-actions-plugin/public';
+import { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
+import { BooleanRelation } from '@kbn/es-query';
 import { IEmbeddable } from '..';
 
 /**

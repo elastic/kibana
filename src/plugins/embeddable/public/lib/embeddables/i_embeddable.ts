@@ -9,23 +9,23 @@
 import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
-  EmbeddableAppContext,
-  HasDisableTriggers,
   HasEditCapabilities,
-  HasLegacyLibraryTransforms,
-  HasParentApi,
   HasType,
-  HasUniqueId,
+  HasDisableTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDisabledActionIds,
-  PublishesPhaseEvents,
-  PublishesSavedObjectId,
   PublishesUnifiedSearch,
+  HasParentApi,
+  HasUniqueId,
   PublishesViewMode,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
+  PublishesPhaseEvents,
+  PublishesSavedObjectId,
+  HasLegacyLibraryTransforms,
+  EmbeddableAppContext,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
@@ -84,7 +84,7 @@ export interface EmbeddableOutput {
 export interface IEmbeddable<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
-  N = any,
+  N = any
 > extends LegacyEmbeddableAPI {
   /**
    * Is this embeddable an instance of a Container class, can it contain

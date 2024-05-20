@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { type FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import type { ExperimentalFeatures } from '../../common/config';
-import type { AppDependencies } from './app_dependencies';
 import { SECTION_SLUG } from './common/constants';
+import type { AppDependencies } from './app_dependencies';
 import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';

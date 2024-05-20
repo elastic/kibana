@@ -6,34 +6,34 @@
  */
 
 import {
-  ACTION_SAVED_OBJECT_TYPE,
-  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-} from '@kbn/actions-plugin/server/constants/saved_objects';
-import {
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import { mapValues, once } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import {
+  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  ACTION_SAVED_OBJECT_TYPE,
+  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+} from '@kbn/actions-plugin/server/constants/saved_objects';
 import { firstValueFrom } from 'rxjs';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
-import { recallRankingEvent } from './analytics/recall_ranking';
 import type { ObservabilityAIAssistantConfig } from './config';
-import { registerFunctions } from './functions';
 import { registerServerRoutes } from './routes/register_routes';
 import { ObservabilityAIAssistantRouteHandlerResources } from './routes/types';
 import { ObservabilityAIAssistantService } from './service';
-import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import {
-  ObservabilityAIAssistantPluginSetupDependencies,
-  ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
+  ObservabilityAIAssistantPluginSetupDependencies,
+  ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
+import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
+import { registerFunctions } from './functions';
+import { recallRankingEvent } from './analytics/recall_ranking';
 
 export class ObservabilityAIAssistantPlugin
   implements

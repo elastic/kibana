@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
 
-import { LazyMyWorkpads } from './my_workpads';
 import { WorkpadCreate } from './workpad_create';
 import { LazyWorkpadTemplates } from './workpad_templates';
+import { LazyMyWorkpads } from './my_workpads';
 
 export type HomePageTab = 'workpads' | 'templates';
 

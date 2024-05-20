@@ -7,17 +7,17 @@
  */
 
 import { Readable } from 'stream';
-import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   createConcatStream,
   createFilterStream,
   createMapStream,
   createPromiseFromStreams,
 } from '@kbn/utils';
+import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { SavedObjectsImportError } from '../errors';
-import { createLimitStream } from './create_limit_stream';
 import { getNonUniqueEntries } from './get_non_unique_entries';
+import { createLimitStream } from './create_limit_stream';
 import type { ImportStateMap } from './types';
 
 interface CollectSavedObjectsOptions {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import stringify from 'json-stable-stringify';
+import React, { useMemo, FC, PropsWithChildren } from 'react';
 import {
   LogHighlightsStateProvider,
   LogPositionStateProvider,
@@ -13,15 +15,13 @@ import {
   useLogStreamContext,
   useLogViewContext,
 } from '@kbn/logs-shared-plugin/public';
-import stringify from 'json-stable-stringify';
-import React, { useMemo, FC, PropsWithChildren } from 'react';
-import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
-import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
-import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import {
   LogStreamPageActorRef,
   LogStreamPageCallbacks,
 } from '../../../observability_logs/log_stream_page/state';
+import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
+import { LogViewConfigurationProvider } from '../../../containers/logs/log_view_configuration';
+import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 
 const ViewLogInContext: FC<PropsWithChildren<unknown>> = ({ children }) => {

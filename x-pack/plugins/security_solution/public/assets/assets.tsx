@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiPageHeader, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
-import { LandingLinksIconsGroups } from '@kbn/security-solution-navigation/landing_links';
-import { LinkButton } from '@kbn/security-solution-navigation/links';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { LandingLinksIconsGroups } from '@kbn/security-solution-navigation/landing_links';
+import { SecurityPageName, ExternalPageName } from '@kbn/security-solution-navigation';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { EuiCallOut, EuiPageHeader, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { useRootNavLink } from '../common/links/nav_links';
 
 const INTEGRATIONS_CALLOUT_TITLE = i18n.translate(

@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { mockAlertCountByRuleResult, mockQuery, parsedAlertCountByRuleResult } from './mock_data';
+import { mockQuery, mockAlertCountByRuleResult, parsedAlertCountByRuleResult } from './mock_data';
 import type {
   UseAlertCountByRuleByStatus,
   UseAlertCountByRuleByStatusProps,

@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { Logger } from '@kbn/core/server';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
-  AgentPolicyInvalidError,
+  PackagePolicyRestrictionRelatedError,
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
-  PackagePolicyRestrictionRelatedError,
+  AgentPolicyInvalidError,
 } from '../errors';
 import type {
   AgentPolicy,
@@ -26,21 +25,22 @@ import type {
   NewAgentPolicy,
   PreconfiguredAgentPolicy,
 } from '../types';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
 
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 
+import { getAgentsByKuery } from './agents';
+import { packagePolicyService } from './package_policy';
+import { appContextService } from './app_context';
+import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 import { getFullAgentPolicy } from './agent_policies';
 import * as outputsHelpers from './agent_policies/outputs_helpers';
-import { getAgentsByKuery } from './agents';
-import { appContextService } from './app_context';
 import { auditLoggingService } from './audit_logging';
-import { downloadSourceService } from './download_source';
 import { licenseService } from './license';
-import { outputService } from './output';
-import { packagePolicyService } from './package_policy';
 import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
@@ -549,7 +549,7 @@ describe('Agent policy', () => {
 
   describe('removeOutputFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<(typeof agentPolicyService)['update']>
+      ReturnType<typeof agentPolicyService['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -624,7 +624,7 @@ describe('Agent policy', () => {
 
   describe('removeDefaultSourceFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<(typeof agentPolicyService)['update']>
+      ReturnType<typeof agentPolicyService['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest

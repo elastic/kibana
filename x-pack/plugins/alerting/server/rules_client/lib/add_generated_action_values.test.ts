@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { addGeneratedActionValues } from './add_generated_action_values';
+import { RuleAction, RuleSystemAction } from '../../../common';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -15,14 +17,12 @@ import {
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { RuleAction, RuleSystemAction } from '../../../common';
 import { AlertingAuthorization } from '../../authorization';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ConstructorOptions } from '../rules_client';
-import { addGeneratedActionValues } from './add_generated_action_values';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 
 jest.mock('uuid', () => ({
   v4: () => '111-222',

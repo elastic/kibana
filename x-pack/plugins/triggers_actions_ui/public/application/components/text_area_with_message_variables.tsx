@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiTextArea } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
-import React, { useState } from 'react';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
-import { templateActionVariable } from '../lib';
 import { TextAreaWithAutocomplete } from './text_area_with_autocomplete';
+import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];

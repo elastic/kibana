@@ -139,7 +139,9 @@
                     "tags": [],
                     "label": "options",
                     "description": [],
-                    "signature": ["(string | undefined)[]"],
+                    "signature": [
+                      "(string | undefined)[]"
+                    ],
                     "path": "packages/shared-ux/page/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -151,7 +153,9 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "signature": ["undefined"],
+                    "signature": [
+                      "undefined"
+                    ],
                     "path": "packages/shared-ux/page/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -389,7 +393,11 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Partial<", "NoDataCardServices", ">"],
+            "signature": [
+              "Partial<",
+              "NoDataCardServices",
+              ">"
+            ],
             "path": "packages/shared-ux/page/no_data/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -406,7 +414,12 @@
         "tags": [],
         "label": "getServicesMock",
         "description": [],
-        "signature": ["(params?: Partial<", "NoDataCardServices", ">) => ", "NoDataCardServices"],
+        "signature": [
+          "(params?: Partial<",
+          "NoDataCardServices",
+          ">) => ",
+          "NoDataCardServices"
+        ],
         "path": "packages/shared-ux/page/no_data/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -418,7 +431,11 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Partial<", "NoDataCardServices", ">"],
+            "signature": [
+              "Partial<",
+              "NoDataCardServices",
+              ">"
+            ],
             "path": "packages/shared-ux/page/no_data/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,

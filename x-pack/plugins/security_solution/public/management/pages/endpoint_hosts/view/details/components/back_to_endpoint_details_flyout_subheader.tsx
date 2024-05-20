@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { CommonProps } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { MouseEventHandler } from 'react';
 import React, { memo, useMemo } from 'react';
-import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
+import { i18n } from '@kbn/i18n';
+import type { CommonProps } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
-import { uiQueryParams } from '../../../store/selectors';
+import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useEndpointSelector } from '../../hooks';
+import { uiQueryParams } from '../../../store/selectors';
+import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 
 type BackButtonProps = CommonProps & {
   backButton?: {

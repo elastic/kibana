@@ -7,10 +7,10 @@
 
 import React, { lazy } from 'react';
 
-import { act, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import CreateConnectorFlyout from '.';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
+import userEvent from '@testing-library/user-event';
+import { waitFor, act } from '@testing-library/react';
+import CreateConnectorFlyout from '.';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
 

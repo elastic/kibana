@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
-import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterMultiTerms } from './create_filter/multi_terms';
 import { aggMultiTermsFnName } from './multi_terms_fn';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
-import { termsOrderAggParamDefinition } from './_terms_order_helper';
-import {
-  constructMultiTermOtherFilter,
-  createOtherBucketPostFlightRequest,
-} from './_terms_other_bucket_helper';
 import { MultiFieldKey } from './multi_field_key';
+import {
+  createOtherBucketPostFlightRequest,
+  constructMultiTermOtherFilter,
+} from './_terms_other_bucket_helper';
+import { termsOrderAggParamDefinition } from './_terms_order_helper';
 
 const termsTitle = i18n.translate('data.search.aggs.buckets.multiTermsTitle', {
   defaultMessage: 'Multi-Terms',

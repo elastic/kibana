@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiLink } from '@elastic/eui';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Legacy } from '../../legacy_shims';
 import { MonitoringStartServices } from '../../types';
 

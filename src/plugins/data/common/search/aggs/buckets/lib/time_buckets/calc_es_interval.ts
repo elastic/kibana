@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import dateMath, { Unit } from '@kbn/datemath';
 import moment from 'moment';
+import dateMath, { Unit } from '@kbn/datemath';
 
 import { i18n } from '@kbn/i18n';
 import { parseEsInterval } from '../../../utils';

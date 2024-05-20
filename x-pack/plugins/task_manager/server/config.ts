@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { getTaskClaimer } from './task_claimers';
 
 export const MAX_WORKERS_LIMIT = 100;

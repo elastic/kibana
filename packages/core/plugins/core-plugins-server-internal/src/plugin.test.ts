@@ -7,26 +7,26 @@
  */
 
 import { join } from 'path';
-import { Env } from '@kbn/config';
-import { schema } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { BehaviorSubject } from 'rxjs';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { schema } from '@kbn/config-schema';
+import { Env } from '@kbn/config';
 
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
-import { PluginType } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import type { PluginManifest } from '@kbn/core-plugins-server';
-import { PluginWrapper } from './plugin';
+import { PluginType } from '@kbn/core-base-common';
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { createRuntimePluginContractResolverMock } from './test_helpers';
+import { PluginWrapper } from './plugin';
 
 import {
-  InstanceInfo,
   createPluginInitializerContext,
   createPluginSetupContext,
+  InstanceInfo,
 } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();

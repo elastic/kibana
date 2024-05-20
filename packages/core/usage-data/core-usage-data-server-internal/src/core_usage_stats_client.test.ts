@@ -6,37 +6,37 @@
  * Side Public License, v 1.
  */
 
+import { Subject } from 'rxjs';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
-  BaseIncrementOptions,
-  CORE_USAGE_STATS_ID,
   CORE_USAGE_STATS_TYPE,
-  IncrementSavedObjectsExportOptions,
+  CORE_USAGE_STATS_ID,
+  BaseIncrementOptions,
   IncrementSavedObjectsImportOptions,
   IncrementSavedObjectsResolveImportErrorsOptions,
+  IncrementSavedObjectsExportOptions,
 } from '@kbn/core-usage-data-base-server-internal';
-import { Subject } from 'rxjs';
-import { CoreUsageStatsClient } from '.';
 import {
   BULK_CREATE_STATS_PREFIX,
-  BULK_DELETE_STATS_PREFIX,
   BULK_GET_STATS_PREFIX,
-  BULK_RESOLVE_STATS_PREFIX,
   BULK_UPDATE_STATS_PREFIX,
+  BULK_DELETE_STATS_PREFIX,
   CREATE_STATS_PREFIX,
   DELETE_STATS_PREFIX,
-  EXPORT_STATS_PREFIX,
   FIND_STATS_PREFIX,
   GET_STATS_PREFIX,
-  IMPORT_STATS_PREFIX,
-  LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX,
-  LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX,
-  RESOLVE_IMPORT_STATS_PREFIX,
   RESOLVE_STATS_PREFIX,
   UPDATE_STATS_PREFIX,
+  IMPORT_STATS_PREFIX,
+  RESOLVE_IMPORT_STATS_PREFIX,
+  EXPORT_STATS_PREFIX,
+  LEGACY_DASHBOARDS_IMPORT_STATS_PREFIX,
+  LEGACY_DASHBOARDS_EXPORT_STATS_PREFIX,
+  BULK_RESOLVE_STATS_PREFIX,
 } from './core_usage_stats_client';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { CoreUsageStatsClient } from '.';
 
 describe('CoreUsageStatsClient', () => {
   const stop$ = new Subject<void>();

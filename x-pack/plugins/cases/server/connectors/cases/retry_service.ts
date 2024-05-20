@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { CasesConnectorError } from './cases_connector_error';
-import type { BackoffFactory, BackoffStrategy } from './types';
+import type { BackoffStrategy, BackoffFactory } from './types';
 
 export class CaseConnectorRetryService {
   private logger: Logger;

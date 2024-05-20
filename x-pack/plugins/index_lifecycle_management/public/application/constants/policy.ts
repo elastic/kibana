@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RolloverAction, SerializedPolicy } from '../../../common/types';
+import { SerializedPolicy, RolloverAction } from '../../../common/types';
 
 export const defaultIndexPriority = {
   hot: '100',

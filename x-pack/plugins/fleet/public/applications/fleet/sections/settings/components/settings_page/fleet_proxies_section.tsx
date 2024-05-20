@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiBetaBadge,
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 import { useAuthz, useLink } from '../../../../hooks';
 import type { FleetProxy } from '../../../../types';

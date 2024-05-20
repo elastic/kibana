@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LogDocument, hashKeysOf } from '@kbn/apm-synthtrace-client';
+import { hashKeysOf, LogDocument } from '@kbn/apm-synthtrace-client';
 import { ServiceAssetDocument } from '@kbn/apm-synthtrace-client/src/lib/assets/service_assets';
 import { identity, noop } from 'lodash';
 import { createLogsAssetsAggregator } from './create_logs_assets_aggregator';

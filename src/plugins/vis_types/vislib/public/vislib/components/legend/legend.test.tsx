@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
+import { mount, ReactWrapper } from 'enzyme';
 
-import { EuiButtonGroup } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { EuiButtonGroup } from '@elastic/eui';
 
-import { act } from '@testing-library/react';
 import { VisLegend, VisLegendProps } from './legend';
 import { legendColors } from './models';
+import { act } from '@testing-library/react';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

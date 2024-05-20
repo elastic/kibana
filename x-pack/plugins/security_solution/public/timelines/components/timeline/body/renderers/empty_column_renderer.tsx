@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import {
-  DragEffects,
   DraggableWrapper,
+  DragEffects,
 } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../../common/components/drag_and_drop/helpers';
 import { getEmptyValue } from '../../../../../common/components/empty_value';

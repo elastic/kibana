@@ -6,8 +6,20 @@
     "id": "kibanaOverview",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["navigation", "dataViews", "home", "share", "dataViewEditor"],
-    "optionalPlugins": ["newsfeed", "usageCollection"],
-    "requiredBundles": ["kibanaReact", "newsfeed"]
+    "requiredPlugins": [
+      "navigation",
+      "dataViews",
+      "home",
+      "share",
+      "dataViewEditor"
+    ],
+    "optionalPlugins": [
+      "newsfeed",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "newsfeed"
+    ]
   }
 }

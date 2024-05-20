@@ -1,7 +1,3 @@
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
-import { isEqual } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,6 +7,10 @@ import { isEqual } from 'lodash';
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isEqual } from 'lodash';
+import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { deriveLensSuggestionFromLensAttributes } from '../utils/external_vis_context';
 
 import {

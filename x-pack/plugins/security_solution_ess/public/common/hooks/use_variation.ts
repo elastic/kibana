@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import type {
   CloudExperimentsFeatureFlagNames,
   CloudExperimentsPluginStart,
 } from '@kbn/cloud-experiments-plugin/common';
-import { useEffect } from 'react';
 /**
  * Retrieves the variation of the feature flag if the cloudExperiments plugin is enabled.
  * @param cloudExperiments {@link CloudExperimentsPluginStart}

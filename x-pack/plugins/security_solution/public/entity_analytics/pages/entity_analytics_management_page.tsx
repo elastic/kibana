@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
+import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
+import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { BETA } from '../../common/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
-import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
-import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 
 export const EntityAnalyticsManagementPage = () => {

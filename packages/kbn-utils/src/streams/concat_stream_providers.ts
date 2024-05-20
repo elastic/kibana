@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PassThrough, Readable, TransformOptions } from 'stream';
+import { Readable, PassThrough, TransformOptions } from 'stream';
 
 /**
  *  Write the data and errors from a list of stream providers

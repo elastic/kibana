@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Ast, fromExpression } from '@kbn/interpreter';
 import { toExpression } from './map';
+import { fromExpression, Ast } from '@kbn/interpreter';
 
 const baseSavedMapInput = {
   id: 'elementId',

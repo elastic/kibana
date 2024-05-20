@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { defer, Subject } from 'rxjs';
+import { finalize, map, delayWhen, filter } from 'rxjs';
 import { once } from 'lodash';
-import { Subject, defer } from 'rxjs';
-import { delayWhen, filter, finalize, map } from 'rxjs';
 import { createPageVisibility$ } from './page_visibility';
 
 export type AutoRefreshDoneFn = () => void;

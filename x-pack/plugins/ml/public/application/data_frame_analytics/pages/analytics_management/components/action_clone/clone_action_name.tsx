@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
+import type { FC } from 'react';
+import React from 'react';
+import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
-  DEFAULT_RESULTS_FIELD,
-  type DataFrameAnalyticsConfig,
   isClassificationAnalysis,
   isOutlierAnalysis,
   isRegressionAnalysis,
+  DEFAULT_RESULTS_FIELD,
+  type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { cloneDeep, isEqual } from 'lodash';
-import type { FC } from 'react';
-import React from 'react';
 import type { DeepReadonly } from '../../../../../../../common/types/common';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form';

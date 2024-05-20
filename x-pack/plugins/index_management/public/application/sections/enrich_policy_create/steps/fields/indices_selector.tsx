@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import type { EuiComboBoxProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isEmpty, uniq } from 'lodash';
 import React, { useState, useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { uniq, isEmpty } from 'lodash';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxProps } from '@elastic/eui';
+import { getMatchingIndices } from '../../../../services/api';
 import type { FieldHook } from '../../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
-import { getMatchingIndices } from '../../../../services/api';
 
 interface IOption {
   label: string;

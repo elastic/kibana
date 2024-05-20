@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { shallow } from 'enzyme';
 import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { LEGACY_DARK_THEME, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { useDarkMode } from '../../lib/kibana';
 import type { ChartSeriesData } from './common';
 import {
-  WrappedByAutoSizer,
   checkIfAllValuesAreZero,
   defaultChartHeight,
   getChartHeight,
   getChartWidth,
+  WrappedByAutoSizer,
   useThemes,
 } from './common';
+import { LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
 

@@ -7,7 +7,7 @@
  */
 
 import type { HttpResponse, HttpSetup } from '@kbn/core/public';
-import { trimEnd, trimStart } from 'lodash';
+import { trimStart, trimEnd } from 'lodash';
 import { API_BASE_PATH, KIBANA_API_PREFIX } from '../../../common/constants';
 
 const esVersion: string[] = [];

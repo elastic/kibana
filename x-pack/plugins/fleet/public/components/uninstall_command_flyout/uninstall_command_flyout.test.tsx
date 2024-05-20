@@ -15,22 +15,22 @@ import type {
 } from '../../../common/types/models/uninstall_token';
 
 import type {
-  GetUninstallTokenResponse,
   GetUninstallTokensMetadataResponse,
+  GetUninstallTokenResponse,
 } from '../../../common/types/rest_spec/uninstall_token';
 
 import type { TestRenderer } from '../../mock';
 import { createFleetTestRendererMock } from '../../mock';
 
 import {
-  useGetUninstallToken,
   useGetUninstallTokens,
+  useGetUninstallToken,
 } from '../../hooks/use_request/uninstall_tokens';
 
 import type { RequestError } from '../../hooks';
 
-import type { UninstallCommandTarget } from './types';
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
+import type { UninstallCommandTarget } from './types';
 
 jest.mock('../../hooks/use_request/uninstall_tokens', () => ({
   useGetUninstallToken: jest.fn(),

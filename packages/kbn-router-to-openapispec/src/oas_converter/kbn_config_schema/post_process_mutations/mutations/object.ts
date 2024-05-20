@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
-import { IContext } from '../context';
+import { metaFields } from '@kbn/config-schema';
 import { deleteField, stripBadDefault } from './utils';
+import { IContext } from '../context';
 
 const { META_FIELD_X_OAS_OPTIONAL } = metaFields;
 

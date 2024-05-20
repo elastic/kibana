@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { isEmpty, omit } from 'lodash';
-import qs from 'query-string';
 import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
+import qs from 'query-string';
+import { i18n } from '@kbn/i18n';
+import { isEmpty, omit } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiBadge,
+  EuiInMemoryTable,
+  EuiLink,
   EuiButton,
   EuiButtonIcon,
-  EuiFilterButton,
+  EuiInMemoryTableProps,
+  EuiTableFieldDataColumnType,
+  EuiPopover,
+  EuiBadge,
+  EuiToolTip,
   EuiFilterGroup,
+  EuiSelectable,
+  EuiFilterButton,
+  EuiSelectableOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
-  EuiLink,
-  EuiPopover,
-  EuiSelectable,
-  EuiSelectableOption,
-  EuiTableFieldDataColumnType,
-  EuiToolTip,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 

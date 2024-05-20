@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import type { HttpService, InternalHttpServicePreboot } from '@kbn/core-http-server-internal';
-import { createCoreContext, createHttpService } from '@kbn/core-http-server-mocks';
 import supertest from 'supertest';
+import { createCoreContext, createHttpService } from '@kbn/core-http-server-mocks';
+import type { HttpService, InternalHttpServicePreboot } from '@kbn/core-http-server-internal';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 
 import { registerPrebootStatusRoute } from '@kbn/core-status-server-internal/src/routes';
 

@@ -6,18 +6,18 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { INTERNAL_RISK_SCORE_URL } from '../../../../../common/constants';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import {
+  serverMock,
   requestContextMock,
   requestMock,
-  serverMock,
 } from '../../../detection_engine/routes/__mocks__';
-import { createIndex } from '../../indices/lib/create_index';
-import { createStoredScript } from '../../stored_scripts/lib/create_script';
-import { createAndStartTransform } from '../../transform/helpers/transforms';
-import { createIngestPipeline } from '../helpers/ingest_pipeline';
+import { INTERNAL_RISK_SCORE_URL } from '../../../../../common/constants';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { installRiskScoresRoute } from './install_risk_scores';
+import { createIngestPipeline } from '../helpers/ingest_pipeline';
+import { createStoredScript } from '../../stored_scripts/lib/create_script';
+import { createIndex } from '../../indices/lib/create_index';
+import { createAndStartTransform } from '../../transform/helpers/transforms';
 
 jest.mock('../../stored_scripts/lib/create_script', () => ({
   createStoredScript: jest

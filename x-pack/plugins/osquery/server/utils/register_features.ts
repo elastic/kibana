@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { PLUGIN_ID } from '../../common';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  packAssetSavedObjectType,
   packSavedObjectType,
+  packAssetSavedObjectType,
   savedQuerySavedObjectType,
 } from '../../common/types';
+import { PLUGIN_ID } from '../../common';
 import type { SetupPlugins } from '../types';
 
 export const registerFeatures = (features: SetupPlugins['features']) => {

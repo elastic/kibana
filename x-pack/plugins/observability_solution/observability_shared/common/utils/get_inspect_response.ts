@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { RequestStatistics, RequestStatus } from '@kbn/inspector-plugin/common';
 import { Request } from '@kbn/inspector-plugin/common';
-import { v4 as uuidv4 } from 'uuid';
 import { WrappedElasticsearchClientError } from './unwrap_es_response';
 
 export type InspectResponse = Request[];

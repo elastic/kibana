@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TypeOf, schema } from '@kbn/config-schema';
 
-import { serializeRestoreSettings } from '../../../common/lib';
 import { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
+import { serializeRestoreSettings } from '../../../common/lib';
 import { deserializeRestoreShard } from '../../lib';
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';

@@ -14,16 +14,16 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
   EuiIcon,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
-  FineTuneModelsButton,
   TextExpansionCallOutState,
   TextExpansionDismissButton,
+  FineTuneModelsButton,
 } from './text_expansion_callout';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 

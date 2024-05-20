@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { transformRawData } from '.';
 import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
+import { transformRawData } from '.';
 
 describe('transformRawData', () => {
   it('returns non-anonymized data when rawData is a string', () => {

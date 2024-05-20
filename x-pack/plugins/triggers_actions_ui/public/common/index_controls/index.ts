@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { uniq } from 'lodash';
-import { getESIndexFields, getMatchingIndices, loadIndexPatterns } from '../lib/data_apis';
+import { loadIndexPatterns, getMatchingIndices, getESIndexFields } from '../lib/data_apis';
 
 export interface IOption {
   label: string;

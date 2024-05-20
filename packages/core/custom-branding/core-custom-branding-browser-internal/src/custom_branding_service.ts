@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { Subject, BehaviorSubject } from 'rxjs';
+import { shareReplay, takeUntil, map } from 'rxjs';
 import type {
+  CustomBrandingStart,
   CustomBrandingSetup,
   CustomBrandingSetupDeps,
-  CustomBrandingStart,
 } from '@kbn/core-custom-branding-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { map, shareReplay, takeUntil } from 'rxjs';
 
 export class CustomBrandingService {
   private customBranding$: BehaviorSubject<CustomBranding> | undefined;

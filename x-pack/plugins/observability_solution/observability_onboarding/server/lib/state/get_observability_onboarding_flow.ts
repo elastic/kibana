@@ -7,8 +7,8 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
   ObservabilityOnboardingFlow,
+  OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
   SavedObservabilityOnboardingFlow,
 } from '../../saved_objects/observability_onboarding_status';
 

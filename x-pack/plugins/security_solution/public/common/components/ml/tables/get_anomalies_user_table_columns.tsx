@@ -7,14 +7,14 @@
 
 import React from 'react';
 import type { Columns } from '../../../../explore/components/paginated_table';
-import { UserDetailsLink } from '../../links';
-import { getRowItemsWithActions } from '../../tables/helpers';
 import type { AnomaliesByUser, Anomaly } from '../types';
+import { getRowItemsWithActions } from '../../tables/helpers';
 import { createCompoundAnomalyKey } from './create_compound_key';
+import { UserDetailsLink } from '../../links';
 
+import * as i18n from './translations';
 import { UsersType } from '../../../../explore/users/store/model';
 import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
-import * as i18n from './translations';
 
 export const getAnomaliesUserTableColumns = (
   startDate: string,
@@ -25,7 +25,7 @@ export const getAnomaliesUserTableColumns = (
   Columns<Anomaly['jobId'], AnomaliesByUser>,
   Columns<Anomaly['entityValue'], AnomaliesByUser>,
   Columns<Anomaly['influencers'], AnomaliesByUser>,
-  Columns<Anomaly['time'], AnomaliesByUser>,
+  Columns<Anomaly['time'], AnomaliesByUser>
 ] => [
   {
     name: i18n.USER_NAME,

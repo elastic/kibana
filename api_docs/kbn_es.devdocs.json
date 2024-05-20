@@ -36,7 +36,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -73,7 +75,9 @@
             "type": "Function",
             "tags": [],
             "label": "installSource",
-            "description": ["\nBuilds and installs ES from source"],
+            "description": [
+              "\nBuilds and installs ES from source"
+            ],
             "signature": [
               "(options: ",
               "InstallSourceOptions",
@@ -90,7 +94,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["InstallSourceOptions"],
+                "signature": [
+                  "InstallSourceOptions"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -105,7 +111,9 @@
             "type": "Function",
             "tags": [],
             "label": "downloadSnapshot",
-            "description": ["\nDownload ES from a snapshot"],
+            "description": [
+              "\nDownload ES from a snapshot"
+            ],
             "signature": [
               "(options: ",
               "DownloadSnapshotOptions",
@@ -122,7 +130,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["DownloadSnapshotOptions"],
+                "signature": [
+                  "DownloadSnapshotOptions"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -137,7 +147,9 @@
             "type": "Function",
             "tags": [],
             "label": "installSnapshot",
-            "description": ["\nDownload and installs ES from a snapshot"],
+            "description": [
+              "\nDownload and installs ES from a snapshot"
+            ],
             "signature": [
               "(options: ",
               "InstallSnapshotOptions",
@@ -154,7 +166,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["InstallSnapshotOptions"],
+                "signature": [
+                  "InstallSnapshotOptions"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -169,7 +183,9 @@
             "type": "Function",
             "tags": [],
             "label": "installArchive",
-            "description": ["\nInstalls ES from a local tar"],
+            "description": [
+              "\nInstalls ES from a local tar"
+            ],
             "signature": [
               "(archivePath: string, options?: ",
               "InstallArchiveOptions",
@@ -186,7 +202,9 @@
                 "tags": [],
                 "label": "archivePath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -199,7 +217,10 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["InstallArchiveOptions", " | undefined"],
+                "signature": [
+                  "InstallArchiveOptions",
+                  " | undefined"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -231,7 +252,9 @@
                 "tags": [],
                 "label": "installPath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -244,7 +267,9 @@
                 "tags": [],
                 "label": "archivePath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -257,7 +282,9 @@
                 "tags": [],
                 "label": "extractDirName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -272,7 +299,9 @@
             "type": "Function",
             "tags": [],
             "label": "installPlugins",
-            "description": ["\nInstalls comma separated list of ES plugins to the specified path"],
+            "description": [
+              "\nInstalls comma separated list of ES plugins to the specified path"
+            ],
             "signature": [
               "(installPath: string, plugins: string, esJavaOpts?: string | undefined) => Promise<void>"
             ],
@@ -287,7 +316,9 @@
                 "tags": [],
                 "label": "installPath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -300,7 +331,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -313,7 +346,9 @@
                 "tags": [],
                 "label": "esJavaOpts",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -343,7 +378,9 @@
                 "tags": [],
                 "label": "installPath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -356,7 +393,9 @@
                 "tags": [],
                 "label": "secureSettingsFiles",
                 "description": [],
-                "signature": ["string[][]"],
+                "signature": [
+                  "string[][]"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -371,7 +410,9 @@
             "type": "Function",
             "tags": [],
             "label": "start",
-            "description": ["\nStarts ES and returns resolved promise once started"],
+            "description": [
+              "\nStarts ES and returns resolved promise once started"
+            ],
             "signature": [
               "(installPath: string, options: ",
               "EsClusterExecOptions",
@@ -388,7 +429,9 @@
                 "tags": [],
                 "label": "installPath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -401,7 +444,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["EsClusterExecOptions"],
+                "signature": [
+                  "EsClusterExecOptions"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -416,7 +461,9 @@
             "type": "Function",
             "tags": [],
             "label": "run",
-            "description": ["\nStarts Elasticsearch and waits for Elasticsearch to exit"],
+            "description": [
+              "\nStarts Elasticsearch and waits for Elasticsearch to exit"
+            ],
             "signature": [
               "(installPath: string, options: ",
               "EsClusterExecOptions",
@@ -433,7 +480,9 @@
                 "tags": [],
                 "label": "installPath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -446,7 +495,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["EsClusterExecOptions"],
+                "signature": [
+                  "EsClusterExecOptions"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -461,8 +512,12 @@
             "type": "Function",
             "tags": [],
             "label": "stop",
-            "description": ["\nStops ES process, if it's running"],
-            "signature": ["() => Promise<void>"],
+            "description": [
+              "\nStops ES process, if it's running"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -475,8 +530,12 @@
             "type": "Function",
             "tags": [],
             "label": "kill",
-            "description": ["\nStops ES process without waiting for it to shutdown gracefully"],
-            "signature": ["() => Promise<void>"],
+            "description": [
+              "\nStops ES process without waiting for it to shutdown gracefully"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -492,7 +551,11 @@
             "description": [
               "\nRuns an Elasticsearch Serverless Docker cluster and returns node names"
             ],
-            "signature": ["(options: ", "ServerlessOptions", ") => Promise<string[]>"],
+            "signature": [
+              "(options: ",
+              "ServerlessOptions",
+              ") => Promise<string[]>"
+            ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -504,7 +567,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["ServerlessOptions"],
+                "signature": [
+                  "ServerlessOptions"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -519,8 +584,14 @@
             "type": "Function",
             "tags": [],
             "label": "runDocker",
-            "description": ["\nRun an Elasticsearch Docker container"],
-            "signature": ["(options: ", "DockerOptions", ") => Promise<void>"],
+            "description": [
+              "\nRun an Elasticsearch Docker container"
+            ],
+            "signature": [
+              "(options: ",
+              "DockerOptions",
+              ") => Promise<void>"
+            ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -532,7 +603,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["DockerOptions"],
+                "signature": [
+                  "DockerOptions"
+                ],
                 "path": "packages/kbn-es/src/cluster.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -555,7 +628,9 @@
         "description": [
           "\nRemoves REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.\nReturns the path where a file will be mounted inside the ES or ES serverless container.\n/root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json"
         ],
-        "signature": ["(hostPath: string) => string"],
+        "signature": [
+          "(hostPath: string) => string"
+        ],
         "path": "packages/kbn-es/src/utils/docker.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -567,7 +642,9 @@
             "tags": [],
             "label": "hostPath",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-es/src/utils/docker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -583,7 +660,9 @@
         "type": "Function",
         "tags": [],
         "label": "maybeCreateDockerNetwork",
-        "description": ["\nSetup elastic Docker network if needed"],
+        "description": [
+          "\nSetup elastic Docker network if needed"
+        ],
         "signature": [
           "(log: ",
           {
@@ -631,7 +710,9 @@
         "tags": [],
         "label": "readRolesFromResource",
         "description": [],
-        "signature": ["(resourcePath: string) => string[]"],
+        "signature": [
+          "(resourcePath: string) => string[]"
+        ],
         "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -643,7 +724,9 @@
             "tags": [],
             "label": "resourcePath",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -660,7 +743,9 @@
         "tags": [],
         "label": "run",
         "description": [],
-        "signature": ["(defaults: {}) => Promise<void>"],
+        "signature": [
+          "(defaults: {}) => Promise<void>"
+        ],
         "path": "packages/kbn-es/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -672,7 +757,9 @@
             "tags": [],
             "label": "defaults",
             "description": [],
-            "signature": ["{}"],
+            "signature": [
+              "{}"
+            ],
             "path": "packages/kbn-es/src/cli.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -688,7 +775,9 @@
         "type": "Function",
         "tags": [],
         "label": "verifyDockerInstalled",
-        "description": ["\nVerify that Docker is installed locally"],
+        "description": [
+          "\nVerify that Docker is installed locally"
+        ],
         "signature": [
           "(log: ",
           {
@@ -740,7 +829,9 @@
         "tags": [],
         "label": "ArtifactLicense",
         "description": [],
-        "signature": ["\"basic\" | \"trial\""],
+        "signature": [
+          "\"basic\" | \"trial\""
+        ],
         "path": "packages/kbn-es/src/artifact.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -753,7 +844,9 @@
         "tags": [],
         "label": "ELASTIC_SERVERLESS_SUPERUSER",
         "description": [],
-        "signature": ["\"elastic_serverless\""],
+        "signature": [
+          "\"elastic_serverless\""
+        ],
         "path": "packages/kbn-es/src/utils/serverless_file_realm.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -766,7 +859,9 @@
         "tags": [],
         "label": "ELASTIC_SERVERLESS_SUPERUSER_PASSWORD",
         "description": [],
-        "signature": ["\"changeme\""],
+        "signature": [
+          "\"changeme\""
+        ],
         "path": "packages/kbn-es/src/utils/serverless_file_realm.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -779,7 +874,9 @@
         "tags": [],
         "label": "SERVERLESS_NODES",
         "description": [],
-        "signature": ["Omit<ServerlessEsNodeArgs, \"image\">[]"],
+        "signature": [
+          "Omit<ServerlessEsNodeArgs, \"image\">[]"
+        ],
         "path": "packages/kbn-es/src/utils/docker.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -804,7 +901,9 @@
         "tags": [],
         "label": "ServerlessProjectType",
         "description": [],
-        "signature": ["\"security\" | \"es\" | \"oblt\""],
+        "signature": [
+          "\"security\" | \"es\" | \"oblt\""
+        ],
         "path": "packages/kbn-es/src/utils/docker.ts",
         "deprecated": false,
         "trackAdoption": false,

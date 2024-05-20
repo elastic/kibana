@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import React, { memo, useMemo } from 'react';
-import { TimelineId } from '../../../../../../common/types';
-import type { ActionProps } from '../../../../../../common/types';
-import { Actions } from '../../../../../common/components/header_actions';
-import type { TimelineModel } from '../../../../store/model';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { eventIsPinned } from '../../body/helpers';
+import { Actions } from '../../../../../common/components/header_actions';
+import { TimelineId } from '../../../../../../common/types';
+import type { TimelineModel } from '../../../../store/model';
+import type { ActionProps } from '../../../../../../common/types';
 
 const noOp = () => {};
 const emptyLoadingEventIds: string[] = [];

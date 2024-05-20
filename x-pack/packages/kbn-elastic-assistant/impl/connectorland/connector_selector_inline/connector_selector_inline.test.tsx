@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render } from '@testing-library/react';
 
-import { Conversation } from '../../..';
-import { mockConnectors } from '../../mock/connectors';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import * as i18n from '../translations';
-import { useLoadConnectors } from '../use_load_connectors';
+import { mockConnectors } from '../../mock/connectors';
 import { ConnectorSelectorInline } from './connector_selector_inline';
+import * as i18n from '../translations';
+import { Conversation } from '../../..';
+import { useLoadConnectors } from '../use_load_connectors';
 
 const setApiConfig = jest.fn();
 const mockConversation = {

@@ -10,7 +10,7 @@ import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
-import { AlertFilterControls, AlertFilterControlsProps } from '../alert_filter_controls';
+import { AlertFilterControlsProps, AlertFilterControls } from '../alert_filter_controls';
 import { TEST_IDS } from '../constants';
 import { getControlGroupMock } from './control_group';
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { useEffect, useState, useRef } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, useRef } from 'react';
-import { useAppContext } from '../../../../app_context';
 import { deleteEnrichPolicy } from '../../../../services/api';
+import { useAppContext } from '../../../../app_context';
 
 export const DeletePolicyModal = ({
   policyToDelete,

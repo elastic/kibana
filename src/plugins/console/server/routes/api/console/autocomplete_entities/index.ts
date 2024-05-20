@@ -8,7 +8,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { RouteDependencies } from '../../..';
-import { type SettingsToRetrieve, autoCompleteEntitiesValidationConfig } from './validation_config';
+import { autoCompleteEntitiesValidationConfig, type SettingsToRetrieve } from './validation_config';
 
 const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 // Limit the response size to 10MB, because the response can be very large and sending it to the client

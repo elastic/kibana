@@ -6,18 +6,18 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  API_VERSIONS,
+  ConversationResponse,
   AppendConversationMessageRequestBody,
   AppendConversationMessageRequestParams,
-  ConversationResponse,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildResponse } from '../utils';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
-import { buildResponse } from '../utils';
 
 export const appendConversationMessageRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned

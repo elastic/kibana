@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 

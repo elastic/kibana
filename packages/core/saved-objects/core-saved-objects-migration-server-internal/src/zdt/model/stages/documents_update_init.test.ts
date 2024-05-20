@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import type { ResponseType } from '../../next';
-import type { DocumentsUpdateInitState } from '../../state';
 import {
-  type MockedMigratorContext,
+  getOutdatedDocumentsQueryMock,
+  createDocumentTransformFnMock,
+  checkVersionCompatibilityMock,
+} from './documents_update_init.test.mocks';
+import * as Either from 'fp-ts/lib/Either';
+import {
   createContextMock,
   createPostInitState,
+  type MockedMigratorContext,
 } from '../../test_helpers';
-import { createType } from '../../test_helpers';
+import type { ResponseType } from '../../next';
+import type { DocumentsUpdateInitState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { documentsUpdateInit } from './documents_update_init';
-import {
-  checkVersionCompatibilityMock,
-  createDocumentTransformFnMock,
-  getOutdatedDocumentsQueryMock,
-} from './documents_update_init.test.mocks';
+import { createType } from '../../test_helpers';
 
 describe('Stage: documentsUpdateInit', () => {
   let context: MockedMigratorContext;

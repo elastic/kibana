@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { screen, render, waitFor, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Tags } from './tags';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 
 describe('Tags', () => {
   const onChange = jest.fn();

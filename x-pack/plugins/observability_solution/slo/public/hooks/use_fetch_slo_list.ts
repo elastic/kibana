@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter, buildQueryFromFilters } from '@kbn/es-query';
+import { buildQueryFromFilters, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';

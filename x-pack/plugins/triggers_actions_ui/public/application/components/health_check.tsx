@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Option, fold, isSome, none, some } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
 import React, { FC, PropsWithChildren } from 'react';
+import { Option, none, some, fold, isSome } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { AlertingFrameworkHealth } from '@kbn/alerting-plugin/common';
 import { DocLinksStart, HttpSetup } from '@kbn/core/public';
+import { AlertingFrameworkHealth } from '@kbn/alerting-plugin/common';
 import './health_check.scss';
-import { triggersActionsUiHealth } from '../../common/lib/health_api';
-import { useKibana } from '../../common/lib/kibana';
 import { useHealthContext } from '../context/health_context';
-import { alertingFrameworkHealth } from '../lib/rule_api/health';
+import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
+import { triggersActionsUiHealth } from '../../common/lib/health_api';
+import { alertingFrameworkHealth } from '../lib/rule_api/health';
 
 interface Props {
   inFlyout?: boolean;

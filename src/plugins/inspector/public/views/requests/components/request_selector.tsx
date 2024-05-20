@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
+import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiBadge,

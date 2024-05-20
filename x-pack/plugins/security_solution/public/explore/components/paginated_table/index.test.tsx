@@ -10,13 +10,13 @@ import React from 'react';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 
-import { ThemeProvider } from 'styled-components';
 import type { BasicTableProps } from '.';
 import { PaginatedTable } from '.';
+import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
+import { ThemeProvider } from 'styled-components';
+import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { Direction } from '../../../../common/search_strategy';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
-import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 jest.mock('../../../common/containers/query_toggle');
 
 jest.mock('react', () => {

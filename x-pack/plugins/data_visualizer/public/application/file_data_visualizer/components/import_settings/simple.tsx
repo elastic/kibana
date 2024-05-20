@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiCheckbox, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiCheckbox, EuiSpacer } from '@elastic/eui';
 import type { CombinedField } from '../../../common/components/combined_fields';
 import { CombinedFieldsReadOnlyForm } from '../../../common/components/combined_fields';
 import { CreateDataViewToolTip } from './create_data_view_tooltip';

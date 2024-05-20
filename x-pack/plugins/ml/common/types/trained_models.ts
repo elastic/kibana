@@ -1,4 +1,3 @@
-import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +5,13 @@ import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/ap
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
 import type {
   DataFrameAnalyticsConfig,
   FeatureImportanceBaseline,
   TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
+import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';

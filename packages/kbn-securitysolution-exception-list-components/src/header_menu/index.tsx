@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { FC, ReactElement, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -17,7 +18,6 @@ import {
   PanelPaddingSize,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import React, { FC, ReactElement, useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
 

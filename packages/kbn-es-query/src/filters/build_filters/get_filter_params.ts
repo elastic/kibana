@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { isPhrasesFilter, PhrasesFilter } from './phrases_filter';
 import { isPhraseFilter } from './phrase_filter';
-import { PhrasesFilter, isPhrasesFilter } from './phrases_filter';
 import { isRangeFilter } from './range_filter';
 import { Filter } from './types';
 

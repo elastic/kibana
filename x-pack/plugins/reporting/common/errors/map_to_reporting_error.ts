@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@kbn/screenshotting-plugin/common';
 import {
   BrowserCouldNotLaunchError,
   BrowserScreenshotError,
@@ -17,7 +18,6 @@ import {
   VisualReportingSoftDisabledError,
 } from '@kbn/reporting-common';
 import { ExecutionError } from '@kbn/reporting-common/types';
-import { errors } from '@kbn/screenshotting-plugin/common';
 
 export function isExecutionError(error: ExecutionError | unknown): error is ExecutionError {
   if (typeof error !== 'object' || error === null) {

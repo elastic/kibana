@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PANEL_ID as selectedPanel } from '@storybook/addon-actions';
 import { addons } from '@storybook/addons';
 import { create } from '@storybook/theming';
+import { PANEL_ID as selectedPanel } from '@storybook/addon-actions';
 
 import { TITLE as brandTitle, URL as brandUrl } from './constants';
 

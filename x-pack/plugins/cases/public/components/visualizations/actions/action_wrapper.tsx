@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { Router } from '@kbn/shared-ux-router';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { SECURITY_SOLUTION_OWNER } from '../../../../common';
-import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
-import { canUseCases } from '../../../client/helpers/can_use_cases';
+import type { CasesUIActionProps } from './types';
 import { KibanaContextProvider, useKibana } from '../../../common/lib/kibana';
 import CasesProvider from '../../cases_context';
-import type { CasesUIActionProps } from './types';
+import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
+import { canUseCases } from '../../../client/helpers/can_use_cases';
 
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 

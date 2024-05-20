@@ -10,7 +10,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { isDiffPathProtocol } from '../../../../../../../common/services';
 import {
   sendPostFleetServerHost,
   sendPutFleetServerHost,
@@ -21,8 +20,9 @@ import {
   useSwitchInput,
   validateInputs,
 } from '../../../../hooks';
-import type { FleetServerHost } from '../../../../types';
+import { isDiffPathProtocol } from '../../../../../../../common/services';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
+import type { FleetServerHost } from '../../../../types';
 
 const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
 

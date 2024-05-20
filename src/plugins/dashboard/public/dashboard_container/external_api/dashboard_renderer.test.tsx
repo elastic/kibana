@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 import React from 'react';
+import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
+import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
 import { DashboardContainerFactory } from '..';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
+import { DashboardRenderer } from './dashboard_renderer';
 import { pluginServices } from '../../services/plugin_services';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardCreationOptions } from '../embeddable/dashboard_container_factory';
-import { DashboardRenderer } from './dashboard_renderer';
+import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
 
 describe('dashboard renderer', () => {
   let mockDashboardContainer: DashboardContainer;

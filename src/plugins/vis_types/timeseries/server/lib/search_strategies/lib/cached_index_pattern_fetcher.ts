@@ -7,9 +7,9 @@
  */
 
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import { fetchIndexPattern, getIndexPatternKey } from '../../../../common/index_patterns_utils';
+import { getIndexPatternKey, fetchIndexPattern } from '../../../../common/index_patterns_utils';
 
-import type { FetchedIndexPattern, IndexPatternValue } from '../../../../common/types';
+import type { IndexPatternValue, FetchedIndexPattern } from '../../../../common/types';
 
 export const getCachedIndexPatternFetcher = (
   indexPatternsService: DataViewsService,

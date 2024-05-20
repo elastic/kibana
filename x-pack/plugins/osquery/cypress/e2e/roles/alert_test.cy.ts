@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ServerlessRoleName } from '../../support/roles';
-import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { closeAlertsStepTourIfVisible } from '../../tasks/integrations';
-import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
 import { initializeDataViews } from '../../tasks/login';
+import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
+import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
+import { closeAlertsStepTourIfVisible } from '../../tasks/integrations';
 
 describe('Alert Test', { tags: ['@ess'] }, () => {
   let ruleName: string;

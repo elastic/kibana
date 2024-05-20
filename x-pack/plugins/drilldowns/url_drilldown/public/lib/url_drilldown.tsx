@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import React from 'react';
 import { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
-  CONTEXT_MENU_TRIGGER,
   ChartActionContext,
+  CONTEXT_MENU_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
-import { KibanaContextProvider, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
-import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
-import {
-  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
-  UiActionsEnhancedDrilldownDefinition as Drilldown,
-  UrlDrilldownCollectConfig,
-  UrlDrilldownConfig,
-  UrlDrilldownGlobalScope,
-  urlDrilldownCompileUrl,
-  urlDrilldownValidateUrlTemplate,
-} from '@kbn/ui-actions-enhanced-plugin/public';
 import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import React from 'react';
+import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
+import { UrlTemplateEditorVariable, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  UiActionsEnhancedDrilldownDefinition as Drilldown,
+  UrlDrilldownGlobalScope,
+  UrlDrilldownConfig,
+  UrlDrilldownCollectConfig,
+  urlDrilldownValidateUrlTemplate,
+  urlDrilldownCompileUrl,
+  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
+} from '@kbn/ui-actions-enhanced-plugin/public';
+import type { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { txtUrlDrilldownDisplayName } from './i18n';
-import { getContextScopeValues, getContextVariableList } from './variables/context_variables';
-import { getEventScopeValues, getEventVariableList } from './variables/event_variables';
+import { getEventVariableList, getEventScopeValues } from './variables/event_variables';
+import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
 import { getGlobalVariableList } from './variables/global_variables';
 
 interface UrlDrilldownDeps {

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import pMap from 'p-map';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { appContextService } from '../app_context';
+import { setupFleet } from '../setup';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
-  SO_SEARCH_LIMIT,
 } from '../../constants';
-import { AgentPolicyInvalidError } from '../../errors';
-import type { AgentPolicy } from '../../types';
 import { agentPolicyService } from '../agent_policy';
-import { forceUnenrollAgent, getAgentsByKuery } from '../agents';
-import { deleteEnrollmentApiKey, listEnrollmentApiKeys } from '../api_keys';
-import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
-import { setupFleet } from '../setup';
+import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
+import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
+import type { AgentPolicy } from '../../types';
+import { AgentPolicyInvalidError } from '../../errors';
 
 export async function resetPreconfiguredAgentPolicies(
   soClient: SavedObjectsClientContract,

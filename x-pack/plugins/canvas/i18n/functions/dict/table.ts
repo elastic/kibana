@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { table } from '../../../canvas_plugin_src/functions/common/table';
-import { FunctionFactory } from '../../../types';
-import { BOOLEAN_FALSE, CSS, FONT_FAMILY, FONT_WEIGHT } from '../../constants';
 import { FunctionHelp } from '../function_help';
+import { FunctionFactory } from '../../../types';
+import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof table>> = {
   help: i18n.translate('xpack.canvas.functions.tableHelpText', {

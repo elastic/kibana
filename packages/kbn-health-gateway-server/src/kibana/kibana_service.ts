@@ -9,8 +9,8 @@
 import type { IConfigService } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ServerStart } from '../server';
-import { StatusHandler } from './handlers';
 import { KibanaConfig } from './kibana_config';
+import { StatusHandler } from './handlers';
 
 interface KibanaServiceStartDependencies {
   server: ServerStart;

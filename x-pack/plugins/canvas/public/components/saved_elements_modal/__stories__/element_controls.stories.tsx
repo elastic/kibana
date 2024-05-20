@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { ElementControls } from '../element_controls';
 
 storiesOf('components/SavedElementsModal/ElementControls', module)

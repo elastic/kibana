@@ -46,7 +46,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -58,7 +60,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -71,7 +75,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -84,7 +90,9 @@
                 "tags": [],
                 "label": "attributes",
                 "description": [],
-                "signature": ["Record<string, any> | undefined"],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -121,7 +129,9 @@
                 "tags": [],
                 "label": "limit",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -244,7 +254,9 @@
                 "tags": [],
                 "label": "cause",
                 "description": [],
-                "signature": ["Error"],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -283,7 +295,9 @@
                 "tags": [],
                 "label": "objectKeys",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -344,7 +358,9 @@
                 "tags": [],
                 "label": "limit",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -381,7 +397,9 @@
                 "tags": [],
                 "label": "nonUniqueEntries",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -418,7 +436,9 @@
                 "tags": [],
                 "label": "nonUniqueRetryObjects",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -455,7 +475,9 @@
                 "tags": [],
                 "label": "nonUniqueRetryDestinations",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -535,7 +557,9 @@
         "description": [
           "\nToken used for the `type` option when exporting by type\nto specify that all (importable and exportable) types should be exported."
         ],
-        "signature": ["\"*\""],
+        "signature": [
+          "\"*\""
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -10,20 +10,20 @@ import { getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type { NetworkTopNFlowRequestOptions } from '../../../../../../common/api/search_strategy';
 import type {
-  AutonomousSystemItem,
   Direction,
-  FlowTargetSourceDest,
   GeoItem,
   NetworkTopNFlowBuckets,
   NetworkTopNFlowEdges,
+  AutonomousSystemItem,
+  FlowTargetSourceDest,
 } from '../../../../../../common/search_strategy';
 import { NetworkTopTablesFields } from '../../../../../../common/search_strategy';
+import { getOppositeField } from '../helpers';
 import {
   formatResponseObjectValues,
   transformLocationFields,
   unflattenObject,
 } from '../../../../helpers/format_response_object_values';
-import { getOppositeField } from '../helpers';
 
 export const getTopNFlowEdges = (
   response: IEsSearchResponse<unknown>,

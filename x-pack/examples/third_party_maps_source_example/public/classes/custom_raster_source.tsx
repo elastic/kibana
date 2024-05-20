@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import _ from 'lodash';
+import React, { ReactElement } from 'react';
 import { calculateBounds } from '@kbn/data-plugin/common';
-import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '@kbn/maps-plugin/common';
+import { FieldFormatter, MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
 import type {
   AbstractSourceDescriptor,
   Attribution,
@@ -17,14 +19,12 @@ import type {
 import type {
   DataRequest,
   IField,
-  IRasterSource,
   ImmutableSourceProperty,
+  IRasterSource,
   SourceEditorArgs,
 } from '@kbn/maps-plugin/public';
 import { RasterTileSourceData } from '@kbn/maps-plugin/public/classes/sources/raster_source';
-import _ from 'lodash';
 import { RasterTileSource } from 'maplibre-gl';
-import React, { ReactElement } from 'react';
 
 type CustomRasterSourceDescriptor = AbstractSourceDescriptor;
 

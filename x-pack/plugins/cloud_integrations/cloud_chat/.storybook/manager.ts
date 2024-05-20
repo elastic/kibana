@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PANEL_ID } from '@storybook/addon-actions';
 import { addons } from '@storybook/addons';
 import { create } from '@storybook/theming';
+import { PANEL_ID } from '@storybook/addon-actions';
 
 addons.setConfig({
   theme: create({

@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import {
-  MAX_TIME_COMPLETE_INSTALL,
   PACKAGES_SAVED_OBJECT_TYPE,
+  MAX_TIME_COMPLETE_INSTALL,
 } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';

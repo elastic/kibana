@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { debugRendererFactory, errorRendererFactory } from '@kbn/expression-error-plugin/public';
 import { imageRendererFactory } from '@kbn/expression-image-plugin/public';
 import { metricRendererFactory } from '@kbn/expression-metric-plugin/public';
-import { repeatImageRendererFactory } from '@kbn/expression-repeat-image-plugin/public';
+import { errorRendererFactory, debugRendererFactory } from '@kbn/expression-error-plugin/public';
 import { revealImageRendererFactory } from '@kbn/expression-reveal-image-plugin/public';
-import { progressRendererFactory, shapeRendererFactory } from '@kbn/expression-shape-plugin/public';
+import { repeatImageRendererFactory } from '@kbn/expression-repeat-image-plugin/public';
+import { shapeRendererFactory, progressRendererFactory } from '@kbn/expression-shape-plugin/public';
 
 export const renderFunctions = [];
 

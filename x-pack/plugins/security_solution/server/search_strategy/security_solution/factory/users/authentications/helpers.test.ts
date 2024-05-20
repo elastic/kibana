@@ -6,8 +6,8 @@
  */
 
 import type { AuthenticationsEdges } from '../../../../../../common/search_strategy';
-import { mockHit } from './__mocks__';
 import { formatAuthenticationData } from './helpers';
+import { mockHit } from './__mocks__';
 
 describe('#formatAuthenticationsData', () => {
   test('it formats a authentication with an empty set', () => {

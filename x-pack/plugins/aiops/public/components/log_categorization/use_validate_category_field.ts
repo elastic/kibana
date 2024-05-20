@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useRef } from 'react';
+import { useRef, useCallback } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
-import type { HttpFetchOptions } from '@kbn/core/public';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
+import type { HttpFetchOptions } from '@kbn/core/public';
+import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
 import { createCategorizeQuery } from '@kbn/aiops-log-pattern-analysis/create_categorize_query';
 

@@ -1,4 +1,3 @@
-import type { Embeddable } from '@kbn/embeddable-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +5,15 @@ import type { Embeddable } from '@kbn/embeddable-plugin/public';
  * 2.0.
  */
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Embeddable } from '@kbn/embeddable-plugin/public';
 
-import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
 import {
   createResetGroupByFieldAction,
   formatAlertsData,
   showInitialLoadingSpinner,
 } from './helpers';
-import { result, stackedByBooleanField, stackedByTextField, textResult } from './mock_data';
+import { result, textResult, stackedByBooleanField, stackedByTextField } from './mock_data';
+import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
 
 describe('helpers', () => {
   describe('showInitialLoadingSpinner', () => {

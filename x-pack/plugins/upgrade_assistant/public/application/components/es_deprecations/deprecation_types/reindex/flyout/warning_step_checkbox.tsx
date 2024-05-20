@@ -10,15 +10,15 @@ import React from 'react';
 import {
   EuiCheckbox,
   EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
 } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DocLinksStart } from '@kbn/core/public';
 import { ReindexWarning, ReindexWarningTypes } from '../../../../../../../common/types';
 
 export const hasReindexWarning = (
@@ -161,33 +161,34 @@ export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCh
   );
 };
 
-export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> =
-  ({ isChecked, onChange, docLinks, id, meta }) => {
-    return (
-      <WarningCheckbox
-        isChecked={isChecked}
-        onChange={onChange}
-        warningId={id}
-        label={
-          <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.replaceIndexWithAliasWarningTitle"
-            defaultMessage="Replace {indexName} index with {reindexName} index and create {indexName} index alias"
-            values={{
-              indexName: <EuiCode>{meta?.indexName}</EuiCode>,
-              reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
-            }}
-          />
-        }
-        description={
-          <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.replaceIndexWithAliasWarningDetail"
-            defaultMessage="You can search {indexName} as before. To delete the data you'll have to delete {reindexName}"
-            values={{
-              indexName: <EuiCode>{meta?.indexName}</EuiCode>,
-              reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
-            }}
-          />
-        }
-      />
-    );
-  };
+export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<
+  WarningCheckboxProps
+> = ({ isChecked, onChange, docLinks, id, meta }) => {
+  return (
+    <WarningCheckbox
+      isChecked={isChecked}
+      onChange={onChange}
+      warningId={id}
+      label={
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.replaceIndexWithAliasWarningTitle"
+          defaultMessage="Replace {indexName} index with {reindexName} index and create {indexName} index alias"
+          values={{
+            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
+            reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
+          }}
+        />
+      }
+      description={
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.replaceIndexWithAliasWarningDetail"
+          defaultMessage="You can search {indexName} as before. To delete the data you'll have to delete {reindexName}"
+          values={{
+            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
+            reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
+          }}
+        />
+      }
+    />
+  );
+};

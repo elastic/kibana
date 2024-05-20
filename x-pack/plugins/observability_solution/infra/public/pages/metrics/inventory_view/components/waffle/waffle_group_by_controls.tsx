@@ -14,14 +14,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import React from 'react';
-import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
-import { DerivedIndexPattern } from '../../../../../containers/metrics_source';
 import { InfraGroupByOptions } from '../../../../../lib/lib';
-import { DropdownButton } from '../dropdown_button';
 import { CustomFieldPanel } from './custom_field_panel';
+import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
+import { DropdownButton } from '../dropdown_button';
+import { DerivedIndexPattern } from '../../../../../containers/metrics_source';
 interface Props {
   options: Array<{ text: string; field: string; toolTipContent?: string }>;
   nodeType: InventoryItemType;

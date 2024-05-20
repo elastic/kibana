@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiButton,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingElastic,
-  EuiSpacer,
   EuiText,
+  EuiFlexGrid,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
-import React from 'react';
 
 interface Props {
   onClose: () => void;

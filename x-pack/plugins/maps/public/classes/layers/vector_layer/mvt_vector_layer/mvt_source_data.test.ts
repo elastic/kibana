@@ -10,10 +10,10 @@ jest.mock('uuid', () => ({
 }));
 
 import sinon from 'sinon';
-import { IESSource } from '../../../sources/es_source';
-import { IMvtVectorSource } from '../../../sources/vector_source';
-import { DataRequest } from '../../../util/data_request';
 import { MockSyncContext } from '../../__fixtures__/mock_sync_context';
+import { IMvtVectorSource } from '../../../sources/vector_source';
+import { IESSource } from '../../../sources/es_source';
+import { DataRequest } from '../../../util/data_request';
 import { syncMvtSourceData } from './mvt_source_data';
 
 const mockSource = {

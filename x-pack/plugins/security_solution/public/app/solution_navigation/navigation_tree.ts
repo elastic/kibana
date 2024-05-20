@@ -1,15 +1,3 @@
-import type {
-  AppDeepLinkId,
-  NavigationTreeDefinition,
-  NodeDefinition,
-  RootNavigationItemDefinition,
-} from '@kbn/core-chrome-browser';
-import type { LinkCategory } from '@kbn/security-solution-navigation';
-import {
-  isAccordionLinkCategory,
-  isSeparatorLinkCategory,
-  isTitleLinkCategory,
-} from '@kbn/security-solution-navigation';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -17,9 +5,21 @@ import {
  * 2.0.
  */
 import { partition } from 'lodash/fp';
-import type { SolutionLinkCategory, SolutionNavLink, SolutionPageName } from '../../common/links';
-import { SOLUTION_NAME } from '../../common/translations';
+import type {
+  AppDeepLinkId,
+  NodeDefinition,
+  NavigationTreeDefinition,
+  RootNavigationItemDefinition,
+} from '@kbn/core-chrome-browser';
+import type { LinkCategory } from '@kbn/security-solution-navigation';
+import {
+  isSeparatorLinkCategory,
+  isTitleLinkCategory,
+  isAccordionLinkCategory,
+} from '@kbn/security-solution-navigation';
+import type { SolutionPageName, SolutionLinkCategory, SolutionNavLink } from '../../common/links';
 import { getNavLinkIdFromSolutionPageName, isBreadcrumbHidden } from './util';
+import { SOLUTION_NAME } from '../../common/translations';
 
 export const formatNavigationTree = (
   solutionNavLinks: SolutionNavLink[],

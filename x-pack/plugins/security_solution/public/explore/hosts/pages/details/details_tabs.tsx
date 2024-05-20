@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { TableId } from '@kbn/securitysolution-data-table';
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { EventsQueryTabBody } from '../../../../common/components/events_tab';
-import { AnomaliesHostTable } from '../../../../common/components/ml/tables/anomalies_host_table';
+import { RiskDetailsTabBody } from '../../../../entity_analytics/components/risk_details_tab_body';
+import { HostsType, HostsTableType } from '../../store/model';
 import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { RiskDetailsTabBody } from '../../../../entity_analytics/components/risk_details_tab_body';
-import { HostsTableType, HostsType } from '../../store/model';
+import { AnomaliesHostTable } from '../../../../common/components/ml/tables/anomalies_host_table';
+import { EventsQueryTabBody } from '../../../../common/components/events_tab';
 
 import type { HostDetailsTabsProps } from './types';
 
 import {
   AuthenticationsQueryTabBody,
-  SessionsTabBody,
   UncommonProcessQueryTabBody,
+  SessionsTabBody,
 } from '../navigation';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(

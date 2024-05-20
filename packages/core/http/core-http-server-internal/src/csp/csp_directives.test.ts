@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { cspConfig } from './config';
 import { CspDirectives } from './csp_directives';
+import { cspConfig } from './config';
 
 describe('CspDirectives', () => {
   describe('#addDirectiveValue', () => {

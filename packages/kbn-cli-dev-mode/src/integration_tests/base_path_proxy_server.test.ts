@@ -7,16 +7,16 @@
  */
 
 import { Server } from '@hapi/hapi';
-import { ByteSizeValue } from '@kbn/config-schema';
-import {
-  IHttpConfig,
-  createServer,
-  getListenerOptions,
-  getServerOptions,
-} from '@kbn/server-http-tools';
-import moment from 'moment';
 import { EMPTY } from 'rxjs';
+import moment from 'moment';
 import supertest from 'supertest';
+import {
+  getServerOptions,
+  getListenerOptions,
+  createServer,
+  IHttpConfig,
+} from '@kbn/server-http-tools';
+import { ByteSizeValue } from '@kbn/config-schema';
 
 import { BasePathProxyServer, BasePathProxyServerOptions } from '../base_path_proxy_server';
 import { DevConfig } from '../config/dev_config';

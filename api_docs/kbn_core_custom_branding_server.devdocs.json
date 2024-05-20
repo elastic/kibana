@@ -147,7 +147,9 @@
                     "tags": [],
                     "label": "unauthenticated",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "packages/core/custom-branding/core-custom-branding-server/types.ts",
                     "deprecated": false,
                     "trackAdoption": false

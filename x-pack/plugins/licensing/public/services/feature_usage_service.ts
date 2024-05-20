@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
 import { isDate } from 'lodash';
+import type { HttpStart } from '@kbn/core/public';
 import { LicenseType } from '../../common/types';
 
 /** @public */

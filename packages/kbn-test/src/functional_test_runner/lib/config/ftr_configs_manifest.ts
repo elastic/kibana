@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import JsYaml from 'js-yaml';

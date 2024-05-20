@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFormRow } from '@elastic/eui';
-import { DataView } from '@kbn/data-plugin/common';
-import { indexPatterns } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { DataView } from '@kbn/data-plugin/common';
+import { EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
-import { getIsTimeseries, getTermsFields } from '../../../../index_pattern_util';
+import { getTermsFields, getIsTimeseries } from '../../../../index_pattern_util';
+import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_constants';
 import { GroupByButtonGroup } from './group_by_button_group';
 import { GroupByLabel } from './group_by_label';
-import { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_constants';
 import { SizeSlider } from './size_slider';
 
 interface Props {

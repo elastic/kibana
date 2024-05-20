@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCard, EuiIcon } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { EuiCard, EuiIcon } from '@elastic/eui';
 
 export const DatasourceSelector = ({ onSelect, datasources, current }) => (
   <div className="canvasDataSource__list">

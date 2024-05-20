@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { EuiBetaBadge, EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Route, HashRouter as Router, Routes } from '@kbn/shared-ux-router';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
+import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import type {
   ApplicationStart,
   ChromeStart,
-  ExecutionContextStart,
   ScopedHistory,
+  ExecutionContextStart,
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { BreadcrumbService, DocTitleService } from './services';
+import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
 import { DevToolsStartServices } from './types';

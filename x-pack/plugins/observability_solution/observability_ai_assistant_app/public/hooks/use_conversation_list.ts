@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   type AbortableAsyncState,
   type Conversation,
   useAbortableAsync,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { useEffect, useState } from 'react';
 import { useKibana } from './use_kibana';
 import { useObservabilityAIAssistantAppService } from './use_observability_ai_assistant_app_service';
 

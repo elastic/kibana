@@ -7,25 +7,25 @@
 
 import type { Draft } from 'immer';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { clamp } from '../../lib/math';
+import { unitsPerNudge, nudgeAnimationDuration } from './scaling_constants';
+import { animatePanning } from './methods';
 import * as vector2 from '../../models/vector2';
+import * as selectors from './selectors';
+import { clamp } from '../../lib/math';
 import type { CameraState, Vector2 } from '../../types';
-import { immerCase, initialAnalyzerState } from '../helpers';
+import { initialAnalyzerState, immerCase } from '../helpers';
 import {
-  userClickedZoomIn,
-  userClickedZoomOut,
-  userMovedPointer,
-  userNudgedCamera,
-  userSetPositionOfCamera,
-  userSetRasterSize,
   userSetZoomLevel,
+  userClickedZoomOut,
+  userClickedZoomIn,
+  userZoomed,
   userStartedPanning,
   userStoppedPanning,
-  userZoomed,
+  userSetPositionOfCamera,
+  userNudgedCamera,
+  userSetRasterSize,
+  userMovedPointer,
 } from './action';
-import { animatePanning } from './methods';
-import { nudgeAnimationDuration, unitsPerNudge } from './scaling_constants';
-import * as selectors from './selectors';
 
 export const cameraReducer = reducerWithInitialState(initialAnalyzerState)
   .withHandling(

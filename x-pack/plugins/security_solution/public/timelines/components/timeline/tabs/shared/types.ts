@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type React from 'react';
-import type { RowRenderer } from '../../../../../../common/types/timeline';
 import type { CellValueElementProps } from '../../cell_rendering';
+import type { RowRenderer } from '../../../../../../common/types/timeline';
 
 export interface TimelineTabCommonProps {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;

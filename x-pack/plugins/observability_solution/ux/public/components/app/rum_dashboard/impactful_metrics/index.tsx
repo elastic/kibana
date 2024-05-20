@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { JSErrors } from './js_errors';
 
 export function ImpactfulMetrics() {

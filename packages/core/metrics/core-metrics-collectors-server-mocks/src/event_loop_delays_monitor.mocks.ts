@@ -1,5 +1,3 @@
-import type { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
-import type { IntervalHistogram } from '@kbn/core-metrics-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import type { IntervalHistogram } from '@kbn/core-metrics-server';
  * Side Public License, v 1.
  */
 import moment from 'moment';
+import type { IntervalHistogram } from '@kbn/core-metrics-server';
+import type { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
 
 function createMockRawNsDataHistogram(
   overwrites: Partial<IntervalHistogram> = {}

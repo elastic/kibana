@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TokenInfo as BraceTokenInfo, IEditSession } from 'brace';
-import { Position, Token, TokensProvider } from '../../types';
+import { IEditSession, TokenInfo as BraceTokenInfo } from 'brace';
+import { TokensProvider, Token, Position } from '../../types';
 
 // Brace's token information types are not accurate.
 interface TokenInfo extends BraceTokenInfo {

@@ -1,4 +1,3 @@
-import { fireEvent, render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +6,10 @@ import { fireEvent, render } from '@testing-library/react';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { fireEvent, render } from '@testing-library/react';
 import { ExceptionListHeader } from '.';
-import { securityLinkAnchorComponentMock } from '../mocks/security_link_component.mock';
 import * as i18n from '../translations';
+import { securityLinkAnchorComponentMock } from '../mocks/security_link_component.mock';
 
 import { useExceptionListHeader as useExceptionListHeaderMock } from './use_list_header';
 const onEditListDetails = jest.fn();

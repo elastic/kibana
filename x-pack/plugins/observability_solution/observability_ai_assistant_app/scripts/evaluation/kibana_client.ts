@@ -5,50 +5,50 @@
  * 2.0.
  */
 
-import { UrlObject, format, parse } from 'url';
-import { inspect } from 'util';
 import {
   BufferFlushEvent,
   ChatCompletionChunkEvent,
   ChatCompletionErrorCode,
   ChatCompletionErrorEvent,
+  concatenateChatCompletionChunks,
   ConversationCreateEvent,
   FunctionDefinition,
+  isChatCompletionError,
   MessageAddEvent,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
-  concatenateChatCompletionChunks,
-  isChatCompletionError,
-} from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  Message,
-  MessageRole,
-  isSupportedConnectorType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
-import type {
-  APIReturnType,
-  ObservabilityAIAssistantAPIClientRequestParamsOf,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  isSupportedConnectorType,
+  Message,
+  MessageRole,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
 import { isArray, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
 import {
-  OperatorFunction,
   concatMap,
   defer,
   filter,
   from,
   lastValueFrom,
   of,
+  OperatorFunction,
   retry,
   switchMap,
   timer,
   toArray,
 } from 'rxjs';
+import { format, parse, UrlObject } from 'url';
+import { inspect } from 'util';
+import type {
+  ObservabilityAIAssistantAPIClientRequestParamsOf,
+  APIReturnType,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { EvaluationResult } from './types';
 
 // eslint-disable-next-line spaced-comment
@@ -222,7 +222,7 @@ export class KibanaClient {
     }> = [];
 
     function serializeAndHandleRetryableErrors<
-      T extends StreamingChatResponseEvent,
+      T extends StreamingChatResponseEvent
     >(): OperatorFunction<Buffer, Exclude<T, ChatCompletionErrorEvent>> {
       return (source$) => {
         const processed$ = source$.pipe(

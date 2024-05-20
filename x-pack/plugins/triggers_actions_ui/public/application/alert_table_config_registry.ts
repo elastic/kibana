@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { AlertsTableConfigurationRegistry } from '../types';
 import { ALERT_TABLE_GENERIC_CONFIG_ID } from './constants';
+import { AlertsTableConfigurationRegistry } from '../types';
 
 export class AlertTableConfigRegistry {
   private readonly objectTypes: Map<string, AlertsTableConfigurationRegistry> = new Map();

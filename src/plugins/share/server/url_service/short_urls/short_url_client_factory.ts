@@ -7,10 +7,10 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import type { ILocatorClient, IShortUrlClientFactory } from '../../../common/url_service';
+import { ShortUrlStorage } from './types';
+import type { IShortUrlClientFactory, ILocatorClient } from '../../../common/url_service';
 import { ServerShortUrlClient } from './short_url_client';
 import { SavedObjectShortUrlStorage } from './storage/saved_object_short_url_storage';
-import { ShortUrlStorage } from './types';
 
 /**
  * Dependencies of the Short URL Client factory.

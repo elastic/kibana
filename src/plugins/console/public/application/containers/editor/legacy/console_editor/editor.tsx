@@ -14,14 +14,12 @@ import {
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
-import { ace } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { DEFAULT_INPUT_VALUE } from '../../../../../../common/constants';
-import { StorageKeys } from '../../../../../services';
+import { ace } from '@kbn/es-ui-shared-plugin/public';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
@@ -30,11 +28,13 @@ import {
   useSetInputEditor,
 } from '../../../../hooks';
 import * as senseEditor from '../../../../models/sense_editor';
-import type { SenseEditor } from '../../../../models/sense_editor';
 import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
+import type { SenseEditor } from '../../../../models/sense_editor';
+import { StorageKeys } from '../../../../../services';
+import { DEFAULT_INPUT_VALUE } from '../../../../../../common/constants';
 
 const { useUIAceKeyboardMode } = ace;
 

@@ -6,11 +6,9 @@
  */
 
 import { axisConfig } from './axis_config';
-import { colorPicker } from './color_picker';
 // @ts-expect-error untyped local
 import { datacolumn } from './datacolumn';
 import { dateFormatInitializer } from './date_format';
-import { editor } from './editor';
 // @ts-expect-error untyped local
 import { filterGroup } from './filter_group';
 // @ts-expect-error untyped local
@@ -19,7 +17,6 @@ import { imageUpload } from './image_upload';
 import { number } from './number';
 import { numberFormatInitializer } from './number_format';
 import { palette, stopsPalette } from './palette';
-import { partitionLabels } from './partition_labels';
 // @ts-expect-error untyped local
 import { percentage } from './percentage';
 // @ts-expect-error untyped local
@@ -35,6 +32,9 @@ import { textarea } from './textarea';
 // @ts-expect-error untyped local
 import { toggle } from './toggle';
 import { visdimension } from './vis_dimension';
+import { colorPicker } from './color_picker';
+import { editor } from './editor';
+import { partitionLabels } from './partition_labels';
 
 import { SetupInitializer } from '../../plugin';
 

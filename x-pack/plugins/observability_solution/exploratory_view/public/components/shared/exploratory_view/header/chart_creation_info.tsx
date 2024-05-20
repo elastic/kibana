@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
 import React from 'react';
+import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import type { ChartTimeRange } from './last_updated';
 
 export function ChartCreationInfo(props: Partial<ChartTimeRange>) {

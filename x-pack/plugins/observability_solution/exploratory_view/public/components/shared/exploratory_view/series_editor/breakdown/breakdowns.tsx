@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiSuperSelect, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import {
   LABEL_FIELDS_BREAKDOWN,
-  PERCENTILE,
-  RECORDS_FIELD,
   USE_BREAK_DOWN_COLUMN,
+  RECORDS_FIELD,
+  PERCENTILE,
 } from '../../configurations/constants';
+import { SeriesConfig, SeriesUrl } from '../../types';
 import { SYNTHETICS_STEP_NAME } from '../../configurations/constants/field_names/synthetics';
 import { isStepLevelMetric } from '../../configurations/synthetics/kpi_over_time_config';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {
   seriesId: number;

@@ -7,18 +7,12 @@
 
 import { memoize } from 'lodash';
 
-import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '../common/constants';
-import type { Immutable } from '../common/endpoint/types';
-import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
-import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
-import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
-import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import { buildFrameworkRequest } from './lib/timeline/utils/common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -28,6 +22,12 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
+import type { Immutable } from '../common/endpoint/types';
+import type { EndpointAuthz } from '../common/endpoint/types/authz';
+import type { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
+import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
+import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
+import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 
 export interface IRequestContextFactory {
   create(

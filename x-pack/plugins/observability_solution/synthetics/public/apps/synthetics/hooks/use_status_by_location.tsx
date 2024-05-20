@@ -7,14 +7,14 @@
 
 import { useEsSearch, useTheme } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
-import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
+import { useLocations } from './use_locations';
+import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
+import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../contexts';
-import { useLocations } from './use_locations';
 
 export type LocationsStatus = Array<{ status: string; id: string; label: string; color: string }>;
 

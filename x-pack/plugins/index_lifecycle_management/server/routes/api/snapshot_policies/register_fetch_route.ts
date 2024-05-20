@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../../../services';
 
 export function registerFetchRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(

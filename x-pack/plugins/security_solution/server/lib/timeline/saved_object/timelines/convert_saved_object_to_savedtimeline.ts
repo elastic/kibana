@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { fold, map } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { intersection, type, partial, literal, union, string } from 'io-ts/lib/index';
 import { failure } from 'io-ts/lib/PathReporter';
-import { intersection, literal, partial, string, type, union } from 'io-ts/lib/index';
-import type { TimelineSavedObject } from '../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 import {
   SavedObjectTimelineRuntimeType,
-  SavedObjectTimelineStatus,
-  SavedObjectTimelineType,
   SavedObjectTimelineTypeLiteralWithNullRt,
+  SavedObjectTimelineType,
+  SavedObjectTimelineStatus,
 } from '../../../../../common/types/timeline/saved_object';
+import type { TimelineSavedObject } from '../../../../../common/api/timeline';
+import { TimelineType, TimelineStatus } from '../../../../../common/api/timeline';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
 const TimelineSavedObjectWithDraftRuntime = intersection([

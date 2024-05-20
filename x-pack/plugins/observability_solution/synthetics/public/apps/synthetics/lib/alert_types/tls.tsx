@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import React from 'react';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import React from 'react';
-import { AlertTypeInitializer } from '.';
-import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
-import { CERTIFICATES_ROUTE } from '../../../../../common/constants/ui';
 import { TlsTranslations } from '../../../../../common/rules/synthetics/translations';
+import { CERTIFICATES_ROUTE } from '../../../../../common/constants/ui';
+import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
 import type { TLSParams } from '../../../../../common/runtime_types/alerts/tls';
+import { AlertTypeInitializer } from '.';
 
 let validateFunc: (ruleParams: any) => ValidationResult;
 

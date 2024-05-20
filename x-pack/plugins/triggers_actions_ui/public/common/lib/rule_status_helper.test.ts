@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { RuleTableItem } from '../../types';
 import { getRuleHealthColor, getRuleStatusMessage } from './rule_status_helpers';
+import { RuleTableItem } from '../../types';
 
+import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
 import {
   ALERT_STATUS_LICENSE_ERROR,
   rulesLastRunOutcomeTranslationMapping,
   rulesStatusesTranslationsMapping,
 } from '../../application/sections/rules_list/translations';
-import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
 
 jest.mock('../get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),

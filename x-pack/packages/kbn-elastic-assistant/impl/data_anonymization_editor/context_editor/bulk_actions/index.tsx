@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { PRIMARY_PANEL_ID, getContextMenuPanels } from '../get_context_menu_panels';
+import { getContextMenuPanels, PRIMARY_PANEL_ID } from '../get_context_menu_panels';
 import * as i18n from '../translations';
 import { BatchUpdateListItem, ContextEditorRow } from '../types';
 

@@ -24,9 +24,9 @@ import {
   ACTIONS_COLUMN,
   BLANK_COLUMN,
   CREATED_AT_COLUMN,
+  LAST_UPDATED_COLUMN,
   DOCUMENT_COUNT_COLUMN,
   FIELD_COUNT_COLUMN,
-  LAST_UPDATED_COLUMN,
   NAME_COLUMN,
 } from './shared_columns';
 import { EnginesTableProps } from './types';

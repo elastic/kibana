@@ -5,85 +5,85 @@
  * 2.0.
  */
 
+import React from 'react';
+import { isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import {
-  EuiBadge,
-  EuiButtonGroupProps,
-  EuiCheckboxProps,
+  EuiIcon,
   EuiCode,
   EuiComboBoxOptionOption,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSelectProps,
+  EuiFieldTextProps,
+  EuiSwitchProps,
   EuiComboBoxProps,
   EuiFieldNumberProps,
   EuiFieldPasswordProps,
-  EuiFieldTextProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHighlight,
-  EuiIcon,
-  EuiLink,
-  EuiSelectProps,
-  EuiSwitchProps,
+  EuiCheckboxProps,
   EuiTextAreaProps,
+  EuiButtonGroupProps,
+  EuiHighlight,
+  EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
-import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { isEqual } from 'lodash';
-import React from 'react';
-import { getDocLinks } from '../../../../../kibana_services';
-import { useMonitorName } from '../../../hooks/use_monitor_name';
-import { ALLOWED_SCHEDULES_IN_MINUTES, AlertConfigKey } from '../constants';
-import { KeyValuePairsFieldProps } from '../fields/key_value_field';
 import {
   PROFILE_OPTIONS,
   ThrottlingConfigFieldProps,
 } from '../fields/throttling/throttling_config_field';
 import {
-  ConfigKey,
-  FieldMap,
-  FormLocation,
-  FormMonitorType,
-  HTTPMethod,
-  Mode,
-  MonitorFields,
-  MonitorTypeEnum,
-  RequestBodyCheck,
-  ResponseBodyIndexPolicy,
-  ResponseCheckJSON,
-  ScreenshotOption,
-  SourceType,
-  TLSVersion,
-  ThrottlingConfig,
-  VerificationMode,
-} from '../types';
-import { getDefaultFormFields } from './defaults';
-import {
-  ButtonGroup,
-  Checkbox,
-  ComboBox,
-  ControlledFieldProp,
+  FieldText,
   FieldNumber,
   FieldPassword,
-  FieldText,
+  Checkbox,
+  ComboBox,
+  Select,
+  Switch,
+  Source,
+  ButtonGroup,
   FormattedComboBox,
   FormattedComboBoxProps,
+  JSONEditor,
+  JSONCodeEditorProps,
+  MonitorTypeRadioGroup,
   HeaderField,
   HeaderFieldProps,
-  JSONCodeEditorProps,
-  JSONEditor,
-  KeyValuePairsField,
-  MonitorTypeRadioGroup,
   RequestBodyField,
   RequestBodyFieldProps,
   ResponseBodyIndexField,
   ResponseBodyIndexFieldProps,
-  Select,
-  Source,
-  Switch,
+  ControlledFieldProp,
+  KeyValuePairsField,
   TextArea,
   ThrottlingWrapper,
 } from './field_wrappers';
-import { FLOATS_ONLY, WHOLE_NUMBERS_ONLY, validate, validateHeaders } from './validation';
+import { getDocLinks } from '../../../../../kibana_services';
+import { useMonitorName } from '../../../hooks/use_monitor_name';
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  FormMonitorType,
+  HTTPMethod,
+  ScreenshotOption,
+  Mode,
+  MonitorFields,
+  TLSVersion,
+  VerificationMode,
+  FieldMap,
+  FormLocation,
+  ResponseBodyIndexPolicy,
+  ResponseCheckJSON,
+  ThrottlingConfig,
+  RequestBodyCheck,
+  SourceType,
+} from '../types';
+import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
+import { getDefaultFormFields } from './defaults';
+import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
+import { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
 const getScheduleContent = (value: number) => {
   if (value > 60) {
@@ -416,8 +416,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
             location.isInvalid || !locations.some((s) => s.id === location.id)
               ? 'danger'
               : location.isServiceManaged
-                ? 'default'
-                : 'primary',
+              ? 'default'
+              : 'primary',
           label:
             (location.label || locations?.find((loc) => location.id === loc.id)?.label) ??
             location.id,

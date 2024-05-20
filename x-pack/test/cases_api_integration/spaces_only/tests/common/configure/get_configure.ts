@@ -6,17 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { nullUser } from '../../../../common/lib/mock';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
-  createConfiguration,
-  deleteConfiguration,
-  getAuthWithSuperUser,
-  getConfiguration,
-  getConfigurationOutput,
-  getConfigurationRequest,
   removeServerGeneratedPropertiesFromSavedObject,
+  getConfigurationOutput,
+  deleteConfiguration,
+  getConfiguration,
+  createConfiguration,
+  getConfigurationRequest,
+  getAuthWithSuperUser,
 } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export

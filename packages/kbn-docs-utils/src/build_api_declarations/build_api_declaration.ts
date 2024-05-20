@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { FunctionTypeNode, Node } from 'ts-morph';
-import { isNamedNode } from '../tsmorph_utils';
-import { ApiDeclaration, PluginOrPackage } from '../types';
-import { ApiScope } from '../types';
-import { buildBasicApiDeclaration } from './build_basic_api_declaration';
-import { buildCallSignatureDec } from './build_call_signature_dec';
+import { ToolingLog } from '@kbn/tooling-log';
 import { buildClassDec } from './build_class_dec';
 import { buildFunctionDec } from './build_function_dec';
-import { buildFunctionTypeDec } from './build_function_type_dec';
-import { buildInterfaceDec } from './build_interface_dec';
-import { buildTypeLiteralDec } from './build_type_literal_dec';
+import { isNamedNode } from '../tsmorph_utils';
+import { ApiDeclaration, PluginOrPackage } from '../types';
 import { buildVariableDec } from './build_variable_dec';
+import { buildTypeLiteralDec } from './build_type_literal_dec';
+import { ApiScope } from '../types';
+import { buildInterfaceDec } from './build_interface_dec';
+import { buildBasicApiDeclaration } from './build_basic_api_declaration';
+import { buildFunctionTypeDec } from './build_function_type_dec';
+import { buildCallSignatureDec } from './build_call_signature_dec';
 import { BuildApiDecOpts } from './types';
 import { buildApiId } from './utils';
 
@@ -74,8 +74,8 @@ export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDecla
       name: Node.isConstructSignatureDeclaration(node)
         ? 'new'
         : Node.isConstructorDeclaration(node)
-          ? 'Constructor'
-          : node.getName() || 'Unnamed',
+        ? 'Constructor'
+        : node.getName() || 'Unnamed',
     });
   } else if (
     Node.isPropertySignature(node) ||

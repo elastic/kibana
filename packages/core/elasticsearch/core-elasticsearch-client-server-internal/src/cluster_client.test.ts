@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { duration } from 'moment';
-import { AgentManager } from './agent_manager';
-import { ClusterClient } from './cluster_client';
 import {
   configureClientMock,
-  createInternalErrorHandlerMock,
   createTransportMock,
+  createInternalErrorHandlerMock,
 } from './cluster_client.test.mocks';
+import type { Client } from '@elastic/elasticsearch';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import { ClusterClient } from './cluster_client';
 import { DEFAULT_HEADERS, getDefaultHeaders } from './headers';
+import { AgentManager } from './agent_manager';
+import { duration } from 'moment';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -42,7 +42,7 @@ const kibanaVersion = '1.0.0';
 const defaultHeaders = getDefaultHeaders(kibanaVersion);
 
 const createClient = () =>
-  ({ close: jest.fn(), child: jest.fn() }) as unknown as jest.Mocked<Client>;
+  ({ close: jest.fn(), child: jest.fn() } as unknown as jest.Mocked<Client>);
 
 describe('ClusterClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

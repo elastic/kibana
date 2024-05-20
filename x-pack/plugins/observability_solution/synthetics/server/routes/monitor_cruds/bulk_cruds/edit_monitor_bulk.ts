@@ -1,4 +1,3 @@
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,11 @@ import { SavedObjectError } from '@kbn/core-saved-objects-common';
  * 2.0.
  */
 import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import { RouteContext } from '../../types';
+import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
@@ -14,14 +18,10 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
-import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
 import {
   formatTelemetryUpdateEvent,
   sendTelemetryEvents,
 } from '../../telemetry/monitor_upgrade_sender';
-import { RouteContext } from '../../types';
 
 // Simplify return promise type and type it with runtime_types
 

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { useThreatIntelligenceDetails } from './use_threat_intelligence_details';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { SecurityPageName } from '../../../../../common/constants';
-import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
+import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import type { RouteSpyState } from '../../../../common/utils/route/types';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
+import { useLeftPanelContext } from '../context';
+import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
+import { SecurityPageName } from '../../../../../common/constants';
+import type { RouteSpyState } from '../../../../common/utils/route/types';
 import {
   type GetBasicDataFromDetailsData,
   useBasicDataFromDetailsData,
 } from '../../../../timelines/components/side_panel/event_details/helpers';
-import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useLeftPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
 
 jest.mock('../../../../timelines/containers/details');

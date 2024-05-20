@@ -7,10 +7,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from '@kbn/core-http-server';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
+import { RequestHandler } from '@kbn/core-http-server';
 import { LastReportedRoute } from '../../common/routes';
 import { v2 } from '../../common/types';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from '../saved_objects';

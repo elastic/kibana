@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import type { Note, SavedTimeline } from '../../../../../../common/api/timeline';
-import { requestContextMock } from '../../../../detection_engine/routes/__mocks__';
-import type { FrameworkRequest } from '../../../../framework';
-import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
-import {
-  createTimelineWithoutTimelineId,
-  getCreateTimelinesRequest,
-} from '../../../__mocks__/request_responses';
-import { getNote } from '../../../saved_object/notes';
-import { persistNotes } from '../../../saved_object/notes/persist_notes';
-import { savePinnedEvents } from '../../../saved_object/pinned_events';
-import { persistTimeline } from '../../../saved_object/timelines';
-import { buildFrameworkRequest } from '../../../utils/common';
 import * as module from './helpers';
+import { savePinnedEvents } from '../../../saved_object/pinned_events';
+import { getNote } from '../../../saved_object/notes';
+import type { FrameworkRequest } from '../../../../framework';
+import type { SavedTimeline, Note } from '../../../../../../common/api/timeline';
+import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
+import { buildFrameworkRequest } from '../../../utils/common';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { requestContextMock } from '../../../../detection_engine/routes/__mocks__';
+import {
+  getCreateTimelinesRequest,
+  createTimelineWithoutTimelineId,
+} from '../../../__mocks__/request_responses';
+import { persistTimeline } from '../../../saved_object/timelines';
+import { persistNotes } from '../../../saved_object/notes/persist_notes';
 
 const template = { ...mockTemplate } as SavedTimeline;
 const timeline = { ...mockTimeline } as SavedTimeline;

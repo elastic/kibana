@@ -15,7 +15,7 @@ import {
 } from '../../common/constants';
 import { getListOfSloSummaryIndices } from '../../common/summary_indices';
 import { StoredSLOSettings } from '../domain/models';
-import { SO_SLO_SETTINGS_TYPE, sloSettingsObjectId } from '../saved_objects/slo_settings';
+import { sloSettingsObjectId, SO_SLO_SETTINGS_TYPE } from '../saved_objects/slo_settings';
 
 export const getSloSettings = async (soClient: SavedObjectsClientContract) => {
   try {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { overwrite } from '../../helpers';
 import { normalizeQuery } from './normalize_query';
+import { overwrite } from '../../helpers';
 
 import {
   TableRequestProcessorsFunction,

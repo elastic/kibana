@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { ary, isFunction, mergeWith } from 'lodash';
 import type {
-  SavedObjectMigration,
   SavedObjectMigrationContext,
+  SavedObjectMigration,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { ary, isFunction, mergeWith } from 'lodash';
 
 /**
  * Composes two migrations into a single migration.

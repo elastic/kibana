@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
-  ObjectRemover,
   getTestRuleData,
   getUnauthorizedErrorMessage,
   getUrlPrefix,
+  ObjectRemover,
 } from '../../../../common/lib';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {

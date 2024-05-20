@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-import { Version, version } from '../version';
+import { Either } from 'fp-ts/lib/Either';
+import { version, Version } from '../version';
 
 /**
  * Types the DefaultVersionNumber as:

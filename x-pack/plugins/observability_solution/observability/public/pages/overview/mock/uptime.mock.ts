@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FetchData, UptimeFetchDataResponse } from '../../../typings';
+import { UptimeFetchDataResponse, FetchData } from '../../../typings';
 
 export const fetchUptimeData: FetchData<UptimeFetchDataResponse> = () => {
   return Promise.resolve(response);

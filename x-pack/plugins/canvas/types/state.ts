@@ -9,16 +9,16 @@ import { KibanaContext } from '@kbn/data-plugin/common';
 import {
   AnyExpressionFunctionDefinition,
   Datatable,
-  ExpressionImage,
   ExpressionValueFilter,
+  ExpressionImage,
   PointSeries,
-  Range,
   Render,
   Style,
+  Range,
 } from '@kbn/expressions-plugin/common';
 import type { Datasource, Model, Transform, View } from '../public/expression_types';
 import { AssetType } from './assets';
-import { CanvasWorkpad, Flyouts, Sidebar } from './canvas';
+import { CanvasWorkpad, Sidebar, Flyouts } from './canvas';
 
 export enum AppStateKeys {
   FULLSCREEN = '__fullscreen',

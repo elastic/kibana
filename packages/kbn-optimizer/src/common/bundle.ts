@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 import { Jsonc } from '@kbn/repo-packages';
 
-import { includes } from './array_helpers';
 import { BundleCache } from './bundle_cache';
-import { ParsedDllManifest } from './dll_manifest';
-import type { Hashes } from './hashes';
-import { omit } from './obj_helpers';
 import { UnknownVals, isObj } from './ts_helpers';
+import { omit } from './obj_helpers';
+import { includes } from './array_helpers';
+import type { Hashes } from './hashes';
+import { ParsedDllManifest } from './dll_manifest';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 
@@ -25,7 +25,7 @@ const toStringArray = (input: any): string[] | null =>
   Array.isArray(input) && input.every((x) => typeof x === 'string') ? input : null;
 
 export interface BundleSpec {
-  readonly type: (typeof VALID_BUNDLE_TYPES)[0];
+  readonly type: typeof VALID_BUNDLE_TYPES[0];
   /** Unique id for this bundle */
   readonly id: string;
   /** Absolute path to the plugin source directory */

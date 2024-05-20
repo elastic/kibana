@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
-import React from 'react';
-import { getAddonPanelParameters, reduxDecorator } from '../../../../storybook';
+import { reduxDecorator, getAddonPanelParameters } from '../../../../storybook';
 
 import { AssetManager, AssetManagerComponent } from '..';
 import { assets } from './assets';

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiPage, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { find } from 'lodash';
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
-import { AlertsCallout } from '../../../alerts/callout';
-import { AlertsByName } from '../../../alerts/types';
+import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
+import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ComponentProps } from '../../route_init';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { useCharts } from '../../hooks/use_charts';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from '../../../components/kibana/detail_status';
-import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { useCharts } from '../../hooks/use_charts';
-import { ComponentProps } from '../../route_init';
 import { PageTemplate } from '../page_template';
+import { AlertsCallout } from '../../../alerts/callout';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 
 const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
   const { zoomInfo, onBrush } = useCharts();

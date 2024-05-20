@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import { useSelector } from 'react-redux';
+import React from 'react';
 import {
-  EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiButton,
   EuiMarkdownFormat,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-import { useSelector } from 'react-redux';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { selectOverviewStatus } from '../state/overview_status';
+import { useCanReadSyntheticsIndex } from '../../../hooks/use_capabilities';
 import {
   LICENSE_MISSING_ERROR,
   LICENSE_NOT_ACTIVE_ERROR,
   LICENSE_NOT_SUPPORTED_ERROR,
   SYNTHETICS_INDEX_PATTERN,
 } from '../../../../common/constants';
-import { useCanReadSyntheticsIndex } from '../../../hooks/use_capabilities';
-import { ClientPluginsStart } from '../../../plugin';
 import { useSyntheticsSettingsContext } from '../contexts';
-import { selectOverviewStatus } from '../state/overview_status';
+import { ClientPluginsStart } from '../../../plugin';
 
 export const useSyntheticsPrivileges = () => {
   const { canRead: canReadSyntheticsIndex, loading: isCanReadLoading } =

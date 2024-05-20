@@ -1,4 +1,3 @@
-import { HttpStart } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { HttpStart } from '@kbn/core/public';
  * 2.0.
  */
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import { HttpStart } from '@kbn/core/public';
 import React from 'react';
-import TutorialConfigAgent from '.';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../utils/test_helpers';
+import TutorialConfigAgent from '.';
 
 const policyElasticAgentOnCloudAgent = {
   id: 'policy-elastic-agent-on-cloud',

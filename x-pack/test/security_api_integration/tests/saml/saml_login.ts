@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
+import { stringify } from 'query-string';
 import url from 'url';
+import { resolve } from 'path';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
+import { adminTestUser } from '@kbn/test';
 import {
   getLogoutRequest,
   getSAMLRequestId,
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
-import { adminTestUser } from '@kbn/test';
-import { stringify } from 'query-string';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { Cookie, parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 

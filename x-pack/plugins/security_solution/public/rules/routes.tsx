@@ -1,4 +1,3 @@
-import { Route, Routes } from '@kbn/shared-ux-router';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +6,10 @@ import { Route, Routes } from '@kbn/shared-ux-router';
  */
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import * as i18n from './translations';
 import {
   COVERAGE_OVERVIEW_PATH,
   RULES_LANDING_PATH,
@@ -16,20 +17,19 @@ import {
   SecurityPageName,
 } from '../../common/constants';
 import { NotFoundPage } from '../app/404';
-import type { SecuritySubPluginRoutes } from '../app/types';
+import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
+import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
+import { RuleDetailsPage } from '../detection_engine/rule_details_ui/pages/rule_details';
+import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_editing';
+import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
-import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
-import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_editing';
-import { RuleDetailsPage } from '../detection_engine/rule_details_ui/pages/rule_details';
-import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
 import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
-import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
-import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
-import { useReadonlyHeader } from '../use_readonly_header';
+import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
-import * as i18n from './translations';
+import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
+import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 
 const RulesSubRoutes = [
   {

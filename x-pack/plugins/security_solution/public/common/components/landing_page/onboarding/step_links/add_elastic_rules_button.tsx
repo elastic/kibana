@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { LinkButton } from '@kbn/security-solution-navigation/links';
 import React, { useCallback } from 'react';
-import { useStepContext } from '../context/step_context';
+import { LinkButton } from '@kbn/security-solution-navigation/links';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import {
   AddAndValidateYourDataCardsId,
   AddIntegrationsSteps,
   EnablePrebuiltRulesSteps,
 } from '../types';
+import { useStepContext } from '../context/step_context';
 import { AddIntegrationCallout } from './add_integration_callout';
 import { ADD_ELASTIC_RULES, ADD_ELASTIC_RULES_CALLOUT_TITLE } from './translations';
 

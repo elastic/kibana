@@ -10,30 +10,30 @@ import React, { useState, useEffect } from 'react';
 import {
   EuiButton,
   EuiConfirmModal,
-  EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSpacer,
+  EuiFilePicker,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import {
+  SAVE_BUTTON_LABEL,
   CANCEL_BUTTON_LABEL,
   RESET_DEFAULT_BUTTON_LABEL,
-  SAVE_BUTTON_LABEL,
 } from '../../../../shared/constants';
 import { readUploadedFileAsBase64 } from '../../../utils';
 
 import {
-  BRAND_TEXT,
-  ICON_TEXT,
   LOGO_TEXT,
-  ORGANIZATION_LABEL,
-  RESET_ICON_DESCRIPTION,
-  RESET_IMAGE_CONFIRMATION_TEXT,
+  ICON_TEXT,
   RESET_IMAGE_TITLE,
   RESET_LOGO_DESCRIPTION,
+  RESET_ICON_DESCRIPTION,
+  RESET_IMAGE_CONFIRMATION_TEXT,
+  ORGANIZATION_LABEL,
+  BRAND_TEXT,
 } from '../constants';
 
 export const defaultLogo =

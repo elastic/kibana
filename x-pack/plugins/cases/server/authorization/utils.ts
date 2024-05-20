@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { partition, remove, uniq } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
-import { partition, remove, uniq } from 'lodash';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { OWNER_FIELD } from '../../common/constants';
 
 export const getOwnersFilter = (

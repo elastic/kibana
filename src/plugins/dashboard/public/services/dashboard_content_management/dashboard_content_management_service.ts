@@ -11,21 +11,21 @@ import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/p
 import type { DashboardStartDependencies } from '../../plugin';
 import { checkForDuplicateDashboardTitle } from './lib/check_for_duplicate_dashboard_title';
 
-import { DashboardContentManagementCache } from './dashboard_content_management_cache';
-import { deleteDashboards } from './lib/delete_dashboards';
 import {
-  findDashboardById,
-  findDashboardIdByTitle,
-  findDashboardsByIds,
   searchDashboards,
+  findDashboardById,
+  findDashboardsByIds,
+  findDashboardIdByTitle,
 } from './lib/find_dashboards';
-import { loadDashboardState } from './lib/load_dashboard_state';
 import { saveDashboardState } from './lib/save_dashboard_state';
-import { updateDashboardMeta } from './lib/update_dashboard_meta';
 import type {
   DashboardContentManagementRequiredServices,
   DashboardContentManagementService,
 } from './types';
+import { deleteDashboards } from './lib/delete_dashboards';
+import { loadDashboardState } from './lib/load_dashboard_state';
+import { updateDashboardMeta } from './lib/update_dashboard_meta';
+import { DashboardContentManagementCache } from './dashboard_content_management_cache';
 
 export type DashboardContentManagementServiceFactory = KibanaPluginServiceFactory<
   DashboardContentManagementService,

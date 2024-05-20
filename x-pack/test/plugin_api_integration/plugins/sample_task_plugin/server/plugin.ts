@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EventEmitter } from 'events';
+import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
+import { EventEmitter } from 'events';
+import { firstValueFrom, Subject } from 'rxjs';
 import {
-  ConcreteTaskInstance,
-  EphemeralTask,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  ConcreteTaskInstance,
+  EphemeralTask,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
 import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
-import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
-import { random } from 'lodash';
-import { Subject, firstValueFrom } from 'rxjs';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies

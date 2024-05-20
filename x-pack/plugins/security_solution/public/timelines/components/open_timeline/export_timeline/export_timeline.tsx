@@ -8,11 +8,11 @@
 import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
+import * as i18n from '../translations';
 import { TimelineType } from '../../../../../common/api/timeline';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { downloadBlob } from '../../../../common/utils/download_blob';
 import { exportSelectedTimeline } from '../../../containers/api';
-import * as i18n from '../translations';
+import { downloadBlob } from '../../../../common/utils/download_blob';
 
 const ExportTimeline: React.FC<{
   exportedIds: string[] | undefined;

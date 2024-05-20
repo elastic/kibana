@@ -8,8 +8,8 @@
 import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
 import { Formatter, commonFormatters } from './common';
-import { arrayFormatter, objectFormatter, stringToObjectFormatter } from './formatting_utils';
 import { tlsFormatters } from './tls';
+import { arrayFormatter, objectFormatter, stringToObjectFormatter } from './formatting_utils';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 

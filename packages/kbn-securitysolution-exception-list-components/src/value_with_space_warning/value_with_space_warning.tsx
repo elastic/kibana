@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import type { FC } from 'react';
+import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { useValueWithSpaceWarning } from './use_value_with_space_warning';

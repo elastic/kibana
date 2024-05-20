@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiLoadingSpinner, EuiTabbedContent } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiTabbedContent, EuiLoadingSpinner } from '@elastic/eui';
 
-import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { AnnotationFlyout } from '../../../../components/annotations/annotation_flyout';
-import { AnnotationsTable } from '../../../../components/annotations/annotations_table';
-import { ModelSnapshotTable } from '../../../../components/model_snapshots';
-import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
-import { DatafeedChartFlyout } from '../datafeed_chart_flyout';
-import { DatafeedPreviewPane } from './datafeed_preview_tab';
 import { extractJobDetails } from './extract_job_details';
+import { JsonPane } from './json_tab';
+import { DatafeedPreviewPane } from './datafeed_preview_tab';
+import { AnnotationsTable } from '../../../../components/annotations/annotations_table';
+import { DatafeedChartFlyout } from '../datafeed_chart_flyout';
+import { AnnotationFlyout } from '../../../../components/annotations/annotation_flyout';
+import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
+import { ModelSnapshotTable } from '../../../../components/model_snapshots';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
-import { JsonPane } from './json_tab';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 export class JobDetailsUI extends Component {
   constructor(props) {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TimelineType } from '@kbn/security-solution-plugin/common/api/timeline';
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
+import { TimelineType } from '@kbn/security-solution-plugin/common/api/timeline';
 
 export const createBasicTimeline = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,

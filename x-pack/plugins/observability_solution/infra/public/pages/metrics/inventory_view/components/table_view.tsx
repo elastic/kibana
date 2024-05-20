@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiButtonEmpty, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { last, first } from 'lodash';
+import React, { useState, useMemo } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { first, last } from 'lodash';
-import React, { useState, useMemo } from 'react';
-import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
+import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
 import { fieldToName } from '../lib/field_to_display_name';
-import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
 import { NodeContextMenu } from './waffle/node_context_menu';
+import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
 
 interface Props {
   nodes: SnapshotNode[];
@@ -52,7 +52,7 @@ export const TableView = (props: Props) => {
 
   const closePopover = () => setOpenPopoverId(null);
 
-  const columns: Array<EuiBasicTableColumn<(typeof items)[number]>> = [
+  const columns: Array<EuiBasicTableColumn<typeof items[number]>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.infra.tableView.columnName.name', { defaultMessage: 'Name' }),

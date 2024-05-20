@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { EuiLinkAnchorProps, EuiMarkdownFormatProps } from '@elastic/eui';
-import { EuiMarkdownFormat } from '@elastic/eui';
-import { cloneDeep } from 'lodash/fp';
 import React, { memo, useMemo } from 'react';
+import { cloneDeep } from 'lodash/fp';
+import type { EuiMarkdownFormatProps, EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiMarkdownFormat } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
 import { usePlugins } from './use_plugins';
 

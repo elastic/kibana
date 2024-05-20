@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiPopoverFooter,
-  EuiRadio,
-  EuiText,
-} from '@elastic/eui';
 import React, { useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiText,
+  EuiRadio,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiPopoverFooter,
+} from '@elastic/eui';
 
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { ExceptionsAddToListsTable } from '../add_to_lists_table';
 import * as i18n from './translations';
+import { ExceptionsAddToListsTable } from '../add_to_lists_table';
+import { useKibana } from '../../../../../common/lib/kibana';
 
 interface ExceptionsAddToListsOptionsComponentProps {
   rulesCount: number;

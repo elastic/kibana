@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { XyPublicConfig } from '../config';
-import { setDataViewsStart, setPalettesService, setUISettings } from './services';
+import { setUISettings, setPalettesService, setDataViewsStart } from './services';
 
 import { visTypesDefinitions } from './vis_types';
 

@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React, { useRef, useState } from 'react';
 import {
-  EuiButton,
-  EuiForm,
-  EuiFormRow,
   EuiPage,
   EuiPageBody,
-  EuiPageHeader,
   EuiPageSection,
+  EuiPageHeader,
   EuiSpacer,
+  EuiForm,
   EuiTextArea,
+  EuiFormRow,
+  EuiButton,
 } from '@elastic/eui';
-import React, { useRef, useState } from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 
+import { EditorError, ESQLAst, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { CodeEditor } from '@kbn/code-editor';
-import { ESQLAst, EditorError, getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { StartDependencies } from './plugin';
 
 export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {

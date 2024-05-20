@@ -6,9 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { sortBy, take, uniq } from 'lodash';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -16,11 +17,10 @@ import {
   TRACE_ID,
 } from '../../../common/es_fields/apm';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../common/utils/environment_query';
 
-import { APMConfig } from '../..';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMConfig } from '../..';
 
 export async function getTraceSampleIds({
   serviceName,

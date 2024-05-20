@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
-import { IRouter, SavedObjectsFindOptions, StartServicesAccessor } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { schema } from '@kbn/config-schema';
+import { IRouter, StartServicesAccessor, SavedObjectsFindOptions } from '@kbn/core/server';
 import { DataViewsService } from '../../../common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { DATA_VIEW_SWAP_REFERENCES_PATH, INITIAL_REST_VERSION } from '../../constants';
-import type {
-  DataViewsServerPluginStart,
-  DataViewsServerPluginStartDependencies,
-} from '../../types';
 import { handleErrors } from './util/handle_errors';
+import type {
+  DataViewsServerPluginStartDependencies,
+  DataViewsServerPluginStart,
+} from '../../types';
+import { DATA_VIEW_SWAP_REFERENCES_PATH, INITIAL_REST_VERSION } from '../../constants';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 interface GetDataViewArgs {
   dataViewsService: DataViewsService;

@@ -1,4 +1,3 @@
-import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import { renderHook } from '@testing-library/react-hooks';
  * 2.0.
  */
 import React from 'react';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
-import { WrappedHelper } from '../utils/testing';
+import { renderHook } from '@testing-library/react-hooks';
 import { getTimeRangeFilter, useLastXChecks } from './use_last_x_checks';
+import { WrappedHelper } from '../utils/testing';
 import * as searchHooks from './use_redux_es_search';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 
 describe('useLastXChecks', () => {
   const getMockHits = (): Array<{ fields: { 'monitor.duration.us': number[] | undefined } }> => {

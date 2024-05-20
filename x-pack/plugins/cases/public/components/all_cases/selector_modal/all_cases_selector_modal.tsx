@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useState, useCallback } from 'react';
 import {
   EuiButtonEmpty,
   EuiModal,
@@ -16,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import React, { useState, useCallback } from 'react';
 import type { CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUI } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';

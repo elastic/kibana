@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import * as React from 'react';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { getPercentileLabel } from '../ux_metrics/translations';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Metrics } from './metrics';
 
 export function ClientMetrics() {

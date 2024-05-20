@@ -8,8 +8,8 @@
 
 import React from 'react';
 
-import { EuiScreenReaderOnly, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiScreenReaderOnly, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 import { OptionsListStrings } from './options_list_strings';
 

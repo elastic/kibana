@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { RenderingService } from '@kbn/core-rendering-browser-internal';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { RenderingService } from '@kbn/core-rendering-browser-internal';
 
 type RenderingServiceContract = PublicMethodsOf<RenderingService>;
 

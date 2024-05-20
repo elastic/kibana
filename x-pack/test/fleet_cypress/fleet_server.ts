@@ -8,9 +8,9 @@
 import { ChildProcess, spawn } from 'child_process';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosRequestConfig } from 'axios';
-import { AgentManagerParams } from './agent';
-import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
+import { getLatestVersion } from './artifact_manager';
+import { AgentManagerParams } from './agent';
 
 export class FleetManager extends Manager {
   private fleetProcess?: ChildProcess;

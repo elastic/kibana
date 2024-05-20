@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import {
-  PluginSetup as DataPluginSetup,
-  PluginStart as DataPluginStart,
-} from '@kbn/data-plugin/server';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import {
+  PluginStart as DataPluginStart,
+  PluginSetup as DataPluginSetup,
+} from '@kbn/data-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { LensAppLocatorDefinition } from '../common/locator/locator';
-import { LensStorage } from './content_management';
-import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
-import { setupExpressions } from './expressions';
-import type { CustomVisualizationMigrations } from './migrations/types';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { setupSavedObjects } from './saved_objects';
+import { setupExpressions } from './expressions';
+import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
+import type { CustomVisualizationMigrations } from './migrations/types';
+import { LensAppLocatorDefinition } from '../common/locator/locator';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { LensStorage } from './content_management';
 
 export interface PluginSetupContract {
   taskManager?: TaskManagerSetupContract;

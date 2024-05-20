@@ -6,17 +6,17 @@
  */
 
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { KibanaRequest, ResponseHeaders } from '@kbn/core-http-server';
-import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { Logger } from '@kbn/logging';
-import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { BaseMessage } from '@langchain/core/messages';
+import { Logger } from '@kbn/logging';
+import { KibanaRequest, ResponseHeaders } from '@kbn/core-http-server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import type { AssistantTool } from '../../../types';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
+import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { ResponseBody } from '../types';
+import type { AssistantTool } from '../../../types';
 
 export interface AgentExecutorParams<T extends boolean> {
   abortSignal?: AbortSignal;

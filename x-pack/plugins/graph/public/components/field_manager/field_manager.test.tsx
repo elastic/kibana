@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiColorPicker, EuiContextMenu, EuiSelectable } from '@elastic/eui';
-import { ShallowWrapper, shallow } from 'enzyme';
 import React, { ReactElement, MouseEvent } from 'react';
-import { act } from 'react-dom/test-utils';
-import { Provider } from 'react-redux';
-import { getSuitableIcon } from '../../helpers/style_choices';
-import { GraphStore, loadFields } from '../../state_management';
-import { createMockGraphStore } from '../../state_management/mocks';
-import { FieldEditor } from './field_editor';
-import { FieldManager } from './field_manager';
+import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiButton } from '@elastic/eui';
 import { FieldPicker } from './field_picker';
+import { FieldEditor } from './field_editor';
+import { GraphStore, loadFields } from '../../state_management';
+import { getSuitableIcon } from '../../helpers/style_choices';
+import { shallow, ShallowWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import { FieldManager } from './field_manager';
+import { Provider } from 'react-redux';
+import { createMockGraphStore } from '../../state_management/mocks';
 
 describe('field_manager', () => {
   let store: GraphStore;

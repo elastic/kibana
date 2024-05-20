@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiButton, EuiLoadingChart } from '@elastic/eui';
 import styled from '@emotion/styled';
-import React from 'react';
 import { TEST_IDS } from './constants';
 
 const FilterGroupLoadingButton = styled(EuiButton)`

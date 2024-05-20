@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -15,21 +14,22 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiCode,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { Connector, ConnectorStatus } from '@kbn/search-connectors';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { docLinks } from '../../../../../common/doc_links';
-import { SAVE_LABEL } from '../../../../../common/i18n_string';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidIndexName } from '../../../../utils/validate_index_name';
-import { DEFAULT_INGESTION_PIPELINE } from '../../../constants';
+import { SAVE_LABEL } from '../../../../../common/i18n_string';
 import { useConnector } from '../../../hooks/api/use_connector';
 import { useKibanaServices } from '../../../hooks/use_kibana';
 import { ApiKeyPanel } from './api_key_panel';
 import { ConnectorIndexNameForm } from './connector_index_name_form';
 import { SyncScheduledCallOut } from './sync_scheduled_callout';
+import { docLinks } from '../../../../../common/doc_links';
+import { DEFAULT_INGESTION_PIPELINE } from '../../../constants';
 interface ConnectorIndexNameProps {
   connector: Connector;
 }

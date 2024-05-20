@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Columns } from '../../../../explore/components/paginated_table';
 import type { AnomaliesBy, Anomaly } from '../types';
 
 import { Entity } from '../entity';
 import { createCompoundAnomalyKey } from './create_compound_key';
 
-import { FormattedRelativePreferenceDate } from '../../formatted_date';
-import { getEntries } from '../get_entries';
-import { ExplorerLink } from '../links/create_explorer_link';
-import { Score } from '../score/score';
 import * as i18n from './translations';
+import { getEntries } from '../get_entries';
+import { Score } from '../score/score';
+import { ExplorerLink } from '../links/create_explorer_link';
+import { FormattedRelativePreferenceDate } from '../../formatted_date';
 
 export const getAnomaliesDefaultTableColumns = (
   startDate: string,
@@ -27,7 +27,7 @@ export const getAnomaliesDefaultTableColumns = (
   Columns<Anomaly['jobId'], AnomaliesBy>,
   Columns<Anomaly['entityValue'], AnomaliesBy>,
   Columns<Anomaly['influencers'], AnomaliesBy>,
-  Columns<Anomaly['time'], AnomaliesBy>,
+  Columns<Anomaly['time'], AnomaliesBy>
 ] => [
   {
     name: i18n.DETECTOR,

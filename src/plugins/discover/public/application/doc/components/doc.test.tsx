@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { throwError, of } from 'rxjs';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { Doc, DocProps } from './doc';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
+import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import type { UnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/types';
-import { ReactWrapper } from 'enzyme';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { of, throwError } from 'rxjs';
-import { Doc, DocProps } from './doc';
 
 const mockSearchApi = jest.fn();
 

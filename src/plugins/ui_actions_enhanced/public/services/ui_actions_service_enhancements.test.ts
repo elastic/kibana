@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { ActionFactory, ActionFactoryDefinition } from '../dynamic_actions';
 import {
   UiActionsServiceEnhancements,
   UiActionsServiceEnhancementsParams,
 } from './ui_actions_service_enhancements';
+import { ActionFactoryDefinition, ActionFactory } from '../dynamic_actions';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 const deps: UiActionsServiceEnhancementsParams = {
   getLicense: () => licensingMock.createLicense(),

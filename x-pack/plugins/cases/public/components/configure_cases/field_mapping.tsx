@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiFontSize } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
+import { EuiFlexItem, EuiFlexGroup, useEuiFontSize } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { FieldMappingRowStatic } from './field_mapping_row_static';
 import * as i18n from './translations';

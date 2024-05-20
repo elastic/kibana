@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
-import { TimeBuckets, calcEsInterval, getBoundsRoundedToInterval } from './time_buckets';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { TimeBuckets, getBoundsRoundedToInterval, calcEsInterval } from './time_buckets';
 
 describe('ML - time buckets', () => {
   let autoBuckets;

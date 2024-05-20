@@ -6,9 +6,9 @@
  */
 
 import { CustomFieldTypes } from '../../common/types/domain';
+import type { ICasesCustomField, CasesCustomFieldsMap } from './types';
 import { getCasesTextCustomField } from './text';
 import { getCasesToggleCustomField } from './toggle';
-import type { CasesCustomFieldsMap, ICasesCustomField } from './types';
 
 const mapping: Record<CustomFieldTypes, ICasesCustomField> = {
   [CustomFieldTypes.TEXT]: getCasesTextCustomField(),

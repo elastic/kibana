@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
+import { setupRequestFlyoutTestBed, RequestFlyoutTestBed } from './request_flyout.helpers';
 import { getDefaultHotPhasePolicy } from '../constants';
-import { RequestFlyoutTestBed, setupRequestFlyoutTestBed } from './request_flyout.helpers';
 
 describe('<EditPolicy /> request flyout', () => {
   let testBed: RequestFlyoutTestBed;

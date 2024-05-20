@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFieldText } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../../common/util/job_utils';
+import { EuiFieldText } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { useStringifiedValue } from '../hooks';
 import { Description } from './description';
+import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../../common/util/job_utils';
+import { useStringifiedValue } from '../hooks';
 
 export const FrequencyInput: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =

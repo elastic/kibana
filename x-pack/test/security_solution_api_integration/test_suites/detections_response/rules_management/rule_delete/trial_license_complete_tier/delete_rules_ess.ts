@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
+import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
-  createAlertsIndex,
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../../common/utils/security_solution';
-import {
+  getSimpleRule,
+  removeServerGeneratedProperties,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
-  getSimpleRule,
-  removeServerGeneratedProperties,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

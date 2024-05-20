@@ -7,9 +7,9 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { APMQueryParams } from '../url_helpers';
 import { APMLinkExtendProps, useAPMHref } from './apm_link';
+import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'transactionResult',

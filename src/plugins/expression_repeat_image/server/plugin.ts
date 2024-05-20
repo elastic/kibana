@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { ExpressionsServerSetup, ExpressionsServerStart } from '@kbn/expressions-plugin/server';
+import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { repeatImageFunction } from '../common';
 
 interface SetupDeps {
@@ -23,7 +23,12 @@ export type ExpressionRepeatImagePluginStart = void;
 
 export class ExpressionRepeatImagePlugin
   implements
-    Plugin<ExpressionRepeatImagePluginSetup, ExpressionRepeatImagePluginStart, SetupDeps, StartDeps>
+    Plugin<
+      ExpressionRepeatImagePluginSetup,
+      ExpressionRepeatImagePluginStart,
+      SetupDeps,
+      StartDeps
+    >
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRepeatImagePluginSetup {
     expressions.registerFunction(repeatImageFunction);

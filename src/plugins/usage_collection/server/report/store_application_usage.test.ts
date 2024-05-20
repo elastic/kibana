@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getDailyId } from '../../common/application_usage';
-import { ApplicationUsageReport } from './schema';
 import { storeApplicationUsage } from './store_application_usage';
+import { ApplicationUsageReport } from './schema';
 
 const createReport = (parts: Partial<ApplicationUsageReport>): ApplicationUsageReport => ({
   appId: 'appId',

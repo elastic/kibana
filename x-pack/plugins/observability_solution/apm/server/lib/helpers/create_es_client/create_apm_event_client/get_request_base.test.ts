@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APMEventESSearchRequest } from '.';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { getRequestBase } from './get_request_base';
 
 describe('getRequestBase', () => {

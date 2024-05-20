@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { convertModelVersionBackwardConversionSchemaMock } from './model_version.test.mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type {
+  SavedObjectsType,
+  SavedObjectsModelVersion,
   SavedObjectModelDataBackfillFn,
   SavedObjectUnsanitizedDoc,
-  SavedObjectsModelVersion,
-  SavedObjectsType,
 } from '@kbn/core-saved-objects-server';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { Transform, TransformType } from './types';
 import {
+  getModelVersionTransforms,
   convertModelVersionTransformFn,
   getModelVersionSchemas,
-  getModelVersionTransforms,
 } from './model_version';
-import { convertModelVersionBackwardConversionSchemaMock } from './model_version.test.mocks';
-import { Transform, TransformType } from './types';
 
 const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
   name: 'test',

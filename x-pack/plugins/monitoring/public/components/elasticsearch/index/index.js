@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiPage, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { AlertsCallout } from '../../../alerts/callout';
-import { MonitoringTimeseriesContainer } from '../../chart';
-import { Logs } from '../../logs';
+import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { IndexDetailStatus } from '../index_detail_status';
+import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
+import { Logs } from '../../logs';
+import { AlertsCallout } from '../../../alerts/callout';
 
 export const Index = ({
   indexSummary,

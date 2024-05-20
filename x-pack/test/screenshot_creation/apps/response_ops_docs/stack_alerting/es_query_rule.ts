@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { esQueryRuleName } from '.';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { esQueryRuleName } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');

@@ -7,8 +7,8 @@
  */
 
 import { SerializableRecord } from '@kbn/utility-types';
-import { LocatorPublic, UrlService } from '../common/url_service';
 import { SharePublicSetup, SharePublicStart } from './plugin';
+import { LocatorPublic, UrlService } from '../common/url_service';
 import { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 

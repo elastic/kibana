@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import _ from 'lodash';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import Command from './command';
-import profiler from './profiler/profiler';
 import serveCommand from './serve/serve';
+import profiler from './profiler/profiler';
 
 const argv = process.argv.slice();
 const program = new Command('bin/kibana');

@@ -8,8 +8,8 @@
 import type { EuiDataGridColumn } from '@elastic/eui';
 import {
   ALERT_HOST_CRITICALITY,
-  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
   ALERT_USER_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
   ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
 } from '../../../../common/field_maps/field_names';
 import type { LicenseService } from '../../../../common/license';

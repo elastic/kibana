@@ -1,4 +1,3 @@
-import { fireEvent, render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,20 +5,21 @@ import { fireEvent, render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
 import { CardStep } from '.';
 import type { StepId } from '../types';
 
-import { fetchRuleManagementFilters } from '../apis';
-import { createProjectSteps, enablePrebuildRuleSteps, overviewVideoSteps } from '../sections';
-import { ALL_DONE_TEXT } from '../translations';
 import {
-  CreateProjectSteps,
   EnablePrebuiltRulesSteps,
   GetStartedWithAlertsCardsId,
-  OverviewSteps,
   QuickStartSectionCardsId,
   SectionId,
+  OverviewSteps,
+  CreateProjectSteps,
 } from '../types';
+import { ALL_DONE_TEXT } from '../translations';
+import { fetchRuleManagementFilters } from '../apis';
+import { createProjectSteps, enablePrebuildRuleSteps, overviewVideoSteps } from '../sections';
 
 jest.mock('./step_content', () => ({
   StepContent: () => <div data-test-subj="mock-step-content" />,

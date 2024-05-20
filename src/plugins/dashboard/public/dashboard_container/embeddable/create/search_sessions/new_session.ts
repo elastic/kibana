@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 import { Filter, TimeRange, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import { combineLatest, distinctUntilChanged, Observable, skip } from 'rxjs';
+import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
-import { Observable, combineLatest, distinctUntilChanged, skip } from 'rxjs';
 import { areTimesEqual } from '../../../state/diffing/dashboard_diffing_utils';
 import { DashboardContainer } from '../../dashboard_container';
 

@@ -5,47 +5,47 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 as uuid } from 'uuid';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import {
+  EuiTitle,
+  EuiSpacer,
+  EuiInMemoryTable,
+  EuiText,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiPanel,
+} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { UserOverview } from '../../../../overview/components/user_overview';
+import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { NetworkDetailsLink } from '../../../../common/components/links';
-import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
-import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { manageQuery } from '../../../../common/components/page/manage_query';
-import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
-import { UserOverview } from '../../../../overview/components/user_overview';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { CellActions } from './cell_actions';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
+import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
+import { manageQuery } from '../../../../common/components/page/manage_query';
+import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
+import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';

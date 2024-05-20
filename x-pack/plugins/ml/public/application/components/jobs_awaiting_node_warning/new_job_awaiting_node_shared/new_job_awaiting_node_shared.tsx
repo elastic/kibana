@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { JOB_STATE } from '../../../../../common/constants/states';
-import { HttpService } from '../../../services/http_service';
 import { mlApiServicesProvider } from '../../../services/ml_api_service';
+import { HttpService } from '../../../services/http_service';
 import type { CloudInfo } from '../../../services/ml_server_info';
 import { extractDeploymentId } from '../../../services/ml_server_info';
 

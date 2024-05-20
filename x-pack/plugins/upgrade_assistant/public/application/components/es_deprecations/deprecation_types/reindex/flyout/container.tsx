@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
 
 import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
+import type { ReindexStateContext } from '../context';
+import { ChecklistFlyoutStep } from './checklist_step';
+import { WarningsFlyoutStep } from './warnings_step';
+import { DeprecationBadge } from '../../../../shared';
 import {
   UIM_REINDEX_START_CLICK,
   UIM_REINDEX_STOP_CLICK,
   uiMetricService,
 } from '../../../../../lib/ui_metric';
-import { DeprecationBadge } from '../../../../shared';
-import type { ReindexStateContext } from '../context';
-import { ChecklistFlyoutStep } from './checklist_step';
-import { WarningsFlyoutStep } from './warnings_step';
 
 export interface ReindexFlyoutProps extends ReindexStateContext {
   deprecation: EnrichedDeprecationInfo;

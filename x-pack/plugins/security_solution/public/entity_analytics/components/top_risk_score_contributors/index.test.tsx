@@ -8,8 +8,8 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TopRiskScoreContributors } from '.';
-import type { RuleRisk } from '../../../../common/search_strategy';
 import { TestProviders } from '../../../common/mock';
+import type { RuleRisk } from '../../../../common/search_strategy';
 
 jest.mock('../../../common/containers/query_toggle');
 const testProps = {

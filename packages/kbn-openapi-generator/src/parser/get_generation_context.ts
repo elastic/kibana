@@ -9,10 +9,10 @@
 import { OpenAPIV3 } from 'openapi-types';
 import { getApiOperationsList } from './lib/get_api_operations_list';
 import { getComponents } from './lib/get_components';
-import { ImportsMap, getImportsMap } from './lib/get_imports_map';
-import { getInfo } from './lib/get_info';
+import { getImportsMap, ImportsMap } from './lib/get_imports_map';
 import { normalizeSchema } from './lib/normalize_schema';
 import { NormalizedOperation, OpenApiDocument } from './openapi_types';
+import { getInfo } from './lib/get_info';
 
 export interface GenerationContext {
   components: OpenAPIV3.ComponentsObject | undefined;

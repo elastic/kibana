@@ -172,7 +172,10 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "signature": ["IconType", " | undefined"],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -184,7 +187,9 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -196,7 +201,9 @@
             "tags": [],
             "label": "stage",
             "description": [],
-            "signature": ["\"experimental\" | \"beta\" | \"production\""],
+            "signature": [
+              "\"experimental\" | \"beta\" | \"production\""
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -250,7 +257,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["VisTypeOptions"],
+            "signature": [
+              "VisTypeOptions"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -262,7 +271,9 @@
             "tags": [],
             "label": "visConfig",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -274,7 +285,9 @@
             "tags": [],
             "label": "editorConfig",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -319,7 +332,9 @@
             "tags": [],
             "label": "suppressWarnings",
             "description": [],
-            "signature": ["(() => boolean) | undefined"],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -331,7 +346,9 @@
             "tags": [],
             "label": "hasPartialRows",
             "description": [],
-            "signature": ["boolean | ((vis: { params: TVisParams; }) => boolean)"],
+            "signature": [
+              "boolean | ((vis: { params: TVisParams; }) => boolean)"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -343,7 +360,9 @@
             "tags": [],
             "label": "hierarchicalData",
             "description": [],
-            "signature": ["boolean | ((vis: { params: TVisParams; }) => boolean)"],
+            "signature": [
+              "boolean | ((vis: { params: TVisParams; }) => boolean)"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -605,7 +624,9 @@
             "tags": [],
             "label": "schemas",
             "description": [],
-            "signature": ["Schemas"],
+            "signature": [
+              "Schemas"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -617,7 +638,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -679,7 +702,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -691,7 +716,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -704,7 +731,9 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": ["PersistedStatePath | undefined"],
+                "signature": [
+                  "PersistedStatePath | undefined"
+                ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -720,7 +749,9 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": ["(key?: PersistedStateKey, defaultValue?: any) => any"],
+            "signature": [
+              "(key?: PersistedStateKey, defaultValue?: any) => any"
+            ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -732,7 +763,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["PersistedStateKey"],
+                "signature": [
+                  "PersistedStateKey"
+                ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -745,7 +778,9 @@
                 "tags": [],
                 "label": "defaultValue",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -761,7 +796,9 @@
             "tags": [],
             "label": "set",
             "description": [],
-            "signature": ["(key: any, value?: any) => this"],
+            "signature": [
+              "(key: any, value?: any) => this"
+            ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -773,7 +810,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -786,7 +825,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -802,7 +843,9 @@
             "tags": [],
             "label": "setSilent",
             "description": [],
-            "signature": ["(key: any, value?: any) => this | undefined"],
+            "signature": [
+              "(key: any, value?: any) => this | undefined"
+            ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -814,7 +857,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -827,7 +872,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -843,7 +890,9 @@
             "tags": [],
             "label": "clearAllKeys",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -857,7 +906,9 @@
             "tags": [],
             "label": "reset",
             "description": [],
-            "signature": ["(path: PersistedStatePath) => void"],
+            "signature": [
+              "(path: PersistedStatePath) => void"
+            ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -869,7 +920,9 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": ["PersistedStatePath"],
+                "signature": [
+                  "PersistedStatePath"
+                ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -885,7 +938,9 @@
             "tags": [],
             "label": "getChanges",
             "description": [],
-            "signature": ["() => any"],
+            "signature": [
+              "() => any"
+            ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -899,7 +954,9 @@
             "tags": [],
             "label": "toJSON",
             "description": [],
-            "signature": ["() => any"],
+            "signature": [
+              "() => any"
+            ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -913,7 +970,9 @@
             "tags": [],
             "label": "toString",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -927,7 +986,9 @@
             "tags": [],
             "label": "fromString",
             "description": [],
-            "signature": ["(input: string) => this"],
+            "signature": [
+              "(input: string) => this"
+            ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -939,7 +1000,9 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1000,7 +1063,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1034,7 +1099,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["TVisParams"],
+            "signature": [
+              "TVisParams"
+            ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1078,7 +1145,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1090,7 +1159,9 @@
                 "tags": [],
                 "label": "visType",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/visualizations/public/vis.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1128,7 +1199,9 @@
             "tags": [],
             "label": "setState",
             "description": [],
-            "signature": ["(inState: PartialVisState) => Promise<void>"],
+            "signature": [
+              "(inState: PartialVisState) => Promise<void>"
+            ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1140,7 +1213,9 @@
                 "tags": [],
                 "label": "inState",
                 "description": [],
-                "signature": ["PartialVisState"],
+                "signature": [
+                  "PartialVisState"
+                ],
                 "path": "src/plugins/visualizations/public/vis.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1212,7 +1287,9 @@
             "tags": [],
             "label": "isHierarchical",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1287,7 +1364,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"visualization\""],
+            "signature": [
+              "\"visualization\""
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1299,7 +1378,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1332,7 +1413,9 @@
                 "tags": [],
                 "label": "{ vis, editPath, editUrl, indexPatterns, deps, capabilities }",
                 "description": [],
-                "signature": ["VisualizeEmbeddableConfiguration"],
+                "signature": [
+                  "VisualizeEmbeddableConfiguration"
+                ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1435,7 +1518,9 @@
             "tags": [],
             "label": "reportsEmbeddableLoad",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1480,7 +1565,9 @@
             "type": "Function",
             "tags": [],
             "label": "getFilters",
-            "description": ["\nGets the Visualize embeddable's local filters"],
+            "description": [
+              "\nGets the Visualize embeddable's local filters"
+            ],
             "signature": [
               "() => ",
               {
@@ -1496,7 +1583,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": ["Local/panel-level array of filters for Visualize embeddable"]
+            "returnComment": [
+              "Local/panel-level array of filters for Visualize embeddable"
+            ]
           },
           {
             "parentPluginId": "visualizations",
@@ -1504,7 +1593,9 @@
             "type": "Function",
             "tags": [],
             "label": "getQuery",
-            "description": ["\nGets the Visualize embeddable's local query"],
+            "description": [
+              "\nGets the Visualize embeddable's local query"
+            ],
             "signature": [
               "() => ",
               {
@@ -1528,7 +1619,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": ["Local/panel-level query for Visualize embeddable"]
+            "returnComment": [
+              "Local/panel-level query for Visualize embeddable"
+            ]
           },
           {
             "parentPluginId": "visualizations",
@@ -1587,7 +1680,9 @@
             "description": [
               "\nTransfers all changes in the containerState.customization into\nthe uiState of this visualization."
             ],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1601,7 +1696,9 @@
             "tags": [],
             "label": "hasInspector",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1615,7 +1712,9 @@
             "tags": [],
             "label": "onContainerLoading",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1629,7 +1728,9 @@
             "tags": [],
             "label": "onContainerData",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1643,7 +1744,9 @@
             "tags": [],
             "label": "onContainerRender",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1702,8 +1805,12 @@
             "type": "Function",
             "tags": [],
             "label": "render",
-            "description": ["\n"],
-            "signature": ["(domNode: HTMLElement) => Promise<void>"],
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "(domNode: HTMLElement) => Promise<void>"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1715,7 +1822,9 @@
                 "tags": [],
                 "label": "domNode",
                 "description": [],
-                "signature": ["HTMLElement"],
+                "signature": [
+                  "HTMLElement"
+                ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1731,7 +1840,9 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1745,7 +1856,9 @@
             "tags": [],
             "label": "reload",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1759,7 +1872,9 @@
             "tags": [],
             "label": "supportedTriggers",
             "description": [],
-            "signature": ["() => string[]"],
+            "signature": [
+              "() => string[]"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1773,7 +1888,11 @@
             "tags": [],
             "label": "getExpressionVariables$",
             "description": [],
-            "signature": ["() => ", "Observable", "<Record<string, unknown> | undefined>"],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<Record<string, unknown> | undefined>"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1787,7 +1906,9 @@
             "tags": [],
             "label": "getExpressionVariables",
             "description": [],
-            "signature": ["() => Record<string, unknown> | undefined"],
+            "signature": [
+              "() => Record<string, unknown> | undefined"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1848,7 +1969,11 @@
             "tags": [],
             "label": "getInputAsValueType",
             "description": [],
-            "signature": ["() => Promise<", "VisualizeByValueInput", ">"],
+            "signature": [
+              "() => Promise<",
+              "VisualizeByValueInput",
+              ">"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1862,7 +1987,11 @@
             "tags": [],
             "label": "getInputAsRefType",
             "description": [],
-            "signature": ["() => Promise<", "VisualizeByReferenceInput", ">"],
+            "signature": [
+              "() => Promise<",
+              "VisualizeByReferenceInput",
+              ">"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1902,7 +2031,9 @@
             "tags": [],
             "label": "api",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1949,7 +2080,9 @@
             "tags": [],
             "label": "indexPatternId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/convert_to_lens/datasource.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1987,7 +2120,9 @@
         "tags": [],
         "label": "getFullPath",
         "description": [],
-        "signature": ["(id: string) => string"],
+        "signature": [
+          "(id: string) => string"
+        ],
         "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1999,7 +2134,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2217,7 +2354,9 @@
             "tags": [],
             "label": "removeUnmappedColumns",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2264,7 +2403,9 @@
             "tags": [],
             "label": "oldState",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "src/plugins/visualizations/public/legacy/vis_update_state.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2281,7 +2422,9 @@
         "tags": [],
         "label": "urlFor",
         "description": [],
-        "signature": ["(id: string) => string"],
+        "signature": [
+          "(id: string) => string"
+        ],
         "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2293,7 +2436,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2326,7 +2471,9 @@
             "tags": [],
             "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n  error,\n  renderComplete,\n}",
             "description": [],
-            "signature": ["VisualizationContainerProps"],
+            "signature": [
+              "VisualizationContainerProps"
+            ],
             "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2411,7 +2558,9 @@
             "tags": [],
             "label": "bounds",
             "description": [],
-            "signature": ["{ min: string | number; max: string | number; } | undefined"],
+            "signature": [
+              "{ min: string | number; max: string | number; } | undefined"
+            ],
             "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2593,7 +2742,9 @@
             "type": "boolean",
             "tags": [],
             "label": "linked",
-            "description": ["\nFlag to determine if visualiztion is linked to the saved search"],
+            "description": [
+              "\nFlag to determine if visualiztion is linked to the saved search"
+            ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2644,7 +2795,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2656,7 +2809,9 @@
             "tags": [],
             "label": "searchSource",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2689,7 +2844,9 @@
             "tags": [],
             "label": "savedSearchId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2701,7 +2858,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2713,7 +2872,9 @@
             "tags": [],
             "label": "indexPattern",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2810,7 +2971,9 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2838,7 +3001,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2861,7 +3026,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2914,7 +3081,9 @@
             "tags": [],
             "label": "uiStateJSON",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2926,7 +3095,9 @@
             "tags": [],
             "label": "savedSearchRefName",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2938,7 +3109,9 @@
             "tags": [],
             "label": "savedSearchId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3055,7 +3228,9 @@
             "tags": [],
             "label": "aggFilter",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3067,7 +3242,9 @@
             "tags": [],
             "label": "group",
             "description": [],
-            "signature": ["\"none\" | \"metrics\" | \"buckets\""],
+            "signature": [
+              "\"none\" | \"metrics\" | \"buckets\""
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3144,7 +3321,9 @@
             "tags": [],
             "label": "defaults",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3156,7 +3335,9 @@
             "tags": [],
             "label": "hideCustomLabel",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3168,7 +3349,9 @@
             "tags": [],
             "label": "mustBeFirst",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3180,7 +3363,9 @@
             "tags": [],
             "label": "aggSettings",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3192,7 +3377,9 @@
             "tags": [],
             "label": "disabled",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3232,7 +3419,9 @@
             "tags": [],
             "label": "[key: string]: unknown",
             "description": [],
-            "signature": ["[key: string]:  unknown"],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3268,7 +3457,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3291,7 +3482,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3314,7 +3507,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3326,7 +3521,9 @@
             "tags": [],
             "label": "uiState",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3372,7 +3569,9 @@
             "tags": [],
             "label": "expression",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3498,7 +3697,9 @@
             "tags": [],
             "label": "savedSearchId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3524,7 +3725,9 @@
             "tags": [],
             "label": "ast",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3599,7 +3802,9 @@
             "tags": [],
             "label": "savedSearchId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3677,7 +3882,9 @@
             "tags": [],
             "label": "stateParams",
             "description": [],
-            "signature": ["VisParamType"],
+            "signature": [
+              "VisParamType"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3752,7 +3959,9 @@
                 "tags": [],
                 "label": "paramName",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3765,7 +3974,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["VisParamType[T]"],
+                "signature": [
+                  "VisParamType[T]"
+                ],
                 "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3781,7 +3992,9 @@
             "tags": [],
             "label": "setValidity",
             "description": [],
-            "signature": ["(isValid: boolean) => void"],
+            "signature": [
+              "(isValid: boolean) => void"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3793,7 +4006,9 @@
                 "tags": [],
                 "label": "isValid",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3809,7 +4024,9 @@
             "tags": [],
             "label": "setTouched",
             "description": [],
-            "signature": ["(isTouched: boolean) => void"],
+            "signature": [
+              "(isTouched: boolean) => void"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3821,7 +4038,9 @@
                 "tags": [],
                 "label": "isTouched",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3851,7 +4070,9 @@
             "tags": [],
             "label": "[key: string]: any",
             "description": [],
-            "signature": ["[key: string]:  any"],
+            "signature": [
+              "[key: string]:  any"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3905,7 +4126,9 @@
             "tags": [],
             "label": "getEsType",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3919,7 +4142,9 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3986,7 +4211,9 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3998,7 +4225,9 @@
             "tags": [],
             "label": "tags",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4217,7 +4446,9 @@
             "tags": [],
             "label": "timeRange",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4229,7 +4460,9 @@
             "tags": [],
             "label": "abortSignal",
             "description": [],
-            "signature": ["AbortSignal | undefined"],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4257,7 +4490,9 @@
             "description": [
               "\nProvide `alias` when your visualization has a dedicated app for creation.\nTODO: Provide a generic callback to create visualizations inline."
             ],
-            "signature": ["{ app: string; path: string; } | undefined"],
+            "signature": [
+              "{ app: string; path: string; } | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4302,7 +4537,9 @@
             "tags": [],
             "label": "promotion",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4325,7 +4562,9 @@
             "tags": [],
             "label": "note",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4337,7 +4576,9 @@
             "tags": [],
             "label": "getSupportedTriggers",
             "description": [],
-            "signature": ["(() => string[]) | undefined"],
+            "signature": [
+              "(() => string[]) | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4351,7 +4592,9 @@
             "tags": [],
             "label": "stage",
             "description": [],
-            "signature": ["\"experimental\" | \"beta\" | \"production\""],
+            "signature": [
+              "\"experimental\" | \"beta\" | \"production\""
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4363,7 +4606,9 @@
             "tags": [],
             "label": "disableCreate",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4375,7 +4620,9 @@
             "tags": [],
             "label": "disableEdit",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4387,7 +4634,9 @@
             "tags": [],
             "label": "isDeprecated",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4440,7 +4689,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["\nVisualization unique name"],
+            "description": [
+              "\nVisualization unique name"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4451,7 +4702,9 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["\nIt is the displayed text on the wizard and the vis listing"],
+            "description": [
+              "\nIt is the displayed text on the wizard and the vis listing"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4465,7 +4718,9 @@
             "description": [
               "\nIf given, it will be diplayed on the wizard vis card as the main description."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4479,7 +4734,9 @@
             "description": [
               "\nIf given, it will be diplayed on the wizard vis card as a note in italic."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4490,7 +4747,9 @@
             "type": "Function",
             "tags": [],
             "label": "getSupportedTriggers",
-            "description": ["\nIf given, it will return the supported triggers for this vis."],
+            "description": [
+              "\nIf given, it will return the supported triggers for this vis."
+            ],
             "signature": [
               "((params?: ",
               {
@@ -4776,7 +5035,9 @@
             "tags": [],
             "label": "isAccessible",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4787,8 +5048,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "icon",
-            "description": ["\nIt is the visualization icon, displayed on the wizard."],
-            "signature": ["IconType", " | undefined"],
+            "description": [
+              "\nIt is the visualization icon, displayed on the wizard."
+            ],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4799,8 +5065,12 @@
             "type": "string",
             "tags": [],
             "label": "image",
-            "description": ["\nExcept from an icon, an image can be passed"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nExcept from an icon, an image can be passed"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4809,10 +5079,16 @@
             "parentPluginId": "visualizations",
             "id": "def-public.VisTypeDefinition.stage",
             "type": "CompoundType",
-            "tags": ["default"],
+            "tags": [
+              "default"
+            ],
             "label": "stage",
-            "description": ["\nDescribes the visualization stage"],
-            "signature": ["\"experimental\" | \"beta\" | \"production\" | undefined"],
+            "description": [
+              "\nDescribes the visualization stage"
+            ],
+            "signature": [
+              "\"experimental\" | \"beta\" | \"production\" | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4823,8 +5099,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isDeprecated",
-            "description": ["\nIt sets the vis type on a deprecated mode when is true"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nIt sets the vis type on a deprecated mode when is true"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4835,8 +5115,12 @@
             "type": "Function",
             "tags": [],
             "label": "suppressWarnings",
-            "description": ["\nIf returns true, no warning toasts will be shown"],
-            "signature": ["(() => boolean) | undefined"],
+            "description": [
+              "\nIf returns true, no warning toasts will be shown"
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4847,7 +5131,9 @@
             "parentPluginId": "visualizations",
             "id": "def-public.VisTypeDefinition.group",
             "type": "CompoundType",
-            "tags": ["default"],
+            "tags": [
+              "default"
+            ],
             "label": "group",
             "description": [
               "\nDescribes the experience group that the visualization belongs.\nIt can be on tools, aggregation based or promoted group."
@@ -4875,7 +5161,9 @@
             "description": [
               "\nIf given, it will be displayed on the wizard instead of the title.\nWe use it because we want to differentiate the vis title from the\nway it is presented on the wizard"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4889,7 +5177,9 @@
             "description": [
               "\nThe flag is necessary for aggregation based visualizations.\nWhen \"true\", an additional step on the vis creation wizard will be provided\nwith the selection of a search source - an index pattern or a saved search."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4903,7 +5193,9 @@
             "description": [
               "\nIn case when the visualization performs an aggregation, this option will be used to display or hide the rows with partial data."
             ],
-            "signature": ["boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"],
+            "signature": [
+              "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4915,7 +5207,9 @@
             "tags": [],
             "label": "hierarchicalData",
             "description": [],
-            "signature": ["boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"],
+            "signature": [
+              "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5018,12 +5312,16 @@
             "parentPluginId": "visualizations",
             "id": "def-public.VisTypeDefinition.fetchDatatable",
             "type": "CompoundType",
-            "tags": ["default"],
+            "tags": [
+              "default"
+            ],
             "label": "fetchDatatable",
             "description": [
               "\nWhen truthy, it will perform a search and pass the results to the visualization as a `datatable`."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5230,7 +5528,9 @@
             "tags": [],
             "label": "disableCreate",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5242,7 +5542,9 @@
             "tags": [],
             "label": "disableEdit",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5254,7 +5556,11 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["Partial<", "VisTypeOptions", "> | undefined"],
+            "signature": [
+              "Partial<",
+              "VisTypeOptions",
+              "> | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5265,8 +5571,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "editorConfig",
-            "description": ["\nConfig for the default editor.\nCustom editor can be specified."],
-            "signature": ["DefaultEditorConfig<TVisParams> | CustomEditorConfig"],
+            "description": [
+              "\nConfig for the default editor.\nCustom editor can be specified."
+            ],
+            "signature": [
+              "DefaultEditorConfig<TVisParams> | CustomEditorConfig"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5280,7 +5590,9 @@
             "description": [
               "\nHave the \"defaults\" prop with default params for a visualization.\nTODO: ideally should have next type: { defaults: TVisParams } , but currently\nhave incosistencies in legacy visLib visualizations"
             ],
-            "signature": ["{ [x: string]: any; }"],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5338,7 +5650,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5520,7 +5834,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5587,7 +5903,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["object | undefined"],
+                "signature": [
+                  "object | undefined"
+                ],
                 "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5617,7 +5935,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5651,7 +5971,9 @@
             "tags": [],
             "label": "stage",
             "description": [],
-            "signature": ["\"experimental\" | \"beta\" | \"production\""],
+            "signature": [
+              "\"experimental\" | \"beta\" | \"production\""
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5685,7 +6007,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5697,7 +6021,9 @@
             "tags": [],
             "label": "getSupportedTriggers",
             "description": [],
-            "signature": ["(() => string[]) | undefined"],
+            "signature": [
+              "(() => string[]) | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5722,7 +6048,9 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5809,7 +6137,9 @@
             "tags": [],
             "label": "vis",
             "description": [],
-            "signature": ["{ colors?: { [key: string]: string; } | undefined; } | undefined"],
+            "signature": [
+              "{ colors?: { [key: string]: string; } | undefined; } | undefined"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5871,7 +6201,9 @@
             "tags": [],
             "label": "table",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5946,7 +6278,9 @@
             "tags": [],
             "label": "timeslice",
             "description": [],
-            "signature": ["[number, number] | undefined"],
+            "signature": [
+              "[number, number] | undefined"
+            ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5989,7 +6323,9 @@
         "tags": [],
         "label": "ACTION_CONVERT_AGG_BASED_TO_LENS",
         "description": [],
-        "signature": ["\"ACTION_CONVERT_AGG_BASED_TO_LENS\""],
+        "signature": [
+          "\"ACTION_CONVERT_AGG_BASED_TO_LENS\""
+        ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6002,7 +6338,9 @@
         "tags": [],
         "label": "ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS",
         "description": [],
-        "signature": ["\"ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS\""],
+        "signature": [
+          "\"ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS\""
+        ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6015,7 +6353,9 @@
         "tags": [],
         "label": "ACTION_CONVERT_TO_LENS",
         "description": [],
-        "signature": ["\"ACTION_CONVERT_TO_LENS\""],
+        "signature": [
+          "\"ACTION_CONVERT_TO_LENS\""
+        ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6028,7 +6368,9 @@
         "tags": [],
         "label": "AGG_BASED_VISUALIZATION_TRIGGER",
         "description": [],
-        "signature": ["\"AGG_BASED_VISUALIZATION_TRIGGER\""],
+        "signature": [
+          "\"AGG_BASED_VISUALIZATION_TRIGGER\""
+        ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6041,7 +6383,9 @@
         "tags": [],
         "label": "DASHBOARD_VISUALIZATION_PANEL_TRIGGER",
         "description": [],
-        "signature": ["\"DASHBOARD_VISUALIZATION_PANEL_TRIGGER\""],
+        "signature": [
+          "\"DASHBOARD_VISUALIZATION_PANEL_TRIGGER\""
+        ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6076,7 +6420,9 @@
         "tags": [],
         "label": "Dimension",
         "description": [],
-        "signature": ["[DimensionColumn[] | undefined, string]"],
+        "signature": [
+          "[DimensionColumn[] | undefined, string]"
+        ],
         "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6201,7 +6547,9 @@
         "tags": [],
         "label": "SAVED_OBJECTS_LIMIT_SETTING",
         "description": [],
-        "signature": ["\"savedObjects:listingLimit\""],
+        "signature": [
+          "\"savedObjects:listingLimit\""
+        ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6214,7 +6562,9 @@
         "tags": [],
         "label": "SAVED_OBJECTS_PER_PAGE_SETTING",
         "description": [],
-        "signature": ["\"savedObjects:perPage\""],
+        "signature": [
+          "\"savedObjects:perPage\""
+        ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6364,7 +6714,9 @@
         "tags": [],
         "label": "VisualizationStage",
         "description": [],
-        "signature": ["\"experimental\" | \"beta\" | \"production\""],
+        "signature": [
+          "\"experimental\" | \"beta\" | \"production\""
+        ],
         "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6377,7 +6729,9 @@
         "tags": [],
         "label": "VISUALIZE_EDITOR_TRIGGER",
         "description": [],
-        "signature": ["\"VISUALIZE_EDITOR_TRIGGER\""],
+        "signature": [
+          "\"VISUALIZE_EDITOR_TRIGGER\""
+        ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6390,7 +6744,9 @@
         "tags": [],
         "label": "VISUALIZE_EMBEDDABLE_TYPE",
         "description": [],
-        "signature": ["\"visualization\""],
+        "signature": [
+          "\"visualization\""
+        ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7124,7 +7480,9 @@
             "tags": [],
             "label": "applyFilter",
             "description": [],
-            "signature": ["\"FILTER_TRIGGER\""],
+            "signature": [
+              "\"FILTER_TRIGGER\""
+            ],
             "path": "src/plugins/visualizations/public/embeddable/events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7136,7 +7494,9 @@
             "tags": [],
             "label": "brush",
             "description": [],
-            "signature": ["\"SELECT_RANGE_TRIGGER\""],
+            "signature": [
+              "\"SELECT_RANGE_TRIGGER\""
+            ],
             "path": "src/plugins/visualizations/public/embeddable/events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7148,7 +7508,9 @@
             "tags": [],
             "label": "filter",
             "description": [],
-            "signature": ["\"VALUE_CLICK_TRIGGER\""],
+            "signature": [
+              "\"VALUE_CLICK_TRIGGER\""
+            ],
             "path": "src/plugins/visualizations/public/embeddable/events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7160,7 +7522,9 @@
             "tags": [],
             "label": "multiFilter",
             "description": [],
-            "signature": ["\"MULTI_VALUE_CLICK_TRIGGER\""],
+            "signature": [
+              "\"MULTI_VALUE_CLICK_TRIGGER\""
+            ],
             "path": "src/plugins/visualizations/public/embeddable/events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7172,7 +7536,9 @@
             "tags": [],
             "label": "tableRowContextMenuClick",
             "description": [],
-            "signature": ["\"ROW_CLICK_TRIGGER\""],
+            "signature": [
+              "\"ROW_CLICK_TRIGGER\""
+            ],
             "path": "src/plugins/visualizations/public/embeddable/events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7202,7 +7568,9 @@
       "type": "Type",
       "tags": [],
       "label": "VisualizationsSetup",
-      "description": ["\nInterface for this plugin's returned setup/start contracts.\n"],
+      "description": [
+        "\nInterface for this plugin's returned setup/start contracts.\n"
+      ],
       "signature": [
         "{ createBaseVisualization: <TVisParams extends ",
         {
@@ -7353,7 +7721,9 @@
               "tags": [],
               "label": "__0",
               "description": [],
-              "signature": ["ShowNewVisModalParams"],
+              "signature": [
+                "ShowNewVisModalParams"
+              ],
               "path": "src/plugins/visualizations/public/wizard/show_new_vis.tsx",
               "deprecated": false,
               "trackAdoption": false
@@ -7390,7 +7760,9 @@
           "tags": [],
           "label": "registerReadOnlyVisType",
           "description": [],
-          "signature": ["(visType: string) => void"],
+          "signature": [
+            "(visType: string) => void"
+          ],
           "path": "src/plugins/visualizations/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -7402,7 +7774,9 @@
               "tags": [],
               "label": "visType",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/visualizations/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -7587,7 +7961,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7656,7 +8032,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7725,7 +8103,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["string | number"],
+            "signature": [
+              "string | number"
+            ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7794,7 +8174,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["string | number"],
+            "signature": [
+              "string | number"
+            ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7862,7 +8244,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7930,7 +8314,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7998,7 +8384,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["string | number"],
+            "signature": [
+              "string | number"
+            ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8066,7 +8454,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["string | number"],
+            "signature": [
+              "string | number"
+            ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8592,7 +8982,9 @@
             "tags": [],
             "label": "invertColors",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/visualizations/common/utils/palette.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8679,7 +9071,9 @@
             "tags": [],
             "label": "candidate",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8727,7 +9121,9 @@
             "tags": [],
             "label": "visType",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8762,7 +9158,9 @@
             "tags": [],
             "label": "aggregation",
             "description": [],
-            "signature": ["SupportedMetric"],
+            "signature": [
+              "SupportedMetric"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8943,7 +9341,9 @@
             "tags": [],
             "label": "removeUnmappedColumns",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9133,7 +9533,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["string | number"],
+            "signature": [
+              "string | number"
+            ],
             "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9145,7 +9547,9 @@
             "tags": [],
             "label": "format",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9157,7 +9561,9 @@
             "tags": [],
             "label": "formatParams",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9230,7 +9636,9 @@
             "tags": [],
             "label": "mode",
             "description": [],
-            "signature": ["\"full\" | \"custom\" | \"dataBounds\""],
+            "signature": [
+              "\"full\" | \"custom\" | \"dataBounds\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9242,7 +9650,9 @@
             "tags": [],
             "label": "lowerBound",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9254,7 +9664,9 @@
             "tags": [],
             "label": "upperBound",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9266,7 +9678,9 @@
             "tags": [],
             "label": "enforce",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9313,7 +9727,9 @@
             "tags": [],
             "label": "operationType",
             "description": [],
-            "signature": ["OperationType"],
+            "signature": [
+              "OperationType"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/columns.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9325,7 +9741,9 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/columns.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9394,7 +9812,9 @@
             "tags": [],
             "label": "timeShift",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/columns.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9406,7 +9826,9 @@
             "tags": [],
             "label": "reducedTimeRange",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/columns.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9418,7 +9840,9 @@
             "tags": [],
             "label": "isStaticValue",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/columns.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9451,7 +9875,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Params"],
+            "signature": [
+              "Params"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/columns.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9502,7 +9928,9 @@
             "tags": [],
             "label": "isPercentageMode",
             "description": [],
-            "signature": ["false"],
+            "signature": [
+              "false"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9553,7 +9981,9 @@
             "tags": [],
             "label": "alignment",
             "description": [],
-            "signature": ["\"right\" | \"left\" | \"center\" | undefined"],
+            "signature": [
+              "\"right\" | \"left\" | \"center\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9565,7 +9995,9 @@
             "tags": [],
             "label": "collapseFn",
             "description": [],
-            "signature": ["\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"],
+            "signature": [
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9638,7 +10070,9 @@
             "tags": [],
             "label": "references",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/columns.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9718,7 +10152,9 @@
             "tags": [],
             "label": "ignoreTimeRange",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9730,7 +10166,9 @@
             "tags": [],
             "label": "includeEmptyRows",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9742,7 +10180,9 @@
             "tags": [],
             "label": "dropPartials",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9800,7 +10240,9 @@
             "tags": [],
             "label": "timeField",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9812,7 +10254,9 @@
             "tags": [],
             "label": "extraFields",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9835,7 +10279,9 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9847,7 +10293,9 @@
             "tags": [],
             "label": "isHidden",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9859,7 +10307,9 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "signature": ["string | (() => JSX.Element) | undefined"],
+            "signature": [
+              "string | (() => JSX.Element) | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9871,7 +10321,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"query\""],
+            "signature": [
+              "\"query\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9883,7 +10335,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["{ type: \"point_in_time\"; }"],
+            "signature": [
+              "{ type: \"point_in_time\"; }"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9929,7 +10383,9 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9955,7 +10411,9 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": ["string | { [key: string]: any; }"],
+            "signature": [
+              "string | { [key: string]: any; }"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10079,7 +10537,9 @@
             "tags": [],
             "label": "formula",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10091,7 +10551,9 @@
             "tags": [],
             "label": "isFormulaBroken",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10171,7 +10633,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["SchemaConfigParams"],
+            "signature": [
+              "SchemaConfigParams"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10183,7 +10647,9 @@
             "tags": [],
             "label": "aggType",
             "description": [],
-            "signature": ["Agg"],
+            "signature": [
+              "Agg"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10195,7 +10661,9 @@
             "tags": [],
             "label": "aggId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10242,7 +10710,9 @@
             "tags": [],
             "label": "percentageMode",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10254,7 +10724,9 @@
             "tags": [],
             "label": "lastRangeIsRightOpen",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10266,7 +10738,9 @@
             "tags": [],
             "label": "showTooltip",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10278,7 +10752,9 @@
             "tags": [],
             "label": "highlightInHover",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10469,7 +10945,9 @@
             "tags": [],
             "label": "ariaLabel",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10495,7 +10973,9 @@
             "tags": [],
             "label": "strokeWidth",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10507,7 +10987,9 @@
             "tags": [],
             "label": "strokeColor",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10552,7 +11034,9 @@
             "tags": [],
             "label": "yTitle",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10586,7 +11070,9 @@
             "tags": [],
             "label": "xTitle",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10598,7 +11084,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"heatmap_grid\""],
+            "signature": [
+              "\"heatmap_grid\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10635,7 +11123,9 @@
             "tags": [],
             "label": "position",
             "description": [],
-            "signature": ["\"right\" | \"left\" | \"top\" | \"bottom\""],
+            "signature": [
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10647,7 +11137,9 @@
             "tags": [],
             "label": "maxLines",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10659,7 +11151,9 @@
             "tags": [],
             "label": "shouldTruncate",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10692,7 +11186,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"heatmap_legend\""],
+            "signature": [
+              "\"heatmap_legend\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10782,7 +11278,9 @@
             "tags": [],
             "label": "sortField",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10862,7 +11360,9 @@
             "tags": [],
             "label": "columnOrder",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/context.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10910,7 +11410,9 @@
             "tags": [],
             "label": "position",
             "description": [],
-            "signature": ["\"right\" | \"left\" | \"top\" | \"bottom\""],
+            "signature": [
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10922,7 +11424,9 @@
             "tags": [],
             "label": "showSingleSeries",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10934,7 +11438,9 @@
             "tags": [],
             "label": "isInside",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10946,7 +11452,9 @@
             "tags": [],
             "label": "horizontalAlignment",
             "description": [],
-            "signature": ["\"right\" | \"left\" | undefined"],
+            "signature": [
+              "\"right\" | \"left\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10958,7 +11466,9 @@
             "tags": [],
             "label": "verticalAlignment",
             "description": [],
-            "signature": ["\"top\" | \"bottom\" | undefined"],
+            "signature": [
+              "\"top\" | \"bottom\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10970,7 +11480,9 @@
             "tags": [],
             "label": "floatingColumns",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10982,7 +11494,9 @@
             "tags": [],
             "label": "maxLines",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10994,7 +11508,9 @@
             "tags": [],
             "label": "shouldTruncate",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11073,7 +11589,9 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": ["\"data\""],
+            "signature": [
+              "\"data\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11085,7 +11603,9 @@
             "tags": [],
             "label": "metricAccessor",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11097,7 +11617,9 @@
             "tags": [],
             "label": "secondaryMetricAccessor",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11109,7 +11631,9 @@
             "tags": [],
             "label": "maxAccessor",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11121,7 +11645,9 @@
             "tags": [],
             "label": "breakdownByAccessor",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11133,7 +11659,9 @@
             "tags": [],
             "label": "collapseFn",
             "description": [],
-            "signature": ["\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"],
+            "signature": [
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11145,7 +11673,9 @@
             "tags": [],
             "label": "subtitle",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11157,7 +11687,9 @@
             "tags": [],
             "label": "secondaryPrefix",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11169,7 +11701,10 @@
             "tags": [],
             "label": "progressDirection",
             "description": [],
-            "signature": ["LayoutDirection", " | undefined"],
+            "signature": [
+              "LayoutDirection",
+              " | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11181,7 +11716,9 @@
             "tags": [],
             "label": "showBar",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11193,7 +11730,9 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11234,7 +11773,9 @@
             "tags": [],
             "label": "maxCols",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11363,7 +11904,9 @@
             "tags": [],
             "label": "configuration",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/context.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11375,7 +11918,9 @@
             "tags": [],
             "label": "indexPatternIds",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/context.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11476,7 +12021,9 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": ["(string | undefined)[]"],
+            "signature": [
+              "(string | undefined)[]"
+            ],
             "path": "src/plugins/visualizations/common/utils/palette.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11488,7 +12035,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["number[]"],
+            "signature": [
+              "number[]"
+            ],
             "path": "src/plugins/visualizations/common/utils/palette.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11525,7 +12074,9 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": ["\"data\" | \"annotations\" | \"referenceLine\""],
+            "signature": [
+              "\"data\" | \"annotations\" | \"referenceLine\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11537,7 +12088,9 @@
             "tags": [],
             "label": "metrics",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11549,7 +12102,9 @@
             "tags": [],
             "label": "primaryGroups",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11561,7 +12116,9 @@
             "tags": [],
             "label": "secondaryGroups",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11573,7 +12130,9 @@
             "tags": [],
             "label": "collapseFns",
             "description": [],
-            "signature": ["Record<string, \"min\" | \"max\" | \"sum\" | \"avg\"> | undefined"],
+            "signature": [
+              "Record<string, \"min\" | \"max\" | \"sum\" | \"avg\"> | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11585,7 +12144,9 @@
             "tags": [],
             "label": "numberDisplay",
             "description": [],
-            "signature": ["\"value\" | \"hidden\" | \"percent\""],
+            "signature": [
+              "\"value\" | \"hidden\" | \"percent\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11597,7 +12158,9 @@
             "tags": [],
             "label": "categoryDisplay",
             "description": [],
-            "signature": ["\"default\" | \"hide\" | \"inside\""],
+            "signature": [
+              "\"default\" | \"hide\" | \"inside\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11609,7 +12172,9 @@
             "tags": [],
             "label": "legendDisplay",
             "description": [],
-            "signature": ["\"default\" | \"hide\" | \"show\""],
+            "signature": [
+              "\"default\" | \"hide\" | \"show\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11621,7 +12186,10 @@
             "tags": [],
             "label": "legendPosition",
             "description": [],
-            "signature": ["Position", " | undefined"],
+            "signature": [
+              "Position",
+              " | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11654,7 +12222,9 @@
             "tags": [],
             "label": "nestedLegend",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11666,7 +12236,9 @@
             "tags": [],
             "label": "percentDecimals",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11678,7 +12250,9 @@
             "tags": [],
             "label": "emptySizeRatio",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11690,7 +12264,9 @@
             "tags": [],
             "label": "legendMaxLines",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11723,7 +12299,9 @@
             "tags": [],
             "label": "truncateLegend",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11749,7 +12327,9 @@
             "tags": [],
             "label": "shape",
             "description": [],
-            "signature": ["\"treemap\" | \"mosaic\" | \"waffle\" | \"pie\" | \"donut\""],
+            "signature": [
+              "\"treemap\" | \"mosaic\" | \"waffle\" | \"pie\" | \"donut\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11901,7 +12481,9 @@
             "tags": [],
             "label": "from",
             "description": [],
-            "signature": ["number | null"],
+            "signature": [
+              "number | null"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11913,7 +12495,9 @@
             "tags": [],
             "label": "to",
             "description": [],
-            "signature": ["number | null"],
+            "signature": [
+              "number | null"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11967,7 +12551,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"histogram\" | \"range\""],
+            "signature": [
+              "\"histogram\" | \"range\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11979,7 +12565,9 @@
             "tags": [],
             "label": "maxBars",
             "description": [],
-            "signature": ["number | \"auto\""],
+            "signature": [
+              "number | \"auto\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11991,7 +12579,9 @@
             "tags": [],
             "label": "ranges",
             "description": [],
-            "signature": ["Range[] | undefined"],
+            "signature": [
+              "Range[] | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12003,7 +12593,9 @@
             "tags": [],
             "label": "includeEmptyRows",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12053,7 +12645,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12076,7 +12670,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12099,7 +12695,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12111,7 +12709,9 @@
             "tags": [],
             "label": "uiState",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12157,7 +12757,9 @@
             "tags": [],
             "label": "expression",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12283,7 +12885,9 @@
             "tags": [],
             "label": "savedSearchId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12309,7 +12913,9 @@
             "tags": [],
             "label": "columnId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12321,7 +12927,9 @@
             "tags": [],
             "label": "direction",
             "description": [],
-            "signature": ["\"asc\" | \"desc\" | \"none\""],
+            "signature": [
+              "\"asc\" | \"desc\" | \"none\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12364,7 +12972,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12422,7 +13032,9 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": ["\"data\""],
+            "signature": [
+              "\"data\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12455,7 +13067,9 @@
             "tags": [],
             "label": "rowHeight",
             "description": [],
-            "signature": ["RowHeightMode | undefined"],
+            "signature": [
+              "RowHeightMode | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12467,7 +13081,9 @@
             "tags": [],
             "label": "headerRowHeight",
             "description": [],
-            "signature": ["RowHeightMode | undefined"],
+            "signature": [
+              "RowHeightMode | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12479,7 +13095,9 @@
             "tags": [],
             "label": "rowHeightLines",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12491,7 +13109,9 @@
             "tags": [],
             "label": "headerRowHeightLines",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12549,7 +13169,9 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": ["\"data\" | \"annotations\" | \"referenceLine\""],
+            "signature": [
+              "\"data\" | \"annotations\" | \"referenceLine\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12690,7 +13312,9 @@
             "tags": [],
             "label": "include",
             "description": [],
-            "signature": ["string[] | number[] | undefined"],
+            "signature": [
+              "string[] | number[] | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12702,7 +13326,9 @@
             "tags": [],
             "label": "exclude",
             "description": [],
-            "signature": ["string[] | number[] | undefined"],
+            "signature": [
+              "string[] | number[] | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12714,7 +13340,9 @@
             "tags": [],
             "label": "includeIsRegex",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12726,7 +13354,9 @@
             "tags": [],
             "label": "excludeIsRegex",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12773,7 +13403,9 @@
             "tags": [],
             "label": "orderDirection",
             "description": [],
-            "signature": ["\"asc\" | \"desc\""],
+            "signature": [
+              "\"asc\" | \"desc\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12785,7 +13417,9 @@
             "tags": [],
             "label": "otherBucket",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12797,7 +13431,9 @@
             "tags": [],
             "label": "missingBucket",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12809,7 +13445,9 @@
             "tags": [],
             "label": "secondaryFields",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12821,7 +13459,9 @@
             "tags": [],
             "label": "parentFormat",
             "description": [],
-            "signature": ["{ id: string; } | undefined"],
+            "signature": [
+              "{ id: string; } | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12847,7 +13487,9 @@
             "tags": [],
             "label": "unit",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12873,7 +13515,9 @@
             "tags": [],
             "label": "[key: string]: any",
             "description": [],
-            "signature": ["[key: string]:  any"],
+            "signature": [
+              "[key: string]:  any"
+            ],
             "path": "src/plugins/visualizations/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12921,7 +13565,9 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12933,7 +13579,9 @@
             "tags": [],
             "label": "updatedAt",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12945,7 +13593,9 @@
             "tags": [],
             "label": "createdAt",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12971,7 +13621,10 @@
             "tags": [],
             "label": "references",
             "description": [],
-            "signature": ["Reference", "[]"],
+            "signature": [
+              "Reference",
+              "[]"
+            ],
             "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12983,7 +13636,9 @@
             "tags": [],
             "label": "namespaces",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12995,7 +13650,9 @@
             "tags": [],
             "label": "originId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13021,7 +13678,9 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13090,7 +13749,9 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": ["\"annotations\""],
+            "signature": [
+              "\"annotations\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13169,7 +13830,9 @@
             "tags": [],
             "label": "valueLabels",
             "description": [],
-            "signature": ["\"hide\" | \"show\" | undefined"],
+            "signature": [
+              "\"hide\" | \"show\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13195,7 +13858,9 @@
             "tags": [],
             "label": "emphasizeFitting",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13207,7 +13872,9 @@
             "tags": [],
             "label": "endValue",
             "description": [],
-            "signature": ["\"None\" | \"Zero\" | \"Nearest\" | undefined"],
+            "signature": [
+              "\"None\" | \"Zero\" | \"Nearest\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13303,7 +13970,9 @@
             "tags": [],
             "label": "xTitle",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13315,7 +13984,9 @@
             "tags": [],
             "label": "yTitle",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13327,7 +13998,9 @@
             "tags": [],
             "label": "yRightTitle",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13339,7 +14012,9 @@
             "tags": [],
             "label": "yLeftScale",
             "description": [],
-            "signature": ["\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"],
+            "signature": [
+              "\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13351,7 +14026,9 @@
             "tags": [],
             "label": "yRightScale",
             "description": [],
-            "signature": ["\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"],
+            "signature": [
+              "\"log\" | \"time\" | \"linear\" | \"sqrt\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13468,7 +14145,9 @@
             "tags": [],
             "label": "fillOpacity",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13480,7 +14159,9 @@
             "tags": [],
             "label": "minBarHeight",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13492,7 +14173,9 @@
             "tags": [],
             "label": "hideEndzones",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13504,7 +14187,9 @@
             "tags": [],
             "label": "showCurrentTimeMarker",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13541,7 +14226,9 @@
             "tags": [],
             "label": "accessors",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13553,7 +14240,9 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": ["\"data\""],
+            "signature": [
+              "\"data\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13579,7 +14268,9 @@
             "tags": [],
             "label": "xAccessor",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13591,7 +14282,9 @@
             "tags": [],
             "label": "simpleView",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13624,7 +14317,9 @@
             "tags": [],
             "label": "splitAccessor",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13657,7 +14352,9 @@
             "tags": [],
             "label": "collapseFn",
             "description": [],
-            "signature": ["\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"],
+            "signature": [
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13669,7 +14366,9 @@
             "tags": [],
             "label": "xScaleType",
             "description": [],
-            "signature": ["\"time\" | \"linear\" | \"ordinal\" | undefined"],
+            "signature": [
+              "\"time\" | \"linear\" | \"ordinal\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13681,7 +14380,9 @@
             "tags": [],
             "label": "isHistogram",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13693,7 +14394,9 @@
             "tags": [],
             "label": "columnToLabel",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13730,7 +14433,9 @@
             "tags": [],
             "label": "accessors",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13763,7 +14468,9 @@
             "tags": [],
             "label": "layerType",
             "description": [],
-            "signature": ["\"referenceLine\""],
+            "signature": [
+              "\"referenceLine\""
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13800,7 +14507,9 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13812,7 +14521,9 @@
             "tags": [],
             "label": "icon",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13824,7 +14535,9 @@
             "tags": [],
             "label": "lineWidth",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13836,7 +14549,9 @@
             "tags": [],
             "label": "lineStyle",
             "description": [],
-            "signature": ["\"solid\" | \"dashed\" | \"dotted\" | undefined"],
+            "signature": [
+              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13869,7 +14584,9 @@
             "tags": [],
             "label": "iconPosition",
             "description": [],
-            "signature": ["\"right\" | \"left\" | \"above\" | \"below\" | \"auto\" | undefined"],
+            "signature": [
+              "\"right\" | \"left\" | \"above\" | \"below\" | \"auto\" | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13881,7 +14598,9 @@
             "tags": [],
             "label": "textVisibility",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -14254,7 +14973,9 @@
         "tags": [],
         "label": "CategoryDisplayType",
         "description": [],
-        "signature": ["\"default\" | \"hide\" | \"inside\""],
+        "signature": [
+          "\"default\" | \"hide\" | \"inside\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14267,7 +14988,9 @@
         "tags": [],
         "label": "ChartShapes",
         "description": [],
-        "signature": ["\"heatmap\""],
+        "signature": [
+          "\"heatmap\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14280,7 +15003,9 @@
         "tags": [],
         "label": "CollapseFunction",
         "description": [],
-        "signature": ["\"min\" | \"max\" | \"sum\" | \"avg\""],
+        "signature": [
+          "\"min\" | \"max\" | \"sum\" | \"avg\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14692,7 +15417,9 @@
         "tags": [],
         "label": "Dimension",
         "description": [],
-        "signature": ["[DimensionColumn[] | undefined, string]"],
+        "signature": [
+          "[DimensionColumn[] | undefined, string]"
+        ],
         "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14790,7 +15517,9 @@
         "tags": [],
         "label": "FillType",
         "description": [],
-        "signature": ["\"none\" | \"above\" | \"below\""],
+        "signature": [
+          "\"none\" | \"above\" | \"below\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14863,7 +15592,9 @@
         "tags": [],
         "label": "GaugeCentralMajorMode",
         "description": [],
-        "signature": ["\"none\" | \"custom\" | \"auto\""],
+        "signature": [
+          "\"none\" | \"custom\" | \"auto\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14876,7 +15607,9 @@
         "tags": [],
         "label": "GaugeColorMode",
         "description": [],
-        "signature": ["\"none\" | \"palette\""],
+        "signature": [
+          "\"none\" | \"palette\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14889,7 +15622,9 @@
         "tags": [],
         "label": "GaugeLabelMajorMode",
         "description": [],
-        "signature": ["\"none\" | \"custom\" | \"auto\""],
+        "signature": [
+          "\"none\" | \"custom\" | \"auto\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14917,7 +15652,9 @@
         "tags": [],
         "label": "GaugeTicksPosition",
         "description": [],
-        "signature": ["\"hidden\" | \"auto\" | \"bands\""],
+        "signature": [
+          "\"hidden\" | \"auto\" | \"bands\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14930,7 +15667,9 @@
         "tags": [],
         "label": "GaugeVisConfiguration",
         "description": [],
-        "signature": ["GaugeState & { layerId: string; layerType: \"data\"; }"],
+        "signature": [
+          "GaugeState & { layerId: string; layerType: \"data\"; }"
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14943,7 +15682,9 @@
         "tags": [],
         "label": "GenericColumnWithMeta",
         "description": [],
-        "signature": ["Col & (Meta extends undefined ? undefined : { meta: Meta; })"],
+        "signature": [
+          "Col & (Meta extends undefined ? undefined : { meta: Meta; })"
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/columns.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15054,7 +15795,9 @@
         "tags": [],
         "label": "LayerType",
         "description": [],
-        "signature": ["\"data\" | \"annotations\" | \"referenceLine\""],
+        "signature": [
+          "\"data\" | \"annotations\" | \"referenceLine\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15067,7 +15810,9 @@
         "tags": [],
         "label": "LegendDisplayType",
         "description": [],
-        "signature": ["\"default\" | \"hide\" | \"show\""],
+        "signature": [
+          "\"default\" | \"hide\" | \"show\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15080,7 +15825,9 @@
         "tags": [],
         "label": "LENS_GAUGE_ID",
         "description": [],
-        "signature": ["\"lnsGauge\""],
+        "signature": [
+          "\"lnsGauge\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15276,7 +16023,9 @@
         "tags": [],
         "label": "NumberDisplayType",
         "description": [],
-        "signature": ["\"value\" | \"hidden\" | \"percent\""],
+        "signature": [
+          "\"value\" | \"hidden\" | \"percent\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15364,7 +16113,9 @@
         "tags": [],
         "label": "PartitionChartType",
         "description": [],
-        "signature": ["\"treemap\" | \"mosaic\" | \"waffle\" | \"pie\" | \"donut\""],
+        "signature": [
+          "\"treemap\" | \"mosaic\" | \"waffle\" | \"pie\" | \"donut\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15537,7 +16288,9 @@
         "tags": [],
         "label": "RangeMode",
         "description": [],
-        "signature": ["\"histogram\" | \"range\""],
+        "signature": [
+          "\"histogram\" | \"range\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15611,7 +16364,9 @@
         "tags": [],
         "label": "SortingHint",
         "description": [],
-        "signature": ["\"version\""],
+        "signature": [
+          "\"version\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15815,7 +16570,9 @@
         "tags": [],
         "label": "TimeScaleUnit",
         "description": [],
-        "signature": ["\"m\" | \"d\" | \"h\" | \"s\""],
+        "signature": [
+          "\"m\" | \"d\" | \"h\" | \"s\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15843,7 +16600,9 @@
         "tags": [],
         "label": "XYCurveType",
         "description": [],
-        "signature": ["\"LINEAR\" | \"CURVE_MONOTONE_X\" | \"CURVE_STEP_AFTER\""],
+        "signature": [
+          "\"LINEAR\" | \"CURVE_MONOTONE_X\" | \"CURVE_STEP_AFTER\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15905,7 +16664,9 @@
         "tags": [],
         "label": "YAxisMode",
         "description": [],
-        "signature": ["\"right\" | \"left\" | \"bottom\" | \"auto\""],
+        "signature": [
+          "\"right\" | \"left\" | \"bottom\" | \"auto\""
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15935,7 +16696,9 @@
         "tags": [],
         "label": "CollapseFunctions",
         "description": [],
-        "signature": ["readonly [\"sum\", \"avg\", \"min\", \"max\"]"],
+        "signature": [
+          "readonly [\"sum\", \"avg\", \"min\", \"max\"]"
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15978,7 +16741,9 @@
         "tags": [],
         "label": "GaugeColorModes",
         "description": [],
-        "signature": ["{ readonly PALETTE: \"palette\"; readonly NONE: \"none\"; }"],
+        "signature": [
+          "{ readonly PALETTE: \"palette\"; readonly NONE: \"none\"; }"
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -16171,7 +16936,9 @@
         "tags": [],
         "label": "RANGE_MODES",
         "description": [],
-        "signature": ["{ readonly Range: \"range\"; readonly Histogram: \"histogram\"; }"],
+        "signature": [
+          "{ readonly Range: \"range\"; readonly Histogram: \"histogram\"; }"
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

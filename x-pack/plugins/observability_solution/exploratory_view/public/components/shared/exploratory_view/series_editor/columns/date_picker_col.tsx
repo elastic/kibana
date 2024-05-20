@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { MobileAddData } from '../../../add_data_buttons/mobile_add_data';
-import { SyntheticsAddData } from '../../../add_data_buttons/synthetics_add_data';
-import { UXAddData } from '../../../add_data_buttons/ux_add_data';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { DateRangePicker } from '../../components/date_range_picker';
 import { SeriesDatePicker } from '../../components/series_date_picker';
+import { AppDataType, SeriesUrl } from '../../types';
 import { ReportTypes } from '../../configurations/constants';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
-import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { AppDataType, SeriesUrl } from '../../types';
+import { SyntheticsAddData } from '../../../add_data_buttons/synthetics_add_data';
+import { MobileAddData } from '../../../add_data_buttons/mobile_add_data';
+import { UXAddData } from '../../../add_data_buttons/ux_add_data';
 
 interface Props {
   seriesId: number;

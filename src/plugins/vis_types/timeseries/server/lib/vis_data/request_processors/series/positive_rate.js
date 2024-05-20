@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { overwrite } from '../../helpers';
-import { bucketTransform } from '../../helpers/bucket_transform';
 import { getBucketSize } from '../../helpers/get_bucket_size';
+import { bucketTransform } from '../../helpers/bucket_transform';
+import { overwrite } from '../../helpers';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 export const filter = (metric) => metric.type === 'positive_rate';
 

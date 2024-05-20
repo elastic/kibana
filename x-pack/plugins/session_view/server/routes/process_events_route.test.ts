@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { ProcessEvent } from '../../common';
+import { fetchEventsAndScopedAlerts } from './process_events_route';
 import {
   TEST_PROCESS_INDEX,
   TEST_SESSION_START_TIME,
-  mockAlerts,
   mockEvents,
+  mockAlerts,
 } from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance, resetAlertingAuthMock } from './alerts_client_mock.test';
-import { fetchEventsAndScopedAlerts } from './process_events_route';
+import type { ProcessEvent } from '../../common';
 
 const getEmptyResponse = async () => {
   return {

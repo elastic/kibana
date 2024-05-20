@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DebugState } from '@elastic/charts';
 import expect from '@kbn/expect';
 import { isNil } from 'lodash';
+import { DebugState } from '@elastic/charts';
 import { FtrService } from '../../ftr_provider_context';
 
 const partitionVisChartSelector = 'partitionVisChart';

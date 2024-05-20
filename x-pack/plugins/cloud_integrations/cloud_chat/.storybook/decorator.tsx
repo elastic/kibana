@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DecoratorFn } from '@storybook/react';
 import React, { FC, PropsWithChildren } from 'react';
-import { CloudChatServices, ServicesProvider } from '../public/services';
+import { DecoratorFn } from '@storybook/react';
+import { ServicesProvider, CloudChatServices } from '../public/services';
 
 // TODO: move to a storybook implementation of the service using parameters.
 const services: CloudChatServices = {
@@ -29,7 +29,8 @@ const services: CloudChatServices = {
 
 export const getCloudContextProvider: () => FC<PropsWithChildren<unknown>> =
   () =>
-  ({ children }) => <ServicesProvider {...services}>{children}</ServicesProvider>;
+  ({ children }) =>
+    <ServicesProvider {...services}>{children}</ServicesProvider>;
 
 export const getCloudContextDecorator: DecoratorFn = (storyFn) => {
   const CloudContextProvider = getCloudContextProvider();

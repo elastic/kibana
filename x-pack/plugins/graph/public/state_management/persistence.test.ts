@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
 import {
-  appStateToSavedWorkspace,
-  lookupIndexPatternId,
-  migrateLegacyIndexPatternRef,
-} from '../services/persistence';
-import { openSaveModal } from '../services/save_modal';
-import { AdvancedSettings, GraphWorkspaceSavedObject, UrlTemplate, WorkspaceField } from '../types';
-import { settingsSelector } from './advanced_settings';
-import { IndexpatternDatasource, datasourceSelector } from './datasource';
-import { fieldsSelector } from './fields';
-import { metaDataSelector, updateMetaData } from './meta_data';
-import { MockedGraphEnvironment, createMockGraphStore } from './mocks';
-import {
-  LoadSavedWorkspacePayload,
   loadSavedWorkspace,
   loadingSaga,
   saveWorkspace,
   savingSaga,
+  LoadSavedWorkspacePayload,
 } from './persistence';
+import { UrlTemplate, AdvancedSettings, WorkspaceField, GraphWorkspaceSavedObject } from '../types';
+import { IndexpatternDatasource, datasourceSelector } from './datasource';
+import { fieldsSelector } from './fields';
+import { metaDataSelector, updateMetaData } from './meta_data';
 import { templatesSelector } from './url_templates';
+import {
+  migrateLegacyIndexPatternRef,
+  appStateToSavedWorkspace,
+  lookupIndexPatternId,
+} from '../services/persistence';
+import { settingsSelector } from './advanced_settings';
+import { openSaveModal } from '../services/save_modal';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 // mocking random id generator function

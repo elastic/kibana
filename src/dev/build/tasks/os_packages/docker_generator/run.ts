@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { access, chmod, link, unlink } from 'fs';
-import { basename, resolve } from 'path';
+import { access, link, unlink, chmod } from 'fs';
+import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { kibanaPackageJson } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { Build, Config, copyAll, exec, mkdirp, write } from '../../../lib';
-import { bundleDockerFiles } from './bundle_dockerfiles';
-import { TemplateContext } from './template_context';
+import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
+import { TemplateContext } from './template_context';
+import { bundleDockerFiles } from './bundle_dockerfiles';
 
 const accessAsync = promisify(access);
 const linkAsync = promisify(link);
@@ -59,8 +59,8 @@ export async function runDockerGenerator(
   const imageNamespace = configuredNamespace
     ? configuredNamespace
     : flags.cloud || flags.serverless
-      ? 'kibana-ci'
-      : 'kibana';
+    ? 'kibana-ci'
+    : 'kibana';
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';

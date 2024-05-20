@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
+import { useLicense } from '../../common/hooks/use_license';
+import type { MaybeImmutable } from '../../../common/endpoint/types';
 import type { EndpointCapabilities } from '../../../common/endpoint/service/response_actions/constants';
 import { type ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
-import type { MaybeImmutable } from '../../../common/endpoint/types';
-import { useLicense } from '../../common/hooks/use_license';
-import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
 import { AgentInfo } from '../components/endpoint_responder/components/header_info/agent_info/agent_info';
 
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useConsoleManager } from '../components/console';
 import {
   ActionLogButton,
+  getEndpointConsoleCommands,
   HeaderEndpointInfo,
   OfflineCallout,
-  getEndpointConsoleCommands,
 } from '../components/endpoint_responder';
+import { useConsoleManager } from '../components/console';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
 import { RESPONDER_PAGE_TITLE } from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 

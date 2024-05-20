@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { decodeCreateAlert, isPartialCreateAlertSchema } from './schema';
 import {
   OpsgenieCreateAlertExample,
   ValidCreateAlertSchema,
 } from '../../../../server/connector_types/opsgenie/test_schema';
-import { decodeCreateAlert, isPartialCreateAlertSchema } from './schema';
 
 describe('schema', () => {
   describe('decodeCreateAlert', () => {

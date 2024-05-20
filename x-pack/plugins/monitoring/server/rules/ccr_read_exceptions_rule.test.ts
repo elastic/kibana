@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { CCRReadExceptionsRule } from './ccr_read_exceptions_rule';
 import { RULE_CCR_READ_EXCEPTIONS } from '../../common/constants';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { CCRReadExceptionsRule } from './ccr_read_exceptions_rule';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 type ICCRReadExceptionsRuleMock = CCRReadExceptionsRule & {
   defaultParams: {

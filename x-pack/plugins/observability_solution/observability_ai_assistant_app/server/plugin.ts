@@ -7,11 +7,11 @@
 
 import {
   type CoreSetup,
-  type CoreStart,
-  KibanaRequest,
   type Logger,
   Plugin,
   type PluginInitializerContext,
+  type CoreStart,
+  KibanaRequest,
 } from '@kbn/core/server';
 import {
   ObservabilityAIAssistantRequestHandlerContext,

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup } from '@kbn/core/public';
-import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
-import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { setFieldFormats } from '../../../services';
 import { createFieldFormatter } from './create_field_formatter';
+import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
+import { setFieldFormats } from '../../../services';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import type { CoreSetup } from '@kbn/core/public';
 
 const mockUiSettings = {
   get: jest.fn((item: keyof typeof mockUiSettings) => mockUiSettings[item]),

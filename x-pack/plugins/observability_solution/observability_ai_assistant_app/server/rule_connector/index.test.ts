@@ -6,17 +6,17 @@
  */
 
 import { AlertHit } from '@kbn/alerting-plugin/server/types';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
-import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
-import { Observable } from 'rxjs';
+import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 import {
-  ObsAIAssistantConnectorTypeExecutorOptions,
   getObsAIAssistantConnectorAdapter,
   getObsAIAssistantConnectorType,
+  ObsAIAssistantConnectorTypeExecutorOptions,
 } from '.';
-import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
+import { Observable } from 'rxjs';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 
 describe('observabilityAIAssistant rule_connector', () => {
   describe('getObsAIAssistantConnectorAdapter', () => {

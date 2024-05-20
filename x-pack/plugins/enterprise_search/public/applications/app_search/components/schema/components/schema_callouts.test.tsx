@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -15,10 +15,10 @@ import { shallow } from 'enzyme';
 import { SchemaErrorsCallout } from '../../../../shared/schema';
 
 import {
+  UnsearchedFieldsCallout,
+  UnconfirmedFieldsCallout,
   ConfirmSchemaButton,
   MissingSubfieldsCallout,
-  UnconfirmedFieldsCallout,
-  UnsearchedFieldsCallout,
 } from './schema_callouts';
 
 import { SchemaCallouts } from '.';

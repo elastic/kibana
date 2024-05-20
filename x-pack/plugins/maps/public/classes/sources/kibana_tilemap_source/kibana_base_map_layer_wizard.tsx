@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
-import { getKibanaTileMap } from '../../../util';
+import { i18n } from '@kbn/i18n';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
-import { RasterTileLayer } from '../../layers/raster_tile_layer/raster_tile_layer';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 // @ts-ignore
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
+import { RasterTileLayer } from '../../layers/raster_tile_layer/raster_tile_layer';
+import { getKibanaTileMap } from '../../../util';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
 
 export const kibanaBasemapLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.KIBANA_BASEMAP,

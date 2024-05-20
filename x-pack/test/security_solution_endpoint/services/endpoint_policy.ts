@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DeleteAgentPolicyRequest,
   DeletePackagePoliciesRequest,
+  epmRouteService,
+  GetPackagePoliciesResponse,
   GetFullAgentPolicyResponse,
   type GetInfoResponse,
-  GetPackagePoliciesResponse,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  epmRouteService,
 } from '@kbn/fleet-plugin/common';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
 import { Immutable } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { v4 as uuidv4 } from 'uuid';
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public/services/pkg_key_from_package_info';

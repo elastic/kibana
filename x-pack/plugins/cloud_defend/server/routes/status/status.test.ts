@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { defineGetCloudDefendStatusRoute, INDEX_TIMEOUT_IN_MINUTES } from './status';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { ESSearchResponse } from '@kbn/es-types';
-import {
-  AgentPolicy,
-  GetAgentStatusResponse,
-  Installation,
-  RegistryPackage,
-} from '@kbn/fleet-plugin/common';
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   AgentClient,
   AgentPolicyServiceInterface,
@@ -24,8 +17,15 @@ import {
   PackagePolicyClient,
   PackageService,
 } from '@kbn/fleet-plugin/server';
+import {
+  AgentPolicy,
+  GetAgentStatusResponse,
+  Installation,
+  RegistryPackage,
+} from '@kbn/fleet-plugin/common';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createCloudDefendRequestHandlerContextMock } from '../../mocks';
-import { INDEX_TIMEOUT_IN_MINUTES, defineGetCloudDefendStatusRoute } from './status';
+import { errors } from '@elastic/elasticsearch';
 
 const mockCloudDefendPackageInfo: Installation = {
   verification_status: 'verified',

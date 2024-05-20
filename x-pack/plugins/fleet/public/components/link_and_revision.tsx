@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CSSProperties } from 'react';
 import React, { memo } from 'react';
 
-import type { Agent, AgentPolicy } from '../../common/types';
+import type { AgentPolicy, Agent } from '../../common/types';
 import { useLink } from '../hooks';
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 const NO_WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'nowrap' };

@@ -1,7 +1,3 @@
-import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,7 +6,11 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
  * Side Public License, v 1.
  */
 import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Redirect } from 'react-router-dom';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 let bannerId: string | undefined;

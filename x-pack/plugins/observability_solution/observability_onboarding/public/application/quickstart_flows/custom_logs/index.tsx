@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { CustomIntegrationOptions } from '@kbn/custom-integrations';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
-import React from 'react';
-import { Step, createWizardContext } from '../../../context/create_wizard_context';
+import { createWizardContext, Step } from '../../../context/create_wizard_context';
 import { ConfigureLogs } from './configure_logs';
 import { Inspect } from './inspect';
 import { InstallElasticAgent } from './install_elastic_agent';

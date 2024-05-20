@@ -9,14 +9,14 @@ import React, { FunctionComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
+import { UseField, TextAreaField } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
-import { TextAreaField, UseField } from '../../../../shared_imports';
-import { Field as FieldType, NormalizedField, ParameterName } from '../../../../types';
 import {
   IgnoreMalformedParameter,
   IgnoreZValueParameter,
-  MetaParameter,
   NullValueParameter,
+  MetaParameter,
 } from '../../field_parameters';
 import { AdvancedParametersSection, BasicParametersSection } from '../edit_field';
 

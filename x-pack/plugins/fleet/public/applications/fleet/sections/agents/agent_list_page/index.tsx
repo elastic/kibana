@@ -1,5 +1,3 @@
-import { EuiPortal, EuiSpacer } from '@elastic/eui';
-import { differenceBy, isEqual } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,18 +5,20 @@ import { differenceBy, isEqual } from 'lodash';
  * 2.0.
  */
 import React, { useState, useMemo, useCallback } from 'react';
+import { differenceBy, isEqual } from 'lodash';
+import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import type { Agent } from '../../../types';
 
-import { AgentEnrollmentFlyout, UninstallCommandFlyout } from '../../../components';
-import { SO_SEARCH_LIMIT } from '../../../constants';
 import {
   useBreadcrumbs,
-  useFleetServerStandalone,
-  useFlyoutContext,
   useStartServices,
+  useFlyoutContext,
+  useFleetServerStandalone,
 } from '../../../hooks';
+import { AgentEnrollmentFlyout, UninstallCommandFlyout } from '../../../components';
 import { policyHasFleetServer } from '../../../services';
+import { SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
@@ -42,7 +42,7 @@ import {
   TagsAddRemove,
 } from './components';
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
-import { useAgentSoftLimit, useFetchAgentsData, useMissingEncryptionKeyCallout } from './hooks';
+import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { cloud } = useStartServices();

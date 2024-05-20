@@ -7,10 +7,10 @@
 
 import { useCallback, useEffect } from 'react';
 
-import { useKibana } from '../../common/lib/kibana';
-import { isReadOnlyPermissions } from '../../utils/permissions';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
+import { useKibana } from '../../common/lib/kibana';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { isReadOnlyPermissions } from '../../utils/permissions';
 
 /**
  * This component places a read-only icon badge in the header if user only has read permissions

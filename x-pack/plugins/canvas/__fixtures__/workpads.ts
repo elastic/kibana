@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CanvasElement, CanvasPage, CanvasVariable, CanvasWorkpad } from '../types';
+import { CanvasWorkpad, CanvasElement, CanvasPage, CanvasVariable } from '../types';
 
 const BaseWorkpad: CanvasWorkpad = {
   '@created': '2019-02-08T18:35:23.029Z',

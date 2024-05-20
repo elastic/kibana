@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
+  TransportResult,
   TransportRequestOptions,
   TransportRequestOptionsWithMeta,
   TransportRequestOptionsWithOutMeta,
-  TransportResult,
 } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from '@kbn/core/server';
 
+import type { MLSavedObjectService } from '../../saved_objects';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { JobType } from '../../../common/types/saved_objects';
-import type { MLSavedObjectService } from '../../saved_objects';
 
 export function searchProvider(
   client: IScopedClusterClient,

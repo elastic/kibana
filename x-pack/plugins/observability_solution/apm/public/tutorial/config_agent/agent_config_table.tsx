@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import React from 'react';
 import type { ValuesType } from 'utility-types';
+import { get } from 'lodash';
+import { EuiBasicTable, EuiText, EuiBasicTableColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export function AgentConfigurationTable({
   variables,

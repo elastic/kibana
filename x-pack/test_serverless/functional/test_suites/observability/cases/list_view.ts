@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {

@@ -6,8 +6,8 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { MlApiServices } from '../../../services/ml_api_service';
 import { QuickGeoJobCreator } from './quick_create_job';

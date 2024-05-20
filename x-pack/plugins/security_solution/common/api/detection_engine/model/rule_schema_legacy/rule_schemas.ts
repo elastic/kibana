@@ -8,6 +8,9 @@
 import * as t from 'io-ts';
 
 import {
+  concurrent_searches,
+  items_per_search,
+  machine_learning_job_id,
   RiskScore,
   RiskScoreMapping,
   RuleActionArray,
@@ -17,9 +20,6 @@ import {
   RuleIntervalTo,
   Severity,
   SeverityMapping,
-  concurrent_searches,
-  items_per_search,
-  machine_learning_job_id,
   threat_filters,
   threat_index,
   threat_indicator_path,
@@ -72,7 +72,7 @@ import { Threshold } from './threshold_attributes';
 export const buildRuleSchemas = <
   Required extends t.Props,
   Optional extends t.Props,
-  Defaultable extends t.Props,
+  Defaultable extends t.Props
 >({
   required,
   optional,

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { Observable } from 'rxjs';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type {
-  UserProfile,
   UserProfileData,
   UserProfileWithSecurity,
+  UserProfile,
 } from '@kbn/core-user-profile-common';
-import type { Observable } from 'rxjs';
 
 export interface UserProfileService {
   /**

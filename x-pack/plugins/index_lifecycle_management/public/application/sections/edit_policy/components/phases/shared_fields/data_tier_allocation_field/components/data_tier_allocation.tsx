@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiSuperSelectOption, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import React, { FunctionComponent } from 'react';
+import { get } from 'lodash';
+import { EuiText, EuiSpacer, EuiSuperSelectOption } from '@elastic/eui';
 
-import { PhaseWithAllocation } from '../../../../../../../../../common/types';
 import { SuperSelectField, useFormData } from '../../../../../../../../shared_imports';
+import { PhaseWithAllocation } from '../../../../../../../../../common/types';
 
 import { DataTierAllocationType } from '../../../../../types';
 

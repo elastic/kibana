@@ -1,5 +1,3 @@
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +5,14 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import moment from 'moment';
+import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import {
-  ALL_OPTION,
-  getOptionLabel,
-} from '../../../../../../../common/agent_configuration/all_option';
+import { i18n } from '@kbn/i18n';
 import { SuggestionsSelect } from '../../../../../shared/suggestions_select';
+import {
+  getOptionLabel,
+  ALL_OPTION,
+} from '../../../../../../../common/agent_configuration/all_option';
 
 interface Props {
   title: string;

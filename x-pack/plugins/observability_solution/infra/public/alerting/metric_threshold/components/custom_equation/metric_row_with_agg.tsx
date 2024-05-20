@@ -6,21 +6,21 @@
  */
 
 import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiSelect,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
-import { get } from 'lodash';
-import React, { useMemo, useCallback } from 'react';
 import { Aggregators, CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
 import { MetricRowControls } from './metric_row_controls';
-import { MetricRowBaseProps, NormalizedFields } from './types';
+import { NormalizedFields, MetricRowBaseProps } from './types';
 
 interface MetricRowWithAggProps extends MetricRowBaseProps {
   aggType?: CustomMetricAggTypes;
@@ -45,20 +45,17 @@ export const MetricRowWithAgg = ({
 
   const fieldOptions = useMemo(
     () =>
-      fields.reduce(
-        (acc, fieldValue) => {
-          if (
-            aggType &&
-            aggregationTypes[aggType].validNormalizedTypes.includes(
-              fieldValue.normalizedType as ValidNormalizedTypes
-            )
-          ) {
-            acc.push({ label: fieldValue.name });
-          }
-          return acc;
-        },
-        [] as Array<{ label: string }>
-      ),
+      fields.reduce((acc, fieldValue) => {
+        if (
+          aggType &&
+          aggregationTypes[aggType].validNormalizedTypes.includes(
+            fieldValue.normalizedType as ValidNormalizedTypes
+          )
+        ) {
+          acc.push({ label: fieldValue.name });
+        }
+        return acc;
+      }, [] as Array<{ label: string }>),
     [fields, aggregationTypes, aggType]
   );
 

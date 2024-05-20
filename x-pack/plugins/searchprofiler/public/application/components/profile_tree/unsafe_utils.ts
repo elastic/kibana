@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
 import tinycolor from 'tinycolor2';
+import _ from 'lodash';
 
 import { BreakdownItem, Index, Operation, Shard, Targets } from '../../types';
-import { MAX_TREE_DEPTH } from './constants';
 import { IndexMap } from './types';
+import { MAX_TREE_DEPTH } from './constants';
 
 export const comparator = (v1: number, v2: number) => {
   if (v1 < v2) {

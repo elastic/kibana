@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { withTimeout, isPromise } from '@kbn/std';
 import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
-import { PluginType } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
-import { isPromise, withTimeout } from '@kbn/std';
+import { PluginType } from '@kbn/core-base-common';
 import type { PluginWrapper } from './plugin';
+import { type PluginDependencies } from './types';
 import {
   createPluginPrebootSetupContext,
   createPluginSetupContext,
   createPluginStartContext,
 } from './plugin_context';
-import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 import type {
   PluginsServicePrebootSetupDeps,
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
 } from './plugins_service';
-import { type PluginDependencies } from './types';
+import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 
 const Sec = 1000;
 
@@ -36,10 +36,7 @@ export class PluginsSystem<T extends PluginType> {
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
 
-  constructor(
-    private readonly coreContext: CoreContext,
-    public readonly type: T
-  ) {
+  constructor(private readonly coreContext: CoreContext, public readonly type: T) {
     this.log = coreContext.logger.get('plugins-system', this.type);
   }
 
@@ -113,18 +110,15 @@ export class PluginsSystem<T extends PluginType> {
     for (const [pluginName, plugin] of sortedPlugins) {
       this.log.debug(`Setting up plugin "${pluginName}"...`);
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
       let pluginSetupContext;
       if (this.type === PluginType.preboot) {
@@ -190,18 +184,15 @@ export class PluginsSystem<T extends PluginType> {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
       let contract: unknown;
       const contractOrPromise = plugin.start(

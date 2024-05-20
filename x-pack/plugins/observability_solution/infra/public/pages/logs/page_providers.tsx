@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React, { useState, FC, PropsWithChildren } from 'react';
 import {
   LogViewProvider,
   initializeFromUrl as createInitializeFromUrl,
-  listenForUrlChanges as createListenForUrlChanges,
   updateContextInUrl as createUpdateContextInUrl,
+  listenForUrlChanges as createListenForUrlChanges,
 } from '@kbn/logs-shared-plugin/public';
-import React, { useState, FC, PropsWithChildren } from 'react';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';

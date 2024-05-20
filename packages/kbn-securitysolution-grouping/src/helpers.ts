@@ -1,4 +1,3 @@
-import * as i18n from './components/translations';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import * as i18n from './components/translations';
  * Side Public License, v 1.
  */
 import { EMPTY_GROUP_BY_ID, GroupModel, GroupsById, Storage } from './hooks/types';
+import * as i18n from './components/translations';
 
 /**
  * All mappings in Elasticsearch support arrays. They can also return null values or be missing. For example, a `keyword` mapping could return `null` or `[null]` or `[]` or `'hi'`, or `['hi', 'there']`. We need to handle these cases in order to avoid throwing an error.

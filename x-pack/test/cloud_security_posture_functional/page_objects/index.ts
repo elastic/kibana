@@ -6,11 +6,11 @@
  */
 
 import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
-import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
-import { CspDashboardPageProvider } from './csp_dashboard_page';
 import { FindingsPageProvider } from './findings_page';
-import { RulePagePageProvider } from './rule_page';
+import { CspDashboardPageProvider } from './csp_dashboard_page';
+import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
 import { VulnerabilityDashboardPageProvider } from './vulnerability_dashboard_page_object';
+import { RulePagePageProvider } from './rule_page';
 
 export const cloudSecurityPosturePageObjects = {
   findings: FindingsPageProvider,

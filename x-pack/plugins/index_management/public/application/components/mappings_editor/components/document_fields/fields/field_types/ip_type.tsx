@@ -8,19 +8,19 @@
 import React from 'react';
 import SemVer from 'semver/classes/semver';
 
+import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { Field as FieldType, NormalizedField } from '../../../../types';
 
 import {
-  BoostParameter,
-  DocValuesParameter,
-  IndexParameter,
-  NullValueParameter,
   StoreParameter,
+  IndexParameter,
+  DocValuesParameter,
+  BoostParameter,
+  NullValueParameter,
 } from '../../field_parameters';
 
-import { Field, UseField } from '../../../../shared_imports';
-import { AdvancedParametersSection, BasicParametersSection } from '../edit_field';
+import { UseField, Field } from '../../../../shared_imports';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {

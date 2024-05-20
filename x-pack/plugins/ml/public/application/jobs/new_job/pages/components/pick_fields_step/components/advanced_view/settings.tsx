@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
 import { BucketSpan } from '../bucket_span';
 import { Influencers } from '../influencers';
+import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;

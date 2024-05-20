@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { EuiTableActionsColumnType } from '@elastic/eui';
 import React from 'react';
+import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { DeleteSpaceAwareItemCheckModal } from '../../../../../components/delete_space_aware_item_check_modal';
-import { useRefreshAnalyticsList } from '../../../../common/analytics';
 import { useCloneAction } from '../action_clone';
-import { DeleteActionModal, useDeleteAction } from '../action_delete';
-import { EditActionFlyout, isEditActionFlyoutVisible, useEditAction } from '../action_edit';
-import { useMapAction } from '../action_map';
-import { StartActionModal, useStartAction } from '../action_start';
-import { StopActionModal, useStopAction } from '../action_stop';
+import { useDeleteAction, DeleteActionModal } from '../action_delete';
+import { isEditActionFlyoutVisible, useEditAction, EditActionFlyout } from '../action_edit';
+import { useStartAction, StartActionModal } from '../action_start';
+import { useStopAction, StopActionModal } from '../action_stop';
 import { useViewAction } from '../action_view';
+import { useMapAction } from '../action_map';
 import type { DataFrameAnalyticsListRow } from './common';
+import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
 export const useActions = (): {
   actions: EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'];

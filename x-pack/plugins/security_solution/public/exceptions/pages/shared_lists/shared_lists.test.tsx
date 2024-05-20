@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { TestProviders } from '../../../common/mock';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useUserData } from '../../../detections/components/user_info';
 
-import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import { useHistory } from 'react-router-dom';
 import { SharedLists } from '.';
-import { generateHistoryMock } from '../../../common/utils/route/mocks';
+import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
+import { useHistory } from 'react-router-dom';
+import { generateHistoryMock } from '../../../common/utils/route/mocks';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 
 jest.mock('../../../detections/components/user_info');
 jest.mock('../../../common/utils/route/mocks');

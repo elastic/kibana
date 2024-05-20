@@ -7,8 +7,8 @@
 
 import {
   UIM_CONFIG_COLD_PHASE,
-  UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_WARM_PHASE,
+  UIM_CONFIG_SET_PRIORITY,
   defaultIndexPriority,
 } from '../constants';
 

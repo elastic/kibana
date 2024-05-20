@@ -7,23 +7,17 @@
 
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { offsetRt } from '../../../common/comparison_rt';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { ErrorDistributionResponse, getErrorDistribution } from './distribution/get_distribution';
-import {
-  TopErroneousTransactionsResponse,
-  getTopErroneousTransactionsPeriods,
-} from './erroneous_transactions/get_top_erroneous_transactions';
-import {
-  ErrorGroupPeriodsResponse,
-  getErrorGroupPeriods,
-} from './get_error_groups/get_error_group_detailed_statistics';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import {
   ErrorGroupMainStatisticsResponse,
   getErrorGroupMainStatistics,
 } from './get_error_groups/get_error_group_main_statistics';
+import {
+  ErrorGroupPeriodsResponse,
+  getErrorGroupPeriods,
+} from './get_error_groups/get_error_group_detailed_statistics';
 import {
   ErrorGroupSampleIdsResponse,
   getErrorGroupSampleIds,
@@ -32,6 +26,12 @@ import {
   ErrorSampleDetailsResponse,
   getErrorSampleDetails,
 } from './get_error_groups/get_error_sample_details';
+import { offsetRt } from '../../../common/comparison_rt';
+import {
+  getTopErroneousTransactionsPeriods,
+  TopErroneousTransactionsResponse,
+} from './erroneous_transactions/get_top_erroneous_transactions';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',

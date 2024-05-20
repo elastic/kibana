@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { useValues } from 'kea';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Facet, SearchBox, SearchProvider, Sorting } from '@elastic/react-search-ui';
+import { SearchProvider, SearchBox, Sorting, Facet } from '@elastic/react-search-ui';
 import type { SortDirection } from '@elastic/search-ui';
 import AppSearchAPIConnector from '@elastic/search-ui-app-search-connector';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +28,7 @@ import { CustomizationCallout } from './customization_callout';
 import { CustomizationModal } from './customization_modal';
 import { SearchExperienceContent } from './search_experience_content';
 import { Fields, SortOption } from './types';
-import { MultiCheckboxFacetsView, SearchBoxView, SortingView } from './views';
+import { SearchBoxView, SortingView, MultiCheckboxFacetsView } from './views';
 
 const DOCUMENT_ID = i18n.translate(
   'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.documentId',

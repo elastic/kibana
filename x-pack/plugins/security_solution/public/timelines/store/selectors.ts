@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/es-query';
-import { get, isEmpty } from 'lodash/fp';
 import { createSelector } from 'reselect';
-import { timelineSelectors } from '.';
-import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
-import { TimelineTabs } from '../../../common/types';
-import type { State } from '../../common/store/types';
+import { get, isEmpty } from 'lodash/fp';
+import type { Query } from '@kbn/es-query';
 import {
   UNTITLED_TEMPLATE,
   UNTITLED_TIMELINE,
 } from '../components/timeline/properties/translations';
+import { timelineSelectors } from '.';
+import { TimelineTabs } from '../../../common/types';
+import type { State } from '../../common/store/types';
 import type { TimelineModel } from './model';
 import type { InsertTimeline, TimelineById } from './types';
+import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
 
 export const getTimelineShowStatusByIdSelector = () =>
   createSelector(timelineSelectors.selectTimeline, (timeline) => ({

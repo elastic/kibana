@@ -6,39 +6,39 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subscription, combineLatest, firstValueFrom, mergeMap, of } from 'rxjs';
+import { Observable, Subscription, combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
 import { map } from 'rxjs';
 
+import { pick, Semaphore } from '@kbn/std';
+import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
+import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
-import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type {
-  InternalContextPreboot,
-  InternalContextSetup,
-} from '@kbn/core-http-context-server-internal';
-import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
-import type {
+  RequestHandlerContextBase,
   IContextContainer,
   IContextProvider,
   IRouter,
-  RequestHandlerContextBase,
 } from '@kbn/core-http-server';
-import { Logger } from '@kbn/logging';
-import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
-import { Semaphore, pick } from '@kbn/std';
+import type {
+  InternalContextSetup,
+  InternalContextPreboot,
+} from '@kbn/core-http-context-server-internal';
+import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
 
 import { CspConfigType, cspConfig } from './csp';
-import { ExternalUrlConfig, ExternalUrlConfigType, externalUrlConfig } from './external_url';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
-import { registerCoreHandlers } from './register_lifecycle_handlers';
 import {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
 } from './types';
+import { registerCoreHandlers } from './register_lifecycle_handlers';
+import { ExternalUrlConfigType, externalUrlConfig, ExternalUrlConfig } from './external_url';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
@@ -125,7 +125,7 @@ export class HttpService
       registerRouteHandlerContext: (pluginOpaqueId, contextName, provider) =>
         prebootServerRequestHandlerContext.registerContext(pluginOpaqueId, contextName, provider),
       registerRoutes: <
-        DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase,
+        DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
       >(
         path: string,
         registerCallback: (router: IRouter<DefaultRequestHandlerType>) => void
@@ -192,7 +192,7 @@ export class HttpService
 
       registerRouteHandlerContext: <
         Context extends RequestHandlerContextBase,
-        ContextName extends keyof Context,
+        ContextName extends keyof Context
       >(
         pluginOpaqueId: PluginOpaqueId,
         contextName: ContextName,

@@ -8,9 +8,9 @@
 import React, { memo, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { CommandExecutionComponentProps } from '../../types';
 import { CommandUsage } from '../command_usage';
 import { HelpOutput } from '../help_output';
+import type { CommandExecutionComponentProps } from '../../types';
 
 /**
  * Builtin component that handles the output of command's `--help` argument

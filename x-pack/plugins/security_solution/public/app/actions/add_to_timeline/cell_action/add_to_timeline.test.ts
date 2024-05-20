@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { set } from 'lodash/fp';
-import { TimelineId } from '../../../../../common/types';
-import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { SecurityAppStore } from '../../../../common/store/types';
-import { GEO_FIELD_TYPE } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { TimelineId } from '../../../../../common/types';
 import { addProvider } from '../../../../timelines/store/actions';
 import { createAddToTimelineCellActionFactory } from './add_to_timeline';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
+import { GEO_FIELD_TYPE } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { set } from 'lodash/fp';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 const services = createStartServicesMock();
 const mockWarningToast = services.notifications.toasts.addWarning;

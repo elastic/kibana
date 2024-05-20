@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { fetchProvider } from './fetch';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { fetchProvider } from './fetch';
 
 jest.mock('../../../common', () => ({
   DEFAULT_QUERY_LANGUAGE: 'lucene',

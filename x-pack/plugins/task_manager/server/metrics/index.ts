@@ -7,8 +7,8 @@
 
 import { Observable } from 'rxjs';
 import { TaskManagerConfig } from '../config';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { Metrics, createMetricsAggregators, createMetricsStream } from './metrics_stream';
+import { TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskManagerMetricsCollector } from './task_metrics_collector';
 export type { Metrics } from './metrics_stream';
 

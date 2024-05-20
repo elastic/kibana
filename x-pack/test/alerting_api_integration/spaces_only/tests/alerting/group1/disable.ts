@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
+import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  ObjectRemover,
   AlertUtils as RuleUtils,
-  TaskManagerDoc,
   checkAAD,
-  getEventLog,
-  getTestRuleData,
   getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  getEventLog,
+  TaskManagerDoc,
 } from '../../../../common/lib';
-import { Spaces } from '../../../scenarios';
 import { validateEvent } from './event_log';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';

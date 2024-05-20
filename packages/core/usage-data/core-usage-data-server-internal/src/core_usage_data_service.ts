@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ChangedDeprecatedPaths, hasConfigPathIntersection } from '@kbn/config';
-import { get } from 'lodash';
-import { Observable, Subject, firstValueFrom } from 'rxjs';
+import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs';
+import { get } from 'lodash';
+import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
 import type {
   AggregationsMultiBucketAggregateBase,
@@ -17,39 +17,39 @@ import type {
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
+import type { Logger } from '@kbn/logging';
+import type { HttpConfigType, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
-import type { HttpConfigType, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
 import type { MetricsServiceSetup, OpsMetrics } from '@kbn/core-metrics-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type SavedObjectsConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type {
+  CoreServicesUsageData,
+  CoreUsageData,
+  CoreUsageDataStart,
+  CoreIncrementUsageCounter,
+  ConfigUsageData,
+  CoreConfigUsageData,
+  CoreIncrementCounterParams,
+  CoreUsageCounter,
+} from '@kbn/core-usage-data-server';
+import {
+  CORE_USAGE_STATS_TYPE,
+  type InternalCoreUsageDataSetup,
+} from '@kbn/core-usage-data-base-server-internal';
 import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import {
   MAIN_SAVED_OBJECT_INDEX,
   type SavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server';
-import {
-  CORE_USAGE_STATS_TYPE,
-  type InternalCoreUsageDataSetup,
-} from '@kbn/core-usage-data-base-server-internal';
-import type {
-  ConfigUsageData,
-  CoreConfigUsageData,
-  CoreIncrementCounterParams,
-  CoreIncrementUsageCounter,
-  CoreServicesUsageData,
-  CoreUsageCounter,
-  CoreUsageData,
-  CoreUsageDataStart,
-} from '@kbn/core-usage-data-server';
-import type { Logger } from '@kbn/logging';
 
-import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { isConfigured } from './is_configured';
 import { coreUsageStatsType } from './saved_objects';
+import { CoreUsageStatsClient } from './core_usage_stats_client';
 
 export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
 
@@ -245,8 +245,8 @@ export class CoreUsageDataService
           numberOfHostsConfigured: Array.isArray(es.hosts)
             ? es.hosts.length
             : isConfigured.string(es.hosts)
-              ? 1
-              : 0,
+            ? 1
+            : 0,
           customHeadersConfigured: isConfigured.record(es.customHeaders),
           healthCheckDelayMs: es.healthCheck.delay.asMilliseconds(),
           logQueries: es.logQueries,
@@ -383,76 +383,73 @@ export class CoreUsageDataService
     const usedPaths = await this.configService.getUsedPaths();
     const exposedConfigsKeys = [...exposedConfigsToUsage.keys()];
 
-    return usedPaths.reduce(
-      (acc, usedPath) => {
-        const rawConfigValue = get(nonDefaultConfigs, usedPath);
-        const pluginId = exposedConfigsKeys.find(
-          (exposedConfigsKey) =>
-            usedPath === exposedConfigsKey || usedPath.startsWith(`${exposedConfigsKey}.`)
-        );
+    return usedPaths.reduce((acc, usedPath) => {
+      const rawConfigValue = get(nonDefaultConfigs, usedPath);
+      const pluginId = exposedConfigsKeys.find(
+        (exposedConfigsKey) =>
+          usedPath === exposedConfigsKey || usedPath.startsWith(`${exposedConfigsKey}.`)
+      );
 
-        const { explicitlyMarked, isSafe } = this.getMarkedAsSafe(
-          exposedConfigsToUsage,
-          usedPath,
-          pluginId
-        );
+      const { explicitlyMarked, isSafe } = this.getMarkedAsSafe(
+        exposedConfigsToUsage,
+        usedPath,
+        pluginId
+      );
 
-        // explicitly marked as safe
-        if (explicitlyMarked && isSafe) {
-          // report array of objects as redacted even if explicitly marked as safe.
-          // TS typings prevent explicitly marking arrays of objects as safe
-          // this makes sure to report redacted even if TS was bypassed.
-          if (
-            Array.isArray(rawConfigValue) &&
-            rawConfigValue.some((item) => typeof item === 'object')
-          ) {
-            acc[usedPath] = '[redacted]';
-          } else {
-            acc[usedPath] = rawConfigValue;
-          }
-        }
-
-        // explicitly marked as unsafe
-        if (explicitlyMarked && !isSafe) {
+      // explicitly marked as safe
+      if (explicitlyMarked && isSafe) {
+        // report array of objects as redacted even if explicitly marked as safe.
+        // TS typings prevent explicitly marking arrays of objects as safe
+        // this makes sure to report redacted even if TS was bypassed.
+        if (
+          Array.isArray(rawConfigValue) &&
+          rawConfigValue.some((item) => typeof item === 'object')
+        ) {
           acc[usedPath] = '[redacted]';
+        } else {
+          acc[usedPath] = rawConfigValue;
         }
+      }
 
-        /**
-         * not all types of values may contain sensitive values.
-         * Report boolean and number configs if not explicitly marked as unsafe.
-         */
-        if (!explicitlyMarked) {
-          switch (typeof rawConfigValue) {
-            case 'number':
-            case 'boolean':
-              acc[usedPath] = rawConfigValue;
-              break;
-            case 'undefined':
-              acc[usedPath] = 'undefined';
-              break;
-            case 'object': {
-              // non-array object types are already handled
-              if (Array.isArray(rawConfigValue)) {
-                if (
-                  rawConfigValue.every(
-                    (item) => typeof item === 'number' || typeof item === 'boolean'
-                  )
-                ) {
-                  acc[usedPath] = rawConfigValue;
-                  break;
-                }
+      // explicitly marked as unsafe
+      if (explicitlyMarked && !isSafe) {
+        acc[usedPath] = '[redacted]';
+      }
+
+      /**
+       * not all types of values may contain sensitive values.
+       * Report boolean and number configs if not explicitly marked as unsafe.
+       */
+      if (!explicitlyMarked) {
+        switch (typeof rawConfigValue) {
+          case 'number':
+          case 'boolean':
+            acc[usedPath] = rawConfigValue;
+            break;
+          case 'undefined':
+            acc[usedPath] = 'undefined';
+            break;
+          case 'object': {
+            // non-array object types are already handled
+            if (Array.isArray(rawConfigValue)) {
+              if (
+                rawConfigValue.every(
+                  (item) => typeof item === 'number' || typeof item === 'boolean'
+                )
+              ) {
+                acc[usedPath] = rawConfigValue;
+                break;
               }
             }
-            default: {
-              acc[usedPath] = '[redacted]';
-            }
+          }
+          default: {
+            acc[usedPath] = '[redacted]';
           }
         }
+      }
 
-        return acc;
-      },
-      {} as Record<string, any | any[]>
-    );
+      return acc;
+    }, {} as Record<string, any | any[]>);
   }
 
   setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ }: SetupDeps) {

@@ -8,21 +8,21 @@
 
 import { inspect } from 'util';
 
-import { FtrConfigProvider } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
-import callsites from 'callsites';
 import { Page } from 'playwright';
-import { Auth, Es, KibanaServer, Retry } from '../services';
+import callsites from 'callsites';
+import { ToolingLog } from '@kbn/tooling-log';
+import { FtrConfigProvider } from '@kbn/test';
 import { FtrProviderContext } from '../services/ftr_context_provider';
+import { Es, KibanaServer, Retry, Auth } from '../services';
 
 import { InputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
+import { JourneyFtrHarness } from './journey_ftr_harness';
+import { makeFtrConfigProvider } from './journey_ftr_config';
+import { JourneyConfig, JourneyConfigOptions } from './journey_config';
 import { KibanaPage } from '../services/page/kibana_page';
 import { ProjectPage } from '../services/page/project_page';
-import { JourneyConfig, JourneyConfigOptions } from './journey_config';
-import { makeFtrConfigProvider } from './journey_ftr_config';
-import { JourneyFtrHarness } from './journey_ftr_harness';
 
 export interface BaseStepCtx {
   kibanaPage: KibanaPage | ProjectPage;

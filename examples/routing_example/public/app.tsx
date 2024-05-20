@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiHorizontalRule,
-  EuiListGroup,
-  EuiPageSection,
-  EuiPageTemplate,
-  EuiText,
-} from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { GetMessageRouteExample } from './get_message_example';
-import { PostMessageRouteExample } from './post_message_example';
-import { RandomNumberBetweenRouteExample } from './random_number_between_example';
+import { AppMountParameters } from '@kbn/core/public';
+import {
+  EuiPageTemplate,
+  EuiPageSection,
+  EuiText,
+  EuiHorizontalRule,
+  EuiListGroup,
+} from '@elastic/eui';
 import { RandomNumberRouteExample } from './random_number_example';
+import { RandomNumberBetweenRouteExample } from './random_number_between_example';
 import { Services } from './services';
+import { PostMessageRouteExample } from './post_message_example';
+import { GetMessageRouteExample } from './get_message_example';
 
 type Props = Services;
 

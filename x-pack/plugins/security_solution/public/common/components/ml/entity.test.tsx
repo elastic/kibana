@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
+import { EntityComponent } from './entity';
 import { TestProviders } from '../../mock/test_providers';
 import { useMountAppended } from '../../utils/use_mount_appended';
-import { EntityComponent } from './entity';
 
 jest.mock('../../lib/kibana');
 

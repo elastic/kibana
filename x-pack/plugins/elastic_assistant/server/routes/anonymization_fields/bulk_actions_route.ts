@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import moment from 'moment';
+import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
   AnonymizationFieldResponse,
@@ -25,6 +25,8 @@ import {
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
+import { ElasticAssistantPluginRouter } from '../../types';
+import { buildResponse } from '../utils';
 import {
   getUpdateScript,
   transformESSearchToAnonymizationFields,
@@ -36,9 +38,7 @@ import {
   EsAnonymizationFieldsSchema,
   UpdateAnonymizationFieldSchema,
 } from '../../ai_assistant_data_clients/anonymization_fields/types';
-import { ElasticAssistantPluginRouter } from '../../types';
 import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
-import { buildResponse } from '../utils';
 
 export interface BulkOperationError {
   message: string;

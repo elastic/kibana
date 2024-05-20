@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFilterButton,
   EuiFilterGroup,
-  EuiFilterSelectItem,
   EuiPopover,
+  EuiFilterSelectItem,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 
 interface Filter {
   name: string;

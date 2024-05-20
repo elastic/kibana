@@ -8,16 +8,16 @@
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import './index.scss';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { usePager } from '@kbn/discover-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { SavedSearchEmbeddableBase } from '../../embeddable/saved_search_embeddable_base';
 import {
-  MAX_ROWS_PER_PAGE_OPTION,
   ToolBarPagination,
+  MAX_ROWS_PER_PAGE_OPTION,
 } from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
+import { SavedSearchEmbeddableBase } from '../../embeddable/saved_search_embeddable_base';
 
 export interface DocTableEmbeddableProps extends Omit<DocTableProps, 'dataTestSubj'> {
   totalHitCount?: number;

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { buildExpression } from '@kbn/expressions-plugin/public';
 import { Ast } from '@kbn/interpreter';
-import faker from 'faker';
-import { RowHeightMode } from '../../../common/types';
+import { buildExpression } from '@kbn/expressions-plugin/public';
 import {
-  DatasourceMock,
   createMockDatasource,
   createMockFramePublicAPI,
+  DatasourceMock,
   generateActiveData,
 } from '../../mocks';
+import faker from 'faker';
+import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
+  Operation,
   DataType,
   FramePublicAPI,
-  Operation,
   TableSuggestionColumn,
-  VisualizationConfigProps,
   VisualizationDimensionGroupConfig,
+  VisualizationConfigProps,
 } from '../../types';
-import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
+import { RowHeightMode } from '../../../common/types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function mockFrame(): FramePublicAPI {
   return {

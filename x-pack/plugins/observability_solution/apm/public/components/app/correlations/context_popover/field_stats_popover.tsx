@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { EuiHorizontalRule, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  FieldStats,
+  FieldStatsServices,
+  FieldStatsProps,
+  FieldStatsState,
+} from '@kbn/unified-field-list/src/components/field_stats';
 import {
   FieldPopover,
   FieldPopoverHeader,
 } from '@kbn/unified-field-list/src/components/field_popover';
-import {
-  FieldStats,
-  FieldStatsProps,
-  FieldStatsServices,
-  FieldStatsState,
-} from '@kbn/unified-field-list/src/components/field_stats';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import {
   FieldTopValuesBucket,
   type FieldTopValuesBucketParams,
 } from '@kbn/unified-field-list/src/components/field_stats';
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiHorizontalRule, EuiText, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import numeral from '@elastic/numeral';
+import { termQuery } from '../../../../../common/utils/term_query';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
-import { termQuery } from '../../../../../common/utils/term_query';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
-import type { ApmPluginStartDeps } from '../../../../plugin';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetchParams } from '../use_fetch_params';
+import type { ApmPluginStartDeps } from '../../../../plugin';
+import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
+import { useTheme } from '../../../../hooks/use_theme';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 const HIGHLIGHTED_BUCKET_PROPS = {
   color: 'accent',

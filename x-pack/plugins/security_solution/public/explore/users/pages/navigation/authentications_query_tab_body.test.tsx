@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { useAuthentications } from '../../../containers/authentications';
-import { UsersType } from '../../store/model';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { AuthenticationsQueryTabBody } from './authentications_query_tab_body';
+import { UsersType } from '../../store/model';
+import { useAuthentications } from '../../../containers/authentications';
 
 jest.mock('../../../containers/authentications');
 jest.mock('../../../../common/containers/query_toggle');

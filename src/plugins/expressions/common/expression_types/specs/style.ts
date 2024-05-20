@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionTypeStyle } from '../../types/style';
 import { ExpressionTypeDefinition } from '../types';
+import { ExpressionTypeStyle } from '../../types/style';
 
 const name = 'style';
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { Capabilities } from '@kbn/core/server';
 import {
-  capabilitiesServiceMock,
-  savedObjectsClientMock,
   savedObjectsTypeRegistryMock,
+  savedObjectsClientMock,
   uiSettingsServiceMock,
+  capabilitiesServiceMock,
 } from '@kbn/core/server/mocks';
-import { of } from 'rxjs';
 
 const createContextMock = (capabilities: Partial<Capabilities> = {}) => {
   return {

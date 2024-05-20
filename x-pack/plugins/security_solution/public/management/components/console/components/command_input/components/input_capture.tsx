@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { pick } from 'lodash';
 import type {
-  ClipboardEventHandler,
-  KeyboardEvent,
   KeyboardEventHandler,
+  KeyboardEvent,
   MutableRefObject,
   PropsWithChildren,
+  ClipboardEventHandler,
 } from 'react';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
+import { pick } from 'lodash';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 

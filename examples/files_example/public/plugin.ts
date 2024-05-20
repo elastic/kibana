@@ -7,8 +7,8 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { MyImageMetadata, PLUGIN_ID, PLUGIN_NAME, exampleFileKind } from '../common';
-import { FilesExamplePluginsSetup, FilesExamplePluginsStart } from './types';
+import { PLUGIN_ID, PLUGIN_NAME, exampleFileKind, MyImageMetadata } from '../common';
+import { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
 
 export class FilesExamplePlugin
   implements Plugin<unknown, unknown, FilesExamplePluginsSetup, FilesExamplePluginsStart>

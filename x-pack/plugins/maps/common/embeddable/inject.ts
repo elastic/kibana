@@ -6,9 +6,9 @@
  */
 
 import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
+import type { MapEmbeddablePersistableState } from './types';
 import type { MapAttributes } from '../content_management';
 import { extractReferences, injectReferences } from '../migrations/references';
-import type { MapEmbeddablePersistableState } from './types';
 
 export const inject: EmbeddableRegistryDefinition['inject'] = (state, references) => {
   const typedState = state as MapEmbeddablePersistableState;

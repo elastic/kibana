@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { ExpressionsServerSetup, ExpressionsServerStart } from '@kbn/expressions-plugin/server';
+import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { imageFunction } from '../common/expression_functions';
 
 interface SetupDeps {

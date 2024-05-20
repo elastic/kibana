@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { useInfrastructureNodeMetrics } from '../shared';
-import { createMetricsClientMock } from '../test_helpers';
 import { useContainerMetricsTable } from './use_container_metrics_table';
+import { useInfrastructureNodeMetrics } from '../shared';
+import { renderHook } from '@testing-library/react-hooks';
+import { createMetricsClientMock } from '../test_helpers';
 
 jest.mock('../shared', () => ({
   ...jest.requireActual('../shared'),

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { useKibana } from '../../lib/kibana/kibana_react';
-import { TestProviders } from '../../mock';
 import { mockAttributes } from './mocks';
 import { DEFAULT_ACTIONS, useActions } from './use_actions';
+import { coreMock } from '@kbn/core/public/mocks';
+import { TestProviders } from '../../mock';
 
 jest.mock('./use_add_to_existing_case', () => {
   return {

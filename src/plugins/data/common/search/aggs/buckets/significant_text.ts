@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../..';
-import { BaseAggParams } from '../types';
 import { BucketAggType } from './bucket_agg_type';
-import { BUCKET_TYPES } from './bucket_agg_types';
-import { createFilterTerms } from './create_filter/terms';
 import { migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
+import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggSignificantTextFnName } from './significant_text_fn';
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../..';
+import { BaseAggParams } from '../types';
+import { createFilterTerms } from './create_filter/terms';
 
 const significantTextTitle = i18n.translate('data.search.aggs.buckets.significantTextTitle', {
   defaultMessage: 'Significant Text',

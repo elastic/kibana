@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import React, { useState, useEffect, useCallback } from 'react';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+import type { RuleSnooze } from '@kbn/alerting-plugin/common';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
-  EuiBadge,
+  EuiLoadingSpinner,
+  EuiPopover,
   EuiContextMenu,
+  EuiBadge,
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiPopover,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { RuleSnooze } from '@kbn/alerting-plugin/common';
-import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import moment from 'moment';
-import React, { useState, useEffect, useCallback } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { BulkOperationResponse, Rule, SnoozeSchedule } from '../../../../types';
-import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
-import { isRuleSnoozed } from '../../../lib';
-import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 import { SnoozePanel } from './rule_snooze';
+import { isRuleSnoozed } from '../../../lib';
+import { Rule, SnoozeSchedule, BulkOperationResponse } from '../../../../types';
+import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
+import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';

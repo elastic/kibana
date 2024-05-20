@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React from 'react';
+import moment from 'moment';
 
 import {
   ALERT_END,
-  ALERT_REASON,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils';
 
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertTypeInitializer } from '.';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
-import { MonitorStatusTranslations } from '../../../../common/rules/legacy_uptime/translations';
 import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
+import { MonitorStatusTranslations } from '../../../../common/rules/legacy_uptime/translations';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 
 const { defaultActionMessage, defaultRecoveryMessage, description } = MonitorStatusTranslations;
 

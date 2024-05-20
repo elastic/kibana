@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsCreateOptions } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { VisualizationSavedObjectAttributes } from '../../../common';
+import type { SavedObjectsCreateOptions } from '@kbn/core/public';
+import { saveWithConfirmation } from './save_with_confirmation';
 import { VisSavedObject } from '../../types';
 import * as deps from './confirm_modal_promise';
 import { OVERWRITE_REJECTED } from './constants';
-import { saveWithConfirmation } from './save_with_confirmation';
+import { VisualizationSavedObjectAttributes } from '../../../common';
 
 const coreStart = coreMock.createStart();
 const mockFindContent = jest.fn(() => ({

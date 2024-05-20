@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type apm from 'elastic-apm-node';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 /**
  * @public

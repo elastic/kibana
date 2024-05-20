@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
-import { createMemoryHistory } from 'history';
 import React, { Component, FC } from 'react';
+import { shallow } from 'enzyme';
 import { Route } from './route';
+import { createMemoryHistory } from 'history';
 
 describe('Route', () => {
   test('renders', () => {

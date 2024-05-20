@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
 import { groupBy, has, isEqual } from 'lodash';
-import { AggregateQuery, Filter, Query } from '../filters';
-import type { KueryQueryOptions } from '../kuery';
-import { isOfQueryType } from './es_aggregate_query';
-import { buildQueryFromFilters } from './from_filters';
-import type { EsQueryFiltersConfig } from './from_filters';
+import { SerializableRecord } from '@kbn/utility-types';
 import { buildQueryFromKuery } from './from_kuery';
+import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
+import { Filter, Query, AggregateQuery } from '../filters';
+import { isOfQueryType } from './es_aggregate_query';
 import { BoolQuery, DataViewBase } from './types';
+import type { KueryQueryOptions } from '../kuery';
+import type { EsQueryFiltersConfig } from './from_filters';
 
 type AnyQuery = Query | AggregateQuery;
 /**

@@ -6,8 +6,8 @@
  */
 
 import { RouteDependencies } from '../../../types';
-import { registerAddPolicyRoute } from './register_add_policy_route';
 import { registerFetchRoute } from './register_fetch_route';
+import { registerAddPolicyRoute } from './register_add_policy_route';
 
 export function registerTemplatesRoutes(dependencies: RouteDependencies) {
   registerFetchRoute(dependencies);

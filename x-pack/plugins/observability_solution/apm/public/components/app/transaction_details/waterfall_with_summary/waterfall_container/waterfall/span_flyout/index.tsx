@@ -13,8 +13,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
-  EuiPortal,
   EuiSkeletonText,
+  EuiPortal,
   EuiSpacer,
   EuiTabbedContent,
   EuiTitle,
@@ -25,9 +25,10 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
+import { PlaintextStacktrace } from '../../../../../error_group_details/error_sampler/plaintext_stacktrace';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { isPending, useFetcher } from '../../../../../../../hooks/use_fetcher';
+import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
 import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
@@ -37,7 +38,6 @@ import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summa
 import { DurationSummaryItem } from '../../../../../../shared/summary/duration_summary_item';
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
 import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
-import { PlaintextStacktrace } from '../../../../../error_group_details/error_sampler/plaintext_stacktrace';
 import { SyncBadge } from '../badge/sync_badge';
 import { FailureBadge } from '../failure_badge';
 import { ResponsiveFlyout } from '../responsive_flyout';

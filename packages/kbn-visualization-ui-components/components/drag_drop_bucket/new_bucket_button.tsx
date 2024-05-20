@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
 
 interface NewBucketButtonProps {
   label: string;

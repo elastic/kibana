@@ -8,6 +8,7 @@
 
 import { type ParserRuleContext } from 'antlr4';
 import {
+  default as esql_parser,
   ArithmeticBinaryContext,
   ArithmeticUnaryContext,
   BooleanArrayLiteralContext,
@@ -28,7 +29,6 @@ import {
   type FieldContext,
   type FieldsContext,
   type FromCommandContext,
-  FromIdentifierContext,
   FunctionContext,
   type GrokCommandContext,
   IntegerLiteralContext,
@@ -56,34 +56,34 @@ import {
   StringLiteralContext,
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
-  default as esql_parser,
+  FromIdentifierContext,
 } from './antlr/esql_parser';
 import {
-  computeLocationExtends,
+  createSource,
   createColumn,
-  createColumnStar,
-  createFakeMultiplyLiteral,
-  createFunction,
-  createList,
-  createLiteral,
-  createNumericLiteral,
   createOption,
+  nonNullable,
+  createFunction,
+  createLiteral,
+  createTimeUnit,
+  createFakeMultiplyLiteral,
+  createList,
+  createNumericLiteral,
+  sanitizeIdentifierString,
+  computeLocationExtends,
+  createColumnStar,
+  wrapIdentifierAsArray,
   createPolicy,
   createSetting,
-  createSource,
-  createTimeUnit,
-  nonNullable,
-  sanitizeIdentifierString,
   textExistsAndIsValid,
-  wrapIdentifierAsArray,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
-  ESQLAstItem,
-  ESQLColumn,
-  ESQLCommandOption,
-  ESQLFunction,
   ESQLLiteral,
+  ESQLColumn,
+  ESQLFunction,
+  ESQLCommandOption,
+  ESQLAstItem,
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {

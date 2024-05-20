@@ -8,10 +8,10 @@
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
+import { TestProviders } from '../../../../../../common/mock/test_providers';
 import type { EqlTabHeaderProps } from '.';
 import { EqlTabHeader } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../../common/types';
-import { TestProviders } from '../../../../../../common/mock/test_providers';
 
 describe('Eql Header', () => {
   const props = {

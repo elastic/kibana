@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
+import { EuiText } from '@elastic/eui';
 
 export const TotalDocuments = ({ totalHitCount }: { totalHitCount: number }) => {
   return (

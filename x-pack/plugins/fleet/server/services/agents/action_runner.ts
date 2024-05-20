@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 import { isResponseError } from '@kbn/es-errors';
 
 import moment from 'moment';
 
+import type { Agent } from '../../types';
 import { appContextService } from '..';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
-import type { Agent } from '../../types';
 
 import { getAgentActions } from './actions';
-import type { BulkActionsResolver } from './bulk_actions_resolver';
 import { closePointInTime, getAgentsByKuery } from './crud';
+import type { BulkActionsResolver } from './bulk_actions_resolver';
 import type { RetryParams } from './retry_helper';
-import { MAX_RETRY_COUNT, getRetryParams } from './retry_helper';
+import { getRetryParams, MAX_RETRY_COUNT } from './retry_helper';
 
 export interface ActionParams {
   kuery: string;

@@ -8,9 +8,9 @@
 
 import { FilesRouter } from './types';
 
-import * as bulkDelete from './bulk_delete';
 import * as find from './find';
 import * as metrics from './metrics';
+import * as bulkDelete from './bulk_delete';
 import * as publicDownload from './public_facing/download';
 
 export { registerFileKindRoutes } from './file_kind';

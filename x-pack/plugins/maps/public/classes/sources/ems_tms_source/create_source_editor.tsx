@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React, { Component } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { EmsTmsSourceConfig, TileServiceSelect } from './tile_service_select';
 
 interface Props {

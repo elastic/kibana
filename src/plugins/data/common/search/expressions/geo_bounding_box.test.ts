@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { geoBoundingBoxFunction } from './geo_bounding_box';
 import { functionWrapper } from './utils';
+import { geoBoundingBoxFunction } from './geo_bounding_box';
 
 describe('interpreter/functions#geoBoundingBox', () => {
   const fn = functionWrapper(geoBoundingBoxFunction);

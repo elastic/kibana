@@ -8,17 +8,17 @@
 
 import { firstValueFrom, of } from 'rxjs';
 import { first, skip, toArray } from 'rxjs';
-import { Observable } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
+import { loader, ExpressionLoader } from './loader';
+import { Observable } from 'rxjs';
 import {
-  AnyExpressionFunctionDefinition,
-  ExecutionContract,
-  ExpressionsService,
+  parseExpression,
   IInterpreterRenderHandlers,
   RenderMode,
-  parseExpression,
+  AnyExpressionFunctionDefinition,
+  ExpressionsService,
+  ExecutionContract,
 } from '../common';
-import { ExpressionLoader, loader } from './loader';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,import/no-commonjs
 const { __getLastExecution, __getLastRenderMode } = require('./services');

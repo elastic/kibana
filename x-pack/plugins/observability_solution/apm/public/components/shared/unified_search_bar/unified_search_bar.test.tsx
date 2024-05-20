@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { mount } from 'enzyme';
-import { MemoryHistory, createMemoryHistory } from 'history';
+import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { UnifiedSearchBar } from '.';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { UrlParams } from '../../../context/url_params_context/types';
+import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useApmDataViewHook from '../../../hooks/use_adhoc_apm_data_view';
 import * as useApmParamsHook from '../../../hooks/use_apm_params';
-import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useProcessorEventHook from '../../../hooks/use_processor_event';
 import { fromQuery } from '../links/url_helpers';
+import { CoreStart } from '@kbn/core/public';
+import { UnifiedSearchBar } from '.';
+import { UrlParams } from '../../../context/url_params_context/types';
+import { mount } from 'enzyme';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

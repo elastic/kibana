@@ -8,9 +8,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { estypes } from '@elastic/elasticsearch';
-import { IFieldSubType } from '@kbn/es-query';
 import { SerializableRecord } from '@kbn/utility-types';
+import { IFieldSubType } from '@kbn/es-query';
+import { estypes } from '@elastic/elasticsearch';
 import { RuntimePrimitiveTypes, RuntimeType } from '../../common/types';
 
 // types for REST responses. separate but similar to other types to draw attention to REST api return changes
@@ -53,7 +53,7 @@ export type FieldFormatParamsRestRespons<P = {}> = SerializableRecord & P;
 
 export type SerializedFieldFormatRestResponse<
   P = {},
-  TParams extends FieldFormatParamsRestRespons<P> = FieldFormatParamsRestRespons<P>,
+  TParams extends FieldFormatParamsRestRespons<P> = FieldFormatParamsRestRespons<P>
 > = {
   id?: string;
   params?: TParams;

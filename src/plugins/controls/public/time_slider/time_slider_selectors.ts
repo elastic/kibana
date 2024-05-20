@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { TimeSliderReduxState } from './types';
 import {
   FROM_INDEX,
   TO_INDEX,
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
 } from './time_utils';
-import type { TimeSliderReduxState } from './types';
 
 export function getRoundedTimeRangeBounds(state: TimeSliderReduxState): [number, number] {
   const stepSize = state.componentState.stepSize;

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
-import React from 'react';
 import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
 import { strings } from '../i18n';
 

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type {
-  InternalUserSettingsServiceSetup,
-  UserSettingsService,
-} from '@kbn/core-user-settings-server-internal';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  UserSettingsService,
+  InternalUserSettingsServiceSetup,
+} from '@kbn/core-user-settings-server-internal';
 
 const createSetupContractMock = (): jest.Mocked<InternalUserSettingsServiceSetup> => {
   return {

@@ -56,7 +56,9 @@
             "tags": [],
             "label": "setup",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -139,7 +141,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
             "deprecated": false,
             "trackAdoption": false,

@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { Observable, Subject } from 'rxjs';
-import { bufferCount, map, skip, take, tap } from 'rxjs';
-import sinon from 'sinon';
-import stats from 'stats-lite';
 import { v4 as uuidv4 } from 'uuid';
+import { Subject, Observable } from 'rxjs';
+import stats from 'stats-lite';
+import sinon from 'sinon';
+import { take, tap, bufferCount, skip, map } from 'rxjs';
 import { mockLogger } from '../test_utils';
 
-import { configSchema } from '../config';
-import { FillPoolResult } from '../lib/fill_pool';
-import { asOk } from '../lib/result_type';
-import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import {
-  TaskPersistence,
-  TaskTiming,
-  asTaskClaimEvent,
-  asTaskManagerStatEvent,
-  asTaskPollingCycleEvent,
   asTaskRunEvent,
+  asTaskPollingCycleEvent,
+  TaskTiming,
+  asTaskManagerStatEvent,
+  TaskPersistence,
+  asTaskClaimEvent,
 } from '../task_events';
+import { asOk } from '../lib/result_type';
+import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
 import {
-  SummarizedTaskRunStat,
-  TaskRunStat,
   createTaskRunAggregator,
   summarizeTaskRunStat,
+  TaskRunStat,
+  SummarizedTaskRunStat,
 } from './task_run_statistics';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import { FillPoolResult } from '../lib/fill_pool';
+import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
+import { configSchema } from '../config';
 
 describe('Task Run Statistics', () => {
   let fakeTimer: sinon.SinonFakeTimers;
@@ -486,9 +486,8 @@ describe('Task Run Statistics', () => {
              * At any given time we only keep track of the last X Polling Results
              * In the tests this is ocnfiugured to a window size of 5
              */
-            expect(
-              taskStats.map((taskStat) => taskStat.value.execution.persistence)
-            ).toMatchInlineSnapshot(`
+            expect(taskStats.map((taskStat) => taskStat.value.execution.persistence))
+              .toMatchInlineSnapshot(`
               Array [
                 Object {
                   "ephemeral": 0,
@@ -628,9 +627,8 @@ describe('Task Run Statistics', () => {
              * At any given time we only keep track of the last X Polling Results
              * In the tests this is ocnfiugured to a window size of 5
              */
-            expect(
-              taskStats.map((taskStat) => taskStat.value.polling.persistence)
-            ).toMatchInlineSnapshot(`
+            expect(taskStats.map((taskStat) => taskStat.value.polling.persistence))
+              .toMatchInlineSnapshot(`
               Array [
                 Object {
                   "non_recurring": 0,

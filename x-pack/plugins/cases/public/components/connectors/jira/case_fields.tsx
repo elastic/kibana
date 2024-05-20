@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { map } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { map } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 import { isEmpty } from 'lodash';
 import type { JiraFieldsType } from '../../../../common/types/domain';
+import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
-import { SearchIssues } from './search_issues';
-import * as i18n from './translations';
-import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { useGetIssueTypes } from './use_get_issue_types';
+import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import { SearchIssues } from './search_issues';
 
 const { emptyField } = fieldValidators;
 

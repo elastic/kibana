@@ -7,24 +7,24 @@
  */
 
 import './visualize_editor.scss';
-import { EventEmitter } from 'events';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { EventEmitter } from 'events';
 
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
-import type { VisualizeInput } from '../..';
-import { VisualizeConstants } from '../../../common/constants';
-import { VisualizeAppProps } from '../app';
-import { VisualizeServices } from '../types';
 import {
   useChromeVisibility,
-  useDataViewUpdates,
-  useEditorUpdates,
-  useLinkedSearchUpdates,
   useSavedVisInstance,
   useVisualizeAppState,
+  useEditorUpdates,
+  useLinkedSearchUpdates,
+  useDataViewUpdates,
 } from '../utils';
+import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
+import { VisualizeAppProps } from '../app';
+import { VisualizeConstants } from '../../../common/constants';
+import type { VisualizeInput } from '../..';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { size } from 'lodash';
 import { tint } from 'polished';
 import React from 'react';
@@ -14,6 +13,7 @@ import javascript from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascr
 import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
 import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
 SyntaxHighlighter.registerLanguage('javascript', javascript);

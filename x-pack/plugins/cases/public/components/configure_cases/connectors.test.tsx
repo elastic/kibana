@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import React from 'react';
+import { render, screen } from '@testing-library/react';
 
-import { ConnectorTypes } from '../../../common/types/domain';
-import {
-  type AppMockRenderer,
-  TestProviders,
-  createAppMockRenderer,
-  noConnectorsCasePermission,
-} from '../../common/mock';
-import { actionTypes, connectors } from './__mock__';
 import type { Props } from './connectors';
 import { Connectors } from './connectors';
+import {
+  type AppMockRenderer,
+  noConnectorsCasePermission,
+  createAppMockRenderer,
+  TestProviders,
+} from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
+import { connectors, actionTypes } from './__mock__';
+import { ConnectorTypes } from '../../../common/types/domain';
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;

@@ -6,11 +6,11 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { kibanaStartMock } from '../utils/kibana_react.mock';
+import * as pluginContext from './use_plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '..';
 import { PluginContextValue } from '../context/plugin_context/plugin_context';
-import { kibanaStartMock } from '../utils/kibana_react.mock';
 import { AlertData, useFetchAlertDetail } from './use_fetch_alert_detail';
-import * as pluginContext from './use_plugin_context';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -55,7 +55,7 @@ describe('useFetchAlertDetail', () => {
       () =>
         ({
           observabilityRuleTypeRegistry: ruleType,
-        }) as unknown as PluginContextValue
+        } as unknown as PluginContextValue)
     );
   });
 

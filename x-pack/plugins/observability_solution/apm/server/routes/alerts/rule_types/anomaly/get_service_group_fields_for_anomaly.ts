@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_TYPE,
+  TRANSACTION_DURATION,
 } from '../../../../../common/es_fields/apm';
 import { alertingEsClient } from '../../alerting_es_client';
 import {

@@ -11,7 +11,7 @@ import type { FailedTransactionsCorrelation } from '../../../../common/correlati
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getEventType, splitAllSettledPromises } from '../utils';
+import { splitAllSettledPromises, getEventType } from '../utils';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';
 

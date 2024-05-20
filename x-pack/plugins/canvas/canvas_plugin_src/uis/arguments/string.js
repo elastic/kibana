@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { useState, useEffect, useCallback } from 'react';
-import { withDebounceArg } from '../../../public/components/with_debounce_arg';
+import PropTypes from 'prop-types';
+import { EuiFlexItem, EuiFlexGroup, EuiFieldText, EuiButton } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { withDebounceArg } from '../../../public/components/with_debounce_arg';
 
 import { ArgumentStrings } from '../../../i18n';
 
@@ -37,7 +37,7 @@ const StringArgInput = ({ argValue, typeInstance, onValueChange, argId }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
-        <EuiFieldText compressed={true} id={argId} value={value} onChange={onChange} />
+        <EuiFieldText compressed id={argId} value={value} onChange={onChange} />
       </EuiFlexItem>
       {confirm && (
         <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">

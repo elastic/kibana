@@ -1,4 +1,3 @@
-import { mount } from 'enzyme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,15 +6,16 @@ import { mount } from 'enzyme';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { mount } from 'enzyme';
 
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitFor } from '@testing-library/react';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
   goToDashboard: jest.fn(),

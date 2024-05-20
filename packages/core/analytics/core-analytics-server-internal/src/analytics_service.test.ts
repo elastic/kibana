@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom, Observable } from 'rxjs';
 import { createTestEnv, createTestPackageInfo } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { Observable, firstValueFrom } from 'rxjs';
-import { AnalyticsService } from './analytics_service';
 import { analyticsClientMock } from './analytics_service.test.mocks';
+import { AnalyticsService } from './analytics_service';
 
 const packageInfo = createTestPackageInfo();
 

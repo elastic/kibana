@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
@@ -16,8 +16,8 @@ import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { IndexNameLogic } from '../../components/search_index/index_name_logic';
 
 import {
-  FetchIndexApiLogic,
   FetchIndexApiParams,
+  FetchIndexApiLogic,
   FetchIndexApiResponse,
 } from './fetch_index_api_logic';
 

@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
+import { ExecutionHandler } from './execution_handler';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   actionsClientMock,
   actionsMock,
   renderActionParameterTemplatesDefault,
 } from '@kbn/actions-plugin/server/mocks';
-import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { ConcreteTaskInstance, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import sinon from 'sinon';
-import { AlertInstanceContext, AlertInstanceState, RuleNotifyWhen } from '../../common';
-import { Alert } from '../alert';
-import { alertsClientMock } from '../alerts_client/alerts_client.mock';
-import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { InjectActionParamsOpts, injectActionParams } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
-  GetViewInAppRelativeUrlFnOpts,
+  ThrottledActions,
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
-  ThrottledActions,
+  GetViewInAppRelativeUrlFnOpts,
 } from '../types';
-import { ExecutionHandler } from './execution_handler';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
+import { ConcreteTaskInstance, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { Alert } from '../alert';
+import { AlertInstanceState, AlertInstanceContext, RuleNotifyWhen } from '../../common';
+import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
+import sinon from 'sinon';
 import { mockAAD } from './fixtures';
-import { InjectActionParamsOpts, injectActionParams } from './inject_action_params';
+import { schema } from '@kbn/config-schema';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
+import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { TaskRunnerContext } from './types';
 
 jest.mock('./inject_action_params', () => ({

@@ -46,8 +46,12 @@
             "type": "Object",
             "tags": [],
             "label": "#buttonGroup",
-            "description": ["\nReturns button group or throws"],
-            "signature": ["HTMLElement"],
+            "description": [
+              "\nReturns button group or throws"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -59,7 +63,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -71,7 +77,9 @@
                 "tags": [],
                 "label": "testId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -86,7 +94,9 @@
             "type": "string",
             "tags": [],
             "label": "testId",
-            "description": ["\nReturns `data-test-subj` of button group"],
+            "description": [
+              "\nReturns `data-test-subj` of button group"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -97,8 +107,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "self",
-            "description": ["\nReturns button group if found, otherwise `null`"],
-            "signature": ["HTMLElement | null"],
+            "description": [
+              "\nReturns button group if found, otherwise `null`"
+            ],
+            "signature": [
+              "HTMLElement | null"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -109,8 +123,12 @@
             "type": "Array",
             "tags": [],
             "label": "options",
-            "description": ["\nReturns all options of button groups"],
-            "signature": ["HTMLElement[]"],
+            "description": [
+              "\nReturns all options of button groups"
+            ],
+            "signature": [
+              "HTMLElement[]"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -121,8 +139,12 @@
             "type": "Object",
             "tags": [],
             "label": "selected",
-            "description": ["\nReturns selected value of button group"],
-            "signature": ["HTMLElement"],
+            "description": [
+              "\nReturns selected value of button group"
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -133,8 +155,12 @@
             "type": "Function",
             "tags": [],
             "label": "select",
-            "description": ["\nSelect option from group"],
-            "signature": ["(optionName: string | RegExp) => void"],
+            "description": [
+              "\nSelect option from group"
+            ],
+            "signature": [
+              "(optionName: string | RegExp) => void"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -146,7 +172,9 @@
                 "tags": [],
                 "label": "optionName",
                 "description": [],
-                "signature": ["string | RegExp"],
+                "signature": [
+                  "string | RegExp"
+                ],
                 "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -191,7 +219,9 @@
             "description": [
               "\nThis method returns the currently selected range as a pair of strings"
             ],
-            "signature": ["{ from: string | null; to: string | null; }"],
+            "signature": [
+              "{ from: string | null; to: string | null; }"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -205,7 +235,9 @@
             "description": [
               "\nThis method runs an assertion against the currently selected range using\nUNIX timestamps.\n\nNOTE: it does not (yet) support commonly-used (textual) ranges like \"Last 15 minutes\""
             ],
-            "signature": ["(range: { from: number; to: number; }, expect: jest.Expect) => void"],
+            "signature": [
+              "(range: { from: number; to: number; }, expect: jest.Expect) => void"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -252,7 +284,9 @@
                 "tags": [],
                 "label": "expect",
                 "description": [],
-                "signature": ["jest.Expect"],
+                "signature": [
+                  "jest.Expect"
+                ],
                 "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -267,8 +301,12 @@
             "type": "Function",
             "tags": [],
             "label": "togglePopover",
-            "description": ["\nOpens the popover for the date picker"],
-            "signature": ["() => void"],
+            "description": [
+              "\nOpens the popover for the date picker"
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -284,7 +322,9 @@
             "description": [
               "\nSelects a commonly-used range from the date picker (opens the popover if it's not already open)"
             ],
-            "signature": ["(label: string) => Promise<void>"],
+            "signature": [
+              "(label: string) => Promise<void>"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -296,7 +336,9 @@
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -311,8 +353,12 @@
             "type": "Function",
             "tags": [],
             "label": "refresh",
-            "description": ["\nActivates the refresh button"],
-            "signature": ["() => void"],
+            "description": [
+              "\nActivates the refresh button"
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -331,7 +377,9 @@
         "tags": [],
         "label": "getSelectedButtonInGroup",
         "description": [],
-        "signature": ["(testId: string) => () => HTMLElement"],
+        "signature": [
+          "(testId: string) => () => HTMLElement"
+        ],
         "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -343,7 +391,9 @@
             "tags": [],
             "label": "testId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-test-eui-helpers/src/rtl_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,

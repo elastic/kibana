@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClientInitContext } from '@kbn/analytics-client';
-import type { Event, IShipper } from '@kbn/core/server';
 import { Subject } from 'rxjs';
+import type { AnalyticsClientInitContext } from '@kbn/analytics-client';
+import type { IShipper, Event } from '@kbn/core/server';
 
 export class CustomShipper implements IShipper {
   public static shipperName = 'FTR-helpers-shipper';

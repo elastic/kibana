@@ -7,6 +7,7 @@
  */
 
 import {
+  htmlIdGenerator,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -15,7 +16,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiIconTip,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -25,13 +25,13 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiTextArea,
-  htmlIdGenerator,
+  EuiIconTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React from 'react';
 
 export interface OnSaveProps {
   newTitle: string;

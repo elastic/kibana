@@ -8,30 +8,30 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { RangeFilterParams } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import styled from 'styled-components';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { RangeFilterParams } from '@kbn/es-query';
+import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
   XYState,
 } from '@kbn/lens-plugin/public';
-import styled from 'styled-components';
-import { useKibana } from '../../lib/kibana';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { useKibana } from '../../lib/kibana';
+import { useLensAttributes } from './use_lens_attributes';
 import type { LensEmbeddableComponentProps } from './types';
 import { DEFAULT_ACTIONS, useActions } from './use_actions';
-import { useLensAttributes } from './use_lens_attributes';
 
+import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { ModalInspectQuery } from '../inspect/modal';
-import { useInspect } from '../inspect/use_inspect';
 import { VisualizationActions } from './actions';
 import { useEmbeddableInspect } from './use_embeddable_inspect';
 import { useVisualizationResponse } from './use_visualization_response';
+import { useInspect } from '../inspect/use_inspect';
 
 const HOVER_ACTIONS_PADDING = 24;
 const DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL'];

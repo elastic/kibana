@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SafeParseSuccess } from 'zod';
 import { AfterKeys } from '.';
+import type { SafeParseSuccess } from 'zod';
 
 describe('after_keys schema', () => {
   it('allows an empty object', () => {

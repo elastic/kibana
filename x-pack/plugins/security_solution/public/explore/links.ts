@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  EXPLORE_PATH,
   HOSTS_PATH,
   NETWORK_PATH,
+  USERS_PATH,
+  EXPLORE_PATH,
   SERVER_APP_ID,
   SecurityPageName,
-  USERS_PATH,
 } from '../../common/constants';
 import { EXPLORE, HOSTS, NETWORK, USERS } from '../app/translations';
-import hostsPageImg from '../common/images/hosts_page.png';
-import networkPageImg from '../common/images/network_page.png';
-import userPageImg from '../common/images/users_page.png';
 import type { LinkItem } from '../common/links/types';
+import hostsPageImg from '../common/images/hosts_page.png';
+import userPageImg from '../common/images/users_page.png';
+import networkPageImg from '../common/images/network_page.png';
 
 const networkLinks: LinkItem = {
   id: SecurityPageName.network,

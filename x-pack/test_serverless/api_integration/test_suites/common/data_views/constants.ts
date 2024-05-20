@@ -6,10 +6,10 @@
  */
 
 import {
-  DATA_VIEW_PATH,
   DATA_VIEW_PATH_LEGACY,
-  SERVICE_KEY,
   SERVICE_KEY_LEGACY,
+  DATA_VIEW_PATH,
+  SERVICE_KEY,
   SERVICE_PATH,
   SERVICE_PATH_LEGACY,
 } from '@kbn/data-views-plugin/server';

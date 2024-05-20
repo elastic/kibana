@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumnActions } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { EuiDataGridColumnActions } from '@elastic/eui';
 import { keyBy } from 'lodash/fp';
 import React from 'react';
 
 import { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
-import { ColumnHeaderOptions } from '../../../common/types';
-import { defaultColumnHeaderType } from '../../../store/data_table/defaults';
 import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from '../constants';
+import { defaultColumnHeaderType } from '../../../store/data_table/defaults';
+import { ColumnHeaderOptions } from '../../../common/types';
 
 const defaultActions: EuiDataGridColumnActions = {
   showSortAsc: true,

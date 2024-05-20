@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import { SetupModeFeature } from '../../../common/enums';
-import { isSetupModeFeatureEnabled } from '../../lib/setup_mode';
+import { EuiBasicTable, EuiSpacer, EuiSearchBar, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getIdentifier } from '../setup_mode/formatting';
+import { isSetupModeFeatureEnabled } from '../../lib/setup_mode';
+import { SetupModeFeature } from '../../../common/enums';
 
 export function EuiMonitoringSSPTable({
   rows: items,

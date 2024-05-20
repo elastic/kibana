@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiToolTip, EuiToolTipProps } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiToolTip, EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
 import React, { Fragment, ReactElement } from 'react';
 
 export type TopNavMenuBadgeProps = EuiBadgeProps & {

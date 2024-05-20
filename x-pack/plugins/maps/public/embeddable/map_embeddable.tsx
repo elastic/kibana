@@ -5,31 +5,12 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
-import type { PaletteRegistry } from '@kbn/coloring';
-import type { KibanaExecutionContext } from '@kbn/core/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import {
-  Embeddable,
-  FilterableEmbeddable,
-  IContainer,
-  ReferenceOrValueEmbeddable,
-  VALUE_CLICK_TRIGGER,
-  genericEmbeddableInputIsEqual,
-  omitGenericEmbeddableInput,
-  shouldFetch$,
-} from '@kbn/embeddable-plugin/public';
-import { type Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
-import fastIsEqual from 'fast-deep-equal';
 import _ from 'lodash';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { Unsubscribe } from 'redux';
+import fastIsEqual from 'fast-deep-equal';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import {
   debounceTime,
@@ -39,32 +20,69 @@ import {
   skip,
   startWith,
 } from 'rxjs';
+import { Unsubscribe } from 'redux';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { Query, type Filter } from '@kbn/es-query';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
-  APP_ID,
-  MAP_EMBEDDABLE_NAME,
-  MAP_SAVED_OBJECT_TYPE,
-  RENDER_TIMEOUT,
-  RawValue,
-  getEditPath,
-  getFullPath,
-} from '../../common/constants';
-import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
+  Embeddable,
+  IContainer,
+  ReferenceOrValueEmbeddable,
+  genericEmbeddableInputIsEqual,
+  VALUE_CLICK_TRIGGER,
+  omitGenericEmbeddableInput,
+  FilterableEmbeddable,
+  shouldFetch$,
+} from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
-import { extractReferences } from '../../common/migrations/references';
 import {
   replaceLayerList,
-  setEmbeddableSearchContext,
-  setExecutionContext,
-  setGotoWithCenter,
   setMapSettings,
   setQuery,
   setReadOnly,
   updateLayerById,
+  setGotoWithCenter,
+  setEmbeddableSearchContext,
+  setExecutionContext,
 } from '../actions';
+import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
+import {
+  getInspectorAdapters,
+  setChartsPaletteServiceGetColor,
+  setEventHandlers,
+  setOnMapMove,
+  EventHandlers,
+} from '../reducers/non_serializable_instances';
+import {
+  isMapLoading,
+  getGeoFieldNames,
+  getEmbeddableSearchContext,
+  getLayerList,
+  getGoto,
+  getMapCenter,
+  getMapBuffer,
+  getMapExtent,
+  getMapReady,
+  getMapSettings,
+  getMapZoom,
+  getHiddenLayerIds,
+  getQueryableUniqueIndexPatternIds,
+} from '../selectors/map_selectors';
+import {
+  APP_ID,
+  getEditPath,
+  getFullPath,
+  MAP_EMBEDDABLE_NAME,
+  MAP_SAVED_OBJECT_TYPE,
+  RawValue,
+  RENDER_TIMEOUT,
+} from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
-import { MapContainer } from '../connected_components/map_container';
-import { checkForDuplicateTitle, getMapClient } from '../content_management';
-import { getIndexPatternsFromIds } from '../index_pattern_util';
 import {
   getAnalytics,
   getCharts,
@@ -77,39 +95,21 @@ import {
   getTheme,
   getUiActions,
 } from '../kibana_services';
-import { getMapAttributeService } from '../map_attribute_service';
-import {
-  EventHandlers,
-  getInspectorAdapters,
-  setChartsPaletteServiceGetColor,
-  setEventHandlers,
-  setOnMapMove,
-} from '../reducers/non_serializable_instances';
+import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
+import { extractReferences } from '../../common/migrations/references';
+import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
-import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
-import {
-  getEmbeddableSearchContext,
-  getGeoFieldNames,
-  getGoto,
-  getHiddenLayerIds,
-  getLayerList,
-  getMapBuffer,
-  getMapCenter,
-  getMapExtent,
-  getMapReady,
-  getMapSettings,
-  getMapZoom,
-  getQueryableUniqueIndexPatternIds,
-  isMapLoading,
-} from '../selectors/map_selectors';
-import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
+import { getIndexPatternsFromIds } from '../index_pattern_util';
+import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
-import { getGeoFieldsLabel } from './get_geo_fields_label';
+import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
+import { getGeoFieldsLabel } from './get_geo_fields_label';
+import { checkForDuplicateTitle, getMapClient } from '../content_management';
 
 import {
-  MapByReferenceInput,
   MapByValueInput,
+  MapByReferenceInput,
   MapEmbeddableConfig,
   MapEmbeddableInput,
   MapEmbeddableOutput,

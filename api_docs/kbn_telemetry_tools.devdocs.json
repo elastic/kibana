@@ -57,7 +57,9 @@
                 "tags": [],
                 "label": "root",
                 "description": [],
-                "signature": ["TelemetrySchemaObject"],
+                "signature": [
+                  "TelemetrySchemaObject"
+                ],
                 "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -69,7 +71,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["TelemetrySchemaObject"],
+                "signature": [
+                  "TelemetrySchemaObject"
+                ],
                 "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -82,8 +86,12 @@
             "type": "Unknown",
             "tags": [],
             "label": "stats",
-            "description": ["The full output of the telemetry plugin"],
-            "signature": ["unknown"],
+            "description": [
+              "The full output of the telemetry plugin"
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "packages/kbn-telemetry-tools/src/schema_ftr_validations/schema_to_config_schema.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -100,7 +108,9 @@
         "tags": [],
         "label": "runTelemetryCheck",
         "description": [],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/kbn-telemetry-tools/src/cli/run_telemetry_check.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -115,7 +125,9 @@
         "tags": [],
         "label": "runTelemetryExtract",
         "description": [],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/kbn-telemetry-tools/src/cli/run_telemetry_extract.ts",
         "deprecated": false,
         "trackAdoption": false,

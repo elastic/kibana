@@ -1,6 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,15 +5,18 @@ import { find } from 'lodash';
  * 2.0.
  */
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
+import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaTemplate } from './kibana_template';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { ComponentProps } from '../../route_init';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
-import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { useCharts } from '../../hooks/use_charts';
-import { ComponentProps } from '../../route_init';
-import { KibanaTemplate } from './kibana_template';
 
 const KibanaOverview = ({ data }: { data: any }) => {
   const { zoomInfo, onBrush } = useCharts();

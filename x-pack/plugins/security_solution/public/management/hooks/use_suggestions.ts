@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public/autocomplete';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
-import { useMemo } from 'react';
 
 /**
  * Hook to get a memoized suggestions interface

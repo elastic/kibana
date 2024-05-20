@@ -7,23 +7,23 @@
 
 import {
   EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormControlLayout,
   EuiFormRow,
   EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
 import { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
-import { RRuleFrequency } from '../../../../../../types';
 import { NumberField } from '../helpers/number_field';
+import { RRuleFrequency } from '../../../../../../types';
 import { I18N_WEEKDAY_OPTIONS } from './constants';
 import {
-  CustomFrequencyState,
   buildCustomRecurrenceSchedulerState,
+  CustomFrequencyState,
   getInitialByweekday,
   getWeekdayInfo,
 } from './helpers';

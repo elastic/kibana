@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,9 +17,8 @@ import {
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { isEmpty } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
-import { Conversation } from '../../..';
 import { AIConnector } from '../../connectorland/connector_selector';
+import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConversationSelector } from '../conversations/conversation_selector';
 import { AssistantSettingsButton } from '../settings/assistant_settings_button';

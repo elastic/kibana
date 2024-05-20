@@ -98,7 +98,9 @@
             "type": "Object",
             "tags": [],
             "label": "props",
-            "description": ["- the props to pass to the {@link FieldCategory } component."],
+            "description": [
+              "- the props to pass to the {@link FieldCategory } component."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-components-field-category",
@@ -149,7 +151,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P & { children?: React.ReactNode; }"],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -161,7 +165,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -225,7 +231,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ClearQueryLinkProps",
-        "description": ["\nProps for the {@link ClearQueryLink} component."],
+        "description": [
+          "\nProps for the {@link ClearQueryLink} component."
+        ],
         "path": "packages/kbn-management/settings/components/field_category/clear_query_link.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -236,7 +244,9 @@
             "type": "number",
             "tags": [],
             "label": "fieldCount",
-            "description": ["The total number of fields in the category."],
+            "description": [
+              "The total number of fields in the category."
+            ],
             "path": "packages/kbn-management/settings/components/field_category/clear_query_link.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -247,7 +257,9 @@
             "type": "number",
             "tags": [],
             "label": "displayCount",
-            "description": ["The number of fields currently being displayed."],
+            "description": [
+              "The number of fields currently being displayed."
+            ],
             "path": "packages/kbn-management/settings/components/field_category/clear_query_link.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -258,8 +270,12 @@
             "type": "Function",
             "tags": [],
             "label": "onClearQuery",
-            "description": ["Handler to invoke when clearing the current filtering query."],
-            "signature": ["() => void"],
+            "description": [
+              "Handler to invoke when clearing the current filtering query."
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-management/settings/components/field_category/clear_query_link.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -275,7 +291,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldCategoriesProps",
-        "description": ["\nProps for the {@link FieldCategories} component."],
+        "description": [
+          "\nProps for the {@link FieldCategories} component."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-category",
@@ -312,7 +330,9 @@
             "type": "Object",
             "tags": [],
             "label": "categorizedFields",
-            "description": ["Categorized fields for display."],
+            "description": [
+              "Categorized fields for display."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
@@ -352,7 +372,9 @@
             "type": "Object",
             "tags": [],
             "label": "unsavedChanges",
-            "description": ["And unsaved changes currently managed by the parent component."],
+            "description": [
+              "And unsaved changes currently managed by the parent component."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
@@ -376,7 +398,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldCategoryProps",
-        "description": ["\nProps for a {@link FieldCategory} component."],
+        "description": [
+          "\nProps for a {@link FieldCategory} component."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-category",
@@ -405,7 +429,9 @@
             "type": "string",
             "tags": [],
             "label": "category",
-            "description": ["The name of the category."],
+            "description": [
+              "The name of the category."
+            ],
             "path": "packages/kbn-management/settings/components/field_category/category.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -416,7 +442,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "children",
-            "description": ["Children-- should be {@link FieldRow} components."],
+            "description": [
+              "Children-- should be {@link FieldRow} components."
+            ],
             "signature": [
               "React.ReactElement<",
               {
@@ -449,7 +477,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldCategoryProviderProps",
-        "description": ["\nProps for {@link FieldCategoryProvider}."],
+        "description": [
+          "\nProps for {@link FieldCategoryProvider}."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-category",

@@ -14,10 +14,10 @@ import type {
   IManagementSectionsPluginsStart,
 } from '..';
 import { APP } from '..';
-import { SearchSessionsConfigSchema } from '../../../../../config';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { renderApp } from './render';
+import { SearchSessionsConfigSchema } from '../../../../../config';
 
 export class SearchSessionsMgmtApp {
   constructor(

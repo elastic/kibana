@@ -17,20 +17,20 @@ import {
 } from '../../../../../screens/alerts';
 
 import {
-  closeAlerts,
-  closeFirstAlert,
-  goToAcknowledgedAlerts,
-  goToClosedAlerts,
-  goToOpenedAlerts,
-  markAcknowledgedFirstAlert,
-  markAlertsAcknowledged,
-  openAlerts,
-  openFirstAlert,
   selectNumberOfAlerts,
   waitForAlerts,
+  markAcknowledgedFirstAlert,
+  markAlertsAcknowledged,
+  goToAcknowledgedAlerts,
+  closeFirstAlert,
+  closeAlerts,
+  goToClosedAlerts,
+  goToOpenedAlerts,
+  openAlerts,
+  openFirstAlert,
 } from '../../../../../tasks/alerts';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { createRule } from '../../../../../tasks/api_calls/rules';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PositiveInteger, PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { PositiveInteger, PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 
 // Attributes specific to Threshold rules
 

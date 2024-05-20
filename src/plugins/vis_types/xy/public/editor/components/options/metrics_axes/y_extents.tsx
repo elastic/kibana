@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useCallback } from 'react';
 
 import { NumberInputOption } from '@kbn/vis-default-editor-plugin/public';
 

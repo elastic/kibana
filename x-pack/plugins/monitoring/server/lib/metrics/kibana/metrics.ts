@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LARGE_BYTES, LARGE_FLOAT, SMALL_FLOAT } from '../../../../common/formatting';
 import {
-  KibanaClusterActionMetric,
-  KibanaClusterRuleMetric,
   KibanaEventsRateClusterMetric,
-  KibanaInstanceActionMetric,
-  KibanaInstanceRuleMetric,
   KibanaMetric,
+  KibanaClusterRuleMetric,
+  KibanaInstanceRuleMetric,
+  KibanaInstanceActionMetric,
+  KibanaClusterActionMetric,
 } from './classes';
+import { LARGE_FLOAT, SMALL_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 
 const clientResponseTimeTitle = i18n.translate(
   'xpack.monitoring.metrics.kibana.clientResponseTimeTitle',

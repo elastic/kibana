@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
 import { of } from 'rxjs';
-import { contextMock } from './services/context.mock';
-import { searchServiceMock } from './services/search_service.mock';
+import { coreMock } from '@kbn/core/server/mocks';
 import {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
-  GlobalSearchRequestHandlerContext,
   RouteHandlerGlobalSearchContext,
+  GlobalSearchRequestHandlerContext,
 } from './types';
+import { searchServiceMock } from './services/search_service.mock';
+import { contextMock } from './services/context.mock';
 
 const createSetupMock = (): jest.Mocked<GlobalSearchPluginSetup> => {
   const searchMock = searchServiceMock.createSetupContract();

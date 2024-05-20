@@ -8,25 +8,25 @@
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
-  createMockConfig,
-  requestContextMock,
   serverMock,
+  requestContextMock,
+  createMockConfig,
 } from '../../../../detection_engine/routes/__mocks__';
 
 import {
-  mockGetCurrentUser,
-  mockGetTemplateTimelineValue,
-  mockGetTimelineValue,
-} from '../../../__mocks__/import_timelines';
-import {
   getUpdateTimelinesRequest,
   inputTimeline,
-  updateTemplateTimelineWithTimelineId,
   updateTimelineWithTimelineId,
+  updateTemplateTimelineWithTimelineId,
 } from '../../../__mocks__/request_responses';
 import {
-  UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
+  mockGetCurrentUser,
+  mockGetTimelineValue,
+  mockGetTemplateTimelineValue,
+} from '../../../__mocks__/import_timelines';
+import {
   UPDATE_TIMELINE_ERROR_MESSAGE,
+  UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
 } from '../../../utils/failure_cases';
 
 describe('update timelines', () => {

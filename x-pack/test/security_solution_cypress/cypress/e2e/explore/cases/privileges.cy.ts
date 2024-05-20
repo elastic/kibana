@@ -23,13 +23,13 @@ import {
   createUsersAndRoles,
   deleteUsersAndRoles,
   secAll,
+  secAllUser,
+  secReadCasesAllUser,
+  secReadCasesAll,
   secAllCasesNoDelete,
   secAllCasesNoDeleteUser,
-  secAllCasesOnlyReadDelete,
   secAllCasesOnlyReadDeleteUser,
-  secAllUser,
-  secReadCasesAll,
-  secReadCasesAllUser,
+  secAllCasesOnlyReadDelete,
 } from '../../../tasks/privileges';
 
 import { CASES_URL } from '../../../urls/navigation';

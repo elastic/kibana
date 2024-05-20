@@ -6,10 +6,10 @@
  */
 
 import {
-  FLEET_INSTALL_FORMAT_VERSION,
   PACKAGES_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
+  FLEET_INSTALL_FORMAT_VERSION,
 } from '../../../../../constants';
 import type { Installation } from '../../../../../types';
 

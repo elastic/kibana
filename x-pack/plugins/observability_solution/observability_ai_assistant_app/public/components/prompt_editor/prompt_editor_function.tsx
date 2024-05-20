@@ -1,10 +1,3 @@
-import { EuiCode, EuiPanel } from '@elastic/eui';
-import { css } from '@emotion/css';
-import { CodeEditor } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
-import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,6 +6,13 @@ import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import { css } from '@emotion/css';
+import { CodeEditor } from '@kbn/code-editor';
+import { monaco } from '@kbn/monaco';
+import { i18n } from '@kbn/i18n';
+import { EuiCode, EuiPanel } from '@elastic/eui';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 
 export interface Props {

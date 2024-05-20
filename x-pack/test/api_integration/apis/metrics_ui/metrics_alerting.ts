@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
 import { Comparator, MetricExpressionParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { getElasticsearchMetricQuery } from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/metric_query';
-import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
       comparator: Comparator.GT_OR_EQ,
       timeSize: 5,
       ...(aggType !== 'count' ? { metric: 'test.metric' } : {}),
-    }) as MetricExpressionParams;
+    } as MetricExpressionParams);
   describe('Metrics Threshold Alerts', () => {
     before(async () => {
       await client.index({

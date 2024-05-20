@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 /* Need to change to the real URL */
 const GOOGLE_CLOUD_SHELL_EXTERNAL_DOC_URL = 'https://cloud.google.com/shell/docs';

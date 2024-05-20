@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { createHash } from 'crypto';
 import Fs from 'fs';
-import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
 import { pipeline } from 'stream/promises';
+import { createHash } from 'crypto';
+import { asyncMapWithLimit, asyncForEachWithLimit } from '@kbn/std';
 
 export class Hashes {
   static async hashFile(path: string) {

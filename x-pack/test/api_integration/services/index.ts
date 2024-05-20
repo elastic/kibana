@@ -15,16 +15,16 @@ import { SupertestWithoutAuthProvider } from './supertest_without_auth';
 
 import { UsageAPIProvider } from './usage_api';
 
-import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { AiopsProvider } from './aiops';
-import { DataViewApiProvider } from './data_view_api';
-import { IndexManagementProvider } from './index_management';
 import { InfraOpsSourceConfigurationProvider } from './infraops_source_configuration';
-import { IngestPipelinesProvider } from './ingest_pipelines';
 import { MachineLearningProvider } from './ml';
-import { SecuritySolutionApiProvider } from './security_solution_api.gen';
-import { SloApiProvider } from './slo';
+import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { TransformProvider } from './transform';
+import { IngestPipelinesProvider } from './ingest_pipelines';
+import { IndexManagementProvider } from './index_management';
+import { DataViewApiProvider } from './data_view_api';
+import { SloApiProvider } from './slo';
+import { SecuritySolutionApiProvider } from './security_solution_api.gen';
 
 export const services = {
   ...commonServices,

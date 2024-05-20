@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { CommonProps } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { PropsWithChildren } from 'react';
 import React, { memo, useMemo } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { ContextMenuWithRouterSupport } from '../../context_menu_with_router_support';
-import type { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support/context_menu_item_nav_by_router';
-import { TextValueDisplay } from './text_value_display';
 import {
   GLOBAL_EFFECT_SCOPE,
   POLICY_EFFECT_SCOPE,
   POLICY_EFFECT_SCOPE_TITLE,
 } from './translations';
+import { TextValueDisplay } from './text_value_display';
+import { ContextMenuWithRouterSupport } from '../../context_menu_with_router_support';
+import type { ContextMenuItemNavByRouterProps } from '../../context_menu_with_router_support/context_menu_item_nav_by_router';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 // FIXME:PT support being able to show per policy label for Artifacst that have >0 policies, but no menu
 //          the intent in this component was to also support to be able to display only text for artifacts

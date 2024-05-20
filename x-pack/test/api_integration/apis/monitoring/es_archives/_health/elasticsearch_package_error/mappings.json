@@ -14,7 +14,9 @@
         "allow_custom_routing": false,
         "hidden": false
       },
-      "index_patterns": ["metrics-elasticsearch.stack_monitoring.node_stats-*"],
+      "index_patterns": [
+        "metrics-elasticsearch.stack_monitoring.node_stats-*"
+      ],
       "name": "metrics-elasticsearch.stack_monitoring.node_stats",
       "priority": 200,
       "template": {

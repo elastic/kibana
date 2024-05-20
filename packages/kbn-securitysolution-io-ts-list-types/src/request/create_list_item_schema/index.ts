@@ -8,12 +8,12 @@
 
 import * as t from 'io-ts';
 
-import { id } from '../../common/id';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { list_id } from '../../common/list_id';
+import { value } from '../../common/value';
+import { id } from '../../common/id';
 import { meta } from '../../common/meta';
 import { refreshWithWaitFor } from '../../common/refresh';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import { value } from '../../common/value';
 
 export const createListItemSchema = t.intersection([
   t.exact(

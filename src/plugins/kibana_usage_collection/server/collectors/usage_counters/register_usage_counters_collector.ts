@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import {
   CollectorFetchContext,
-  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
   UsageCollectionSetup,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
   UsageCountersSavedObject,
   UsageCountersSavedObjectAttributes,
 } from '@kbn/usage-collection-plugin/server';
-import moment from 'moment';
 
 interface UsageCounterEvent {
   domainId: string;

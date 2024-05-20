@@ -7,7 +7,6 @@
  */
 
 import '../../storage/hashed_item_store/mock';
-import { CoreScopedHistory } from '@kbn/core/public';
 import {
   History,
   createBrowserHistory,
@@ -16,12 +15,13 @@ import {
   createPath,
 } from 'history';
 import {
-  IKbnUrlControls,
-  createKbnUrlControls,
   getRelativeToHistoryPath,
-  getStateFromKbnUrl,
+  createKbnUrlControls,
+  IKbnUrlControls,
   setStateToKbnUrl,
+  getStateFromKbnUrl,
 } from './kbn_url_storage';
+import { CoreScopedHistory } from '@kbn/core/public';
 
 describe('kbn_url_storage', () => {
   describe('getStateFromUrl & setStateToUrl', () => {

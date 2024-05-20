@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { Filter, Query } from '@kbn/es-query';
 import type {
   DatatableVisualizationState,
   FieldBasedIndexPatternColumn,
   FormBasedPersistedState,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { Filter, Query } from '@kbn/es-query';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
-import type { Status } from '../../../../common/api/detection_engine';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
+import type { Status } from '../../../../common/api/detection_engine';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
 export type GetLensAttributes = (

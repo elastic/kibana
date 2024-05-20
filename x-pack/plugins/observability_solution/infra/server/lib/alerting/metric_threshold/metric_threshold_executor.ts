@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-import {
-  ActionGroupIdsOf,
-  AlertInstanceContext as AlertContext,
-  AlertInstanceState as AlertState,
-  RecoveredActionGroup,
-} from '@kbn/alerting-plugin/common';
-import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { i18n } from '@kbn/i18n';
-import type { TimeUnitChar } from '@kbn/observability-plugin/common';
-import { getAlertUrl } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
@@ -23,11 +13,20 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { isEqual } from 'lodash';
+import {
+  ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  RecoveredActionGroup,
+} from '@kbn/alerting-plugin/common';
+import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common';
+import { getAlertUrl } from '@kbn/observability-plugin/common';
+import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
-import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { InfraBackendLibs } from '../../infra_types';
-import { getEvaluationValues, getThresholds } from '../common/get_values';
 import {
   buildFiredAlertReason,
   buildInvalidQueryAlertReason,
@@ -35,23 +34,24 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
-import { Group } from '../common/types';
 import {
-  AdditionalContext,
-  UNGROUPED_FACTORY_KEY,
   createScopedLogger,
-  flattenAdditionalContext,
+  AdditionalContext,
   getContextForRecoveredAlerts,
-  getFormattedGroupBy,
-  getGroupByObject,
   getMetricsViewInAppUrlWithSpaceId,
+  UNGROUPED_FACTORY_KEY,
   hasAdditionalContext,
   validGroupByForContext,
+  flattenAdditionalContext,
+  getGroupByObject,
+  getFormattedGroupBy,
 } from '../common/utils';
+import { getEvaluationValues, getThresholds } from '../common/get_values';
+import { Group } from '../common/types';
 
+import { EvaluatedRuleParams, evaluateRule, Evaluation } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
-import { EvaluatedRuleParams, Evaluation, evaluateRule } from './lib/evaluate_rule';
 
 export type MetricThresholdAlert = Omit<
   ObservabilityMetricsAlert,
@@ -286,10 +286,10 @@ export const createMetricThresholdExecutor =
       const nextState = isNoData
         ? AlertStates.NO_DATA
         : shouldAlertFire
-          ? AlertStates.ALERT
-          : shouldAlertWarn
-            ? AlertStates.WARNING
-            : AlertStates.OK;
+        ? AlertStates.ALERT
+        : shouldAlertWarn
+        ? AlertStates.WARNING
+        : AlertStates.OK;
 
       let reason;
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
@@ -336,10 +336,10 @@ export const createMetricThresholdExecutor =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
             : nextState === AlertStates.NO_DATA
-              ? NO_DATA_ACTIONS_ID
-              : nextState === AlertStates.WARNING
-                ? WARNING_ACTIONS_ID
-                : FIRED_ACTIONS_ID;
+            ? NO_DATA_ACTIONS_ID
+            : nextState === AlertStates.WARNING
+            ? WARNING_ACTIONS_ID
+            : FIRED_ACTIONS_ID;
 
         const additionalContext = hasAdditionalContext(params.groupBy, validGroupByForContext)
           ? alertResults && alertResults.length > 0
@@ -508,13 +508,10 @@ const mapToConditionsLookup = (
   list: any[],
   mapFn: (value: any, index: number, array: any[]) => unknown
 ) =>
-  list.map(mapFn).reduce(
-    (result: Record<string, any>, value, i) => {
-      result[`condition${i}`] = value;
-      return result;
-    },
-    {} as Record<string, unknown>
-  );
+  list.map(mapFn).reduce((result: Record<string, any>, value, i) => {
+    result[`condition${i}`] = value;
+    return result;
+  }, {} as Record<string, unknown>);
 
 const formatAlertResult = <AlertResult>(
   alertResult: {

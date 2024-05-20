@@ -6,11 +6,11 @@
  */
 
 import {
-  convertDurationToFrequency,
+  parseDuration,
   formatDuration,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
-  parseDuration,
+  convertDurationToFrequency,
 } from './parse_duration';
 
 test('parses seconds', () => {

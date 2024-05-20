@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import BedrockLogo from '../connector_types/bedrock/logo';
 import OpenAILogo from '../connector_types/openai/logo';
+import BedrockLogo from '../connector_types/bedrock/logo';
 
 export { OPENAI_CONNECTOR_ID, OpenAiProviderType } from '../../common/openai/constants';
 export { OpenAILogo };

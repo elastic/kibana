@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
+import { getThreatMappingMock } from '../../rule_types/indicator_match/threat_mapping/build_threat_mapping_filter.mock';
 import type {
   BaseRuleParams,
   CompleteRule,
@@ -18,10 +20,8 @@ import type {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '..';
-import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { sampleRuleGuid } from '../../rule_types/__mocks__/es_results';
-import { getThreatMappingMock } from '../../rule_types/indicator_match/threat_mapping/build_threat_mapping_filter.mock';
 
 export const getBaseRuleParams = (): BaseRuleParams => {
   return {

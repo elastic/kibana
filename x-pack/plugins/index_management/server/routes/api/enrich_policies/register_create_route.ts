@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
-import { addInternalBasePath } from '..';
-import { serializeAsESPolicy } from '../../../../common/lib';
-import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 import { RouteDependencies } from '../../../types';
-import { FieldCapsList, getCommonFields, getIndices, normalizeFieldsList } from './helpers';
+import { addInternalBasePath } from '..';
+import { enrichPoliciesActions } from '../../../lib/enrich_policies';
+import { serializeAsESPolicy } from '../../../../common/lib';
+import { normalizeFieldsList, getIndices, FieldCapsList, getCommonFields } from './helpers';
 
 const validationSchema = schema.object({
   policy: schema.object({

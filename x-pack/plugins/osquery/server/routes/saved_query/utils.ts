@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { find, filter, map, reduce } from 'lodash';
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
-import { filter, find, map, reduce } from 'lodash';
 
 import type { PackageClient } from '@kbn/fleet-plugin/server';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';

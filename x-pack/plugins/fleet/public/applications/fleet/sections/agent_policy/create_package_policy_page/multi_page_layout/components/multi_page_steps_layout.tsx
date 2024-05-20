@@ -8,12 +8,12 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 
+import { IntegrationBreadcrumb } from '../../components';
+import { pkgKeyFromPackageInfo } from '../../../../../services';
 import { Error } from '../../../../../components';
 import { WithHeaderLayout } from '../../../../../layouts';
-import { pkgKeyFromPackageInfo } from '../../../../../services';
-import { IntegrationBreadcrumb } from '../../components';
 
 import type { MultiPageStepLayoutProps } from '../types';
 

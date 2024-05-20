@@ -12,16 +12,16 @@ import { BulkCreateAttachmentsRequestRt } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
-import type { CasesClientArgs } from '..';
-import { createCaseError } from '../../common/error';
 import { CaseCommentModel } from '../../common/models';
+import { createCaseError } from '../../common/error';
+import type { CasesClientArgs } from '..';
 
+import { decodeCommentRequest } from '../utils';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
-import { validateMaxUserActions } from '../../common/validators';
-import { decodeCommentRequest } from '../utils';
 import type { BulkCreateArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
+import { validateMaxUserActions } from '../../common/validators';
 
 export const bulkCreate = async (
   args: BulkCreateArgs,
@@ -56,7 +56,7 @@ export const bulkCreate = async (
 
     const [attachmentsWithIds, entities]: [
       Array<{ id: string } & AttachmentRequest>,
-      OwnerEntity[],
+      OwnerEntity[]
     ] = attachments.reduce<[Array<{ id: string } & AttachmentRequest>, OwnerEntity[]]>(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();

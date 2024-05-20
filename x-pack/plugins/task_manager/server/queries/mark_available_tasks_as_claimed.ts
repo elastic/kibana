@@ -6,11 +6,11 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  MustCondition,
-  MustNotCondition,
   ScriptBasedSortClause,
   ScriptClause,
   mustBeAllOf,
+  MustCondition,
+  MustNotCondition,
 } from './query_clauses';
 
 export function taskWithLessThanMaxAttempts(type: string, maxAttempts: number): MustCondition {

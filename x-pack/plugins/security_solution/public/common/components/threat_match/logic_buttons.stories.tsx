@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { euiLightVars } from '@kbn/ui-theme';
+import { storiesOf, addDecorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { addDecorator, storiesOf } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { euiLightVars } from '@kbn/ui-theme';
 
 import { LogicButtons } from './logic_buttons';
 

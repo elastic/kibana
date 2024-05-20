@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { SearchSessionState } from '../../search_session_state';
+import { storiesOf } from '@storybook/react';
 import { SearchSessionIndicator } from './search_session_indicator';
+import { SearchSessionState } from '../../search_session_state';
 
 storiesOf('components/SearchSessionIndicator', module).add('default', () => {
   const [searchSessionName, setSearchSessionName] = React.useState('Discover session');

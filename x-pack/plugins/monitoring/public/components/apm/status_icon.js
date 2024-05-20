@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { STATUS_ICON_TYPES, StatusIcon } from '../status_icon';
+import { StatusIcon, STATUS_ICON_TYPES } from '../status_icon';
+import { i18n } from '@kbn/i18n';
 
 export function ApmStatusIcon({ status, availability = true }) {
   const type = (() => {

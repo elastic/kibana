@@ -5,10 +5,17 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "master_timeout": ["-1", "0"]
+      "master_timeout": [
+        "-1",
+        "0"
+      ]
     },
-    "methods": ["GET"],
-    "patterns": ["_scripts/{id}"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_scripts/{id}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting.html",
     "availability": {
       "stack": true,

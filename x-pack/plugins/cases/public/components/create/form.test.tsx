@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
-import { mount } from 'enzyme';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { mount } from 'enzyme';
+import { act, render, within, fireEvent, waitFor } from '@testing-library/react';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import { TestProviders } from '../../common/mock';
-import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
-import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
-import { useGetTags } from '../../containers/use_get_tags';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { useGetAllCaseConfigurationsResponse } from '../configure_cases/__mock__';
-import type { CreateCaseFormProps } from './form';
-import { CreateCaseForm } from './form';
 import type { FormProps } from './schema';
 import { schema } from './schema';
+import type { CreateCaseFormProps } from './form';
+import { CreateCaseForm } from './form';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
+import { useGetAllCaseConfigurationsResponse } from '../configure_cases/__mock__';
+import { TestProviders } from '../../common/mock';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useGetTags } from '../../containers/use_get_tags';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');

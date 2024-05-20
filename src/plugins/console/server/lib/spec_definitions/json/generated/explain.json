@@ -7,7 +7,10 @@
       "pretty": "__flag__",
       "analyzer": "",
       "analyze_wildcard": "__flag__",
-      "default_operator": ["and", "or"],
+      "default_operator": [
+        "and",
+        "or"
+      ],
       "df": "",
       "lenient": "__flag__",
       "preference": "",
@@ -18,8 +21,13 @@
       "stored_fields": [],
       "q": ""
     },
-    "methods": ["GET", "POST"],
-    "patterns": ["{index}/_explain/{id}"],
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_explain/{id}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-explain.html",
     "availability": {
       "stack": true,

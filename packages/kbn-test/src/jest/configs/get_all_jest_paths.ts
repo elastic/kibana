@@ -8,8 +8,8 @@
 
 import Path from 'path';
 
-import { getRepoFiles } from '@kbn/get-repo-files';
 import minimatch from 'minimatch';
+import { getRepoFiles } from '@kbn/get-repo-files';
 
 import { testMatch } from '../../../jest-preset';
 

@@ -7,10 +7,10 @@
 
 import { ThreatMatchQueryType } from './types';
 
-import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
 import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
 import { getThreatList } from './get_threat_list';
 import { encodeThreatMatchNamedQuery } from './utils';
+import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
 
 import { threatSearchParamsMock } from './get_signals_map_from_threat_index.mock';
 

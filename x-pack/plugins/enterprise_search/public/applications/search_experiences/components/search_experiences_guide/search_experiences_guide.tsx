@@ -8,18 +8,18 @@
 import React from 'react';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiImage,
   EuiPanel,
+  EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiImage,
+  EuiHorizontalRule,
+  EuiCard,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

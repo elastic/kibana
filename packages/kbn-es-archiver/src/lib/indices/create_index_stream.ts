@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Readable, Transform } from 'stream';
+import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import type { Client } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
@@ -18,15 +18,15 @@ import {
   MAIN_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
-import { ES_CLIENT_HEADERS } from '../../client_headers';
 import { Stats } from '../stats';
-import { deleteDataStream } from './delete_data_stream';
-import { deleteIndex } from './delete_index';
 import {
   cleanSavedObjectIndices,
   deleteSavedObjectIndices,
   isSavedObjectIndex,
 } from './kibana_index';
+import { deleteIndex } from './delete_index';
+import { deleteDataStream } from './delete_data_stream';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 interface DocRecord {
   value: estypes.IndicesIndexState & {

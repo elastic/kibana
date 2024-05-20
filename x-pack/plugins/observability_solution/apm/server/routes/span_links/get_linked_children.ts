@@ -1,4 +1,3 @@
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,20 +5,21 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
  * 2.0.
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import {
   PROCESSOR_EVENT,
   SPAN_ID,
   SPAN_LINKS,
-  SPAN_LINKS_SPAN_ID,
   SPAN_LINKS_TRACE_ID,
+  SPAN_LINKS_SPAN_ID,
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
 import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBufferedTimerange } from './utils';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function fetchLinkedChildrenOfSpan({
   traceId,

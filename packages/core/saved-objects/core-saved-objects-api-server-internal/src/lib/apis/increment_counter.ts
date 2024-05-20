@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { isObject } from 'lodash';
+import { SavedObjectsErrorHelpers, type SavedObject } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { isObject } from 'lodash';
-import { incrementCounterInternal } from './internals';
 import { ApiExecutionContext } from './types';
+import { incrementCounterInternal } from './internals';
 
 export interface PerformIncrementCounterParams<T = unknown> {
   type: string;

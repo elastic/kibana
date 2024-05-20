@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 import { getApplication } from './api';
-import { UseGetApplication, useGetApplication } from './use_get_application';
+import { useGetApplication, UseGetApplication } from './use_get_application';
 
 jest.mock('./api');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');

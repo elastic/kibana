@@ -11,9 +11,9 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import React, { useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { useKibana } from '../../../lib/kibana';
 import { useBreadcrumbsNav } from '../breadcrumbs';

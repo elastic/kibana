@@ -8,8 +8,13 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "metrics_data_access"],
-    "requiredPlugins": ["data", "observabilityShared"],
-    "requiredBundles": ["kibanaReact"],
+    "requiredPlugins": [
+      "data",
+      "observabilityShared"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
     "extraPublicDirs": ["common"]
   }
 }

@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { CriteriaWithPagination, EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
-import { EuiToolTip } from '@elastic/eui';
-import { EuiBadge } from '@elastic/eui';
-import { CloudProvider } from '@kbn/custom-icons';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiBasicTableColumn, CriteriaWithPagination, EuiTableSelectionType } from '@elastic/eui';
 import createContainer from 'constate';
+import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
-import React, { useCallback, useMemo, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
+import { CloudProvider } from '@kbn/custom-icons';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { EuiToolTip } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
+import { EntryTitle } from '../components/table/entry_title';
 import type {
   InfraAssetMetadataType,
-  InfraAssetMetricType,
   InfraAssetMetricsItem,
+  InfraAssetMetricType,
 } from '../../../../../common/http_api';
-import { METRICS_TOOLTIP } from '../../../../common/visualizations';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
-import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
-import { ColumnHeader } from '../components/table/column_header';
-import { EntryTitle } from '../components/table/entry_title';
-import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { useMetricsDataViewContext } from './use_metrics_data_view';
+import { ColumnHeader } from '../components/table/column_header';
+import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
+import { METRICS_TOOLTIP } from '../../../../common/visualizations';
+import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 
 /**
  * Columns and items types

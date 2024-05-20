@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { MarkdownOptions } from './markdown_options';
 import { MarkdownVisParams } from './types';
+import { MarkdownOptions } from './markdown_options';
 
 describe('MarkdownOptions', () => {
   const props = {

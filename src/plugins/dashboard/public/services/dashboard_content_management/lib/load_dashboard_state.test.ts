@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getSampleDashboardInput } from '../../../mocks';
-import { pluginServices } from '../../plugin_services';
 import { registry } from '../../plugin_services.stub';
-import { dashboardContentManagementCache } from '../dashboard_content_management_service';
+import { pluginServices } from '../../plugin_services';
+import { getSampleDashboardInput } from '../../../mocks';
 import { loadDashboardState } from './load_dashboard_state';
+import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 
 pluginServices.setRegistry(registry.start({}));
 const { data, embeddable, contentManagement, savedObjectsTagging } = pluginServices.getServices();

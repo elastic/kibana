@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { padStart, times } from 'lodash';
+import { times, padStart } from 'lodash';
 
 export const ADMIN_CONSOLE = 'admin-console';
 

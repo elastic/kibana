@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type {
-  MatrixHistogramConfigs,
-  MatrixHistogramOption,
-} from '../../../components/matrix_histogram/types';
 import * as i18n from './translations';
+import type {
+  MatrixHistogramOption,
+  MatrixHistogramConfigs,
+} from '../../../components/matrix_histogram/types';
 
 export const anomaliesStackByOptions: MatrixHistogramOption[] = [
   {

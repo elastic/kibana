@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import React from 'react';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
 import type { Capabilities } from '@kbn/core/types';
+import { mockGlobalState, TestProviders } from '../mock';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { AppLinkItems, LinkItem, LinksPermissions } from './types';
 import { act, renderHook } from '@testing-library/react-hooks';
-import React from 'react';
-import { CASES_FEATURE_ID, SERVER_APP_ID, SecurityPageName } from '../../../common/constants';
-import { hasCapabilities } from '../lib/capabilities';
-import { TestProviders, mockGlobalState } from '../mock';
 import {
+  useAppLinks,
   getAncestorLinksInfo,
   getLinkInfo,
-  isLinkUiSettingsAllowed,
   needsUrlState,
   updateAppLinks,
-  useAppLinks,
   useLinkExists,
+  isLinkUiSettingsAllowed,
 } from './links';
 import { createCapabilities } from './test_utils';
-import type { AppLinkItems, LinkItem, LinksPermissions } from './types';
+import { hasCapabilities } from '../lib/capabilities';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import React from 'react';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const defaultAppLinks: AppLinkItems = [
   {

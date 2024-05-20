@@ -10,13 +10,13 @@ import type {
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
-import { oracleRecord, oracleRecordError } from './index.mock';
+import { oracleRecordError, oracleRecord } from './index.mock';
 import {
-  buildRequiredCustomFieldsForRequest,
-  constructRequiredKibanaPrivileges,
   convertValueToString,
   isRecordError,
   partitionRecordsByError,
+  buildRequiredCustomFieldsForRequest,
+  constructRequiredKibanaPrivileges,
 } from './utils';
 
 describe('utils', () => {
@@ -229,7 +229,7 @@ describe('utils', () => {
             label: `label-${type}`,
             required: true,
             // missing default value
-          }) as CustomFieldConfiguration
+          } as CustomFieldConfiguration)
       );
 
       expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration).length).toEqual(

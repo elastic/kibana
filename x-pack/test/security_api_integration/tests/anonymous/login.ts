@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import expect from '@kbn/expect';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
-import { Cookie, parse as parseCookie } from 'tough-cookie';
+import { resolve } from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 

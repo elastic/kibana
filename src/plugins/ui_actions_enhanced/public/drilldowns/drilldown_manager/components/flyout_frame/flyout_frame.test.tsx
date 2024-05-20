@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { fireEvent, render as renderTestingLibrary } from '@testing-library/react';
 import React from 'react';
 import { render } from 'react-dom';
+import { render as renderTestingLibrary, fireEvent } from '@testing-library/react';
 import { FlyoutFrame } from '.';
 
 describe('<FlyoutFrame>', () => {

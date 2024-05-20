@@ -6,36 +6,36 @@
  */
 
 import {
-  type CriteriaWithPagination,
   EuiBasicTable,
   type EuiBasicTableColumn,
   type EuiBasicTableProps,
-  EuiButtonEmpty,
+  type Pagination,
+  type CriteriaWithPagination,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  type Pagination,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
 import { generatePath } from 'react-router-dom';
-import type { Benchmark, BenchmarkScore, BenchmarksCisId } from '../../../common/types/latest';
-import { getBenchmarkApplicableTo, getBenchmarkCisName } from '../../../common/utils/helpers';
 import { FINDINGS_GROUPING_OPTIONS } from '../../common/constants';
+import { useNavigateFindings } from '../../common/hooks/use_navigate_findings';
+import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
+import * as TEST_SUBJ from './test_subjects';
+import { isCommonError } from '../../components/cloud_posture_page';
+import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
+import { ComplianceScoreBar } from '../../components/compliance_score_bar';
+import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
+import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
+import { benchmarksNavigation } from '../../common/navigation/constants';
 import {
   GetBenchmarkDynamicValues,
   useBenchmarkDynamicValues,
 } from '../../common/hooks/use_benchmark_dynamic_values';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { useNavigateFindings } from '../../common/hooks/use_navigate_findings';
-import { benchmarksNavigation } from '../../common/navigation/constants';
-import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
-import { isCommonError } from '../../components/cloud_posture_page';
-import { ComplianceScoreBar } from '../../components/compliance_score_bar';
-import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
-import * as TEST_SUBJ from './test_subjects';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
 

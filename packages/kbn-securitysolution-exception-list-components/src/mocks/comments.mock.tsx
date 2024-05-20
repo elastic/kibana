@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Comment, CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 import React from 'react';
+import type { Comment, CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getCommentsMock = (): Comment => ({
   comment: 'some old comment',

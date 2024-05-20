@@ -8,11 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Processor } from '../../../../common/types';
 import {
-  Document,
   ProcessorInternal,
+  VerboseTestOutput,
+  Document,
   ProcessorResult,
   ProcessorResults,
-  VerboseTestOutput,
 } from './types';
 
 export interface DeserializeArgs {

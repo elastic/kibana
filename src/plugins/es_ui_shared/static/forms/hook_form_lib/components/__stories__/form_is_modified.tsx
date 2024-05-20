@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
-import React, { useEffect } from 'react';
 
 import { TextField, ToggleField } from '../../../components';
 import { useForm } from '../../hooks/use_form';
@@ -16,8 +16,8 @@ import { useFormIsModified } from '../../hooks/use_form_is_modified';
 import { Form } from '../form';
 import { UseField } from '../use_field';
 import { titleConfigBase } from './constants';
-import { submitForm } from './form_utils';
 import { FormArgs } from './types';
+import { submitForm } from './form_utils';
 
 export const IsModified = (args: FormArgs) => {
   const { form } = useForm();

@@ -14,9 +14,9 @@ import {
 } from '@kbn/core/server';
 import { Observable } from 'rxjs';
 import { CollectorSet } from '../collector';
-import type { UsageCounter } from '../usage_counters';
-import { registerStatsRoute } from './stats';
 import { registerUiCountersRoute } from './ui_counters';
+import { registerStatsRoute } from './stats';
+import type { UsageCounter } from '../usage_counters';
 export function setupRoutes({
   router,
   uiCountersUsageCounter,

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TestProviders, getMockNetflowData } from '../../../../../../common/mock';
+import { getMockNetflowData, TestProviders } from '../../../../../../common/mock';
 
-import { TimelineId } from '../../../../../../../common/types/timeline';
 import {
   eventActionMatches,
   eventCategoryMatches,
   netflowRowRenderer,
 } from './netflow_row_renderer';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 
 export const justIdAndTimestamp: Ecs = {
   _id: 'abcd',

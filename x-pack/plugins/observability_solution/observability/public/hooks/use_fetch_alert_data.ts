@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { useCallback, useMemo } from 'react';
+import { isEmpty } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { HttpSetup } from '@kbn/core/public';

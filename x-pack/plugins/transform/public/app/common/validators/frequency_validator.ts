@@ -7,8 +7,8 @@
 
 import { frequencyNotValidErrorMessage } from './messages';
 
-import { isValidFrequency } from './is_valid_frequency';
 import { parseDurationAboveZero } from './parse_duration_above_zero';
+import { isValidFrequency } from './is_valid_frequency';
 import type { Validator } from './types';
 
 // Only allow frequencies in the form of 1s/1h etc.

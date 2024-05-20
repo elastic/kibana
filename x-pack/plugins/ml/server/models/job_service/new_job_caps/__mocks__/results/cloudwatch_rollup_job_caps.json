@@ -44,7 +44,12 @@
           "max": "avg",
           "min": "avg"
         },
-        "fieldIds": ["CPUUtilization", "DiskReadBytes", "NetworkIn", "NetworkOut"]
+        "fieldIds": [
+          "CPUUtilization",
+          "DiskReadBytes",
+          "NetworkIn",
+          "NetworkOut"
+        ]
       },
       {
         "id": "high_mean",
@@ -56,7 +61,12 @@
           "max": "avg",
           "min": "avg"
         },
-        "fieldIds": ["CPUUtilization", "DiskReadBytes", "NetworkIn", "NetworkOut"]
+        "fieldIds": [
+          "CPUUtilization",
+          "DiskReadBytes",
+          "NetworkIn",
+          "NetworkOut"
+        ]
       },
       {
         "id": "low_mean",
@@ -68,7 +78,12 @@
           "max": "avg",
           "min": "avg"
         },
-        "fieldIds": ["CPUUtilization", "DiskReadBytes", "NetworkIn", "NetworkOut"]
+        "fieldIds": [
+          "CPUUtilization",
+          "DiskReadBytes",
+          "NetworkIn",
+          "NetworkOut"
+        ]
       },
       {
         "id": "sum",
@@ -80,7 +95,10 @@
           "max": "sum",
           "min": "sum"
         },
-        "fieldIds": ["DiskReadBytes", "DiskWriteOps"]
+        "fieldIds": [
+          "DiskReadBytes",
+          "DiskWriteOps"
+        ]
       },
       {
         "id": "high_sum",
@@ -92,7 +110,10 @@
           "max": "sum",
           "min": "sum"
         },
-        "fieldIds": ["DiskReadBytes", "DiskWriteOps"]
+        "fieldIds": [
+          "DiskReadBytes",
+          "DiskWriteOps"
+        ]
       },
       {
         "id": "low_sum",
@@ -104,7 +125,10 @@
           "max": "sum",
           "min": "sum"
         },
-        "fieldIds": ["DiskReadBytes", "DiskWriteOps"]
+        "fieldIds": [
+          "DiskReadBytes",
+          "DiskWriteOps"
+        ]
       },
       {
         "dslName": "percentiles",
@@ -152,7 +176,10 @@
           "max": "min",
           "min": "min"
         },
-        "fieldIds": ["NetworkIn", "NetworkOut"]
+        "fieldIds": [
+          "NetworkIn",
+          "NetworkOut"
+        ]
       },
       {
         "id": "max",
@@ -164,7 +191,10 @@
           "max": "max",
           "min": "max"
         },
-        "fieldIds": ["CPUUtilization", "DiskReadBytes"]
+        "fieldIds": [
+          "CPUUtilization",
+          "DiskReadBytes"
+        ]
       },
       {
         "dslName": "cardinality",
@@ -427,7 +457,12 @@
         "type": "double",
         "aggregatable": true,
         "counter": false,
-        "aggIds": ["mean", "high_mean", "low_mean", "max"]
+        "aggIds": [
+          "mean",
+          "high_mean",
+          "low_mean",
+          "max"
+        ]
       },
       {
         "id": "DiskReadBytes",
@@ -435,7 +470,15 @@
         "type": "double",
         "aggregatable": true,
         "counter": false,
-        "aggIds": ["mean", "high_mean", "low_mean", "sum", "high_sum", "low_sum", "max"]
+        "aggIds": [
+          "mean",
+          "high_mean",
+          "low_mean",
+          "sum",
+          "high_sum",
+          "low_sum",
+          "max"
+        ]
       },
       {
         "id": "DiskWriteOps",
@@ -443,7 +486,11 @@
         "type": "double",
         "aggregatable": true,
         "counter": false,
-        "aggIds": ["sum", "high_sum", "low_sum"]
+        "aggIds": [
+          "sum",
+          "high_sum",
+          "low_sum"
+        ]
       },
       {
         "id": "NetworkIn",
@@ -451,7 +498,12 @@
         "type": "double",
         "aggregatable": true,
         "counter": false,
-        "aggIds": ["mean", "high_mean", "low_mean", "min"]
+        "aggIds": [
+          "mean",
+          "high_mean",
+          "low_mean",
+          "min"
+        ]
       },
       {
         "id": "NetworkOut",
@@ -459,7 +511,12 @@
         "type": "double",
         "aggregatable": true,
         "counter": false,
-        "aggIds": ["mean", "high_mean", "low_mean", "min"]
+        "aggIds": [
+          "mean",
+          "high_mean",
+          "low_mean",
+          "min"
+        ]
       }
     ]
   }

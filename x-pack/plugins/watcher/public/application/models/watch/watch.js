@@ -9,8 +9,8 @@ import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { JsonWatch } from './json_watch';
-import { MonitoringWatch } from './monitoring_watch';
 import { ThresholdWatch } from './threshold_watch';
+import { MonitoringWatch } from './monitoring_watch';
 
 const WatchTypes = {};
 set(WatchTypes, WATCH_TYPES.JSON, JsonWatch);

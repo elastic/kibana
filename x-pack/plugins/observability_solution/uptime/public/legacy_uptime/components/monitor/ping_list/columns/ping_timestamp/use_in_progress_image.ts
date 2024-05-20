@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { MONITOR_ADD_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../../../common/constants';
+import { useEffect, useState } from 'react';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import {
   ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from '../../../../../../../common/runtime_types';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
+import { MONITOR_ADD_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../../../common/constants';
 
 const NUMBER_OF_RETRIES = 20;
 

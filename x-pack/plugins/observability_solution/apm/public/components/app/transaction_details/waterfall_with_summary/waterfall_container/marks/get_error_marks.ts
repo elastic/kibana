@@ -6,9 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
+import { IWaterfallError } from '../waterfall/waterfall_helpers/waterfall_helpers';
 import { Mark } from '.';
 import { WaterfallError } from '../../../../../../../common/waterfall/typings';
-import { IWaterfallError } from '../waterfall/waterfall_helpers/waterfall_helpers';
 
 export interface ErrorMark extends Mark {
   type: 'errorMark';

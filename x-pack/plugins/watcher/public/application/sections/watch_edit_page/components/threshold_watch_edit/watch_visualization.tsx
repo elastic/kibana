@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import {
   AnnotationDomainType,
   Axis,
@@ -16,23 +17,22 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { EuiCallOut, EuiEmptyPrompt, EuiLoadingChart, EuiSpacer, EuiText } from '@elastic/eui';
-import { IUiSettingsClient } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
-import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
-import React, { Fragment, useContext, useEffect, useMemo } from 'react';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 import { VisualizeOptions } from '../../../../models/visualize_options';
 import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
 
-import { useAppContext } from '../../../../app_context';
-import { Error, SectionError } from '../../../../components';
 import { useGetWatchVisualizationData } from '../../../../lib/api';
+import { WatchContext } from '../../watch_context';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { comparators } from '../../../../models/watch/comparators';
-import { WatchContext } from '../../watch_context';
+import { SectionError, Error } from '../../../../components';
+import { useAppContext } from '../../../../app_context';
 
 const customTheme = (): PartialTheme => {
   return {

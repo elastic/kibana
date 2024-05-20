@@ -7,8 +7,8 @@
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
-import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../common/constants';
 import type { Installation, Output } from '../../../common/types';
+import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../common/constants';
 
 export const migrateOutputToV800: SavedObjectMigrationFn<Output, Output> = (
   outputDoc,

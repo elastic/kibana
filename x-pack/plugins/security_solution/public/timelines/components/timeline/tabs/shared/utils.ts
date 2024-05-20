@@ -6,11 +6,11 @@
  */
 import type { BrowserFields, ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import memoizeOne from 'memoize-one';
-import type { TimelineItem } from '../../../../../../common/search_strategy';
 import type { ControlColumnProps } from '../../../../../../common/types';
+import type { Sort } from '../../body/sort';
+import type { TimelineItem } from '../../../../../../common/search_strategy';
 import type { inputsModel } from '../../../../../common/store';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
-import type { Sort } from '../../body/sort';
 interface TimerangeSimilarityProps {
   end: inputsModel.InputsRange['timerange']['to'];
   start: inputsModel.InputsRange['timerange']['from'];

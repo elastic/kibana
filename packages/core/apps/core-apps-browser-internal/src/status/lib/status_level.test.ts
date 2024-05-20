@@ -7,8 +7,8 @@
  */
 
 import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common-internal';
+import { getLevelSortValue, groupByLevel, getHighestStatus } from './status_level';
 import { FormattedStatus, StatusState } from './load_status';
-import { getHighestStatus, getLevelSortValue, groupByLevel } from './status_level';
 
 type CreateStatusInput = Partial<Omit<FormattedStatus, 'state' | 'original'>> & {
   state?: Partial<StatusState>;

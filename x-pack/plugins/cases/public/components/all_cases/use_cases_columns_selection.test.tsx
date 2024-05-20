@@ -11,8 +11,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import type { AppMockRenderer } from '../../common/mock';
 
 import { createAppMockRenderer } from '../../common/mock';
-import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 import { useCasesColumnsSelection } from './use_cases_columns_selection';
+import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
 
 jest.mock('./use_cases_columns_configuration');
 

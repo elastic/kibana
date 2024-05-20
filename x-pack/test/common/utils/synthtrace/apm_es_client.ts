@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ApmSynthtraceEsClient, LogLevel, createLogger } from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 
 interface GetApmSynthtraceEsClientParams {
   client: Client;

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { ReactText, useContext, useState } from 'react';
 import {
   EuiBasicTable,
-  EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
+  EuiFlexGroup,
   EuiSpacer,
-  EuiStat,
   EuiTitle,
+  EuiStat,
   EuiToolTip,
+  EuiLink,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ReactText, useContext, useState } from 'react';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useJsErrorsQuery } from '../../../../hooks/use_js_errors_query';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
-import { CsmSharedContext } from '../csm_shared_context';
 import { I18LABELS } from '../translations';
+import { CsmSharedContext } from '../csm_shared_context';
 
 interface JSErrorItem {
   errorMessage: string;

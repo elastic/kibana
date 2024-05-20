@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { Observable, Subscription } from 'rxjs';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchAbortController } from './search_abort_controller';
 
 interface ResponseCacheItem {
@@ -26,10 +26,7 @@ export class SearchResponseCache {
   private responseCache: Map<string, ResponseCacheItemInternal>;
   private cacheSize = 0;
 
-  constructor(
-    private maxItems: number,
-    private maxCacheSizeMB: number
-  ) {
+  constructor(private maxItems: number, private maxCacheSizeMB: number) {
     this.responseCache = new Map();
   }
 

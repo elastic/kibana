@@ -1,11 +1,3 @@
-import {
-  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  FINDINGS_INDEX_PATTERN,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,15 +5,23 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import {
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  FINDINGS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
-  assertIndexStatus,
-  createCSPOnlyRole,
   createPackagePolicy,
   createUser,
-  deleteIndex,
+  createCSPOnlyRole,
   deleteRole,
   deleteUser,
+  deleteIndex,
+  assertIndexStatus,
 } from '../helper';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';

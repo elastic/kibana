@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 2023-10-31
  */
 
-import { AgentId, SuccessResponse } from '../model/schema/common.gen';
+import { SuccessResponse, AgentId } from '../model/schema/common.gen';
 
 export type GetAgentPolicySummaryRequestQuery = z.infer<typeof GetAgentPolicySummaryRequestQuery>;
 export const GetAgentPolicySummaryRequestQuery = z.object({

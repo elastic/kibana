@@ -7,8 +7,8 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type { IContext } from './context';
 import * as mutations from './mutations';
+import type { IContext } from './context';
 import { isAnyType } from './mutations/utils';
 
 interface PostProcessMutationsArgs {

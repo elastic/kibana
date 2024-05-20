@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HasInspectorAdapters, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import { apiHasInspectorAdapters, HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import {
   EmbeddableApiContext,
-  HasParentApi,
-  PublishesPanelTitle,
   getPanelTitle,
+  PublishesPanelTitle,
+  HasParentApi,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { inspector } from '../../kibana_services';

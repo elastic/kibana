@@ -1,4 +1,3 @@
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
  * 2.0.
  */
 import React from 'react';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { Alert, AlertsField } from '../../../../types';
 import { AlertsFlyout } from './alerts_flyout';
+import { Alert, AlertsField } from '../../../../types';
 
 const onClose = jest.fn();
 const onPaginate = jest.fn();

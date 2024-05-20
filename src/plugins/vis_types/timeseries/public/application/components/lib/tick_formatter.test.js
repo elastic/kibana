@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
-import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { setFieldFormats } from '../../../services';
 import { createTickFormatter } from './tick_formatter';
+import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
+import { setFieldFormats } from '../../../services';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 
 const mockUiSettings = {
   get: (item) => {

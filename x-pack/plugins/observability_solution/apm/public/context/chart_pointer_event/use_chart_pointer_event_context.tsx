@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useContext, useEffect, useCallback, useRef } from 'react';
 import { Chart } from '@elastic/charts';
 import { PointerEvent } from '@elastic/charts';
-import React, { useContext, useEffect, useCallback, useRef } from 'react';
 import { ChartPointerEventContext, UPDATE_POINTER_EVENT } from './chart_pointer_event_context';
 
 export function useChartPointerEventContext() {

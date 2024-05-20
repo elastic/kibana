@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
 import React, { memo } from 'react';
+import { EuiLink } from '@elastic/eui';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 
 export const EndpointListNavLink = memo<{

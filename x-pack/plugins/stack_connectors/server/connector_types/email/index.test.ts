@@ -9,28 +9,28 @@ jest.mock('./send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
-import { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { Logger } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import {
   validateConfig,
   validateConnector,
   validateParams,
   validateSecrets,
 } from '@kbn/actions-plugin/server/lib';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
-import { Logger } from '@kbn/core/server';
-import { loggerMock } from '@kbn/logging-mocks';
+import { sendEmail } from './send_email';
 import {
   ActionParamsType,
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
+  getConnectorType,
   EmailConnectorType,
   EmailConnectorTypeExecutorOptions,
-  getConnectorType,
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
 } from '.';
-import { sendEmail } from './send_email';
+import { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -430,9 +430,8 @@ describe('params validation', () => {
       subject: 'this is a test',
       message: 'this is the message',
     };
-    expect(
-      validateParams(connectorType, params, { configurationUtilities })
-    ).toMatchInlineSnapshot(`
+    expect(validateParams(connectorType, params, { configurationUtilities }))
+      .toMatchInlineSnapshot(`
       Object {
         "bcc": Array [],
         "cc": Array [],

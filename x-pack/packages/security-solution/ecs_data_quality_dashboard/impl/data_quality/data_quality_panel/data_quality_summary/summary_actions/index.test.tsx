@@ -10,13 +10,13 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { Props, SummaryActions } from '.';
 import { EMPTY_STAT } from '../../../helpers';
 import { alertIndexWithAllResults } from '../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { PatternRollup } from '../../../types';
+import { Props, SummaryActions } from '.';
 import {
   getTotalDocsCount,
   getTotalIncompatible,

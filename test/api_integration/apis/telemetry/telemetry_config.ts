@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { AxiosError } from 'axios';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { AxiosError } from 'axios';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const TELEMETRY_SO_TYPE = 'telemetry';

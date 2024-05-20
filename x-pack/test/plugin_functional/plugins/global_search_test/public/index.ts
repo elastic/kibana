@@ -9,8 +9,8 @@ import { PluginInitializer } from '@kbn/core/public';
 import {
   GlobalSearchTestPlugin,
   GlobalSearchTestPluginSetup,
-  GlobalSearchTestPluginSetupDeps,
   GlobalSearchTestPluginStart,
+  GlobalSearchTestPluginSetupDeps,
   GlobalSearchTestPluginStartDeps,
 } from './plugin';
 

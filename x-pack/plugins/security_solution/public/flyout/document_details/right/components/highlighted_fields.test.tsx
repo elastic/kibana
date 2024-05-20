@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { RightPanelContext } from '../context';
+import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
+import { HighlightedFields } from './highlighted_fields';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 import { TestProviders } from '../../../../common/mock';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { RightPanelContext } from '../context';
-import { HighlightedFields } from './highlighted_fields';
-import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 
 jest.mock('../../shared/hooks/use_highlighted_fields');
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');

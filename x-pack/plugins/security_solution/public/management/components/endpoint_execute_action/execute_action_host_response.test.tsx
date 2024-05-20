@@ -1,12 +1,3 @@
-import { getEmptyValue } from '@kbn/cases-plugin/public/components/empty_value';
-import React from 'react';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type {
-  ActionDetails,
-  DeepMutable,
-  ResponseActionExecuteOutputContent,
-  ResponseActionsExecuteParameters,
-} from '../../../../common/endpoint/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,10 +6,19 @@ import type {
  */
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type {
+  ResponseActionExecuteOutputContent,
+  ResponseActionsExecuteParameters,
+  ActionDetails,
+  DeepMutable,
+} from '../../../../common/endpoint/types';
+import React from 'react';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   ExecuteActionHostResponse,
   type ExecuteActionHostResponseProps,
 } from './execute_action_host_response';
+import { getEmptyValue } from '@kbn/cases-plugin/public/components/empty_value';
 import { EXECUTE_OUTPUT_FILE_TRUNCATED_MESSAGE } from './execute_action_host_response_output';
 
 describe('When using the `ExecuteActionHostResponse` component', () => {

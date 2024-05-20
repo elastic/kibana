@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { merge } from 'lodash';
 import type { DeepPartial } from 'utility-types';
-import { ENDPOINT_ACTIONS_DS, ENDPOINT_ACTION_RESPONSES_DS } from '../constants';
-import {
-  DEFAULT_EXECUTE_ACTION_TIMEOUT,
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
-} from '../service/response_actions/constants';
-import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
+import { merge } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
+import { BaseDataGenerator } from './base_data_generator';
 import type {
   ActionDetails,
-  ActionResponseOutput,
-  EndpointActionDataParameterTypes,
-  EndpointActionResponseDataOutput,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   EndpointPendingActions,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ProcessesEntry,
-  ResponseActionExecuteOutputContent,
+  EndpointActionDataParameterTypes,
+  ActionResponseOutput,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  ResponseActionsExecuteParameters,
+  ResponseActionExecuteOutputContent,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
-  ResponseActionsExecuteParameters,
+  EndpointActionResponseDataOutput,
   WithAllKeys,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
-import { BaseDataGenerator } from './base_data_generator';
+import {
+  DEFAULT_EXECUTE_ACTION_TIMEOUT,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+} from '../service/response_actions/constants';
+import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
   generate<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {},
+    TMeta extends {} = {}
   >(
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): LogsEndpointAction<TParameters, TOutputContent, TMeta> {
@@ -75,7 +75,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   generateActionEsHit<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {},
+    TMeta extends {} = {}
   >(
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): estypes.SearchHit<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
@@ -86,7 +86,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   /** Generates an endpoint action response */
   generateResponse<
-    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
   >(
     overrides: DeepPartial<LogsEndpointActionResponse<TOutputContent>> = {}
   ): LogsEndpointActionResponse<TOutputContent> {
@@ -193,7 +193,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   generateActionDetails<
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     overrides: DeepPartial<ActionDetails<TOutputContent, TParameters>> = {}
   ): ActionDetails<TOutputContent, TParameters> {
@@ -363,7 +363,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateActivityLogActionResponse<
-    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
   >(
     overrides: DeepPartial<EndpointActivityLogActionResponse<TOutputContent>>
   ): EndpointActivityLogActionResponse<TOutputContent> {

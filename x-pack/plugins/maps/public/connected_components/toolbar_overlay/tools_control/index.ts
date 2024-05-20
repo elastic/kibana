@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { DRAW_MODE } from '../../../../common/constants';
-import { DrawState } from '../../../../common/descriptor_types';
+import { connect } from 'react-redux';
+import { ToolsControl } from './tools_control';
 import { setDrawMode, updateDrawState } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
+import { DrawState } from '../../../../common/descriptor_types';
+import { DRAW_MODE } from '../../../../common/constants';
 import { getDrawMode } from '../../../selectors/ui_selectors';
-import { ToolsControl } from './tools_control';
 
 function mapStateToProps(state: MapStoreState) {
   const drawMode = getDrawMode(state);

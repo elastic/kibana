@@ -5,27 +5,26 @@
  * 2.0.
  */
 
+import { type Subject } from 'rxjs';
 import { IToasts, IUiSettingsClient } from '@kbn/core/public';
 import { QueryStart } from '@kbn/data-plugin/public';
+import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
-import { type Subject } from 'rxjs';
-import { InterpreterFrom, actions, createMachine, interpret, raise } from 'xstate';
+import type { LogsExplorerCustomizations, LogsExplorerPublicEvent } from '../../../controller';
 import { ControlPanelRT } from '../../../../common/control_panels';
 import {
   AllDatasetSelection,
   isDataSourceSelection,
   isDataViewSelection,
 } from '../../../../common/data_source_selection';
-import type { LogsExplorerCustomizations, LogsExplorerPublicEvent } from '../../../controller';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   createCreateDataViewFailedNotifier,
-  createDataViewSelectionRestoreFailedNotifier,
   createDatasetSelectionRestoreFailedNotifier,
+  createDataViewSelectionRestoreFailedNotifier,
 } from './notifications';
-import { createDataReceivedEventEmitter } from './public_events';
 import {
   initializeControlPanels,
   subscribeControlGroup,
@@ -50,6 +49,7 @@ import {
   LogsExplorerControllerEvent,
   LogsExplorerControllerTypeState,
 } from './types';
+import { createDataReceivedEventEmitter } from './public_events';
 
 export const createPureLogsExplorerControllerStateMachine = (
   initialContext: LogsExplorerControllerContext

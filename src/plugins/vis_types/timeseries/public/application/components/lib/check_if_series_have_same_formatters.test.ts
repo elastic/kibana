@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { checkIfSeriesHaveSameFormatters } from './check_if_series_have_same_formatters';
 import { DATA_FORMATTERS } from '../../../../common/enums';
 import type { Series } from '../../../../common/types';
-import { checkIfSeriesHaveSameFormatters } from './check_if_series_have_same_formatters';
 
 describe('checkIfSeriesHaveSameFormatters(seriesModel, fieldFormatMap)', () => {
   const fieldFormatMap = {

@@ -61,7 +61,10 @@
             "tags": [],
             "label": "hasCustomBranding$",
             "description": [],
-            "signature": ["Observable", "<boolean>"],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
             "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -87,7 +90,9 @@
             "tags": [],
             "label": "injectedMetadata",
             "description": [],
-            "signature": ["InternalInjectedMetadataSetup"],
+            "signature": [
+              "InternalInjectedMetadataSetup"
+            ],
             "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -136,7 +141,10 @@
             "tags": [],
             "label": "hasCustomBranding$",
             "description": [],
-            "signature": ["Observable", "<boolean>"],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
             "path": "packages/core/custom-branding/core-custom-branding-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type { EuiDataGridControlColumn } from '@elastic/eui';
-import { renderHook } from '@testing-library/react-hooks';
-import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { TestProviders } from '../../../../../common/mock';
+import { renderHook } from '@testing-library/react-hooks';
+import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineControlColumn } from './use_timeline_control_columns';
+import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
 
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),

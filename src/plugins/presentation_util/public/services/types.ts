@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PresentationCapabilitiesService } from './capabilities/types';
-import { PresentationContentManagementService } from './content_management/types';
-import { PresentationDataViewsService } from './data_views/types';
 import { PresentationLabsService } from './labs/types';
+import { PresentationCapabilitiesService } from './capabilities/types';
+import { PresentationDataViewsService } from './data_views/types';
 import { PresentationUiActionsService } from './ui_actions/types';
+import { PresentationContentManagementService } from './content_management/types';
 
 export interface PresentationUtilServices {
   contentManagement: PresentationContentManagementService;

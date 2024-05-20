@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiDataGridProps } from '@elastic/eui';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { shallow } from 'enzyme';
 import React from 'react';
-import { FormattedColumn, TableVisConfig, TableVisUiState } from '../types';
+import { shallow } from 'enzyme';
 import { TableVisBasic } from './table_vis_basic';
+import { FormattedColumn, TableVisConfig, TableVisUiState } from '../types';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createTableVisCell } from './table_vis_cell';
 import { createGridColumns } from './table_vis_columns';
+import { EuiDataGridProps } from '@elastic/eui';
 
 jest.mock('./table_vis_columns', () => ({
   createGridColumns: jest.fn(() => []),

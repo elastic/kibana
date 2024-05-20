@@ -7,8 +7,8 @@
  */
 
 import _ from 'lodash';
-import { populateContext } from './engine';
 import { UrlParams } from './url_params';
+import { populateContext } from './engine';
 
 describe('Url params', () => {
   function paramTest(name, description, tokenPath, expectedContext, globalParams) {

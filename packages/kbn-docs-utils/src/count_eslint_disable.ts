@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import { asyncForEachWithLimit } from '@kbn/std';
+import Fs from 'fs';
 
 export interface EslintDisableCounts {
   eslintDisableLineCount: number;

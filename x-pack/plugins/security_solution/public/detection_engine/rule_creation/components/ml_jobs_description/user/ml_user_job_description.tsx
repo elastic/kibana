@@ -1,5 +1,3 @@
-import { EuiSwitch, EuiToolTip } from '@elastic/eui';
-import noop from 'lodash/noop';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import noop from 'lodash/noop';
  */
 import type { FC } from 'react';
 import React, { useMemo, memo } from 'react';
+import { EuiSwitch, EuiToolTip } from '@elastic/eui';
+import noop from 'lodash/noop';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 

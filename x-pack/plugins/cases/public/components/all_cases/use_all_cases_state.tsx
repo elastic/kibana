@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
+import { useLocation, useHistory } from 'react-router-dom';
 import deepEqual from 'react-fast-compare';
-import { useHistory, useLocation } from 'react-router-dom';
+import { isEmpty } from 'lodash';
 
-import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import type { FilterOptions, QueryParams } from '../../../common/ui/types';
-import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import {
   DEFAULT_CASES_TABLE_STATE,
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,
 } from '../../containers/constants';
+import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import type { AllCasesTableState, AllCasesURLState } from './types';
+import { stringifyUrlParams } from './utils/stringify_url_params';
 import { allCasesUrlStateDeserializer } from './utils/all_cases_url_state_deserializer';
 import { allCasesUrlStateSerializer } from './utils/all_cases_url_state_serializer';
 import { parseUrlParams } from './utils/parse_url_params';
 import { sanitizeState } from './utils/sanitize_state';
-import { stringifyUrlParams } from './utils/stringify_url_params';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
 
 interface UseAllCasesStateReturn {
   filterOptions: FilterOptions;
@@ -114,7 +114,7 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
 
 const useAllCasesUrlState = (): [
   AllCasesURLState,
-  (updated: AllCasesTableState, mode?: 'push' | 'replace') => void,
+  (updated: AllCasesTableState, mode?: 'push' | 'replace') => void
 ] => {
   const history = useHistory();
   const location = useLocation();
@@ -175,7 +175,7 @@ const isURLStateEmpty = (urlState: AllCasesURLState) => {
 
 const useAllCasesLocalStorage = (): [
   AllCasesTableState | undefined,
-  (item: AllCasesTableState | undefined) => void,
+  (item: AllCasesTableState | undefined) => void
 ] => {
   const [state, setState] = useCasesLocalStorage<AllCasesTableState | undefined>(
     LOCAL_STORAGE_KEYS.casesTableState,

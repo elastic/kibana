@@ -1,5 +1,3 @@
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import type { AggregateQuery } from '@kbn/es-query';
  * Side Public License, v 1.
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { AggregateQuery } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
 

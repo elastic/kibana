@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { PipelineEditor } from './pipeline_editor';
 
 describe('PipelineEditor component', () => {

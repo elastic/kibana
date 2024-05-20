@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/alerting-plugin/common';
 import { RulesClient } from '@kbn/alerting-plugin/server';
+import { Rule } from '@kbn/alerting-plugin/common';
 import {
-  BaseRule,
-  CCRReadExceptionsRule,
-  ClusterHealthRule,
-  CpuUsageRule,
-  DiskUsageRule,
-  ElasticsearchVersionMismatchRule,
-  KibanaVersionMismatchRule,
   LargeShardSizeRule,
-  LicenseExpirationRule,
-  LogstashVersionMismatchRule,
-  MemoryUsageRule,
+  CCRReadExceptionsRule,
+  CpuUsageRule,
   MissingMonitoringDataRule,
-  NodesChangedRule,
+  DiskUsageRule,
   ThreadPoolSearchRejectionsRule,
   ThreadPoolWriteRejectionsRule,
+  MemoryUsageRule,
+  NodesChangedRule,
+  ClusterHealthRule,
+  LicenseExpirationRule,
+  LogstashVersionMismatchRule,
+  KibanaVersionMismatchRule,
+  ElasticsearchVersionMismatchRule,
+  BaseRule,
 } from '.';
 import {
-  RULE_CCR_READ_EXCEPTIONS,
   RULE_CLUSTER_HEALTH,
-  RULE_CPU_USAGE,
-  RULE_DISK_USAGE,
-  RULE_ELASTICSEARCH_VERSION_MISMATCH,
-  RULE_KIBANA_VERSION_MISMATCH,
-  RULE_LARGE_SHARD_SIZE,
   RULE_LICENSE_EXPIRATION,
-  RULE_LOGSTASH_VERSION_MISMATCH,
-  RULE_MEMORY_USAGE,
+  RULE_CPU_USAGE,
   RULE_MISSING_MONITORING_DATA,
-  RULE_NODES_CHANGED,
+  RULE_DISK_USAGE,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
   RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_MEMORY_USAGE,
+  RULE_NODES_CHANGED,
+  RULE_LOGSTASH_VERSION_MISMATCH,
+  RULE_KIBANA_VERSION_MISMATCH,
+  RULE_ELASTICSEARCH_VERSION_MISMATCH,
+  RULE_CCR_READ_EXCEPTIONS,
+  RULE_LARGE_SHARD_SIZE,
 } from '../../common/constants';
 import { CommonAlertParams as CommonRuleParams } from '../../common/types/alerts';
 

@@ -67,7 +67,9 @@
         "tags": [],
         "label": "ConcurrentSearches",
         "description": [],
-        "signature": ["number"],
+        "signature": [
+          "number"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -80,7 +82,9 @@
         "tags": [],
         "label": "ConcurrentSearchesOrUndefined",
         "description": [],
-        "signature": ["number | undefined"],
+        "signature": [
+          "number | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -93,7 +97,9 @@
         "tags": [],
         "label": "ItemsPerSearch",
         "description": [],
-        "signature": ["number"],
+        "signature": [
+          "number"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -106,7 +112,9 @@
         "tags": [],
         "label": "ItemsPerSearchOrUndefined",
         "description": [],
-        "signature": ["number | undefined"],
+        "signature": [
+          "number | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -119,7 +127,9 @@
         "tags": [],
         "label": "Language",
         "description": [],
-        "signature": ["\"eql\" | \"esql\" | \"kuery\" | \"lucene\""],
+        "signature": [
+          "\"eql\" | \"esql\" | \"kuery\" | \"lucene\""
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -132,7 +142,9 @@
         "tags": [],
         "label": "LanguageOrUndefined",
         "description": [],
-        "signature": ["\"eql\" | \"esql\" | \"kuery\" | \"lucene\" | undefined"],
+        "signature": [
+          "\"eql\" | \"esql\" | \"kuery\" | \"lucene\" | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -145,7 +157,9 @@
         "tags": [],
         "label": "MachineLearningJobId",
         "description": [],
-        "signature": ["string | string[]"],
+        "signature": [
+          "string | string[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -158,7 +172,9 @@
         "tags": [],
         "label": "MachineLearningJobIdNormalized",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -171,7 +187,9 @@
         "tags": [],
         "label": "MachineLearningJobIdNormalizedOrUndefined",
         "description": [],
-        "signature": ["string[] | undefined"],
+        "signature": [
+          "string[] | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -184,7 +202,9 @@
         "tags": [],
         "label": "MachineLearningJobIdOrUndefined",
         "description": [],
-        "signature": ["string | string[] | undefined"],
+        "signature": [
+          "string | string[] | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -197,7 +217,9 @@
         "tags": [],
         "label": "MaxSignals",
         "description": [],
-        "signature": ["number"],
+        "signature": [
+          "number"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -210,7 +232,9 @@
         "tags": [],
         "label": "MaxSignalsOrUndefined",
         "description": [],
-        "signature": ["number | undefined"],
+        "signature": [
+          "number | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -225,7 +249,9 @@
         "description": [
           "\nTypes the risk score as:\n  - Natural Number (positive integer and not a float),\n  - Between the values [0 and 100] inclusive."
         ],
-        "signature": ["number"],
+        "signature": [
+          "number"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -377,7 +403,9 @@
         "tags": [],
         "label": "RuleActionGroup",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -390,7 +418,9 @@
         "tags": [],
         "label": "RuleActionId",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -405,7 +435,9 @@
         "description": [
           "\nThe condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`"
         ],
-        "signature": ["\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""],
+        "signature": [
+          "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -415,7 +447,9 @@
         "parentPluginId": "@kbn/securitysolution-io-ts-alerting-types",
         "id": "def-common.RuleActionParams",
         "type": "Type",
-        "tags": ["see"],
+        "tags": [
+          "see"
+        ],
         "label": "RuleActionParams",
         "description": [
           "\nParams is an \"object\", since it is a type of RuleActionParams which is action templates."
@@ -443,7 +477,9 @@
         "description": [
           "\nAction summary indicates whether we will send a summary notification about all the generate alerts or notification per individual alert"
         ],
-        "signature": ["boolean"],
+        "signature": [
+          "boolean"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -456,7 +492,9 @@
         "tags": [],
         "label": "RuleActionThrottle",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/throttle/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -469,7 +507,9 @@
         "tags": [],
         "label": "RuleActionTypeId",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -482,7 +522,9 @@
         "tags": [],
         "label": "RuleActionUuid",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -495,7 +537,9 @@
         "tags": [],
         "label": "RuleInterval",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -508,7 +552,9 @@
         "tags": [],
         "label": "RuleIntervalFrom",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -523,7 +569,9 @@
         "description": [
           "\nTODO: Create a regular expression type or custom date math part type here"
         ],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -593,7 +641,9 @@
         "tags": [],
         "label": "Severity",
         "description": [],
-        "signature": ["\"medium\" | \"high\" | \"low\" | \"critical\""],
+        "signature": [
+          "\"medium\" | \"high\" | \"low\" | \"critical\""
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -651,7 +701,9 @@
         "tags": [],
         "label": "ThreatFilters",
         "description": [],
-        "signature": ["unknown[]"],
+        "signature": [
+          "unknown[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -664,7 +716,9 @@
         "tags": [],
         "label": "ThreatFiltersOrUndefined",
         "description": [],
-        "signature": ["unknown[] | undefined"],
+        "signature": [
+          "unknown[] | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -677,7 +731,9 @@
         "tags": [],
         "label": "ThreatIndex",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -690,7 +746,9 @@
         "tags": [],
         "label": "ThreatIndexOrUndefined",
         "description": [],
-        "signature": ["string[] | undefined"],
+        "signature": [
+          "string[] | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -703,7 +761,9 @@
         "tags": [],
         "label": "ThreatIndicatorPath",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -716,7 +776,9 @@
         "tags": [],
         "label": "ThreatIndicatorPathOrUndefined",
         "description": [],
-        "signature": ["string | undefined"],
+        "signature": [
+          "string | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -729,7 +791,9 @@
         "tags": [],
         "label": "ThreatLanguage",
         "description": [],
-        "signature": ["\"eql\" | \"esql\" | \"kuery\" | \"lucene\" | undefined"],
+        "signature": [
+          "\"eql\" | \"esql\" | \"kuery\" | \"lucene\" | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -742,7 +806,9 @@
         "tags": [],
         "label": "ThreatLanguageOrUndefined",
         "description": [],
-        "signature": ["\"eql\" | \"esql\" | \"kuery\" | \"lucene\" | undefined"],
+        "signature": [
+          "\"eql\" | \"esql\" | \"kuery\" | \"lucene\" | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -755,7 +821,9 @@
         "tags": [],
         "label": "ThreatMap",
         "description": [],
-        "signature": ["{ entries: { field: string; type: \"mapping\"; value: string; }[]; }"],
+        "signature": [
+          "{ entries: { field: string; type: \"mapping\"; value: string; }[]; }"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -768,7 +836,9 @@
         "tags": [],
         "label": "ThreatMapEntry",
         "description": [],
-        "signature": ["{ field: string; type: \"mapping\"; value: string; }"],
+        "signature": [
+          "{ field: string; type: \"mapping\"; value: string; }"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -781,7 +851,9 @@
         "tags": [],
         "label": "ThreatMapping",
         "description": [],
-        "signature": ["{ entries: { field: string; type: \"mapping\"; value: string; }[]; }[]"],
+        "signature": [
+          "{ entries: { field: string; type: \"mapping\"; value: string; }[]; }[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -794,7 +866,9 @@
         "tags": [],
         "label": "ThreatMappingEntries",
         "description": [],
-        "signature": ["{ field: string; type: \"mapping\"; value: string; }[]"],
+        "signature": [
+          "{ field: string; type: \"mapping\"; value: string; }[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -822,7 +896,9 @@
         "tags": [],
         "label": "ThreatQuery",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -835,7 +911,9 @@
         "tags": [],
         "label": "ThreatQueryOrUndefined",
         "description": [],
-        "signature": ["string | undefined"],
+        "signature": [
+          "string | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -878,7 +956,9 @@
         "tags": [],
         "label": "ThreatSubtechnique",
         "description": [],
-        "signature": ["{ id: string; name: string; reference: string; }"],
+        "signature": [
+          "{ id: string; name: string; reference: string; }"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -938,7 +1018,10 @@
         "tags": [],
         "label": "concurrent_searches",
         "description": [],
-        "signature": ["Type", "<number, number, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -951,7 +1034,14 @@
         "tags": [],
         "label": "concurrentSearchesOrUndefined",
         "description": [],
-        "signature": ["UnionC", "<[", "Type", "<number, number, unknown>, ", "UndefinedC", "]>"],
+        "signature": [
+          "UnionC",
+          "<[",
+          "Type",
+          "<number, number, unknown>, ",
+          "UndefinedC",
+          "]>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -998,7 +1088,10 @@
         "description": [
           "\nTypes the DefaultExportFileName as:\n  - If null or undefined, then a default of \"export.ndjson\" will be used"
         ],
-        "signature": ["Type", "<string, string | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_export_file_name/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1013,7 +1106,10 @@
         "description": [
           "\nTypes the DefaultFromString as:\n  - If null or undefined, then a default of the string \"now-6m\" will be used"
         ],
-        "signature": ["Type", "<string, string | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_from_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1028,7 +1124,10 @@
         "description": [
           "\nTypes the DefaultIntervalString as:\n  - If null or undefined, then a default of the string \"5m\" will be used"
         ],
-        "signature": ["Type", "<string, string | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_interval_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1043,7 +1142,10 @@
         "description": [
           "\nTypes the DefaultLanguageString as:\n  - If null or undefined, then a default of the string \"kuery\" will be used"
         ],
-        "signature": ["Type", "<string, string | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_language_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1058,7 +1160,10 @@
         "description": [
           "\nTypes the default max signal:\n  - Natural Number (positive integer and not a float),\n  - greater than 1\n  - If undefined then it will use DEFAULT_MAX_SIGNALS (100) as the default"
         ],
-        "signature": ["Type", "<number, number | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_max_signals_number/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1073,7 +1178,10 @@
         "description": [
           "\nTypes the DefaultPerPage as:\n  - If a string this will convert the string to a number\n  - If null or undefined, then a default of 1 will be used\n  - If the number is 0 or less this will not validate as it has to be a positive number greater than zero"
         ],
-        "signature": ["Type", "<number, number | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_page/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1088,7 +1196,10 @@
         "description": [
           "\nTypes the DefaultPerPage as:\n  - If a string this will convert the string to a number\n  - If null or undefined, then a default of 20 will be used\n  - If the number is 0 or less this will not validate as it has to be a positive number greater than zero"
         ],
-        "signature": ["Type", "<number, number | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_per_page/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1157,7 +1268,10 @@
         "description": [
           "\nTypes the DefaultToString as:\n  - If null or undefined, then a default of the string \"now\" will be used"
         ],
-        "signature": ["Type", "<string, string | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_to_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1172,7 +1286,10 @@
         "description": [
           "\nTypes the DefaultUuid as:\n  - If null or undefined, then a default string uuidv4() will be\n    created otherwise it will be checked just against an empty string"
         ],
-        "signature": ["Type", "<string, string | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_uuid/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1185,7 +1302,10 @@
         "tags": [],
         "label": "items_per_search",
         "description": [],
-        "signature": ["Type", "<number, number, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1198,7 +1318,14 @@
         "tags": [],
         "label": "itemsPerSearchOrUndefined",
         "description": [],
-        "signature": ["UnionC", "<[", "Type", "<number, number, unknown>, ", "UndefinedC", "]>"],
+        "signature": [
+          "UnionC",
+          "<[",
+          "Type",
+          "<number, number, unknown>, ",
+          "UndefinedC",
+          "]>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1211,7 +1338,10 @@
         "tags": [],
         "label": "language",
         "description": [],
-        "signature": ["KeyofC", "<{ eql: null; kuery: null; lucene: null; esql: null; }>"],
+        "signature": [
+          "KeyofC",
+          "<{ eql: null; kuery: null; lucene: null; esql: null; }>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1244,7 +1374,14 @@
         "tags": [],
         "label": "machine_learning_job_id",
         "description": [],
-        "signature": ["UnionC", "<[", "StringC", ", ", "Type", "<string[], string[], unknown>]>"],
+        "signature": [
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "Type",
+          "<string[], string[], unknown>]>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/machine_learning_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1257,7 +1394,10 @@
         "tags": [],
         "label": "machine_learning_job_id_normalized",
         "description": [],
-        "signature": ["Type", "<string[], string[], unknown>"],
+        "signature": [
+          "Type",
+          "<string[], string[], unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/normalized_ml_job_id/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1314,7 +1454,10 @@
         "tags": [],
         "label": "max_signals",
         "description": [],
-        "signature": ["Type", "<number, number, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1327,7 +1470,14 @@
         "tags": [],
         "label": "maxSignalsOrUndefined",
         "description": [],
-        "signature": ["UnionC", "<[", "Type", "<number, number, unknown>, ", "UndefinedC", "]>"],
+        "signature": [
+          "UnionC",
+          "<[",
+          "Type",
+          "<number, number, unknown>, ",
+          "UndefinedC",
+          "]>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/max_signals/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1342,7 +1492,10 @@
         "description": [
           "\nTypes the ReferencesDefaultArray as:\n  - If null or undefined, then a default array will be set"
         ],
-        "signature": ["Type", "<string[], string[] | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string[], string[] | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/references_default_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1355,7 +1508,10 @@
         "tags": [],
         "label": "RiskScore",
         "description": [],
-        "signature": ["Type", "<number, number, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/risk_score/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2274,7 +2430,9 @@
         "tags": [],
         "label": "RuleActionGroup",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2287,7 +2445,9 @@
         "tags": [],
         "label": "RuleActionId",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2354,7 +2514,9 @@
         "tags": [],
         "label": "RuleActionSummary",
         "description": [],
-        "signature": ["BooleanC"],
+        "signature": [
+          "BooleanC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/frequency/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2389,7 +2551,9 @@
         "tags": [],
         "label": "RuleActionTypeId",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2402,7 +2566,10 @@
         "tags": [],
         "label": "RuleActionUuid",
         "description": [],
-        "signature": ["Type", "<string, string, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2415,7 +2582,9 @@
         "tags": [],
         "label": "RuleInterval",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2428,7 +2597,10 @@
         "tags": [],
         "label": "RuleIntervalFrom",
         "description": [],
-        "signature": ["Type", "<string, string, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2441,7 +2613,9 @@
         "tags": [],
         "label": "RuleIntervalTo",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/rule_schedule/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2550,7 +2724,10 @@
         "tags": [],
         "label": "Severity",
         "description": [],
-        "signature": ["KeyofC", "<{ low: null; medium: null; high: null; critical: null; }>"],
+        "signature": [
+          "KeyofC",
+          "<{ low: null; medium: null; high: null; critical: null; }>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/severity/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2679,7 +2856,12 @@
         "tags": [],
         "label": "threat_filters",
         "description": [],
-        "signature": ["ArrayC", "<", "UnknownC", ">"],
+        "signature": [
+          "ArrayC",
+          "<",
+          "UnknownC",
+          ">"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2692,7 +2874,9 @@
         "tags": [],
         "label": "threat_framework",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2705,7 +2889,12 @@
         "tags": [],
         "label": "threat_index",
         "description": [],
-        "signature": ["ArrayC", "<", "StringC", ">"],
+        "signature": [
+          "ArrayC",
+          "<",
+          "StringC",
+          ">"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2718,7 +2907,9 @@
         "tags": [],
         "label": "threat_indicator_path",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2767,7 +2958,9 @@
         "tags": [],
         "label": "threat_query",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2802,7 +2995,9 @@
         "tags": [],
         "label": "threat_subtechnique_id",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2815,7 +3010,9 @@
         "tags": [],
         "label": "threat_subtechnique_name",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2828,7 +3025,9 @@
         "tags": [],
         "label": "threat_subtechnique_reference",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_subtechnique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2887,7 +3086,9 @@
         "tags": [],
         "label": "threat_tactic_id",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2900,7 +3101,9 @@
         "tags": [],
         "label": "threat_tactic_name",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2913,7 +3116,9 @@
         "tags": [],
         "label": "threat_tactic_reference",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_tactic/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2966,7 +3171,9 @@
         "tags": [],
         "label": "threat_technique_id",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2979,7 +3186,9 @@
         "tags": [],
         "label": "threat_technique_name",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2992,7 +3201,9 @@
         "tags": [],
         "label": "threat_technique_reference",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_technique/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3047,7 +3258,16 @@
         "tags": [],
         "label": "threatFiltersOrUndefined",
         "description": [],
-        "signature": ["UnionC", "<[", "ArrayC", "<", "UnknownC", ">, ", "UndefinedC", "]>"],
+        "signature": [
+          "UnionC",
+          "<[",
+          "ArrayC",
+          "<",
+          "UnknownC",
+          ">, ",
+          "UndefinedC",
+          "]>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3060,7 +3280,16 @@
         "tags": [],
         "label": "threatIndexOrUndefined",
         "description": [],
-        "signature": ["UnionC", "<[", "ArrayC", "<", "StringC", ">, ", "UndefinedC", "]>"],
+        "signature": [
+          "UnionC",
+          "<[",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">, ",
+          "UndefinedC",
+          "]>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3073,7 +3302,14 @@
         "tags": [],
         "label": "threatIndicatorPathOrUndefined",
         "description": [],
-        "signature": ["UnionC", "<[", "StringC", ", ", "UndefinedC", "]>"],
+        "signature": [
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "UndefinedC",
+          "]>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3210,7 +3446,14 @@
         "tags": [],
         "label": "threatQueryOrUndefined",
         "description": [],
-        "signature": ["UnionC", "<[", "StringC", ", ", "UndefinedC", "]>"],
+        "signature": [
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "UndefinedC",
+          "]>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
         "trackAdoption": false,

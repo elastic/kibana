@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
 import { merge } from 'lodash';
 import { createElement } from 'react';
-import {
-  AssetType,
-  CanvasElement,
-  DatatableColumn,
-  ExpressionAstExpression,
-  ExpressionContext,
-  ExpressionValue,
-} from '../../types';
+import { Ast } from '@kbn/interpreter';
 // @ts-expect-error unconverted components
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type_registry';
+import type { Args, ArgType, ArgTypeDef, ArgValue, ExpressionType } from './types';
+import {
+  AssetType,
+  CanvasElement,
+  ExpressionAstExpression,
+  ExpressionValue,
+  ExpressionContext,
+  DatatableColumn,
+} from '../../types';
 import { BaseFormProps } from './base_form';
-import type { ArgType, ArgTypeDef, ArgValue, Args, ExpressionType } from './types';
 
 interface ArtOwnProps {
   argType: ArgType;

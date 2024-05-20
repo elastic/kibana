@@ -7,8 +7,8 @@
  */
 
 import { App, AppMountParameters, CoreSetup } from '@kbn/core/public';
-import { ForwardDefinition, UrlForwardingStart } from '../plugin';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
+import { ForwardDefinition, UrlForwardingStart } from '../plugin';
 
 export const createLegacyUrlForwardApp = (
   core: CoreSetup<{}, UrlForwardingStart>,

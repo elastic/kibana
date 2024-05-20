@@ -8,12 +8,12 @@
 
 import { of } from 'rxjs';
 
+import { embeddablePluginMock } from '../../../mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { Embeddable, EmbeddableInput, ViewMode } from '../..';
-import { core, embeddableStart } from '../../../kibana_services';
-import { embeddablePluginMock } from '../../../mocks';
-import { ContactCardEmbeddable } from '../../test_samples';
 import { canEditEmbeddable, editLegacyEmbeddable } from './edit_legacy_embeddable';
+import { ContactCardEmbeddable } from '../../test_samples';
+import { core, embeddableStart } from '../../../kibana_services';
 
 const applicationMock = applicationServiceMock.createStartContract();
 const stateTransferMock = embeddablePluginMock.createStartContract().getStateTransfer();

@@ -6,11 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { processAggregations } from '../../common/utils/aggregations';
 import { generateGroupOption } from './agent_grouper';
-import { generateAgentSelection, getNumAgentsInGrouping, getNumOverlapped } from './helpers';
+import { getNumOverlapped, getNumAgentsInGrouping, generateAgentSelection } from './helpers';
 import type { GroupOption, Overlap, SelectedGroups } from './types';
 import { AGENT_GROUP_KEY } from './types';
+import { processAggregations } from '../../common/utils/aggregations';
 
 describe('generateAgentSelection', () => {
   it('should handle empty input', () => {

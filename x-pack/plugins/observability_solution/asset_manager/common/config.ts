@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export const INDEX_DEFAULTS = {
   logs: 'filebeat-*,logs-*',
@@ -40,7 +40,7 @@ export const exposeToBrowserConfig = {
 } as const;
 
 type ValidKeys = keyof {
-  [K in keyof typeof exposeToBrowserConfig as (typeof exposeToBrowserConfig)[K] extends true
+  [K in keyof typeof exposeToBrowserConfig as typeof exposeToBrowserConfig[K] extends true
     ? K
     : never]: true;
 };

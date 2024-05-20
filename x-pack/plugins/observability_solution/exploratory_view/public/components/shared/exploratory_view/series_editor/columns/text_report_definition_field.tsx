@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {

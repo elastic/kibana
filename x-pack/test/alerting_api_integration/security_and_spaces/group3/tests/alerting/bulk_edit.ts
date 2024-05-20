@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import expect from '@kbn/expect';
+import { SavedObject } from '@kbn/core/server';
 import { RuleNotifyWhen, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObject } from '@kbn/core/server';
-import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
-  ObjectRemover,
   checkAAD,
-  getTestRuleData,
-  getUnauthorizedErrorMessage,
   getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
-import { SuperuserAtSpace1, UserAtSpaceScenarios, systemActionScenario } from '../../../scenarios';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {

@@ -7,10 +7,10 @@
  */
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
+import _ from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import './_error.scss';
 

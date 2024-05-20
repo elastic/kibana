@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { first, gt, gte, isEqual, last, lt, lte, sortBy } from 'lodash';
+import { isEqual, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
 import { mix, parseToRgb, toColorString } from 'polished';
 import {
-  GradientLegendRT,
   InfraWaffleMapBounds,
-  InfraWaffleMapGradientRule,
   InfraWaffleMapLegend,
   InfraWaffleMapRuleOperator,
-  InfraWaffleMapStepRule,
-  StepLegendRT,
+  GradientLegendRT,
   SteppedGradientLegendRT,
+  StepLegendRT,
+  InfraWaffleMapStepRule,
+  InfraWaffleMapGradientRule,
 } from '../../../../lib/lib';
 
 const OPERATOR_TO_FN = {

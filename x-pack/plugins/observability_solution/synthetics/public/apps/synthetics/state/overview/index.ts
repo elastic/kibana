@@ -9,8 +9,6 @@ import { createReducer } from '@reduxjs/toolkit';
 import { isStatusEnabled } from '../../../../../common/runtime_types/monitor_management/alert_config';
 import { MonitorOverviewState } from './models';
 
-import { ConfigKey } from '../../components/monitor_add_edit/types';
-import { enableMonitorAlertAction } from '../monitor_list/actions';
 import {
   fetchMonitorOverviewAction,
   setFlyoutConfig,
@@ -18,6 +16,8 @@ import {
   setOverviewPageStateAction,
   toggleErrorPopoverOpen,
 } from './actions';
+import { enableMonitorAlertAction } from '../monitor_list/actions';
+import { ConfigKey } from '../../components/monitor_add_edit/types';
 
 const initialState: MonitorOverviewState = {
   data: {

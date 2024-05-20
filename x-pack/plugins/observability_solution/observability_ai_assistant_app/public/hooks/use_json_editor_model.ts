@@ -1,4 +1,3 @@
-import { monaco } from '@kbn/monaco';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { monaco } from '@kbn/monaco';
  * 2.0.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { monaco } from '@kbn/monaco';
 import { createInitializedObject } from '../utils/create_initialized_object';
-import { safeJsonParse } from '../utils/safe_json_parse';
 import { useObservabilityAIAssistantChatService } from './use_observability_ai_assistant_chat_service';
+import { safeJsonParse } from '../utils/safe_json_parse';
 
 const { editor, languages, Uri } = monaco;
 
@@ -44,8 +44,8 @@ export const useJsonEditorModel = ({
     const initialJsonString = initialJsonValue
       ? JSON.stringify(safeJsonParse(initialJsonValue), null, 4) // prettify the json
       : functionDefinition.parameters.properties
-        ? JSON.stringify(createInitializedObject(functionDefinition.parameters), null, 4)
-        : '';
+      ? JSON.stringify(createInitializedObject(functionDefinition.parameters), null, 4)
+      : '';
 
     languages.json.jsonDefaults.setDiagnosticsOptions({
       validate: true,

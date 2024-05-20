@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import React from 'react';
-import { LeftPanelInvestigationTab } from '../../left';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
 import { InvestigationGuide } from './investigation_guide';
+import { RightPanelContext } from '../context';
 import {
   INVESTIGATION_GUIDE_BUTTON_TEST_ID,
   INVESTIGATION_GUIDE_LOADING_TEST_ID,
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
+import { mockContextValue } from '../mocks/mock_context';
+import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInvestigationTab } from '../../left';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
 jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutApi: jest.fn() }));

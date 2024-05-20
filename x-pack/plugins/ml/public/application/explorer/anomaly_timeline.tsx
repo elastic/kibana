@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { isEqual } from 'lodash';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
@@ -23,50 +26,47 @@ import {
   EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
-import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import useDebounce from 'react-use/lib/useDebounce';
+import useObservable from 'react-use/lib/useObservable';
+import type { Query } from '@kbn/es-query';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { isEqual } from 'lodash';
-import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import useObservable from 'react-use/lib/useObservable';
-import type { AnomalySwimLaneEmbeddableState } from '../..';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
-import { MlTooltipComponent } from '../components/chart_tooltip';
-import { SeverityControl } from '../components/severity_control';
-import { useMlKibana } from '../contexts/kibana';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
-import { SwimLaneWrapper } from './alerts';
-import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
-import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
-import { NoOverallData } from './components/no_overall_data';
-import { Y_AXIS_LABEL_WIDTH } from './constants';
+import type { AnomalySwimLaneEmbeddableState } from '../..';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import type { SwimlaneType } from './explorer_constants';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
+import { useMlKibana } from '../contexts/kibana';
+import type { ExplorerState } from './reducers/explorer_reducer';
+import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
+import { SwimlaneContainer } from './swimlane_container';
 import type {
   AppStateSelectedCells,
   OverallSwimlaneData,
   ViewBySwimLaneData,
 } from './explorer_utils';
-import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
-import type { ExplorerState } from './reducers/explorer_reducer';
+import { NoOverallData } from './components/no_overall_data';
+import { SeverityControl } from '../components/severity_control';
+import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
+import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
-import { SwimlaneContainer } from './swimlane_container';
+import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
+import { useAnomalyExplorerContext } from './anomaly_explorer_context';
+import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
+import { SwimLaneWrapper } from './alerts';
+import { Y_AXIS_LABEL_WIDTH } from './constants';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({

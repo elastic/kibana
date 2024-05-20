@@ -5,52 +5,52 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { SavedObjectReference } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { Ast } from '@kbn/interpreter';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { TinymathAST } from '@kbn/tinymath';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { cloneDeep } from 'lodash';
 import { ReactElement } from 'react';
+import { SavedObjectReference } from '@kbn/core/public';
 import { isFragment } from 'react-is';
-import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
-import { createMockDataViewsState } from '../../data_views_service/mocks';
-import { createMockFramePublicAPI } from '../../mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { FormBasedPersistedState, FormBasedPrivateState } from './types';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { Ast } from '@kbn/interpreter';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { TinymathAST } from '@kbn/tinymath';
+import { getFormBasedDatasource, GenericIndexPatternColumn } from './form_based';
 import {
-  Datasource,
   DatasourcePublicAPI,
+  Datasource,
   FramePublicAPI,
   OperationDescriptor,
   UserMessage,
 } from '../../types';
-import { GenericIndexPatternColumn, getFormBasedDatasource } from './form_based';
+import { getFieldByNameFactory } from './pure_helpers';
 import {
-  AvgIndexPatternColumn,
-  CountIndexPatternColumn,
-  DateHistogramIndexPatternColumn,
-  FiltersIndexPatternColumn,
-  FormulaIndexPatternColumn,
-  MathIndexPatternColumn,
-  MedianIndexPatternColumn,
-  MovingAverageIndexPatternColumn,
-  PercentileIndexPatternColumn,
-  RangeIndexPatternColumn,
-  SumIndexPatternColumn,
-  TermsIndexPatternColumn,
-  getErrorMessages,
   operationDefinitionMap,
+  getErrorMessages,
+  TermsIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+  MathIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  RangeIndexPatternColumn,
+  FiltersIndexPatternColumn,
+  PercentileIndexPatternColumn,
+  CountIndexPatternColumn,
+  SumIndexPatternColumn,
+  AvgIndexPatternColumn,
+  MedianIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
-import { getFieldByNameFactory } from './pure_helpers';
-import { FormBasedPersistedState, FormBasedPrivateState } from './types';
+import { cloneDeep } from 'lodash';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { createMockFramePublicAPI } from '../../mocks';
+import { createMockDataViewsState } from '../../data_views_service/mocks';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');

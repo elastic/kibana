@@ -22,10 +22,7 @@ export function createDefaultFileAttributes(): Pick<
 }
 
 export class FilesPluginError extends Error {
-  constructor(
-    message: string,
-    public readonly meta?: any
-  ) {
+  constructor(message: string, public readonly meta?: any) {
     super(message);
     // For debugging - capture name of subclasses
     this.name = this.constructor.name;

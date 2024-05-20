@@ -8,11 +8,11 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
-import { isActiveTimeline } from '../../../../helpers';
-import { Resolver } from '../../../../resolver/view';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { useLeftPanelContext } from '../context';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
+import { Resolver } from '../../../../resolver/view';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { isActiveTimeline } from '../../../../helpers';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
 

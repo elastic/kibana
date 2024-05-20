@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
+import { screen } from '@testing-library/react';
+import { AlertLifecycleStatusCell } from './alert_lifecycle_status_cell';
+import { CellComponentProps } from '../types';
 import { Alert } from '../../../../types';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';
 import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
-import { CellComponentProps } from '../types';
-import { AlertLifecycleStatusCell } from './alert_lifecycle_status_cell';
 
 jest.mock('../../../../common/lib/kibana');
 

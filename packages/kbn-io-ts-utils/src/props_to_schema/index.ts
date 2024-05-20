@@ -1,5 +1,3 @@
-import { Type, schema } from '@kbn/config-schema';
-import { isLeft } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +7,8 @@ import { isLeft } from 'fp-ts/lib/Either';
  */
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { schema, Type } from '@kbn/config-schema';
+import { isLeft } from 'fp-ts/lib/Either';
 
 export function propsToSchema<T extends t.Type<any>>(type: T): Type<t.TypeOf<T>> {
   return schema.object(

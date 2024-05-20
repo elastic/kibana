@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
 import { useContext } from 'react';
+import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
 import * as i18n from './translations';
 
 export const useTimelineUnifiedDataTableContext = () => {

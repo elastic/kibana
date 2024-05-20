@@ -5,71 +5,71 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Query } from '@kbn/data-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import type { FilterSpecification, LayerSpecification, Map as MbMap } from '@kbn/mapbox-gl';
-import { asyncForEach } from '@kbn/std';
-import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
-import _ from 'lodash';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { asyncForEach } from '@kbn/std';
+import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { Query } from '@kbn/data-plugin/common';
+import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
+import _ from 'lodash';
+import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { AbstractLayer } from '../layer';
+import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
   AGG_TYPE,
+  SOURCE_META_DATA_REQUEST_ID,
+  SOURCE_FORMATTERS_DATA_REQUEST_ID,
+  LAYER_TYPE,
   FIELD_ORIGIN,
   FieldFormatter,
-  LAYER_TYPE,
-  SOURCE_FORMATTERS_DATA_REQUEST_ID,
-  SOURCE_META_DATA_REQUEST_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
+import { TermJoinTooltipProperty } from '../../tooltips/term_join_tooltip_property';
+import { DataRequestAbortError } from '../../util/data_request';
+import { canSkipStyleMetaUpdate, canSkipFormattersUpdate } from '../../util/can_skip_fetch';
+import {
+  getLabelFilterExpression,
+  getFillFilterExpression,
+  getLineFilterExpression,
+  getPointFilterExpression,
+  TimesliceMaskConfig,
+} from '../../util/mb_filter_expressions';
 import {
   AbstractESJoinSourceDescriptor,
   AggDescriptor,
   CustomIcon,
-  DataFilters,
   DynamicStylePropertyOptions,
+  DataFilters,
   JoinDescriptor,
   StyleMetaDescriptor,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
-import { PropertiesMap } from '../../../../common/elasticsearch_util';
-import { getJoinAggKey } from '../../../../common/get_agg_key';
-import { DataRequestContext } from '../../../actions';
-import { IField } from '../../fields/field';
+import { IVectorSource } from '../../sources/vector_source';
+import { isESVectorTileSource } from '../../sources/es_source';
+import { LayerIcon, ILayer, LayerMessage } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
 import { isSpatialJoin } from '../../joins/is_spatial_join';
-import type { IESAggSource } from '../../sources/es_agg_source';
-import { isESVectorTileSource } from '../../sources/es_source';
+import { IField } from '../../fields/field';
+import { DataRequestContext } from '../../../actions';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { hasESSourceMethod } from '../../sources/es_source';
 import type { IJoinSource, ITermJoinSource } from '../../sources/join_sources';
 import { isTermJoinSource } from '../../sources/join_sources';
-import { IVectorSource } from '../../sources/vector_source';
-import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
-import { TermJoinTooltipProperty } from '../../tooltips/term_join_tooltip_property';
-import { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { canSkipFormattersUpdate, canSkipStyleMetaUpdate } from '../../util/can_skip_fetch';
-import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { DataRequestAbortError } from '../../util/data_request';
-import {
-  TimesliceMaskConfig,
-  getFillFilterExpression,
-  getLabelFilterExpression,
-  getLineFilterExpression,
-  getPointFilterExpression,
-} from '../../util/mb_filter_expressions';
+import type { IESAggSource } from '../../sources/es_agg_source';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
-import { AbstractLayer } from '../layer';
-import { ILayer, LayerIcon, LayerMessage } from '../layer';
+import { getJoinAggKey } from '../../../../common/get_agg_key';
 import { syncBoundsData } from './bounds_data';
-import { Mask } from './mask';
 import { JoinState } from './types';
+import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
+import { PropertiesMap } from '../../../../common/elasticsearch_util';
+import { Mask } from './mask';
 
 const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 

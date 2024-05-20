@@ -8,8 +8,8 @@
 import { Observable } from 'rxjs';
 import {
   GlobalSearchProviderFindOptions,
-  GlobalSearchProviderFindParams,
   GlobalSearchProviderResult,
+  GlobalSearchProviderFindParams,
 } from '../common/types';
 import { SearchServiceSetup, SearchServiceStart } from './services';
 

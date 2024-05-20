@@ -8,8 +8,8 @@
 
 import React, { Component } from 'react';
 import { Request } from '../../../../../common/adapters/request/types';
-import { RequestCodeViewer } from './req_code_viewer';
 import { DetailViewProps } from './types';
+import { RequestCodeViewer } from './req_code_viewer';
 
 export class RequestDetailsResponse extends Component<DetailViewProps> {
   static shouldShow = (request: Request) =>

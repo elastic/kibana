@@ -5,51 +5,51 @@
  * 2.0.
  */
 
-import type { EuiTableActionsColumnType } from '@elastic/eui';
-import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { type DataViewField, UI_SETTINGS } from '@kbn/data-plugin/common';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { i18n } from '@kbn/i18n';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { Dictionary } from '@kbn/ml-url-state';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { merge } from 'rxjs';
-import seedrandom from 'seedrandom';
 import type { Required } from 'utility-types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { merge } from 'rxjs';
+import type { EuiTableActionsColumnType } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { UI_SETTINGS, type DataViewField } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import seedrandom from 'seedrandom';
+import type { Dictionary } from '@kbn/ml-url-state';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import useObservable from 'react-use/lib/useObservable';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
+import type { RandomSamplerOption } from '../constants/random_sampler';
+import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
+import { useDataVisualizerKibana } from '../../kibana_context';
+import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
+import type { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
+import type { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
   NON_AGGREGATABLE_FIELD_TYPES,
   OMIT_FIELDS,
   SUPPORTED_FIELD_TYPES,
 } from '../../../../common/constants';
 import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
+import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
+import { getActions } from '../../common/components/field_data_row/action_menu';
+import { useFieldStatsSearchStrategy } from './use_field_stats';
+import { useOverallStats } from './use_overall_stats';
 import type {
   OverallStatsSearchStrategyParams,
   SamplingOption,
 } from '../../../../common/types/field_stats';
-import { getActions } from '../../common/components/field_data_row/action_menu';
-import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
-import type { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
-import type { FieldVisConfig } from '../../common/components/stats_table/types';
+import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
+import { getSupportedAggs } from '../utils/get_supported_aggs';
 import { DEFAULT_BAR_TARGET } from '../../common/constants';
-import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
-import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   DATA_VISUALIZER_INDEX_VIEWER_ID,
   getDefaultPageState,
 } from '../constants/index_data_visualizer_viewer';
-import type { RandomSamplerOption } from '../constants/random_sampler';
-import type { FieldStatisticsTableEmbeddableState } from '../embeddables/grid_embeddable/types';
-import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
-import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 import { getFieldsWithSubFields } from '../utils/get_fields_with_subfields_utils';
-import { getSupportedAggs } from '../utils/get_supported_aggs';
-import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
-import { useFieldStatsSearchStrategy } from './use_field_stats';
-import { useOverallStats } from './use_overall_stats';
+import type { FieldStatisticsTableEmbeddableState } from '../embeddables/grid_embeddable/types';
 
 const defaults = getDefaultPageState();
 

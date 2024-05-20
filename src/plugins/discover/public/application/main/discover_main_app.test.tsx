@@ -1,9 +1,3 @@
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Router } from '@kbn/shared-ux-router';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { createMemoryHistory } from 'history';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,10 +7,16 @@ import { createMemoryHistory } from 'history';
  */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
-import { discoverServiceMock } from '../../__mocks__/services';
-import { DiscoverTopNav } from './components/top_nav/discover_topnav';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverMainApp } from './discover_main_app';
+import { DiscoverTopNav } from './components/top_nav/discover_topnav';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { discoverServiceMock } from '../../__mocks__/services';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
+import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from './state_management/discover_state_provider';
 
 discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {

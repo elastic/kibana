@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiNotificationBadge, EuiTabbedContent } from '@elastic/eui';
-import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 import { ResultsTable } from '../../../results/results_table';
+import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 
 const euiTabbedContentCss = {
   'div.euiTabs': {

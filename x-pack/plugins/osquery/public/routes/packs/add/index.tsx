@@ -9,10 +9,10 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
+import { useRouterNavigate } from '../../../common/lib/kibana';
 import { PackForm } from '../../../packs/form';
+import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const AddPackPageComponent = () => {
   useBreadcrumbs('pack_add');

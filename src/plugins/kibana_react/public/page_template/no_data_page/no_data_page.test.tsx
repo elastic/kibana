@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { NoDataPage } from './no_data_page';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 describe('NoDataPage', () => {
   test('render', () => {

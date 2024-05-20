@@ -15,8 +15,8 @@ import React from 'react';
 import {
   EuiButton,
   EuiFieldText,
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
   EuiForm,
   EuiFormRow,
   EuiSpacer,
@@ -24,16 +24,16 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { JOB_STATE } from '../../../../../common/constants/states';
+import { FORECAST_DURATION_MAX_DAYS } from './forecasting_modal';
+import { ForecastProgress } from './forecast_progress';
+import { currentMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import {
   checkPermission,
   createPermissionFailureMessage,
 } from '../../../capabilities/check_capabilities';
-import { currentMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
-import { ForecastProgress } from './forecast_progress';
-import { FORECAST_DURATION_MAX_DAYS } from './forecasting_modal';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 function getRunInputDisabledState(job, isForecastRequested) {
   // Disable the 'run forecast' text field and button if any of the conditions are met:

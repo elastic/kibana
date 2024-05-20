@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CliArgs, Env, RawConfigAdapter } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
+import { CliArgs, Env, RawConfigAdapter } from '@kbn/config';
 import { CliDevMode } from './cli_dev_mode';
-import { loadConfig } from './config';
 import { CliLog } from './log';
 import { convertToLogger } from './log_adapter';
+import { loadConfig } from './config';
 
 interface BootstrapArgs {
   configs: string[];

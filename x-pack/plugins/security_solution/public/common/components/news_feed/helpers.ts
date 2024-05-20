@@ -7,10 +7,10 @@
 
 import { get } from 'lodash/fp';
 import moment from 'moment';
-import semverCoerce from 'semver/functions/coerce';
 import { v4 as uuidv4 } from 'uuid';
-import { KibanaServices } from '../../lib/kibana';
+import semverCoerce from 'semver/functions/coerce';
 import type { NewsItem, RawNewsApiItem, RawNewsApiResponse } from './types';
+import { KibanaServices } from '../../lib/kibana';
 
 /**
  * Removes the suffix that is sometimes appended to the Kibana version,

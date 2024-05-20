@@ -7,8 +7,8 @@
  */
 
 import type { IndexMapping, IndexMappingMeta } from '../mappings';
-import { assertValidVirtualVersion } from './conversion';
 import type { VirtualVersionMap } from './version_map';
+import { assertValidVirtualVersion } from './conversion';
 
 export interface GetModelVersionsFromMappingsOpts {
   mappings: IndexMapping;

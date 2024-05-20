@@ -6,8 +6,8 @@
  */
 
 import { useReducer } from 'react';
-import { Operation, ShardSerialized, Targets } from '../types';
 import { reducer } from './reducer';
+import { Operation, ShardSerialized, Targets } from '../types';
 
 export type OperationNoChildParent = Omit<Operation, 'children' | 'parent'>;
 

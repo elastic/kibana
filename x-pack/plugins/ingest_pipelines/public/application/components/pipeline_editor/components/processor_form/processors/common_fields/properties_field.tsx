@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { FunctionComponent } from 'react';
 import { EuiComboBoxProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
 
 import { ComboBoxField, FIELD_TYPES, UseField } from '../../../../../../../shared_imports';
 

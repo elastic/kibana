@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiLink } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
-import moment from 'moment';
 import React from 'react';
-import { RuleDurationFormat } from '../../../rules_list/components/rule_duration_format';
-import { DEFAULT_DATE_FORMAT, EventLogListCellRenderer } from './event_log_list_cell_renderer';
+import moment from 'moment';
+import { EuiIcon, EuiLink } from '@elastic/eui';
+import { shallow, mount } from 'enzyme';
+import { EventLogListCellRenderer, DEFAULT_DATE_FORMAT } from './event_log_list_cell_renderer';
 import { EventLogListStatus } from './event_log_list_status';
+import { RuleDurationFormat } from '../../../rules_list/components/rule_duration_format';
 
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({

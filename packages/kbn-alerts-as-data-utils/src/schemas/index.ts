@@ -7,15 +7,15 @@
  */
 
 import type { Alert } from './generated/alert_schema';
-import type { DefaultAlert } from './generated/default_schema';
-import type { MlAnomalyDetectionHealthAlert } from './generated/ml_anomaly_detection_health_schema';
-import type { MlAnomalyDetectionAlert } from './generated/ml_anomaly_detection_schema';
 import type { ObservabilityApmAlert } from './generated/observability_apm_schema';
 import type { ObservabilityLogsAlert } from './generated/observability_logs_schema';
 import type { ObservabilityMetricsAlert } from './generated/observability_metrics_schema';
 import type { ObservabilitySloAlert } from './generated/observability_slo_schema';
 import type { ObservabilityUptimeAlert } from './generated/observability_uptime_schema';
 import type { SecurityAlert } from './generated/security_schema';
+import type { MlAnomalyDetectionAlert } from './generated/ml_anomaly_detection_schema';
+import type { DefaultAlert } from './generated/default_schema';
+import type { MlAnomalyDetectionHealthAlert } from './generated/ml_anomaly_detection_health_schema';
 import type { TransformHealthAlert } from './generated/transform_health_schema';
 
 export * from './create_schema_from_field_map';

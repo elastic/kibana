@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { HttpStart as Http, ToastsSetup } from '@kbn/core/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { HttpStart as Http, ToastsSetup } from '@kbn/core/public';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { LicenseStatus } from '../../common';
 import { KibanaRenderContextProvider } from '../shared_imports';
-import { SearchProfilerStartServices } from '../types';
 import { App } from './app';
 import { AppContextProvider } from './contexts/app_context';
 import { ProfileContextProvider } from './contexts/profiler_context';
+import { SearchProfilerStartServices } from '../types';
 
 interface AppDependencies {
   el: HTMLElement;

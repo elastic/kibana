@@ -6,9 +6,9 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { CspRouter } from '../../../types';
 import { CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH } from '../../../../common/constants';
 import { CspBenchmarkRulesStates } from '../../../../common/types/rules/v4';
-import { CspRouter } from '../../../types';
 import { getCspBenchmarkRulesStatesHandler } from './v1';
 
 export const defineGetCspBenchmarkRulesStatesRoute = (router: CspRouter) =>
@@ -31,8 +31,9 @@ export const defineGetCspBenchmarkRulesStatesRoute = (router: CspRouter) =>
         try {
           const encryptedSoClient = cspContext.encryptedSavedObjects;
 
-          const rulesStates: CspBenchmarkRulesStates =
-            await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
+          const rulesStates: CspBenchmarkRulesStates = await getCspBenchmarkRulesStatesHandler(
+            encryptedSoClient
+          );
 
           return response.ok({
             body: rulesStates,

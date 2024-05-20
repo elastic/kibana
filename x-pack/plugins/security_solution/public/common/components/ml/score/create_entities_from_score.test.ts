@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
 import { mockAnomalies } from '../mock';
 import {
   createEntitiesFromScore,
@@ -13,6 +12,7 @@ import {
   createEntityFromRecord,
   createInfluencersFromScore,
 } from './create_entities_from_score';
+import { cloneDeep } from 'lodash/fp';
 
 describe('create_entities_from_score', () => {
   let anomalies = cloneDeep(mockAnomalies);

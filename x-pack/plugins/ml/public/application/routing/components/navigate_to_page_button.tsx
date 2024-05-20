@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiButton } from '@elastic/eui';
 import { useNavigateToPath } from '../../contexts/kibana';
 
 export const NavigateToPageButton = ({

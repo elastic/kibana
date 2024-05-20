@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect, useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
-  FieldConfig,
-  FieldHook,
+  useForm,
   Form,
-  FormDataProvider,
+  UseField,
   SelectField,
   SuperSelectField,
-  UseField,
-  useForm,
+  FieldConfig,
+  FieldHook,
+  FormDataProvider,
 } from '../../../shared_imports';
 import { SelectOption, SuperSelectOption } from '../../../types';
 import { MapOptionsToSubOptions } from './analyzer_parameter';

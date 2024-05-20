@@ -17,23 +17,23 @@ import d3 from 'd3';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
-import { context } from '@kbn/kibana-react-plugin/public';
 import {
   getFormattedSeverityScore,
   getSeverityColor,
   getSeverityWithLow,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import { context } from '@kbn/kibana-react-plugin/public';
 
-import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { formatValue } from '../../formatters/format_value';
 import {
-  chartExtendedLimits,
   getChartType,
   getTickValues,
   numTicksForDateFormat,
   removeLabelOverlap,
+  chartExtendedLimits,
 } from '../../util/chart_utils';
+import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 
 import { CHART_TYPE } from '../explorer_constants';
 import { TRANSPARENT_BACKGROUND } from './constants';

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
+import { useInProgressImage } from './use_in_progress_image';
 import {
-  ScreenshotRefImageData,
   isScreenshotImageBlob,
   isScreenshotRef,
+  ScreenshotRefImageData,
 } from '../../../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../../../contexts';
-import { useInProgressImage } from './use_in_progress_image';
 
 import { NoImageDisplay } from './no_image_display';
 import { StepImageCaption } from './step_image_caption';

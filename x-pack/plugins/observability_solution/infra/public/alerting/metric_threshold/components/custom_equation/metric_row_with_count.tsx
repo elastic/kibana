@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiHorizontalRule, EuiSelect } from '@elastic/eui';
-import { DataViewBase } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiHorizontalRule, EuiFlexItem, EuiFlexGroup, EuiSelect } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { Aggregators, CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
+import { i18n } from '@kbn/i18n';
+import { DataViewBase } from '@kbn/es-query';
 import { MetricsExplorerKueryBar } from '../../../../pages/metrics/metrics_explorer/components/kuery_bar';
+import { Aggregators, CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
 import { MetricRowControls } from './metric_row_controls';
 import { MetricRowBaseProps } from './types';
 

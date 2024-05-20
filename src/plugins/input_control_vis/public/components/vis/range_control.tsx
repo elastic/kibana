@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import _ from 'lodash';
 import React, { PureComponent } from 'react';
-import { RangeControl as RangeControlClass } from '../../control/range_control_factory';
+import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { FormRow } from './form_row';
+import { RangeControl as RangeControlClass } from '../../control/range_control_factory';
 
 function roundWithPrecision(
   value: number,

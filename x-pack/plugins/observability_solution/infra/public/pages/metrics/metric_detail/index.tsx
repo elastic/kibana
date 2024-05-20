@@ -6,14 +6,14 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
+import React from 'react';
+import { useRouteMatch } from 'react-router-dom';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { enableInfrastructureContainerAssetView } from '@kbn/observability-plugin/common';
-import React from 'react';
-import { useRouteMatch } from 'react-router-dom';
 import { AssetDetailPage } from './asset_detail_page';
-import { MetricsTimeProvider } from './hooks/use_metrics_time';
 import { MetricDetailPage } from './metric_detail_page';
+import { MetricsTimeProvider } from './hooks/use_metrics_time';
 
 export const NodeDetail = () => {
   const {

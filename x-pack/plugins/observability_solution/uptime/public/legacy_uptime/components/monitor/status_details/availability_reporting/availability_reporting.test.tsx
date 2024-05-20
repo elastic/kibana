@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render } from '../../../../lib/helper/rtl_helpers';
 import { AvailabilityReporting } from './availability_reporting';
 import { StatusTag } from './location_status_tags';
+import { render } from '../../../../lib/helper/rtl_helpers';
 
 describe('AvailabilityReporting component', () => {
   let allLocations: StatusTag[];

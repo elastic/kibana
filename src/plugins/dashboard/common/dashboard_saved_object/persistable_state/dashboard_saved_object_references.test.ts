@@ -7,17 +7,17 @@
  */
 
 import {
-  InjectExtractDeps,
   extractReferences,
   injectReferences,
+  InjectExtractDeps,
 } from './dashboard_saved_object_references';
 
-import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
-import { DashboardAttributes } from '../../content_management';
 import {
   createExtract,
   createInject,
 } from '../../dashboard_container/persistable_state/dashboard_container_references';
+import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
+import { DashboardAttributes } from '../../content_management';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
 const dashboardInject = createInject(embeddablePersistableStateServiceMock);

@@ -7,8 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
-import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
 export const turnOffAgentPolicyFeatures = async (
   fleetServices: EndpointInternalFleetServicesInterface,

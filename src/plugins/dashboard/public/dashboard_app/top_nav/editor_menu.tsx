@@ -8,6 +8,7 @@
 
 import './editor_menu.scss';
 
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiBadge,
   EuiContextMenu,
@@ -18,19 +19,18 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { DASHBOARD_APP_ID } from '../../dashboard_constants';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { ADD_PANEL_TRIGGER } from '../../triggers';
 import {
-  type GroupedAddPanelActions,
   getAddPanelActionMenuItems,
+  type GroupedAddPanelActions,
 } from './add_panel_action_menu_items';
 
 export interface FactoryGroup {

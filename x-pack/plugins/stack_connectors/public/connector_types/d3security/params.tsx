@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFormRow } from '@elastic/eui';
-import { EuiFieldText } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { SUB_ACTION } from '../../../common/d3security/constants';
+import { EuiFormRow } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 import { D3SecurityRunActionParams } from '../../../common/d3security/types';
+import { SUB_ACTION } from '../../../common/d3security/constants';
 import { D3SecurityActionParams } from './types';
 
 const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityActionParams>> = ({

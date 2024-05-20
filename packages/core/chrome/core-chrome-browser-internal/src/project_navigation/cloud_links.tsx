@@ -1,4 +1,3 @@
-import type { CloudLink, CloudLinks, CloudURLs } from '@kbn/core-chrome-browser';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import type { CloudLink, CloudLinks, CloudURLs } from '@kbn/core-chrome-browser'
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import type { CloudLinks, CloudLink, CloudURLs } from '@kbn/core-chrome-browser';
 
 const stripTrailingForwardSlash = (str: string) => {
   return str[str.length - 1] === '/' ? str.substring(0, str.length - 1) : str;

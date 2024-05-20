@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
-import { getFunctionErrors, getFunctionHelp } from '../../../i18n';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Position } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   show: boolean;

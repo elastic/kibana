@@ -40,8 +40,7 @@
       "fields": {
         "service.name": {
           "keyword": {
-            "type": "keyword",
-            "metadata_field": false,
+            "type": "keyword",            "metadata_field": false,
             "searchable": true,
             "aggregatable": true
           }
@@ -1445,7 +1444,9 @@
       {
         "name": "logs-apm.app",
         "index_template": {
-          "index_patterns": ["logs-apm.app.*-*"],
+          "index_patterns": [
+            "logs-apm.app.*-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1481,7 +1482,9 @@
       {
         "name": "logs-apm.error",
         "index_template": {
-          "index_patterns": ["logs-apm.error-*"],
+          "index_patterns": [
+            "logs-apm.error-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1517,7 +1520,9 @@
       {
         "name": "metrics-apm.app",
         "index_template": {
-          "index_patterns": ["metrics-apm.app.*-*"],
+          "index_patterns": [
+            "metrics-apm.app.*-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1553,7 +1558,9 @@
       {
         "name": "metrics-apm.internal",
         "index_template": {
-          "index_patterns": ["metrics-apm.internal-*"],
+          "index_patterns": [
+            "metrics-apm.internal-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1589,7 +1596,9 @@
       {
         "name": "traces-apm.rum",
         "index_template": {
-          "index_patterns": ["traces-apm.rum-*"],
+          "index_patterns": [
+            "traces-apm.rum-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1625,7 +1634,9 @@
       {
         "name": "traces-apm.sampled",
         "index_template": {
-          "index_patterns": ["traces-apm.sampled-*"],
+          "index_patterns": [
+            "traces-apm.sampled-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1661,7 +1672,9 @@
       {
         "name": "traces-apm",
         "index_template": {
-          "index_patterns": ["traces-apm-*"],
+          "index_patterns": [
+            "traces-apm-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1697,7 +1710,9 @@
       {
         "name": "metrics-apm.service_destination.1m",
         "index_template": {
-          "index_patterns": ["metrics-apm.service_destination.1m-*"],
+          "index_patterns": [
+            "metrics-apm.service_destination.1m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1733,7 +1748,9 @@
       {
         "name": "metrics-apm.service_summary.1m",
         "index_template": {
-          "index_patterns": ["metrics-apm.service_summary.1m-*"],
+          "index_patterns": [
+            "metrics-apm.service_summary.1m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1769,7 +1786,9 @@
       {
         "name": "metrics-apm.service_transaction.1m",
         "index_template": {
-          "index_patterns": ["metrics-apm.service_transaction.1m-*"],
+          "index_patterns": [
+            "metrics-apm.service_transaction.1m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1805,7 +1824,9 @@
       {
         "name": "metrics-apm.transaction.1m",
         "index_template": {
-          "index_patterns": ["metrics-apm.transaction.1m-*"],
+          "index_patterns": [
+            "metrics-apm.transaction.1m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1841,7 +1862,9 @@
       {
         "name": "metrics-apm.service_destination.10m",
         "index_template": {
-          "index_patterns": ["metrics-apm.service_destination.10m-*"],
+          "index_patterns": [
+            "metrics-apm.service_destination.10m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1877,7 +1900,9 @@
       {
         "name": "metrics-apm.service_summary.10m",
         "index_template": {
-          "index_patterns": ["metrics-apm.service_summary.10m-*"],
+          "index_patterns": [
+            "metrics-apm.service_summary.10m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1913,7 +1938,9 @@
       {
         "name": "metrics-apm.service_transaction.10m",
         "index_template": {
-          "index_patterns": ["metrics-apm.service_transaction.10m-*"],
+          "index_patterns": [
+            "metrics-apm.service_transaction.10m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1949,7 +1976,9 @@
       {
         "name": "metrics-apm.transaction.10m",
         "index_template": {
-          "index_patterns": ["metrics-apm.transaction.10m-*"],
+          "index_patterns": [
+            "metrics-apm.transaction.10m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -1985,7 +2014,9 @@
       {
         "name": "metrics-apm.service_destination.60m",
         "index_template": {
-          "index_patterns": ["metrics-apm.service_destination.60m-*"],
+          "index_patterns": [
+            "metrics-apm.service_destination.60m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -2021,7 +2052,9 @@
       {
         "name": "metrics-apm.service_summary.60m",
         "index_template": {
-          "index_patterns": ["metrics-apm.service_summary.60m-*"],
+          "index_patterns": [
+            "metrics-apm.service_summary.60m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -2057,7 +2090,9 @@
       {
         "name": "metrics-apm.service_transaction.60m",
         "index_template": {
-          "index_patterns": ["metrics-apm.service_transaction.60m-*"],
+          "index_patterns": [
+            "metrics-apm.service_transaction.60m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -2093,7 +2128,9 @@
       {
         "name": "metrics-apm.transaction.60m",
         "index_template": {
-          "index_patterns": ["metrics-apm.transaction.60m-*"],
+          "index_patterns": [
+            "metrics-apm.transaction.60m-*"
+          ],
           "template": {
             "settings": {},
             "mappings": {
@@ -3940,19 +3977,25 @@
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["logs-apm.error-*"],
+          "templateIndexPatterns": [
+            "logs-apm.error-*"
+          ],
           "templateName": "logs-apm.error"
         },
         {
           "isNonStandard": false,
           "priority": 150,
-          "templateIndexPatterns": ["logs-apm.app.*-*"],
+          "templateIndexPatterns": [
+            "logs-apm.app.*-*"
+          ],
           "templateName": "logs-apm.app"
         },
         {
           "isNonStandard": false,
           "priority": 100,
-          "templateIndexPatterns": ["logs-*-*"],
+          "templateIndexPatterns": [
+            "logs-*-*"
+          ],
           "templateName": "logs"
         }
       ]
@@ -3962,62 +4005,86 @@
       "indexTemplates": [
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.15.0-error*"],
+          "templateIndexPatterns": [
+            "apm-7.15.0-error*"
+          ],
           "templateName": "apm-7.15.0-error"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.14.0-error*"],
+          "templateIndexPatterns": [
+            "apm-7.14.0-error*"
+          ],
           "templateName": "apm-7.14.0-error"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.14.0-metric*"],
+          "templateIndexPatterns": [
+            "apm-7.14.0-metric*"
+          ],
           "templateName": "apm-7.14.0-metric"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.14.0-transaction*"],
+          "templateIndexPatterns": [
+            "apm-7.14.0-transaction*"
+          ],
           "templateName": "apm-7.14.0-transaction"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.15.0-profile*"],
+          "templateIndexPatterns": [
+            "apm-7.15.0-profile*"
+          ],
           "templateName": "apm-7.15.0-profile"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.14.0-profile*"],
+          "templateIndexPatterns": [
+            "apm-7.14.0-profile*"
+          ],
           "templateName": "apm-7.14.0-profile"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.15.0-transaction*"],
+          "templateIndexPatterns": [
+            "apm-7.15.0-transaction*"
+          ],
           "templateName": "apm-7.15.0-transaction"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.15.0-metric*"],
+          "templateIndexPatterns": [
+            "apm-7.15.0-metric*"
+          ],
           "templateName": "apm-7.15.0-metric"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.15.0-span*"],
+          "templateIndexPatterns": [
+            "apm-7.15.0-span*"
+          ],
           "templateName": "apm-7.15.0-span"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.15.0*"],
+          "templateIndexPatterns": [
+            "apm-7.15.0*"
+          ],
           "templateName": "apm-7.15.0"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.14.0-span*"],
+          "templateIndexPatterns": [
+            "apm-7.14.0-span*"
+          ],
           "templateName": "apm-7.14.0-span"
         },
         {
           "isNonStandard": true,
-          "templateIndexPatterns": ["apm-7.14.0*"],
+          "templateIndexPatterns": [
+            "apm-7.14.0*"
+          ],
           "templateName": "apm-7.14.0"
         }
       ]
@@ -4028,97 +4095,129 @@
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.service_transaction.60m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.service_transaction.60m-*"
+          ],
           "templateName": "metrics-apm.service_transaction.60m"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.service_destination.10m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.service_destination.10m-*"
+          ],
           "templateName": "metrics-apm.service_destination.10m"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.transaction.1m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.transaction.1m-*"
+          ],
           "templateName": "metrics-apm.transaction.1m"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.service_destination.1m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.service_destination.1m-*"
+          ],
           "templateName": "metrics-apm.service_destination.1m"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.service_transaction.10m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.service_transaction.10m-*"
+          ],
           "templateName": "metrics-apm.service_transaction.10m"
         },
         {
           "isNonStandard": true,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.profiling-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.profiling-*"
+          ],
           "templateName": "metrics-apm.profiling"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.service_transaction.1m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.service_transaction.1m-*"
+          ],
           "templateName": "metrics-apm.service_transaction.1m"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.transaction.60m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.transaction.60m-*"
+          ],
           "templateName": "metrics-apm.transaction.60m"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.service_destination.60m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.service_destination.60m-*"
+          ],
           "templateName": "metrics-apm.service_destination.60m"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.service_summary.1m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.service_summary.1m-*"
+          ],
           "templateName": "metrics-apm.service_summary.1m"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.transaction.10m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.transaction.10m-*"
+          ],
           "templateName": "metrics-apm.transaction.10m"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.internal-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.internal-*"
+          ],
           "templateName": "metrics-apm.internal"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.service_summary.10m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.service_summary.10m-*"
+          ],
           "templateName": "metrics-apm.service_summary.10m"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["metrics-apm.service_summary.60m-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.service_summary.60m-*"
+          ],
           "templateName": "metrics-apm.service_summary.60m"
         },
         {
           "isNonStandard": false,
           "priority": 150,
-          "templateIndexPatterns": ["metrics-apm.app.*-*"],
+          "templateIndexPatterns": [
+            "metrics-apm.app.*-*"
+          ],
           "templateName": "metrics-apm.app"
         },
         {
           "isNonStandard": false,
           "priority": 100,
-          "templateIndexPatterns": ["metrics-*-*"],
+          "templateIndexPatterns": [
+            "metrics-*-*"
+          ],
           "templateName": "metrics"
         }
       ]
@@ -4129,19 +4228,25 @@
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["traces-apm-*"],
+          "templateIndexPatterns": [
+            "traces-apm-*"
+          ],
           "templateName": "traces-apm"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["traces-apm.rum-*"],
+          "templateIndexPatterns": [
+            "traces-apm.rum-*"
+          ],
           "templateName": "traces-apm.rum"
         },
         {
           "isNonStandard": false,
           "priority": 200,
-          "templateIndexPatterns": ["traces-apm.sampled-*"],
+          "templateIndexPatterns": [
+            "traces-apm.sampled-*"
+          ],
           "templateName": "traces-apm.sampled"
         }
       ]
@@ -4325,7 +4430,10 @@
     {
       "name": "Metric: Service destination",
       "kuery": "processor.event: \"metric\" AND metricset.name: \"service_destination\"",
-      "index": ["metrics-apm*", "apm-*"],
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
       "docCount": 4036,
       "intervals": {
         "1m": 18899
@@ -4334,7 +4442,10 @@
     {
       "name": "Metric: Service transaction (with summary field)",
       "kuery": "processor.event: \"metric\" AND metricset.name: \"service_transaction\" AND transaction.duration.summary :* ",
-      "index": ["metrics-apm*", "apm-*"],
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
       "docCount": 1122,
       "intervals": {
         "1m": 33017
@@ -4343,7 +4454,10 @@
     {
       "name": "Metric: Transaction (with summary field)",
       "kuery": "processor.event: \"metric\" AND metricset.name: \"transaction\" AND transaction.duration.summary :* ",
-      "index": ["metrics-apm*", "apm-*"],
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
       "docCount": 2873,
       "intervals": {
         "1m": 33017
@@ -4352,28 +4466,40 @@
     {
       "name": "Metric: Service transaction (without summary field)",
       "kuery": "processor.event: \"metric\" AND metricset.name: \"service_transaction\" AND not transaction.duration.summary :* ",
-      "index": ["metrics-apm*", "apm-*"],
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
       "docCount": 0,
       "intervals": {}
     },
     {
       "name": "Metric: Transaction (without summary field)",
       "kuery": "processor.event: \"metric\" AND metricset.name: \"transaction\" AND not transaction.duration.summary :* ",
-      "index": ["metrics-apm*", "apm-*"],
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
       "docCount": 0,
       "intervals": {}
     },
     {
       "name": "Metric: Span breakdown",
       "kuery": "processor.event: \"metric\" AND metricset.name: \"span_breakdown\"",
-      "index": ["metrics-apm*", "apm-*"],
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
       "docCount": 6603,
       "intervals": {}
     },
     {
       "name": "Metric: Service summary",
       "kuery": "processor.event: \"metric\" AND metricset.name: \"service_summary\"",
-      "index": ["metrics-apm*", "apm-*"],
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
       "docCount": 1409,
       "intervals": {
         "1m": 1409
@@ -4382,19 +4508,28 @@
     {
       "name": "Event: Transaction",
       "kuery": "processor.event: \"transaction\"",
-      "index": ["traces-apm*", "apm-*"],
+      "index": [
+        "traces-apm*",
+        "apm-*"
+      ],
       "docCount": 32941
     },
     {
       "name": "Event: Span",
       "kuery": "processor.event: \"span\"",
-      "index": ["traces-apm*", "apm-*"],
+      "index": [
+        "traces-apm*",
+        "apm-*"
+      ],
       "docCount": 39666
     },
     {
       "name": "Event: Error",
       "kuery": "processor.event: \"error\"",
-      "index": ["logs-apm*", "apm-*"],
+      "index": [
+        "logs-apm*",
+        "apm-*"
+      ],
       "docCount": 259
     }
   ],

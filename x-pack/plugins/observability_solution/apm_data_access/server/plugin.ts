@@ -6,19 +6,19 @@
  */
 
 import {
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
-  PluginInitializerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { APMDataAccessConfig } from '.';
+import { ApmDataAccessPluginSetup, ApmDataAccessPluginStart } from './types';
+import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 import {
   apmIndicesSavedObjectDefinition,
   getApmIndicesSavedObject,
 } from './saved_objects/apm_indices';
-import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
-import { ApmDataAccessPluginSetup, ApmDataAccessPluginStart } from './types';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>

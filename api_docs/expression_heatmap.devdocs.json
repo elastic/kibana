@@ -63,7 +63,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["\"brush\""],
+            "signature": [
+              "\"brush\""
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -111,7 +113,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["\"filter\""],
+            "signature": [
+              "\"filter\""
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -159,7 +163,9 @@
             "tags": [],
             "label": "percentageMode",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -171,7 +177,9 @@
             "tags": [],
             "label": "lastRangeIsRightOpen",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -183,7 +191,9 @@
             "tags": [],
             "label": "showTooltip",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -195,7 +205,9 @@
             "tags": [],
             "label": "highlightInHover",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -346,7 +358,10 @@
             "tags": [],
             "label": "legend",
             "description": [],
-            "signature": ["HeatmapLegendConfig", " & { type: \"heatmap_legend\"; }"],
+            "signature": [
+              "HeatmapLegendConfig",
+              " & { type: \"heatmap_legend\"; }"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -358,7 +373,10 @@
             "tags": [],
             "label": "gridConfig",
             "description": [],
-            "signature": ["HeatmapGridConfig", " & { type: \"heatmap_grid\"; }"],
+            "signature": [
+              "HeatmapGridConfig",
+              " & { type: \"heatmap_grid\"; }"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -370,7 +388,9 @@
             "tags": [],
             "label": "ariaLabel",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -458,7 +478,9 @@
             "tags": [],
             "label": "canNavigateToLens",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -524,7 +546,9 @@
         "tags": [],
         "label": "EXPRESSION_HEATMAP_NAME",
         "description": [],
-        "signature": ["\"heatmap\""],
+        "signature": [
+          "\"heatmap\""
+        ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -677,7 +701,10 @@
         "tags": [],
         "label": "HeatmapGridConfigResult",
         "description": [],
-        "signature": ["HeatmapGridConfig", " & { type: \"heatmap_grid\"; }"],
+        "signature": [
+          "HeatmapGridConfig",
+          " & { type: \"heatmap_grid\"; }"
+        ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -738,7 +765,10 @@
         "tags": [],
         "label": "HeatmapLegendConfigResult",
         "description": [],
-        "signature": ["HeatmapLegendConfig", " & { type: \"heatmap_legend\"; }"],
+        "signature": [
+          "HeatmapLegendConfig",
+          " & { type: \"heatmap_legend\"; }"
+        ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -889,7 +919,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"expressionHeatmap\""],
+        "signature": [
+          "\"expressionHeatmap\""
+        ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -902,7 +934,9 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": ["\"expressionHeatmap\""],
+        "signature": [
+          "\"expressionHeatmap\""
+        ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -928,7 +962,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["\"heatmap_grid\""],
+            "signature": [
+              "\"heatmap_grid\""
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -940,7 +976,9 @@
             "tags": [],
             "label": "aliases",
             "description": [],
-            "signature": ["never[]"],
+            "signature": [
+              "never[]"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -952,7 +990,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"heatmap_grid\""],
+            "signature": [
+              "\"heatmap_grid\""
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -975,7 +1015,9 @@
             "tags": [],
             "label": "inputTypes",
             "description": [],
-            "signature": ["\"null\"[]"],
+            "signature": [
+              "\"null\"[]"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -997,7 +1039,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "strokeWidth",
-                "description": ["// grid"],
+                "description": [
+                  "// grid"
+                ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1009,7 +1053,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"number\"[]"],
+                    "signature": [
+                      "\"number\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1032,7 +1078,9 @@
                     "tags": [],
                     "label": "required",
                     "description": [],
-                    "signature": ["false"],
+                    "signature": [
+                      "false"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1057,7 +1105,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"string\"[]"],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1080,7 +1130,9 @@
                     "tags": [],
                     "label": "required",
                     "description": [],
-                    "signature": ["false"],
+                    "signature": [
+                      "false"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1093,7 +1145,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "isCellLabelVisible",
-                "description": ["// cells"],
+                "description": [
+                  "// cells"
+                ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1105,7 +1159,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"boolean\"[]"],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1129,7 +1185,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "isYAxisLabelVisible",
-                "description": ["// Y-axis"],
+                "description": [
+                  "// Y-axis"
+                ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1141,7 +1199,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"boolean\"[]"],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1177,7 +1237,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"boolean\"[]"],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1213,7 +1275,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"string\"[]"],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1236,7 +1300,9 @@
                     "tags": [],
                     "label": "required",
                     "description": [],
-                    "signature": ["false"],
+                    "signature": [
+                      "false"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1249,7 +1315,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "isXAxisLabelVisible",
-                "description": ["// X-axis"],
+                "description": [
+                  "// X-axis"
+                ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1261,7 +1329,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"boolean\"[]"],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1297,7 +1367,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"boolean\"[]"],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1333,7 +1405,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"string\"[]"],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1356,7 +1430,9 @@
                     "tags": [],
                     "label": "required",
                     "description": [],
-                    "signature": ["false"],
+                    "signature": [
+                      "false"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1388,7 +1464,9 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": ["null"],
+                "signature": [
+                  "null"
+                ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1401,7 +1479,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["HeatmapGridConfig"],
+                "signature": [
+                  "HeatmapGridConfig"
+                ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1431,7 +1511,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["\"heatmap_legend\""],
+            "signature": [
+              "\"heatmap_legend\""
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1443,7 +1525,9 @@
             "tags": [],
             "label": "aliases",
             "description": [],
-            "signature": ["never[]"],
+            "signature": [
+              "never[]"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1455,7 +1539,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"heatmap_legend\""],
+            "signature": [
+              "\"heatmap_legend\""
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1478,7 +1564,9 @@
             "tags": [],
             "label": "inputTypes",
             "description": [],
-            "signature": ["\"null\"[]"],
+            "signature": [
+              "\"null\"[]"
+            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1512,7 +1600,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"boolean\"[]"],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1548,7 +1638,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"string\"[]"],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1560,7 +1652,9 @@
                     "tags": [],
                     "label": "default",
                     "description": [],
-                    "signature": ["\"right\""],
+                    "signature": [
+                      "\"right\""
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1572,7 +1666,9 @@
                     "tags": [],
                     "label": "options",
                     "description": [],
-                    "signature": ["(\"right\" | \"left\" | \"top\" | \"bottom\")[]"],
+                    "signature": [
+                      "(\"right\" | \"left\" | \"top\" | \"bottom\")[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1595,7 +1691,9 @@
                     "tags": [],
                     "label": "strict",
                     "description": [],
-                    "signature": ["true"],
+                    "signature": [
+                      "true"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1620,7 +1718,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"number\"[]"],
+                    "signature": [
+                      "\"number\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1656,7 +1756,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"boolean\"[]"],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1668,7 +1770,9 @@
                     "tags": [],
                     "label": "default",
                     "description": [],
-                    "signature": ["true"],
+                    "signature": [
+                      "true"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1704,7 +1808,9 @@
                     "tags": [],
                     "label": "types",
                     "description": [],
-                    "signature": ["\"string\"[]"],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1768,7 +1874,9 @@
                     "tags": [],
                     "label": "strict",
                     "description": [],
-                    "signature": ["true"],
+                    "signature": [
+                      "true"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1810,7 +1918,9 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": ["null"],
+                "signature": [
+                  "null"
+                ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1823,7 +1933,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["HeatmapLegendConfig"],
+                "signature": [
+                  "HeatmapLegendConfig"
+                ],
                 "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                 "deprecated": false,
                 "trackAdoption": false,

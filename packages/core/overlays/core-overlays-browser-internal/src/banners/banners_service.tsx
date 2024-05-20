@@ -12,12 +12,12 @@ import { map } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { OverlayBannersStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { BannersList } from './banners_list';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { OverlayBannersStart } from '@kbn/core-overlays-browser';
 import { PriorityMap } from './priority_map';
+import { BannersList } from './banners_list';
 import { UserBannerService } from './user_banner_service';
 
 interface StartServices {

@@ -7,17 +7,17 @@
  */
 
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
-import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { FilterStateStore, RangeFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DiscoverServices } from '../build_services';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
-  SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
+  SEARCH_FIELDS_FROM_SOURCE,
 } from '@kbn/discover-utils';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { FilterStateStore, RangeFilter } from '@kbn/es-query';
 import { createDiscoverServicesMock } from '../__mocks__/services';
-import type { DiscoverServices } from '../build_services';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {

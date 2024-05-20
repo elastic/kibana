@@ -5,28 +5,28 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import _ from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter, Logger } from '@kbn/core/server';
-import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
-import _ from 'lodash';
-import { ProcessEvent } from '../../common';
+import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import {
   ALERTS_PER_PROCESS_EVENTS_PAGE,
+  PROCESS_EVENTS_ROUTE,
+  PROCESS_EVENTS_PER_PAGE,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
+  TIMESTAMP_PROPERTY,
+  PROCESS_EVENT_FIELDS,
+  EVENT_ACTION_EXECUTED,
   EVENT_ACTION_END,
   EVENT_ACTION_EXEC,
-  EVENT_ACTION_EXECUTED,
   EVENT_ACTION_FORK,
-  PROCESS_EVENTS_PER_PAGE,
-  PROCESS_EVENTS_ROUTE,
-  PROCESS_EVENT_FIELDS,
-  TIMESTAMP_PROPERTY,
 } from '../../common/constants';
+import { ProcessEvent } from '../../common';
 import { searchAlerts } from './alerts_route';
 import { searchProcessWithIOEvents } from './io_events_route';
 

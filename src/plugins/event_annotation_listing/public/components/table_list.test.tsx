@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import {
-  EVENT_ANNOTATION_GROUP_TYPE,
-  EventAnnotationGroupConfig,
-} from '@kbn/event-annotation-common';
-import type { EventAnnotationServiceType } from '@kbn/event-annotation-components/types';
-import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
-import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
 import {
   EventAnnotationGroupTableList,
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
 } from './table_list';
+import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-components/types';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { shallow, ShallowWrapper } from 'enzyme';
+import {
+  EventAnnotationGroupConfig,
+  EVENT_ANNOTATION_GROUP_TYPE,
+} from '@kbn/event-annotation-common';
+import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 
-import { IToasts } from '@kbn/core-notifications-browser';
-import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
-import { ISessionService } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { QueryInputServices } from '@kbn/visualization-ui-components';
 import { act } from 'react-dom/test-utils';
 import { GroupEditorFlyout } from './group_editor_flyout';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { QueryInputServices } from '@kbn/visualization-ui-components';
+import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { ISessionService } from '@kbn/data-plugin/public';
 
 describe('annotation list view', () => {
   const adHocDVId = 'ad-hoc';
@@ -66,7 +66,7 @@ describe('annotation list view', () => {
           ({
             [SAVED_OBJECTS_LIMIT_SETTING]: 30,
             [SAVED_OBJECTS_PER_PAGE_SETTING]: 10,
-          })[key]
+          }[key])
       ),
     } as Partial<IUiSettingsClient> as IUiSettingsClient;
 
@@ -157,9 +157,8 @@ describe('annotation list view', () => {
         },
       ]);
 
-      expect(
-        (mockEventAnnotationService.deleteAnnotationGroups as jest.Mock).mock.calls
-      ).toMatchInlineSnapshot(`
+      expect((mockEventAnnotationService.deleteAnnotationGroups as jest.Mock).mock.calls)
+        .toMatchInlineSnapshot(`
         Array [
           Array [
             Array [

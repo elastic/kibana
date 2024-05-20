@@ -9,13 +9,13 @@
 import type { PackageInfo } from '@kbn/core/server';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { WarningHandlerCallback } from '@kbn/search-response-warnings';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ISearchStartSearchSource } from '../../common/search';
 import { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
 import { SearchUsageCollector } from './collectors';
-import { ISessionService, ISessionsClient } from './session';
+import { ISessionsClient, ISessionService } from './session';
 
 export { SEARCH_EVENT_TYPE } from './collectors';
 export type { ISearchStartSearchSource, SearchUsageCollector };

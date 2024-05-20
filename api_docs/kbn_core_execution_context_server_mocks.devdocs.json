@@ -41,7 +41,11 @@
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [],
-            "signature": ["() => jest.Mocked<", "IExecutionContext", ">"],
+            "signature": [
+              "() => jest.Mocked<",
+              "IExecutionContext",
+              ">"
+            ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,7 +59,11 @@
             "tags": [],
             "label": "createInternalStartContract",
             "description": [],
-            "signature": ["() => jest.Mocked<", "IExecutionContext", ">"],
+            "signature": [
+              "() => jest.Mocked<",
+              "IExecutionContext",
+              ">"
+            ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

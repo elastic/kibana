@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import {
-  AlertingConnectorFeatureId,
-  SecurityConnectorFeatureId,
-  UptimeConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+import { isUndefined, pick, omitBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
+import moment from 'moment';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import { TypeOf, schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import { isUndefined, omitBy, pick } from 'lodash';
-import moment from 'moment';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
 import { postPagerduty } from './post_pagerduty';
 
 // uses the PagerDuty Events API v2

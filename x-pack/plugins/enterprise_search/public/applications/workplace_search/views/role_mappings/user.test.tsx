@@ -15,10 +15,10 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  DeactivatedUserCallout,
-  UserAddedInfo,
   UserFlyout,
+  UserAddedInfo,
   UserInvitationCallout,
+  DeactivatedUserCallout,
 } from '../../../shared/role_mapping';
 import { elasticsearchUsers } from '../../../shared/role_mapping/__mocks__/elasticsearch_users';
 import { wsSingleUserRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';

@@ -11,14 +11,14 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../../common/types/api';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import {
   DeleteCrawlerDomainApiLogic,
-  DeleteCrawlerDomainArgs,
   DeleteCrawlerDomainResponse,
+  DeleteCrawlerDomainArgs,
 } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import { CrawlerDomain } from '../../../../api/crawler/types';
 import { IndexNameLogic } from '../../index_name_logic';

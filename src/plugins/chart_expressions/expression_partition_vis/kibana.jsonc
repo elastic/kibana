@@ -15,8 +15,14 @@
       "fieldFormats",
       "presentationUtil"
     ],
-    "optionalPlugins": ["usageCollection"],
-    "requiredBundles": ["kibanaUtils"],
-    "extraPublicDirs": ["common"]
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

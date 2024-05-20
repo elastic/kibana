@@ -64,7 +64,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/user-profile/core-user-profile-browser-internal/src/user_profile_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -76,7 +78,9 @@
                 "tags": [],
                 "label": "coreContext",
                 "description": [],
-                "signature": ["CoreContext"],
+                "signature": [
+                  "CoreContext"
+                ],
                 "path": "packages/core/user-profile/core-user-profile-browser-internal/src/user_profile_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -138,7 +142,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/user-profile/core-user-profile-browser-internal/src/user_profile_service.ts",
             "deprecated": false,
             "trackAdoption": false,

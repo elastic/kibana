@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Router } from '@kbn/shared-ux-router';
 
-// @ts-ignore
-import { App } from './app.container';
 import { AppDependencies } from './app_context';
 import { AppProviders } from './app_providers';
+// @ts-ignore
+import { App } from './app.container';
 
 const AppWithRouter = (props: { [key: string]: any }) => (
   <Router history={props.history}>

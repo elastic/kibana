@@ -6,18 +6,18 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
 
 import {
+  bulkDisableRulesRequestBodySchemaV1,
   BulkDisableRulesRequestBodyV1,
   BulkDisableRulesResponseV1,
-  bulkDisableRulesRequestBodySchemaV1,
 } from '../../../../../common/routes/rule/apis/bulk_disable';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { Rule } from '../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { Rule } from '../../../../application/rule/types';
 
 export const bulkDisableRulesRoute = ({
   router,

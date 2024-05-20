@@ -14,10 +14,10 @@ import { ConnectorServerSideDefinition } from '@kbn/search-connectors-plugin/ser
 
 import { ConfigType } from '..';
 import {
-  AI_SEARCH_PLUGIN,
-  APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  APP_SEARCH_PLUGIN,
+  AI_SEARCH_PLUGIN,
 } from '../../common/constants';
 
 type ServiceDefinition =

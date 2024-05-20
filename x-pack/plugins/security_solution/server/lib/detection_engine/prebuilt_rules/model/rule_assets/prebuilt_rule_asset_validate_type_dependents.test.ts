@@ -6,8 +6,8 @@
  */
 
 import type { PrebuiltRuleAsset } from './prebuilt_rule_asset';
-import { getPrebuiltRuleMock } from './prebuilt_rule_asset.mock';
 import { addPrepackagedRuleValidateTypeDependents } from './prebuilt_rule_asset_validate_type_dependents';
+import { getPrebuiltRuleMock } from './prebuilt_rule_asset.mock';
 
 describe('addPrepackagedRuleValidateTypeDependents', () => {
   test('You cannot omit timeline_title when timeline_id is present', () => {

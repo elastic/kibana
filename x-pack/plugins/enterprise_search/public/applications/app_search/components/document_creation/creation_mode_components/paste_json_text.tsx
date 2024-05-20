@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiTextArea,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

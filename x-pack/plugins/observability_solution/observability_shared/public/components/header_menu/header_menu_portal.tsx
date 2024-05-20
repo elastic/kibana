@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo } from 'react';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 // FIXME use import { toMountPoint } from '@kbn/react-kibana-mount';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import React, { useEffect, useMemo } from 'react';
-import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import type { HeaderMenuPortalProps } from '../../types';
 
 // eslint-disable-next-line import/no-default-export

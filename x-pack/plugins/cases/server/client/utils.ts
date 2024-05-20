@@ -6,14 +6,14 @@
  */
 
 import { badRequest } from '@hapi/boom';
+import { get, isPlainObject, differenceWith, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { differenceWith, get, isEqual, isPlainObject } from 'lodash';
 import { validate as uuidValidate } from 'uuid';
 
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 
-import { escapeKuery, fromKueryExpression, nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
 import type {
@@ -34,27 +34,27 @@ import {
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
 
+import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   NO_ASSIGNEES_FILTERING_KEYWORD,
   OWNER_FIELD,
 } from '../../common/constants';
-import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
-import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import {
-  assertUnreachable,
   getIDsAndIndicesAsArrays,
-  isCommentRequestTypeActions,
   isCommentRequestTypeAlert,
   isCommentRequestTypeUser,
+  isCommentRequestTypeActions,
+  assertUnreachable,
 } from '../common/utils';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
 

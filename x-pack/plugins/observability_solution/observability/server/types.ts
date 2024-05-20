@@ -1,11 +1,3 @@
-import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import type {
-  CoreRequestHandlerContext,
-  CustomRequestHandlerContext,
-  IRouter,
-} from '@kbn/core/server';
-import { isoToEpochRt, nonEmptyStringRt } from '@kbn/io-ts-utils';
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,6 +5,14 @@ import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/se
  * 2.0.
  */
 import * as rt from 'io-ts';
+import { isoToEpochRt, nonEmptyStringRt } from '@kbn/io-ts-utils';
+import type {
+  IRouter,
+  CustomRequestHandlerContext,
+  CoreRequestHandlerContext,
+} from '@kbn/core/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 export type {
   ObservabilityRouteCreateOptions,

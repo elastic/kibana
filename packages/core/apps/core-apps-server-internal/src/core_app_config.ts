@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type TypeOf, schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 /**

@@ -1,16 +1,3 @@
-import type { KibanaRequest } from '@kbn/core-http-server';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
-import {
-  ENCRYPTION_EXTENSION_ID,
-  type ISavedObjectTypeRegistry,
-  SECURITY_EXTENSION_ID,
-  SPACES_EXTENSION_ID,
-  type SavedObjectsClientFactory,
-  type SavedObjectsEncryptionExtensionFactory,
-  type SavedObjectsSecurityExtensionFactory,
-  type SavedObjectsSpacesExtensionFactory,
-} from '@kbn/core-saved-objects-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -19,8 +6,21 @@ import {
  * Side Public License, v 1.
  */
 import type { Optional } from 'utility-types';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { SavedObjectsClientProvider } from './scoped_client_provider';
+import {
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsClientFactory,
+  type SavedObjectsEncryptionExtensionFactory,
+  type SavedObjectsSecurityExtensionFactory,
+  type SavedObjectsSpacesExtensionFactory,
+  ENCRYPTION_EXTENSION_ID,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
+} from '@kbn/core-saved-objects-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 /**
  * @internal only used for unit tests

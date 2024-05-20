@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -15,19 +16,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
-import { MAINTENANCE_WINDOW_DEEP_LINK_IDS, MAINTENANCE_WINDOW_FEATURE_ID } from '../../../common';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
-import { useLicense } from '../../hooks/use_license';
-import { useCreateMaintenanceWindowNavigation } from '../../hooks/use_navigation';
 import { useKibana } from '../../utils/kibana_react';
-import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EmptyPrompt } from './components/empty_prompt';
-import { LicensePrompt } from './components/license_prompt';
-import { MaintenanceWindowsList } from './components/maintenance_windows_list';
-import { ExperimentalBadge } from './components/page_header';
 import * as i18n from './translations';
+import { useCreateMaintenanceWindowNavigation } from '../../hooks/use_navigation';
+import { MaintenanceWindowsList } from './components/maintenance_windows_list';
+import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
+import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { ExperimentalBadge } from './components/page_header';
+import { useLicense } from '../../hooks/use_license';
+import { LicensePrompt } from './components/license_prompt';
+import { MAINTENANCE_WINDOW_FEATURE_ID, MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const {

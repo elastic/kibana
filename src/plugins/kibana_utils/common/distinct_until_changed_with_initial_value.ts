@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MonoTypeOperatorFunction, from, queueScheduler, scheduled } from 'rxjs';
+import { MonoTypeOperatorFunction, queueScheduler, scheduled, from } from 'rxjs';
 import { concatAll, distinctUntilChanged, skip } from 'rxjs';
 
 export function distinctUntilChangedWithInitialValue<T>(

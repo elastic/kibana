@@ -15,15 +15,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  CloudDetailsPanel,
-  InstallClientPanel,
-  LanguageClientPanel,
+  SelectClientPanel,
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
+  LanguageClientPanel,
+  InstallClientPanel,
   OverviewPanel,
-  SelectClientPanel,
-  getConsoleRequest,
   getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
+  CloudDetailsPanel,
 } from '@kbn/search-api-panels';
 
 import { ApiKey } from '@kbn/security-plugin/common';

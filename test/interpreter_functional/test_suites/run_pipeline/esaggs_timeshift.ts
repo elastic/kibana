@@ -8,8 +8,8 @@
 
 import expect from '@kbn/expect';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 import { ExpectExpression, expectExpressionProvider } from './helpers';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 function getCell(esaggsResult: any, row: number, column: number): unknown | undefined {
   if (esaggsResult && !esaggsResult.columns) {

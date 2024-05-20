@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
 
-import { PARAMETERS_OPTIONS } from '../../../../constants';
+import { NormalizedField, Field as FieldType } from '../../../../types';
+import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
-import { Field, UseField } from '../../../../shared_imports';
-import { Field as FieldType, NormalizedField } from '../../../../types';
+import { PARAMETERS_OPTIONS } from '../../../../constants';
 import {
-  BoostParameter,
   DocValuesParameter,
-  EagerGlobalOrdinalsParameter,
-  IgnoreAboveParameter,
   IndexParameter,
-  MetaParameter,
+  BoostParameter,
+  EagerGlobalOrdinalsParameter,
   NullValueParameter,
   SimilarityParameter,
   SplitQueriesOnWhitespaceParameter,
+  MetaParameter,
+  IgnoreAboveParameter,
 } from '../../field_parameters';
-import { AdvancedParametersSection, BasicParametersSection, EditFieldFormRow } from '../edit_field';
+import { BasicParametersSection, EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;

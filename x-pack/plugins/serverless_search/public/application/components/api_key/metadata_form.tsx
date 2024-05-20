@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { CodeEditorField } from '@kbn/code-editor';
+import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CodeEditorField } from '@kbn/code-editor';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
 

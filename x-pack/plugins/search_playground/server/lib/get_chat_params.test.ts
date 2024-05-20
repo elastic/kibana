@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { getChatParams } from './get_chat_params';
 import {
   ActionsClientChatOpenAI,
   ActionsClientLlm,
 } from '@kbn/elastic-assistant-common/impl/language_models';
 import {
-  BEDROCK_CONNECTOR_ID,
   OPENAI_CONNECTOR_ID,
+  BEDROCK_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
 import { Prompt } from '../../common/prompt';
-import { getChatParams } from './get_chat_params';
+import { KibanaRequest, Logger } from '@kbn/core/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 
 jest.mock('@kbn/elastic-assistant-common/impl/language_models', () => ({
   ActionsClientChatOpenAI: jest.fn(),

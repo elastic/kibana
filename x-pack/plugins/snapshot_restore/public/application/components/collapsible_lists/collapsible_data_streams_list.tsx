@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiTitle, EuiLink, EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { useCollapsibleList } from './use_collapsible_list';
 

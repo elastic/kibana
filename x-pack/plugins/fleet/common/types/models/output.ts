@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ValueOf } from '..';
 import type { outputType } from '../../constants';
+import type { ValueOf } from '..';
 import type { kafkaAuthType, kafkaCompressionType, kafkaSaslMechanism } from '../../constants';
 import type { kafkaPartitionType } from '../../constants';
 import type { kafkaTopicWhenType } from '../../constants';

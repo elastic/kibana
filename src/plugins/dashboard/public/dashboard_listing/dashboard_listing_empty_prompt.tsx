@@ -7,24 +7,24 @@
  */
 
 import {
+  EuiLink,
   EuiButton,
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
-import { pluginServices } from '../services/plugin_services';
 import {
-  dashboardUnsavedListingStrings,
-  getNewDashboardTitle,
   noItemsStrings,
+  getNewDashboardTitle,
+  dashboardUnsavedListingStrings,
 } from './_dashboard_listing_strings';
+import { pluginServices } from '../services/plugin_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup/dashboard_backup_service';
 import { DashboardListingProps } from './types';
 
 export interface DashboardListingEmptyPromptProps {

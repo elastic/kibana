@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { RawBucket } from '../../types';
 import { flattenBucket } from './flatten_bucket';
 import {
   bucketsWithStackByField1,
   bucketsWithoutStackByField1,
   maxRiskSubAggregations,
 } from './mocks/mock_buckets';
+import type { RawBucket } from '../../types';
 
 describe('flattenBucket', () => {
   it(`returns the expected flattened buckets when stackByField1 has buckets`, () => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PaletteDefinition, PaletteRegistry } from '@kbn/coloring';
+import type { PaletteRegistry, PaletteDefinition } from '@kbn/coloring';
 import { getActivePaletteName } from '@kbn/coloring';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginSetup } from '../..';

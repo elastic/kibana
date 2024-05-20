@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import React, { useState, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import {
+  EuiForm,
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
+  EuiFormRow,
   EuiFieldText,
+  EuiComboBox,
+  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiPopoverTitle,
-  EuiSelect,
   EuiText,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
-import React, { useState, useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import {
-  SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregation,
-  SnapshotCustomAggregationRT,
   SnapshotCustomMetricInput,
+  SNAPSHOT_CUSTOM_AGGREGATIONS,
+  SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
 import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
+import { getOr } from 'lodash/fp';
 
-import { manageQuery } from '../../../../common/components/page/manage_query';
 import { NetworkHttpTable } from '../../components/network_http_table';
 import { ID, useNetworkHttp } from '../../containers/network_http';
+import { manageQuery } from '../../../../common/components/page/manage_query';
 
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { HttpQueryTabBodyProps } from './types';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
 

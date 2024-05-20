@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow } from 'enzyme';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { OfExpression } from './of';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 describe('of expression', () => {
   it('renders of builtin aggregation types', () => {
@@ -24,9 +24,8 @@ describe('of expression', () => {
         onChangeSelectedAggField={onChangeSelectedAggField}
       />
     );
-    expect(
-      wrapper.find('[data-test-subj="availablefieldsOptionsComboBox"]')
-    ).toMatchInlineSnapshot(`
+    expect(wrapper.find('[data-test-subj="availablefieldsOptionsComboBox"]'))
+      .toMatchInlineSnapshot(`
       <EuiComboBox
         async={false}
         compressed={false}
@@ -81,9 +80,8 @@ describe('of expression', () => {
         }}
       />
     );
-    expect(
-      wrapper.find('[data-test-subj="availablefieldsOptionsComboBox"]')
-    ).toMatchInlineSnapshot(`
+    expect(wrapper.find('[data-test-subj="availablefieldsOptionsComboBox"]'))
+      .toMatchInlineSnapshot(`
       <EuiComboBox
         async={false}
         compressed={false}

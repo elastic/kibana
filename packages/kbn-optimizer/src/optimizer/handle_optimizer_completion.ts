@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { createFailError } from '@kbn/dev-cli-errors';
 import { tap } from 'rxjs';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 import { pipeClosure } from '../common';
 import { OptimizerUpdate$ } from '../run_optimizer';
 
-import { OptimizerConfig } from './optimizer_config';
 import { OptimizerState } from './optimizer_state';
+import { OptimizerConfig } from './optimizer_config';
 
 export function handleOptimizerCompletion(config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {

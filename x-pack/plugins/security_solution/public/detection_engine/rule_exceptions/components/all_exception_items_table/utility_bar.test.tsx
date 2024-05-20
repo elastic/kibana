@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 
-import { TestProviders } from '../../../../common/mock';
 import { ExceptionsViewerUtility } from './utility_bar';
+import { TestProviders } from '../../../../common/mock';
 
 describe('ExceptionsViewerUtility', () => {
   it('it renders correct item counts', () => {

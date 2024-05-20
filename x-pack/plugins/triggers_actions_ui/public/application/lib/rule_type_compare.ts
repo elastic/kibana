@@ -6,7 +6,7 @@
  */
 
 import { RuleTypeModel } from '../../types';
-import { IsDisabledResult, IsEnabledResult } from './check_rule_type_enabled';
+import { IsEnabledResult, IsDisabledResult } from './check_rule_type_enabled';
 
 export type RuleTypeGroup = [
   string,
@@ -15,7 +15,7 @@ export type RuleTypeGroup = [
     name: string;
     checkEnabledResult: IsEnabledResult | IsDisabledResult;
     ruleTypeItem: RuleTypeModel;
-  }>,
+  }>
 ];
 
 export function ruleTypeGroupCompare(

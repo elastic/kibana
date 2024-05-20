@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
+import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import type { ComponentType } from 'react';
 import type { ReactElement } from 'react-markdown';
 import { useSpaceId } from '../../hooks/use_space_id';

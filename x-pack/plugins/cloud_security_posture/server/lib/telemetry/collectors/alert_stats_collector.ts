@@ -1,4 +1,3 @@
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +5,9 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { DETECTION_ENGINE_ALERTS_INDEX_DEFAULT } from '../../../../common/constants';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CloudSecurityAlertsStats } from './types';
+import { DETECTION_ENGINE_ALERTS_INDEX_DEFAULT } from '../../../../common/constants';
 
 interface AlertStat {
   doc_count: number;

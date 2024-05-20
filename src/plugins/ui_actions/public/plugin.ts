@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   rowClickTrigger,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { UiActionsService } from './service';
 import { setAnalytics, setI18n, setTheme } from './services';
 

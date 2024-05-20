@@ -6,6 +6,10 @@
     "id": "alertingFixture",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["alerting", "triggersActionsUi", "features"]
+    "requiredPlugins": [
+      "alerting",
+      "triggersActionsUi",
+      "features"
+    ]
   }
 }

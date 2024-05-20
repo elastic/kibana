@@ -8,7 +8,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { createHttpService } from '@kbn/core-http-server-mocks';
 import {
   type MetricsServiceSetup,
   RequestHandlerContext,
@@ -17,13 +16,14 @@ import {
 } from '@kbn/core/server';
 import {
   contextServiceMock,
-  executionContextServiceMock,
   loggingSystemMock,
   metricsServiceMock,
+  executionContextServiceMock,
 } from '@kbn/core/server/mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
+import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';
-import { registerStatsRoute } from '../stats';
 
 type HttpService = ReturnType<typeof createHttpService>;
 type HttpSetup = Awaited<ReturnType<HttpService['setup']>>;

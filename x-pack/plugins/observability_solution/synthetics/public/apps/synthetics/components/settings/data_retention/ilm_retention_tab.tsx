@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBasicTable, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useGetIlmPolicies } from '../hooks/use_get_ilm_policies';
+import { i18n } from '@kbn/i18n';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { PolicyLink, PolicyNameLabel } from '../policy_link';
+import { useGetIlmPolicies } from '../hooks/use_get_ilm_policies';
 import { Unprivileged } from './unprivileged';
 
 export const IlmRetentionTab = () => {
@@ -43,7 +43,7 @@ export const IlmRetentionTab = () => {
     {
       field: 'policy.name',
       name: <PolicyNameLabel />,
-      render: (name: string, _item: (typeof data)[0]) => <PolicyLink name={name} />,
+      render: (name: string, _item: typeof data[0]) => <PolicyLink name={name} />,
     },
   ];
 

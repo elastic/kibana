@@ -7,9 +7,9 @@
 
 import { MetricsExplorerViewsClient } from './metrics_explorer_views_client';
 import {
+  MetricsExplorerViewsServiceStartDeps,
   MetricsExplorerViewsServiceSetup,
   MetricsExplorerViewsServiceStart,
-  MetricsExplorerViewsServiceStartDeps,
 } from './types';
 
 export class MetricsExplorerViewsService {

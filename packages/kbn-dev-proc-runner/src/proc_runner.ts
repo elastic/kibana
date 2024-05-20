@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { createFailError } from '@kbn/dev-cli-errors';
-import { ToolingLog } from '@kbn/tooling-log';
-import exitHook from 'exit-hook';
 import * as Rx from 'rxjs';
+import exitHook from 'exit-hook';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 import { Proc, ProcOptions, startProc } from './proc';
 

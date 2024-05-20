@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { ISessionService, SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
 import { first, take, toArray } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-import { SearchUsageCollector } from '../..';
-import { NowProviderInternalContract } from '../../now_provider';
-import { createNowProviderMock } from '../../now_provider/mocks';
-import { createSearchUsageCollectorMock } from '../collectors/mocks';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { getSessionsClientMock } from './mocks';
+import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
-import { ISessionService, SessionService } from './session_service';
+import { createNowProviderMock } from '../../now_provider/mocks';
+import { NowProviderInternalContract } from '../../now_provider';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import type { ISessionsClient, SearchSessionSavedObject } from './sessions_client';
+import { CoreStart } from '@kbn/core/public';
+import { SearchUsageCollector } from '../..';
+import { createSearchUsageCollectorMock } from '../collectors/mocks';
 
 const mockSavedObject: SearchSessionSavedObject = {
   id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',

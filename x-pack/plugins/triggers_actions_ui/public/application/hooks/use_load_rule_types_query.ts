@@ -1,4 +1,3 @@
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +6,11 @@ import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
  */
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useMemo } from 'react';
+import { loadRuleTypes } from '../lib/rule_api/rule_types';
 import { useKibana } from '../../common/lib/kibana';
 import { RuleType, RuleTypeIndex } from '../../types';
-import { loadRuleTypes } from '../lib/rule_api/rule_types';
 
 interface UseLoadRuleTypesQueryProps {
   filteredRuleTypes: string[];

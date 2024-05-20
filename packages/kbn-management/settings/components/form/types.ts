@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { I18nStart } from '@kbn/core-i18n-browser';
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import type {
   FieldRowKibanaDependencies,
   FieldRowServices,
 } from '@kbn/management-settings-components-field-row';
 import { UnsavedFieldChange } from '@kbn/management-settings-types';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { I18nStart } from '@kbn/core-i18n-browser';
+import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { ToastsStart } from '@kbn/core-notifications-browser';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 /**
  * Contextual services used by a {@link Form} component.

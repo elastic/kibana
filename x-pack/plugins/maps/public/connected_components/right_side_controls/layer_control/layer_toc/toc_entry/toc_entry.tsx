@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiConfirmModal, EuiIcon } from '@elastic/eui';
-import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import classNames from 'classnames';
 import React, { Component } from 'react';
-import { ILayer } from '../../../../../classes/layers/layer';
-import { isLayerGroup } from '../../../../../classes/layers/layer_group';
+import classNames from 'classnames';
+import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
-  EDIT_LAYER_SETTINGS_LABEL,
-  FIT_TO_DATA_LABEL,
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
+  EDIT_LAYER_SETTINGS_LABEL,
+  FIT_TO_DATA_LABEL,
 } from './action_labels';
 import { LegendDetails } from './legend_details';
-import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
+import { ILayer } from '../../../../../classes/layers/layer';
+import { isLayerGroup } from '../../../../../classes/layers/layer_group';
 
 function escapeLayerName(name: string) {
   return name.split(' ').join('_');

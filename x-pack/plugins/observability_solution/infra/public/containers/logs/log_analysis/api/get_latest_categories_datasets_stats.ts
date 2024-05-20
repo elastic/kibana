@@ -8,10 +8,10 @@
 import { HttpHandler } from '@kbn/core/public';
 import {
   CategorizerStatus,
-  LOG_ANALYSIS_GET_LATEST_LOG_ENTRY_CATEGORY_DATASETS_STATS_PATH,
-  LogEntryCategoriesDatasetStats,
   getLatestLogEntryCategoryDatasetsStatsRequestPayloadRT,
   getLatestLogEntryCategoryDatasetsStatsSuccessResponsePayloadRT,
+  LogEntryCategoriesDatasetStats,
+  LOG_ANALYSIS_GET_LATEST_LOG_ENTRY_CATEGORY_DATASETS_STATS_PATH,
 } from '../../../../../common/http_api';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 

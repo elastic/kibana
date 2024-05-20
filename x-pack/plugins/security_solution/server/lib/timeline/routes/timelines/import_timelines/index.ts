@@ -13,14 +13,14 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_IMPORT_URL } from '../../../../../../common/constants';
 
-import type { ConfigType } from '../../../../../config';
 import type { SetupPlugins } from '../../../../../plugin';
+import type { ConfigType } from '../../../../../config';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
+import { importTimelines } from './helpers';
 import { ImportTimelinesPayloadSchemaRt } from '../../../../../../common/api/timeline';
 import { buildFrameworkRequest } from '../../../utils/common';
-import { importTimelines } from './helpers';
 
 export { importTimelines } from './helpers';
 

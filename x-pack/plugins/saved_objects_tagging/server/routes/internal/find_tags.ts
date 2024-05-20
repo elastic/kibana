@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { TagsPluginRouter } from '../../types';
 import { tagSavedObjectTypeName } from '../../../common/constants';
 import { TagAttributes } from '../../../common/types';
 import { savedObjectToTag } from '../../services/tags';
-import type { TagsPluginRouter } from '../../types';
 import { addConnectionCount } from '../lib';
 
 export const registerInternalFindTagsRoute = (router: TagsPluginRouter) => {

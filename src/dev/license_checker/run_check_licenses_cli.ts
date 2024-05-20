@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { run } from '@kbn/dev-cli-runner';
 import { getInstalledPackages } from '../npm';
 
 import {
-  DEV_ONLY_LICENSE_ALLOWED,
   LICENSE_ALLOWED,
+  DEV_ONLY_LICENSE_ALLOWED,
   LICENSE_OVERRIDES,
   PER_PACKAGE_ALLOWED_LICENSES,
 } from './config';

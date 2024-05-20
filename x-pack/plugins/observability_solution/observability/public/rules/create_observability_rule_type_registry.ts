@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import {
   RuleTypeModel,
   RuleTypeParams,
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { AsDuration, AsPercent } from '../../common/utils/formatters';
 
 export type ObservabilityRuleTypeFormatter = (options: {

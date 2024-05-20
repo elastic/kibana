@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,21 +13,22 @@ import {
   EuiFlexItem,
   EuiImage,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
-import { RULE_FAILED, RULE_PASSED } from '../../../common/constants';
-import noDataIllustration from '../../assets/illustrations/no_data_illustration.svg';
-import { statusColors } from '../../common/constants';
+import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
-import { useKibana } from '../../common/hooks/use_kibana';
-import { useNavigateFindings } from '../../common/hooks/use_navigate_findings';
-import { cloudPosturePages } from '../../common/navigation/constants';
-import { CspCounterCard } from '../../components/csp_counter_card';
-import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { getPostureScorePercentage } from '../compliance_dashboard/compliance_charts/compliance_score_chart';
 import { RULE_COUNTERS_TEST_SUBJ } from './test_subjects';
+import noDataIllustration from '../../assets/illustrations/no_data_illustration.svg';
+import { useNavigateFindings } from '../../common/hooks/use_navigate_findings';
+import { cloudPosturePages } from '../../common/navigation/constants';
+import { RULE_FAILED, RULE_PASSED } from '../../../common/constants';
+import { statusColors } from '../../common/constants';
+import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
+import { CspCounterCard } from '../../components/csp_counter_card';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const EvaluationPieChart = ({ failed, passed }: { failed: number; passed: number }) => {
   const {

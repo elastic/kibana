@@ -1,4 +1,3 @@
-import { isLeft, isRight } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { isLeft, isRight } from 'fp-ts/lib/Either';
  * Side Public License, v 1.
  */
 import { nonEmptyStringRt } from '.';
+import { isLeft, isRight } from 'fp-ts/lib/Either';
 
 describe('nonEmptyStringRt', () => {
   it('fails on empty strings', () => {

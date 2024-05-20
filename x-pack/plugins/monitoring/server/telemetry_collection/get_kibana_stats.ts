@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import moment from 'moment';
+import { isEmpty } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { isEmpty } from 'lodash';
-import moment from 'moment';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 import {
-  ClusterHighLevelStats,
-  ClustersHighLevelStats,
   fetchHighLevelStats,
   handleHighLevelStatsResponse,
+  ClustersHighLevelStats,
+  ClusterHighLevelStats,
 } from './get_high_level_stats';
 
 export function rollUpTotals(

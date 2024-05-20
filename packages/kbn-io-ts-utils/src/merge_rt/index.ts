@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { isLeft } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 import { merge as lodashMerge } from 'lodash';
+import { isLeft } from 'fp-ts/lib/Either';
 
 type PlainObject = Record<string | number | symbol, any>;
 

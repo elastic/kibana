@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { LayerConfig, LensAttributes } from './lens_attributes';
 import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
-import { LayerConfig, LensAttributes } from './lens_attributes';
 import { sampleAttribute } from './test_data/sample_attribute';
 
-import { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { obsvReportConfigMap } from '../obsv_exploratory_view';
-import { PERCENTILE_RANKS, RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from './constants';
 import {
   LCP_FIELD,
   TRANSACTION_DURATION,
   USER_AGENT_NAME,
 } from './constants/elasticsearch_fieldnames';
-import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
-import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
+import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
+import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
+import { obsvReportConfigMap } from '../obsv_exploratory_view';
+import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
 
 describe('Lens Attribute', () => {
   mockAppDataView();

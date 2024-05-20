@@ -12,8 +12,8 @@ import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
 } from '../common/constants';
-import { endpointMiddlewareFactory } from '../pages/endpoint_hosts/store/middleware';
 import { policyDetailsMiddlewareFactory } from '../pages/policy/store/policy_details';
+import { endpointMiddlewareFactory } from '../pages/endpoint_hosts/store/middleware';
 
 type ManagementSubStateKey = keyof State[typeof MANAGEMENT_STORE_GLOBAL_NAMESPACE];
 

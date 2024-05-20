@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiToolTip,
-} from '@elastic/eui';
-import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiToolTip,
+  EuiPopover,
+  EuiSelectable,
+  EuiPopoverTitle,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiIconTip,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useStyles } from './styles';
 
 const TIMESTAMP_OPTION_KEY = 'Timestamp';

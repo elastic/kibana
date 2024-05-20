@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { defer, map, retry, timer, firstValueFrom, throwError } from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { defer, firstValueFrom, map, retry, throwError, timer } from 'rxjs';
 import { isRetryableEsClientError } from './retryable_es_client_errors';
 
 const scriptAllowedTypesKey = 'script.allowed_types';

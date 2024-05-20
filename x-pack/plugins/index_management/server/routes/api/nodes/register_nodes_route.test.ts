@@ -6,8 +6,8 @@
  */
 
 import { addBasePath } from '..';
-import { RequestMock, RouterMock, routeDependencies } from '../../../test/helpers';
 import { registerNodesRoute } from './register_nodes_route';
+import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
 
 describe('[Index management API Routes] Nodes info', () => {
   const router = new RouterMock();

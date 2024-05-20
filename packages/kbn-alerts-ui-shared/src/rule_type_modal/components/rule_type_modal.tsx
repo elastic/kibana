@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiModal,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  useCurrentEuiBreakpoint,
-  useEuiTheme,
-} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { RuleTypeCountsByProducer, RuleTypeWithDescription } from '../types';
+import {
+  EuiPageHeader,
+  EuiModal,
+  EuiPanel,
+  EuiPageHeaderSection,
+  EuiTitle,
+  EuiFieldSearch,
+  EuiSpacer,
+  useEuiTheme,
+  useCurrentEuiBreakpoint,
+  EuiEmptyPrompt,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { RuleTypeList } from './rule_type_list';
+import { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
 export interface RuleTypeModalProps {
   onClose: () => void;

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiIcon,
   EuiPageTemplate,
+  EuiIcon,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import './empty_connectors_prompt.scss';
 
 export const EmptyConnectorsPrompt = ({

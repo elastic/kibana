@@ -8,8 +8,12 @@
       "accept_enterprise": "__flag__",
       "local": "__flag__"
     },
-    "methods": ["GET"],
-    "patterns": ["_license"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_license"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-license.html",
     "availability": {
       "stack": true,

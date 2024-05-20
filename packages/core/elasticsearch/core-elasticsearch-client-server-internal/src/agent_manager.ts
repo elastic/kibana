@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { type AgentOptions, Agent as HttpAgent } from 'http';
+import { Agent as HttpAgent, type AgentOptions } from 'http';
 import { Agent as HttpsAgent } from 'https';
 import type { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
-import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 
 const HTTPS = 'https:';

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { createRecursiveSerializer, createStripAnsiSerializer } from '@kbn/jest-serializers';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import { Build } from './build';
+import { createStripAnsiSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 import { Config } from './config';
-import { isErrorLogged, markErrorLogged } from './errors';
 import { createRunner } from './runner';
+import { Build } from './build';
+import { isErrorLogged, markErrorLogged } from './errors';
 
 jest.mock('./version_info');
 

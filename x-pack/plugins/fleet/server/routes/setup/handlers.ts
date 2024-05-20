@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common/types';
-import { defaultFleetErrorHandler } from '../../errors';
 import { appContextService } from '../../services';
-import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
-import { hasFleetServers } from '../../services/fleet_server';
-import { isSecretStorageEnabled } from '../../services/secrets';
+import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common/types';
 import { formatNonFatalErrors, setupFleet } from '../../services/setup';
+import { hasFleetServers } from '../../services/fleet_server';
+import { defaultFleetErrorHandler } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
+import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
+import { isSecretStorageEnabled } from '../../services/secrets';
 
 export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   const coreContext = await context.core;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
+import type { IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 export interface PipelineListItemOptions {

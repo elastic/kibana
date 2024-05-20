@@ -402,10 +402,14 @@
             "parentPluginId": "savedObjectsFinder",
             "id": "def-public.SavedObjectMetaData.includeFields",
             "type": "Array",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "includeFields",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
             "deprecated": true,
             "trackAdoption": false,
@@ -437,7 +441,9 @@
         "tags": [],
         "label": "SavedObjectFinderProps",
         "description": [],
-        "signature": ["SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize"],
+        "signature": [
+          "SavedObjectFinderFixedPage | SavedObjectFinderInitialPageSize"
+        ],
         "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -476,7 +482,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_objects_finder/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -488,7 +496,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_objects_finder/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -506,7 +516,9 @@
         "tags": [],
         "label": "LISTING_LIMIT_SETTING",
         "description": [],
-        "signature": ["\"savedObjects:listingLimit\""],
+        "signature": [
+          "\"savedObjects:listingLimit\""
+        ],
         "path": "packages/kbn-saved-objects-settings/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -519,7 +531,9 @@
         "tags": [],
         "label": "PER_PAGE_SETTING",
         "description": [],
-        "signature": ["\"savedObjects:perPage\""],
+        "signature": [
+          "\"savedObjects:perPage\""
+        ],
         "path": "packages/kbn-saved-objects-settings/index.ts",
         "deprecated": false,
         "trackAdoption": false,

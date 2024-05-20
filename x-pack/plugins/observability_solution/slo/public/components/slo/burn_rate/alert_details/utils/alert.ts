@@ -11,8 +11,8 @@ import {
   LOW_PRIORITY_ACTION_ID,
   MEDIUM_PRIORITY_ACTION_ID,
 } from '../../../../../../common/constants';
-import { WindowSchema } from '../../../../../typings';
 import { BurnRateAlert } from '../types';
+import { WindowSchema } from '../../../../../typings';
 
 export function getActionGroupFromReason(reason: string): string {
   const prefix = reason.split(':')[0]?.toLowerCase() ?? undefined;

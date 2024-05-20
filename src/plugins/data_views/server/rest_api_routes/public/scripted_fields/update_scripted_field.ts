@@ -9,16 +9,16 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { FieldSpec } from '../../../../common';
-import { fieldSpecSchemaFields } from '../../../../common/schemas';
-import { INITIAL_REST_VERSION } from '../../../constants';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
+import { handleErrors } from '../util/handle_errors';
+import { fieldSpecSchemaFields } from '../../../../common/schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
-import type { IndexPatternsRuntimeResponseType } from '../../route_types';
+import { INITIAL_REST_VERSION } from '../../../constants';
 import { indexPatternsRuntimeResponseSchema } from '../../schema';
-import { handleErrors } from '../util/handle_errors';
+import type { IndexPatternsRuntimeResponseType } from '../../route_types';
 
 export const registerUpdateScriptedFieldRoute = (
   router: IRouter,

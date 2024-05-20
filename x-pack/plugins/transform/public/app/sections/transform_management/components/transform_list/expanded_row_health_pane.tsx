@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import { EuiInMemoryTable, EuiPanel, EuiSpacer, formatDate } from '@elastic/eui';
+import { formatDate, EuiPanel, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

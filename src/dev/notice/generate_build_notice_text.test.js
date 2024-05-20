@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { readFileSync } from 'fs';
 
 import { generateBuildNoticeText } from './generate_build_notice_text';
 

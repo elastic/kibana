@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
-import { SyntheticsRestApiRouteFactory } from '../types';
 import { DefaultAlertService } from './default_alert_service';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

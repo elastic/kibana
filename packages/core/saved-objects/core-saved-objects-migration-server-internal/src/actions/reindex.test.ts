@@ -1,5 +1,3 @@
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +7,8 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
  */
 import * as Option from 'fp-ts/lib/Option';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { reindex } from './reindex';
 
 jest.mock('./catch_retryable_es_client_errors');

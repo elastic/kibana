@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { DocViewerLegacyTable } from './table';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../types';
-import { DocViewerLegacyTable } from './table';
 
 const services = {
   uiSettings: {

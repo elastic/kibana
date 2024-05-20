@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { round } from 'lodash';
 import { ReactElement, useState } from 'react';
 import React from 'react';
-import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
+import { round } from 'lodash';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsStatic } from './panels_static';
+import { ResizableLayoutDirection, ResizableLayoutMode } from '../types';
 import { getContainerSize, pixelsToPercent } from './utils';
 
 export interface ResizableLayoutProps {

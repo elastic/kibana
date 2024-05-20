@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { debounce } from 'lodash';
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef } from 'react';
+import { debounce } from 'lodash';
+import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { CodeEditor } from '@kbn/code-editor';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { useNotifications } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { ANALYTICS_STEPS } from '../../page';
 import { CreateStep } from '../create_step';
+import { ANALYTICS_STEPS } from '../../page';
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (props) => {
   const { actions, state } = props;

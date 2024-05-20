@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import type { FilterAggConfigEditor } from '../types';
 
 export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAggFormComponent'] = ({

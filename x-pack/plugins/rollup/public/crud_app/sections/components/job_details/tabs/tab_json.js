@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
+import { EuiCodeBlock } from '@elastic/eui';
 
 export const TabJson = ({ json }) => {
   const jsonString = JSON.stringify(json, null, 2);

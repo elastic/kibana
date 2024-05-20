@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React, { MouseEvent } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isBoolean } from 'lodash';
-import React, { MouseEvent } from 'react';
 
 interface AddDeleteButtonsProps {
   addTooltip: string;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiIcon, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { CUSTOM_PALETTE, CustomizablePalette, PaletteRegistry } from '@kbn/coloring';
-import { GaugeColorModes, GaugeTicksPositions } from '@kbn/expression-gauge-plugin/common';
-import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { TooltipWrapper } from '@kbn/visualization-utils';
+import { EuiFormRow, EuiSwitchEvent, EuiSwitch, EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { PaletteRegistry, CustomizablePalette, CUSTOM_PALETTE } from '@kbn/coloring';
+import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
+import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
-import { PalettePanelContainer, applyPaletteParams } from '../../shared_components';
+import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import type { GaugeVisualizationState } from './constants';
 import { defaultPaletteParams } from './palette_config';

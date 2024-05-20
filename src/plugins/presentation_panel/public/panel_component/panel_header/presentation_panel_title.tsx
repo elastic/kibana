@@ -12,24 +12,24 @@ import { once } from 'lodash';
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import {
   type Observable,
-  defaultIfEmpty,
   fromEvent,
   map,
-  mergeMap,
   race,
-  repeatWhen,
-  takeLast,
+  mergeMap,
   takeUntil,
+  takeLast,
   takeWhile,
+  defaultIfEmpty,
+  repeatWhen,
 } from 'rxjs';
 
 import { ViewMode } from '@kbn/presentation-publishing';
+import { getEditTitleAriaLabel, placeholderTitle } from '../presentation_panel_strings';
 import {
   CustomizePanelActionApi,
   isApiCompatibleWithCustomizePanelAction,
 } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
-import { getEditTitleAriaLabel, placeholderTitle } from '../presentation_panel_strings';
 
 const createDocumentMouseMoveListener = once(() => fromEvent<MouseEvent>(document, 'mousemove'));
 const createDocumentMouseUpListener = once(() => fromEvent<MouseEvent>(document, 'mouseup'));

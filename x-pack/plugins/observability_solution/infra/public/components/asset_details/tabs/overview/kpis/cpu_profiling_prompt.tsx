@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { useProfilingIntegrationSetting } from '../../../../../hooks/use_profiling_integration_setting';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
 

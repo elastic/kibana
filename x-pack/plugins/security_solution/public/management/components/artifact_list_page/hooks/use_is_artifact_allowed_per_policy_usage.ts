@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useMemo } from 'react';
-import { isArtifactByPolicy } from '../../../../../common/endpoint/service/artifacts';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { ArtifactFormComponentProps } from '../types';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { isArtifactByPolicy } from '../../../../../common/endpoint/service/artifacts';
 
 export const useIsArtifactAllowedPerPolicyUsage = (
   item: Pick<ExceptionListItemSchema, 'tags'>,

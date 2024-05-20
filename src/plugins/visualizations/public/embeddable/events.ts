@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import {
-  MULTI_VALUE_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
+  MULTI_VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 
 export interface VisEventToTrigger {
   ['applyFilter']: typeof APPLY_FILTER_TRIGGER;

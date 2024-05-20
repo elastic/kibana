@@ -6,7 +6,7 @@
  */
 
 import { CasesServerSetup } from '@kbn/cases-plugin/server/types';
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { getPersistableStateAttachmentServer } from './attachments/persistable_state';
 

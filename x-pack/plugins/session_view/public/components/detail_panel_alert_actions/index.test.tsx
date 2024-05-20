@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import {
-  BUTTON_TEST_ID,
-  DetailPanelAlertActions,
-  JUMP_TO_PROCESS_TEST_ID,
-  SHOW_DETAILS_TEST_ID,
-} from '.';
-import { ProcessEvent } from '../../../common';
-import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import {
+  DetailPanelAlertActions,
+  BUTTON_TEST_ID,
+  SHOW_DETAILS_TEST_ID,
+  JUMP_TO_PROCESS_TEST_ID,
+} from '.';
+import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
+import { ProcessEvent } from '../../../common';
 
 describe('DetailPanelAlertActions component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RequestAdapter } from '../../common/adapters';
 import { inspectorPluginMock } from '../mocks';
+import { RequestAdapter } from '../../common/adapters';
 
 const adapter2 = new RequestAdapter();
 

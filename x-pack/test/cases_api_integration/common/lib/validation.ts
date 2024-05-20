@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common/types/api';
-import { AttachmentTotals, Case, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
-import { isEqual, xorWith } from 'lodash';
+import { AttachmentTotals, Case, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
+import { xorWith, isEqual } from 'lodash';
+import { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common/types/api';
 
 type AttachmentTotalsKeys = keyof AttachmentTotals;
 

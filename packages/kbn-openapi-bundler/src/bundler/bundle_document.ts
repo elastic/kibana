@@ -7,29 +7,26 @@
  */
 
 import { isAbsolute } from 'path';
-import { isPlainObjectType } from '../utils/is_plain_object_type';
+import { RefResolver } from './ref_resolver';
+import { processDocument } from './process_document';
 import { BundleRefProcessor } from './document_processors/bundle_refs';
+import { createSkipNodeWithInternalPropProcessor } from './document_processors/skip_node_with_internal_prop';
 import { createModifyPartialProcessor } from './document_processors/modify_partial';
+import { createSkipInternalPathProcessor } from './document_processors/skip_internal_path';
+import { ResolvedDocument, ResolvedRef } from './types';
+import { createRemovePropsProcessor } from './document_processors/remove_props';
 import { createModifyRequiredProcessor } from './document_processors/modify_required';
+import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
+import { RemoveUnusedComponentsProcessor } from './document_processors/remove_unused_components';
+import { isPlainObjectType } from '../utils/is_plain_object_type';
 import {
   createFlattenFoldedAllOfItemsProcessor,
   createMergeNonConflictingAllOfItemsProcessor,
   createUnfoldSingleAllOfItemProcessor,
 } from './document_processors/reduce_all_of_items';
-import { createRemovePropsProcessor } from './document_processors/remove_props';
-import { RemoveUnusedComponentsProcessor } from './document_processors/remove_unused_components';
-import { createSkipInternalPathProcessor } from './document_processors/skip_internal_path';
-import { createSkipNodeWithInternalPropProcessor } from './document_processors/skip_node_with_internal_prop';
-import { X_CODEGEN_ENABLED, X_INLINE, X_INTERNAL, X_MODIFY } from './known_custom_props';
-import { processDocument } from './process_document';
-import { RefResolver } from './ref_resolver';
-import { ResolvedDocument, ResolvedRef } from './types';
 
 export class SkipException extends Error {
-  constructor(
-    public documentPath: string,
-    message: string
-  ) {
+  constructor(public documentPath: string, message: string) {
     super(message);
   }
 }

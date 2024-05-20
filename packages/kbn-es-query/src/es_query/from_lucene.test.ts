@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Query } from '../..';
-import { decorateQuery } from './decorate_query';
 import { buildQueryFromLucene } from './from_lucene';
+import { decorateQuery } from './decorate_query';
 import { luceneStringToDsl } from './lucene_string_to_dsl';
+import { Query } from '../..';
 
 describe('build query', () => {
   describe('buildQueryFromLucene', () => {

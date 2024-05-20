@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SavedObject, SavedObjectError } from '@kbn/core/types';
-import { managementMock } from '../services/management.mock';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { findRelationships } from './find_relationships';
+import { managementMock } from '../services/management.mock';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 const createObj = (parts: Partial<SavedObject<any>>): SavedObject<any> => ({
   id: 'id',

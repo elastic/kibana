@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback } from 'react';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import {
-  getLensVisualizations,
-  parseCommentString,
-} from '../../../../../common/utils/markdown_plugins/utils';
 import { AttachmentActionType } from '../../../../client/attachment_framework/types';
 import { useKibana } from '../../../../common/lib/kibana';
+import {
+  parseCommentString,
+  getLensVisualizations,
+} from '../../../../../common/utils/markdown_plugins/utils';
 import { OPEN_IN_VISUALIZATION } from '../../../visualizations/translations';
 
 export const useLensOpenVisualization = ({ comment }: { comment: string }) => {

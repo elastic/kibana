@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { pollSearch } from './poll_search';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 describe('pollSearch', () => {
   function getMockedSearch$(resolveOnI = 1) {

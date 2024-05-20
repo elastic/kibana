@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { createUrlTracker, IUrlTracker } from './url_tracker';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { History, createMemoryHistory } from 'history';
-import { IUrlTracker, createUrlTracker } from './url_tracker';
+import { createMemoryHistory, History } from 'history';
 
 describe('urlTracker', () => {
   let storage: StubBrowserStorage;

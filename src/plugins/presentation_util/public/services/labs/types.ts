@@ -9,14 +9,14 @@
 import { IUiSettingsClient } from '@kbn/core/public';
 import {
   EnvironmentName,
-  EnvironmentStatus,
+  projectIDs,
   Project,
   ProjectConfig,
   ProjectID,
-  SolutionName,
+  EnvironmentStatus,
   environmentNames,
   isProjectEnabledByStatus,
-  projectIDs,
+  SolutionName,
 } from '../../../common';
 
 export interface PresentationLabsService {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import expect from '@kbn/expect';
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateMobileData } from './generate_mobile_data';
 

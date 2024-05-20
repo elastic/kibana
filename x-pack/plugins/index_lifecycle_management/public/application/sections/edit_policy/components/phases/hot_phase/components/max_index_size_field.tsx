@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
 import { NumericField } from '../../../../../../../shared_imports';
-import { ROLLOVER_FORM_PATHS, byteSizeUnits } from '../../../../constants';
 import { UseField } from '../../../../form';
+import { byteSizeUnits, ROLLOVER_FORM_PATHS } from '../../../../constants';
 import { UnitField } from '../../shared_fields/unit_field';
 
 const i18nTexts = {

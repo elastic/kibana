@@ -7,14 +7,14 @@
 
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 
-import { cloneDeep, isArray, isPlainObject } from 'lodash';
+import { isPlainObject, cloneDeep, isArray } from 'lodash';
 
 import type { SearchTypes } from '../../../../../../common/detection_engine/types';
-import { isValidBooleanType } from './ecs_types_validators/is_valid_boolean_type';
-import { isValidDateType } from './ecs_types_validators/is_valid_date_type';
 import { isValidIpType } from './ecs_types_validators/is_valid_ip_type';
-import { isValidLongType } from './ecs_types_validators/is_valid_long_type';
+import { isValidDateType } from './ecs_types_validators/is_valid_date_type';
 import { isValidNumericType } from './ecs_types_validators/is_valid_numeric_type';
+import { isValidBooleanType } from './ecs_types_validators/is_valid_boolean_type';
+import { isValidLongType } from './ecs_types_validators/is_valid_long_type';
 
 type SourceFieldRecord = Record<string, SearchTypes>;
 type SourceField = SearchTypes | SourceFieldRecord;

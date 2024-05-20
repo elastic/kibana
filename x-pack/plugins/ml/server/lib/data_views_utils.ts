@@ -7,8 +7,8 @@
 
 import type {
   IScopedClusterClient,
-  KibanaRequest,
   SavedObjectsClientContract,
+  KibanaRequest,
 } from '@kbn/core/server';
 
 import type { DataViewsService } from '@kbn/data-views-plugin/common';

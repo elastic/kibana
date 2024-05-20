@@ -8,15 +8,15 @@ import { GET_INDEX_STATS } from '../../common/constants';
 
 import { fetchAvailableIndices, fetchMeteringStats, fetchStats } from '../lib';
 
-import type { MockedLogger } from '@kbn/logging-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
-import { mockMeteringStatsIndex } from '../__mocks__/mock_metering_stats_index';
-import { mockStatsGreenIndex } from '../__mocks__/mock_stats_green_index';
-import { mockStatsYellowIndex } from '../__mocks__/mock_stats_yellow_index';
+import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
-import { serverMock } from '../__mocks__/server';
 import { getIndexStatsRoute } from './get_index_stats';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { mockStatsGreenIndex } from '../__mocks__/mock_stats_green_index';
+import { mockStatsYellowIndex } from '../__mocks__/mock_stats_yellow_index';
+import { mockMeteringStatsIndex } from '../__mocks__/mock_metering_stats_index';
 
 jest.mock('../lib', () => {
   const originalModule = jest.requireActual('../lib');

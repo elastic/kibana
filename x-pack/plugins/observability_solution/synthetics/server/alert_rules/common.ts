@@ -1,10 +1,3 @@
-import { IRuleTypeAlerts, RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import { IBasePath } from '@kbn/core/server';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { isRight } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,24 +5,31 @@ import { isRight } from 'fp-ts/lib/Either';
  * 2.0.
  */
 import moment, { Moment } from 'moment';
+import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
-import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../common/constants/synthetics_alerts';
+import { IBasePath } from '@kbn/core/server';
+import { IRuleTypeAlerts, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
+import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../common/constants/synthetics_alerts';
 import { uptimeRuleFieldMap } from '../../common/rules/uptime_rule_field_map';
+import {
+  getUptimeIndexPattern,
+  IndexPatternTitleAndFields,
+} from '../legacy_uptime/lib/requests/get_index_pattern';
 import { StatusCheckFilters } from '../../common/runtime_types';
+import { UptimeEsClient } from '../lib';
+import { getMonitorSummary } from './status_rule/message_utils';
 import {
   SyntheticsCommonState,
   SyntheticsCommonStateCodec,
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
-import {
-  IndexPatternTitleAndFields,
-  getUptimeIndexPattern,
-} from '../legacy_uptime/lib/requests/get_index_pattern';
-import { UptimeEsClient } from '../lib';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
-import { getMonitorSummary } from './status_rule/message_utils';
 import { AlertOverviewStatus } from './status_rule/status_rule_executor';
 import type { MonitorSummaryStatusRule } from './status_rule/types';
 

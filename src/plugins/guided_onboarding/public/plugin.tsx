@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
+import ReactDOM from 'react-dom';
+import React from 'react';
 import {
-  ApplicationStart,
   CoreSetup,
   CoreStart,
-  NotificationsStart,
   Plugin,
+  ApplicationStart,
+  NotificationsStart,
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React from 'react';
-import ReactDOM from 'react-dom';
 
 import { PLUGIN_FEATURE } from '../common/constants';
-import { GuidePanel } from './components';
-import { ApiService, apiService } from './services/api.service';
 import type {
   AppPluginStartDependencies,
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,
 } from './types';
+import { GuidePanel } from './components';
+import { ApiService, apiService } from './services/api.service';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>

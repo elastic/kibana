@@ -7,8 +7,8 @@
 
 import { from } from 'rxjs';
 import { debounceTime, first, map, switchMap } from 'rxjs';
-import { MapStore } from '../../../reducers/store';
 import { getLayerList, getMapZoom } from '../../../selectors/map_selectors';
+import { MapStore } from '../../../reducers/store';
 
 export function waitUntilTimeLayersLoad$(store: MapStore) {
   const reduxState$ = from(store);

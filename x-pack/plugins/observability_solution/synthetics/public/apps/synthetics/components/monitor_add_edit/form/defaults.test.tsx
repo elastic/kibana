@@ -1,11 +1,11 @@
-import { DEFAULT_FIELDS, PROFILES_MAP, PROFILE_VALUES_ENUM } from '../constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ConfigKey, FormMonitorType, MonitorTypeEnum, SyntheticsMonitor } from '../types';
+import { ConfigKey, MonitorTypeEnum, FormMonitorType, SyntheticsMonitor } from '../types';
+import { DEFAULT_FIELDS, PROFILE_VALUES_ENUM, PROFILES_MAP } from '../constants';
 import { formatDefaultFormValues } from './defaults';
 
 describe('defaults', () => {

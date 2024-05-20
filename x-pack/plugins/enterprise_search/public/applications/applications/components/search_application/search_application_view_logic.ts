@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
 import { SchemaField } from '../../../../../common/types/search_applications';
@@ -21,8 +21,8 @@ import { FetchSearchApplicationFieldCapabilitiesApiLogic } from '../../api/searc
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
 import {
-  SearchApplicationsListActions,
   SearchApplicationsListLogic,
+  SearchApplicationsListActions,
 } from '../search_applications/search_applications_list_logic';
 
 import { SearchApplicationNameLogic } from './search_application_name_logic';

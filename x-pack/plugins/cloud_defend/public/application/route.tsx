@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Route } from '@kbn/shared-ux-router';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
+import { Route } from '@kbn/shared-ux-router';
 import { type RouteProps } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { cloudDefendPages } from '../common/navigation/constants';
-import type { CloudDefendPageNavigationItem } from '../common/navigation/types';
 import { useSecuritySolutionContext } from './security_solution_context';
+import type { CloudDefendPageNavigationItem } from '../common/navigation/types';
 
 type CloudDefendRouteProps = Omit<RouteProps, 'render'> & CloudDefendPageNavigationItem;
 

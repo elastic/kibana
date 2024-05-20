@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import { type AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   MappingTypeMapping,
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Callbacks } from '@langchain/core/callbacks/manager';
-import { VectorStore } from '@langchain/core/vectorstores';
 import { Document } from 'langchain/document';
+import { VectorStore } from '@langchain/core/vectorstores';
 import * as uuid from 'uuid';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { ElasticsearchEmbeddings } from '../embeddings/elasticsearch_embeddings';
+import { FlattenedHit, getFlattenedHits } from './helpers/get_flattened_hits';
+import { getMsearchQueryBody } from './helpers/get_msearch_query_body';
+import { getTermsSearchQuery } from './helpers/get_terms_search_query';
+import { getVectorSearchQuery } from './helpers/get_vector_search_query';
+import type { MsearchResponse } from './helpers/types';
 import {
   ESQL_RESOURCE,
   KNOWLEDGE_BASE_INDEX_PATTERN,
   KNOWLEDGE_BASE_INGEST_PIPELINE,
 } from '../../../routes/knowledge_base/constants';
+import { getRequiredKbDocsTermsQueryDsl } from './helpers/get_required_kb_docs_terms_query_dsl';
 import {
   KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
   KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
 } from '../../telemetry/event_based_telemetry';
-import { ElasticsearchEmbeddings } from '../embeddings/elasticsearch_embeddings';
-import { FlattenedHit, getFlattenedHits } from './helpers/get_flattened_hits';
-import { getMsearchQueryBody } from './helpers/get_msearch_query_body';
-import { getRequiredKbDocsTermsQueryDsl } from './helpers/get_required_kb_docs_terms_query_dsl';
-import { getTermsSearchQuery } from './helpers/get_terms_search_query';
-import { getVectorSearchQuery } from './helpers/get_vector_search_query';
-import type { MsearchResponse } from './helpers/types';
 
 interface CreatePipelineParams {
   id?: string;

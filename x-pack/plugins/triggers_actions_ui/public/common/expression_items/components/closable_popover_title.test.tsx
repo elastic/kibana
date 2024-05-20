@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import * as React from 'react';
+import { mount } from 'enzyme';
 import { ClosablePopoverTitle } from './closable_popover_title';
 
 describe('closable popover title', () => {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { TRANSFORM_HEALTH_LABEL, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type {
   TransformLatestConfig,
   TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
+import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { getCommonRequestHeader } from '../../../services/ml/common_api';
-import { USER } from '../../../services/transform/security_common';
 import { getLatestTransformConfig, getPivotTransformConfig } from '../helpers';
+import { USER } from '../../../services/transform/security_common';
+import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
 interface TestDataPivot {
   suiteTitle: string;

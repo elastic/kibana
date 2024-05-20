@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
 import { appContextService } from '../app_context';
+import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
 
 export function getFilteredSearchPackages() {
   const shouldFilterFleetServer = appContextService.getConfig()?.internal?.fleetServerStandalone;

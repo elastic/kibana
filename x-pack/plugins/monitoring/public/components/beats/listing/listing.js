@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React, { PureComponent } from 'react';
+import { uniq, get } from 'lodash';
 import {
-  EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPanel,
-  EuiScreenReaderOnly,
   EuiSpacer,
+  EuiLink,
+  EuiScreenReaderOnly,
+  EuiPanel,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { get, uniq } from 'lodash';
-import React, { PureComponent } from 'react';
 import { Stats } from '..';
-import { BEATS_SYSTEM_ID } from '../../../../common/constants';
-import { SetupModeFeature } from '../../../../common/enums';
 import { formatMetric } from '../../../lib/format_number';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
-import { SetupModeBadge } from '../../setup_mode/badge';
-import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { EuiMonitoringTable } from '../../table';
+import { i18n } from '@kbn/i18n';
+import { BEATS_SYSTEM_ID } from '../../../../common/constants';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { ListingCallOut } from '../../setup_mode/listing_callout';
+import { SetupModeBadge } from '../../setup_mode/badge';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 export class Listing extends PureComponent {
   getColumns() {

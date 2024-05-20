@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
-import { RendererStrings } from '../../../i18n';
-import { RendererFactory } from '../../../types';
-import { Return as Config } from '../../functions/browser/markdown';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { StartInitializer } from '../../plugin';
+import { RendererStrings } from '../../../i18n';
+import { Return as Config } from '../../functions/browser/markdown';
+import { RendererFactory } from '../../../types';
 
 const { markdown: strings } = RendererStrings;
 

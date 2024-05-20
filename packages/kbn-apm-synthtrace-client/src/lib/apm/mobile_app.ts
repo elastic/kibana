@@ -7,9 +7,9 @@
  */
 
 import { Entity } from '../entity';
-import { generateLongId } from '../utils/generate_id';
 import { ApmFields } from './apm_fields';
 import { MobileDevice } from './mobile_device';
+import { generateLongId } from '../utils/generate_id';
 
 type MobileAgentName = 'android/java' | 'iOS/swift';
 

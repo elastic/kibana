@@ -7,6 +7,8 @@
     "id": "helloWorld",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["developerExamples"]
+    "requiredPlugins": [
+      "developerExamples"
+    ]
   }
 }

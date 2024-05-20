@@ -7,8 +7,8 @@
 
 import { sampleDocWithSortId } from '../../__mocks__/es_results';
 
-import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 import { partitionEvents } from './filter_events';
 import type { FieldSet } from './types';
 

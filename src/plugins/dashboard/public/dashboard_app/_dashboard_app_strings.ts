@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 export const getDashboardPageTitle = () =>
   i18n.translate('dashboard.dashboardPageTitle', {

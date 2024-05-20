@@ -75,8 +75,9 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary =
-        await PageObjects.timeToVisualize.libraryNotificationExists('document example copy');
+      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'document example copy'
+      );
       expect(isInLibrary).to.be(false);
       await PageObjects.timeToVisualize.resetNewDashboard();
     });
@@ -105,8 +106,9 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary =
-        await PageObjects.timeToVisualize.libraryNotificationExists('My New Map 2');
+      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'My New Map 2'
+      );
       expect(isInLibrary).to.be(false);
     });
 
@@ -133,8 +135,9 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary =
-        await PageObjects.timeToVisualize.libraryNotificationExists('document example copy 2');
+      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'document example copy 2'
+      );
       expect(isInLibrary).to.be(false);
     });
 
@@ -174,8 +177,9 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary =
-        await PageObjects.timeToVisualize.libraryNotificationExists('document example copy');
+      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'document example copy'
+      );
       expect(isInLibrary).to.be(true);
       await PageObjects.timeToVisualize.resetNewDashboard();
     });
@@ -204,8 +208,9 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary =
-        await PageObjects.timeToVisualize.libraryNotificationExists('My New Map 2');
+      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'My New Map 2'
+      );
       expect(isInLibrary).to.be(true);
     });
 
@@ -232,8 +237,9 @@ export default function ({ getPageObjects, getService }) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isInLibrary =
-        await PageObjects.timeToVisualize.libraryNotificationExists('document example copy 2');
+      const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'document example copy 2'
+      );
       expect(isInLibrary).to.be(true);
     });
   });

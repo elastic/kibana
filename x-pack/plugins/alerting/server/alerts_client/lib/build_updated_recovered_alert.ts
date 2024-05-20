@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RawAlertInstance } from '@kbn/alerting-state-types';
+import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_FLAPPING,
@@ -14,7 +14,7 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import deepmerge from 'deepmerge';
+import { RawAlertInstance } from '@kbn/alerting-state-types';
 import { get } from 'lodash';
 import { RuleAlertData } from '../../types';
 import { AlertRule } from '../types';

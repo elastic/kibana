@@ -74,7 +74,9 @@
             "tags": [],
             "label": "homePage",
             "description": [],
-            "signature": ["\"observabilityOnboarding\""],
+            "signature": [
+              "\"observabilityOnboarding\""
+            ],
             "path": "packages/solution-nav/oblt/definition.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -10,13 +10,13 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_NEUTRAL_PALETTE_INDEX,
 } from '../config/default_color_mapping';
-import { AVAILABLE_PALETTES, getPalette } from '../palettes';
+import { getColorFactory } from './color_handling';
+import { getPalette, AVAILABLE_PALETTES } from '../palettes';
 import {
   EUIAmsterdamColorBlindPalette,
   EUI_AMSTERDAM_PALETTE_COLORS,
 } from '../palettes/eui_amsterdam';
-import { NEUTRAL_COLOR_DARK, NEUTRAL_COLOR_LIGHT, NeutralPalette } from '../palettes/neutral';
-import { getColorFactory } from './color_handling';
+import { NeutralPalette, NEUTRAL_COLOR_DARK, NEUTRAL_COLOR_LIGHT } from '../palettes/neutral';
 import { toHex } from './color_math';
 
 import { ColorMapping } from '../config';

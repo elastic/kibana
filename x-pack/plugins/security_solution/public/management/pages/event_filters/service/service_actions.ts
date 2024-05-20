@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
 import type {
   ExceptionListItemSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { Immutable } from '../../../../../common/endpoint/types';
+import type { HttpStart } from '@kbn/core/public';
 import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  EVENT_FILTER_LIST_DEFINITION,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
+  EVENT_FILTER_LIST_DEFINITION,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
 } from '../constants';
+import type { Immutable } from '../../../../../common/endpoint/types';
 
 async function createEventFilterList(http: HttpStart): Promise<void> {
   try {

@@ -8,8 +8,8 @@
 
 import { ShareMenuItem } from '../types';
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
 import { ShareContextMenu, ShareContextMenuProps } from './share_context_menu';
 

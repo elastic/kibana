@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ServiceParams } from '@kbn/actions-plugin/server';
-import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
-import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { TypeOf, schema } from '@kbn/config-schema';
 // eslint-disable-next-line max-classes-per-file
 import { AxiosError } from 'axios';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 
 const TestConfigSchema = schema.object({ url: schema.string() });
 const TestSecretsSchema = schema.object({

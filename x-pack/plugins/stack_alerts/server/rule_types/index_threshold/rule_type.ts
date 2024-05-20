@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import {
+  TimeSeriesQuery,
+  TIME_SERIES_BUCKET_SELECTOR_FIELD,
+} from '@kbn/triggers-actions-ui-plugin/server';
+import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
-import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
-import {
-  TIME_SERIES_BUCKET_SELECTOR_FIELD,
-  TimeSeriesQuery,
-} from '@kbn/triggers-actions-ui-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
 import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
-import { RuleExecutorOptions, RuleType, StackAlertsStartDeps } from '../../types';
-import { StackAlertType } from '../types';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
 import { Params, ParamsSchema } from './rule_type_params';
+import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
+import { StackAlertType } from '../types';
 
 export const ID = '.index-threshold';
 export const ActionGroupId = 'threshold met';
@@ -274,7 +274,9 @@ export function getRuleType(
       filterKuery: params.filterKuery,
     };
     // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
-    const result = await (await data).timeSeriesQuery({
+    const result = await (
+      await data
+    ).timeSeriesQuery({
       logger,
       esClient,
       query: queryParams,

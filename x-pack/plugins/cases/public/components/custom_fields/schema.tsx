@@ -6,8 +6,8 @@
  */
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
+import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
 
 const { emptyField, maxLengthField } = fieldValidators;
 

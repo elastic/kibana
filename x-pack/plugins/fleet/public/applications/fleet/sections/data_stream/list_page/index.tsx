@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiEmptyPrompt,
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n-react';
 
-import { PackageIcon } from '../../../components';
-import { useBreadcrumbs, useGetDataStreams, usePagination } from '../../../hooks';
 import type { DataStream } from '../../../types';
+import { useGetDataStreams, usePagination, useBreadcrumbs } from '../../../hooks';
+import { PackageIcon } from '../../../components';
 
 import { DataStreamRowActions } from './components/data_stream_row_actions';
 

@@ -1,4 +1,3 @@
-import { FilterStateStore } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { FilterStateStore } from '@kbn/es-query';
  * 2.0.
  */
 import { ALL_VALUE, FiltersSchema } from '@kbn/slo-schema';
+import { FilterStateStore } from '@kbn/es-query';
 
 export const getGroupByCardinalityFilters = ({
   serviceName,

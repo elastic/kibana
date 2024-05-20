@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { CaseSeverity } from '@kbn/cases-plugin/common';
-import { BulkCreateCasesResponse } from '@kbn/cases-plugin/common/types/api';
-import { CaseStatuses, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
-import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import expect from '@kbn/expect';
+import { BulkCreateCasesResponse } from '@kbn/cases-plugin/common/types/api';
+import { CaseSeverity } from '@kbn/cases-plugin/common';
+import { CaseStatuses, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { User } from '../../../../common/lib/authentication/types';
+import { defaultUser, getPostCaseRequest, postCaseResp } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   getCaseUserActions,
@@ -18,18 +19,17 @@ import {
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
 } from '../../../../common/lib/api';
-import { User } from '../../../../common/lib/authentication/types';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsOnlyRead,
-  obsSecRead,
   secOnly,
   secOnlyRead,
-  superUser,
+  globalRead,
+  obsOnlyRead,
+  obsSecRead,
+  noKibanaPrivileges,
   testDisabled,
+  superUser,
 } from '../../../../common/lib/authentication/users';
-import { defaultUser, getPostCaseRequest, postCaseResp } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

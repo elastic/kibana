@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { debugRendererFactory, errorRendererFactory } from './expression_renderers';
 
 interface SetupDeps {

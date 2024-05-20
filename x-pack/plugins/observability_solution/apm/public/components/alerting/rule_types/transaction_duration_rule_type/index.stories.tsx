@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { Story } from '@storybook/react';
 import React, { ComponentType, useState } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { TransactionDurationRuleParams, TransactionDurationRuleType } from '.';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { AlertMetadata } from '../../utils/helper';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {} } },

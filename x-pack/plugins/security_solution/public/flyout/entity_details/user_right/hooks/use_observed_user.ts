@@ -6,17 +6,17 @@
  */
 
 import { useMemo } from 'react';
-import type { UserItem } from '../../../../../common/search_strategy';
-import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
-import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import { getSourcererScopeId, isActiveTimeline } from '../../../../helpers';
+import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
+import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import type { UserItem } from '../../../../../common/search_strategy';
+import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
+import { getSourcererScopeId, isActiveTimeline } from '../../../../helpers';
 
 export const useObservedUser = (
   userName: string,

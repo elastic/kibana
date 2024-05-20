@@ -7,9 +7,9 @@
 
 import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.json';
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import moment from 'moment-timezone';
 import React from 'react';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { AnnotationDescriptionList } from '.';
 

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import {
-  fireEvent,
   render,
   screen,
   waitFor,
   waitForElementToBeRemoved,
+  fireEvent,
 } from '@testing-library/react';
-import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { RuleStatusPanel, RuleStatusPanelWithApiProps } from './rule_status_panel';
 import { mockRule } from './test_helpers';
 

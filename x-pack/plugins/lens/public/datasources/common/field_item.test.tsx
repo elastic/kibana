@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { FieldIcon } from '@kbn/field-utils';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { FieldPopoverFooter, FieldStats } from '@kbn/unified-field-list';
-import * as loadFieldStatsModule from '@kbn/unified-field-list/src/services/field_stats';
-import { ReactWrapper } from 'enzyme';
 import React, { ReactElement } from 'react';
+import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import { InnerFieldItem, FieldItemIndexPatternFieldProps } from './field_item';
+import { coreMock } from '@kbn/core/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { IndexPattern } from '../../types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from '../form_based/document_field';
-import { FieldItemIndexPatternFieldProps, InnerFieldItem } from './field_item';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import * as loadFieldStatsModule from '@kbn/unified-field-list/src/services/field_stats';
+import { FieldIcon } from '@kbn/field-utils';
+import { FieldStats, FieldPopoverFooter } from '@kbn/unified-field-list';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),

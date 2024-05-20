@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { IToasts } from '@kbn/core-notifications-browser';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 

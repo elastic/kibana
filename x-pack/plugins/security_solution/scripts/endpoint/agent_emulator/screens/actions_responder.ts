@@ -7,12 +7,12 @@
 
 import { blue } from 'chalk';
 import { HORIZONTAL_LINE } from '../../common/constants';
-import type { DataFormatter } from '../../common/screen';
-import { ChoiceMenuFormatter, ScreenBaseClass } from '../../common/screen';
+import { RunServiceStatus } from './components/run_service_status_formatter';
 import { ColumnLayoutFormatter } from '../../common/screen/column_layout_formatter';
 import { TOOL_TITLE } from '../constants';
 import type { EmulatorRunContext } from '../services/emulator_run_context';
-import { RunServiceStatus } from './components/run_service_status_formatter';
+import type { DataFormatter } from '../../common/screen';
+import { ChoiceMenuFormatter, ScreenBaseClass } from '../../common/screen';
 
 export class ActionResponderScreen extends ScreenBaseClass {
   constructor(private readonly emulatorContext: EmulatorRunContext) {

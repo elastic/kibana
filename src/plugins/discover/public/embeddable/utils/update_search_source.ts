@@ -1,4 +1,3 @@
-import type { ISearchSource } from '@kbn/data-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import type { ISearchSource } from '@kbn/data-plugin/public';
  * Side Public License, v 1.
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortForSearchSource } from '../../utils/sorting';
 

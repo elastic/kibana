@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
+import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import {
+  secOnly,
+  obsOnlyRead,
+  secOnlyRead,
+  noKibanaPrivileges,
+  superUser,
+  globalRead,
+  obsSecRead,
+  obsSec,
+} from '../../../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   createCase,
@@ -15,16 +25,6 @@ import {
   getCasesMetrics,
   updateCase,
 } from '../../../../../common/lib/api';
-import {
-  globalRead,
-  noKibanaPrivileges,
-  obsOnlyRead,
-  obsSec,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
-  superUser,
-} from '../../../../../common/lib/authentication/users';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export

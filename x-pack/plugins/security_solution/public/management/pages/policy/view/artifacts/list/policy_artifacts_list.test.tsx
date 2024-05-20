@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
-import type { PolicyData } from '../../../../../../../common/endpoint/types';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
+import type { PolicyData } from '../../../../../../../common/endpoint/types';
 import { getEventFiltersListPath, getPolicyEventFiltersPath } from '../../../../../common/routing';
-import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../../../common/utils';
-import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
-import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { PolicyArtifactsList } from './policy_artifacts_list';
+import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../../common/utils';
+import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({

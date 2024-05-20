@@ -11,7 +11,7 @@ import {
   RequestHandlerContext,
   RouteValidatorConfig,
 } from '@kbn/core/server';
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 /**
  * Test helper that mocks Kibana's router and DRYs out various helper (callRoute, schema validation)

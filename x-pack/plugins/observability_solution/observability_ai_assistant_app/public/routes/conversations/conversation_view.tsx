@@ -6,22 +6,22 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
+import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatBody } from '../../components/chat/chat_body';
 import { ChatInlineEditingContent } from '../../components/chat/chat_inline_edit';
 import { ConversationList } from '../../components/chat/conversation_list';
-import { useConversationKey } from '../../hooks/use_conversation_key';
-import { useConversationList } from '../../hooks/use_conversation_list';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
-import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
-import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
+import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
+import { useKibana } from '../../hooks/use_kibana';
+import { useConversationKey } from '../../hooks/use_conversation_key';
+import { useConversationList } from '../../hooks/use_conversation_list';
 
 const SECOND_SLOT_CONTAINER_WIDTH = 400;
 

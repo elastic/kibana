@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
-  AlertUtils,
-  ObjectRemover,
-  getEventLog,
   getTestRuleData,
   getUrlPrefix,
+  ObjectRemover,
+  getEventLog,
+  AlertUtils,
 } from '../../../../common/lib';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {

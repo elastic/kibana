@@ -7,10 +7,10 @@
 
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import type { OverviewStepProps } from '../../types';
 import { EsDeprecationIssuesPanel, KibanaDeprecationIssuesPanel } from './components';

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render } from '@testing-library/react';
+import { QueryClientProvider } from '@tanstack/react-query';
 
-import * as privileges from '../../action_results/use_action_privileges';
-import * as useLiveQueryDetails from '../../actions/use_live_query_details';
-import { useKibana } from '../../common/lib/kibana';
-import { queryClient } from '../../query_client';
-import { PERMISSION_DENIED } from '../osquery_action/translations';
 import { OsqueryActionResults } from './osquery_results';
-import { DETAILS_QUERY, defaultLiveQueryDetails, getMockedKibanaConfig } from './test_utils';
+import { queryClient } from '../../query_client';
+import { useKibana } from '../../common/lib/kibana';
+import * as useLiveQueryDetails from '../../actions/use_live_query_details';
+import { PERMISSION_DENIED } from '../osquery_action/translations';
+import * as privileges from '../../action_results/use_action_privileges';
+import { defaultLiveQueryDetails, DETAILS_QUERY, getMockedKibanaConfig } from './test_utils';
 import type { OsqueryActionResultsProps } from './types';
 
 jest.mock('../../common/lib/kibana');

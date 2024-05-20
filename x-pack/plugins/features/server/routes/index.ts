@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { FeatureRegistry } from '../feature_registry';
 import type { FeaturesPluginRouter } from '../types';
+import { FeatureRegistry } from '../feature_registry';
 
 /**
  * Describes parameters used to define HTTP routes.

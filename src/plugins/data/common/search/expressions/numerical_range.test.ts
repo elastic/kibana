@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { numericalRangeFunction } from './numerical_range';
 import { functionWrapper } from './utils';
+import { numericalRangeFunction } from './numerical_range';
 
 describe('interpreter/functions#numericalRange', () => {
   const fn = functionWrapper(numericalRangeFunction);

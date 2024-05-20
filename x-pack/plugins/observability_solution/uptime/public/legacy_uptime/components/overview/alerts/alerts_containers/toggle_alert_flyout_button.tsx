@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { ToggleAlertFlyoutButtonComponent } from '..';
 import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../../state/actions';
+import { ToggleAlertFlyoutButtonComponent } from '..';
 
 export interface ToggleAlertFlyoutButtonProps {
   alertOptions?: string[];

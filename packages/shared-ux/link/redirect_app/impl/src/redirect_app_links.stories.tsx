@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { RedirectAppLinksStorybookMock } from '@kbn/shared-ux-link-redirect-app-mocks';
-import { action } from '@storybook/addon-actions';
 import React from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { action } from '@storybook/addon-actions';
+import { RedirectAppLinksStorybookMock } from '@kbn/shared-ux-link-redirect-app-mocks';
 
-import mdx from '../README.mdx';
 import { RedirectAppLinks as Component } from './redirect_app_links';
+import mdx from '../README.mdx';
 
 export default {
   title: 'Link/Redirect App Links',

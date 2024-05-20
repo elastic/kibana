@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { mockGroupValues } from './__mocks__/group_logic.mock';
 import {
   LogicMounter,
+  mockKibanaValues,
   mockFlashMessageHelpers,
   mockHttpValues,
-  mockKibanaValues,
 } from '../../../__mocks__/kea_logic';
 import { groups } from '../../__mocks__/groups.mock';
-import { mockGroupValues } from './__mocks__/group_logic.mock';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 

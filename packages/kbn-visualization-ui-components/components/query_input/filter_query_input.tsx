@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiPopover,
+  EuiFormRow,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiIconTip,
   EuiPopoverProps,
 } from '@elastic/eui';
 import type { DataViewBase, Query } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
 import { QueryInput, validateQuery } from '.';
 import type { QueryInputServices } from '.';
 import './filter_query_input.scss';

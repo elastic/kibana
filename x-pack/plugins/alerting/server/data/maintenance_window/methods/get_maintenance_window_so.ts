@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../common';
+import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import { MaintenanceWindowAttributes } from '../types';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../common';
 
 export interface GetMaintenanceWindowSoParams {
   id: string;

@@ -6,42 +6,42 @@
  * Side Public License, v 1.
  */
 
-import { Server } from '@hapi/hapi';
 import {
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  IUiSettingsClient,
-  KibanaRequest,
-  Logger,
   Plugin,
-  PluginInitializerContext,
+  Logger,
+  KibanaRequest,
+  IUiSettingsClient,
 } from '@kbn/core/server';
+import { firstValueFrom, Observable } from 'rxjs';
+import { Server } from '@hapi/hapi';
+import { map } from 'rxjs';
+import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { PluginStart } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { PluginStart as DataViewsPublicPluginStart } from '@kbn/data-views-plugin/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
-import { Observable, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs';
 import { VIS_TYPE } from '../common/constants';
 import { VisTypeTimeseriesConfig } from '../config';
 import { getVisData } from './lib/get_vis_data';
-import { fieldsRoutes } from './routes/fields';
 import { visDataRoutes } from './routes/vis';
+import { fieldsRoutes } from './routes/fields';
+import { getUiSettings } from './ui_settings';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from './types';
-import { getUiSettings } from './ui_settings';
 
-import type { TimeseriesVisData, VisPayload } from '../common/types';
 import {
+  SearchStrategyRegistry,
   DefaultSearchStrategy,
   RollupSearchStrategy,
-  SearchStrategyRegistry,
 } from './lib/search_strategies';
+import type { TimeseriesVisData, VisPayload } from '../common/types';
 
 export interface LegacySetup {
   server: Server;

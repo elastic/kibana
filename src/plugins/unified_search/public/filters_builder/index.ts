@@ -1,4 +1,3 @@
-import { withSuspense } from '@kbn/shared-ux-utility';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
 /**
  * The Lazily-loaded `FiltersBuilder` component.  Consumers should use `React.Suspense` or

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
-import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ImageMode } from '../../../common';
+import { storiesOf } from '@storybook/react';
+import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { getImageRenderer } from '../image_renderer';
+import { ImageMode } from '../../../common';
 
 const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
   const config = {

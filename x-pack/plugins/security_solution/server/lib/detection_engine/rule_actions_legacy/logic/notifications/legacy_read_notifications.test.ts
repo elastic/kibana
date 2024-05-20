@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-import {
-  legacyGetFindNotificationsResultWithSingleHit,
-  legacyGetNotificationResult,
-} from '../../../routes/__mocks__/request_responses';
 // eslint-disable-next-line no-restricted-imports
 import { legacyReadNotifications } from './legacy_read_notifications';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import {
+  legacyGetNotificationResult,
+  legacyGetFindNotificationsResultWithSingleHit,
+} from '../../../routes/__mocks__/request_responses';
 
 class LegacyTestError extends Error {
   constructor() {

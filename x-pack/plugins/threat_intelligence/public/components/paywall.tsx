@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { VFC } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,7 +15,6 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { VFC } from 'react';
 import { useKibana } from '../hooks/use_kibana';
 
 export const Paywall: VFC = () => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { API_URLS } from '../../../../common/constants';
 import { BaseParams } from './types';
 import { apiService } from './utils';
+import { API_URLS } from '../../../../common/constants';
 
 export const fetchMonitorDuration = async ({ monitorId, dateStart, dateEnd }: BaseParams) => {
   const queryParams = {

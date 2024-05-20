@@ -7,14 +7,11 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig } from '../../../types';
 import { Operations } from '../../constants';
-import { Operation } from '../../types';
-import { isFieldValid } from '../../utils';
-import { getFieldNameFromField } from '../utils';
 import { createColumn, getFormat } from './column';
 import { SupportedMetric } from './supported_metrics';
 import { CommonColumnConverterArgs, MetricsWithField } from './types';
+import { SchemaConfig } from '../../../types';
 import {
   AvgColumn,
   CardinalityColumn,
@@ -24,6 +21,9 @@ import {
   MinColumn,
   SumColumn,
 } from './types';
+import { getFieldNameFromField } from '../utils';
+import { isFieldValid } from '../../utils';
+import { Operation } from '../../types';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE

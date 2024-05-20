@@ -10,27 +10,27 @@ import {
   ALL_VALUE,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
+  SyntheticsAvailabilityIndicator,
   BudgetingMethod,
   HistogramIndicator,
   IndicatorType,
   KQLCustomIndicator,
   MetricCustomIndicator,
-  SyntheticsAvailabilityIndicator,
-  TimeWindowType,
   TimesliceMetricIndicator,
+  TimeWindowType,
 } from '@kbn/slo-schema';
-import { SYNTHETICS_DEFAULT_GROUPINGS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
   INDICATOR_APM_AVAILABILITY,
   INDICATOR_APM_LATENCY,
+  INDICATOR_SYNTHETICS_AVAILABILITY,
   INDICATOR_CUSTOM_KQL,
   INDICATOR_CUSTOM_METRIC,
   INDICATOR_HISTOGRAM,
-  INDICATOR_SYNTHETICS_AVAILABILITY,
   INDICATOR_TIMESLICE_METRIC,
 } from '../../utils/slo/labels';
+import { SYNTHETICS_DEFAULT_GROUPINGS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { CreateSLOForm } from './types';
 
 export const SLI_OPTIONS: Array<{

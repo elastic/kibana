@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { createFailError } from '@kbn/dev-cli-errors';
 import chalk from 'chalk';
-import { I18nConfig, extractMessagesFromPathToMap, filterConfigPaths } from '..';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { extractMessagesFromPathToMap, filterConfigPaths, I18nConfig } from '..';
 import { I18nCheckTaskContext } from '../types';
 
 export function extractDefaultMessages(config: I18nConfig, inputPaths: string[]) {

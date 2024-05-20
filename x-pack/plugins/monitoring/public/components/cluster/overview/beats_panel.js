@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import React from 'react';
-import { BEATS_SYSTEM_ID } from '../../../../common/constants';
-import { SetupModeFeature } from '../../../../common/enums';
 import { formatMetric } from '../../../lib/format_number';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiLink,
+  EuiTitle,
+  EuiPanel,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+} from '@elastic/eui';
+import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
-import { SetupModeTooltip } from '../../setup_mode/tooltip';
-import { ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
+import { SetupModeFeature } from '../../../../common/enums';
 
 export function BeatsPanel(props) {
   const { setupMode } = props;

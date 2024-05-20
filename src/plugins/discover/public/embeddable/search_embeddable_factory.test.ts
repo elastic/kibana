@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { SearchByValueInput } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../__mocks__/services';
 import { SearchEmbeddableFactory, type StartServices } from './search_embeddable_factory';
+import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { SearchByValueInput } from '@kbn/saved-search-plugin/public';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   return {

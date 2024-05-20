@@ -19,13 +19,13 @@ import {
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics';
 
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { LogMeta, Logger } from '@kbn/logging';
-import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
-import { infraPluginMock } from '../../../mocks';
-import { InfraBackendLibs } from '../../infra_types';
-import { ConditionResult } from './evaluate_condition';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { createInventoryMetricThresholdExecutor } from './inventory_metric_threshold_executor';
+import { ConditionResult } from './evaluate_condition';
+import { InfraBackendLibs } from '../../infra_types';
+import { infraPluginMock } from '../../../mocks';
+import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
 
 jest.mock('./evaluate_condition', () => ({ evaluateCondition: jest.fn() }));
 

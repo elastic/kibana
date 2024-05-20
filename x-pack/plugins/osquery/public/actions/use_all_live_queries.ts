@@ -9,11 +9,11 @@ import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { API_VERSIONS } from '../../common/constants';
-import type { ActionEdges, ActionsStrategyResponse } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
+import type { ActionEdges, ActionsStrategyResponse } from '../../common/search_strategy';
 
-import { Direction } from '../../common/search_strategy';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { Direction } from '../../common/search_strategy';
 
 export interface UseAllLiveQueriesConfig {
   activePage?: number;

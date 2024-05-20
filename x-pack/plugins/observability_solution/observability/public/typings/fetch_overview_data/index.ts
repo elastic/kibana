@@ -6,8 +6,8 @@
  */
 
 import { UXMetrics } from '@kbn/observability-shared-plugin/public';
-import { ApmIndicesConfig } from '../../../common/typings';
 import type { ObservabilityApp } from '../../../typings/common';
+import { ApmIndicesConfig } from '../../../common/typings';
 
 export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
@@ -84,7 +84,7 @@ export type ObservabilityFetchDataPlugins = Exclude<
 >;
 
 export interface DataHandler<
-  T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins,
+  T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins
 > {
   fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
   hasData: HasData<T>;

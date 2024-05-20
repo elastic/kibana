@@ -6,10 +6,10 @@
  */
 
 import { connect } from 'react-redux';
-import { getInspectorAdapters } from '../../../../../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../../../../../reducers/store';
 import { getMapZoom, isUsingSearch } from '../../../../../../selectors/map_selectors';
-import { OwnProps, ReduxStateProps, TOCEntryButton } from './toc_entry_button';
+import { getInspectorAdapters } from '../../../../../../reducers/non_serializable_instances';
+import { TOCEntryButton, ReduxStateProps, OwnProps } from './toc_entry_button';
 
 function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   return {

@@ -6,40 +6,40 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { KibanaRequest } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
 import { Observable } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 
 import { SavedObjectReference } from '@kbn/core/types';
-import { ExecutionContextSearch } from '@kbn/es-query';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   MigrateFunctionsObject,
   PersistableStateService,
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { ExecutionContextSearch } from '@kbn/es-query';
+import { Executor } from '../executor';
+import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract, ExecutionResult } from '../execution';
-import { Executor } from '../executor';
+import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import {
   clog,
   createTable,
+  font,
+  variableSet,
+  variable,
+  theme,
   cumulativeSum,
   derivative,
-  font,
+  movingAverage,
   mapColumn,
+  overallMetric,
   math,
   mathColumn,
-  movingAverage,
-  overallMetric,
-  theme,
-  variable,
-  variableSet,
 } from '../expression_functions';
-import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
-import { AnyExpressionTypeDefinition, ExpressionValueError } from '../expression_types';
 import { ExpressionsServiceFork } from './expressions_fork';
 
 /**

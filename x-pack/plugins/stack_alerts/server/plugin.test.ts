@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { AlertingBuiltinsPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
-import { AlertingBuiltinsPlugin } from './plugin';
 
 describe('AlertingBuiltins Plugin', () => {
   describe('setup()', () => {
-    let context: ReturnType<(typeof coreMock)['createPluginInitializerContext']>;
+    let context: ReturnType<typeof coreMock['createPluginInitializerContext']>;
     let plugin: AlertingBuiltinsPlugin;
-    let coreSetup: ReturnType<(typeof coreMock)['createSetup']>;
+    let coreSetup: ReturnType<typeof coreMock['createSetup']>;
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext();

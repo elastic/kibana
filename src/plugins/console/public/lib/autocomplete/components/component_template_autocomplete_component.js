@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ENTITIES, getAutocompleteInfo } from '../../../services';
+import { getAutocompleteInfo, ENTITIES } from '../../../services';
 import { ListComponent } from './list_component';
 
 export class ComponentTemplateAutocompleteComponent extends ListComponent {

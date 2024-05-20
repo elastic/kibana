@@ -8,8 +8,8 @@
 import { Logger, RequestHandlerContext } from '@kbn/core/server';
 import { KibanaRequest, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 export interface LicenseStatus {
   isValid: boolean;

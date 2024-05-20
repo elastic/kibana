@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { DiscoverServices } from '../build_services';
 
 const rootPath = '#/';

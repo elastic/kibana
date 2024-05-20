@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { TimeRange } from '@kbn/data-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { PANEL_TYPES } from '../../common/enums';
+import { TimeRange } from '@kbn/data-plugin/common';
 import type { Panel } from '../../common/types';
+import { PANEL_TYPES } from '../../common/enums';
 import { ConvertTsvbToLensVisualization } from './types';
 
 const getConvertFnByType = (type: PANEL_TYPES) => {

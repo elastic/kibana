@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, KbnFieldTypeOptions } from './types';
+import { KbnFieldTypeOptions, ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 
 export class KbnFieldType {
   public readonly name: string;

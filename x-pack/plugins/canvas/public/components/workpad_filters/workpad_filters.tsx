@@ -7,8 +7,8 @@
 
 import React, { FC, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { FilterField, PositionedElement, State } from '../../../types';
-import { getFiltersExprsFromExpression, groupFiltersBy } from '../../lib/filter';
+import { State, FilterField, PositionedElement } from '../../../types';
+import { groupFiltersBy, getFiltersExprsFromExpression } from '../../lib/filter';
 import { setGroupFiltersByOption } from '../../state/actions/sidebar';
 import { getGroupFiltersByOption } from '../../state/selectors/sidebar';
 import { useCanvasFilters } from './hooks';

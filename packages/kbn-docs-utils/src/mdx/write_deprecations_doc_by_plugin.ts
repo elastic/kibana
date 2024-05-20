@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
+import moment from 'moment';
 import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import Fsp from 'fs/promises';
-import moment from 'moment';
-import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
+import Path from 'path';
 import { ApiDeclaration, ApiReference, ReferencedDeprecationsByPlugin } from '../types';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
 export async function writeDeprecationDocByPlugin(
@@ -25,16 +25,13 @@ export async function writeDeprecationDocByPlugin(
     .map((key) => {
       const groupedDeprecationReferences: {
         [key: string]: { api: ApiDeclaration; refs: ApiReference[] };
-      } = deprecationsByPlugin[key].reduce(
-        (acc, deprecation) => {
-          if (acc[deprecation.deprecatedApi.id] === undefined) {
-            acc[deprecation.deprecatedApi.id] = { api: deprecation.deprecatedApi, refs: [] };
-          }
-          acc[deprecation.deprecatedApi.id].refs.push(deprecation.ref);
-          return acc;
-        },
-        {} as { [key: string]: { api: ApiDeclaration; refs: ApiReference[] } }
-      );
+      } = deprecationsByPlugin[key].reduce((acc, deprecation) => {
+        if (acc[deprecation.deprecatedApi.id] === undefined) {
+          acc[deprecation.deprecatedApi.id] = { api: deprecation.deprecatedApi, refs: [] };
+        }
+        acc[deprecation.deprecatedApi.id].refs.push(deprecation.ref);
+        return acc;
+      }, {} as { [key: string]: { api: ApiDeclaration; refs: ApiReference[] } });
 
       return `
     ## ${key}

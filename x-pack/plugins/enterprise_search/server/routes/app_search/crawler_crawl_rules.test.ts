@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MockRouter, mockDependencies, mockRequestHandler } from '../../__mocks__';
+import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks__';
 
 import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
 

@@ -8,9 +8,9 @@
 import { sortBy } from 'lodash';
 import { AssignableObject, getKey } from '../../../common/assignments';
 import {
-  AssignmentAction,
   AssignmentOverride,
   AssignmentStatus,
+  AssignmentAction,
   AssignmentStatusMap,
 } from './types';
 

@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import { EcsVersion } from '@elastic/ecs';
 import numeral from '@elastic/numeral';
+import { EcsVersion } from '@elastic/ecs';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { EMPTY_STAT } from '../../../helpers';
-import {
-  hostNameKeyword,
-  someField,
-} from '../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
-import { PartitionedFieldMetadata } from '../../../types';
 import { ECS_IS_A_PERMISSIVE_SCHEMA } from '../../index_properties/translations';
 import {
   getAllCustomMarkdownComments,
@@ -23,6 +16,13 @@ import {
   getCustomMarkdownComment,
   showCustomCallout,
 } from './helpers';
+import {
+  hostNameKeyword,
+  someField,
+} from '../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
+import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
+import { PartitionedFieldMetadata } from '../../../types';
+import { EMPTY_STAT } from '../../../helpers';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>
@@ -35,9 +35,8 @@ const formatNumber = (value: number | undefined) =>
 describe('helpers', () => {
   describe('getCustomMarkdownComment', () => {
     test('it returns a comment for custom fields with the expected field counts and ECS version', () => {
-      expect(
-        getCustomMarkdownComment({ enrichedFieldMetadata: [hostNameKeyword, someField] })
-      ).toEqual(`#### 2 Custom field mappings
+      expect(getCustomMarkdownComment({ enrichedFieldMetadata: [hostNameKeyword, someField] }))
+        .toEqual(`#### 2 Custom field mappings
 
 These fields are not defined by the Elastic Common Schema (ECS), version ${EcsVersion}.
 

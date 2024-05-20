@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FieldCopyAction } from '../../common/types';
 import { csvToIngestPipeline } from './mapper';
+import { FieldCopyAction } from '../../common/types';
 
 describe('mapper', () => {
   describe('csvToIngestPipeline()', () => {

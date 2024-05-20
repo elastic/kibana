@@ -13,10 +13,10 @@ import type {
   SavedObjectsClientFactory,
   SavedObjectsClientProviderOptions,
   SavedObjectsEncryptionExtensionFactory,
-  SavedObjectsExtensionFactory,
-  SavedObjectsExtensions,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensions,
+  SavedObjectsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
 import {
   ENCRYPTION_EXTENSION_ID,

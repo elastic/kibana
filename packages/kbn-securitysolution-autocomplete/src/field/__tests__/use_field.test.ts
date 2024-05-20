@@ -7,8 +7,8 @@
  */
 
 import { DataViewFieldBase } from '@kbn/es-query';
-import { act } from '@testing-library/react';
 import { ReactElement } from 'react';
+import { act } from '@testing-library/react';
 
 import { renderHook } from '@testing-library/react-hooks';
 import TestRenderer from 'react-test-renderer';

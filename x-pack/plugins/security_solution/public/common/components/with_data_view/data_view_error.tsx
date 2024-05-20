@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import * as i18n from './translations';
 
 export const DataViewErrorComponent = () => {

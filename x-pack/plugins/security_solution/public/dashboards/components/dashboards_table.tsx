@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 import type { Search } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import {
-  useSecurityDashboardsTableColumns,
   useSecurityDashboardsTableItems,
+  useSecurityDashboardsTableColumns,
 } from '../hooks/use_security_dashboards_table';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 
 export const DASHBOARDS_QUERY_ERROR = i18n.translate(
   'xpack.securitySolution.dashboards.queryError',

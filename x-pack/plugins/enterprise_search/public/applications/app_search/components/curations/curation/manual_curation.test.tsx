@@ -12,17 +12,17 @@ import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiTab } from '@elastic/eui';
 
-import { getPageHeaderActions, getPageHeaderTabs, getPageTitle } from '../../../../test_helpers';
+import { getPageTitle, getPageHeaderActions, getPageHeaderTabs } from '../../../../test_helpers';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { CurationLogic } from './curation_logic';
 
 import { DeleteCurationButton } from './delete_curation_button';
-import { HiddenDocuments, OrganicDocuments, PromotedDocuments } from './documents';
+import { PromotedDocuments, HiddenDocuments, OrganicDocuments } from './documents';
 import { ManualCuration } from './manual_curation';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 import { AddResultFlyout } from './results';

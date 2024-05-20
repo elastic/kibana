@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React, { FC, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiPanel } from '@elastic/eui';
+import { StatusTable } from './status_table';
 import { FormattedStatus, getHighestStatus } from '../lib';
 import { StatusBadge } from './status_badge';
-import { StatusTable } from './status_table';
 
 interface StatusSectionProps {
   id: string;

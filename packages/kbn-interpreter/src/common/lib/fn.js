@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { includes, mapValues } from 'lodash';
+import { mapValues, includes } from 'lodash';
 import { Arg } from './arg';
 
 export function Fn(config) {

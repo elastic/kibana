@@ -6,55 +6,55 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiDelayRender,
   EuiPage,
   EuiPageBody,
   EuiPanel,
   EuiProgress,
   useEuiBackgroundColor,
+  EuiDelayRender,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
+import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
+import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import {
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
-import { i18n } from '@kbn/i18n';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import classNames from 'classnames';
-import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { VIEW_MODE } from '../../../../../common/constants';
-import { ErrorCallout } from '../../../../components/common/error_callout';
-import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
-import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { addLog } from '../../../../utils/add_log';
-import { FetchStatus, SidebarToggleState } from '../../../types';
-import { useDataState } from '../../hooks/use_data_state';
-import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
-import { DataMainMsg, RecordRawType } from '../../state_management/discover_data_state_container';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
-import { getRawRecordType } from '../../utils/get_raw_record_type';
-import { getResultState } from '../../utils/get_result_state';
-import { LoadingSpinner } from '../loading_spinner/loading_spinner';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
+import { VIEW_MODE } from '../../../../../common/constants';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
+import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
+import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
+import { DataMainMsg, RecordRawType } from '../../state_management/discover_data_state_container';
+import { FetchStatus, SidebarToggleState } from '../../../types';
+import { useDataState } from '../../hooks/use_data_state';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
+import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { ErrorCallout } from '../../../../components/common/error_callout';
+import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
+import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
+import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);

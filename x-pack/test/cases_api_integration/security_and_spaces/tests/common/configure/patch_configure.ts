@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
-import { ConnectorTypes, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import { ConnectorTypes, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
 import {
-  createConfiguration,
-  deleteConfiguration,
-  getConfiguration,
-  getConfigurationOutput,
-  getConfigurationRequest,
   removeServerGeneratedPropertiesFromSavedObject,
+  getConfigurationOutput,
+  deleteConfiguration,
+  createConfiguration,
   updateConfiguration,
+  getConfigurationRequest,
+  getConfiguration,
 } from '../../../../common/lib/api';
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsOnlyRead,
-  obsSecRead,
   secOnly,
+  obsOnlyRead,
   secOnlyRead,
+  noKibanaPrivileges,
+  globalRead,
+  obsSecRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
 

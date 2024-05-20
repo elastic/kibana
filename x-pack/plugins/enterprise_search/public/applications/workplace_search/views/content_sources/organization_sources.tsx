@@ -18,9 +18,9 @@ import { NAV } from '../../constants';
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import {
-  ORG_SOURCES_HEADER_DESCRIPTION,
-  ORG_SOURCES_HEADER_TITLE,
   ORG_SOURCES_LINK,
+  ORG_SOURCES_HEADER_TITLE,
+  ORG_SOURCES_HEADER_DESCRIPTION,
 } from './constants';
 import { SourcesLogic } from './sources_logic';
 import { SourcesView } from './sources_view';

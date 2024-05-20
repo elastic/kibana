@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React, { Fragment, useState, useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Moment } from 'moment';
-import React, { Fragment, useState, useEffect, useContext } from 'react';
 
 import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiIcon,
   EuiInMemoryTable,
   EuiTitle,
+  EuiButtonEmpty,
   EuiToolTip,
+  EuiCallOut,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../../common/constants';
-import { useAppContext } from '../../../app_context';
-import { ActionStateBadge } from '../../../components';
 import { ackWatchAction } from '../../../lib/api';
+import { ActionStateBadge } from '../../../components';
+import { useAppContext } from '../../../app_context';
 import { WatchDetailsContext } from '../watch_details_context';
 
 interface ActionError {

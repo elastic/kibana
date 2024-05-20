@@ -7,12 +7,6 @@
  */
 
 import {
-  ENDPOINT_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_NAME,
-} from '@kbn/securitysolution-list-constants';
-import {
   DATE_NOW,
   DESCRIPTION,
   ELASTIC_USER,
@@ -26,6 +20,12 @@ import {
   VERSION,
   _VERSION,
 } from '../../constants/index.mock';
+import {
+  ENDPOINT_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_NAME,
+} from '@kbn/securitysolution-list-constants';
 
 import { ExceptionListSchema } from '.';
 

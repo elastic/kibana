@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const RedirectToLogs = () => {
   const { logViewId } = useParams<{ logViewId?: string }>();

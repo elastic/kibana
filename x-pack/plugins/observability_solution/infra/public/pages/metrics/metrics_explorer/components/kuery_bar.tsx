@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
-import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { fromKueryExpression } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
-import { AutocompleteField } from '../../../../components/autocomplete_field';
+import { DataViewBase } from '@kbn/es-query';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
+import { AutocompleteField } from '../../../../components/autocomplete_field';
 
 type LoadSuggestionsFn = (
   e: string,

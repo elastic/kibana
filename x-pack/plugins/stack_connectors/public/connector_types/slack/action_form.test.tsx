@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { ApplicationStart } from '@kbn/core/public';
-import { IToasts } from '@kbn/core/public';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { ActionForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { getSlackApiConnectorType } from '../slack_api';
+import type { ApplicationStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
+import { IToasts } from '@kbn/core/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getConnectorType as getSlackConnectorType } from './slack';
+import { getSlackApiConnectorType } from '../slack_api';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({

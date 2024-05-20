@@ -6,42 +6,42 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiComboBox,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiIconTip,
-  EuiRange,
-  htmlIdGenerator,
-} from '@elastic/eui';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useContext, useCallback, useEffect, useState } from 'react';
-import { isTimerangeModeEnabled } from '../../../common/check_ui_restrictions';
-import { AUTO_INTERVAL } from '../../../common/constants';
+import {
+  htmlIdGenerator,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiComboBox,
+  EuiRange,
+  EuiIconTip,
+  EuiFormLabel,
+} from '@elastic/eui';
+import { FieldSelect } from './aggs/field_select';
+import { createSelectHandler } from './lib/create_select_handler';
+import { createTextHandler } from './lib/create_text_handler';
+import { IndexPatternSelect } from './lib/index_pattern_select';
+import { YesNo } from './yes_no';
+import { LastValueModePopover } from './last_value_mode_popover';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
+import { AUTO_INTERVAL } from '../../../common/constants';
+import { isTimerangeModeEnabled } from '../../../common/check_ui_restrictions';
+import { VisDataContext } from '../contexts/vis_data_context';
+import { PanelModelContext } from '../contexts/panel_model_context';
+import { FormValidationContext } from '../contexts/form_validation_context';
+import { getUISettings, getDataViewsStart } from '../../services';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import {
   fetchIndexPattern,
   isDataViewTypeIndexPattern,
 } from '../../../common/index_patterns_utils';
-import { getDataViewsStart, getUISettings } from '../../services';
-import { FormValidationContext } from '../contexts/form_validation_context';
-import { PanelModelContext } from '../contexts/panel_model_context';
-import { VisDataContext } from '../contexts/vis_data_context';
-import { FieldSelect } from './aggs/field_select';
-import { LastValueModePopover } from './last_value_mode_popover';
-import { createSelectHandler } from './lib/create_select_handler';
-import { createTextHandler } from './lib/create_text_handler';
-import { isAutoInterval, isGteInterval, validateReInterval } from './lib/get_interval';
-import { IndexPatternSelect } from './lib/index_pattern_select';
-import { YesNo } from './yes_no';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const LEVEL_OF_DETAIL_STEPS = 10;

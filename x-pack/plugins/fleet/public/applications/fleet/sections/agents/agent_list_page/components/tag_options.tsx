@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MouseEvent, ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -14,10 +16,8 @@ import {
   EuiIcon,
   EuiWrappingPopover,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ChangeEvent, MouseEvent } from 'react';
-import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { useUpdateTags } from '../hooks';
 import { sanitizeTag } from '../utils';

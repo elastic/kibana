@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexItem, EuiFlexGroup, EuiFieldNumber, EuiSelect, EuiFormRow } from '@elastic/eui';
 
 enum TIME_UNITS {
   SECOND = 's',

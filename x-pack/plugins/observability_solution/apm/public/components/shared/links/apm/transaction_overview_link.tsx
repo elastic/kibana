@@ -8,8 +8,8 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMLinkExtendProps, getLegacyApmHref } from './apm_link';
 
 interface Props extends APMLinkExtendProps {

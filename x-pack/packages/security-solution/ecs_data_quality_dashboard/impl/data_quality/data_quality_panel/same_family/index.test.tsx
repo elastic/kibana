@@ -8,9 +8,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { SameFamily } from '.';
-import { TestProviders } from '../../mock/test_providers/test_providers';
 import { SAME_FAMILY } from './translations';
+import { TestProviders } from '../../mock/test_providers/test_providers';
+import { SameFamily } from '.';
 
 describe('SameFamily', () => {
   test('it renders a badge with the expected content', () => {

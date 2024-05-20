@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ChangeHandler, FieldValues, UseFormProps, useForm } from 'react-hook-form';
+import { FieldValues, useForm, UseFormProps, ChangeHandler } from 'react-hook-form';
 import useDebounce from 'react-use/lib/useDebounce';
 
 export function useFormWrapped<TFieldValues extends FieldValues = FieldValues, TContext = any>(

@@ -7,50 +7,50 @@
 
 import { curry } from 'lodash';
 
-import {
-  AlertingConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import { ServiceNowITOMConnectorTypeId, snExternalServiceConfig } from '../lib/servicenow/config';
-import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
+import { validate } from '../lib/servicenow/validators';
 import {
   ExecutorParamsSchemaITOM,
-  ExternalIncidentServiceConfigurationBaseSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
+  ExternalIncidentServiceConfigurationBaseSchema,
 } from '../lib/servicenow/schema';
 import * as i18n from '../lib/servicenow/translations';
 import {
+  ExecutorSubActionGetChoicesParams,
+  PushToServiceResponse,
+  ServiceNowExecutorResultData,
+  ServiceNowSecretConfigurationType,
+  ServiceFactory,
   ExecutorParamsITOM,
   ExecutorSubActionAddEventParams,
-  ExecutorSubActionGetChoicesParams,
   ExternalServiceApiITOM,
   ExternalServiceITOM,
-  PushToServiceResponse,
-  ServiceFactory,
-  ServiceNowExecutorResultData,
   ServiceNowPublicConfigurationBaseType,
-  ServiceNowSecretConfigurationType,
 } from '../lib/servicenow/types';
+import { ServiceNowITOMConnectorTypeId, snExternalServiceConfig } from '../lib/servicenow/config';
 import { throwIfSubActionIsNotSupported } from '../lib/servicenow/utils';
-import { validate } from '../lib/servicenow/validators';
-import { api as apiITOM } from './api';
 import { createExternalService } from './service';
+import { api as apiITOM } from './api';
+import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
 
 export { ServiceNowITOMConnectorTypeId };
 
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParamsITOM,
+  T extends Record<string, unknown> = ExecutorParamsITOM
 > = ConnectorType<C, ServiceNowSecretConfigurationType, T, PushToServiceResponse | {}>;
 
 export type ServiceNowConnectorTypeExecutorOptions<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParamsITOM,
+  T extends Record<string, unknown> = ExecutorParamsITOM
 > = ConnectorTypeExecutorOptions<C, ServiceNowSecretConfigurationType, T>;
 
 // connector type definition

@@ -33,7 +33,9 @@
             "tags": [],
             "label": "ui",
             "description": [],
-            "signature": ["{ enabled: boolean; }"],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
             "path": "x-pack/plugins/observability_solution/apm/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -92,7 +94,9 @@
             "tags": [],
             "label": "serverless",
             "description": [],
-            "signature": ["{ enabled: boolean; }"],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
             "path": "x-pack/plugins/observability_solution/apm/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -155,7 +159,9 @@
       "tags": [],
       "label": "ApmPluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "x-pack/plugins/observability_solution/apm/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -213,7 +219,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/observability_solution/apm/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -304,7 +312,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["APMPluginSetupDependencies"],
+                "signature": [
+                  "APMPluginSetupDependencies"
+                ],
                 "path": "x-pack/plugins/observability_solution/apm/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -365,7 +375,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["APMPluginStartDependencies"],
+                "signature": [
+                  "APMPluginStartDependencies"
+                ],
                 "path": "x-pack/plugins/observability_solution/apm/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -381,7 +393,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/observability_solution/apm/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -418,7 +432,9 @@
         "tags": [],
         "label": "APM_SERVER_FEATURE_ID",
         "description": [],
-        "signature": ["\"apm\""],
+        "signature": [
+          "\"apm\""
+        ],
         "path": "x-pack/plugins/observability_solution/apm/common/rules/apm_rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8036,7 +8052,9 @@
                 "tags": [],
                 "label": "criticalPath",
                 "description": [],
-                "signature": ["CriticalPathResponse"],
+                "signature": [
+                  "CriticalPathResponse"
+                ],
                 "path": "x-pack/plugins/observability_solution/apm/common/critical_path/get_aggregated_critical_path_root_nodes.ts",
                 "deprecated": false,
                 "trackAdoption": false

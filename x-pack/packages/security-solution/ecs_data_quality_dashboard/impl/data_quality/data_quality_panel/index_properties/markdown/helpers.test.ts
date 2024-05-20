@@ -12,29 +12,8 @@ import {
   FIELD,
   INDEX_MAPPING_TYPE_ACTUAL,
 } from '../../../compare_fields_table/translations';
-import { EMPTY_STAT } from '../../../helpers';
-import { mockAllowedValues } from '../../../mock/allowed_values/mock_allowed_values';
-import {
-  eventCategory,
-  mockCustomFields,
-  mockIncompatibleMappings,
-  sourceIpWithTextMapping,
-} from '../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
-import {
-  auditbeatNoResults,
-  auditbeatWithAllResults,
-} from '../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import {
-  EnrichedFieldMetadata,
-  ErrorSummary,
-  PatternRollup,
-  UnallowedValueCount,
-} from '../../../types';
 import { ERRORS } from '../../data_quality_summary/errors_popover/translations';
 import { ERROR, INDEX, PATTERN } from '../../data_quality_summary/errors_viewer/translations';
-import { SAME_FAMILY } from '../../same_family/translations';
-import { INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE } from '../../tabs/incompatible_tab/translations';
 import {
   escape,
   escapePreserveNewlines,
@@ -62,6 +41,27 @@ import {
   getSummaryTableMarkdownRow,
   getTabCountsMarkdownComment,
 } from './helpers';
+import { EMPTY_STAT } from '../../../helpers';
+import { mockAllowedValues } from '../../../mock/allowed_values/mock_allowed_values';
+import {
+  eventCategory,
+  mockCustomFields,
+  mockIncompatibleMappings,
+  sourceIpWithTextMapping,
+} from '../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
+import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
+import {
+  auditbeatNoResults,
+  auditbeatWithAllResults,
+} from '../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import { SAME_FAMILY } from '../../same_family/translations';
+import { INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE } from '../../tabs/incompatible_tab/translations';
+import {
+  EnrichedFieldMetadata,
+  ErrorSummary,
+  PatternRollup,
+  UnallowedValueCount,
+} from '../../../types';
 
 const errorSummary: ErrorSummary[] = [
   {

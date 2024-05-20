@@ -7,8 +7,8 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { NoDataPageConfig } from '../config';
 import type { NoDataPagePublicSetup, NoDataPagePublicStart } from './types';
+import type { NoDataPageConfig } from '../config';
 
 export class NoDataPagePlugin implements Plugin<NoDataPagePublicSetup, NoDataPagePublicStart> {
   constructor(private initializerContext: PluginInitializerContext<NoDataPageConfig>) {}

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CONTROL_TYPES, ControlParams } from '../editor_utils';
-import { getDepsMock, getSearchSourceMock } from '../test_utils';
 import { rangeControlFactory } from './range_control_factory';
+import { ControlParams, CONTROL_TYPES } from '../editor_utils';
+import { getDepsMock, getSearchSourceMock } from '../test_utils';
 
 describe('rangeControlFactory', () => {
   describe('fetch', () => {

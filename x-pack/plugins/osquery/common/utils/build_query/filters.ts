@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Inspect, PaginationInputPaginated } from '../../search_strategy';
+import type { PaginationInputPaginated, Inspect } from '../../search_strategy';
 
 export type InspectResponse = Inspect & { response: string[] };
 

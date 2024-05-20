@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
-import { omit } from 'lodash';
 import type { PluginWrapper } from './plugin';
-import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
 import type { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
 
 /**
  * Provides a plugin-specific context passed to the plugin's constructor. This is currently
@@ -63,7 +63,7 @@ export function createPluginSetupContext<
   TSetup,
   TStart,
   TPluginsSetup extends object,
-  TPluginsStart extends object,
+  TPluginsStart extends object
 >({
   deps,
   plugin,
@@ -122,7 +122,7 @@ export function createPluginStartContext<
   TSetup,
   TStart,
   TPluginsSetup extends object,
-  TPluginsStart extends object,
+  TPluginsStart extends object
 >({
   deps,
   plugin,

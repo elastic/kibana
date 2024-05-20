@@ -1,7 +1,3 @@
-import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
-import { coreMock } from '@kbn/core/public/mocks';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,19 +5,23 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render } from '@testing-library/react';
 import { EventDetailsPanel } from '.';
+import { TestProviders } from '../../../../common/mock';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
+import { mockBrowserFields, mockRuntimeMappings } from '../../../../common/containers/source/mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { useTimelineEventsDetails } from '../../../containers/details';
+import { allCasesPermissions } from '../../../../cases_test_utils';
 import {
-  ASSISTANT_FEATURE_ID,
   DEFAULT_ALERTS_INDEX,
   DEFAULT_PREVIEW_INDEX,
+  ASSISTANT_FEATURE_ID,
 } from '../../../../../common/constants';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { allCasesPermissions } from '../../../../cases_test_utils';
-import { mockBrowserFields, mockRuntimeMappings } from '../../../../common/containers/source/mock';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
-import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
-import { TestProviders } from '../../../../common/mock';
-import { useTimelineEventsDetails } from '../../../containers/details';
 
 const ecsData: Ecs = {
   _id: '1',

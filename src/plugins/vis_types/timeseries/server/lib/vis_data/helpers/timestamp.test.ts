@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PanelData } from '../../../../common/types';
 import { getLastSeriesTimestamp } from './timestamp';
+import { PanelData } from '../../../../common/types';
 
 describe('src/legacy/core_plugins/metrics/server/lib/vis_data/helpers/timestamp.js', () => {
   let series: PanelData[][];

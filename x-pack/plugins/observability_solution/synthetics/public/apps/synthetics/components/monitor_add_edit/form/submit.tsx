@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import React, { useState } from 'react';
+import { Redirect, useParams, useHistory } from 'react-router-dom';
+import { EuiButton, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
-import { Redirect, useHistory, useParams } from 'react-router-dom';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { RunTestButton } from './run_test_btn';
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
+import { useMonitorSave } from '../hooks/use_monitor_save';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { DeleteMonitor } from '../../monitors_page/management/monitor_list_table/delete_monitor';
-import { useMonitorSave } from '../hooks/use_monitor_save';
 import { ConfigKey, SourceType, SyntheticsMonitor } from '../types';
 import { format } from './formatter';
-import { RunTestButton } from './run_test_btn';
 
 import { MONITORS_ROUTE } from '../../../../../../common/constants';
 

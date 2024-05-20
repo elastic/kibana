@@ -13,10 +13,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { asDynamicBytes, asInteger } from '@kbn/observability-plugin/common';
 import React, { useMemo, useState } from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../common';
+import { asDynamicBytes, asInteger } from '@kbn/observability-plugin/common';
 import { StorageDetailsPerIndex } from '../../../../common/storage_explorer';
+import { NOT_AVAILABLE_LABEL } from '../../../../common';
 
 interface Props {
   data?: StorageDetailsPerIndex[];

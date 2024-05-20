@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import React from 'react';
 import { ReactElement, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 const NO_DATA_POPOVER_STORAGE_KEY = 'data.noDataPopover';
 

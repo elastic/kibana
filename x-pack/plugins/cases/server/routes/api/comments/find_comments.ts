@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
 import type { attachmentApiV1 } from '../../../../common/types/api';
-import { createCaseError } from '../../../common/error';
+import { CASE_FIND_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCasesRoute } from '../create_cases_route';
+import { createCaseError } from '../../../common/error';
 
 export const findCommentsRoute = createCasesRoute({
   method: 'get',

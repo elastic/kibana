@@ -21,16 +21,16 @@ import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
 
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
-import type { Owner } from '../../../common/constants/types';
 import { constructFileKindIdByOwner } from '../../../common/files';
+import type { Owner } from '../../../common/constants/types';
 
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common';
 import { useCasesToast } from '../../common/use_cases_toast';
-import { deleteFileAttachments } from '../../containers/api';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { deleteFileAttachments } from '../../containers/api';
 
 interface AddFileProps {
   caseId: string;

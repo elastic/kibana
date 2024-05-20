@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../common/utils';
+import type { MaybeImmutable } from '../../../../../common/endpoint/types';
 
 export const useKueryFromExceptionsSearchFilter = (
   filter: string | undefined,

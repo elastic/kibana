@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { Dispatch, useEffect, useState } from 'react';
 import type {
   CreateExceptionListItemSchema,
   PersistHookProps,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { addExceptionListItem, updateExceptionListItem } from '@kbn/securitysolution-list-api';
-import { Dispatch, useEffect, useState } from 'react';
 
 import { transformNewItemOutput, transformOutput } from '../transforms';
 
@@ -23,7 +23,7 @@ interface PersistReturnExceptionItem {
 
 export type ReturnPersistExceptionItem = [
   PersistReturnExceptionItem,
-  Dispatch<CreateExceptionListItemSchema | UpdateExceptionListItemSchema | null>,
+  Dispatch<CreateExceptionListItemSchema | UpdateExceptionListItemSchema | null>
 ];
 
 // TODO: Add this to @kbn/securitysolution-list-hooks

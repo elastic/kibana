@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
+import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { Store } from 'redux';
-import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
-import { writeToStorage } from '../settings_storage';
+import { Provider } from 'react-redux';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
-  LensAppState,
   disableAutoApply,
   enableAutoApply,
+  LensAppState,
   selectAutoApplyEnabled,
   useLensDispatch,
   useLensSelector,
 } from '../state_management';
+import { writeToStorage } from '../settings_storage';
+import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
 import { StartServices } from '../types';
 
 const container = document.createElement('div');

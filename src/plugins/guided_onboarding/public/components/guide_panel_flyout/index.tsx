@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import {
   EuiButtonEmpty,
-  EuiFocusTrap,
-  EuiOverlayMask,
   EuiPanel,
   EuiPortal,
+  EuiOverlayMask,
+  EuiFocusTrap,
   EuiThemeComputed,
 } from '@elastic/eui';
 import { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import type { PluginState } from '../../../common';
-import { getGuidePanelStyles } from '../guide_panel.styles';
-import { GuidePanelFlyoutBody } from './guide_panel_flyout_body';
-import { GuidePanelFlyoutFooter } from './guide_panel_flyout_footer';
 import { GuidePanelFlyoutHeader } from './guide_panel_flyout_header';
+import { GuidePanelFlyoutBody } from './guide_panel_flyout_body';
+import type { PluginState } from '../../../common';
+import { GuidePanelFlyoutFooter } from './guide_panel_flyout_footer';
+import { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyout = ({
   isOpen,

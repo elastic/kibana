@@ -12,9 +12,9 @@ import { useActions, useValues } from 'kea';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

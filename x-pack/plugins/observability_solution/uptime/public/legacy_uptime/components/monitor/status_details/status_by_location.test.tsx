@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { StatusByLocations } from '.';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { MonitorLocation } from '../../../../../common/runtime_types';
+import { StatusByLocations } from '.';
 
 describe('StatusByLocation component', () => {
   let monitorLocations: MonitorLocation[];

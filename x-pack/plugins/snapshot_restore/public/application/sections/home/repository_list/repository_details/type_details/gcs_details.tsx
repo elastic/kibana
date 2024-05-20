@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { GCSRepository } from '../../../../../../../common/types';
 

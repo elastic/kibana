@@ -8,20 +8,20 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { SecurityPageName } from '../../../../common/constants';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { ID as OverviewHostQueryId } from '../../containers/overview_host';
+import { OverviewHost } from '../overview_host';
+import { OverviewNetwork } from '../overview_network';
+import { useKibana } from '../../../common/lib/kibana';
+import { convertToBuildEsQuery } from '../../../common/lib/kuery';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import {
   fieldNameExistsFilter,
   sourceOrDestinationIpExistsFilter,
 } from '../../../common/components/visualization_actions/utils';
-import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
-import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { useKibana } from '../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../common/lib/kuery';
-import { ID as OverviewHostQueryId } from '../../containers/overview_host';
-import { OverviewHost } from '../overview_host';
-import { OverviewNetwork } from '../overview_network';
+import { SecurityPageName } from '../../../../common/constants';
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters: Filter[];

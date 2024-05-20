@@ -1,6 +1,3 @@
-import type { ESQLColumn, ESQLSearchReponse } from '@kbn/es-types';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,7 +6,10 @@ import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import type { ESQLColumn, ESQLSearchReponse } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 import { ESQL_LATEST_VERSION } from '../../constants';
 

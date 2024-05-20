@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IBasePath } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { IBasePath } from '@kbn/core/server';
 import { LogsSharedConfig } from '../../common/plugin_config';
 import type { LogsSharedPluginStartServicesAccessor, UsageCollector } from '../types';
 import type { KibanaFramework } from './adapters/framework/kibana_framework_adapter';

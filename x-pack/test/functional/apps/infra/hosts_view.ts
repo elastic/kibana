@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import moment from 'moment';
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   enableInfrastructureAssetCustomDashboards,
   enableInfrastructureHostsView,
 } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import moment from 'moment';
-import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
-  DATE_PICKER_FORMAT,
   HOSTS_LINK_LOCAL_STORAGE_KEY,
   HOSTS_VIEW_PATH,
+  DATE_PICKER_FORMAT,
 } from './constants';
 import { generateAddServicesToExistingHost } from './helpers';
+import { getApmSynthtraceEsClient } from '../../../common/utils/synthtrace/apm_es_client';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -284,8 +284,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.try(async () => {
-                const tileValue =
-                  await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
+                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
+                  metric
+                );
                 expect(tileValue).to.eql(value);
               });
             });

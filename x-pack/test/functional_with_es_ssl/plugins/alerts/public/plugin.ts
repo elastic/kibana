@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 
 export type Setup = void;
 export type Start = void;

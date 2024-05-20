@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isLowerCaseString } from '../../../validators/string';
 import { ValidationFunc } from '../../hook_form_lib';
+import { isLowerCaseString } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
 export const lowerCaseStringField =

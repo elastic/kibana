@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { cloneDeep } from 'lodash/fp';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
-import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines_page';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
+import type { OpenTimelineResult, OpenTimelineProps } from '../types';
 import type { TimelinesTableProps } from '../timelines_table';
-import type { OpenTimelineProps, OpenTimelineResult } from '../types';
+import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { OpenTimelineModalBody } from './open_timeline_modal_body';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../constants';
+import { TimelineType, TimelineStatus } from '../../../../../common/api/timeline';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../../common/lib/kibana');
 

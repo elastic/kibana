@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { find, omit, pick } from 'lodash';
-import { getFunctionHelp } from '../../../i18n';
+import { omit, pick, find } from 'lodash';
 import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   include: string;

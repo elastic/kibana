@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { findTestSubject, registerTestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 import { AutoFollowPatternList } from '../../../app/sections/home/auto_follow_pattern_list';
-import { routing } from '../../../app/services/routing';
 import { ccrStore } from '../../../app/store';
+import { routing } from '../../../app/services/routing';
 
 const testBedConfig = {
   store: ccrStore,

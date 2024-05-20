@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties } from 'geojson';
+import { DataView } from '@kbn/data-plugin/common';
+import type { IESAggSource, ESAggsSourceSyncMeta } from './types';
+import { AbstractESSource } from '../es_source';
+import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
+import { getSourceAggKey } from '../../../../common/get_agg_key';
 import {
   AbstractESAggSourceDescriptor,
   AggDescriptor,
   DataFilters,
 } from '../../../../common/descriptor_types';
-import { getSourceAggKey } from '../../../../common/get_agg_key';
-import { IESAggField, esAggFieldsFactory } from '../../fields/agg';
 import { IField } from '../../fields/field';
-import { BUCKETS } from '../../layers/vector_layer/mask';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
-import { AbstractESSource } from '../es_source';
 import { getAggDisplayName } from './get_agg_display_name';
-import type { ESAggsSourceSyncMeta, IESAggSource } from './types';
+import { BUCKETS } from '../../layers/vector_layer/mask';
 
 export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 

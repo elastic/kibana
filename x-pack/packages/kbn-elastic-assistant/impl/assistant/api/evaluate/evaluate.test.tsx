@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { postEvaluation } from './evaluate';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
-import { postEvaluation } from './evaluate';
 
 jest.mock('@kbn/core-http-browser');
 

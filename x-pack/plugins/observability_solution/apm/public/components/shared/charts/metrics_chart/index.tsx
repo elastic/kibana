@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import {
   asDecimal,
   asInteger,
@@ -16,7 +17,6 @@ import {
 } from '../../../../../common/utils/formatters';
 import { Maybe } from '../../../../../typings/common';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { getMaxY, getResponseTimeTickFormatter } from '../transaction_charts/helper';
 

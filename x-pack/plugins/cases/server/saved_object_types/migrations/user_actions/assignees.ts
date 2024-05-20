@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 import type { CreateCaseUserAction } from '../../../../common/types/domain';
 import { UserActionTypes } from '../../../../common/types/domain';
 

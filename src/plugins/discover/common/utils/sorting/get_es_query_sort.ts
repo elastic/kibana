@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
 
 /**

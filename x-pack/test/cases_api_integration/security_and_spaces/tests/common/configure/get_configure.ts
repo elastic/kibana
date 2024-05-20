@@ -10,24 +10,24 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
-  createConfiguration,
-  deleteConfiguration,
-  ensureSavedObjectIsAuthorized,
-  getConfiguration,
-  getConfigurationOutput,
-  getConfigurationRequest,
   removeServerGeneratedPropertiesFromSavedObject,
+  getConfigurationOutput,
+  deleteConfiguration,
+  getConfiguration,
+  createConfiguration,
+  getConfigurationRequest,
+  ensureSavedObjectIsAuthorized,
 } from '../../../../common/lib/api';
 import {
-  globalRead,
-  noKibanaPrivileges,
   obsOnly,
-  obsOnlyRead,
-  obsSec,
-  obsSecRead,
   secOnly,
+  obsOnlyRead,
   secOnlyRead,
+  noKibanaPrivileges,
   superUser,
+  globalRead,
+  obsSecRead,
+  obsSec,
 } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export

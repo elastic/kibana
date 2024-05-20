@@ -7,11 +7,11 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { getSearchDsl } from '../search';
 import type { ApiExecutionContext } from './types';
 

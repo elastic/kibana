@@ -1,4 +1,3 @@
-import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +5,18 @@ import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { POLICIES_ROUTE_PATH, INTEGRATION_PACKAGE_NAME } from '../../../common/constants';
 import { policiesQueryParamsSchema } from '../../../common';
 import type { CloudDefendPolicy } from '../../../common';
-import { INTEGRATION_PACKAGE_NAME, POLICIES_ROUTE_PATH } from '../../../common/constants';
 import { isNonNullable } from '../../../common/utils/helpers';
+import { CloudDefendRouter } from '../../types';
 import {
-  type AgentStatusByAgentPolicyMap,
   getAgentStatusesByAgentPolicies,
+  type AgentStatusByAgentPolicyMap,
   getCloudDefendAgentPolicies,
   getCloudDefendPackagePolicies,
 } from '../../lib/fleet_util';
-import { CloudDefendRouter } from '../../types';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 

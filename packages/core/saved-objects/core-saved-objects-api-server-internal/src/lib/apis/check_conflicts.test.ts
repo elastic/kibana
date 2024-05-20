@@ -7,36 +7,36 @@
  */
 
 import {
+  pointInTimeFinderMock,
   mockGetCurrentTime,
   mockGetSearchDsl,
-  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { loggerMock } from '@kbn/logging-mocks';
-import { kibanaMigratorMock } from '../../mocks';
 import { SavedObjectsRepository } from '../repository';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { kibanaMigratorMock } from '../../mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
-  HIDDEN_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
   NAMESPACE_AGNOSTIC_TYPE,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  HIDDEN_TYPE,
+  mockTimestamp,
+  mappings,
+  createRegistry,
+  createDocumentMigrator,
+  getMockGetResponse,
   type TypeIdTuple,
+  createSpySerializer,
   checkConflicts,
   checkConflictsSuccess,
   createBadRequestErrorPayload,
-  createConflictErrorPayload,
-  createDocumentMigrator,
-  createRegistry,
-  createSpySerializer,
   createUnsupportedTypeErrorPayload,
-  getMockGetResponse,
-  mappings,
-  mockTimestamp,
+  createConflictErrorPayload,
 } from '../../test_helpers/repository.test.common';
 
 describe('#checkConflicts', () => {

@@ -9,7 +9,7 @@ import {
   CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
   CLOUD_SNAPSHOT_REPOSITORY,
 } from '../../../../common/constants';
-import { advanceTime, setupEnvironment } from '../../helpers';
+import { setupEnvironment, advanceTime } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Backup Step', () => {

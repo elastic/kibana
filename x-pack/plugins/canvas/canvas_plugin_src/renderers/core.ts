@@ -8,8 +8,8 @@
 import { markdownFactory } from './markdown';
 import { pie } from './pie';
 import { plot } from './plot';
-import { tableFactory } from './table';
 import { textFactory } from './text';
+import { tableFactory } from './table';
 
 export const renderFunctions = [pie, plot];
 

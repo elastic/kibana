@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import moment from 'moment';
-import { tlog } from './helpers';
 import type { ITelemetryReceiver } from './receiver';
 import type { ITelemetryEventsSender } from './sender';
 import type { ITaskMetricsService } from './task_metrics.types';
-import { type LatestTaskStateSchema, emptyState, stateSchemaByVersion } from './task_state';
+import { tlog } from './helpers';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 export interface SecurityTelemetryTaskConfig {
   type: string;

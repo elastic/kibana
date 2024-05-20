@@ -11,19 +11,12 @@ import {
   IlmExplainLifecycleLifecycleExplainUnmanaged,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { getIndexNames, getTotalDocsCount } from '../../helpers';
-import { mockDataQualityCheckResult } from '../../mock/data_quality_check_result/mock_index';
-import { mockIlmExplain } from '../../mock/ilm_explain/mock_ilm_explain';
-import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import { mockStats } from '../../mock/stats/mock_stats';
-import { DataQualityCheckResult } from '../../types';
-import { IndexSummaryTableItem } from '../summary_table/helpers';
 import {
   defaultSort,
-  getIlmExplainPhaseCounts,
   getIlmPhase,
-  getIndexIncompatible,
   getIndexPropertiesContainerId,
+  getIlmExplainPhaseCounts,
+  getIndexIncompatible,
   getPageIndex,
   getPhaseCount,
   getSummaryTableItems,
@@ -31,6 +24,13 @@ import {
   shouldCreateIndexNames,
   shouldCreatePatternRollup,
 } from './helpers';
+import { mockIlmExplain } from '../../mock/ilm_explain/mock_ilm_explain';
+import { mockDataQualityCheckResult } from '../../mock/data_quality_check_result/mock_index';
+import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import { mockStats } from '../../mock/stats/mock_stats';
+import { IndexSummaryTableItem } from '../summary_table/helpers';
+import { DataQualityCheckResult } from '../../types';
+import { getIndexNames, getTotalDocsCount } from '../../helpers';
 
 const hot: IlmExplainLifecycleLifecycleExplainManaged = {
   index: '.ds-packetbeat-8.6.1-2023.02.04-000001',

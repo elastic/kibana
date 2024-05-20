@@ -9,13 +9,13 @@
 import { isFunction, omitBy, union } from 'lodash';
 
 import {
-  IKbnUrlStateStorage,
   createStateContainer,
   syncState,
+  IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
+import { migrateAppState } from './migrate_app_state';
 import type { SavedVisState } from '../../types';
 import type { VisualizeAppState, VisualizeAppStateTransitions } from '../types';
-import { migrateAppState } from './migrate_app_state';
 
 const STATE_STORAGE_KEY = '_a';
 

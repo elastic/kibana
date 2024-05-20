@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getFlattenedObject, merge } from '@kbn/std';
+import { merge, getFlattenedObject } from '@kbn/std';
 
 export const mockStreamWrite = jest.fn();
 jest.doMock('fs', () => ({

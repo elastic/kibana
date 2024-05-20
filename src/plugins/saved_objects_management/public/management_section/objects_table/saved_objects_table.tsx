@@ -6,46 +6,46 @@
  * Side Public License, v 1.
  */
 
-import { CriteriaWithPagination, EuiSpacer, Query } from '@elastic/eui';
+import React, { Component } from 'react';
+import { debounce, matches } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { ApplicationStart, HttpStart, NotificationsStart, OverlayStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { EuiSpacer, Query, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { HttpStart, OverlayStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { debounce, matches } from 'lodash';
-import React, { Component } from 'react';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { Subscription } from 'rxjs';
-import type { FindQueryHTTP, SavedObjectManagementTypeInfo } from '../../../common/types/latest';
+import type { SavedObjectManagementTypeInfo, FindQueryHTTP } from '../../../common/types/latest';
 import {
-  SavedObjectsExportResultDetails,
+  parseQuery,
+  getSavedObjectCounts,
+  getRelationships,
+  fetchExportObjects,
+  fetchExportByTypeAndSearch,
+  findObjects,
   bulkDeleteObjects,
   bulkGetObjects,
   extractExportDetails,
-  fetchExportByTypeAndSearch,
-  fetchExportObjects,
-  findObjects,
-  getRelationships,
-  getSavedObjectCounts,
+  SavedObjectsExportResultDetails,
   getTagFindReferences,
-  parseQuery,
 } from '../../lib';
 
+import { SavedObjectWithMetadata } from '../../types';
 import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../../services';
-import { SavedObjectWithMetadata } from '../../types';
 import {
+  Header,
+  Table,
+  Flyout,
+  Relationships,
   DeleteConfirmModal,
   ExportModal,
-  Flyout,
-  Header,
-  Relationships,
-  Table,
 } from './components';
 
 interface ExportAllOption {
@@ -119,13 +119,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         direction: 'desc',
       },
       savedObjects: [],
-      savedObjectCounts: props.allowedTypes.reduce(
-        (typeToCountMap, type) => {
-          typeToCountMap[type.name] = 0;
-          return typeToCountMap;
-        },
-        {} as Record<string, number>
-      ),
+      savedObjectCounts: props.allowedTypes.reduce((typeToCountMap, type) => {
+        typeToCountMap[type.name] = 0;
+        return typeToCountMap;
+      }, {} as Record<string, number>),
       activeQuery: props.initialQuery ?? Query.parse(''),
       selectedSavedObjects: [],
       isShowingImportFlyout: false,

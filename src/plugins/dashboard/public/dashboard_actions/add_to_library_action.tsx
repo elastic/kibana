@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { PresentationContainer } from '@kbn/presentation-containers';
+import React from 'react';
 import {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasLibraryTransforms,
-  HasParentApi,
-  HasType,
-  HasTypeDisplayName,
-  HasUniqueId,
-  PublishesPanelTitle,
   apiCanAccessViewMode,
   apiHasLibraryTransforms,
-  apiHasParentApi,
-  apiHasType,
-  apiHasUniqueId,
-  getInheritedViewMode,
+  EmbeddableApiContext,
   getPanelTitle,
+  PublishesPanelTitle,
+  CanAccessViewMode,
+  getInheritedViewMode,
+  HasLibraryTransforms,
+  HasType,
+  HasTypeDisplayName,
+  apiHasType,
+  HasUniqueId,
+  HasParentApi,
+  apiHasUniqueId,
+  apiHasParentApi,
 } from '@kbn/presentation-publishing';
 import {
   OnSaveProps,
-  SaveResult,
   SavedObjectSaveModal,
+  SaveResult,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import React from 'react';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
 

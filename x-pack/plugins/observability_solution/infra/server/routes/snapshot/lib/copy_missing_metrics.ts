@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first, last, memoize } from 'lodash';
+import { memoize, last, first } from 'lodash';
 import { SnapshotNode, SnapshotNodeResponse } from '../../../../common/http_api';
 
 const createMissingMetricFinder = (nodes: SnapshotNode[]) =>

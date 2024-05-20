@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo } from 'react';
+import type { InternalFieldErrors } from 'react-hook-form';
+import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, last, reject } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
-import type { InternalFieldErrors } from 'react-hook-form';
-import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import { convertShardsToArray, convertShardsToObject } from '../../../../common/utils/converters';
 import type { ShardsArray } from '../../../../common/utils/converters';
 import { useAgentPolicies } from '../../../agent_policies';
@@ -37,9 +37,7 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
     setValue: setValueRoot,
     formState: { errors: errorsRoot },
   } = useFormContext();
-  const {
-    data: { agentPoliciesById } = {},
-  } = useAgentPolicies();
+  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
   const rootShards = watchRoot('shards');
 

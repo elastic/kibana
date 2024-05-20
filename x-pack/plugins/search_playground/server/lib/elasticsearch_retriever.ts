@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';
+import { Document } from '@langchain/core/documents';
 import { Client } from '@elastic/elasticsearch';
 import {
   AggregationsAggregate,
   SearchHit,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Document } from '@langchain/core/documents';
-import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrievers';
 import { getValueForSelectedField } from '../utils/get_value_for_selected_field';
 
 export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {

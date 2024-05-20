@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IconChartTagcloud } from '@kbn/chart-icons';
 import { partition } from 'lodash';
+import { IconChartTagcloud } from '@kbn/chart-icons';
 import type { SuggestionRequest, VisualizationSuggestion } from '../../types';
-import { getColorMappingDefaults } from '../../utils';
-import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 import type { TagcloudState } from './types';
+import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
+import { getColorMappingDefaults } from '../../utils';
 
 export function getSuggestions({
   table,
@@ -51,8 +51,8 @@ export function getSuggestions({
           colorMapping: !mainPalette
             ? getColorMappingDefaults()
             : mainPalette?.type === 'colorMapping'
-              ? mainPalette.value
-              : undefined,
+            ? mainPalette.value
+            : undefined,
         },
       };
     });

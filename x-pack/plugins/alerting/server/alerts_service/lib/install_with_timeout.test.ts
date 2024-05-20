@@ -6,8 +6,8 @@
  */
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { ReplaySubject, Subject } from 'rxjs';
 import { installWithTimeout } from './install_with_timeout';
+import { ReplaySubject, Subject } from 'rxjs';
 
 const logger = loggerMock.create();
 

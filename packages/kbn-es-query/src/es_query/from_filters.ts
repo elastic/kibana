@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isUndefined } from 'lodash';
-import { Filter, cleanFilter, isFilterDisabled } from '../filters';
-import { filterMatchesIndex } from './filter_matches_index';
-import { fromCombinedFilter } from './from_combined_filter';
-import { fromNestedFilter } from './from_nested_filter';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { migrateFilter } from './migrate_filter';
+import { filterMatchesIndex } from './filter_matches_index';
+import { Filter, cleanFilter, isFilterDisabled } from '../filters';
 import { BoolQuery, DataViewBase } from './types';
+import { fromNestedFilter } from './from_nested_filter';
+import { fromCombinedFilter } from './from_combined_filter';
 
 /**
  * Create a filter that can be reversed for filters with negate set

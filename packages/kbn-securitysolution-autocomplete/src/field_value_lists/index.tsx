@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React, { ElementType, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
-import { getDocLinks } from '@kbn/doc-links';
-import { DataViewFieldBase } from '@kbn/es-query';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
-import React, { ElementType, useCallback, useEffect, useMemo, useState } from 'react';
+import { DataViewFieldBase } from '@kbn/es-query';
+import { getDocLinks } from '@kbn/doc-links';
 
 import { filterFieldToList } from '../filter_field_to_list';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';

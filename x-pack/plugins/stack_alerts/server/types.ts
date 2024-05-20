@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
 import { PluginStartContract as TriggersActionsUiStartContract } from '@kbn/triggers-actions-ui-plugin/server';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
 
 export type {
   PluginSetupContract as AlertingSetup,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonProps, EuiLink } from '@elastic/eui';
 import React, { memo } from 'react';
+import { EuiButtonProps, EuiButton, EuiLink } from '@elastic/eui';
 
 import * as i18n from './translations';
 

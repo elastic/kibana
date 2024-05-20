@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { setHTMLElementClientSizes, setSVGElementGetBBox } from '@kbn/test-jest-helpers';
 import $ from 'jquery';
 import _ from 'lodash';
+import { setHTMLElementClientSizes, setSVGElementGetBBox } from '@kbn/test-jest-helpers';
 
 import data from '../../fixtures/mock_data/terms/_series_multiple';
 import { getMockUiState } from '../../fixtures/mocks';

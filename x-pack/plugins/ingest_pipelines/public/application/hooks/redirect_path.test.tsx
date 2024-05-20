@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
-import { useKibana } from '../../shared_imports';
 import { useRedirectPath } from './redirect_path';
+import { useKibana } from '../../shared_imports';
 
 const mockedUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 jest.mock('../../shared_imports');

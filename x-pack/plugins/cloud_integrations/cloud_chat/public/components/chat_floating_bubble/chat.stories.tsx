@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiGlobalToastList,
   EuiGlobalToastListProps,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 
 import { forceReRender } from '@storybook/react';
 
-import { ServicesProvider } from '../../services';
 import { Chat } from './chat_floating_bubble';
+import { ServicesProvider } from '../../services';
 
 export default {
   title: 'Chat Widget',

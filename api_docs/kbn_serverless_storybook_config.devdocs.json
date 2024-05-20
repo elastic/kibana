@@ -28,8 +28,12 @@
         "type": "string",
         "tags": [],
         "label": "TITLE",
-        "description": ["The title of the Storybook."],
-        "signature": ["\"Serverless Storybook\""],
+        "description": [
+          "The title of the Storybook."
+        ],
+        "signature": [
+          "\"Serverless Storybook\""
+        ],
         "path": "packages/serverless/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +48,9 @@
         "description": [
           "The remote URL of the root from which Storybook loads stories for Serverless."
         ],
-        "signature": ["\"https://github.com/elastic/kibana/tree/main/packages/serverless\""],
+        "signature": [
+          "\"https://github.com/elastic/kibana/tree/main/packages/serverless\""
+        ],
         "path": "packages/serverless/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

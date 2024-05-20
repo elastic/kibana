@@ -9,8 +9,8 @@ import { flow } from 'fp-ts/function';
 import { createDeserializer } from '../form';
 
 import {
-  calculateRelativeFromAbsoluteMilliseconds,
   formDataToAbsoluteTimings,
+  calculateRelativeFromAbsoluteMilliseconds,
 } from './absolute_timing_to_relative_timing';
 
 const deserializer = createDeserializer(false);

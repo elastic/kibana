@@ -17,9 +17,8 @@ describe('EncryptedSavedObjects Plugin', () => {
       const plugin = new EncryptedSavedObjectsPlugin(
         coreMock.createPluginInitializerContext(ConfigSchema.validate({}, { dist: true }))
       );
-      expect(
-        plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() })
-      ).toMatchInlineSnapshot(`
+      expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
+        .toMatchInlineSnapshot(`
         Object {
           "canEncrypt": false,
           "createMigration": [Function],
@@ -36,9 +35,8 @@ describe('EncryptedSavedObjects Plugin', () => {
 
       const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
 
-      expect(
-        plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() })
-      ).toMatchInlineSnapshot(`
+      expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
+        .toMatchInlineSnapshot(`
         Object {
           "canEncrypt": true,
           "createMigration": [Function],

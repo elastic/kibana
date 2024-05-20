@@ -12,8 +12,8 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
 
-import { AggParamEditorProps } from '../agg_param_props';
 import { useValidation } from './utils';
+import { AggParamEditorProps } from '../agg_param_props';
 
 export interface Bounds {
   min: number | '';

@@ -7,10 +7,10 @@
  */
 
 import { parse } from '@babel/parser';
-import { isCallExpression, isJSXIdentifier, isJSXOpeningElement } from '@babel/types';
+import { isCallExpression, isJSXOpeningElement, isJSXIdentifier } from '@babel/types';
 
+import { extractIntlMessages, extractFormattedMessages } from './react';
 import { traverseNodes } from '../utils';
-import { extractFormattedMessages, extractIntlMessages } from './react';
 
 const intlFormatMessageCallSource = `
 const MyComponentContent = ({ intl }) => (

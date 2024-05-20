@@ -8,13 +8,13 @@
 
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
+import { RuntimeField, RuntimePrimitiveTypes, FieldSpec, DataViewSpec } from '../types';
+import { stubLogstashFields } from '../field.stub';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { last, map } from 'lodash';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
-import { stubLogstashFields } from '../field.stub';
 import { DataViewField } from '../fields';
-import { DataViewSpec, FieldSpec, RuntimeField, RuntimePrimitiveTypes } from '../types';
 import { DataView } from './data_view';
 
 class MockFieldFormatter {}
@@ -653,9 +653,8 @@ describe('IndexPattern', () => {
         },
       };
 
-      expect(
-        create('test', spec).toMinimalSpec({ keepFieldAttrs: ['customLabel'] }).fieldAttrs
-      ).toMatchInlineSnapshot(`
+      expect(create('test', spec).toMinimalSpec({ keepFieldAttrs: ['customLabel'] }).fieldAttrs)
+        .toMatchInlineSnapshot(`
         Object {
           "test1": Object {
             "customLabel": "test11",

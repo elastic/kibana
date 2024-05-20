@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import type { EuiMarkdownAstNodePosition, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import { first } from 'rxjs';
+import type { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
 import {
-  EuiBetaBadge,
-  EuiButton,
   EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiMarkdownContext,
   EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiMarkdownContext,
+  EuiModalFooter,
+  EuiButton,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiBetaBadge,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { first } from 'rxjs';
+import { css } from '@emotion/react';
 
-import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { useIsMainApplication } from '../../../../common/hooks';
 import { useKibana } from '../../../../common/lib/kibana';
-import { CommentEditorContext } from '../../context';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
-import { VISUALIZATION } from './translations';
+import { CommentEditorContext } from '../../context';
 import { useLensDraftComment } from './use_lens_draft_comment';
+import { VISUALIZATION } from './translations';
+import { useIsMainApplication } from '../../../../common/hooks';
 
 const DEFAULT_TIMERANGE = {
   from: 'now-7d',

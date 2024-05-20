@@ -9,8 +9,8 @@ import {
   EuiCode,
   EuiCodeBlock,
   EuiLink,
-  EuiTable,
   EuiTableHeaderCell,
+  EuiTable,
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';

@@ -10,21 +10,21 @@ import _ from 'lodash';
 import { debounceTime } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import {
-  DashboardContainerInput,
   DashboardPanelMap,
   SharedDashboardState,
   convertSavedPanelsToPanelMap,
+  DashboardContainerInput,
 } from '../../../common';
-import { SavedDashboardPanel } from '../../../common/content_management';
-import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
 import { DashboardAPI } from '../../dashboard_container';
-import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
+import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
+import { SavedDashboardPanel } from '../../../common/content_management';
+import { migrateLegacyQuery } from '../../services/dashboard_content_management/lib/load_dashboard_state';
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.

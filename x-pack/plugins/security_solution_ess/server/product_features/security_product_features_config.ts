@@ -10,13 +10,13 @@ import type {
   ProductFeaturesSecurityConfig,
 } from '@kbn/security-solution-features';
 import {
-  createEnabledProductFeaturesConfigMap,
-  securityDefaultProductFeaturesConfig,
-} from '@kbn/security-solution-features/config';
-import {
   ProductFeatureSecurityKey,
   type SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
+import {
+  securityDefaultProductFeaturesConfig,
+  createEnabledProductFeaturesConfigMap,
+} from '@kbn/security-solution-features/config';
 import {
   ProductFeaturesPrivilegeId,
   ProductFeaturesPrivileges,

@@ -5,12 +5,11 @@
  * 2.0.
  */
 import { Embeddable, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
-import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
 import { createFlameGraph } from '@kbn/profiling-utils';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { FlameGraph } from '../../components/flamegraph';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
 import {
@@ -18,6 +17,7 @@ import {
   ProfilingEmbeddablesDependencies,
 } from '../profiling_embeddable_provider';
 import { EmbeddableFlamegraphEmbeddableInput } from './embeddable_flamegraph_factory';
+import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 export class EmbeddableFlamegraph extends Embeddable<
   EmbeddableFlamegraphEmbeddableInput,

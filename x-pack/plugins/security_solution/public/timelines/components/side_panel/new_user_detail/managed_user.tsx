@@ -6,33 +6,33 @@
  */
 
 import {
-  EuiAccordion,
   EuiButton,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiPanel,
   EuiSpacer,
+  EuiAccordion,
   EuiTitle,
+  EuiPanel,
+  EuiEmptyPrompt,
+  EuiCallOut,
 } from '@elastic/eui';
 
-import { css } from '@emotion/css';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
+import type { EntityDetailsLeftPanelTab } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { UserAssetTableType } from '../../../../explore/users/store/model';
 import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
-import { UserAssetTableType } from '../../../../explore/users/store/model';
-import type { EntityDetailsLeftPanelTab } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import * as i18n from './translations';
 
 import { BasicTable } from '../../../../common/components/ml/tables/basic_table';
 import { getManagedUserTableColumns } from './columns';
 
+import type { ManagedUserData } from './types';
+import { INSTALL_EA_INTEGRATIONS_HREF, MANAGED_USER_QUERY_ID } from './constants';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { useAppUrl } from '../../../../common/lib/kibana';
-import { INSTALL_EA_INTEGRATIONS_HREF, MANAGED_USER_QUERY_ID } from './constants';
-import { useManagedUserItems } from './hooks/use_managed_user_items';
 import { ManagedUserAccordion } from './managed_user_accordion';
-import type { ManagedUserData } from './types';
+import { useManagedUserItems } from './hooks/use_managed_user_items';
 
 const accordionStyle = css`
   width: 100%;

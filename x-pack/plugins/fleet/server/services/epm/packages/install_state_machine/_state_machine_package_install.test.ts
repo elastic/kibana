@@ -6,28 +6,28 @@
  */
 
 import type {
+  SavedObjectsClientContract,
   ElasticsearchClient,
   SavedObject,
-  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import {
-  ConcurrentInstallOperationError,
   PackageSavedObjectConflictError,
+  ConcurrentInstallOperationError,
 } from '../../../../errors';
 
 import type { Installation } from '../../../../../common';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 
-import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../../app_context';
+import { createAppContextStartContractMock } from '../../../../mocks';
 import { saveArchiveEntriesFromAssetsMap } from '../../archive/storage';
-import { installIlmForDataStream } from '../../elasticsearch/datastream_ilm/install';
 import { installILMPolicy } from '../../elasticsearch/ilm/install';
+import { installIlmForDataStream } from '../../elasticsearch/datastream_ilm/install';
 
 jest.mock('../../elasticsearch/template/template');
 jest.mock('../../kibana/assets/install');

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { asyncForEach } from '@kbn/std';
 import { FeatureCollection } from 'geojson';
+import { asyncForEach } from '@kbn/std';
+import { i18n } from '@kbn/i18n';
 import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../../../common/constants';
 import { DataRequestContext } from '../../../../actions';
-import { type ITermJoinSource, isTermJoinSource } from '../../../sources/join_sources';
 import { JoinState } from '../types';
+import { isTermJoinSource, type ITermJoinSource } from '../../../sources/join_sources';
 
 interface SourceResult {
   refreshed: boolean;

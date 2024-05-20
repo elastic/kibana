@@ -127,7 +127,11 @@
             "tags": [],
             "label": "cb",
             "description": [],
-            "signature": ["(span?: ", "Span", " | undefined) => Promise<T>"],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => Promise<T>"
+            ],
             "path": "packages/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -168,7 +172,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -180,7 +186,9 @@
             "tags": [],
             "label": "subtype",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -192,7 +200,9 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": ["Record<string, string> | undefined"],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
             "path": "packages/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -204,7 +214,9 @@
             "tags": [],
             "label": "intercept",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-apm-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false

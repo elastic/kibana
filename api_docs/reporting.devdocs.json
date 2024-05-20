@@ -13,7 +13,9 @@
       "type": "Type",
       "tags": [],
       "label": "ReportingStart",
-      "description": ["\nStart contract for the Reporting plugin."],
+      "description": [
+        "\nStart contract for the Reporting plugin."
+      ],
       "signature": [
         {
           "pluginId": "reporting",
@@ -43,7 +45,9 @@
       "type": "Type",
       "tags": [],
       "label": "ReportingStart",
-      "description": ["\nPlugin Start Contract"],
+      "description": [
+        "\nPlugin Start Contract"
+      ],
       "signature": [
         {
           "pluginId": "reporting",

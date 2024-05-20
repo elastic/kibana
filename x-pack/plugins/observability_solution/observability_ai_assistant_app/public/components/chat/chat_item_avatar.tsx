@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/css';
-import { AssistantAvatar, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { UserAvatar } from '@kbn/user-profile-components';
 import React from 'react';
+import { UserAvatar } from '@kbn/user-profile-components';
+import { css } from '@emotion/css';
+import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { AssistantAvatar, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 
 interface ChatAvatarProps {
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'> | undefined;

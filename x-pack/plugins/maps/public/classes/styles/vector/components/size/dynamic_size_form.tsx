@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { ReactNode } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,13 +15,12 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
-import { VECTOR_STYLES } from '../../../../../../common/constants';
-import { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
-import { DynamicSizeProperty } from '../../properties/dynamic_size_property';
-import { StyleField } from '../../style_fields_helper';
 import { FieldSelect } from '../field_select';
 import { SizeRangeSelector } from './size_range_selector';
+import { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
+import { VECTOR_STYLES } from '../../../../../../common/constants';
+import { DynamicSizeProperty } from '../../properties/dynamic_size_property';
+import { StyleField } from '../../style_fields_helper';
 
 interface Props {
   fields: StyleField[];

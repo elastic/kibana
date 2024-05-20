@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { UNNAMED_LOCATION } from '../../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { MonitorLocation, MonitorLocations } from '../../../../common/runtime_types';
 import { UMElasticsearchQueryFn } from '../adapters';
+import { MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
+import { UNNAMED_LOCATION } from '../../../../common/constants';
 
 /**
  * Fetch data for the monitor page title.

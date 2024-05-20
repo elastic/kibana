@@ -6,13 +6,13 @@
  */
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
-import { fillEmptySeverityMappings } from './helpers';
+import { DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
 import { DataSourceType, GroupByOptions, RuleStep } from './types';
+import { fillEmptySeverityMappings } from './helpers';
 
 export const ruleStepsOrder: RuleStepsOrder = [
   RuleStep.defineRule,

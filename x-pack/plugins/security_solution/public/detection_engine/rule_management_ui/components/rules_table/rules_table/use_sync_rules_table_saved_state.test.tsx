@@ -6,26 +6,26 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { omit } from 'lodash';
-import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
-import { useKibana } from '../../../../../common/lib/kibana';
 import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import { useRulesTableContextMock } from './__mocks__/rules_table_context';
-import type { RulesTableState } from './rules_table_context';
-import { useRulesTableContext } from './rules_table_context';
 import {
-  DEFAULT_FILTER_OPTIONS,
   DEFAULT_PAGE,
   DEFAULT_RULES_PER_PAGE,
+  DEFAULT_FILTER_OPTIONS,
   DEFAULT_SORTING_OPTIONS,
 } from './rules_table_defaults';
+import type { RulesTableState } from './rules_table_context';
+import { useRulesTableContext } from './rules_table_context';
 import type {
   RulesTableStorageSavedState,
   RulesTableUrlSavedState,
 } from './rules_table_saved_state';
 import { RuleSource } from './rules_table_saved_state';
 import { useSyncRulesTableSavedState } from './use_sync_rules_table_saved_state';
+import { omit } from 'lodash';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/utils/global_query_string/helpers', () => ({

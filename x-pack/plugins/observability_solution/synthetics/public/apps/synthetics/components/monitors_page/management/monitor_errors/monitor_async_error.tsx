@@ -1,6 +1,3 @@
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
  */
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { selectMonitorListState, selectServiceLocationsState } from '../../../../state';
 
 export const MonitorAsyncError = () => {

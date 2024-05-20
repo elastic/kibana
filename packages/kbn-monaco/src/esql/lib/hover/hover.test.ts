@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { monaco } from '../../../monaco_imports';
+import { getHoverItem } from './hover';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
   ENRICH_MODES,
   getFunctionDefinition,
   getFunctionSignatures,
 } from '@kbn/esql-validation-autocomplete';
-import { monaco } from '../../../monaco_imports';
-import { getHoverItem } from './hover';
 
 const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
   ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
@@ -91,7 +91,7 @@ describe('hover', () => {
     string,
     string,
     (n: string) => string[],
-    Parameters<typeof createCustomCallbackMocks>?,
+    Parameters<typeof createCustomCallbackMocks>?
   ];
 
   const testSuggestionsFn = (
@@ -157,7 +157,7 @@ describe('hover', () => {
   describe('policies', () => {
     function createPolicyContent(
       policyName: string,
-      customPolicies: Array<(typeof policies)[number]> = policies
+      customPolicies: Array<typeof policies[number]> = policies
     ) {
       const policyHit = customPolicies.find((p) => p.name === policyName);
       if (!policyHit) {

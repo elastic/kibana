@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { GetAlertSummaryParams } from '../rules_client';
+import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
-  AlertSummary,
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
+  AlertSummary,
 } from '../types';
-import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 
 const paramSchema = schema.object({
   id: schema.string(),

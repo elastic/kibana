@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useState } from 'react';
 
 import type { AgentPolicy } from '../../../../../../../../common';
 

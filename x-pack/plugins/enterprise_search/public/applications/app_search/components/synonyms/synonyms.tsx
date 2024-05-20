@@ -7,15 +7,15 @@
 
 import React, { useEffect } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiPagination, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiFlexGrid, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
-import { EmptyState, SynonymCard, SynonymModal } from './components';
+import { SynonymCard, SynonymModal, EmptyState } from './components';
 import { SYNONYMS_TITLE } from './constants';
 
 import { SynonymsLogic } from '.';

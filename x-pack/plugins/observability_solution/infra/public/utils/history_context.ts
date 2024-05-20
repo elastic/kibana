@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ScopedHistory } from '@kbn/core/public';
 import { createContext, useContext } from 'react';
+import { ScopedHistory } from '@kbn/core/public';
 
 export const HistoryContext = createContext<ScopedHistory | undefined>(undefined);
 

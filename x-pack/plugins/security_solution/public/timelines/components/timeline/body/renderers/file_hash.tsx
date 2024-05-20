@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
 
-import { TokensFlexItem, isNillEmptyOrNotFinite } from './helpers';
+import { isNillEmptyOrNotFinite, TokensFlexItem } from './helpers';
 
 const HashFlexGroup = styled(EuiFlexGroup)`
   margin: ${({ theme }) => theme.eui.euiSizeXS};

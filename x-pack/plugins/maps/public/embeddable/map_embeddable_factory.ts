@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs';
-import { APP_ICON, MAP_EMBEDDABLE_NAME, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { i18n } from '@kbn/i18n';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { MAP_SAVED_OBJECT_TYPE, APP_ICON, MAP_EMBEDDABLE_NAME } from '../../common/constants';
 import { extract, inject } from '../../common/embeddable';
-import { getApplication, getMapsCapabilities, getUsageCollection } from '../kibana_services';
 import { MapByReferenceInput, MapEmbeddableInput } from './types';
+import { getApplication, getMapsCapabilities, getUsageCollection } from '../kibana_services';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;

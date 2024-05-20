@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import React, { useState, FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiCallOut,
   EuiSpacer,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState, FunctionComponent } from 'react';
 
 import {
+  getUseField,
   Field,
-  FieldConfig,
+  useKibana,
+  useForm,
   Form,
   TextField,
   fieldValidators,
-  getUseField,
-  useForm,
-  useKibana,
+  FieldConfig,
 } from '../../../../../../../shared_imports';
-import { Document } from '../../../../types';
 import { useIsMounted } from '../../../../use_is_mounted';
+import { Document } from '../../../../types';
 
 const UseField = getUseField({ component: Field });
 

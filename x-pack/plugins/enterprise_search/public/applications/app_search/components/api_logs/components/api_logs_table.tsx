@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiButtonEmpty,
+  EuiBadge,
   EuiHealth,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';

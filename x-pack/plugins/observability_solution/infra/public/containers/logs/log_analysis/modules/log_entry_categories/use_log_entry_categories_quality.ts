@@ -14,8 +14,8 @@ import {
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
-  LogEntryCategoriesDatasetStats,
   callGetLatestCategoriesDatasetsStatsAPI,
+  LogEntryCategoriesDatasetStats,
 } from '../../api/get_latest_categories_datasets_stats';
 import { JobModelSizeStats, JobSummary } from '../../log_analysis_module_types';
 

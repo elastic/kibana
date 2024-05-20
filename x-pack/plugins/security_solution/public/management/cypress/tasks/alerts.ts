@@ -6,15 +6,15 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ELASTIC_SECURITY_RULE_ID } from '../../../../common';
+import type { Rule } from '../../../detection_engine/rule_management/logic';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '../../../../common/constants';
-import { ENDPOINT_ALERTS_INDEX } from '../../../../scripts/endpoint/common/constants';
-import type { Rule } from '../../../detection_engine/rule_management/logic';
+import { ELASTIC_SECURITY_RULE_ID } from '../../../../common';
 import { request } from './common';
+import { ENDPOINT_ALERTS_INDEX } from '../../../../scripts/endpoint/common/constants';
 
 const ES_URL = Cypress.env('ELASTICSEARCH_URL');
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import { isEmpty } from 'lodash/fp';
+import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy/timeline/eql';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import {

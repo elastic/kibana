@@ -7,29 +7,29 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiFlyoutBody,
+  EuiCallOut,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DocumentCreationLogic } from '..';
 import { CLOSE_BUTTON_LABEL } from '../../../../shared/constants';
-import { DOCUMENT_CREATION_ERRORS, FLYOUT_ARIA_LABEL_ID } from '../constants';
+import { FLYOUT_ARIA_LABEL_ID, DOCUMENT_CREATION_ERRORS } from '../constants';
 import { DocumentCreationStep } from '../types';
 
 import {
   InvalidDocumentsSummary,
-  SchemaFieldsSummary,
   ValidDocumentsSummary,
+  SchemaFieldsSummary,
 } from './summary_sections';
 
 export const Summary: React.FC = () => {

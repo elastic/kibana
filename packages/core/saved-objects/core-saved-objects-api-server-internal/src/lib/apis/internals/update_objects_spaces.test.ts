@@ -7,33 +7,33 @@
  */
 
 import {
-  mockDeleteLegacyUrlAliases,
   mockGetBulkOperationError,
   mockGetExpectedVersionProperties,
   mockRawDocExistsInNamespace,
+  mockDeleteLegacyUrlAliases,
 } from './update_objects_spaces.test.mock';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
+import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsUpdateObjectsSpacesObject } from '@kbn/core-saved-objects-api-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
+import { updateObjectsSpaces } from './update_objects_spaces';
 import {
   ISavedObjectsSecurityExtension,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 import {
-  authMap,
   checkAuthError,
   enforceError,
-  setupAuthorizeFunc,
   setupRedactPassthrough,
+  authMap,
+  setupAuthorizeFunc,
 } from '../../../test_helpers/repository.test.common';
-import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
-import { updateObjectsSpaces } from './update_objects_spaces';
+import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 
 type SetupParams = Partial<
   Pick<UpdateObjectsSpacesParams, 'objects' | 'spacesToAdd' | 'spacesToRemove' | 'options'>

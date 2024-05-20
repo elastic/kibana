@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiTitle,
+  EuiText,
+  EuiCodeBlock,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 import type {
   EnrichedDeprecationInfo,
   HealthIndicatorAction,
 } from '../../../../../../common/types';
-import { DeprecationBadge, DeprecationFlyoutLearnMoreLink } from '../../../shared';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
 
 export interface HealthIndicatorFlyoutProps {
   deprecation: EnrichedDeprecationInfo;

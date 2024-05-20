@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback } from 'react';
 import {
   EuiButtonGroup,
   EuiButtonGroupProps,
@@ -16,19 +17,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
 
-import { ColorMode, colorSchemas } from '@kbn/charts-plugin/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
   ColorRanges,
-  ColorSchemaOptions,
-  PercentageModeOption,
-  RangeOption,
   SetColorRangeValue,
-  SetColorSchemaOptionsValue,
   SwitchOption,
+  SetColorSchemaOptionsValue,
+  ColorSchemaOptions,
+  RangeOption,
+  PercentageModeOption,
 } from '@kbn/vis-default-editor-plugin/public';
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { ColorMode, colorSchemas } from '@kbn/charts-plugin/public';
 import { MetricVisParam, VisParams } from '../types';
 
 const metricColorMode = [

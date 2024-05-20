@@ -13,7 +13,9 @@
     "ecs_8.0.0_log",
     "ecs_8.0.0_host"
   ],
-  "index_patterns": ["kbn-data-forge-fake_stack.admin-console-*"],
+  "index_patterns": [
+    "kbn-data-forge-fake_stack.admin-console-*"
+  ],
   "priority": 1,
   "template": {
     "mappings": {

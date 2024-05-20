@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { sendGetPackagePolicy, sendGetEndpointSecurityPackage } from './ingest';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { API_VERSIONS, PACKAGE_POLICY_API_ROOT, epmRouteService } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_API_ROOT, epmRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { policyListApiPathHandlers } from '../../pages/policy/store/test_mock_utils';
-import { sendGetEndpointSecurityPackage, sendGetPackagePolicy } from './ingest';
 
 describe('ingest service', () => {
   let http: ReturnType<typeof httpServiceMock.createStartContract>;

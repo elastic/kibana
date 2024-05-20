@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { pick } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { pick } from 'lodash';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import expect from '@kbn/expect';
+import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 

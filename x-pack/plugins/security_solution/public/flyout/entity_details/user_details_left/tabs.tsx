@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { RiskScoreEntity } from '../../../../common/search_strategy';
-import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
-import type {
-  ManagedUserHit,
-  ManagedUserHits,
-} from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
 import { UserAssetTableType } from '../../../explore/users/store/model';
+import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
+import type {
+  ManagedUserHits,
+  ManagedUserHit,
+} from '../../../../common/search_strategy/security_solution/users/managed_details';
+import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
+import { AssetDocumentTab } from './tabs/asset_document';
 import { RightPanelProvider } from '../../document_details/right/context';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
-import { AssetDocumentTab } from './tabs/asset_document';
-import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 
 export const useTabs = (
   managedUser: ManagedUserHits,

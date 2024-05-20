@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CORRELATIONS_IMPACT_THRESHOLD } from '../../../../../common/correlations/failed_transactions_correlations/constants';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
+import { CORRELATIONS_IMPACT_THRESHOLD } from '../../../../../common/correlations/failed_transactions_correlations/constants';
 
 const EXPECTED_RESULT = {
   HIGH: {

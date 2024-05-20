@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '../../../common/types/domain';
-import { useApplicationCapabilities } from '../../common/lib/kibana';
-import * as i18n from '../../common/translations';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { schema } from './schema';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { getConnectorById, getConnectorsFormValidators } from '../utils';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
+import * as i18n from '../../common/translations';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface Props {
   connectors: ActionConnector[];

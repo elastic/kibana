@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { buildRangeFilter, Filter } from '@kbn/es-query';
 import {
   DataView,
   DataViewsContract,
@@ -13,10 +13,6 @@ import {
   ISearchStartSearchSource,
   SortDirection,
 } from '@kbn/data-plugin/common';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { Filter, buildRangeFilter } from '@kbn/es-query';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { SharePluginStart } from '@kbn/share-plugin/server';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -24,8 +20,12 @@ import {
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
-import { getComparatorScript } from '../../../../common';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { Logger } from '@kbn/core/server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
+import { getComparatorScript } from '../../../../common';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
-import React from 'react';
 
 interface Props {
   timePercentage: string;

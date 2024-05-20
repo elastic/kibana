@@ -6,8 +6,8 @@
  */
 
 import type { Dispatch } from 'redux';
+import type { State, ImmutableMiddlewareFactory } from './types';
 import type { AppAction } from './actions';
-import type { ImmutableMiddlewareFactory, State } from './types';
 
 interface WaitForActionOptions<T extends A['type'], A extends AppAction = AppAction> {
   validate?: (action: A extends { type: T } ? A : never) => boolean;
@@ -77,7 +77,7 @@ export interface MiddlewareActionSpyHelper<S = State, A extends AppAction = AppA
  */
 export const createSpyMiddleware = <
   S = State,
-  A extends AppAction = AppAction,
+  A extends AppAction = AppAction
 >(): MiddlewareActionSpyHelper<S, A> => {
   type ActionWatcher = (action: A) => void;
 

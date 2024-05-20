@@ -6,11 +6,11 @@
  */
 
 import type { TransportResult } from '@elastic/transport/lib/types';
+import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
+import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { responseActionsClientMock } from '../mocks';
 import { metadataCurrentIndexPattern } from '../../../../../../common/endpoint/constants';
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
-import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
-import type { ResponseActionsClientOptions } from '../lib/base_response_actions_client';
-import { responseActionsClientMock } from '../mocks';
 
 const createConstructorOptionsMock = (): ResponseActionsClientOptions => {
   const options = responseActionsClientMock.createConstructorOptions();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,7 +17,7 @@ import { formatApiName } from '../../utils/format_api_name';
 
 import { DEFAULT_LANGUAGE, ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 import { SearchIndexSelectableOption } from './search_index_selectable';
-import { formatIndicesToSelectable, getRedirectToAfterEngineCreation } from './utils';
+import { getRedirectToAfterEngineCreation, formatIndicesToSelectable } from './utils';
 
 export enum EngineCreationSteps {
   SelectStep = 'Select Engine Type',

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ChromeHelpMenuActions } from '@kbn/core/public';
 import React, { FC, useCallback } from 'react';
+import { ChromeHelpMenuActions } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
-import { setKeyboardShortcutsDocVisibility } from '../../state/actions/flyouts';
 import { HelpMenu as Component } from './help_menu.component';
+import { setKeyboardShortcutsDocVisibility } from '../../state/actions/flyouts';
 
 interface Props {
   hideHelpMenu: ChromeHelpMenuActions['hideHelpMenu'];

@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import { startsWith } from 'lodash';
+import { parseTimelionExpressionAsync } from '../../common/parser_async';
 import type {
-  ExpressionLocation,
   ParsedExpression,
   TimelionExpressionArgument,
+  ExpressionLocation,
 } from '../../common/parser';
-import { parseTimelionExpressionAsync } from '../../common/parser_async';
 
-import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 import { ArgValueSuggestions } from '../helpers/arg_value_suggestions';
+import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 
 export enum SUGGESTION_TYPE {
   ARGUMENTS = 'arguments',

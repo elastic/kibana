@@ -7,50 +7,50 @@
 
 /* eslint-disable complexity */
 
+import { has, isEmpty, get } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
-import deepmerge from 'deepmerge';
-import { get, has, isEmpty } from 'lodash/fp';
-import omit from 'lodash/omit';
 import moment from 'moment';
+import deepmerge from 'deepmerge';
+import omit from 'lodash/omit';
 
 import type {
+  ExceptionListType,
+  NamespaceType,
+  List,
+} from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  Threats,
   ThreatSubtechnique,
   ThreatTechnique,
-  Threats,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type {
-  ExceptionListType,
-  List,
-  NamespaceType,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
   transformAlertToRuleResponseAction,
 } from '../../../../../common/detection_engine/transform_actions';
-import { assertUnreachable } from '../../../../../common/utility_types';
 
 import type {
-  AlertSuppression,
-  RuleCreateProps,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
-import type {
   AboutStepRule,
-  AboutStepRuleJson,
-  ActionsStepRule,
-  ActionsStepRuleJson,
   DefineStepRule,
-  DefineStepRuleJson,
   ScheduleStepRule,
+  ActionsStepRule,
+  DefineStepRuleJson,
   ScheduleStepRuleJson,
+  AboutStepRuleJson,
+  ActionsStepRuleJson,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   DataSourceType,
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
+import type {
+  RuleCreateProps,
+  AlertSuppression,
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
@@ -432,91 +432,91 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         machine_learning_job_id: ruleFields.machineLearningJobId,
       }
     : isThresholdFields(ruleFields)
-      ? {
-          index: ruleFields.index,
-          filters: ruleFields.queryBar?.filters,
-          language: ruleFields.queryBar?.query?.language,
-          query: ruleFields.queryBar?.query?.query as string,
-          saved_id: ruleFields.queryBar?.saved_id ?? undefined,
-          ...(ruleType === 'threshold' && {
-            threshold: {
-              field: ruleFields.threshold?.field ?? [],
-              value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
-              cardinality:
-                !isEmpty(ruleFields.threshold.cardinality?.field) &&
-                ruleFields.threshold.cardinality?.value != null
-                  ? [
-                      {
-                        field: ruleFields.threshold.cardinality.field[0],
-                        value: parseInt(ruleFields.threshold.cardinality.value, 10),
-                      },
-                    ]
-                  : [],
-            },
-            ...(ruleFields.enableThresholdSuppression && {
-              alert_suppression: { duration: ruleFields.groupByDuration },
-            }),
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+        ...(ruleType === 'threshold' && {
+          threshold: {
+            field: ruleFields.threshold?.field ?? [],
+            value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
+            cardinality:
+              !isEmpty(ruleFields.threshold.cardinality?.field) &&
+              ruleFields.threshold.cardinality?.value != null
+                ? [
+                    {
+                      field: ruleFields.threshold.cardinality.field[0],
+                      value: parseInt(ruleFields.threshold.cardinality.value, 10),
+                    },
+                  ]
+                : [],
+          },
+          ...(ruleFields.enableThresholdSuppression && {
+            alert_suppression: { duration: ruleFields.groupByDuration },
           }),
-        }
-      : isThreatMatchFields(ruleFields)
-        ? {
-            index: ruleFields.index,
-            filters: ruleFields.queryBar?.filters,
-            language: ruleFields.queryBar?.query?.language,
-            query: ruleFields.queryBar?.query?.query as string,
-            saved_id: ruleFields.queryBar?.saved_id ?? undefined,
-            threat_index: ruleFields.threatIndex,
-            threat_query: ruleFields.threatQueryBar?.query?.query as string,
-            threat_filters: ruleFields.threatQueryBar?.filters,
-            threat_mapping: ruleFields.threatMapping,
-            threat_language: ruleFields.threatQueryBar?.query?.language,
-            ...alertSuppressionFields,
-          }
-        : isEqlFields(ruleFields)
-          ? {
-              index: ruleFields.index,
-              filters: ruleFields.queryBar?.filters,
-              language: ruleFields.queryBar?.query?.language,
-              query: ruleFields.queryBar?.query?.query as string,
-              saved_id: ruleFields.queryBar?.saved_id ?? undefined,
-              timestamp_field: ruleFields.eqlOptions?.timestampField,
-              event_category_override: ruleFields.eqlOptions?.eventCategoryField,
-              tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
-              ...alertSuppressionFields,
-            }
-          : isNewTermsFields(ruleFields)
-            ? {
-                index: ruleFields.index,
-                filters: ruleFields.queryBar?.filters,
-                language: ruleFields.queryBar?.query?.language,
-                query: ruleFields.queryBar?.query?.query as string,
-                new_terms_fields: ruleFields.newTermsFields,
-                history_window_start: `now-${ruleFields.historyWindowSize}`,
-                ...alertSuppressionFields,
-              }
-            : isEsqlFields(ruleFields) && !('index' in ruleFields)
-              ? {
-                  language: ruleFields.queryBar?.query?.language,
-                  query: ruleFields.queryBar?.query?.query as string,
-                }
-              : {
-                  ...alertSuppressionFields,
-                  index: ruleFields.index,
-                  filters: ruleFields.queryBar?.filters,
-                  language: ruleFields.queryBar?.query?.language,
-                  query: ruleFields.queryBar?.query?.query as string,
-                  saved_id: undefined,
-                  type: 'query' as const,
-                  // rule only be updated as saved_query type if it has saved_id and shouldLoadQueryDynamically checkbox checked
-                  ...(['query', 'saved_query'].includes(ruleType) &&
-                    ruleFields.queryBar?.saved_id &&
-                    ruleFields.shouldLoadQueryDynamically && {
-                      type: 'saved_query' as const,
-                      query: undefined,
-                      filters: undefined,
-                      saved_id: ruleFields.queryBar.saved_id,
-                    }),
-                };
+        }),
+      }
+    : isThreatMatchFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+        threat_index: ruleFields.threatIndex,
+        threat_query: ruleFields.threatQueryBar?.query?.query as string,
+        threat_filters: ruleFields.threatQueryBar?.filters,
+        threat_mapping: ruleFields.threatMapping,
+        threat_language: ruleFields.threatQueryBar?.query?.language,
+        ...alertSuppressionFields,
+      }
+    : isEqlFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
+        timestamp_field: ruleFields.eqlOptions?.timestampField,
+        event_category_override: ruleFields.eqlOptions?.eventCategoryField,
+        tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
+        ...alertSuppressionFields,
+      }
+    : isNewTermsFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        new_terms_fields: ruleFields.newTermsFields,
+        history_window_start: `now-${ruleFields.historyWindowSize}`,
+        ...alertSuppressionFields,
+      }
+    : isEsqlFields(ruleFields) && !('index' in ruleFields)
+    ? {
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+      }
+    : {
+        ...alertSuppressionFields,
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: undefined,
+        type: 'query' as const,
+        // rule only be updated as saved_query type if it has saved_id and shouldLoadQueryDynamically checkbox checked
+        ...(['query', 'saved_query'].includes(ruleType) &&
+          ruleFields.queryBar?.saved_id &&
+          ruleFields.shouldLoadQueryDynamically && {
+            type: 'saved_query' as const,
+            query: undefined,
+            filters: undefined,
+            saved_id: ruleFields.queryBar.saved_id,
+          }),
+      };
 
   return {
     ...baseFields,
@@ -588,10 +588,10 @@ export const formatAboutStepData = (
           ],
         }
       : exceptionsList != null
-        ? {
-            exceptions_list: [...detectionExceptionLists],
-          }
-        : {}),
+      ? {
+          exceptions_list: [...detectionExceptionLists],
+        }
+      : {}),
     false_positives: falsePositives.filter((item) => !isEmpty(item)),
     references: references.filter((item) => !isEmpty(item)),
     investigation_fields: isinvestigationFieldsEmpty

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiTitle, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useAuthz, useLink } from '../../../../hooks';
 import type { DownloadSource } from '../../../../types';

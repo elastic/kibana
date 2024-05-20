@@ -5,37 +5,37 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useEffect, useMemo, useState } from 'react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { rulesLocatorID } from '../../../common';
-import { observabilityAlertFeatureIds } from '../../../common/constants';
-import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
-import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
-import {
-  Provider,
-  alertSearchBarStateContainer,
-  useAlertSearchBarStateContainer,
-} from '../../components/alert_search_bar/containers';
-import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
-import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { RulesParams } from '../../locators/rules';
+import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useToasts } from '../../hooks/use_toast';
-import { RulesParams } from '../../locators/rules';
-import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
-import { useKibana } from '../../utils/kibana_react';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { renderRuleStats, RuleStatsState } from './components/rule_stats';
+import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
+import {
+  alertSearchBarStateContainer,
+  Provider,
+  useAlertSearchBarStateContainer,
+} from '../../components/alert_search_bar/containers';
 import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
-import { RuleStatsState, renderRuleStats } from './components/rule_stats';
+import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
+import { observabilityAlertFeatureIds } from '../../../common/constants';
+import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;

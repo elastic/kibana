@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
 
 interface Props {
   title: React.ReactNode;

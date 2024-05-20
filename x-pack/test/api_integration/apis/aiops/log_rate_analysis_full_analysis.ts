@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { format as formatUrl } from 'url';
 import { orderBy } from 'lodash';
 import fetch from 'node-fetch';
+import { format as formatUrl } from 'url';
 
+import expect from '@kbn/expect';
 import type { AiopsLogRateAnalysisSchema } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { parseStream } from './parse_stream';
-import { API_VERSIONS, getLogRateAnalysisTestData } from './test_data';
+import { getLogRateAnalysisTestData, API_VERSIONS } from './test_data';
 import {
   getAddSignificationItemsActions,
+  getHistogramActions,
   getGroupActions,
   getGroupHistogramActions,
-  getHistogramActions,
 } from './test_helpers';
 
 export default ({ getService }: FtrProviderContext) => {

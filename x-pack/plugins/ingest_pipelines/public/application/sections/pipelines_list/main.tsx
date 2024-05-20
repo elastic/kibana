@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Location } from 'history';
 import { parse } from 'query-string';
-import React, { useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiPageHeader,
-  EuiPageTemplate,
-  EuiPopover,
-  EuiSpacer,
-} from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import {
+  EuiPageHeader,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
+  EuiPageTemplate,
+  EuiContextMenu,
+  EuiPopover,
+} from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
-import { SectionLoading, useKibana } from '../../../shared_imports';
+import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
-import { getClonePath, getEditPath } from '../../services/navigation';
+import { getEditPath, getClonePath } from '../../services/navigation';
 
-import { PipelineDeleteModal } from './delete_modal';
-import { PipelineDetailsFlyout } from './details_flyout';
 import { EmptyList } from './empty_list';
-import { PipelineNotFoundFlyout } from './not_found_flyout';
 import { PipelineTable } from './table';
+import { PipelineDetailsFlyout } from './details_flyout';
+import { PipelineNotFoundFlyout } from './not_found_flyout';
+import { PipelineDeleteModal } from './delete_modal';
 
 const getPipelineNameFromLocation = (location: Location) => {
   const { pipeline } = parse(location.search.substring(1));

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import * as t from 'io-ts';
+import { schema } from '@kbn/config-schema';
 
 export const AlertConfigCodec = t.intersection([
   t.interface({

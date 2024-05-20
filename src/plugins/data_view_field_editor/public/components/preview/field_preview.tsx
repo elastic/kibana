@@ -1,5 +1,3 @@
-import { EuiCallOut, EuiFieldSearch, EuiResizeObserver, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,15 +6,17 @@ import { i18n } from '@kbn/i18n';
  * Side Public License, v 1.
  */
 import React, { useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiResizeObserver, EuiFieldSearch, EuiCallOut } from '@elastic/eui';
 
-import { useStateSelector } from '../../state_utils';
-import { DocumentsNavPreview } from './documents_nav_preview';
-import { PreviewFieldList } from './field_list/field_list';
-import { PreviewListItem } from './field_list/field_list_item';
 import { useFieldPreviewContext } from './field_preview_context';
-import { FieldPreviewEmptyPrompt } from './field_preview_empty_prompt';
-import { FieldPreviewError } from './field_preview_error';
 import { FieldPreviewHeader } from './field_preview_header';
+import { FieldPreviewEmptyPrompt } from './field_preview_empty_prompt';
+import { DocumentsNavPreview } from './documents_nav_preview';
+import { FieldPreviewError } from './field_preview_error';
+import { PreviewListItem } from './field_list/field_list_item';
+import { PreviewFieldList } from './field_list/field_list';
+import { useStateSelector } from '../../state_utils';
 import { PreviewState } from './types';
 
 import './field_preview.scss';

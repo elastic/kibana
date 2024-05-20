@@ -7,23 +7,23 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { assertNever } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { assertNever } from '@kbn/std';
 import { capitalize } from 'lodash';
 import { Observable, Subscription } from 'rxjs';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import { PLUGIN } from '../../common/constants/plugin';
+import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
 import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleAlertData,
   RuleType,
   RuleTypeParams,
   RuleTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  RuleAlertData,
 } from '../types';
 import { RuleTypeDisabledError } from './errors/rule_type_disabled';
-import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 
@@ -181,7 +181,7 @@ export class LicenseState {
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string,
-    AlertData extends RuleAlertData,
+    AlertData extends RuleAlertData
   >(
     ruleType: RuleType<
       Params,

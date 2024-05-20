@@ -46,7 +46,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/dev_tools/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -138,7 +140,9 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/dev_tools/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -152,7 +156,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/dev_tools/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -173,8 +179,12 @@
         "type": "string",
         "tags": [],
         "label": "DEV_TOOLS_FEATURE_ID",
-        "description": ["\nThe UI Setting prefix and category for dev tools UI Settings"],
-        "signature": ["\"devTools\""],
+        "description": [
+          "\nThe UI Setting prefix and category for dev tools UI Settings"
+        ],
+        "signature": [
+          "\"devTools\""
+        ],
         "path": "src/plugins/dev_tools/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -189,7 +199,9 @@
         "description": [
           "\nUI Setting ID for enabling / disabling the persistent console in Kibana"
         ],
-        "signature": ["\"devTools:enablePersistentConsole\""],
+        "signature": [
+          "\"devTools:enablePersistentConsole\""
+        ],
         "path": "src/plugins/dev_tools/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -217,7 +229,12 @@
           "description": [
             "\nRegister a developer tool. It will be available\nin the dev tools app under a separate tab.\n\nRegistering dev tools works almost similar to registering\napplications in the core application service,\nbut they will be rendered with a frame containing tabs\nto switch between the tools."
           ],
-          "signature": ["(devTool: ", "CreateDevToolArgs", ") => ", "DevToolApp"],
+          "signature": [
+            "(devTool: ",
+            "CreateDevToolArgs",
+            ") => ",
+            "DevToolApp"
+          ],
           "path": "src/plugins/dev_tools/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -228,8 +245,12 @@
               "type": "CompoundType",
               "tags": [],
               "label": "devTool",
-              "description": ["The dev tools descriptor"],
-              "signature": ["CreateDevToolArgs"],
+              "description": [
+                "The dev tools descriptor"
+              ],
+              "signature": [
+                "CreateDevToolArgs"
+              ],
               "path": "src/plugins/dev_tools/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -263,8 +284,12 @@
         "type": "string",
         "tags": [],
         "label": "DEV_TOOLS_FEATURE_ID",
-        "description": ["\nThe UI Setting prefix and category for dev tools UI Settings"],
-        "signature": ["\"devTools\""],
+        "description": [
+          "\nThe UI Setting prefix and category for dev tools UI Settings"
+        ],
+        "signature": [
+          "\"devTools\""
+        ],
         "path": "src/plugins/dev_tools/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -279,7 +304,9 @@
         "description": [
           "\nUI Setting ID for enabling / disabling the persistent console in Kibana"
         ],
-        "signature": ["\"devTools:enablePersistentConsole\""],
+        "signature": [
+          "\"devTools:enablePersistentConsole\""
+        ],
         "path": "src/plugins/dev_tools/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

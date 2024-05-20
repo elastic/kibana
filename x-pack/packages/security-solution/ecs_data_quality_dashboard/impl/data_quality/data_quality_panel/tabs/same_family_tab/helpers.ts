@@ -8,21 +8,21 @@
 import { EcsVersion } from '@elastic/ecs';
 
 import {
-  ECS_MAPPING_TYPE_EXPECTED,
   FIELD,
+  ECS_MAPPING_TYPE_EXPECTED,
   INDEX_MAPPING_TYPE_ACTUAL,
 } from '../../../compare_fields_table/translations';
-import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
 import {
+  getSummaryMarkdownComment,
   getIncompatibleMappingsMarkdownTableRows,
   getMarkdownComment,
   getMarkdownTable,
-  getSummaryMarkdownComment,
   getSummaryTableMarkdownComment,
   getTabCountsMarkdownComment,
 } from '../../index_properties/markdown/helpers';
 import * as i18n from '../../index_properties/translations';
 import { SAME_FAMILY_FIELD_MAPPINGS_TABLE_TITLE } from './translations';
+import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
 
 export const getSameFamilyMarkdownComment = (fieldsInSameFamily: number): string =>
   getMarkdownComment({

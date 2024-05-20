@@ -6,6 +6,8 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
 import type {
   UpdateRuleRequestBodyV1,
   UpdateRuleRequestParamsV1,
@@ -16,13 +18,11 @@ import {
   updateParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/update';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { Rule } from '../../../../application/rule/types';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
-import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
+import { Rule } from '../../../../application/rule/types';
+import { transformUpdateBodyV1 } from './transforms';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
-import { transformUpdateBodyV1 } from './transforms';
 
 export const updateRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

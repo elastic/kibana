@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { has } from 'lodash';
 import { useState } from 'react';
+import { has } from 'lodash';
 
 interface ParsedMonitoringData {
   [key: string]: any;

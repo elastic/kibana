@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import { v4 as uuidv4 } from 'uuid';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';

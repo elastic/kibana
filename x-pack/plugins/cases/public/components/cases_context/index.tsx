@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, FC, PropsWithChildren, ReactNode } from 'react';
+import type { Dispatch, ReactNode, FC, PropsWithChildren } from 'react';
 
 import { merge } from 'lodash';
 import React, { useCallback, useMemo, useReducer } from 'react';
@@ -15,22 +15,22 @@ import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { CasesContextStoreAction } from './cases_context_reducer';
 import type {
-  CasesFeatures,
   CasesFeaturesAllRequired,
+  CasesFeatures,
   CasesPermissions,
 } from '../../containers/types';
 import type { ReleasePhase } from '../types';
-import type { CasesContextStoreAction } from './cases_context_reducer';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 
+import { CasesGlobalComponents } from './cases_global_components';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
-import { isRegisteredOwner } from '../../files';
 import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
-import { CasesGlobalComponents } from './cases_global_components';
+import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
 
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;

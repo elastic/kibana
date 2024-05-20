@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import { getConfigPath } from '@kbn/utils';
-import { Logger } from '../../cli/logger';
-import { logWarnings } from '../lib/log_warnings';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import { install } from './install';
+import { Logger } from '../../cli/logger';
 import { parse, parseMilliseconds } from './settings';
+import { logWarnings } from '../lib/log_warnings';
 
 function processCommand(command, options) {
   let settings;

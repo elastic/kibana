@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { get } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
+import { get } from 'lodash/fp';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { usersActions } from '.';
-import type { State } from '../../../common/store/types';
-import type { UserAssetTableType } from './model';
 import { selectUserAssetTables } from './selectors';
+import type { UserAssetTableType } from './model';
+import type { State } from '../../../common/store/types';
 import { persistUserAssetTableInStorage } from './storage';
 
 const { removeUserAssetTableField, addUserAssetTableField } = usersActions;

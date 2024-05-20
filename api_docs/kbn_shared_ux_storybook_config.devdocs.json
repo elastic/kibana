@@ -28,8 +28,12 @@
         "type": "string",
         "tags": [],
         "label": "TITLE",
-        "description": ["The title of the Storybook."],
-        "signature": ["\"Shared UX Storybook\""],
+        "description": [
+          "The title of the Storybook."
+        ],
+        "signature": [
+          "\"Shared UX Storybook\""
+        ],
         "path": "packages/shared-ux/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +48,9 @@
         "description": [
           "The remote URL of the root from which Storybook loads stories for Shared UX."
         ],
-        "signature": ["\"https://github.com/elastic/kibana/tree/main/packages/shared_ux\""],
+        "signature": [
+          "\"https://github.com/elastic/kibana/tree/main/packages/shared_ux\""
+        ],
         "path": "packages/shared-ux/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

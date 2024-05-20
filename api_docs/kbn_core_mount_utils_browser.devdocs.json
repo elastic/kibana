@@ -42,7 +42,9 @@
             "description": [
               "\nA Promise that will resolve once this overlay is closed.\n\nOverlays can close from user interaction, calling `close()` on the overlay\nreference or another overlay replacing yours via `openModal` or `openFlyout`."
             ],
-            "signature": ["Promise<void>"],
+            "signature": [
+              "Promise<void>"
+            ],
             "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -56,7 +58,9 @@
             "description": [
               "\nCloses the referenced overlay if it's still open which in turn will\nresolve the `onClose` Promise. If the overlay had already been\nclosed this method does nothing."
             ],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/core/mount-utils/core-mount-utils-browser/src/overlay_ref.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -91,7 +95,9 @@
         "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": ["a {@link UnmountCallback } that unmount the element on call."],
+        "returnComment": [
+          "a {@link UnmountCallback } that unmount the element on call."
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/core-mount-utils-browser",
@@ -99,8 +105,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "element",
-            "description": ["the container element to render into"],
-            "signature": ["T"],
+            "description": [
+              "the container element to render into"
+            ],
+            "signature": [
+              "T"
+            ],
             "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -117,7 +127,9 @@
         "description": [
           "\nA function that will unmount the element previously mounted by\nthe associated {@link MountPoint}\n"
         ],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
         "deprecated": false,
         "trackAdoption": false,

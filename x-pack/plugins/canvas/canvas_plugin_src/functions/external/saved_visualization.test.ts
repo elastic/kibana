@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { savedVisualization } from './saved_visualization';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter } from '../../../types';
-import { savedVisualization } from './saved_visualization';
 
 const filterContext: ExpressionValueFilter = {
   type: 'filter',

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import React, { useMemo } from 'react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { EuiBasicTable, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 
-import { useAlertsByIds } from '../../../containers/alerts/use_alerts_by_ids';
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { SeverityBadge } from '../../severity_badge';
+import { useAlertsByIds } from '../../../containers/alerts/use_alerts_by_ids';
 import { SIMPLE_ALERT_TABLE_ERROR, SIMPLE_ALERT_TABLE_LIMITED } from './translations';
 
 const TABLE_FIELDS = ['@timestamp', 'kibana.alert.rule.name', 'kibana.alert.severity'];

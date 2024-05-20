@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
 import { createStore as createReduxStore } from 'redux';
+import { isPlainObject } from 'lodash';
 import { middleware } from './middleware';
 import { getRootReducer } from './reducers';
 

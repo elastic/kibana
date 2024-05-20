@@ -7,9 +7,9 @@
 
 import { connect } from 'react-redux';
 
+import { StartTrial as PresentationComponent } from './start_trial';
 import { loadTrialStatus, startLicenseTrial } from '../../../store/actions/start_trial';
 import { shouldShowStartTrial } from '../../../store/reducers/license_management';
-import { StartTrial as PresentationComponent } from './start_trial';
 
 const mapStateToProps = (state) => {
   return {

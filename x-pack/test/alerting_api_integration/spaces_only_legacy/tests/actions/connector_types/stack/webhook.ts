@@ -7,13 +7,13 @@
 
 import http from 'http';
 import https from 'https';
+import getPort from 'get-port';
+import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import {
-  getHttpsWebhookServer,
   getWebhookServer,
+  getHttpsWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import expect from '@kbn/expect';
-import getPort from 'get-port';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { createTlsWebhookServer } from '../../../../../common/lib/get_tls_webhook_servers';
 

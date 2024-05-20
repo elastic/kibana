@@ -6,9 +6,9 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { rgba } from 'polished';
-import { CHART_HEADER_HEIGHT, FIXED_AXIS_HEIGHT } from './constants';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { FIXED_AXIS_HEIGHT, CHART_HEADER_HEIGHT } from './constants';
 
 interface WaterfallChartOuterContainerProps {
   height?: string;

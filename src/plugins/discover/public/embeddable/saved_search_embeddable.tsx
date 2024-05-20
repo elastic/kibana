@@ -6,9 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { CellActionsProvider } from '@kbn/cell-actions';
+import { lastValueFrom, Subscription } from 'rxjs';
+import {
+  onlyDisabledFiltersChanged,
+  Filter,
+  Query,
+  TimeRange,
+  FilterStateStore,
+} from '@kbn/es-query';
+import React from 'react';
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
+import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
+import {
+  Container,
+  Embeddable,
+  FilterableEmbeddable,
+  ReferenceOrValueEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import type {
+  SavedSearchAttributeService,
+  SearchByReferenceInput,
+  SearchByValueInput,
+  SortOrder,
+} from '@kbn/saved-search-plugin/public';
 import {
   APPLY_FILTER_TRIGGER,
   generateFilters,
@@ -16,6 +39,14 @@ import {
 } from '@kbn/data-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -24,53 +55,22 @@ import {
   buildDataTableRecord,
   isLegacyTableEnabled,
 } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
-import {
-  Container,
-  Embeddable,
-  FilterableEmbeddable,
-  ReferenceOrValueEmbeddable,
-} from '@kbn/embeddable-plugin/public';
-import {
-  Filter,
-  FilterStateStore,
-  Query,
-  TimeRange,
-  onlyDisabledFiltersChanged,
-} from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type {
-  SavedSearchAttributeService,
-  SearchByReferenceInput,
-  SearchByValueInput,
-  SortOrder,
-} from '@kbn/saved-search-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { columnActions, getTextBasedColumnsMeta } from '@kbn/unified-data-table';
-import { isEqual } from 'lodash';
-import React from 'react';
-import ReactDOM, { unmountComponentAtNode } from 'react-dom';
-import { Subscription, lastValueFrom } from 'rxjs';
 import { VIEW_MODE, getDefaultRowsPerPage } from '../../common/constants';
+import type { ISearchEmbeddable, SearchInput, SearchOutput, SearchProps } from './types';
+import type { DiscoverServices } from '../build_services';
+import { getSortForEmbeddable, SortPair } from '../utils/sorting';
+import { getMaxAllowedSampleSize, getAllowedSampleSize } from '../utils/get_allowed_sample_size';
+import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
+import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+import { handleSourceColumnState } from '../utils/state_helpers';
+import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
 import { fetchTextBased } from '../application/main/data_fetching/fetch_text_based';
-import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
-import type { DiscoverServices } from '../build_services';
+import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
-import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../utils/get_allowed_sample_size';
-import { SortPair, getSortForEmbeddable } from '../utils/sorting';
-import { handleSourceColumnState } from '../utils/state_helpers';
-import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID, SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
-import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
-import type { ISearchEmbeddable, SearchInput, SearchOutput, SearchProps } from './types';
-import { updateSearchSource } from './utils/update_search_source';
 
 export interface SearchEmbeddableConfig {
   editable: boolean;

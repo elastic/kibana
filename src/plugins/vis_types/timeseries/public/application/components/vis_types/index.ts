@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { GeometryValue, XYChartSeriesIdentifier } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
-import { IUiSettingsClient } from '@kbn/core/public';
-import type { FieldFormatMap } from '@kbn/data-views-plugin/common';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
 import React, { lazy } from 'react';
-import type { PanelData, TimeseriesVisData } from '../../../../common/types';
-import { FetchedIndexPattern } from '../../../../common/types';
+import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { FieldFormatMap } from '@kbn/data-views-plugin/common';
 import { TimeseriesVisParams } from '../../../types';
+import type { TimeseriesVisData, PanelData } from '../../../../common/types';
+import { FetchedIndexPattern } from '../../../../common/types';
 
 import './_vis_types.scss';
 

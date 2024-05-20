@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/server/mocks';
 import { pick } from 'lodash';
-import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { rulesClientMock } from '../../../../rules_client.mock';
-import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { cloneRuleRoute } from './clone_rule_route';
+import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({

@@ -10,14 +10,14 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { metricVisFunction } from '../common';
-import { metricTrendlineFunction } from '../common/expression_functions/metric_trendline_function';
-import { getMetricVisRenderer } from './expression_renderers';
 import { setFormatService, setPaletteService } from './services';
+import { getMetricVisRenderer } from './expression_renderers';
 import { setThemeService } from './services/theme_service';
 import { setUiSettingsService } from './services/ui_settings';
+import { metricTrendlineFunction } from '../common/expression_functions/metric_trendline_function';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {

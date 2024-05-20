@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';

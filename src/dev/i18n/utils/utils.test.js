@@ -10,14 +10,14 @@ import { parse } from '@babel/parser';
 import { isExpressionStatement, isObjectExpression, isObjectProperty } from '@babel/types';
 
 import {
-  checkValuesProperty,
-  createParserErrorMessage,
-  extractMessageValueFromNode,
-  formatJSString,
   isI18nTranslateFunction,
   isPropertyWithKey,
-  normalizePath,
   traverseNodes,
+  formatJSString,
+  checkValuesProperty,
+  createParserErrorMessage,
+  normalizePath,
+  extractMessageValueFromNode,
 } from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(

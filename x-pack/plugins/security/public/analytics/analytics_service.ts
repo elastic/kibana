@@ -15,8 +15,8 @@ import type {
 } from '@kbn/core/public';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
-import type { SecurityLicense } from '../../common';
 import { registerUserContext } from './register_user_context';
+import type { SecurityLicense } from '../../common';
 
 interface AnalyticsServiceSetupParams {
   securityLicense: SecurityLicense;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RISK_ENGINE_PRIVILEGES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { RISK_ENGINE_PRIVILEGES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   RISK_SCORE_PREVIEW_PRIVILEGES_CALLOUT,
   RISK_SCORE_PRIVILEGES_CALLOUT,

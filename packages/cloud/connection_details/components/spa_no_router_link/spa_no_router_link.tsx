@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiLink } from '@elastic/eui';
 import * as React from 'react';
+import { EuiLink } from '@elastic/eui';
 
 const hasActiveModifierKey = (event: React.MouseEvent): boolean => {
   return event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;

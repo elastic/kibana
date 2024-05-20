@@ -36,7 +36,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/user-settings/core-user-settings-server-internal/user_settings_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -48,7 +50,9 @@
                 "tags": [],
                 "label": "coreContext",
                 "description": [],
-                "signature": ["CoreContext"],
+                "signature": [
+                  "CoreContext"
+                ],
                 "path": "packages/core/user-settings/core-user-settings-server-internal/user_settings_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -64,7 +68,10 @@
             "tags": [],
             "label": "setup",
             "description": [],
-            "signature": ["() => ", "InternalUserSettingsServiceSetup"],
+            "signature": [
+              "() => ",
+              "InternalUserSettingsServiceSetup"
+            ],
             "path": "packages/core/user-settings/core-user-settings-server-internal/user_settings_service.ts",
             "deprecated": false,
             "trackAdoption": false,

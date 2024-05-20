@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React, { Component, Fragment, ReactElement } from 'react';
 import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Component, Fragment, ReactElement } from 'react';
+import { getVectorStyleLabel, getDisabledByMessage } from './get_vector_style_label';
 import { STYLE_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
 import { CustomIcon } from '../../../../../common/descriptor_types';
 import { IStyleProperty } from '../properties/style_property';
 import { StyleField } from '../style_fields_helper';
-import { getDisabledByMessage, getVectorStyleLabel } from './get_vector_style_label';
 
 export const FIXED_LABEL = i18n.translate('xpack.maps.styles.staticDynamicSelect.staticLabel', {
   defaultMessage: 'Fixed',

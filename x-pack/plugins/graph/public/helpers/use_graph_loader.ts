@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import type { CoreStart, ToastsStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useCallback, useMemo, useState } from 'react';
+import type { CoreStart, ToastsStart } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type {
   ExploreRequest,
   GraphExploreCallback,

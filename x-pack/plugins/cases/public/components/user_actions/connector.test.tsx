@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import { UserActionActions } from '../../../common/types/domain';
+import { getUserAction, getJiraConnector } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
-import { getJiraConnector, getUserAction } from '../../containers/mock';
 import { createConnectorUserActionBuilder } from './connector';
 import { getMockBuilderArgs } from './mock';
+import { UserActionActions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

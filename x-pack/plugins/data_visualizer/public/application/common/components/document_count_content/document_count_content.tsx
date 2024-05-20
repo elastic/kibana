@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPanel,
-  EuiPopover,
-  EuiSelect,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
-import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { DocumentCountStats } from '../../../../../common/types/field_stats';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiCallOut,
+  EuiSelect,
+  EuiFormRow,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
 import type { RandomSamplerOption } from '../../../index_data_visualizer/constants/random_sampler';
 import {
-  RANDOM_SAMPLER_OPTION,
   RANDOM_SAMPLER_SELECT_OPTIONS,
+  RANDOM_SAMPLER_OPTION,
 } from '../../../index_data_visualizer/constants/random_sampler';
-import { ProbabilityUsedMessage } from '../random_sampling_menu/probability_used';
-import { RandomSamplerRangeSlider } from '../random_sampling_menu/random_sampler_range_slider';
-import { DocumentCountChart } from './document_count_chart';
 import { TotalCountHeader } from './total_count_header';
+import type { DocumentCountStats } from '../../../../../common/types/field_stats';
+import { DocumentCountChart } from './document_count_chart';
+import { RandomSamplerRangeSlider } from '../random_sampling_menu/random_sampler_range_slider';
+import { ProbabilityUsedMessage } from '../random_sampling_menu/probability_used';
 
 export interface Props {
   documentCountStats?: DocumentCountStats;

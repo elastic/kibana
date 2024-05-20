@@ -1,13 +1,14 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
+    "aliases": {
+    },
     "index": "conflicts-0001",
     "mappings": {
       "dynamic": false,
       "properties": {
-        "@timestamp": {
-          "type": "date"
+        "@timestamp":{
+          "type":"date"
         },
         "doc_id": {
           "type": "long"

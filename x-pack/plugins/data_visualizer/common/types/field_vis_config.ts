@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FieldVisStats, Percentile, SupportedFieldType } from '.';
 import type { SupportedAggs } from './field_stats';
+import type { Percentile, SupportedFieldType, FieldVisStats } from '.';
 export interface MetricFieldVisStats {
   avg?: number;
   distribution?: {

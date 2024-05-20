@@ -7,8 +7,8 @@
  */
 
 import { EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 export const countCss = css`

@@ -18,8 +18,8 @@ import { z } from 'zod';
 
 import {
   ConversationCreateProps,
-  ConversationResponse,
   ConversationUpdateProps,
+  ConversationResponse,
 } from './common_attributes.gen';
 
 export type BulkActionSkipReason = z.infer<typeof BulkActionSkipReason>;

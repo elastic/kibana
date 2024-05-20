@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import type {
+  SavedObjectsType,
+  SavedObjectsMappingProperties,
+} from '@kbn/core-saved-objects-server';
 import {
   type IndexMapping,
-  getModelVersionDelta,
-  getVirtualVersionMap,
   getVirtualVersionsFromMappingMeta,
+  getVirtualVersionMap,
+  getModelVersionDelta,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type {
-  SavedObjectsMappingProperties,
-  SavedObjectsType,
-} from '@kbn/core-saved-objects-server';
-import { getBaseMappings } from '../../core/build_active_mappings';
 import { getUpdatedRootFields } from '../../core/compare_mappings';
+import { getBaseMappings } from '../../core/build_active_mappings';
 
 interface GenerateAdditiveMappingsDiffOpts {
   types: SavedObjectsType[];

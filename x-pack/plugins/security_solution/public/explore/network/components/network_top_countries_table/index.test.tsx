@@ -11,7 +11,7 @@ import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
-import { TestProviders, createMockStore, mockIndexPattern } from '../../../../common/mock';
+import { mockIndexPattern, TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
 

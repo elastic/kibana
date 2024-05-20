@@ -8,9 +8,9 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ServiceLocation } from '../../../../../../common/runtime_types';
-import { useLocations, useUrlParams } from '../../../hooks';
-import { selectSelectedLocationId, setMonitorDetailsLocationAction } from '../../../state';
 import { useSelectedMonitor } from './use_selected_monitor';
+import { selectSelectedLocationId, setMonitorDetailsLocationAction } from '../../../state';
+import { useUrlParams, useLocations } from '../../../hooks';
 
 export const useSelectedLocation = (updateUrl = true) => {
   const [getUrlParams, updateUrlParams] = useUrlParams();

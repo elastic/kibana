@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { buildDataTableRecord } from '@kbn/discover-utils';
 import { calcFieldCounts } from './calc_field_counts';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 describe('calcFieldCounts', () => {
   test('returns valid field count data', async () => {

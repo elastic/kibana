@@ -7,9 +7,9 @@
 
 import {
   dataStreamPartsToIndexName,
-  extractIndexNameFromBackingIndex,
-  indexNameToDataStreamParts,
   streamPartsToIndexPattern,
+  indexNameToDataStreamParts,
+  extractIndexNameFromBackingIndex,
 } from './dataset_name';
 
 describe('dataset_name', () => {

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { GenericIndexPatternColumn } from '.';
-import { IndexPattern, IndexPatternField } from '../../../types';
-import { documentField } from '../document_field';
-import { getFieldByNameFactory } from '../pure_helpers';
-import { FormBasedLayer } from '../types';
 import {
-  AvgIndexPatternColumn,
-  DerivativeIndexPatternColumn,
+  sumOperation,
   averageOperation,
   countOperation,
   counterRateOperation,
+  movingAverageOperation,
   cumulativeSumOperation,
   derivativeOperation,
-  movingAverageOperation,
-  sumOperation,
+  AvgIndexPatternColumn,
+  DerivativeIndexPatternColumn,
 } from './definitions';
+import { getFieldByNameFactory } from '../pure_helpers';
+import { documentField } from '../document_field';
+import { FormBasedLayer } from '../types';
+import { IndexPattern, IndexPatternField } from '../../../types';
+import { GenericIndexPatternColumn } from '.';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 
 const indexPatternFields = [

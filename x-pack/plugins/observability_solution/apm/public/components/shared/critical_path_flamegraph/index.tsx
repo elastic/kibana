@@ -7,11 +7,11 @@
 import { Chart, Datum, Flame, Settings, Tooltip } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { i18n } from '@kbn/i18n';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useMemo, useRef } from 'react';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { i18n } from '@kbn/i18n';
+import { FETCH_STATUS, useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
 import { criticalPathToFlamegraph } from './critical_path_to_flamegraph';
 
@@ -39,29 +39,27 @@ export function CriticalPathFlamegraph(
   const timerange = useRef({ start, end });
   timerange.current = { start, end };
 
-  const {
-    data: { criticalPath } = { criticalPath: null },
-    status: criticalPathFetchStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      if (!traceIds.length) {
-        return Promise.resolve({ criticalPath: null });
-      }
+  const { data: { criticalPath } = { criticalPath: null }, status: criticalPathFetchStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (!traceIds.length) {
+          return Promise.resolve({ criticalPath: null });
+        }
 
-      return callApmApi('POST /internal/apm/traces/aggregated_critical_path', {
-        params: {
-          body: {
-            start: timerange.current.start,
-            end: timerange.current.end,
-            traceIds,
-            serviceName,
-            transactionName,
+        return callApmApi('POST /internal/apm/traces/aggregated_critical_path', {
+          params: {
+            body: {
+              start: timerange.current.start,
+              end: timerange.current.end,
+              traceIds,
+              serviceName,
+              transactionName,
+            },
           },
-        },
-      });
-    },
-    [timerange, traceIds, serviceName, transactionName]
-  );
+        });
+      },
+      [timerange, traceIds, serviceName, transactionName]
+    );
 
   const chartThemes = useChartThemes();
 

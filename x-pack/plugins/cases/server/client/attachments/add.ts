@@ -7,17 +7,17 @@
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { CasesClientArgs } from '..';
 import { AttachmentRequestRt } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
-import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
-import { CaseCommentModel } from '../../common/models';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
-import { validateMaxUserActions } from '../../common/validators';
+import { CaseCommentModel } from '../../common/models';
+import { createCaseError } from '../../common/error';
+import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
+import { Operations } from '../../authorization';
 import type { AddArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
+import { validateMaxUserActions } from '../../common/validators';
 
 /**
  * Create an attachment to a case.

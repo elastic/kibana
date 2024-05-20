@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { safeLoad } from 'js-yaml';
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { safeLoad } from 'js-yaml';
 
 import { i18n } from '@kbn/i18n';
 
@@ -16,19 +16,19 @@ import { useConfirmForceInstall } from '../../../../../../../integrations/hooks'
 
 import { isVerificationError } from '../../../../../../../../services';
 
-import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
-import { NotObscuredByBottomBar } from '..';
-import { Error, ExtensionWrapper } from '../../../../../../components';
+import type { MultiPageStepLayoutProps } from '../../types';
+import type { PackagePolicyFormState } from '../../../types';
+import type { NewPackagePolicy } from '../../../../../../types';
 import { sendCreatePackagePolicy, useStartServices, useUIExtension } from '../../../../../../hooks';
 import type { RequestError } from '../../../../../../hooks';
-import type { NewPackagePolicy } from '../../../../../../types';
-import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
+import { Error, ExtensionWrapper } from '../../../../../../components';
+import { sendGeneratePackagePolicy } from '../../hooks';
+import { CreatePackagePolicyBottomBar, StandaloneModeWarningCallout } from '..';
 import type { PackagePolicyValidationResults } from '../../../services';
 import { validatePackagePolicy, validationHasErrors } from '../../../services';
+import { NotObscuredByBottomBar } from '..';
+import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
-import type { PackagePolicyFormState } from '../../../types';
-import { sendGeneratePackagePolicy } from '../../hooks';
-import type { MultiPageStepLayoutProps } from '../../types';
 
 const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);

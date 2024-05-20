@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { TableId } from '@kbn/securitysolution-data-table';
-import { fireEvent, render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { getPersistentControlsHook } from './use_persistent_controls';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { renderHook } from '@testing-library/react-hooks';
+import { render, fireEvent } from '@testing-library/react';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
-import { TestProviders, createMockStore, mockGlobalState } from '../../../common/mock';
-import { getPersistentControlsHook } from './use_persistent_controls';
 
 const mockDispatch = jest.fn();
 const mockedUseKibana = mockUseKibana();

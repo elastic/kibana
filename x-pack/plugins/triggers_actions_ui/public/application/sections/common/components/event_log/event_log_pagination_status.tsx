@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiText, Pagination } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Pagination, EuiText } from '@elastic/eui';
 
 export type EventLogPaginationStatusProps = Required<
   Pick<Pagination, 'pageIndex' | 'pageSize' | 'totalItemCount'>

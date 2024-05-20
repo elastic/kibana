@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
-import { Integration } from '../../../common/data_streams_stats/integration';
+import { css } from '@emotion/react';
 import {
   flyoutIntegrationDetailsText,
   flyoutIntegrationNameText,
   flyoutIntegrationVersionText,
 } from '../../../common/translations';
+import { Integration } from '../../../common/data_streams_stats/integration';
 import { IntegrationIcon } from '../common';
 import { FieldsList } from './fields_list';
 import { IntegrationActionsMenu } from './integration_actions_menu';

@@ -7,8 +7,8 @@
 
 import React, { useMemo, useState } from 'react';
 
-import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import type { TransformListAction, TransformListRow } from '../../../../common';
 import {
@@ -18,9 +18,9 @@ import {
 } from '../../../../hooks';
 
 import {
-  DeleteActionName,
   deleteActionNameText,
   isDeleteActionDisabled,
+  DeleteActionName,
 } from './delete_action_name';
 
 export type DeleteAction = ReturnType<typeof useDeleteAction>;

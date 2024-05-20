@@ -14,27 +14,27 @@ import { enableMapSet } from 'immer';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
-import { sourcererModel, sourcererReducer } from './sourcerer';
+import { sourcererReducer, sourcererModel } from './sourcerer';
 
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
 import type { UsersPluginReducer } from '../../explore/users/store';
 import type { TimelinePluginReducer } from '../../timelines/store';
 
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecuritySubPlugins } from '../../app/types';
 import type { ManagementPluginReducer } from '../../management';
-import { analyzerReducer } from '../../resolver/store/reducer';
-import type { AnalyzerState } from '../../resolver/types';
+import type { State } from './types';
 import type { AppAction } from './actions';
-import { securitySolutionDiscoverReducer } from './discover/reducer';
+import type { SourcererModel } from './sourcerer/model';
+import { initDataView, SourcererScopeName } from './sourcerer/model';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 import { groupsReducer } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
-import { getScopePatternListSelection } from './sourcerer/helpers';
-import type { SourcererModel } from './sourcerer/model';
-import { SourcererScopeName, initDataView } from './sourcerer/model';
-import type { State } from './types';
+import { analyzerReducer } from '../../resolver/store/reducer';
+import { securitySolutionDiscoverReducer } from './discover/reducer';
+import type { AnalyzerState } from '../../resolver/types';
 
 enableMapSet();
 

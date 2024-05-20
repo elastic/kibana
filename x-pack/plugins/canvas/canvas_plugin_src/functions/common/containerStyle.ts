@@ -7,8 +7,8 @@
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { isValidUrl } from '@kbn/presentation-util-plugin/common';
-import { getFunctionErrors, getFunctionHelp } from '../../../i18n';
-import { BackgroundRepeat, BackgroundSize, ContainerStyle, Overflow } from '../../../types';
+import { ContainerStyle, Overflow, BackgroundRepeat, BackgroundSize } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Output extends ContainerStyle {
   type: 'containerStyle';

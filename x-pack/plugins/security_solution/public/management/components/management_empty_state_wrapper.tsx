@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPageTemplate, EuiPanel } from '@elastic/eui';
 import React, { memo } from 'react';
+import { EuiFlexGroup, EuiPanel, EuiPageTemplate } from '@elastic/eui';
 import styled from 'styled-components';
 
 export const StyledEuiFlexGroup = styled(EuiFlexGroup)`

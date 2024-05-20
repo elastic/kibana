@@ -1,8 +1,3 @@
-import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSuperUpdateButton } from '@elastic/eui';
-import type {
-  DurationRange,
-  OnRefreshChangeProps,
-} from '@elastic/eui/src/components/date_picker/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,15 +5,20 @@ import type {
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSuperUpdateButton } from '@elastic/eui';
+import type {
+  DurationRange,
+  OnRefreshChangeProps,
+} from '@elastic/eui/src/components/date_picker/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { useGetEndpointActionList } from '../../../hooks';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import {
   ActionLogDateRangePicker,
   type DateRangePickerValues,
 } from './actions_log_date_range_picker';
 import { ActionsLogFilter } from './actions_log_filter';
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const ActionsLogFilters = memo(
   ({

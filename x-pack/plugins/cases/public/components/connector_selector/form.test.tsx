@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { mount } from 'enzyme';
 import React from 'react';
-import { useKibana } from '../../common/lib/kibana';
+import { mount } from 'enzyme';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField, Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ConnectorSelector } from './form';
 import { connectorsMock } from '../../containers/mock';
 import { getFormMock } from '../__mock__/form';
-import { ConnectorSelector } from './form';
+import { useKibana } from '../../common/lib/kibana';
 
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
 jest.mock('../../common/lib/kibana');

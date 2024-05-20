@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonIcon,
-  EuiCode,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiCode,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 
 export const TitleDocsPopover: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);

@@ -5,51 +5,51 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import reduceReducers from 'reduce-reducers';
 import type {
   Action,
-  AnyAction,
-  Dispatch,
-  Middleware,
-  PreloadedState,
-  Reducer,
   Store,
+  Middleware,
+  Dispatch,
+  PreloadedState,
+  AnyAction,
+  Reducer,
 } from 'redux';
 import { applyMiddleware, createStore as createReduxStore } from 'redux';
-import type { EnhancerOptions } from 'redux-devtools-extension';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
+import type { EnhancerOptions } from 'redux-devtools-extension';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import reduceReducers from 'reduce-reducers';
 import { TimelineType } from '../../../common/api/timeline';
+import { TimelineId } from '../../../common/types';
+import { initialGroupingState } from './grouping/reducer';
+import type { GroupState } from './grouping/types';
 import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   SERVER_APP_ID,
 } from '../../../common/constants';
-import type { Immutable } from '../../../common/endpoint/types';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { TimelineId } from '../../../common/types';
-import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
-import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
-import type { AnalyzerState } from '../../resolver/types';
-import * as timelineActions from '../../timelines/store/actions';
-import { addNewTimeline } from '../../timelines/store/helpers';
-import type { TimelineModel } from '../../timelines/store/model';
-import type { TimelineState } from '../../timelines/store/types';
-import type { StartPlugins, StartedSubPlugins } from '../../types';
-import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
 import { telemetryMiddleware } from '../lib/telemetry';
-import type { AppAction } from './actions';
-import { initialGroupingState } from './grouping/reducer';
-import type { GroupState } from './grouping/types';
-import { createMiddlewares } from './middlewares';
+import * as timelineActions from '../../timelines/store/actions';
+import type { TimelineModel } from '../../timelines/store/model';
 import type { SubPluginsInitReducer } from './reducer';
 import { createInitialState, createReducer } from './reducer';
-import { sourcererActions } from './sourcerer';
-import type { KibanaDataView, SourcererDataView, SourcererModel } from './sourcerer/model';
-import { initDataView } from './sourcerer/model';
+import type { AppAction } from './actions';
+import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
+import type { TimelineState } from '../../timelines/store/types';
+import type { KibanaDataView, SourcererModel, SourcererDataView } from './sourcerer/model';
+import { initDataView } from './sourcerer/model';
+import type { StartedSubPlugins, StartPlugins } from '../../types';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
+import type { AnalyzerState } from '../../resolver/types';
+import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
+import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
+import { sourcererActions } from './sourcerer';
+import { createMiddlewares } from './middlewares';
+import { addNewTimeline } from '../../timelines/store/helpers';
 
 let store: Store<State, Action> | null = null;
 

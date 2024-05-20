@@ -7,13 +7,13 @@
 
 import React, { useMemo, useState } from 'react';
 
-import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import type { TransformListAction, TransformListRow } from '../../../../common';
-import { useStartTransforms, useTransformCapabilities } from '../../../../hooks';
+import { useTransformCapabilities, useStartTransforms } from '../../../../hooks';
 
-import { StartActionName, isStartActionDisabled, startActionNameText } from './start_action_name';
+import { isStartActionDisabled, startActionNameText, StartActionName } from './start_action_name';
 
 export type StartAction = ReturnType<typeof useStartAction>;
 export const useStartAction = (forceDisable: boolean, transformNodes: number) => {

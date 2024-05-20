@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiTabs } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { memo } from 'react';
+import { EuiTabs } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface FlyoutHeaderTabsProps extends React.ComponentProps<typeof EuiTabs> {
   children: React.ReactNode;

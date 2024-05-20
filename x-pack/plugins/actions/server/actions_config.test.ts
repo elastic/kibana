@@ -6,20 +6,20 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ActionsConfig } from './config';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
 import {
+  getActionsConfigurationUtilities,
   AllowedHosts,
   EnabledActionTypes,
-  getActionsConfigurationUtilities,
 } from './actions_config';
-import { ActionsConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import moment from 'moment';
 

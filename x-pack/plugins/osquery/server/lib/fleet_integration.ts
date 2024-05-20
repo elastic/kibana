@@ -6,11 +6,11 @@
  */
 
 import type { SavedObjectReference, SavedObjectsClient } from '@kbn/core/server';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
 import { filter, map } from 'lodash';
-import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { packSavedObjectType } from '../../common/types';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const getPackagePolicyDeleteCallback =
   (packsClient: SavedObjectsClient): PostPackagePolicyPostDeleteCallback =>

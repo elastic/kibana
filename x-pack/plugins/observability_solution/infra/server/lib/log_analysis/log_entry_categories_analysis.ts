@@ -26,13 +26,13 @@ import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import { fetchMlJob, getLogEntryDatasets } from './common';
 import { InsufficientLogAnalysisMlJobConfigurationError, UnknownCategoryError } from './errors';
 import {
-  LogEntryCategoryHit,
   createLogEntryCategoriesQuery,
   logEntryCategoriesResponseRT,
+  LogEntryCategoryHit,
 } from './queries/log_entry_categories';
 import {
-  LogEntryCategoryExampleHit,
   createLogEntryCategoryExamplesQuery,
+  LogEntryCategoryExampleHit,
   logEntryCategoryExamplesResponseRT,
 } from './queries/log_entry_category_examples';
 import {

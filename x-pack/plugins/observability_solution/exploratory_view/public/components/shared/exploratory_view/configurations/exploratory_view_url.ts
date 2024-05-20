@@ -6,10 +6,10 @@
  */
 
 import rison from '@kbn/rison';
+import { URL_KEYS } from './constants/url_constants';
+import type { ReportViewType, SeriesUrl } from '../types';
 import type { AllSeries } from '../../../..';
 import type { AllShortSeries } from '../hooks/use_series_storage';
-import type { ReportViewType, SeriesUrl } from '../types';
-import { URL_KEYS } from './constants/url_constants';
 
 export function convertToShortUrl(series: SeriesUrl) {
   const {

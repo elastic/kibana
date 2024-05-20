@@ -8,19 +8,19 @@
 import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import { LogQueryFields } from '../../../metrics/types';
 import { InfraSource } from '../../../sources';
+import { createRequest } from './create_request';
 import {
   AdditionalContext,
-  KUBERNETES_POD_UID,
   doFieldsExist,
+  KUBERNETES_POD_UID,
   termsAggField,
 } from '../../common/utils';
-import { createRequest } from './create_request';
 
 interface BucketKey {
   node: string;

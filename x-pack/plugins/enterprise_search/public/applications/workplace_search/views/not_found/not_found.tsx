@@ -11,7 +11,7 @@ import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { PageTemplateProps } from '../../../shared/layout';
 import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
-import { PersonalDashboardLayout, WorkplaceSearchPageTemplate } from '../../components/layout';
+import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
 import { PRIVATE_SOURCES_PATH } from '../../routes';
 
 interface Props {

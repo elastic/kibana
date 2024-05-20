@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
+  htmlIdGenerator,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFieldText,
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
   EuiFormErrorText,
-  EuiFormRow,
   EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiText,
-  htmlIdGenerator,
+  EuiFormRow,
 } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import useMount from 'react-use/lib/useMount';
+import { DocLinksStart } from '@kbn/core/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggParamEditorProps } from '../agg_param_props';

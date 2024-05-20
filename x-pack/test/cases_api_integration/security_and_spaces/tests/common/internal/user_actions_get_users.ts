@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import { GetCaseUsersResponseRt } from '@kbn/cases-plugin/common/types/api';
 import expect from '@kbn/expect';
-import { UserProfile } from '@kbn/security-plugin/common';
 import { Cookie } from 'tough-cookie';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { UserProfile } from '@kbn/security-plugin/common';
+import { GetCaseUsersResponseRt } from '@kbn/cases-plugin/common/types/api';
+import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
+import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
-  bulkGetUserProfiles,
   createCase,
   deleteAllCaseItems,
   getCase,
+  updateCase,
   getCaseUsers,
   loginUsers,
-  updateCase,
+  bulkGetUserProfiles,
   updateUserProfileAvatar,
 } from '../../../../common/lib/api';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
-import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 import {
-  globalRead,
-  noKibanaPrivileges,
   obsOnly,
   obsOnlyRead,
   obsSec,
@@ -33,8 +32,9 @@ import {
   secOnlyRead,
   secOnlySpacesAll,
   superUser,
+  noKibanaPrivileges,
+  globalRead,
 } from '../../../../common/lib/authentication/users';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

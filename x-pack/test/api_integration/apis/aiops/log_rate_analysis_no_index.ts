@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-import { API_VERSIONS, getLogRateAnalysisTestData } from './test_data';
+import { getLogRateAnalysisTestData, API_VERSIONS } from './test_data';
 import { getErrorActions } from './test_helpers';
 
 export default ({ getService }: FtrProviderContext) => {

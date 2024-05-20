@@ -5,18 +5,18 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter, Logger } from '@kbn/core/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  CLOUD_INSTANCE_NAME,
-  CONTAINER_IMAGE_NAME,
   COUNT_ROUTE,
-  ENTRY_LEADER_ENTITY_ID,
   ORCHESTRATOR_CLUSTER_ID,
-  ORCHESTRATOR_CLUSTER_NAME,
-  ORCHESTRATOR_NAMESPACE,
   ORCHESTRATOR_RESOURCE_ID,
+  ORCHESTRATOR_NAMESPACE,
+  ORCHESTRATOR_CLUSTER_NAME,
+  CONTAINER_IMAGE_NAME,
+  CLOUD_INSTANCE_NAME,
+  ENTRY_LEADER_ENTITY_ID,
 } from '../../common/constants';
 
 export const registerCountRoute = (router: IRouter, logger: Logger) => {

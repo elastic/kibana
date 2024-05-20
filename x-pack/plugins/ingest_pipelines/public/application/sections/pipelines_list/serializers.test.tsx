@@ -6,7 +6,7 @@
  */
 
 import { EuiSelectableOption } from '@elastic/eui';
-import { deserializeFilterOptions, serializeFilterOptions } from './table';
+import { serializeFilterOptions, deserializeFilterOptions } from './table';
 
 describe('Query param serialization', () => {
   it('knows how to serialize a set of options', () => {

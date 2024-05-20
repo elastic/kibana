@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  Criteria,
-  CustomItemAction,
-  EuiBasicTableColumn,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  useEuiTheme,
   EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiButtonEmpty,
+  Criteria,
+  EuiButtonIcon,
+  CustomItemAction,
+  EuiCopy,
   EuiToolTip,
   euiScrollBarStyles,
-  useEuiTheme,
 } from '@elastic/eui';
-import { Interpolation, Theme, css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { css, Interpolation, Theme } from '@emotion/react';
 import { type QueryHistoryItem, getHistoryItems } from './history_local_storage';
 import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
 

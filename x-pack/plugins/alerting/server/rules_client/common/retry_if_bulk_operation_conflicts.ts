@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
-import { Logger, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
-import { KueryNode } from '@kbn/es-query';
-import { chunk } from 'lodash';
 import pMap from 'p-map';
-import { RuleAttributes } from '../../data/rule/types';
+import { chunk } from 'lodash';
+import { KueryNode } from '@kbn/es-query';
+import { Logger, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../types';
-import { RETRY_IF_CONFLICTS_ATTEMPTS, waitBeforeNextRetry } from './wait_before_next_retry';
+import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
+import { RuleAttributes } from '../../data/rule/types';
 
 const MAX_RULES_IDS_IN_RETRY = 1000;
 

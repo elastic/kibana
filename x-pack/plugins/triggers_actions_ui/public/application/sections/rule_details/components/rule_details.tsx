@@ -5,72 +5,72 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiIconTip,
-  EuiLink,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import React, { useState, useEffect, useReducer, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
-import { useKibana } from '../../../../common/lib/kibana';
 import {
-  ActionConnector,
-  ActionType,
-  Rule,
-  RuleType,
-  TriggersActionsUiConfig,
-} from '../../../../types';
-import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
+  EuiPageHeader,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiPageSection,
+  EuiCallOut,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiIcon,
+  EuiLink,
+  EuiIconTip,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
+import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { routeToRules } from '../../../constants';
-import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
-import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
-import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
+import { RuleActionsPopover } from './rule_actions_popover';
 import {
   hasAllPrivilege,
   hasExecuteActionsCapability,
   hasManageApiKeysCapability,
 } from '../../../lib/capabilities';
+import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
-import { runRule } from '../../../lib/run_rule';
-import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
+import {
+  Rule,
+  RuleType,
+  ActionType,
+  ActionConnector,
+  TriggersActionsUiConfig,
+} from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { RuleRouteWithApi } from './rule_route';
+import { ViewInApp } from './view_in_app';
 import { RuleEdit } from '../../rule_form';
-import { getRuleReducer } from '../../rule_form/rule_reducer';
+import { routeToRules } from '../../../constants';
 import {
   rulesErrorReasonTranslationsMapping,
   rulesWarningReasonTranslationsMapping,
 } from '../../rules_list/translations';
+import { useKibana } from '../../../../common/lib/kibana';
+import { getRuleReducer } from '../../rule_form/rule_reducer';
+import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
+import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { runRule } from '../../../lib/run_rule';
 import {
-  MULTIPLE_RULE_TITLE,
-  SINGLE_RULE_TITLE,
   getConfirmDeletionButtonText,
   getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
 } from '../../rules_list/translations';
-import { RuleActionsPopover } from './rule_actions_popover';
-import { RuleRouteWithApi } from './rule_route';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { RefreshToken } from './types';
-import { ViewInApp } from './view_in_app';
+import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
 export type RuleDetailsProps = {
   rule: Rule;

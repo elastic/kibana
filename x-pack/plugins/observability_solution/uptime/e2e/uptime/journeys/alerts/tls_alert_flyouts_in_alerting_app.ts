@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { before, expect, journey, step } from '@elastic/synthetics';
+import { journey, step, before, expect } from '@elastic/synthetics';
+import { byTestId, assertText, waitForLoadingToFinish } from '../../../helpers/utils';
 import { recordVideo } from '../../../helpers/record_video';
-import { assertText, byTestId, waitForLoadingToFinish } from '../../../helpers/utils';
 import { loginPageProvider } from '../../../page_objects/login';
 
 journey('TlsFlyoutInAlertingApp', async ({ page, params }) => {

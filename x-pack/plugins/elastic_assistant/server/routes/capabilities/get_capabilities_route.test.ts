@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getGetCapabilitiesRequest } from '../../__mocks__/request';
-import { requestContextMock } from '../../__mocks__/request_context';
-import { serverMock } from '../../__mocks__/server';
-import { getPluginNameFromRequest } from '../helpers';
 import { getCapabilitiesRoute } from './get_capabilities_route';
+import { serverMock } from '../../__mocks__/server';
+import { requestContextMock } from '../../__mocks__/request_context';
+import { getGetCapabilitiesRequest } from '../../__mocks__/request';
+import { getPluginNameFromRequest } from '../helpers';
 
 jest.mock('../helpers');
 

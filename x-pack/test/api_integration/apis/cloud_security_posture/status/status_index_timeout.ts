@@ -1,11 +1,3 @@
-import {
-  FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
-  VULNERABILITIES_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,10 +5,18 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
  * 2.0.
  */
 import expect from '@kbn/expect';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  VULNERABILITIES_INDEX_DEFAULT_NS,
+} from '@kbn/cloud-security-posture-plugin/common/constants';
 import { setupFleetAndAgents } from '../../../../fleet_api_integration/apis/agents/services';
 import { generateAgent } from '../../../../fleet_api_integration/helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy, deleteIndex } from '../helper';
+import { deleteIndex, createPackagePolicy } from '../helper';
 
 const INDEX_ARRAY = [
   FINDINGS_INDEX_DEFAULT_NS,

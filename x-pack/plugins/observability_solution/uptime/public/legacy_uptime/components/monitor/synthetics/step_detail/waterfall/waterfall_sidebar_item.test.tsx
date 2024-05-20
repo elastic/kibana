@@ -9,11 +9,11 @@ import React from 'react';
 import 'jest-canvas-mock';
 import { fireEvent } from '@testing-library/react';
 
-import { render } from '../../../../../lib/helper/rtl_helpers';
-import { getChunks } from '../../waterfall/components/middle_truncated_text';
-import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from '../../waterfall/components/translations';
 import { SidebarItem } from './types';
+import { render } from '../../../../../lib/helper/rtl_helpers';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
+import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from '../../waterfall/components/translations';
+import { getChunks } from '../../waterfall/components/middle_truncated_text';
 
 describe('waterfall filter', () => {
   const url = 'http://www.elastic.co/observability/uptime';

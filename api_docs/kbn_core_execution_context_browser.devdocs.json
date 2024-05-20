@@ -39,7 +39,9 @@
             "type": "Object",
             "tags": [],
             "label": "context$",
-            "description": ["\nThe current context observable"],
+            "description": [
+              "\nThe current context observable"
+            ],
             "signature": [
               "Observable",
               "<",
@@ -62,7 +64,9 @@
             "type": "Function",
             "tags": [],
             "label": "set",
-            "description": ["\nSet the current top level context"],
+            "description": [
+              "\nSet the current top level context"
+            ],
             "signature": [
               "(c$: ",
               {
@@ -108,7 +112,9 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": ["\nGet the current top level context"],
+            "description": [
+              "\nGet the current top level context"
+            ],
             "signature": [
               "() => ",
               {
@@ -131,8 +137,12 @@
             "type": "Function",
             "tags": [],
             "label": "clear",
-            "description": ["\nclears the context"],
-            "signature": ["() => void"],
+            "description": [
+              "\nclears the context"
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -145,8 +155,13 @@
             "type": "Function",
             "tags": [],
             "label": "getAsLabels",
-            "description": ["\nreturns apm labels"],
-            "signature": ["() => ", "Labels"],
+            "description": [
+              "\nreturns apm labels"
+            ],
+            "signature": [
+              "() => ",
+              "Labels"
+            ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -221,7 +236,9 @@
         "type": "Type",
         "tags": [],
         "label": "ExecutionContextStart",
-        "description": ["\nSee {@link ExecutionContextSetup}."],
+        "description": [
+          "\nSee {@link ExecutionContextSetup}."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-execution-context-browser",

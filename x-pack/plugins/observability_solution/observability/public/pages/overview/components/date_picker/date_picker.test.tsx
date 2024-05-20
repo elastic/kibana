@@ -6,17 +6,17 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Router } from '@kbn/shared-ux-router';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { MemoryHistory, createMemoryHistory } from 'history';
-import qs from 'query-string';
+import { createMemoryHistory, MemoryHistory } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
+import qs from 'query-string';
+import { DatePicker } from './date_picker';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { of } from 'rxjs';
 import { DatePickerContextProvider } from '../../../../context/date_picker_context/date_picker_context';
-import { DatePicker } from './date_picker';
 
 let history: MemoryHistory;
 

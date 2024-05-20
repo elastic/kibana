@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuItemProps,
-  EuiContextMenuPanel,
   EuiIcon,
   EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiContextMenuItemProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntryColumnContent } from './log_entry_column';

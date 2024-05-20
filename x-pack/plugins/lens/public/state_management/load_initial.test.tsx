@@ -1,8 +1,3 @@
-import { Filter } from '@kbn/es-query';
-import faker from 'faker';
-import { History, Location } from 'history';
-import { act } from 'react-dom/test-utils';
-import { LensEmbeddableInput } from '../embeddable';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,15 +5,20 @@ import { LensEmbeddableInput } from '../embeddable';
  * 2.0.
  */
 import {
-  createMockDatasource,
-  createMockVisualization,
-  defaultDoc,
-  exactMatchDoc,
   makeDefaultServices,
   makeLensStore,
+  defaultDoc,
+  createMockVisualization,
+  createMockDatasource,
   mockStoreDeps,
+  exactMatchDoc,
 } from '../mocks';
+import { Location, History } from 'history';
+import { act } from 'react-dom/test-utils';
+import { LensEmbeddableInput } from '../embeddable';
 import { loadInitial } from './lens_slice';
+import { Filter } from '@kbn/es-query';
+import faker from 'faker';
 
 const history = {
   location: {

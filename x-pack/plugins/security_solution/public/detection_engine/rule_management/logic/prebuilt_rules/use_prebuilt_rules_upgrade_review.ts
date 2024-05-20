@@ -8,8 +8,8 @@ import type { UseQueryOptions } from '@tanstack/react-query';
 import type { ReviewRuleUpgradeResponseBody } from '../../../../../common/api/detection_engine/prebuilt_rules';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-import { useFetchPrebuiltRulesUpgradeReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
 import * as i18n from '../translations';
+import { useFetchPrebuiltRulesUpgradeReviewQuery } from '../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,

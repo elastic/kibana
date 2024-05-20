@@ -8,10 +8,10 @@
 import { Client } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
-  METADATA_DATASTREAM,
-  METADATA_UNITED_INDEX,
   alertsIndexPattern,
   eventsIndexPattern,
+  METADATA_DATASTREAM,
+  METADATA_UNITED_INDEX,
   metadataCurrentIndexPattern,
   metadataIndexPattern,
   policyIndexPattern,

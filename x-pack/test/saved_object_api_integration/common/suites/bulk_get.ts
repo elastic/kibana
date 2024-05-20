@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { SPACE_1, SPACE_2, getTestDataLoader } from '../../../common/lib/test_data_loader';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
-import { expectResponses, getTestTitle, getUrlPrefix } from '../lib/saved_object_test_utils';
 import { SPACES } from '../lib/spaces';
+import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface BulkGetTestDefinition extends TestDefinition {
   request: Array<{ type: string; id: string }>;

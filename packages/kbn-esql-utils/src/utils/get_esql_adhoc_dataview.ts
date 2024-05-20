@@ -1,4 +1,3 @@
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
  * Side Public License, v 1.
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {

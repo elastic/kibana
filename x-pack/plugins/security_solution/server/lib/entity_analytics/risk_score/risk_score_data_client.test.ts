@@ -10,8 +10,8 @@ import {
   createOrUpdateIndexTemplate,
 } from '@kbn/alerting-plugin/server';
 import {
-  elasticsearchServiceMock,
   loggingSystemMock,
+  elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 
@@ -19,8 +19,8 @@ import { RiskScoreDataClient } from './risk_score_data_client';
 
 import { createDataStream } from '../utils/create_datastream';
 
-import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import * as transforms from '../utils/transforms';
+import { createOrUpdateIndex } from '../utils/create_or_update_index';
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
@@ -96,9 +96,8 @@ describe('RiskScoreDataClient', () => {
           totalFieldsLimit: 1000,
         })
       );
-      expect(
-        (createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template
-      ).toMatchInlineSnapshot(`
+      expect((createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template)
+        .toMatchInlineSnapshot(`
             Object {
               "mappings": Object {
                 "dynamic": "strict",

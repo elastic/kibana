@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { IEnvOptions } from './get_service_map';
 

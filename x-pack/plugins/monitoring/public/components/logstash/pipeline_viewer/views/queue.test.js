@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 import { Queue } from './queue';
+import { shallow } from 'enzyme';
 
 describe('Queue component', () => {
   it('renders default elements', () => {

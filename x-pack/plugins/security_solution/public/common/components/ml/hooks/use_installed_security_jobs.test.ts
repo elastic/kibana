@@ -7,15 +7,15 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../hooks/use_app_toasts.mock';
-import { TestProviders } from '../../../mock';
 import { mockJobsSummaryResponse } from '../../ml_popover/api.mock';
 import { getJobsSummary } from '../api/get_jobs_summary';
 import { useInstalledSecurityJobs } from './use_installed_security_jobs';
+import { TestProviders } from '../../../mock';
 
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 jest.mock('../../../../../common/machine_learning/has_ml_license');

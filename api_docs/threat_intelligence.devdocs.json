@@ -25,15 +25,21 @@
             "type": "string",
             "tags": [],
             "label": "threatIntelligencePage",
-            "description": ["the name of the threat intelligence page."],
-            "signature": ["\"indicators\""],
+            "description": [
+              "the name of the threat intelligence page."
+            ],
+            "signature": [
+              "\"indicators\""
+            ],
             "path": "x-pack/plugins/threat_intelligence/public/utils/security_solution_links.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["a {@link TILinkItem }"],
+        "returnComment": [
+          "a {@link TILinkItem }"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -60,7 +66,9 @@
             "description": [
               "\nGets the `FiltersGlobal` component for embedding a filter bar in the security solution application."
             ],
-            "signature": ["() => React.ComponentType<{ children: React.ReactNode; }>"],
+            "signature": [
+              "() => React.ComponentType<{ children: React.ReactNode; }>"
+            ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -76,7 +84,9 @@
             "description": [
               "\nGets the `PageWrapper` component for embedding a filter bar in the security solution application."
             ],
-            "signature": ["() => React.ComponentType<{ children: React.ReactNode; }>"],
+            "signature": [
+              "() => React.ComponentType<{ children: React.ReactNode; }>"
+            ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -92,7 +102,9 @@
             "description": [
               "\nGet the user's license to drive the Threat Intelligence plugin's visibility."
             ],
-            "signature": ["LicenseAware"],
+            "signature": [
+              "LicenseAware"
+            ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -106,7 +118,9 @@
             "description": [
               "\nGets Security Solution shared information like browerFields, indexPattern and selectedPatterns in DataView."
             ],
-            "signature": ["SelectedDataView"],
+            "signature": [
+              "SelectedDataView"
+            ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -117,8 +131,15 @@
             "type": "Object",
             "tags": [],
             "label": "securitySolutionStore",
-            "description": ["\nSecurity Solution store"],
-            "signature": ["Store", "<any, ", "AnyAction", ">"],
+            "description": [
+              "\nSecurity Solution store"
+            ],
+            "signature": [
+              "Store",
+              "<any, ",
+              "AnyAction",
+              ">"
+            ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -129,7 +150,9 @@
             "type": "Function",
             "tags": [],
             "label": "getUseInvestigateInTimeline",
-            "description": ["\nPass UseInvestigateInTimeline functionality to TI plugin"],
+            "description": [
+              "\nPass UseInvestigateInTimeline functionality to TI plugin"
+            ],
             "signature": [
               "({ dataProviders, from, to, }: ",
               "UseInvestigateInTimelineProps",
@@ -146,7 +169,9 @@
                 "tags": [],
                 "label": "{\n    dataProviders,\n    from,\n    to,\n  }",
                 "description": [],
-                "signature": ["UseInvestigateInTimelineProps"],
+                "signature": [
+                  "UseInvestigateInTimelineProps"
+                ],
                 "path": "x-pack/plugins/threat_intelligence/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -232,7 +257,9 @@
             "tags": [],
             "label": "SiemSearchBar",
             "description": [],
-            "signature": ["React.VoidFunctionComponent<any>"],
+            "signature": [
+              "React.VoidFunctionComponent<any>"
+            ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -245,7 +272,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -257,7 +286,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -320,7 +351,9 @@
                     "tags": [],
                     "label": "refetch",
                     "description": [],
-                    "signature": ["VoidFunction"],
+                    "signature": [
+                      "VoidFunction"
+                    ],
                     "path": "x-pack/plugins/threat_intelligence/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -338,8 +371,12 @@
             "type": "Function",
             "tags": [],
             "label": "deregisterQuery",
-            "description": ["\nDeregister stale query"],
-            "signature": ["(query: { id: string; }) => void"],
+            "description": [
+              "\nDeregister stale query"
+            ],
+            "signature": [
+              "(query: { id: string; }) => void"
+            ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -377,8 +414,12 @@
             "type": "Object",
             "tags": [],
             "label": "blockList",
-            "description": ["\nAdd to blocklist feature"],
-            "signature": ["Blocking"],
+            "description": [
+              "\nAdd to blocklist feature"
+            ],
+            "signature": [
+              "Blocking"
+            ],
             "path": "x-pack/plugins/threat_intelligence/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -446,8 +487,12 @@
         "type": "string",
         "tags": [],
         "label": "THREAT_INTELLIGENCE_BASE_PATH",
-        "description": ["\nBase path for all the pages within the Threat Intelligence plugin."],
-        "signature": ["\"/threat_intelligence\""],
+        "description": [
+          "\nBase path for all the pages within the Threat Intelligence plugin."
+        ],
+        "signature": [
+          "\"/threat_intelligence\""
+        ],
         "path": "x-pack/plugins/threat_intelligence/public/constants/navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -462,7 +507,9 @@
         "description": [
           "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence' | 'threat_intelligence-feed';"
         ],
-        "signature": ["\"threat_intelligence\""],
+        "signature": [
+          "\"threat_intelligence\""
+        ],
         "path": "x-pack/plugins/threat_intelligence/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,

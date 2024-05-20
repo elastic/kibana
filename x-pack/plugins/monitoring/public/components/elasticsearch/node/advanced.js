@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
+  EuiPage,
+  EuiPageSection,
+  EuiPageBody,
+  EuiPanel,
+  EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageSection,
-  EuiPanel,
   EuiScreenReaderOnly,
-  EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { AlertsCallout } from '../../../alerts/callout';
-import { MonitoringTimeseriesContainer } from '../../chart';
 import { NodeDetailStatus } from '../node_detail_status';
+import { MonitoringTimeseriesContainer } from '../../chart';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertsCallout } from '../../../alerts/callout';
 
 export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
   const metricsToShow = [

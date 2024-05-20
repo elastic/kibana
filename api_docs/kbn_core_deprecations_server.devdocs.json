@@ -59,7 +59,9 @@
                 "tags": [],
                 "label": "domainId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -117,7 +119,9 @@
         "type": "Interface",
         "tags": [],
         "label": "DeprecationsRequestHandlerContext",
-        "description": ["\nCore's `deprecations` request handler context."],
+        "description": [
+          "\nCore's `deprecations` request handler context."
+        ],
         "path": "packages/core/deprecations/core-deprecations-server/src/request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { History } from 'history';
 import React, { FunctionComponent, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { History } from 'history';
 import { EMPTY, Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { CoreTheme } from '@kbn/core-theme-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { CoreScopedHistory } from '../scoped_history';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { Mounter } from '../types';
 import { AppContainer } from './app_container';
+import { CoreScopedHistory } from '../scoped_history';
 
 interface Props {
   analytics: AnalyticsServiceStart;

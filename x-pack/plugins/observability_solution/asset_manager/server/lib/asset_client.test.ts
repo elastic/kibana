@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   ElasticsearchClientMock,
   elasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { MetricsDataClient, MetricsDataClientMock } from '@kbn/metrics-data-access-plugin/server';
-import { createGetApmIndicesMock, expectToThrowValidationErrorWithStatusCode } from '../test_utils';
 import { AssetClient } from './asset_client';
-import { GetApmIndicesMethod } from './asset_client_types';
+import { MetricsDataClient, MetricsDataClientMock } from '@kbn/metrics-data-access-plugin/server';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { AssetsValidationError } from './validators/validation_error';
+import { GetApmIndicesMethod } from './asset_client_types';
+import { createGetApmIndicesMock, expectToThrowValidationErrorWithStatusCode } from '../test_utils';
 
 function createAssetClient(
   metricsDataClient: MetricsDataClient,

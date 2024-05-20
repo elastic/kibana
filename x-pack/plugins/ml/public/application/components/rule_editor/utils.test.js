@@ -8,11 +8,11 @@
 import {
   ML_DETECTOR_RULE_ACTION,
   ML_DETECTOR_RULE_APPLIES_TO,
-  ML_DETECTOR_RULE_FILTER_TYPE,
   ML_DETECTOR_RULE_OPERATOR,
+  ML_DETECTOR_RULE_FILTER_TYPE,
 } from '@kbn/ml-anomaly-utils';
 
-import { buildRuleDescription, getAppliesToValueFromAnomaly, isValidRule } from './utils';
+import { isValidRule, buildRuleDescription, getAppliesToValueFromAnomaly } from './utils';
 
 describe('ML - rule editor utils', () => {
   const ruleWithCondition = {

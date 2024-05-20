@@ -40,7 +40,9 @@
             "tags": [],
             "label": "{ client, children }",
             "description": [],
-            "signature": ["React.PropsWithChildren<React.PropsWithChildren<ContextProps>>"],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<ContextProps>>"
+            ],
             "path": "packages/shared-ux/file/context/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -93,7 +95,9 @@
             "type": "Object",
             "tags": [],
             "label": "client",
-            "description": ["\nA files client that will be used process uploads."],
+            "description": [
+              "\nA files client that will be used process uploads."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-file-types",

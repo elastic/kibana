@@ -7,12 +7,12 @@
  */
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import type { PaletteRegistry } from '../../../palettes';
 import { ColorRanges, ColorRangesProps } from './color_ranges';
+import { ReactWrapper } from 'enzyme';
 import { ColorRangesContext } from './color_ranges_context';
+import type { PaletteRegistry } from '../../../palettes';
 
 const extraActionSelectors = {
   addColor: '[data-test-subj^="lnsPalettePanel_dynamicColoring_addColor"]',

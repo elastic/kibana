@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { renderHook } from '@testing-library/react-hooks';
+import { getUseCellActionsHook } from './use_cell_actions';
+import { columns as mockColumns, data as mockData } from './mock/data';
 import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
@@ -12,16 +17,11 @@ import type {
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { render, screen } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
 import type { ComponentProps, JSXElementConstructor, PropsWithChildren } from 'react';
 import React from 'react';
-import { VIEW_SELECTION } from '../../../../common/constants';
 import { makeAction } from '../../../common/components/cell_actions/mocks';
-import { TestProviders, createMockStore, mockGlobalState } from '../../../common/mock';
-import { columns as mockColumns, data as mockData } from './mock/data';
-import { getUseCellActionsHook } from './use_cell_actions';
+import { VIEW_SELECTION } from '../../../../common/constants';
 
 const useCellActions = getUseCellActionsHook(TableId.test);
 

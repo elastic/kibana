@@ -1,12 +1,3 @@
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-import type { Filter } from '@kbn/es-query';
-import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,36 +5,45 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
  * 2.0.
  */
 import { performance } from 'perf_hooks';
-import { createEnrichEventsFunction } from '../utils/enrichments';
+import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Filter } from '@kbn/es-query';
 import { buildEqlSearchRequest } from './build_eql_search_request';
+import { createEnrichEventsFunction } from '../utils/enrichments';
 
 import type { ExperimentalFeatures } from '../../../../../common';
+import type {
+  BulkCreate,
+  WrapHits,
+  WrapSequences,
+  RuleRangeTuple,
+  SearchAfterAndBulkCreateReturnType,
+  SignalSource,
+  WrapSuppressedHits,
+} from '../types';
+import {
+  addToSearchAfterReturn,
+  createSearchAfterReturnType,
+  makeFloatString,
+  getUnprocessedExceptionsWarnings,
+  getMaxSignalsWarning,
+  getSuppressionMaxSignalsWarning,
+} from '../utils/utils';
+import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
+import type { CompleteRule, EqlRuleParams } from '../../rule_schema';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import type { CompleteRule, EqlRuleParams } from '../../rule_schema';
-import type {
-  BulkCreate,
-  RuleRangeTuple,
-  SearchAfterAndBulkCreateReturnType,
-  SignalSource,
-  WrapHits,
-  WrapSequences,
-  WrapSuppressedHits,
-} from '../types';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
-import { buildReasonMessageForEqlAlert } from '../utils/reason_formatters';
-import {
-  addToSearchAfterReturn,
-  createSearchAfterReturnType,
-  getMaxSignalsWarning,
-  getSuppressionMaxSignalsWarning,
-  getUnprocessedExceptionsWarnings,
-  makeFloatString,
-} from '../utils/utils';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -117,8 +117,9 @@ export const eqlExecutor = async ({
     const eqlSignalSearchStart = performance.now();
 
     try {
-      const response =
-        await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(request);
+      const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
+        request
+      );
 
       const eqlSignalSearchEnd = performance.now();
       const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);

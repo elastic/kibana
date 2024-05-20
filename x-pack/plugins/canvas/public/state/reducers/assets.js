@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { handleActions, combineActions } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { combineActions, handleActions } from 'redux-actions';
-import { removeAsset, resetAssets, setAsset, setAssetValue, setAssets } from '../actions/assets';
+import { get } from 'lodash';
+import { setAssetValue, removeAsset, setAssets, resetAssets, setAsset } from '../actions/assets';
 
 const { set, assign, del } = immutable;
 

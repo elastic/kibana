@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { CreateAlert } from '.';
+import userEvent from '@testing-library/user-event';
 
 describe('CreateAlert', () => {
   const editSubAction = jest.fn();

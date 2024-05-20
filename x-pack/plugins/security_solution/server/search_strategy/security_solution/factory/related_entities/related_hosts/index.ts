@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
 import type { IEsSearchResponse } from '@kbn/search-types';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { getOr } from 'lodash/fp';
+import type { RiskSeverity } from '../../../../../../common/search_strategy/security_solution/risk_score/all';
+import type { SecuritySolutionFactory } from '../../types';
+import type { EndpointAppContext } from '../../../../../endpoint/types';
 import type { RelatedEntitiesQueries } from '../../../../../../common/search_strategy/security_solution/related_entities';
 import type {
-  RelatedHost,
-  RelatedHostBucket,
   UsersRelatedHostsStrategyResponse,
+  RelatedHostBucket,
+  RelatedHost,
 } from '../../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
-import type { RiskSeverity } from '../../../../../../common/search_strategy/security_solution/risk_score/all';
-import type { EndpointAppContext } from '../../../../../endpoint/types';
-import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { getHostRiskData } from '../../hosts/all';
-import type { SecuritySolutionFactory } from '../../types';
 import { buildRelatedHostsQuery } from './query.related_hosts.dsl';
+import { getHostRiskData } from '../../hosts/all';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 export const usersRelatedHosts: SecuritySolutionFactory<RelatedEntitiesQueries.relatedHosts> = {
   buildDsl: (options) => buildRelatedHostsQuery(options),

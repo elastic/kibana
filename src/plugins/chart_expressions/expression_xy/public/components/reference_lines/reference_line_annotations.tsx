@@ -7,21 +7,21 @@
  */
 
 import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
 import React, { FC } from 'react';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import {
+  AxesMap,
+  AxisConfiguration,
+  getOriginalAxisPosition,
+  LINES_MARKER_SIZE,
+} from '../../helpers';
 import {
   AvailableReferenceLineIcon,
   FillStyle,
   IconPosition,
   LineStyle,
 } from '../../../common/types';
-import {
-  AxesMap,
-  AxisConfiguration,
-  LINES_MARKER_SIZE,
-  getOriginalAxisPosition,
-} from '../../helpers';
 import {
   getBaseIconPlacement,
   getBottomRect,

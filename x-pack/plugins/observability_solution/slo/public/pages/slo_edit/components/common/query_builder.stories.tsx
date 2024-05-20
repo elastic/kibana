@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { ComponentStory } from '@storybook/react';
 
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { FormProvider, useForm } from 'react-hook-form';
-import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
+import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { QueryBuilder as Component, SearchBarProps } from './query_builder';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 
 export default {
   component: Component,

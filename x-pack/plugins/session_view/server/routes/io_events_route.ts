@@ -5,19 +5,19 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { IRouter, Logger } from '@kbn/core/server';
+import { EVENT_ACTION, TIMESTAMP } from '@kbn/rule-data-utils';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Aggregate } from '../../common';
 import {
-  ENTRY_SESSION_ENTITY_ID_PROPERTY,
-  IO_EVENTS_PER_PAGE,
   IO_EVENTS_ROUTE,
-  IO_EVENT_FIELDS,
+  IO_EVENTS_PER_PAGE,
+  ENTRY_SESSION_ENTITY_ID_PROPERTY,
+  TIMESTAMP_PROPERTY,
   PROCESS_ENTITY_ID_PROPERTY,
   PROCESS_EVENTS_PER_PAGE,
-  TIMESTAMP_PROPERTY,
+  IO_EVENT_FIELDS,
 } from '../../common/constants';
 
 export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type {
-  ElasticsearchRequestHandlerContext,
-  IScopedClusterClient,
-} from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type {
+  IScopedClusterClient,
+  ElasticsearchRequestHandlerContext,
+} from '@kbn/core-elasticsearch-server';
 import type { InternalElasticsearchServiceStart } from './types';
 
 /**

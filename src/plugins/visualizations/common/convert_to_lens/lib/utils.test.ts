@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { AggBasedColumn, ColumnWithMeta, Operations } from '../..';
 import { SchemaConfig } from '../../types';
 import {

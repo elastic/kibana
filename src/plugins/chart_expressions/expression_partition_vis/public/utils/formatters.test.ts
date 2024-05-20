@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { BucketColumns } from '../../common/types';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { createMockVisData } from '../mocks';
 import { generateFormatters, getAvailableFormatter, getFormatter } from './formatters';
+import { BucketColumns } from '../../common/types';
 
 describe('generateFormatters', () => {
   const visData = createMockVisData();

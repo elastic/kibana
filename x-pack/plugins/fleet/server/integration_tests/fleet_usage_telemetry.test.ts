@@ -10,8 +10,8 @@ import path from 'path';
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
-  createRootWithCorePlugins,
   createTestServers,
+  createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
 import { fetchFleetUsage } from '../collectors/register';

@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { Routes, Router, Route } from '@kbn/shared-ux-router';
 import { EuiPageTemplate } from '@elastic/eui';
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import React from 'react';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
-import { Main } from './main';
-import { StepFour } from './step_four';
+import { StepTwo } from './step_two';
 import { StepOne } from './step_one';
 import { StepThree } from './step_three';
-import { StepTwo } from './step_two';
+import { StepFour } from './step_four';
+import { Main } from './main';
 
 interface GuidedOnboardingExampleAppDeps {
   notifications: CoreStart['notifications'];

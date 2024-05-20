@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiDescriptionList, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiCallOut, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { useDiagnosticsContext } from '../context/use_diagnostics';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
-import { DataStreamsStatus } from './data_streams_status';
 import { IndexTemplatesStatus } from './index_templates_status';
 import { FieldMappingStatus } from './indicies_status';
+import { DataStreamsStatus } from './data_streams_status';
+import { useDiagnosticsContext } from '../context/use_diagnostics';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { AXIS_EXTENT_CONFIG } from '../constants';
 import { strings } from '../i18n';
 import { XAxisConfigFn, YAxisConfigFn } from '../types';
+import { AXIS_EXTENT_CONFIG } from '../constants';
 
 type CommonAxisConfigFn = XAxisConfigFn | YAxisConfigFn;
 

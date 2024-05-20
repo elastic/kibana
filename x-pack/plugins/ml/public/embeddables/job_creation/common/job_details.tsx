@@ -11,34 +11,34 @@ import useDebounce from 'react-use/lib/useDebounce';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  EuiAccordion,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCheckbox,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
+  EuiSpacer,
+  EuiIcon,
+  EuiText,
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
   EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
+  EuiButtonEmpty,
+  EuiCheckbox,
+  EuiAccordion,
+  EuiCallOut,
 } from '@elastic/eui';
 
-import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
-import { DEFAULT_BUCKET_SPAN, JOB_TYPE } from '../../../../common/constants/new_job';
-import { JOB_ID_MAX_LENGTH } from '../../../../common/constants/validation';
-import { basicJobValidation } from '../../../../common/util/job_utils';
-import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
-import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';
+import type { TimeRange } from '@kbn/es-query';
 import type { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
+import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';
+import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../common/constants/new_job';
+import { basicJobValidation } from '../../../../common/util/job_utils';
+import { JOB_ID_MAX_LENGTH } from '../../../../common/constants/validation';
+import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { useMlFromLensKibanaContext } from './context';
 
 export interface CreateADJobParams {

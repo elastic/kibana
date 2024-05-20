@@ -7,12 +7,10 @@
 
 /* eslint-disable import/no-extraneous-dependencies */
 
-import { EuiCode } from '@elastic/eui';
-import { act, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React, { memo, useEffect } from 'react';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { EuiCode } from '@elastic/eui';
+import userEvent from '@testing-library/user-event';
+import { act, within } from '@testing-library/react';
 import { convertToTestId } from './components/command_list';
 import { Console } from './console';
 import type {
@@ -21,6 +19,8 @@ import type {
   CommandExecutionComponent,
   ConsoleProps,
 } from './types';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 
 interface ConsoleSelectorsAndActionsMock {
   getLeftOfCursorInputText: () => string;

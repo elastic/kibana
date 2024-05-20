@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiExpression, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { TlsTranslations } from './translations';
 
 interface Props {

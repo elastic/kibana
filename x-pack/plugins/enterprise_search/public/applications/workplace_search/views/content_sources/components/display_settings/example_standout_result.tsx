@@ -10,7 +10,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { useValues } from 'kea';
 
-import { hexToRgb, isColorDark } from '@elastic/eui';
+import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { DESCRIPTION_LABEL } from '../../../../constants';
 import { getAsLocalDateTimeString, mimeType } from '../../../../utils';

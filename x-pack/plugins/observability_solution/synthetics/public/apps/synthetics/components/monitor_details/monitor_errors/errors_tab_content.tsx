@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { FailedTestsByStep } from './failed_tests_by_step';
 import { PingState } from '../../../../../../common/runtime_types';
-import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
-import { ErrorsList } from './errors_list';
-import { MonitorFailedTests } from './failed_tests';
-import { FailedTestsByStep } from './failed_tests_by_step';
 import { FailedTestsCount } from './failed_tests_count';
+import { MonitorFailedTests } from './failed_tests';
+import { ErrorsList } from './errors_list';
+import { useRefreshedRangeFromUrl } from '../../../hooks';
 
 export const ErrorsTabContent = ({
   errorStates,

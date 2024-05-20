@@ -6,12 +6,11 @@
  */
 
 import {
-  CASE_COMMENT_EXTERNAL_REFERENCE,
-  FLYOUT_ADD_TO_EXISTING_CASE_ITEM,
-  FLYOUT_ADD_TO_NEW_CASE_ITEM,
-  INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON,
-  INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON,
-} from '../screens/cases';
+  navigateToThreatIntelligence,
+  openFlyout,
+  openFlyoutTakeAction,
+  openIndicatorsTableMoreActions,
+} from '../tasks/common';
 import {
   createNewCaseFromTI,
   navigateToCaseViaToaster,
@@ -22,13 +21,14 @@ import {
   selectExistingCase,
 } from '../tasks/cases';
 import {
-  navigateToThreatIntelligence,
-  openFlyout,
-  openFlyoutTakeAction,
-  openIndicatorsTableMoreActions,
-} from '../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+  CASE_COMMENT_EXTERNAL_REFERENCE,
+  FLYOUT_ADD_TO_EXISTING_CASE_ITEM,
+  FLYOUT_ADD_TO_NEW_CASE_ITEM,
+  INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON,
+  INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON,
+} from '../screens/cases';
 import { login, visit } from '../tasks/login';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 

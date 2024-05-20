@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
 import { ImportExceptionListSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
 
+import { getAllListTypes } from './find_all_exception_list_types';
+import { sortExceptionListsToUpdateOrCreate } from './sort_exception_lists_to_create_update';
 import { bulkCreateImportedLists } from './bulk_create_imported_lists';
 import { bulkUpdateImportedLists } from './bulk_update_imported_lists';
 import { deleteListItemsToBeOverwritten } from './delete_list_items_to_overwrite';
-import { getAllListTypes } from './find_all_exception_list_types';
-import { sortExceptionListsToUpdateOrCreate } from './sort_exception_lists_to_create_update';
 import { sortListsImportsByNamespace } from './sort_import_by_namespace';
 import { sortImportResponses } from './sort_import_responses';
 /**

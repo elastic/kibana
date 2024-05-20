@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isObject, isString, keys } from 'lodash';
+import { isObject, keys, get, isString } from 'lodash';
 
 export function validateEmptyStrings(value: unknown) {
   if (isString(value)) {

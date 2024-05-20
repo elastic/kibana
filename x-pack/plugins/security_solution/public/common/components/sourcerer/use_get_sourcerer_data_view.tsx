@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useKibana } from '../../lib/kibana';
 import type { SourcererScopeName } from '../../store/sourcerer/model';

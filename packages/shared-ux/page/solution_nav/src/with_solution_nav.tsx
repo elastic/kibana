@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiPageSidebarProps,
-  useEuiTheme,
-  useIsWithinBreakpoints,
-  useIsWithinMinBreakpoint,
-} from '@elastic/eui';
-import classNames from 'classnames';
 import React, { ComponentType, ReactNode, useState } from 'react';
+import classNames from 'classnames';
+import {
+  useIsWithinBreakpoints,
+  useEuiTheme,
+  useIsWithinMinBreakpoint,
+  EuiPageSidebarProps,
+} from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 import { WithSolutionNavStyles } from './with_solution_nav.styles';
 

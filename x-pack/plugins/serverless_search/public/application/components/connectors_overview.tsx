@@ -18,13 +18,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { PLUGIN_ID } from '../../../common';
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
+import { PLUGIN_ID } from '../../../common';
 import { useConnectors } from '../hooks/api/use_connectors';
 import { useCreateConnector } from '../hooks/api/use_create_connector';
 import { useKibanaServices } from '../hooks/use_kibana';
-import { ConnectorsTable } from './connectors/connectors_table';
 import { EmptyConnectorsPrompt } from './connectors/empty_connectors_prompt';
+import { ConnectorsTable } from './connectors/connectors_table';
 
 export const ConnectorsOverview = () => {
   const { data, isLoading: connectorsLoading } = useConnectors();

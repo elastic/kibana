@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SET_MAP_SETTINGS } from '../../actions/map_action_constants';
 import { DEFAULT_MAP_STATE, map } from './map';
+import { SET_MAP_SETTINGS } from '../../actions/map_action_constants';
 
 describe('SET_MAP_SETTINGS', () => {
   test('Should preserve previous settings when setting partial map settings', () => {

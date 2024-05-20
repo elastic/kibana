@@ -8,9 +8,9 @@
 
 import { isEqual } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
-import { Observable, Subject, debounceTime, startWith, switchMap } from 'rxjs';
+import { debounceTime, Observable, startWith, Subject, switchMap } from 'rxjs';
 
-import { COMPARE_ALL_OPTIONS, compareFilters } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import { ControlGroupContainer } from '..';
 import { persistableControlGroupInputIsEqual } from '../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../constants';

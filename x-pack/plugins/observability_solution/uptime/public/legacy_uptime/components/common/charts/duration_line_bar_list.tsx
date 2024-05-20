@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AnnotationTooltipFormatter, RectAnnotation, RectAnnotationDatum } from '@elastic/charts';
-import moment from 'moment';
 import React from 'react';
+import moment from 'moment';
+import { AnnotationTooltipFormatter, RectAnnotation, RectAnnotationDatum } from '@elastic/charts';
 
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 // Individual deep imports to not consume the whole package bundle.
 import { getSeverityColor } from '@kbn/ml-anomaly-utils/get_severity_color';
 import { getSeverityType } from '@kbn/ml-anomaly-utils/get_severity_type';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 import { AnnotationTooltip } from './annotation_tooltip';
 

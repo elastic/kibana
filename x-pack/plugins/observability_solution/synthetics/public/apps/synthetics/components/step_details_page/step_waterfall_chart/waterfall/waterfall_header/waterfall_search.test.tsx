@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { act, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { act, fireEvent } from '@testing-library/react';
 import 'jest-canvas-mock';
-import { render } from '../../../../../utils/testing';
-import { FILTER_REQUESTS_LABEL } from '../translations';
 import { WaterfallSearch } from './waterfall_search';
+import { FILTER_REQUESTS_LABEL } from '../translations';
+import { render } from '../../../../../utils/testing';
 
 describe('waterfall filter', () => {
   jest.useFakeTimers();

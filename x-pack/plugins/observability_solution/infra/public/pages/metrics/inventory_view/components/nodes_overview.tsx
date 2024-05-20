@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { useCurrentEuiBreakpoint } from '@elastic/eui';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import React, { useCallback } from 'react';
+import { useCurrentEuiBreakpoint } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import React, { useCallback } from 'react';
-import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
+import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
-import { InfraFormatter, InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../lib/lib';
-import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
-import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
-import { TableView } from './table_view';
-import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
-import { Legend } from './waffle/legend';
 import { Map } from './waffle/map';
+import { TableView } from './table_view';
+import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
+import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
+import { Legend } from './waffle/legend';
+import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
+import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
 
 export interface KueryFilterQuery {
   kind: 'kuery';

@@ -16,13 +16,13 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useLocalStorage } from '../../hooks/use_local_storage';
+import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
-import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
+import { useLocalStorage } from '../../hooks/use_local_storage';
+import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 
 export const PROFILING_FEEDBACK_LINK = 'https://ela.st/profiling-feedback';
 

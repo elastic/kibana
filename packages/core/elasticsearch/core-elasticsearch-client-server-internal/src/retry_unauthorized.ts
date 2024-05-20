@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { MaybePromise } from '@kbn/utility-types';
+import { UnauthorizedError } from '@kbn/es-errors';
+import type { SetAuthHeaders } from '@kbn/core-http-server';
+import { isRealRequest } from '@kbn/core-http-router-server-internal';
 import type {
   ScopeableRequest,
   UnauthorizedErrorHandler,
-  UnauthorizedErrorHandlerNotHandledResult,
   UnauthorizedErrorHandlerResult,
-  UnauthorizedErrorHandlerRetryResult,
   UnauthorizedErrorHandlerToolkit,
+  UnauthorizedErrorHandlerRetryResult,
+  UnauthorizedErrorHandlerNotHandledResult,
 } from '@kbn/core-elasticsearch-server';
-import { isRealRequest } from '@kbn/core-http-router-server-internal';
-import type { SetAuthHeaders } from '@kbn/core-http-server';
-import { UnauthorizedError } from '@kbn/es-errors';
-import { MaybePromise } from '@kbn/utility-types';
 
 /** @internal */
 export type InternalUnauthorizedErrorHandler = (

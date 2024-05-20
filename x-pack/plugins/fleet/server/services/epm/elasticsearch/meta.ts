@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeDump, safeLoad } from 'js-yaml';
+import { safeLoad, safeDump } from 'js-yaml';
 
 import type { ESAssetMetadata } from '../../../../common/types';
 

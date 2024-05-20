@@ -6,14 +6,14 @@
  */
 
 import moment from 'moment';
-import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { apiService } from '../../../../utils/api_service';
 import {
-  EncryptedSyntheticsMonitorCodec,
   EncryptedSyntheticsSavedMonitor,
+  EncryptedSyntheticsMonitorCodec,
   PingsResponse,
   PingsResponseType,
 } from '../../../../../common/runtime_types';
-import { apiService } from '../../../../utils/api_service';
+import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export const fetchMonitorLastRun = async ({
   monitorId,

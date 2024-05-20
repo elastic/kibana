@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { Story } from '@storybook/react';
 import moment from 'moment';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';
+import { Story } from '@storybook/react';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { TimeRange } from '@kbn/es-query';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { BARCHART_AGGREGATION_NAME } from '../../../../../common/constants';
-import { mockKibanaTimelinesService } from '../../../../mocks/mock_kibana_timelines_service';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
-import { Aggregation, ChartSeries } from '../../services/fetch_aggregated_indicators';
+import { mockKibanaTimelinesService } from '../../../../mocks/mock_kibana_timelines_service';
 import { IndicatorsBarChartWrapper } from './wrapper';
+import { Aggregation, ChartSeries } from '../../services/fetch_aggregated_indicators';
 
 export default {
   component: IndicatorsBarChartWrapper,

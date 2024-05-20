@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiHealth } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiHealth } from '@elastic/eui';
 
 import { RepositoryVerification } from '../../../common/types';
 

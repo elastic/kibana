@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EcsVersion } from '@elastic/ecs';
 import numeral from '@elastic/numeral';
+import { EcsVersion } from '@elastic/ecs';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EMPTY_STAT } from '../../../helpers';
 

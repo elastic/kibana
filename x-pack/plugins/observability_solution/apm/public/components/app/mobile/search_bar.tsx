@@ -9,8 +9,8 @@ import { EuiFlexGroup, EuiFlexGroupProps, EuiFlexItem, EuiSpacer } from '@elasti
 import React from 'react';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { TimeComparison } from '../../shared/time_comparison';
-import { UnifiedSearchBar } from '../../shared/unified_search_bar';
 import { MobileFilters } from './service_overview/filters';
+import { UnifiedSearchBar } from '../../shared/unified_search_bar';
 
 interface Props {
   hidden?: boolean;

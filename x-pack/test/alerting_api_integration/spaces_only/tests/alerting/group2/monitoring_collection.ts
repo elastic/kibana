@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { Spaces } from '../../../scenarios';
 import {
+  getUrlPrefix,
+  getTestRuleData,
   ObjectRemover,
   createWaitForExecutionCount,
   getEventLog,
-  getTestRuleData,
-  getUrlPrefix,
 } from '../../../../common/lib';
-import { Spaces } from '../../../scenarios';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { createEsDocuments } from '../create_test_data';
 
 const NODE_RULES_MONITORING_COLLECTION_URL = `/api/monitoring_collection/node_rules`;

@@ -9,16 +9,16 @@ import { createReducer } from '@reduxjs/toolkit';
 
 import { isScreenshotBlockDoc } from '../../../../../common/runtime_types';
 
+import type { BrowserJourneyState } from './models';
 import {
-  fetchBlocksAction,
   fetchJourneyAction,
   pruneCacheAction,
   putBlocksAction,
   putCacheSize,
-  setBlockLoadingAction,
   updateHitCountsAction,
+  fetchBlocksAction,
+  setBlockLoadingAction,
 } from './actions';
-import type { BrowserJourneyState } from './models';
 
 const initialState: BrowserJourneyState = {
   blocks: {},

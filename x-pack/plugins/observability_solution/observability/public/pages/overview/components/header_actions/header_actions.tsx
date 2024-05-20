@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useRef } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,10 +17,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useObservabilityTourContext } from '@kbn/observability-shared-plugin/public';
-import React, { useRef } from 'react';
 
-import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { DatePicker } from '../date_picker/date_picker';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 
 export interface HeaderActionsProps {
   showTour?: boolean;

@@ -5,37 +5,37 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  EuiButton,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
+  euiPaletteComplementary,
   EuiFormRow,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiSpacer,
+  EuiTitle,
   EuiText,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiComboBox,
+  EuiButton,
+  EuiComboBoxOptionOption,
   EuiTextArea,
   EuiTextColor,
-  EuiTitle,
-  euiPaletteComplementary,
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiLink,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
-import type { GetEvaluateResponse, PostEvaluateResponse } from '@kbn/elastic-assistant-common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { GetEvaluateResponse, PostEvaluateResponse } from '@kbn/elastic-assistant-common';
+import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
+import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
-import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
-import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
 import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
-import * as i18n from './translations';
 import { getApmLink, getDiscoverLink } from './utils';
+import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
 
 const DEFAULT_EVAL_TYPES_OPTIONS = [
   { label: 'correctness' },

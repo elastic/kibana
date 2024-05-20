@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiSwitch, EuiText } from '@elastic/eui';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { EuiSwitch, EuiText } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   AVG_ID,
   AVG_NAME,
@@ -22,26 +24,24 @@ import {
   SUM_ID,
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
-import { euiThemeVars } from '@kbn/ui-theme';
-import React from 'react';
 import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
-import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
-import { updateColumnParam } from '../layer_helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import {
-  BaseIndexPatternColumn,
-  FieldBasedIndexPatternColumn,
-  ValueFormatConfig,
-} from './column_types';
-import { getGroupByKey } from './get_group_by_key';
-import {
-  combineErrorMessages,
-  getFilter,
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
+  getFilter,
+  combineErrorMessages,
   isColumnOfType,
 } from './helpers';
+import {
+  FieldBasedIndexPatternColumn,
+  BaseIndexPatternColumn,
+  ValueFormatConfig,
+} from './column_types';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import { updateColumnParam } from '../layer_helpers';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from './get_group_by_key';
 
 type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;

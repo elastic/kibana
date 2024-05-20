@@ -7,10 +7,10 @@
 
 import { HttpFetchQuery } from '@kbn/core/public';
 import {
+  createFlameGraph,
+  TopNFunctions,
   type BaseFlameGraph,
   type ElasticFlameGraph,
-  TopNFunctions,
-  createFlameGraph,
 } from '@kbn/profiling-utils';
 import { getRoutePaths } from '../common';
 import type {

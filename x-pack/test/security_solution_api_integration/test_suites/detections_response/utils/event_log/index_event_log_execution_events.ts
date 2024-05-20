@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
 
 /**
  * Indexes provided execution events into .kibana-event-log-*

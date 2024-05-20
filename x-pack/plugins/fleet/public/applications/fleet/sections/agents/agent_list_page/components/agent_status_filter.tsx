@@ -9,12 +9,12 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import {
   EuiFilterButton,
-  EuiLink,
   EuiNotificationBadge,
   EuiPopover,
   EuiSelectable,
   EuiText,
   EuiTourStep,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

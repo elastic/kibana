@@ -9,17 +9,17 @@ import { connect } from 'react-redux';
 
 import { SECTIONS } from '../../constants';
 import {
+  getApiStatus,
+  getApiError,
+  getSelectedFollowerIndexId,
+  getSelectedFollowerIndex,
+} from '../../store/selectors';
+import {
+  saveFollowerIndex,
   clearApiError,
   getFollowerIndex,
-  saveFollowerIndex,
   selectEditFollowerIndex,
 } from '../../store/actions';
-import {
-  getApiError,
-  getApiStatus,
-  getSelectedFollowerIndex,
-  getSelectedFollowerIndexId,
-} from '../../store/selectors';
 import { FollowerIndexEdit as FollowerIndexEditView } from './follower_index_edit';
 
 const scope = SECTIONS.FOLLOWER_INDEX;

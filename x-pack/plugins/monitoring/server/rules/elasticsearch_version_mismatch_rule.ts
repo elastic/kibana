@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { LEGACY_RULE_DETAILS, RULE_ELASTICSEARCH_VERSION_MISMATCH } from '../../common/constants';
-import { AlertSeverity } from '../../common/enums';
-import {
-  AlertCluster,
-  AlertData,
-  AlertInstanceState,
-  AlertMessage,
-  AlertState,
-  AlertVersions,
-  CommonAlertParams,
-} from '../../common/types/alerts';
-import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
-import { Globals } from '../static_globals';
-import { AlertingDefaults } from './alert_helpers';
 import { BaseRule } from './base_rule';
+import {
+  AlertData,
+  AlertCluster,
+  AlertState,
+  AlertMessage,
+  AlertInstanceState,
+  CommonAlertParams,
+  AlertVersions,
+} from '../../common/types/alerts';
+import { RULE_ELASTICSEARCH_VERSION_MISMATCH, LEGACY_RULE_DETAILS } from '../../common/constants';
+import { AlertSeverity } from '../../common/enums';
+import { AlertingDefaults } from './alert_helpers';
+import { Globals } from '../static_globals';
+import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 
 export class ElasticsearchVersionMismatchRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {

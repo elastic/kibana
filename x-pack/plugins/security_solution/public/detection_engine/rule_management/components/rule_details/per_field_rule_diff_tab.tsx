@@ -7,11 +7,11 @@
 
 import React, { useMemo } from 'react';
 import type { PartialRuleDiff, RuleFieldsDiff } from '../../../../../common/api/detection_engine';
-import type { FieldsGroupDiff } from '../../model/rule_details/rule_field_diff';
+import { getFormattedFieldDiffGroups } from './per_field_diff/get_formatted_field_diff';
 import { UPGRADE_FIELD_ORDER } from './constants';
 import { RuleDiffHeaderBar, RuleDiffSection } from './diff_components';
 import { getSectionedFieldDiffs } from './helpers';
-import { getFormattedFieldDiffGroups } from './per_field_diff/get_formatted_field_diff';
+import type { FieldsGroupDiff } from '../../model/rule_details/rule_field_diff';
 import * as i18n from './translations';
 
 interface PerFieldRuleDiffTabProps {

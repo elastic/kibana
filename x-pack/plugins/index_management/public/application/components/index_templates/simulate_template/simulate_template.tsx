@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, useCallback, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
+import { serializers } from '../../../../shared_imports';
 import { TemplateDeserialized } from '../../../../../common';
 import { serializeTemplate } from '../../../../../common/lib/template_serialization';
-import { serializers } from '../../../../shared_imports';
 import { simulateIndexTemplate } from '../../../services';
 
 const { stripEmptyFields } = serializers;

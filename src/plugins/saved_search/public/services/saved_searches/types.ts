@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
 import type { SortOrder } from '../..';
 import type { SavedSearchAttributes } from '../../../common';
 import type { SavedSearch as SavedSearchCommon } from '../../../common';

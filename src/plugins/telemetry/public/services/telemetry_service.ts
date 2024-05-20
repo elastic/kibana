@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import {
-  FetchSnapshotTelemetry,
-  INTERNAL_VERSION,
   LastReportedRoute,
+  INTERNAL_VERSION,
   OptInRoute,
+  FetchSnapshotTelemetry,
   UserHasSeenNoticeRoute,
 } from '../../common/routes';
+import type { TelemetryPluginConfig } from '../plugin';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import type {
+  UnencryptedTelemetryPayload,
   EncryptedTelemetryPayload,
   FetchLastReportedResponse,
-  UnencryptedTelemetryPayload,
 } from '../../common/types/latest';
-import type { TelemetryPluginConfig } from '../plugin';
+import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 
 interface TelemetryServiceConstructor {
   config: TelemetryPluginConfig;

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { identity } from 'lodash';
 import { SavedObjectReference } from '@kbn/core/types';
 import {
-  GetMigrationFunctionObjectFn,
   MigrateFunctionsObject,
+  GetMigrationFunctionObjectFn,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import { identity } from 'lodash';
-import { ExpressionAstFunction } from '../ast';
-import { ExpressionValue } from '../expression_types/types';
-import { ExpressionFunctionParameter } from './expression_function_parameter';
 import { AnyExpressionFunctionDefinition } from './types';
+import { ExpressionFunctionParameter } from './expression_function_parameter';
+import { ExpressionValue } from '../expression_types/types';
+import { ExpressionAstFunction } from '../ast';
 
 export class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {
   /**

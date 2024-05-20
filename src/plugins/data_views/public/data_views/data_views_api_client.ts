@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { HttpResponse, HttpSetup } from '@kbn/core/public';
-import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
-import { FIELDS_FOR_WILDCARD_PATH, FIELDS_PATH } from '../../common/constants';
+import { HttpSetup, HttpResponse } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
+import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
+import { FIELDS_FOR_WILDCARD_PATH, FIELDS_PATH } from '../../common/constants';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';

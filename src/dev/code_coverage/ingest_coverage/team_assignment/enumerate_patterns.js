@@ -8,18 +8,18 @@
 
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
+import {
+  push,
+  prokGlob,
+  trim,
+  isRejectedDir,
+  isFileAllowed,
+  isDir,
+  tryPath,
+  notFound,
+} from './enumeration_helpers';
 import { stripLeading } from '../transforms';
 import { id } from '../utils';
-import {
-  isDir,
-  isFileAllowed,
-  isRejectedDir,
-  notFound,
-  prokGlob,
-  push,
-  trim,
-  tryPath,
-} from './enumeration_helpers';
 
 export const enumeratePatterns = (rootPath) => (log) => (patterns) => {
   const res = [];

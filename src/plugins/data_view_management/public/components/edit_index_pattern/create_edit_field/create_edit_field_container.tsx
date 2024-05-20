@@ -7,12 +7,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadcrumbs';
 import { IndexPatternManagmentContext } from '../../../types';
-import { getCreateFieldBreadcrumbs, getEditFieldBreadcrumbs } from '../../breadcrumbs';
 import { CreateEditField } from './create_edit_field';
 
 export type CreateEditFieldContainerProps = RouteComponentProps<{ id: string; fieldName?: string }>;

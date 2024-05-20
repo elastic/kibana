@@ -10,14 +10,14 @@
  *
  * */
 
-import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useCallback, useState, useEffect } from 'react';
+import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { tourConfig, type TourState } from '../utils/tour_step_config';
+import type { FlyoutTourStepsProps } from '../utils/tour_step_config';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { type TourState, tourConfig } from '../utils/tour_step_config';
-import type { FlyoutTourStepsProps } from '../utils/tour_step_config';
 import { FLYOUT_TOUR_TEST_ID } from './test_ids';
 
 export interface FlyoutTourProps {

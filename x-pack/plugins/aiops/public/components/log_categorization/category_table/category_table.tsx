@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
+import moment from 'moment';
 
 import type { EuiBasicTableColumn, EuiTableSelectionType } from '@elastic/eui';
 import {
-  EuiButtonIcon,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiSpacer,
-  EuiToolTip,
   useEuiBackgroundColor,
+  EuiInMemoryTable,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 
-import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
-import { QUERY_MODE, type QueryMode } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
+import { i18n } from '@kbn/i18n';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { useTableState } from '@kbn/ml-in-memory-table';
+import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import { type QueryMode, QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
-import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
+import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
 
 import { MiniHistogram } from '../../mini_histogram';
 
+import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import type { EventRate } from '../use_categorize_request';
-import { createFilter, useDiscoverLinks } from '../use_discover_links';
 
-import { FormattedPatternExamples, FormattedTokens } from '../format_category';
-import { ExpandedRow } from './expanded_row';
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
+import { ExpandedRow } from './expanded_row';
+import { FormattedPatternExamples, FormattedTokens } from '../format_category';
 
 interface Props {
   categories: Category[];

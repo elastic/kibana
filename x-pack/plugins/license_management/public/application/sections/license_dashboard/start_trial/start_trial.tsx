@@ -8,24 +8,24 @@
 import React, { Component } from 'react';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiCard,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCard,
   EuiLink,
+  EuiText,
   EuiModal,
-  EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
+  EuiModalBody,
   EuiModalHeaderTitle,
-  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
 import { AppContextConsumer, AppDependencies } from '../../../app_context';
-import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { TelemetryPluginStart, shouldShowTelemetryOptIn } from '../../../lib/telemetry';
 
 export interface Props {

@@ -7,7 +7,7 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ConnectorSyncRulesForm } from './connector_sync_form';

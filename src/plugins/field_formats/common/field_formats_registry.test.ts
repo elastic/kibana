@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { BoolFormat, PercentFormat, StringFormat } from './converters';
 import { FieldFormatsRegistry } from './field_formats_registry';
+import { BoolFormat, PercentFormat, StringFormat } from './converters';
 import { FieldFormatConfig, FieldFormatsGetConfigFn } from './types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 describe('FieldFormatsRegistry', () => {
   let fieldFormatsRegistry: FieldFormatsRegistry;

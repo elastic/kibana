@@ -7,26 +7,26 @@
 
 import { ComponentType } from 'react';
 import {
-  createDjangoAgentInstructions,
   createDotNetAgentInstructions,
+  createDjangoAgentInstructions,
   createFlaskAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
   createJsAgentInstructions,
   createNodeAgentInstructions,
-  createOpenTelemetryAgentInstructions,
   createPhpAgentInstructions,
-  createRackAgentInstructions,
   createRailsAgentInstructions,
+  createRackAgentInstructions,
+  createOpenTelemetryAgentInstructions,
 } from '../../../../common/tutorial/instructions/apm_agent_instructions';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+// TODO: Uncomment once https://github.com/elastic/beats/issues/29631 has been closed
+import { JavaRuntimeAttachment } from './runtime_attachment/supported_agents/java_runtime_attachment';
 import {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,
 } from '../apm_policy_form/typings';
-// TODO: Uncomment once https://github.com/elastic/beats/issues/29631 has been closed
-import { JavaRuntimeAttachment } from './runtime_attachment/supported_agents/java_runtime_attachment';
 
 export interface AgentRuntimeAttachmentProps {
   policy: PackagePolicy;

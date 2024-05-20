@@ -6,28 +6,28 @@
  */
 
 import http from 'http';
+import expect from '@kbn/expect';
 import { User } from '@kbn/cases-plugin/common/types/domain';
 import {
   PushedUserAction,
   UserActionWithDeprecatedResponse,
 } from '@kbn/cases-plugin/common/types/domain';
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
+import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
   createCase,
-  createCaseWithConnector,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
-  getCaseUserActions,
-  getServiceNowSimulationServer,
   pushCase,
   updateCase,
   updateConfiguration,
+  createCaseWithConnector,
+  getServiceNowSimulationServer,
+  getCaseUserActions,
 } from '../../../../../common/lib/api';
-import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 import { setupSuperUserProfile } from '../../../../../common/lib/api/user_profiles';
@@ -160,8 +160,9 @@ export default ({ getService }: FtrProviderContext): void => {
       let superUserInfo: User;
 
       before(async () => {
-        ({ headers, superUserInfo, superUserWithProfile } =
-          await setupSuperUserProfile(getService));
+        ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
+          getService
+        ));
       });
 
       it('sets the profile uid', async () => {

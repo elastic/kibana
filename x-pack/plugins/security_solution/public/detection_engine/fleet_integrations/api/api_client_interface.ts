@@ -6,8 +6,8 @@
  */
 
 import type {
-  GetAllIntegrationsResponse,
   GetInstalledIntegrationsResponse,
+  GetAllIntegrationsResponse,
 } from '../../../../common/api/detection_engine/fleet_integrations';
 
 export interface IFleetIntegrationsApiClient {

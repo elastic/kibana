@@ -8,8 +8,8 @@
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiImage, EuiToolTip } from '@elastic/eui';
 import type { Story } from '@storybook/react';
 import React from 'react';
-import { SpanIcon } from '.';
 import { getSpanIcon, spanTypeIcons } from './get_span_icon';
+import { SpanIcon } from '.';
 
 const spanTypes = Object.keys(spanTypeIcons);
 

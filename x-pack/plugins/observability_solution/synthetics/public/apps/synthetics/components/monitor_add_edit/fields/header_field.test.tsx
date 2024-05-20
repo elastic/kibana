@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { CodeEditorMode } from '../types';
 import { HeaderField, contentTypes } from './header_field';
+import { CodeEditorMode } from '../types';
 
 describe('<HeaderField />', () => {
   const onChange = jest.fn();

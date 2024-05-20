@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { debounce, isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 
 import { ColumnWidthData, TableVisUiState, TableVisUseUiStateProps } from '../../types';
 

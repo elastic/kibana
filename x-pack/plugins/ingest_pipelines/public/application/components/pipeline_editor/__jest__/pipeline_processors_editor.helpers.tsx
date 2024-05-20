@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act } from 'react-dom/test-utils';
+import React from 'react';
 
-import { TestBed, registerTestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { Props } from '..';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 

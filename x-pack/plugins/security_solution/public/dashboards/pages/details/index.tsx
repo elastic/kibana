@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import React, { useState, useCallback, useMemo } from 'react';
+import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
-import type { ViewMode } from '@kbn/embeddable-plugin/common';
-import { pick } from 'lodash/fp';
 import { useParams } from 'react-router-dom';
+import { pick } from 'lodash/fp';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import { SecurityPageName } from '../../../../common/constants';
-import { FiltersGlobal } from '../../../common/components/filters_global';
-import { HeaderPage } from '../../../common/components/header_page';
-import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { SiemSearchBar } from '../../../common/components/search_bar';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useCapabilities } from '../../../common/lib/kibana';
-import { inputsSelectors } from '../../../common/store';
-import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { DashboardRenderer } from '../../components/dashboard_renderer';
-import { DashboardToolBar } from '../../components/dashboard_tool_bar';
-import { StatusPrompt } from '../../components/status_prompt';
+import { useCapabilities } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
+import { DashboardRenderer } from '../../components/dashboard_renderer';
+import { StatusPrompt } from '../../components/status_prompt';
+import { SiemSearchBar } from '../../../common/components/search_bar';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
+import { FiltersGlobal } from '../../../common/components/filters_global';
+import { InputsModelId } from '../../../common/store/inputs/constants';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { HeaderPage } from '../../../common/components/header_page';
+import { inputsSelectors } from '../../../common/store';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 
-import { DashboardTitle } from '../../components/dashboard_title';
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
+import { DashboardTitle } from '../../components/dashboard_title';
 
 interface DashboardViewProps {
   initialViewMode: ViewMode;

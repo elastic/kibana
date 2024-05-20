@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
-  RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
-} from '../../../constants';
-import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
-import { getJsDomPerformanceFix } from '../../test_utils';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleEventLogListTable, RuleEventLogListTableProps } from './rule_event_log_list_table';
-import { mockLogResponse, mockRule } from './test_helpers';
+import {
+  RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+  GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+} from '../../../constants';
+import { mockRule, mockLogResponse } from './test_helpers';
+import { getJsDomPerformanceFix } from '../../test_utils';
+import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');

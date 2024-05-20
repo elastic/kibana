@@ -8,8 +8,8 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import {
   NumberInputOption,
@@ -18,8 +18,8 @@ import {
 } from '@kbn/vis-default-editor-plugin/public';
 
 import { SeriesParam } from '../../../../types';
-import { getInterpolationModes } from '../../../collections';
 import { SetChart } from './chart_options';
+import { getInterpolationModes } from '../../../collections';
 
 const interpolationModes = getInterpolationModes();
 

@@ -14,10 +14,10 @@ import { FormattedDateTime } from '../../../../utils/formatted_date_time';
 import { RecentQuery } from '../../types';
 
 import {
-  ACTIONS_COLUMN,
-  COUNT_COLUMN_PROPS,
-  TAGS_LIST_COLUMN,
   TERM_COLUMN_PROPS,
+  TAGS_LIST_COLUMN,
+  COUNT_COLUMN_PROPS,
+  ACTIONS_COLUMN,
 } from './shared_columns';
 
 interface Props {

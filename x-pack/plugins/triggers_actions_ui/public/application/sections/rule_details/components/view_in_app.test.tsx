@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ReactWrapper, mount } from 'enzyme';
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
 import { v4 as uuidv4 } from 'uuid';
+import { mount, ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
-import { useKibana } from '../../../../common/lib/kibana';
 import { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';
+import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../lib/capabilities', () => ({

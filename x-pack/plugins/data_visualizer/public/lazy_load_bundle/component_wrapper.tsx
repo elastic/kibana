@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React, { Suspense } from 'react';
+import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 import type { ResultLinks } from '../../common/app';
 import type { DataDriftDetectionAppStateProps } from '../application/data_drift/data_drift_app_state';
 

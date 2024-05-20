@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { promises as fs } from 'fs';
+import { mkdtemp } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { mkdtemp } from 'fs/promises';
 import type { CommandArgs } from './lib';
 import { command } from './lib';
 

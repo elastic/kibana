@@ -8,8 +8,8 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 import { services as commonServices } from '../../common/services';
-import { pageObjects } from '../../functional/page_objects';
 import { services as functionalServices } from '../../functional/services';
+import { pageObjects } from '../../functional/page_objects';
 
 import { KibanaEBTServerProvider, KibanaEBTUIProvider } from './kibana_ebt';
 

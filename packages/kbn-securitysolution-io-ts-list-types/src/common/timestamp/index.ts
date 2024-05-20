@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 
 export const timestamp = IsoDateString;
 export const timestampOrUndefined = t.union([IsoDateString, t.undefined]);

@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useAssistantTelemetry } from '.';
-import { createTelemetryServiceMock } from '../../common/lib/telemetry/telemetry_service.mock';
 import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
+import { createTelemetryServiceMock } from '../../common/lib/telemetry/telemetry_service.mock';
 
 const customId = `My Convo`;
 const mockedConversations = {

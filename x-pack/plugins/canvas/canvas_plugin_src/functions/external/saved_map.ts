@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { MapEmbeddableInput } from '@kbn/maps-plugin/public';
+import { SavedObjectReference } from '@kbn/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { getFunctionHelp } from '../../../i18n';
 import { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
 import {
-  EmbeddableExpression,
-  EmbeddableExpressionType,
   EmbeddableTypes,
+  EmbeddableExpressionType,
+  EmbeddableExpression,
 } from '../../expression_types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   id: string;

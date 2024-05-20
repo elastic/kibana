@@ -6,6 +6,8 @@
     "id": "savedObjectsHiddenType",
     "server": true,
     "browser": false,
-    "configPath": ["saved_objects_hidden_type"]
+    "configPath": [
+      "saved_objects_hidden_type"
+    ]
   }
 }

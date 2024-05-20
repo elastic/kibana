@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
-import { CustomizablePalette, PaletteRegistry } from '@kbn/coloring';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
+import { CustomizablePalette, PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
-import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
-import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
 import {
-  PalettePanelContainer,
   applyPaletteParams,
   defaultPaletteParams,
+  PalettePanelContainer,
   findMinMaxByColumnId,
 } from '../../../shared_components';
+import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 import './dimension_editor.scss';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';

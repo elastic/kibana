@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Route, Routes } from '@kbn/shared-ux-router';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
-import { MANAGEMENT_PATH, SecurityPageName } from '../../../common/constants';
-import { NotFoundPage } from '../../app/404';
-import { useUserPrivileges } from '../../common/components/user_privileges';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ManagementEmptyStateWrapper } from '../components/management_empty_state_wrapper';
 import {
-  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
-  MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
+  MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
 } from '../common/constants';
-import { getEndpointListPath } from '../common/routing';
-import { ManagementEmptyStateWrapper } from '../components/management_empty_state_wrapper';
-import { PrivilegedRoute } from '../components/privileged_route';
-import { BlocklistContainer } from './blocklist';
+import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
-import { EventFiltersContainer } from './event_filters';
-import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { PolicyContainer } from './policy';
-import { ResponseActionsContainer } from './response_actions';
 import { TrustedAppsContainer } from './trusted_apps';
+import { MANAGEMENT_PATH, SecurityPageName } from '../../../common/constants';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { EventFiltersContainer } from './event_filters';
+import { getEndpointListPath } from '../common/routing';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
+import { BlocklistContainer } from './blocklist';
+import { ResponseActionsContainer } from './response_actions';
+import { PrivilegedRoute } from '../components/privileged_route';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>

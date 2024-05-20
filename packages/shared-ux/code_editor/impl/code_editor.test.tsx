@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '@kbn/monaco';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 import React from 'react';
+import { ReactWrapper } from 'enzyme';
+import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
+import { monaco } from '@kbn/monaco';
 
 import { keys } from '@elastic/eui';
 

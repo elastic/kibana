@@ -24,9 +24,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  getDependentVar,
   type DataFrameAnalyticsConfig,
   type DataFrameTaskStateType,
-  getDependentVar,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { useCurrentThemeVars, useMlKibana } from '../../../../../contexts/kibana';
@@ -35,8 +35,8 @@ import { useCurrentThemeVars, useMlKibana } from '../../../../../contexts/kibana
 import { VegaChart } from '../../../../../components/vega_chart';
 import { VegaChartLoading } from '../../../../../components/vega_chart/vega_chart_loading';
 
-import type { ResultsSearchQuery } from '../../../../common/analytics';
 import { ErrorCallout } from '../error_callout';
+import type { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
 
@@ -48,16 +48,16 @@ import { getRocCurveChartVegaLiteSpec } from './get_roc_curve_chart_vega_lite_sp
 import type { ConfusionMatrixColumn, ConfusionMatrixColumnData } from './column_data';
 import {
   ACTUAL_CLASS_ID,
-  MAX_COLUMNS,
   getColumnData,
   getTrailingControlColumns,
+  MAX_COLUMNS,
 } from './column_data';
 
-import { MulticlassConfusionMatrixHelpPopover } from './confusion_matrix_help_popover';
 import { isTrainingFilter } from './is_training_filter';
-import { RocCurveHelpPopover } from './roc_curve_help_popover';
-import { useConfusionMatrix } from './use_confusion_matrix';
 import { useRocCurve } from './use_roc_curve';
+import { useConfusionMatrix } from './use_confusion_matrix';
+import { MulticlassConfusionMatrixHelpPopover } from './confusion_matrix_help_popover';
+import { RocCurveHelpPopover } from './roc_curve_help_popover';
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;

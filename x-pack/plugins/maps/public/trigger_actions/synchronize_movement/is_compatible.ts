@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isLensApi } from '@kbn/lens-plugin/public';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
+import { isLensApi } from '@kbn/lens-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_singleton';
 import { isLegacyMapApi } from '../../legacy_visualizations/is_legacy_map';
+import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_singleton';
 import type { SynchronizeMovementActionApi } from './types';
 
 export function isCompatible(api: SynchronizeMovementActionApi) {

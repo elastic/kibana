@@ -1,4 +1,3 @@
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
  * Side Public License, v 1.
  */
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 export default function ({ getService }) {
   const esArchiver = getService('esArchiver');

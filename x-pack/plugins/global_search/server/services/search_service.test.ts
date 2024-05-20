@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { duration } from 'moment';
-import { Observable, firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { GlobalSearchFindError } from '../../common/errors';
+import { duration } from 'moment';
+import { httpServiceMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult } from '../../common/types';
+import { GlobalSearchFindError } from '../../common/errors';
 import { GlobalSearchConfigType } from '../config';
 import { GlobalSearchResultProvider } from '../types';
 import { SearchService } from './search_service';

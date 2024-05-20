@@ -8,8 +8,8 @@
 import type { AssetParts, AssetsMap } from '../../../../common/types';
 import {
   PackageInvalidArchiveError,
-  PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
+  PackageNotFoundError,
 } from '../../../errors';
 
 import { deletePackageInfo } from './cache';

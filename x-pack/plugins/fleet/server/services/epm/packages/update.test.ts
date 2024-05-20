@@ -14,8 +14,8 @@ import { appContextService } from '../../app_context';
 
 import { auditLoggingService } from '../../audit_logging';
 
-import { getInstallationObject, getPackageInfo } from './get';
 import { updatePackage } from './update';
+import { getPackageInfo, getInstallationObject } from './get';
 
 jest.mock('./get');
 jest.mock('../../audit_logging');

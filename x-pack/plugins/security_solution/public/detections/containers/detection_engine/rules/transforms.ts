@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 import { flow } from 'fp-ts/lib/function';
+import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
 import type {
   RuleCreateProps,
   RuleResponse,

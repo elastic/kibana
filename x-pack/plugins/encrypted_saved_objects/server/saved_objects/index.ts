@@ -8,9 +8,9 @@
 import pMap from 'p-map';
 
 import type {
-  ISavedObjectTypeRegistry,
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
+  ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
@@ -21,9 +21,9 @@ import type {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
 import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_extension';
+import type { EncryptedSavedObjectsService } from '../crypto';
 
 export { normalizeNamespace };
 

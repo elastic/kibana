@@ -12,9 +12,9 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { GroupBySelector } from './selector';
 
 interface Props {

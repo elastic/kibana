@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ExpressionsServiceStart } from '@kbn/expressions-plugin/common';
 import { createContext } from 'react';
+import type { ExpressionsServiceStart } from '@kbn/expressions-plugin/common';
 
 export const ExpressionsContext = createContext<ExpressionsServiceStart | undefined>(undefined);

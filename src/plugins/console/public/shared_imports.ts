@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { XJson, sendRequest } from '@kbn/es-ui-shared-plugin/public';
+import { sendRequest, XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 

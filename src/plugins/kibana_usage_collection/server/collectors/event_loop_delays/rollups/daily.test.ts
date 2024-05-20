@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { rollDailyData } from './daily';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 describe('rollDailyData', () => {
   const logger = loggingSystemMock.createLogger();

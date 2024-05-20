@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
 
 import type {
   BrushEndListener,
   ElementClickListener,
-  XYBrushEvent,
   XYChartElementEvent,
+  XYBrushEvent,
 } from '@elastic/charts';
 import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import type {
@@ -20,23 +20,23 @@ import type {
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
+import { getTimeZone } from '@kbn/visualization-utils';
+import { i18n } from '@kbn/i18n';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import {
-  type DocumentCountStatsChangePoint,
-  type LogRateAnalysisType,
-  type LogRateHistogramItem,
-  type WindowParameters,
   getLogRateAnalysisType,
   getSnappedTimestamps,
   getSnappedWindowParameters,
   getWindowParametersForTrigger,
+  type DocumentCountStatsChangePoint,
+  type LogRateAnalysisType,
+  type LogRateHistogramItem,
+  type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { getTimeZone } from '@kbn/visualization-utils';
 
 import { DualBrush, DualBrushAnnotation } from '../..';
 

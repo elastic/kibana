@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiComboBox,
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React, { memo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo, useState } from 'react';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiButtonEmpty,
+  EuiText,
+  EuiComboBox,
+  EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import styled from 'styled-components';
 
-import { Loading } from '../../../../../components';
-import { useStartServices } from '../../../../../hooks';
 import type {
   AgentPolicy,
-  NewPackagePolicy,
   PackageInfo,
+  NewPackagePolicy,
   RegistryVarsEntry,
 } from '../../../../../types';
+import { Loading } from '../../../../../components';
+import { useStartServices } from '../../../../../hooks';
 
 import { isAdvancedVar } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';

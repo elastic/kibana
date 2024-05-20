@@ -6,11 +6,11 @@
  */
 
 import {
-  ComponentTemplateDeserialized,
+  TemplateFromEs,
   ComponentTemplateFromEs,
+  ComponentTemplateDeserialized,
   ComponentTemplateListItem,
   ComponentTemplateSerialized,
-  TemplateFromEs,
 } from '../types';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
@@ -36,17 +36,14 @@ const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
  */
 
 const getIndexTemplatesToUsedBy = (indexTemplatesEs: TemplateFromEs[]) => {
-  return indexTemplatesEs.reduce(
-    (acc, item) => {
-      if (item.index_template.composed_of) {
-        item.index_template.composed_of.forEach((component) => {
-          acc[component] = acc[component] ? [...acc[component], item.name] : [item.name];
-        });
-      }
-      return acc;
-    },
-    {} as { [key: string]: string[] }
-  );
+  return indexTemplatesEs.reduce((acc, item) => {
+    if (item.index_template.composed_of) {
+      item.index_template.composed_of.forEach((component) => {
+        acc[component] = acc[component] ? [...acc[component], item.name] : [item.name];
+      });
+    }
+    return acc;
+  }, {} as { [key: string]: string[] });
 };
 
 export function deserializeComponentTemplate(

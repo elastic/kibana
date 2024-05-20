@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import React, { ElementType, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import styled from 'styled-components';
 import { HttpStart } from '@kbn/core/public';
-import { DataViewBase } from '@kbn/es-query';
+import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
   ExceptionListItemSchema,
   ExceptionListType,
@@ -30,18 +32,16 @@ import {
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { addIdToItem } from '@kbn/securitysolution-utils';
+import { DataViewBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import deepEqual from 'fast-deep-equal';
-import React, { ElementType, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import styled from 'styled-components';
 
 import { AndOrBadge } from '../and_or_badge';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
-import { EntryFieldError, State, exceptionsBuilderReducer } from './reducer';
 import { getTotalErrorExist } from './selectors';
+import { EntryFieldError, State, exceptionsBuilderReducer } from './reducer';
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
 `;

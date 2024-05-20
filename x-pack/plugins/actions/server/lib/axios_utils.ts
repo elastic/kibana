@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { isObjectLike, isEmpty } from 'lodash';
 import {
-  AxiosHeaderValue,
-  AxiosHeaders,
   AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
   Method,
+  AxiosResponse,
+  AxiosRequestConfig,
+  AxiosHeaders,
+  AxiosHeaderValue,
 } from 'axios';
-import { isEmpty, isObjectLike } from 'lodash';
+import { Logger } from '@kbn/core/server';
+import { getCustomAgents } from './get_custom_agents';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SSLSettings } from '../types';
-import { getCustomAgents } from './get_custom_agents';
 
 export const request = async <T = unknown>({
   axios,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import { IN_MEMORY_METRICS, InMemoryMetrics } from '.';
+import { InMemoryMetrics, IN_MEMORY_METRICS } from '.';
 
 export function registerNodeCollector({
   monitoringCollection,

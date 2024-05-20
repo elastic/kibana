@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import { FLEET } from '../tasks/navigation';
 import {
+  createUsersAndRoles,
   FleetAllIntegrNoneRole,
   FleetAllIntegrNoneUser,
-  createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../tasks/privileges';
+import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
 import { MISSING_PRIVILEGES } from '../screens/fleet';
 const rolesToCreate = [FleetAllIntegrNoneRole];

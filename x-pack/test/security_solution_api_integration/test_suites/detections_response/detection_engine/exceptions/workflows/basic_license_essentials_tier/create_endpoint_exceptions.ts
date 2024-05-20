@@ -9,22 +9,22 @@ import { ToolingLog } from '@kbn/tooling-log';
 import expect from 'expect';
 
 import type SuperTest from 'supertest';
+import { createRuleWithExceptionEntries } from '../../../../utils';
 import {
-  createAlertsIndex,
   createRule,
-  deleteAllAlerts,
+  createAlertsIndex,
   deleteAllRules,
-  getAlertsById,
+  deleteAllAlerts,
   getRuleForAlertTesting,
-  waitForAlertsToBePresent,
+  getAlertsById,
   waitForRuleSuccess,
+  waitForAlertsToBePresent,
 } from '../../../../../../../common/utils/security_solution';
 import {
   createListsIndex,
   deleteAllExceptions,
   deleteListsIndex,
 } from '../../../../../lists_and_exception_lists/utils';
-import { createRuleWithExceptionEntries } from '../../../../utils';
 
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 

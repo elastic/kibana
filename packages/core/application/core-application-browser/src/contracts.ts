@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { Observable } from 'rxjs';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { App, AppUpdater, PublicAppInfo } from './application';
 
 /** @public */

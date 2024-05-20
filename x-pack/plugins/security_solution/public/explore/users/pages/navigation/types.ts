@@ -1,6 +1,3 @@
-import type { ESTermQuery } from '../../../../../common/typed_json';
-import type { NavTab } from '../../../../common/components/navigation/types';
-import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import type { GlobalTimeArgs } from '../../../../common/containers/use_global_ti
  * 2.0.
  */
 import type { UsersTableType, UsersType } from '../../store/model';
+import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
+import type { ESTermQuery } from '../../../../../common/typed_json';
+import type { NavTab } from '../../../../common/components/navigation/types';
 
 type KeyUsersNavTab = `${UsersTableType}`;
 

@@ -6,39 +6,39 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { UiCounterMetricType } from '@kbn/analytics';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import {
-  FieldsGroupNames,
-  UnifiedFieldListSidebarContainer,
-  type UnifiedFieldListSidebarContainerApi,
-  type UnifiedFieldListSidebarContainerProps,
-} from '@kbn/unified-field-list';
-import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { UiCounterMetricType } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import {
+  UnifiedFieldListSidebarContainer,
+  type UnifiedFieldListSidebarContainerProps,
+  type UnifiedFieldListSidebarContainerApi,
+  FieldsGroupNames,
+} from '@kbn/unified-field-list';
 import { PLUGIN_ID } from '../../../../../common';
-import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { FetchStatus, SidebarToggleState } from '../../../types';
-import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import {
   AvailableFields$,
   DataDocuments$,
   RecordRawType,
 } from '../../state_management/discover_data_state_container';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
+import { FetchStatus, SidebarToggleState } from '../../../types';
+import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import {
-  DiscoverSidebarReducerActionType,
-  DiscoverSidebarReducerStatus,
   discoverSidebarReducer,
   getInitialState,
+  DiscoverSidebarReducerActionType,
+  DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
+import { useDiscoverCustomization } from '../../../../customizations';
+import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 
 const EMPTY_FIELD_COUNTS = {};
 

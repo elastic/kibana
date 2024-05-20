@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React, { FC, PropsWithChildren } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import React, { FC, PropsWithChildren } from 'react';
-import { txtBack, txtClose } from './i18n';
+import { txtClose, txtBack } from './i18n';
 
 export interface FlyoutFrameProps {
   title?: React.ReactNode;

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { LogDocumentOverview } from '@kbn/discover-utils';
-import React from 'react';
 
 const LEVEL_DICT = {
   error: 'danger',

@@ -11,26 +11,26 @@ import expect from 'expect';
 
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
-import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 
 import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
-import {
-  SAMPLE_PREBUILT_RULES,
-  createExceptionList,
-  downgradeImmutableRule,
   fetchRule,
+  createExceptionList,
+  removeServerGeneratedProperties,
+  downgradeImmutableRule,
+  installMockPrebuiltRules,
   findImmutableRuleById,
   getPrebuiltRulesAndTimelinesStatus,
-  installMockPrebuiltRules,
-  removeServerGeneratedProperties,
+  SAMPLE_PREBUILT_RULES,
 } from '../../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
+import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

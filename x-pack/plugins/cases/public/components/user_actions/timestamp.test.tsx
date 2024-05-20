@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import React from 'react';
 import { TestProviders } from '../../common/mock';
 import { UserActionTimestamp } from './timestamp';
 

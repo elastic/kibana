@@ -7,8 +7,8 @@
 
 import type { ConfigType } from '../../../../config';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../types';
-import { installPrebuiltRulesPackage } from '../api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 import type { IPrebuiltRuleAssetsClient } from './rule_assets/prebuilt_rule_assets_client';
+import { installPrebuiltRulesPackage } from '../api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 
 export async function ensureLatestRulesPackageInstalled(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,

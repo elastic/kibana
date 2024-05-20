@@ -10,7 +10,9 @@
         "tags": [],
         "label": "getSavedSearchFullPathUrl",
         "description": [],
-        "signature": ["(id?: string | undefined) => string"],
+        "signature": [
+          "(id?: string | undefined) => string"
+        ],
         "path": "src/plugins/saved_search/common/saved_searches_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -22,7 +24,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_search/common/saved_searches_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -39,7 +43,9 @@
         "tags": [],
         "label": "getSavedSearchUrl",
         "description": [],
-        "signature": ["(id?: string | undefined) => string"],
+        "signature": [
+          "(id?: string | undefined) => string"
+        ],
         "path": "src/plugins/saved_search/common/saved_searches_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -51,7 +57,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_search/common/saved_searches_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -140,7 +148,9 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -225,7 +235,9 @@
             "tags": [],
             "label": "onTitleDuplicate",
             "description": [],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -239,7 +251,9 @@
             "tags": [],
             "label": "isTitleDuplicateConfirmed",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -251,7 +265,9 @@
             "tags": [],
             "label": "copyOnSave",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_search/public/services/saved_searches/save_saved_searches.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -407,7 +423,9 @@
       "type": "Interface",
       "tags": [],
       "label": "SavedSearchPublicPluginStart",
-      "description": ["\nSaved search plugin public Setup contract"],
+      "description": [
+        "\nSaved search plugin public Setup contract"
+      ],
       "path": "src/plugins/saved_search/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -441,7 +459,9 @@
               "tags": [],
               "label": "savedSearchId",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/saved_search/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -650,7 +670,9 @@
             "tags": [],
             "label": "savedSearchId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/saved_search/server/services/saved_searches/get_saved_searches.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -663,7 +685,9 @@
             "tags": [],
             "label": "deps",
             "description": [],
-            "signature": ["GetSavedSearchDependencies"],
+            "signature": [
+              "GetSavedSearchDependencies"
+            ],
             "path": "src/plugins/saved_search/server/services/saved_searches/get_saved_searches.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -720,7 +744,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -733,7 +759,9 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": ["SavedSearchAttributes"],
+            "signature": [
+              "SavedSearchAttributes"
+            ],
             "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -746,7 +774,9 @@
             "tags": [],
             "label": "tags",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -780,7 +810,9 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -857,7 +889,9 @@
         "tags": [],
         "label": "getSavedSearchFullPathUrl",
         "description": [],
-        "signature": ["(id?: string | undefined) => string"],
+        "signature": [
+          "(id?: string | undefined) => string"
+        ],
         "path": "src/plugins/saved_search/common/saved_searches_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -869,7 +903,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_search/common/saved_searches_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -886,7 +922,9 @@
         "tags": [],
         "label": "getSavedSearchUrl",
         "description": [],
-        "signature": ["(id?: string | undefined) => string"],
+        "signature": [
+          "(id?: string | undefined) => string"
+        ],
         "path": "src/plugins/saved_search/common/saved_searches_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -898,7 +936,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_search/common/saved_searches_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -998,7 +1038,9 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1250,7 +1292,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1262,7 +1306,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1274,7 +1320,10 @@
             "tags": [],
             "label": "sort",
             "description": [],
-            "signature": ["SortOrder", "[] | undefined"],
+            "signature": [
+              "SortOrder",
+              "[] | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1286,7 +1335,9 @@
             "tags": [],
             "label": "columns",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1298,7 +1349,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1310,7 +1363,9 @@
             "tags": [],
             "label": "tags",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1343,7 +1398,9 @@
             "tags": [],
             "label": "hideChart",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1376,7 +1433,9 @@
             "tags": [],
             "label": "hideAggregatedPreview",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1388,7 +1447,9 @@
             "tags": [],
             "label": "rowHeight",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1400,7 +1461,9 @@
             "tags": [],
             "label": "headerRowHeight",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1412,7 +1475,9 @@
             "tags": [],
             "label": "isTextBasedQuery",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1424,7 +1489,9 @@
             "tags": [],
             "label": "usesAdHocDataView",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1436,7 +1503,9 @@
             "tags": [],
             "label": "timeRestore",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1490,7 +1559,9 @@
             "tags": [],
             "label": "rowsPerPage",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1502,7 +1573,9 @@
             "tags": [],
             "label": "sampleSize",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1514,7 +1587,9 @@
             "tags": [],
             "label": "breakdownField",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1526,7 +1601,10 @@
             "tags": [],
             "label": "visContext",
             "description": [],
-            "signature": ["VisContextUnmapped", " | undefined"],
+            "signature": [
+              "VisContextUnmapped",
+              " | undefined"
+            ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1603,7 +1681,9 @@
         "tags": [],
         "label": "LATEST_VERSION",
         "description": [],
-        "signature": ["1"],
+        "signature": [
+          "1"
+        ],
         "path": "src/plugins/saved_search/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1616,7 +1696,9 @@
         "tags": [],
         "label": "MAX_SAVED_SEARCH_SAMPLE_SIZE",
         "description": [],
-        "signature": ["10000"],
+        "signature": [
+          "10000"
+        ],
         "path": "src/plugins/saved_search/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1629,7 +1711,9 @@
         "tags": [],
         "label": "MIN_SAVED_SEARCH_SAMPLE_SIZE",
         "description": [],
-        "signature": ["1"],
+        "signature": [
+          "1"
+        ],
         "path": "src/plugins/saved_search/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1642,7 +1726,9 @@
         "tags": [],
         "label": "SavedSearchType",
         "description": [],
-        "signature": ["\"search\""],
+        "signature": [
+          "\"search\""
+        ],
         "path": "src/plugins/saved_search/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

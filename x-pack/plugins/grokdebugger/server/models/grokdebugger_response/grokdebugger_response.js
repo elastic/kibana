@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { get, isEmpty, omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 /**
  * This model captures the grok debugger response from upstream to be passed to

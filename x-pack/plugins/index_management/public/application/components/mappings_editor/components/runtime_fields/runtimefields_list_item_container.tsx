@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import { useDispatch, useMappingsState } from '../../mappings_state_context';
+import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import { NormalizedRuntimeField } from '../../types';
 import { RuntimeFieldsListItem } from './runtimefields_list_item';
 

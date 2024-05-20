@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { MouseEvent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { ALERT_STATUS_ACTIVE, AlertStatus } from '@kbn/rule-data-utils';
-import React, { MouseEvent } from 'react';
 import { ActiveAlertCounts } from './active_alert_counts';
 import { AllAlertCounts } from './all_alert_counts';
 

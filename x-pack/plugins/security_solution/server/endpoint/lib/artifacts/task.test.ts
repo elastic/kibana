@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { createMockEndpointAppContext } from '../../mocks';
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
-import { InvalidInternalManifestError } from '../../services/artifacts/errors';
+import { ManifestTaskConstants, ManifestTask } from './task';
+import { MockManifestTask } from './task.mock';
 import { ManifestManager } from '../../services/artifacts/manifest_manager';
 import { buildManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
+import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { getMockArtifacts } from './mocks';
-import { ManifestTask, ManifestTaskConstants } from './task';
-import { MockManifestTask } from './task.mock';
+import { InvalidInternalManifestError } from '../../services/artifacts/errors';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('Endpoint artifact packager task', () => {
   const MOCK_TASK_INSTANCE = {

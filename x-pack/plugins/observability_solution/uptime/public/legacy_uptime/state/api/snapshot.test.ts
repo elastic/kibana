@@ -6,9 +6,9 @@
  */
 
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
-import { API_URLS } from '../../../../common/constants';
 import { fetchSnapshotCount } from './snapshot';
 import { apiService } from './utils';
+import { API_URLS } from '../../../../common/constants';
 
 describe('snapshot API', () => {
   let fetchMock: jest.SpyInstance<Partial<unknown>>;

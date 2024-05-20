@@ -7,8 +7,8 @@
  */
 
 import moment from 'moment-timezone';
-import { FieldFormatsGetConfigFn } from '../types';
 import { DateNanosFormat, analysePatternForFract, formatWithNanos } from './date_nanos_shared';
+import { FieldFormatsGetConfigFn } from '../types';
 
 describe('Date Nanos Format', () => {
   let convert: Function;

@@ -1,4 +1,3 @@
-import { API_VERSIONS } from '../../../common/constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { API_VERSIONS } from '../../../common/constants';
  * 2.0.
  */
 import type { FleetAuthzRouter } from '../../services/security';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { FLEET_PROXY_API_ROUTES } from '../../../common/constants';
 import {
@@ -15,10 +15,10 @@ import {
 } from '../../types';
 
 import {
-  deleteFleetProxyHandler,
   getAllFleetProxyHandler,
-  getFleetProxyHandler,
   postFleetProxyHandler,
+  deleteFleetProxyHandler,
+  getFleetProxyHandler,
   putFleetProxyHandler,
 } from './handler';
 

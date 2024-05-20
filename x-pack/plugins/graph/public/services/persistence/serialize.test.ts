@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import { IndexpatternDatasource } from '../../state_management';
+import { appStateToSavedWorkspace } from './serialize';
 import {
-  AdvancedSettings,
   GraphWorkspaceSavedObject,
-  UrlTemplate,
   Workspace,
   WorkspaceEdge,
+  UrlTemplate,
+  AdvancedSettings,
   WorkspaceField,
 } from '../../types';
-import { appStateToSavedWorkspace } from './serialize';
+import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { IndexpatternDatasource } from '../../state_management';
 
 describe('serialize', () => {
   let appState: {

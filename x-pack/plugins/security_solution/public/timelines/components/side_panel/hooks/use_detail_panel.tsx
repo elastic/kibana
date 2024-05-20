@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { dataTableSelectors } from '@kbn/securitysolution-data-table';
-import type { EntityType } from '@kbn/timelines-plugin/common';
 import React, { useMemo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { DetailsPanel as DetailsPanelComponent } from '..';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
-import type { ExpandedDetailType } from '../../../../../common/types';
-import { TimelineTabs } from '../../../../../common/types/timeline';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import { dataTableSelectors } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
+import type { ExpandedDetailType } from '../../../../../common/types';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../../helpers';
 import { timelineSelectors } from '../../../store';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/defaults';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { DetailsPanel as DetailsPanelComponent } from '..';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 
 export interface UseDetailPanelConfig {
   entityType?: EntityType;

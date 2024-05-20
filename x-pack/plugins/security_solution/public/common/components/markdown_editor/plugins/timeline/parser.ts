@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { Plugin } from 'unified';
 import type { RemarkTokenizer } from '@elastic/eui';
 import { safeDecode } from '@kbn/rison';
 import { parse } from 'query-string';
-import type { Plugin } from 'unified';
 
 import { ID, PREFIX } from './constants';
 import * as i18n from './translations';

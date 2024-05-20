@@ -1,4 +1,3 @@
-import { migrationMocks } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +5,9 @@ import { migrationMocks } from '@kbn/core/server/mocks';
  * 2.0.
  */
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { migration860, SyntheticsUnsanitizedDoc860 } from './8.6.0';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { ConfigKey, LocationStatus } from '../../../../common/runtime_types';
-import { SyntheticsUnsanitizedDoc860, migration860 } from './8.6.0';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();

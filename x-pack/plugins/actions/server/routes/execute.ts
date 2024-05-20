@@ -9,9 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 
+import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types';
 import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
-import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 const paramSchema = schema.object({

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mockPacketbeatPatternRollup } from '../../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
 import { getAllIndicesToCheck, getIndexDocsCountFromRollup, getIndexToCheck } from './helpers';
+import { mockPacketbeatPatternRollup } from '../../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
 
 const patternIndexNames: Record<string, string[]> = {
   'packetbeat-*': [

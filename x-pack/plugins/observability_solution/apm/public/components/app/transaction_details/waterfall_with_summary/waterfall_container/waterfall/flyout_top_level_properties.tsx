@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { getNextEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
 import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../../../../common/es_fields/apm';
+import { getNextEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../../../common/latency_aggregation_types';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
-import { ServiceLink } from '../../../../../shared/links/apm/service_link';
 import { TransactionDetailLink } from '../../../../../shared/links/apm/transaction_detail_link';
+import { ServiceLink } from '../../../../../shared/links/apm/service_link';
 import { StickyProperties } from '../../../../../shared/sticky_properties';
 
 interface Props {

@@ -12,9 +12,9 @@ import { uninstallTokensRouteService } from '../../../common/services';
 import { API_VERSIONS } from '../../../common/constants';
 
 import type {
-  GetUninstallTokenResponse,
   GetUninstallTokensMetadataRequest,
   GetUninstallTokensMetadataResponse,
+  GetUninstallTokenResponse,
 } from '../../../common/types/rest_spec/uninstall_token';
 
 import type { RequestError } from './use_request';

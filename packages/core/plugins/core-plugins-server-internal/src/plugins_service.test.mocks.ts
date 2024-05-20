@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { resolve } from 'path';
 
 const loadJsonFile = jest.requireActual('load-json-file');
 const kibanaPackagePath = resolve(REPO_ROOT, 'package.json');

@@ -7,9 +7,9 @@
 
 import type { Action } from 'redux-actions';
 import { call, put, takeLatest } from 'redux-saga/effects';
+import { fetchNetworkEvents } from './api';
 import { SyntheticsNetworkEventsApiResponse } from '../../../../../common/runtime_types';
 import { FetchNetworkEventsParams, getNetworkEvents } from './actions';
-import { fetchNetworkEvents } from './api';
 
 export function* fetchNetworkEventsEffect() {
   yield takeLatest(

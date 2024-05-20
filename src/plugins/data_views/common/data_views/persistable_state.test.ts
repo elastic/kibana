@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { DataViewPersistableStateService } from './persistable_state';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { DataViewSpec } from '../types';
-import { DataViewPersistableStateService } from './persistable_state';
 const { inject, extract } = DataViewPersistableStateService;
 
 describe('data view persistable state tests', () => {

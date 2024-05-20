@@ -7,8 +7,8 @@
  */
 
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { ConfigType } from './config';
 import { registerRoutes } from './routes';
+import type { ConfigType } from './config';
 
 export class FtrApisPlugin implements Plugin {
   private readonly config: ConfigType;

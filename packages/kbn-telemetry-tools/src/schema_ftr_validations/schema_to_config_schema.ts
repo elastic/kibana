@@ -9,8 +9,8 @@
 import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { set } from '@kbn/safer-lodash-set';
-import type { AllowedSchemaTypes } from '@kbn/usage-collection-plugin/server';
 import { get, merge } from 'lodash';
+import type { AllowedSchemaTypes } from '@kbn/usage-collection-plugin/server';
 
 /**
  * Type that defines all the possible values that the Telemetry Schema accepts.

@@ -7,21 +7,20 @@
         "__one_of": ["fs", "url", "s3", "hdfs", "azure"]
       },
       "settings": {
-        "__one_of": [
-          {
-            "__condition": {
-              "lines_regex": "type[\"']\\s*:\\s*[\"']fs"
-            },
-            "__template": {
-              "location": "path"
-            },
-            "location": "path",
-            "compress": { "__one_of": [true, false] },
-            "concurrent_streams": 5,
-            "chunk_size": "10m",
-            "max_restore_bytes_per_sec": "20mb",
-            "max_snapshot_bytes_per_sec": "20mb"
+        "__one_of": [{
+          "__condition": {
+            "lines_regex": "type[\"']\\s*:\\s*[\"']fs"
           },
+          "__template": {
+            "location": "path"
+          },
+          "location": "path",
+          "compress": { "__one_of": [true, false] },
+          "concurrent_streams": 5,
+          "chunk_size": "10m",
+          "max_restore_bytes_per_sec": "20mb",
+          "max_snapshot_bytes_per_sec": "20mb"
+        },
           {
             "__condition": {
               "lines_regex": "type[\"']\\s*:\\s*[\"']url"

@@ -6,41 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { ESQL_TYPE } from '@kbn/data-view-utils';
+import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
   type IKbnUrlStateStorage,
-  SavedObjectNotFound,
   redirectWhenMissing,
+  SavedObjectNotFound,
 } from '@kbn/kibana-utils-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
-import { withSuspense } from '@kbn/shared-ux-utility';
-import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { useUrl } from './hooks/use_url';
+import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import { MainHistoryLocationState } from '../../../common';
-import { DiscoverError } from '../../components/common/error_alert';
+import { DiscoverMainApp } from './discover_main_app';
+import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
+import { DiscoverError } from '../../components/common/error_alert';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useAlertResultsToast } from './hooks/use_alert_results_toast';
+import { DiscoverMainProvider } from './state_management/discover_state_provider';
 import {
   CustomizationCallback,
   DiscoverCustomizationContext,
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
-import { DiscoverMainApp } from './discover_main_app';
-import { useAlertResultsToast } from './hooks/use_alert_results_toast';
-import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
-import { useUrl } from './hooks/use_url';
-import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
-import { DiscoverMainProvider } from './state_management/discover_state_provider';
 import { isTextBasedQuery } from './utils/is_text_based_query';
+import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 

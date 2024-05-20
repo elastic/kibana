@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { estypes } from '@elastic/elasticsearch';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ClustersTable } from './clusters_table';
 
 describe('ClustersTable', () => {

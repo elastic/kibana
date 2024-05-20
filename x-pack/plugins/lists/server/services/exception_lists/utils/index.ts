@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   SavedObject,
   SavedObjectsFindResponse,
@@ -25,7 +26,6 @@ import {
   exceptionListType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListType } from '@kbn/securitysolution-list-utils';
-import { v4 as uuidv4 } from 'uuid';
 
 import { ExceptionListSoSchema } from '../../../schemas/saved_objects';
 import {

@@ -6,8 +6,8 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { createEsParams, UptimeEsClient } from '../lib';
 import { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
-import { UptimeEsClient, createEsParams } from '../lib';
 
 export interface GetJourneyDetails {
   checkGroup: string;

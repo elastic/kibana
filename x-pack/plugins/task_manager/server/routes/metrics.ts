@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
 import {
-  IKibanaResponse,
   IRouter,
-  KibanaRequest,
-  KibanaResponseFactory,
   RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
 } from '@kbn/core/server';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable, Subject } from 'rxjs';
 import { Metrics } from '../metrics';
 

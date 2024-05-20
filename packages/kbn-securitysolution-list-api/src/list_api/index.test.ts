@@ -17,10 +17,10 @@ import {
 import { HttpFetchOptions } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
-import { getAcknowledgeSchemaResponseMock } from './mocks/response/acknowledge_schema.mock';
 import { getFoundListSchemaMock } from './mocks/response/found_list_schema.mock';
-import { getListItemIndexExistSchemaResponseMock } from './mocks/response/list_item_index_exist_schema.mock';
 import { getListResponseMock } from './mocks/response/list_schema.mock';
+import { getListItemIndexExistSchemaResponseMock } from './mocks/response/list_item_index_exist_schema.mock';
+import { getAcknowledgeSchemaResponseMock } from './mocks/response/acknowledge_schema.mock';
 
 describe('Value Lists API', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;

@@ -6,8 +6,8 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { choices } from '../mock';
 import { getChoices } from './api';
+import { choices } from '../mock';
 
 const choicesResponse = {
   status: 'ok',

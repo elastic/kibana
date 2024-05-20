@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { FunctionComponent } from 'react';
+import PropTypes from 'prop-types';
 import {
-  EuiCode,
-  EuiDescriptionList,
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiDescriptionList,
   EuiHorizontalRule,
+  EuiCode,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
 
+import { keymap } from '../../lib/keymap';
 import { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
 import { getClientPlatform } from '../../lib/get_client_platform';
 import { getId } from '../../lib/get_id';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';
-import { keymap } from '../../lib/keymap';
 
 const strings = {
   getFlyoutCloseButtonAriaLabel: () =>

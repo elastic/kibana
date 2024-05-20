@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import { v4 as uuidV4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { v4 as uuidV4 } from 'uuid';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { ES_SEARCH_LIMIT } from '../../../common/constants';
 
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 import { FleetActionsError } from '../../../common/errors';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 import { auditLoggingService } from '../audit_logging';
 
 import {
-  ALLOWED_FLEET_ACTIONS_FIELD_TYPES,
-  allowedFleetActionsFields,
   validateFilterKueryNode,
+  allowedFleetActionsFields,
+  ALLOWED_FLEET_ACTIONS_FIELD_TYPES,
 } from './utils';
 
-import type { BulkCreateResponse, FleetActionRequest, FleetActionResult } from './types';
+import type { FleetActionRequest, FleetActionResult, BulkCreateResponse } from './types';
 
 const queryOptions = Object.freeze({
   ignore: [404],
@@ -123,8 +123,8 @@ export const bulkCreateActions = async (
     const status = responseItems.every((item) => item.create?.error)
       ? 'failed'
       : responseItems.some((item) => item.create?.error)
-        ? 'mixed'
-        : 'success';
+      ? 'mixed'
+      : 'success';
 
     return {
       status,

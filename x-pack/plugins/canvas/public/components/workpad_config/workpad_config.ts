@@ -9,16 +9,16 @@ import { connect } from 'react-redux';
 
 import { get } from 'lodash';
 import {
-  setName,
   sizeWorkpad as setSize,
+  setName,
   setWorkpadCSS,
   updateWorkpadVariables,
 } from '../../state/actions/workpad';
 
-import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
-import { CanvasVariable, State } from '../../../types';
 import { getWorkpad } from '../../state/selectors/workpad';
+import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 import { WorkpadConfig as Component } from './workpad_config.component';
+import { State, CanvasVariable } from '../../../types';
 
 const mapStateToProps = (state: State) => {
   const workpad = getWorkpad(state);

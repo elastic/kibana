@@ -1,4 +1,3 @@
-import type { DocLinks } from '@kbn/doc-links';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import type { DocLinks } from '@kbn/doc-links';
  * Side Public License, v 1.
  */
 import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { DocLinks } from '@kbn/doc-links';
 
 /**
  * Config deprecation hook used when invoking a {@link ConfigDeprecation}

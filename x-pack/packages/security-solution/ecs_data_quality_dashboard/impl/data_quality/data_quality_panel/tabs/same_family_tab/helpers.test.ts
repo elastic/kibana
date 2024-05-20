@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EcsVersion } from '@elastic/ecs';
 import numeral from '@elastic/numeral';
+import { EcsVersion } from '@elastic/ecs';
 
-import { EMPTY_STAT } from '../../../helpers';
-import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
-import { mockPartitionedFieldMetadataWithSameFamily } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
 import {
   getAllSameFamilyMarkdownComments,
   getSameFamilyMarkdownComment,
   getSameFamilyMarkdownTablesComment,
 } from './helpers';
+import { EMPTY_STAT } from '../../../helpers';
+import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
+import { mockPartitionedFieldMetadataWithSameFamily } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
 
 describe('helpers', () => {
   describe('getSameFamilyMarkdownComment', () => {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { waitFor, screen } from '@testing-library/react';
 
-import userEvent from '@testing-library/user-event';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { OBSERVABILITY_OWNER, OWNER_INFO } from '../../../common/constants';
+import { CreateCaseOwnerSelector } from './owner_selector';
+import { FormTestComponent } from '../../common/test_utils';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { FormTestComponent } from '../../common/test_utils';
-import { CreateCaseOwnerSelector } from './owner_selector';
+import userEvent from '@testing-library/user-event';
 
 describe('Case Owner Selection', () => {
   const onSubmit = jest.fn();

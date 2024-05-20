@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { firstValueFrom, Observable } from 'rxjs';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { Observable, firstValueFrom } from 'rxjs';
 import { Config } from '../common';
 
 interface SetupDependencies {

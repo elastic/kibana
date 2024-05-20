@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { type FC, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -18,11 +19,10 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { type RefreshInterval } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import React, { type FC, useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { type RefreshInterval } from '@kbn/data-plugin/common';
 import {
   type SelectedChangePoint,
   useChangePointDetectionContext,

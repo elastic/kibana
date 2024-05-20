@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -22,7 +23,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { Doc } from '../../types';

@@ -7,17 +7,17 @@
  */
 
 import { Readable } from 'stream';
-import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 import { FileServiceStart } from '../../file_service';
 
-import { File } from '../../file';
-import { AbortedUploadError } from '../../file/errors';
+import { handler } from './upload';
 import { createFileKindsRequestHandlerContextMock } from '../test_utils';
 import { FileKindsRequestHandlerContext } from './types';
-import { handler } from './upload';
+import { File } from '../../file';
+import { AbortedUploadError } from '../../file/errors';
 
 const createRequest = httpServerMock.createKibanaRequest;
 

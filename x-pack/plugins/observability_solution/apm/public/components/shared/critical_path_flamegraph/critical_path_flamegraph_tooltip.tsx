@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
-import { AgentIcon } from '@kbn/custom-icons';
-import { i18n } from '@kbn/i18n';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { AgentIcon } from '@kbn/custom-icons';
+import type { CriticalPathResponse } from '../../../../server/routes/traces/get_aggregated_critical_path';
 import {
   AGENT_NAME,
   SERVICE_NAME,
@@ -18,9 +19,8 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
-import { asPercent } from '../../../../common/utils/formatters';
-import type { CriticalPathResponse } from '../../../../server/routes/traces/get_aggregated_critical_path';
 import { SpanIcon } from '../span_icon';
+import { asPercent } from '../../../../common/utils/formatters';
 
 export function CriticalPathFlamegraphTooltip({
   metadata,

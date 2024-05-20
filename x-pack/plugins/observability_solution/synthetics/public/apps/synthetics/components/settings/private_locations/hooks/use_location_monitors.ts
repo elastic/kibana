@@ -7,8 +7,8 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectLocationMonitors } from '../../../../state/settings';
 import { getLocationMonitorsAction } from '../../../../state/settings/actions';
+import { selectLocationMonitors } from '../../../../state/settings';
 
 export const useLocationMonitors = () => {
   const dispatch = useDispatch();

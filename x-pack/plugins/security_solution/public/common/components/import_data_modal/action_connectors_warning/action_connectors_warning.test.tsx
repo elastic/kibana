@@ -1,4 +1,3 @@
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render } from '@testing-library/react';
 import { ActionConnectorWarnings } from '.';
 
 jest.mock('../../../lib/kibana/kibana_react', () => ({

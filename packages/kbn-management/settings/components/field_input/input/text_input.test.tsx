@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
 
-import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { TextInput, TextInputProps } from './text_input';
+import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 const name = 'Some text field';
 const id = 'some:text:field';

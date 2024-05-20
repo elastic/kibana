@@ -9,15 +9,15 @@ import { ADMIN_CONSOLE } from '../../common/constants';
 
 import base from './generated/elasticsearch/composable/component/base.json';
 import event from './generated/elasticsearch/composable/component/event.json';
-import host from './generated/elasticsearch/composable/component/host.json';
 import http from './generated/elasticsearch/composable/component/http.json';
-import log from './generated/elasticsearch/composable/component/log.json';
 import url from './generated/elasticsearch/composable/component/url.json';
 import user from './generated/elasticsearch/composable/component/user.json';
 import userAgent from './generated/elasticsearch/composable/component/user_agent.json';
+import log from './generated/elasticsearch/composable/component/log.json';
+import host from './generated/elasticsearch/composable/component/host.json';
 
-import { IndexTemplateDef } from '../../../../types';
 import template from './generated/elasticsearch/composable/template.json';
+import { IndexTemplateDef } from '../../../../types';
 
 const ECS_VERSION = template._meta.ecs_version;
 

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 
-import { createReplaceSerializer, createStripAnsiSerializer } from '@kbn/jest-serializers';
-import { REPO_ROOT } from '@kbn/repo-info';
-import del from 'del';
 import execa from 'execa';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';
+import del from 'del';
 import globby from 'globby';
 import loadJsonFile from 'load-json-file';
 
@@ -113,9 +113,8 @@ it('builds a generated plugin into a viable archive', async () => {
     ]
   `);
 
-  expect(
-    loadJsonFile.sync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json'))
-  ).toMatchInlineSnapshot(`
+  expect(loadJsonFile.sync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json')))
+    .toMatchInlineSnapshot(`
     Object {
       "description": "",
       "id": "fooTestPlugin",

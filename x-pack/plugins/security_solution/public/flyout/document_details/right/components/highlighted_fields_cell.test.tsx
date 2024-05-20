@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import {
+  HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
+  HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID,
+  HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
+} from './test_ids';
+import { HighlightedFieldsCell } from './highlighted_fields_cell';
+import { RightPanelContext } from '../context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { TestProviders } from '../../../../common/mock';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useGetEndpointDetails } from '../../../../management/hooks';
 import {
   useAgentStatusHook,
   useGetAgentStatus,
   useGetSentinelOneAgentStatus,
 } from '../../../../management/hooks/agents/use_get_agent_status';
-import { LeftPanelInsightsTab } from '../../left';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { RightPanelContext } from '../context';
-import { HighlightedFieldsCell } from './highlighted_fields_cell';
-import {
-  HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
-  HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID,
-  HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
-} from './test_ids';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../management/hooks');
 jest.mock('../../../../management/hooks/agents/use_get_agent_status');

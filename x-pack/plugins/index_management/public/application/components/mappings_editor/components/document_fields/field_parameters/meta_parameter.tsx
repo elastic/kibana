@@ -10,8 +10,8 @@ import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { documentationService } from '../../../../../services/documentation';
+import { UseField, JsonEditorField } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
-import { JsonEditorField, UseField } from '../../../shared_imports';
 import { EditFieldFormRow } from '../fields/edit_field';
 
 interface Props {

@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  createNoticeableDelay,
   startJobs as sendStartJobsRequest,
   stopJobs as sendStopJobsRequest,
+  createNoticeableDelay,
   showApiError,
 } from '../../services';
 
-import { UPDATE_JOB_FAILURE, UPDATE_JOB_START, UPDATE_JOB_SUCCESS } from '../action_types';
+import { UPDATE_JOB_START, UPDATE_JOB_SUCCESS, UPDATE_JOB_FAILURE } from '../action_types';
 
 import { refreshJobs } from './refresh_jobs';
 

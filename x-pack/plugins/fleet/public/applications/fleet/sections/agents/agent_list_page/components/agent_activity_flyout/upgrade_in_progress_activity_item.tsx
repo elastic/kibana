@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiLoadingSpinner,
-  EuiPanel,
+  EuiIcon,
   EuiText,
+  EuiPanel,
+  EuiButton,
+  EuiLink,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useStartServices } from '../../../../../hooks';
 import type { ActionStatus } from '../../../../../types';
+import { useStartServices } from '../../../../../hooks';
 
 import {
   formattedTime,

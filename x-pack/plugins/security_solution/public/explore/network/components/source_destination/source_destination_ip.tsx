@@ -6,14 +6,14 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
 import { isEmpty, uniqWith } from 'lodash/fp';
 import React from 'react';
+import deepEqual from 'fast-deep-equal';
 
-import * as i18n from '../../../../timelines/components/timeline/body/renderers/translations';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { Port } from '../port';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
+import * as i18n from '../../../../timelines/components/timeline/body/renderers/translations';
 
 import { GeoFields } from './geo_fields';
 import { IpWithPort } from './ip_with_port';
@@ -61,8 +61,8 @@ export const getPorts = ({
     type === 'source' && sourcePort != null
       ? sourcePort
       : type === 'destination' && destinationPort != null
-        ? destinationPort
-        : [];
+      ? destinationPort
+      : [];
 
   return ports
     .filter((p) => p != null)

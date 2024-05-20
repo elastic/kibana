@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { FilesContext } from '@kbn/shared-ux-file-context';
-import { FileKindBrowser, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
-import { action } from '@storybook/addon-actions';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import { FileKindBrowser, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
+import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import { FileUpload, Props } from './file_upload';
 

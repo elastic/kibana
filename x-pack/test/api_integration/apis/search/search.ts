@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { DataViewType } from '@kbn/data-views-plugin/common';
 import expect from '@kbn/expect';
 import { parse as parseCookie } from 'tough-cookie';
-import { verifyErrorResponse } from '../../../../../test/api_integration/apis/search/verify_error';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { verifyErrorResponse } from '../../../../../test/api_integration/apis/search/verify_error';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

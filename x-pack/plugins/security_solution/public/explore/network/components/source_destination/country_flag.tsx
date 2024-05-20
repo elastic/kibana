@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { memo, useEffect, useState } from 'react';
+import { isEmpty } from 'lodash/fp';
 import { EuiToolTip } from '@elastic/eui';
 import countries from 'i18n-iso-countries';
 import countryJson from 'i18n-iso-countries/langs/en.json';
-import { isEmpty } from 'lodash/fp';
-import React, { memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 // Fixes vertical alignment of the flag

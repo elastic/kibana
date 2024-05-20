@@ -1,4 +1,3 @@
-import { inspect } from 'util';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { inspect } from 'util';
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
+import { inspect } from 'util';
 
 export class WrappedElasticsearchClientError extends Error {
   originalError: errors.ElasticsearchClientError;

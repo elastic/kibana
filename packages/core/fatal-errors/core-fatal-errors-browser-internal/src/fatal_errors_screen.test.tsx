@@ -7,10 +7,10 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import React from 'react';
-import { ReplaySubject, of } from 'rxjs';
+import { of, ReplaySubject } from 'rxjs';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { FatalErrorsScreen } from './fatal_errors_screen';
 

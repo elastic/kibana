@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiHighlight, EuiText } from '@elastic/eui';
 import React from 'react';
+import { EuiHighlight, EuiText } from '@elastic/eui';
 
 /** Renders a field name in it's non-dragging state */
 export const FieldName = React.memo<{

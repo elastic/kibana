@@ -7,8 +7,8 @@
 
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import React from 'react';
-import { EMBEDDABLE_FLAMEGRAPH } from '.';
 import { ProfilingEmbeddable } from './profiling_embeddable';
+import { EMBEDDABLE_FLAMEGRAPH } from '.';
 
 interface Props {
   data?: BaseFlameGraph;

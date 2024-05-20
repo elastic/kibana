@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import type { PaletteOutput, PaletteDefinition } from '@kbn/coloring';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import type { PaletteDefinition, PaletteOutput } from '@kbn/coloring';
+import { byDataColorPaletteMap, SimplifiedArrayNode } from './get_color';
 import type { SeriesLayer } from '@kbn/coloring';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { getDistinctSeries } from '..';
-import { ChartTypes } from '../../../common/types';
-import { createMockBucketColumns, createMockPieParams, createMockVisData } from '../../mocks';
-import { generateFormatters } from '../formatters';
-import { SimplifiedArrayNode, byDataColorPaletteMap } from './get_color';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getColor } from './get_color';
+import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
+import { generateFormatters } from '../formatters';
+import { ChartTypes } from '../../../common/types';
+import { getDistinctSeries } from '..';
 
 describe('#byDataColorPaletteMap', () => {
   let paletteDefinition: PaletteDefinition;

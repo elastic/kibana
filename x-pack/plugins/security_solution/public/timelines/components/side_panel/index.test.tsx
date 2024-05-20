@@ -8,15 +8,15 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { DetailsPanel } from '.';
-import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import type { ExpandedDetailTimeline } from '../../../../common/types';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
-import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { TestProviders, createMockStore, mockGlobalState } from '../../../common/mock';
+import { mockGlobalState, TestProviders, createMockStore } from '../../../common/mock';
 import type { State } from '../../../common/store';
+import { DetailsPanel } from '.';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
+import type { ExpandedDetailTimeline } from '../../../../common/types';
+import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),

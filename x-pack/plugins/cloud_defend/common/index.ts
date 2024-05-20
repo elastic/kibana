@@ -21,6 +21,6 @@ export type {
 
 export { policiesQueryParamsSchema } from './latest';
 
-import * as schemaV1 from './schemas/v1';
 import * as v1 from './v1';
+import * as schemaV1 from './schemas/v1';
 export { v1, schemaV1 };

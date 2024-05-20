@@ -1,5 +1,3 @@
-import { RefreshInterval } from '@kbn/data-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +5,12 @@ import type { TimeRange } from '@kbn/es-query';
  * 2.0.
  */
 import React, { createContext, useState, FC, PropsWithChildren } from 'react';
+import type { TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/public';
 import useUnmount from 'react-use/lib/useUnmount';
-import { Legacy } from '../../legacy_shims';
-import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
 import { GlobalState } from '../../url_state';
+import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
+import { Legacy } from '../../legacy_shims';
 import { shouldOverrideRefreshInterval } from './should_override_refresh_interval';
 
 interface GlobalStateProviderProps {

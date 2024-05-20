@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DashboardContainerInput } from '../../../../common';
-import { getSampleDashboardInput } from '../../../mocks';
-import { pluginServices } from '../../plugin_services';
 import { registry } from '../../plugin_services.stub';
+import { pluginServices } from '../../plugin_services';
+import { getSampleDashboardInput } from '../../../mocks';
 import { saveDashboardState } from './save_dashboard_state';
+import { DashboardContainerInput } from '../../../../common';
 
 pluginServices.setRegistry(registry.start({}));
 const {

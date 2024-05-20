@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiLoadingChart, OnTimeChangeProps } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiLoadingChart, OnTimeChangeProps } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import React, { useCallback } from 'react';
 
 import { flyoutDegradedDocsTrendText } from '../../../../common/translations';
-import { useDegradedDocsChart } from '../../../hooks';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../../../utils';
+import { useDegradedDocsChart } from '../../../hooks';
 
 const CHART_HEIGHT = 180;
 const DISABLED_ACTIONS = [

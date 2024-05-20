@@ -10,10 +10,10 @@ import React, { useEffect, FunctionComponent, useState, useCallback } from 'reac
 import { act } from 'react-dom/test-utils';
 import { first } from 'rxjs';
 
+import { registerTestBed, TestBed } from '../shared_imports';
+import { FormHook, OnUpdateHandler, FieldConfig, FieldHook } from '../types';
 import { useForm } from '../hooks/use_form';
 import { useBehaviorSubject } from '../hooks/utils/use_behavior_subject';
-import { TestBed, registerTestBed } from '../shared_imports';
-import { FieldConfig, FieldHook, FormHook, OnUpdateHandler } from '../types';
 import { Form } from './form';
 import { UseField } from './use_field';
 

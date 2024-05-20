@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useContext } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import * as eventModel from '../../../common/endpoint/models/event';
-import * as nodeModel from '../../../common/endpoint/models/node';
-import type { ResolverNode } from '../../../common/endpoint/types';
-import type { State } from '../../common/store/types';
-import * as nodeDataModel from '../models/node_data';
-import { applyMatrix3 } from '../models/vector2';
-import { userFocusedOnResolverNode, userSelectedResolverNode } from '../store/actions';
-import { userReloadedResolverNode } from '../store/data/action';
-import * as selectors from '../store/selectors';
-import type { Matrix3, Vector2 } from '../types';
-import { fontSize } from './font_size';
-import { SideEffectContext } from './side_effect_context';
+import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useSelector, useDispatch } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { NodeSubMenu } from './styles';
-import { useColors } from './use_colors';
+import { applyMatrix3 } from '../models/vector2';
+import type { Vector2, Matrix3 } from '../types';
+import type { ResolverNode } from '../../../common/endpoint/types';
+import { SideEffectContext } from './side_effect_context';
+import * as nodeModel from '../../../common/endpoint/models/node';
+import * as eventModel from '../../../common/endpoint/models/event';
+import * as nodeDataModel from '../models/node_data';
+import * as selectors from '../store/selectors';
+import { fontSize } from './font_size';
 import { useCubeAssets } from './use_cube_assets';
-import { useLinkProps } from './use_link_props';
 import { useSymbolIDs } from './use_symbol_ids';
+import { useColors } from './use_colors';
+import { useLinkProps } from './use_link_props';
+import { userSelectedResolverNode, userFocusedOnResolverNode } from '../store/actions';
+import { userReloadedResolverNode } from '../store/data/action';
+import type { State } from '../../common/store/types';
 
 interface StyledActionsContainer {
   readonly color: string;

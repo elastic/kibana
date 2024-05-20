@@ -7,20 +7,20 @@
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getESQLWithSafeLimit } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import { useCancellableSearch } from '@kbn/ml-cancellable-search';
-import { chunk } from 'lodash';
 import { useEffect, useReducer, useState } from 'react';
+import { chunk } from 'lodash';
+import { useCancellableSearch } from '@kbn/ml-cancellable-search';
+import { getESQLWithSafeLimit } from '@kbn/esql-utils';
 import type { DataStatsFetchProgress, FieldStats } from '../../../../../common/types/field_stats';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { getInitialProgress, getReducer } from '../../progress_utils';
-import { getESQLBooleanFieldStats } from '../../search_strategy/esql_requests/get_boolean_field_stats';
-import { getESQLDateFieldStats } from '../../search_strategy/esql_requests/get_date_field_stats';
-import { getESQLKeywordFieldStats } from '../../search_strategy/esql_requests/get_keyword_fields';
-import { getESQLNumericFieldStats } from '../../search_strategy/esql_requests/get_numeric_field_stats';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { Column } from './use_esql_overall_stats_data';
+import { getESQLNumericFieldStats } from '../../search_strategy/esql_requests/get_numeric_field_stats';
+import { getESQLKeywordFieldStats } from '../../search_strategy/esql_requests/get_keyword_fields';
+import { getESQLDateFieldStats } from '../../search_strategy/esql_requests/get_date_field_stats';
+import { getESQLBooleanFieldStats } from '../../search_strategy/esql_requests/get_boolean_field_stats';
 
 export const useESQLFieldStatsData = <T extends Column>({
   searchQuery,

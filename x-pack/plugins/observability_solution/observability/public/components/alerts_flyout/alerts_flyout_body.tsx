@@ -1,7 +1,3 @@
-import { EuiPanel, EuiTabbedContentTab } from '@elastic/eui';
-import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
-import { i18n } from '@kbn/i18n';
-import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +5,10 @@ import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/publ
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
+import { EuiPanel, EuiTabbedContentTab } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { AlertFieldsTable, ScrollableFlyoutTabbedContent } from '@kbn/alerts-ui-shared';
+import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TopAlert } from '../../typings/alerts';
 import { AlertOverview } from '../alert_overview/alert_overview';
 

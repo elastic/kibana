@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { TimelineId } from '../../../../../common/types';
-import { getSourcererScopeId } from '../../../../helpers';
 import {
-  CellActionsMode,
   SecurityCellActions,
+  CellActionsMode,
   SecurityCellActionsTrigger,
 } from '../../cell_actions';
+import { FieldValueCell } from './field_value_cell';
 import type { AlertSummaryRow } from '../helpers';
 import { hasHoverOrRowActions } from '../helpers';
-import { FieldValueCell } from './field_value_cell';
+import { TimelineId } from '../../../../../common/types';
+import { getSourcererScopeId } from '../../../../helpers';
 
 const style = { flexGrow: 0 };
 

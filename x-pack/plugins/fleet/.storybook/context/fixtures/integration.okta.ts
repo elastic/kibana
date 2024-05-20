@@ -1,4 +1,3 @@
-import { ElasticsearchAssetType, KibanaAssetType } from '../../../common/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { ElasticsearchAssetType, KibanaAssetType } from '../../../common/types';
  * 2.0.
  */
 import type { GetInfoResponse } from '../../../public/types';
+import { KibanaAssetType, ElasticsearchAssetType } from '../../../common/types';
 
 export const item: GetInfoResponse['item'] = {
   name: 'okta',

@@ -10,9 +10,9 @@ import { TIMELINE_HEADER, TIMELINE_TABS } from '../../../screens/timeline';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
+  openTimelineUsingToggle,
   enterFullScreenMode,
   exitFullScreenMode,
-  openTimelineUsingToggle,
 } from '../../../tasks/security_main';
 
 import { hostsUrl } from '../../../urls/navigation';

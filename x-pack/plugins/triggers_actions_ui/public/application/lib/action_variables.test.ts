@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { ActionVariables, RuleType } from '../../types';
+import { RuleType, ActionVariables } from '../../types';
 import { transformActionVariables } from './action_variables';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 beforeEach(() => jest.resetAllMocks());
 

@@ -1,6 +1,3 @@
-import { ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,11 +5,14 @@ import userEvent from '@testing-library/user-event';
  * 2.0.
  */
 import React from 'react';
-import { Alert } from '../../../../types';
-import { getCasesMockMap } from '../cases/index.mock';
-import { CellComponentProps } from '../types';
+import { screen, render } from '@testing-library/react';
+import { ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCell } from './cell';
+import { CellComponentProps } from '../types';
+import { Alert } from '../../../../types';
 import { getMaintenanceWindowMockMap } from './index.mock';
+import { getCasesMockMap } from '../cases/index.mock';
+import userEvent from '@testing-library/user-event';
 
 const casesMap = getCasesMockMap();
 const maintenanceWindowsMap = getMaintenanceWindowMockMap();

@@ -13,14 +13,14 @@ import type {
   ValidationResponsePromise,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type {
-  ActionTypeRegistryContract,
   RuleAction,
+  ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { validateActionFilterQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleActionsFormData } from '../../../../../detection_engine/rule_management_ui/components/rules_table/bulk_actions/forms/rule_actions_form';
-import type { ERROR_CODE, ValidationFunc } from '../../../../../shared_imports';
 import type { ActionsStepRule } from '../../../../pages/detection_engine/rules/types';
-import { getActionTypeName, validateActionParams, validateMustache } from './utils';
+import type { ValidationFunc, ERROR_CODE } from '../../../../../shared_imports';
+import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 export const DEFAULT_VALIDATION_TIMEOUT = 100;
 

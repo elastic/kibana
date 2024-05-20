@@ -7,8 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { renderSearchError } from '@kbn/search-errors';
 import React, { ReactNode } from 'react';
+import { renderSearchError } from '@kbn/search-errors';
 import type { DataRequestDescriptor, DataRequestMeta } from '../../../common/descriptor_types';
 
 export class DataRequest {

@@ -5,18 +5,18 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { performance } from 'perf_hooks';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { performance } from 'perf_hooks';
+import type { SignalSearchResponse, SignalSource, OverrideBodyQuery } from '../types';
+import { buildEventsSearchQuery } from './build_events_query';
+import { createErrorsFromShard, makeFloatString } from './utils';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import type { OverrideBodyQuery, SignalSearchResponse, SignalSource } from '../types';
-import { buildEventsSearchQuery } from './build_events_query';
-import { createErrorsFromShard, makeFloatString } from './utils';
 
 export interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -39,7 +39,7 @@ export interface SingleSearchAfterParams {
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
 >({
   aggregations,
   searchAfterSortIds,

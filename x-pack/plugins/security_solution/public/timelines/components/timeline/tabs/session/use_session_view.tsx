@@ -5,37 +5,37 @@
  * 2.0.
  */
 
+import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import styled from 'styled-components';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import { useDispatch } from 'react-redux';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { EntityType } from '@kbn/timelines-plugin/common';
-import React, { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
-import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../../../common/constants';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import {
-  useGlobalFullScreen,
-  useTimelineFullScreen,
-} from '../../../../../common/containers/use_full_screen';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import {
   getScopedActions,
   isActiveTimeline,
   isInTableScope,
   isTimelineScope,
 } from '../../../../../helpers';
+import { useKibana } from '../../../../../common/lib/kibana';
+import * as i18n from './translations';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { useDetailPanel } from '../../../side_panel/hooks/use_detail_panel';
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { isFullScreen } from '../../body/column_headers';
+import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../../../common/constants';
+import { FULL_SCREEN } from '../../body/column_headers/translations';
+import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
+import {
+  useTimelineFullScreen,
+  useGlobalFullScreen,
+} from '../../../../../common/containers/use_full_screen';
 import { detectionsTimelineIds } from '../../../../containers/helpers';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useDetailPanel } from '../../../side_panel/hooks/use_detail_panel';
-import { isFullScreen } from '../../body/column_headers';
-import { FULL_SCREEN } from '../../body/column_headers/translations';
-import * as i18n from './translations';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 
 const FullScreenButtonIcon = styled(EuiButtonIcon)`
   margin: 4px 0 4px 0;

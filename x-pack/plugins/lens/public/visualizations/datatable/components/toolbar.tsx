@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { RowHeightSettings } from '@kbn/unified-data-table';
 import React, { useCallback } from 'react';
-import { RowHeightMode } from '../../../../common/types';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { RowHeightSettings } from '@kbn/unified-data-table';
 import { ToolbarPopover } from '../../../shared_components';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
+import { RowHeightMode } from '../../../../common/types';
+import { DEFAULT_PAGE_SIZE } from './table_basic';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   DEFAULT_ROW_HEIGHT_LINES,
 } from './constants';
-import { DEFAULT_PAGE_SIZE } from './table_basic';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
@@ -33,8 +33,8 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         newHeightMode === RowHeightMode.single
           ? 1
           : newHeightMode !== RowHeightMode.auto
-            ? defaultRowHeight
-            : undefined;
+          ? defaultRowHeight
+          : undefined;
       setState({
         ...state,
         [heightProperty]: newHeightMode,

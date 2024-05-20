@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
-import React from 'react';
 import {
   UnsavedChangesBadge,
   type UnsavedChangesBadgeProps,

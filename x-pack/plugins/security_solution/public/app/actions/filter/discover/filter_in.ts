@@ -7,8 +7,8 @@
 
 import type { CellAction, CellActionFactory } from '@kbn/cell-actions';
 import type { SecurityAppStore } from '../../../../common/store';
-import type { StartServices } from '../../../../types';
 import { isInSecurityApp } from '../../utils';
+import type { StartServices } from '../../../../types';
 import { createFilterInCellActionFactory } from '../cell_action/filter_in';
 
 export const createFilterInDiscoverCellActionFactory = ({

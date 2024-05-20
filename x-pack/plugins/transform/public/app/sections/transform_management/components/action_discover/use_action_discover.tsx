@@ -14,9 +14,9 @@ import { useAppDependencies } from '../../../../app_dependencies';
 import { useGetDataViewsTitleIdMap } from '../../../../hooks';
 
 import {
-  DiscoverActionName,
-  discoverActionNameText,
   isDiscoverActionDisabled,
+  discoverActionNameText,
+  DiscoverActionName,
 } from './discover_action_name';
 
 export type DiscoverAction = ReturnType<typeof useDiscoverAction>;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
-import { Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
+import { Story } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { RuleTagBadge } from './rule_tag_badge';
 
 type Args = ComponentProps<typeof RuleTagBadge>;

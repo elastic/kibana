@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { StartServices } from '../../types';
-import { confirmModalPromise } from './confirm_modal_promise';
-import { SAVE_DUPLICATE_REJECTED } from './constants';
 import type { ConfirmModalSavedObjectMeta } from './types';
+import { SAVE_DUPLICATE_REJECTED } from './constants';
+import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
   { title, displayName }: ConfirmModalSavedObjectMeta,

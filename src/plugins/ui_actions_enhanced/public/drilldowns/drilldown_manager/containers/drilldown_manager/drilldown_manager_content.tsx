@@ -7,10 +7,10 @@
  */
 
 import * as React from 'react';
-import { useDrilldownManager } from '../context';
 import { CreateDrilldownForm } from '../create_drilldown_form';
-import { EditDrilldownForm } from '../edit_drilldown_form';
 import { Tabs } from '../tabs';
+import { useDrilldownManager } from '../context';
+import { EditDrilldownForm } from '../edit_drilldown_form';
 
 export const DrilldownManagerContent: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();

@@ -6,8 +6,8 @@
  */
 
 import { memoize } from 'lodash';
-import { Maybe } from '../../typings';
 import { asDecimal } from './formatters';
+import { Maybe } from '../../typings';
 
 function asKilobytes(value: number) {
   return `${asDecimal(value / 1000)} KB`;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
 import { mapKeys } from 'lodash';
+import { useQuery } from '@tanstack/react-query';
 
-import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS } from '../../common/constants';
-import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const useAgentPolicies = () => {
   const { http } = useKibana().services;

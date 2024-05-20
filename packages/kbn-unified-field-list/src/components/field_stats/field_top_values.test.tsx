@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonIcon, EuiProgress } from '@elastic/eui';
+import React from 'react';
+import { EuiProgress, EuiButtonIcon } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { FieldTopValues, FieldTopValuesProps } from './field_top_values';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import React from 'react';
-import { FieldTopValues, FieldTopValuesProps } from './field_top_values';
 
 describe('UnifiedFieldList <FieldTopValues />', () => {
   let defaultProps: FieldTopValuesProps;

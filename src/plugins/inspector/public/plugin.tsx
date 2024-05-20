@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import * as React from 'react';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SharePluginStart } from '@kbn/share-plugin/public';
-import * as React from 'react';
-import { Adapters } from '../common';
+import { InspectorViewRegistry } from './view_registry';
 import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
-import { InspectorViewRegistry } from './view_registry';
+import { Adapters } from '../common';
 
 import { getRequestsViewDescription } from './views';
 

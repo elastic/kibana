@@ -6,9 +6,9 @@
  */
 
 import { EuiHealth } from '@elastic/eui';
-import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_severity_score';
 import React, { useMemo } from 'react';
-import { ML_SEVERITY_COLORS, getSeverityCategoryForScore } from '../../../../common/log_analysis';
+import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils/get_formatted_severity_score';
+import { getSeverityCategoryForScore, ML_SEVERITY_COLORS } from '../../../../common/log_analysis';
 
 export const AnomalySeverityIndicator: React.FunctionComponent<{
   anomalyScore: number;

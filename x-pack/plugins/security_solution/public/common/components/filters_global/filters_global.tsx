@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { InPortal } from 'react-reverse-portal';
 import styled from 'styled-components';
+import { InPortal } from 'react-reverse-portal';
+import { EuiPanel } from '@elastic/eui';
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 
 const FiltersGlobalContainer = styled.header<{ show: boolean }>`

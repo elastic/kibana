@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { run } from '../../lib/spawn.mjs';
 import * as Bazel from '../../lib/bazel.mjs';
 import External from '../../lib/external_packages.js';
-import { run } from '../../lib/spawn.mjs';
 
-import { discovery } from './discovery.mjs';
-import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
-import { regeneratePackageMap } from './regenerate_package_map.mjs';
-import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
+import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
 import { setupRemoteCache } from './setup_remote_cache.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
+import { regeneratePackageMap } from './regenerate_package_map.mjs';
+import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
+import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
+import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
-import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
 
 /** @type {import('../../lib/command').Command} */
 export const command = {

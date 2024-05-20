@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
+import { noop } from 'lodash/fp';
 
 import { EuiPanel } from '@elastic/eui';
-import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../common/search_strategy';
+import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
+import { useRiskScore } from '../api/hooks/use_risk_score';
+import { UserRiskScoreQueryId } from '../common/utils';
+import { EnableRiskScore } from './enable_risk_score';
+import type { UsersComponentsQueryProps } from '../../explore/users/pages/navigation/types';
 import { manageQuery } from '../../common/components/page/manage_query';
-import { useQueryToggle } from '../../common/containers/query_toggle';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import type { State } from '../../common/store';
-import type { UsersComponentsQueryProps } from '../../explore/users/pages/navigation/types';
-import { usersSelectors } from '../../explore/users/store';
-import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
-import { useRiskScore } from '../api/hooks/use_risk_score';
-import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
-import { UserRiskScoreQueryId } from '../common/utils';
-import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
-import { EnableRiskScore } from './enable_risk_score';
-import { RiskEnginePrivilegesCallOut } from './risk_engine_privileges_callout';
-import { RiskScoresNoDataDetected } from './risk_score_onboarding/risk_score_no_data_detected';
-import { RiskScoreUpdatePanel } from './risk_score_update_panel';
 import { UserRiskScoreTable } from './user_risk_score_table';
+import { usersSelectors } from '../../explore/users/store';
+import { useQueryToggle } from '../../common/containers/query_toggle';
+import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../common/search_strategy';
+import { RiskScoresNoDataDetected } from './risk_score_onboarding/risk_score_no_data_detected';
+import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from './risk_score_update_panel';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { RiskEnginePrivilegesCallOut } from './risk_engine_privileges_callout';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 

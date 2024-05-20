@@ -8,6 +8,11 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
+import {
+  calculateEndpointAuthz,
+  getEndpointAuthzInitialState,
+} from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
   ENABLE_ASSET_CRITICALITY_SETTING,
@@ -19,41 +24,36 @@ import {
   MANAGE_PATH,
   POLICIES_PATH,
   RESPONSE_ACTIONS_HISTORY_PATH,
-  SERVER_APP_ID,
   SecurityPageName,
+  SERVER_APP_ID,
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
-  calculateEndpointAuthz,
-  getEndpointAuthzInitialState,
-} from '../../common/endpoint/service/authz';
-import {
-  ASSET_CRITICALITY,
   BLOCKLIST,
   ENDPOINTS,
-  ENTITY_ANALYTICS_RISK_SCORE,
   EVENT_FILTERS,
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
+  ENTITY_ANALYTICS_RISK_SCORE,
+  ASSET_CRITICALITY,
 } from '../app/translations';
-import { cloudDefendLink } from '../cloud_defend/links';
 import { licenseService } from '../common/hooks/use_license';
-import { IconAssetCriticality } from '../common/icons/asset_criticality';
-import { IconConsole } from '../common/icons/console';
-import { IconDashboards } from '../common/icons/dashboards';
-import { IconEndpoints } from '../common/icons/endpoints';
-import { IconEntityAnalytics } from '../common/icons/entity_analytics';
-import { IconPipeline } from '../common/icons/pipeline';
-import { IconSavedObject } from '../common/icons/saved_object';
-import { IconShield } from '../common/icons/shield';
-import { IconTool } from '../common/icons/tool';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
+import { cloudDefendLink } from '../cloud_defend/links';
+import { IconConsole } from '../common/icons/console';
+import { IconShield } from '../common/icons/shield';
+import { IconEndpoints } from '../common/icons/endpoints';
+import { IconTool } from '../common/icons/tool';
+import { IconPipeline } from '../common/icons/pipeline';
+import { IconSavedObject } from '../common/icons/saved_object';
+import { IconDashboards } from '../common/icons/dashboards';
+import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
+import { IconAssetCriticality } from '../common/icons/asset_criticality';
 
 const categories = [
   {

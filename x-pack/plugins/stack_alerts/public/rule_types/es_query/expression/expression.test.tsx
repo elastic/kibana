@@ -7,20 +7,12 @@
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import 'brace';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import React, { useState } from 'react';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ISearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { ReactWrapper } from 'enzyme';
-import React, { useState } from 'react';
-import { act } from 'react-dom/test-utils';
-import { Subject } from 'rxjs';
 import {
   CommonEsQueryRuleParams,
   EsQueryRuleMetaData,
@@ -28,6 +20,14 @@ import {
   SearchType,
 } from '../types';
 import { EsQueryRuleTypeExpression } from './expression';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { Subject } from 'rxjs';
+import { ISearchSource } from '@kbn/data-plugin/common';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { act } from 'react-dom/test-utils';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { ReactWrapper } from 'enzyme';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');

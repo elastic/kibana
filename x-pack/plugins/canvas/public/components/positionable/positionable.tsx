@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React, { FC, ReactElement, CSSProperties } from 'react';
-import { TransformMatrix3d } from '../../lib/aeroelastic';
+import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
+import { TransformMatrix3d } from '../../lib/aeroelastic';
 
 interface Props {
   children: ReactElement;

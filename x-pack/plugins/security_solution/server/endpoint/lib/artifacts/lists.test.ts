@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { EntriesArray, EntryList } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  buildArtifact,
+  getAllItemsFromEndpointExceptionList,
+  getFilteredEndpointExceptionListRaw,
+  convertExceptionsToEndpointFormat,
+} from './lists';
+import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
+import { ArtifactConstants } from './common';
 import {
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -17,14 +25,6 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
-import { ArtifactConstants } from './common';
-import {
-  buildArtifact,
-  convertExceptionsToEndpointFormat,
-  getAllItemsFromEndpointExceptionList,
-  getFilteredEndpointExceptionListRaw,
-} from './lists';
 
 describe('artifacts lists', () => {
   let mockExceptionClient: ExceptionListClient;

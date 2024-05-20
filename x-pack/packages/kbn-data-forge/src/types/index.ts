@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { Moment } from 'moment';
 import { Client } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
-import type { Moment } from 'moment';
 import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK } from '../constants';
 
 export interface Doc {

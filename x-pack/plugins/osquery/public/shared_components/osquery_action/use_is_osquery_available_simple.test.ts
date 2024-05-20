@@ -1,7 +1,3 @@
-import { httpServiceMock } from '@kbn/core/public/mocks';
-import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
-import { renderHook } from '@testing-library/react-hooks';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +6,10 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../common';
  */
 import { useKibana } from '../../common/lib/kibana';
 import { useIsOsqueryAvailableSimple } from './use_is_osquery_available_simple';
+import { renderHook } from '@testing-library/react-hooks';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../common/lib/kibana');
 

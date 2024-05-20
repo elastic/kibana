@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { Action } from '@kbn/ui-actions-plugin/public';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { RawValue } from '../../common/constants';
 
 export function isUrlDrilldown(action: Action) {

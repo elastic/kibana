@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { evaluate } from '@kbn/tinymath';
+import { groupBy, zipObject, omit, uniqBy } from 'lodash';
+import moment from 'moment';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import {
   Datatable,
@@ -13,14 +16,11 @@ import {
   PointSeriesColumnName,
   PointSeriesColumns,
 } from '@kbn/expressions-plugin/common';
-import { evaluate } from '@kbn/tinymath';
-import { groupBy, omit, uniqBy, zipObject } from 'lodash';
-import moment from 'moment';
 import { pivotObjectArray } from '../../../../common/lib/pivot_object_array';
 import { unquoteString } from '../../../../common/lib/unquote_string';
-import { getFunctionErrors, getFunctionHelp } from '../../../../i18n';
-import { getExpressionType } from './lib/get_expression_type';
 import { isColumnReference } from './lib/is_column_reference';
+import { getExpressionType } from './lib/get_expression_type';
+import { getFunctionHelp, getFunctionErrors } from '../../../../i18n';
 
 // TODO: pointseries performs poorly, that's why we run it on the server.
 

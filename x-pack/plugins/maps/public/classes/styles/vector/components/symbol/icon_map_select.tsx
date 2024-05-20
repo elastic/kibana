@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiSuperSelect } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
+import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { ICON_SOURCE } from '../../../../../../common/constants';
+import { IconStops } from './icon_stops';
+import { getIconPaletteOptions, PREFERRED_ICONS } from '../../symbol_utils';
 import {
   CustomIcon,
   IconDynamicOptions,
   IconStop,
 } from '../../../../../../common/descriptor_types';
+import { ICON_SOURCE } from '../../../../../../common/constants';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
-import { PREFERRED_ICONS, getIconPaletteOptions } from '../../symbol_utils';
-import { IconStops } from './icon_stops';
 
 const CUSTOM_MAP_ID = 'CUSTOM_MAP_ID';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TIME_UNITS } from '../../application/constants';
 import { getTimeUnitLabel } from './get_time_unit_label';
+import { TIME_UNITS } from '../../application/constants';
 
 export const getTimeOptions = (unitSize: number) =>
   Object.entries(TIME_UNITS).map(([_key, value]) => {

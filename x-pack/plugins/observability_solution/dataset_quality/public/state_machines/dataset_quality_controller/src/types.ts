@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { DoneInvokeEvent } from 'xstate';
+import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import { QualityIndicators } from '../../../../common/types';
+import { Integration } from '../../../../common/data_streams_stats/integration';
+import { Direction, SortField } from '../../../hooks';
+import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
   DashboardType,
   DataStreamDegradedDocsStatServiceResponse,
-  DataStreamDetails,
   DataStreamSettings,
-  DataStreamStat,
+  DataStreamDetails,
   DataStreamStatServiceResponse,
+  IntegrationsResponse,
+  DataStreamStat,
   DataStreamStatType,
   GetNonAggregatableDataStreamsResponse,
-  IntegrationsResponse,
 } from '../../../../common/data_streams_stats';
-import { Integration } from '../../../../common/data_streams_stats/integration';
-import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
-import { QualityIndicators } from '../../../../common/types';
-import { Direction, SortField } from '../../../hooks';
 
 export type FlyoutDataset = Omit<
   DataStreamStat,

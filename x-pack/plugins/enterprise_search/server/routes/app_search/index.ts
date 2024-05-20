@@ -17,7 +17,7 @@ import { registerCrawlerEntryPointRoutes } from './crawler_entry_points';
 import { registerCrawlerSitemapRoutes } from './crawler_sitemaps';
 import { registerCredentialsRoutes } from './credentials';
 import { registerCurationsRoutes } from './curations';
-import { registerDocumentRoutes, registerDocumentsRoutes } from './documents';
+import { registerDocumentsRoutes, registerDocumentRoutes } from './documents';
 import { registerEnginesRoutes } from './engines';
 import { registerOnboardingRoutes } from './onboarding';
 import { registerResultSettingsRoutes } from './result_settings';

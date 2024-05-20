@@ -7,9 +7,9 @@
 
 import type {
   FilePickerState,
-  ReducerState,
-  ResultStepState,
   ValidationStepState,
+  ResultStepState,
+  ReducerState,
 } from './reducer';
 import { FileUploaderSteps } from './types';
 

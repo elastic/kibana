@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import numeral from '@elastic/numeral';
-import dateMath from '@kbn/datemath';
 import Handlebars, { type HelperOptions, type HelperDelegate } from '@kbn/handlebars';
-import { url } from '@kbn/kibana-utils-plugin/public';
 import { encode } from '@kbn/rison';
+import dateMath from '@kbn/datemath';
 import moment, { Moment } from 'moment';
+import numeral from '@elastic/numeral';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 const handlebars = Handlebars.create();
 

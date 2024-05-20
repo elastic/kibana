@@ -7,13 +7,13 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
+import { throwBadResponse } from '../../../model/helpers';
+import type { ModelStage } from '../types';
+import { logProgress, setProgressTotal } from '../../../model/progress';
 import {
   extractDiscardedCorruptDocs,
   extractTransformFailuresReason,
 } from '../../../model/extract_errors';
-import { throwBadResponse } from '../../../model/helpers';
-import { logProgress, setProgressTotal } from '../../../model/progress';
-import type { ModelStage } from '../types';
 
 export const outdatedDocumentsSearchRead: ModelStage<
   'OUTDATED_DOCUMENTS_SEARCH_READ',

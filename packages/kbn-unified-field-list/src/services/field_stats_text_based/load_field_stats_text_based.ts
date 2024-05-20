@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { AggregateQuery } from '@kbn/es-query';
-import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
-import { ESQL_LATEST_VERSION, getESQLWithSafeLimit } from '@kbn/esql-utils';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
-import { ESQL_SAFE_LIMIT } from '../../constants';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
+import type { AggregateQuery } from '@kbn/es-query';
+import { ESQL_LATEST_VERSION, getESQLWithSafeLimit } from '@kbn/esql-utils';
 import type { FieldStatsResponse } from '../../types';
 import {
-  SearchHandlerTextBased,
   buildSearchFilter,
+  SearchHandlerTextBased,
   fetchAndCalculateFieldStats,
 } from './field_stats_utils_text_based';
+import { ESQL_SAFE_LIMIT } from '../../constants';
 
 interface FetchFieldStatsParamsTextBased {
   services: {

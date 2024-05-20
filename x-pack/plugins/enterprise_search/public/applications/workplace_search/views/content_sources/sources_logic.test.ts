@@ -24,9 +24,9 @@ import { AppLogic } from '../../app_logic';
 
 import { staticSourceData } from './source_data';
 import {
-  POLLING_INTERVAL,
   SourcesLogic,
   fetchSourceStatuses,
+  POLLING_INTERVAL,
   mergeServerAndStaticData,
 } from './sources_logic';
 

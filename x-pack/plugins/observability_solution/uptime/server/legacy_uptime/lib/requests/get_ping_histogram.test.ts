@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as intervalHelper from '../../../../common/lib/get_histogram_interval';
 import { getPingHistogram } from './get_ping_histogram';
+import * as intervalHelper from '../../../../common/lib/get_histogram_interval';
 import { getUptimeESMockClient } from './test_helpers';
 
 describe('getPingHistogram', () => {

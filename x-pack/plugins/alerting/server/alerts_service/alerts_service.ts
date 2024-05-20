@@ -5,47 +5,47 @@
  * 2.0.
  */
 
+import { isEmpty, isEqual, omit } from 'lodash';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { Observable } from 'rxjs';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isEmpty, isEqual, omit } from 'lodash';
-import { Observable } from 'rxjs';
-import type { AlertRuleData, LegacyAlertsClientParams } from '../alerts_client';
-import { AlertsClient } from '../alerts_client';
-import { IAlertsClient } from '../alerts_client/types';
 import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  DataStreamAdapter,
-  IRuleTypeAlerts,
-  RuleAlertData,
-} from '../types';
-import {
-  InitializationPromise,
-  ResourceInstallationHelper,
-  createResourceInstallationHelper,
-  errorResult,
-  successResult,
-} from './create_resource_installation_helper';
-import {
-  DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
+  DEFAULT_ALERTS_ILM_POLICY,
 } from './default_lifecycle_policy';
-import {
-  InstallShutdownError,
-  createConcreteWriteIndex,
-  createOrUpdateComponentTemplate,
-  createOrUpdateIlmPolicy,
-  createOrUpdateIndexTemplate,
-  getIndexTemplate,
-  installWithTimeout,
-} from './lib';
-import { SetAlertsToUntrackedParams, setAlertsToUntracked } from './lib/set_alerts_to_untracked';
 import {
   getComponentTemplate,
   getComponentTemplateName,
   getIndexTemplateAndPattern,
 } from './resource_installer_utils';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  IRuleTypeAlerts,
+  RuleAlertData,
+  DataStreamAdapter,
+} from '../types';
+import {
+  createResourceInstallationHelper,
+  errorResult,
+  InitializationPromise,
+  ResourceInstallationHelper,
+  successResult,
+} from './create_resource_installation_helper';
+import {
+  createOrUpdateIlmPolicy,
+  createOrUpdateComponentTemplate,
+  getIndexTemplate,
+  createOrUpdateIndexTemplate,
+  createConcreteWriteIndex,
+  installWithTimeout,
+  InstallShutdownError,
+} from './lib';
+import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
+import { AlertsClient } from '../alerts_client';
+import { IAlertsClient } from '../alerts_client/types';
+import { setAlertsToUntracked, SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -100,7 +100,7 @@ interface IAlertsService {
     LegacyState extends AlertInstanceState,
     LegacyContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string,
+    RecoveryActionGroupId extends string
   >(
     opts: CreateAlertsClientParams
   ): Promise<IAlertsClient<
@@ -150,7 +150,7 @@ export class AlertsService implements IAlertsService {
     LegacyState extends AlertInstanceState,
     LegacyContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string,
+    RecoveryActionGroupId extends string
   >(
     opts: CreateAlertsClientParams
   ): Promise<IAlertsClient<

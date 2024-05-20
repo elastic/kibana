@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
 
 import { useAllCasesNavigation } from '../../common/navigation';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { LinkIcon } from '../link_icon';
 import { Title } from './title';
 import * as i18n from './translations';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface HeaderProps {
   border?: boolean;
@@ -31,16 +31,14 @@ export interface HeaderPageProps extends HeaderProps {
 
 const getHeaderCss = (euiTheme: EuiThemeComputed<{}>, border?: boolean) => css`
   margin-bottom: ${euiTheme.size.l};
-  ${
-    border &&
-    css`
+  ${border &&
+  css`
     border-bottom: ${euiTheme.border.thin};
     padding-bottom: ${euiTheme.size.l};
     .euiProgress {
       top: ${euiTheme.size.l};
     }
-  `
-  }
+  `}
 `;
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({

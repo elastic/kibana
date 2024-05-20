@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import { get, omit } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
+import type { CoreStart } from '@kbn/core/public';
 
-import type { PinnedEventResponse } from '../../../../common/api/timeline';
 import type { State } from '../../../common/store/types';
-import { persistPinnedEvent } from '../../containers/pinned_event/api';
+import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
+import type { PinnedEventResponse } from '../../../../common/api/timeline';
 import {
-  endTimelineSaving,
   pinEvent,
-  showCallOutUnauthorizedMsg,
-  startTimelineSaving,
+  endTimelineSaving,
   unPinEvent,
   updateTimeline,
+  startTimelineSaving,
+  showCallOutUnauthorizedMsg,
 } from '../actions';
-import { selectTimelineById } from '../selectors';
+import { persistPinnedEvent } from '../../containers/pinned_event/api';
 import { ensureTimelineIsSaved, refreshTimelines } from './helpers';
 
 type PinnedEventAction = ReturnType<typeof pinEvent | typeof unPinEvent>;

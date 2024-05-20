@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { useMemo, useState } from 'react';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 
 import { IdFormat } from '../../../../common/http_api/latest';
 import { LogEntryExample } from '../../../../common/log_analysis';

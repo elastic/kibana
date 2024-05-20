@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/es-query';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EnhancedStore } from '@reduxjs/toolkit';
+import type { Query } from '@kbn/es-query';
 import {
-  LensRootStore,
-  addLayer,
-  removeDimension,
-  removeOrClearLayer,
-  selectChangesApplied,
-  selectTriggerApplyChanges,
-  setState,
-  switchAndCleanDatasource,
   switchDatasource,
+  switchAndCleanDatasource,
   switchVisualization,
+  setState,
   updateDatasourceState,
   updateVisualizationState,
+  removeOrClearLayer,
+  addLayer,
+  LensRootStore,
+  selectTriggerApplyChanges,
+  selectChangesApplied,
+  removeDimension,
 } from '.';
-import { layerTypes } from '../../common/layer_types';
-import { defaultState, makeLensStore, mockStoreDeps } from '../mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
 import {
   Datasource,
   DatasourceMap,
@@ -33,6 +32,7 @@ import {
 } from '../types';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
 import { DataViewsState, LensAppState } from './types';
+import { layerTypes } from '../../common/layer_types';
 
 describe('lensSlice', () => {
   let store: EnhancedStore<{ lens: LensAppState }>;

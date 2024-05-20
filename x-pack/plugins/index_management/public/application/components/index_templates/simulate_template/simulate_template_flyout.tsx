@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiFlyoutHeader,
+  EuiTitle,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
   EuiTextColor,
-  EuiTitle,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useCallback, useEffect, useRef } from 'react';
 
-import { CheckBoxField, Form, FormDataProvider, getUseField, useForm } from '../shared_imports';
-import { Filters, SimulateTemplate } from './simulate_template';
+import { useForm, Form, getUseField, CheckBoxField, FormDataProvider } from '../shared_imports';
+import { SimulateTemplate, Filters } from './simulate_template';
 
 const CheckBox = getUseField({ component: CheckBoxField });
 

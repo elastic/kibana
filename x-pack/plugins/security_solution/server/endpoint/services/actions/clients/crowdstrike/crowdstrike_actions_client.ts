@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import {
-  CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
+  CROWDSTRIKE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
 } from '../../..';
-import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { stringify } from '../../../../utils/stringify';
+import { ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
 } from '../../../../../../common/endpoint/types';
-import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
-import { stringify } from '../../../../utils/stringify';
-import { ELASTIC_RESPONSE_ACTION_MESSAGE } from '../../utils';
-import { ResponseActionsClientError } from '../errors';
+import type { IsolationRouteRequestBody } from '../../../../../../common/api/endpoint';
 import type {
   ResponseActionsClientOptions,
-  ResponseActionsClientValidateRequestResponse,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+  ResponseActionsClientValidateRequestResponse,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
+import { ELASTIC_RESPONSE_ACTION_MESSAGE } from '../../utils';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -55,7 +55,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {},
+    TMeta extends {} = {}
   >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,

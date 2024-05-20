@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/public';
 import { DataViewFieldBase } from '@kbn/es-query';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 type IndexedFieldItemBase = Partial<DataViewField> & DataViewFieldBase;
 

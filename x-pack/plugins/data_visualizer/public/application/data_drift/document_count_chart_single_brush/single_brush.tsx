@@ -7,11 +7,11 @@
 
 import React, { useEffect, useRef, type FC } from 'react';
 
-import { useEuiTheme } from '@elastic/eui';
 import * as d3Brush from 'd3-brush';
 import * as d3Scale from 'd3-scale';
 import * as d3Selection from 'd3-selection';
 import * as d3Transition from 'd3-transition';
+import { useEuiTheme } from '@elastic/eui';
 
 // TODO Consolidate with similar component `DualBrush` in
 // x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx

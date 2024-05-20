@@ -16,6 +16,8 @@
       "features",
       "developerExamples"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

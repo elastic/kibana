@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsModelChange } from './model_change';
 import type { SavedObjectsModelVersionSchemaDefinitions } from './schemas';
+import type { SavedObjectsModelChange } from './model_change';
 
 /**
  * Represents a model version of a given saved object type.

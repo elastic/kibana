@@ -112,7 +112,9 @@
                 "tags": [],
                 "label": "settings",
                 "description": [],
-                "signature": ["Record<string, any> | undefined"],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
                 "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -227,7 +229,9 @@
                 "tags": [],
                 "label": "settings",
                 "description": [],
-                "signature": ["Record<string, any> | undefined"],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
                 "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
                 "deprecated": false,
                 "trackAdoption": false

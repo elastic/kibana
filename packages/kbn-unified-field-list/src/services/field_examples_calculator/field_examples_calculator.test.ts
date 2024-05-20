@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { keys, clone, uniq, filter, map, flatten } from 'lodash';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { clone, filter, flatten, keys, map, uniq } from 'lodash';
 import {
-  type FieldValueCountsParams,
   getFieldExampleBuckets,
-  getFieldValues,
   groupValues,
+  getFieldValues,
+  type FieldValueCountsParams,
 } from './field_examples_calculator';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 const hitsAsValues: Array<Record<string, string | number | string[] | object>> = [
   {

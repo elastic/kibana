@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EventEmitter } from 'events';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
 import React, {
   memo,
   useMemo,
@@ -18,20 +14,24 @@ import React, {
   KeyboardEventHandler,
   useEffect,
 } from 'react';
+import { isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EventEmitter } from 'events';
 
-import type { TimeRange } from '@kbn/es-query';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
-  PersistedState,
   Vis,
+  PersistedState,
   VisualizeEmbeddableContract,
 } from '@kbn/visualizations-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
-import { DefaultEditorAggCommonProps } from '../agg_common_props';
-import { DefaultEditorControls } from './controls';
+import type { TimeRange } from '@kbn/es-query';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DefaultEditorNavBar } from './navbar';
+import { DefaultEditorControls } from './controls';
+import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
+import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
-import { discardChanges, setStateParamValue, useEditorFormState, useEditorReducer } from './state';
 import { useOptionTabs } from './use_option_tabs';
 
 interface DefaultEditorSideBarProps {

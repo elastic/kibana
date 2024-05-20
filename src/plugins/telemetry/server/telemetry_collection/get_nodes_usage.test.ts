@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { TIMEOUT } from './constants';
 import { getNodesUsage } from './get_nodes_usage';
+import { TIMEOUT } from './constants';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const mockedNodesFetchResponse = {
   cluster_name: 'test cluster',

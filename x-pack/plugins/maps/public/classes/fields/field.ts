@@ -10,8 +10,8 @@ import type {
   AggregationsPercentilesAggregation,
   AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FIELD_ORIGIN } from '../../../common/constants';
 import { TileMetaFeature } from '../../../common/descriptor_types';
+import { FIELD_ORIGIN } from '../../../common/constants';
 import { IVectorSource } from '../sources/vector_source';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 

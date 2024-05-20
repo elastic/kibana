@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PackageCustomExtensionComponent } from '@kbn/fleet-plugin/public';
 import { lazy } from 'react';
+import type { PackageCustomExtensionComponent } from '@kbn/fleet-plugin/public';
 import type { FleetUiExtensionGetterOptions } from './types';
 
 export const getLazyEndpointPackageCustomExtension = ({

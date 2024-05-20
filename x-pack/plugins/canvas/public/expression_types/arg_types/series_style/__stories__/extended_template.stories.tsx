@@ -6,12 +6,12 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { array, boolean, radios } from '@storybook/addon-knobs';
 import { storiesOf } from '@storybook/react';
+import { array, radios, boolean } from '@storybook/addon-knobs';
 import React from 'react';
 
-import { ExpressionAstExpression } from '../../../../../types';
 import { ExtendedTemplate } from '../extended_template';
+import { ExpressionAstExpression } from '../../../../../types';
 
 const defaultExpression: ExpressionAstExpression = {
   type: 'expression',

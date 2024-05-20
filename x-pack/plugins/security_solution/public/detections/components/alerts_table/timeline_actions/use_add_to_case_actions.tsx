@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import React, { useCallback, useMemo } from 'react';
 import { APP_ID } from '../../../../../common';
-import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
-import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
 import {
   AlertsCasesTourSteps,
-  SecurityStepId,
   sampleCase,
+  SecurityStepId,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { useKibana } from '../../../../common/lib/kibana';
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
 

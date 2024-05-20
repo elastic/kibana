@@ -22,8 +22,8 @@ import { useProfilingDependencies } from '../../../components/contexts/profiling
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
-import { HostBreakdownChart } from './host_breakdown_chart';
 import { HostsTable } from './hosts_table';
+import { HostBreakdownChart } from './host_breakdown_chart';
 
 interface Props {
   hasDistinctProbabilisticValues: boolean;

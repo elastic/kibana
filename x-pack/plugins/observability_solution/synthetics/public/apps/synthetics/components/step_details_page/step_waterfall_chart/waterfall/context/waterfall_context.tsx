@@ -19,8 +19,8 @@ import {
   WaterfallDataEntry,
   WaterfallMetadata,
 } from '../../../common/network_data/types';
+import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../waterfall_flyout/use_flyout';
 import { SidebarItem } from '../../../common/network_data/types';
-import { OnElementClick, OnProjectionClick, OnSidebarClick } from '../waterfall_flyout/use_flyout';
 
 export type MarkerItems = Array<{
   id:

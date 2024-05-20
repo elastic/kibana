@@ -22,11 +22,11 @@ import {
   ABOUT_INVESTIGATION_NOTES,
   ABOUT_RULE_DESCRIPTION,
   ADDITIONAL_LOOK_BACK_DETAILS,
-  DEFINITION_DETAILS,
   EQL_QUERY_DETAILS,
+  DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
-  INTERVAL_ABBR_VALUE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -39,16 +39,10 @@ import {
   SEVERITY_DETAILS,
   TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
-  removeExternalLinkText,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
-import {
-  EQL_OPTIONS_POPOVER_TRIGGER,
-  EQL_OPTIONS_TIMESTAMP_INPUT,
-  EQL_QUERY_INPUT,
-  EQL_QUERY_VALIDATION_ERROR,
-  RULES_CREATION_FORM,
-} from '../../../../screens/create_new_rule';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
@@ -63,9 +57,15 @@ import {
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import {
+  EQL_OPTIONS_POPOVER_TRIGGER,
+  EQL_OPTIONS_TIMESTAMP_INPUT,
+  EQL_QUERY_INPUT,
+  EQL_QUERY_VALIDATION_ERROR,
+  RULES_CREATION_FORM,
+} from '../../../../screens/create_new_rule';
 
 describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

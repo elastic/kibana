@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { screen, fireEvent, within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
-  createMockFramePublicAPI,
   createMockVisualization,
+  mockStoreDeps,
+  createMockFramePublicAPI,
   mockDatasourceMap,
   mockDatasourceStates,
-  mockStoreDeps,
   renderWithReduxStore,
 } from '../../../../mocks';
 
-import { LensAppState, applyChanges } from '../../../../state_management';
-import { DatasourcePublicAPI, DatasourceSuggestion, SuggestionRequest } from '../../../../types';
+import { DatasourcePublicAPI, SuggestionRequest, DatasourceSuggestion } from '../../../../types';
 import { ChartSwitch, ChartSwitchProps } from './chart_switch';
+import { LensAppState, applyChanges } from '../../../../state_management';
 
 const mockFrame = (layers: string[]) => ({
   ...createMockFramePublicAPI(),

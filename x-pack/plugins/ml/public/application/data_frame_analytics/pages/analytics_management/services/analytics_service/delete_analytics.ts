@@ -10,7 +10,7 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { ml } from '../../../../../services/ml_api_service';
 import type { ToastNotificationService } from '../../../../../services/toast_notification_service';
-import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
+import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
 import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
 
 export const deleteAnalytics = async (

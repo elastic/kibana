@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render } from '@testing-library/react';
+import { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
+import { EmbeddedMap } from './embedded_map';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MemoryRouter } from 'react-router-dom';
 import { MapTypes } from '../../../../../../common/mobile/constants';
-import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
-import { EmbeddedMap } from './embedded_map';
 
 describe('Embedded Map', () => {
   it('it renders', async () => {

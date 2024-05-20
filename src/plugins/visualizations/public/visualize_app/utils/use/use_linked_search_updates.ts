@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EventEmitter } from 'events';
-import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EventEmitter } from 'events';
 
 import { Filter, Query } from '@kbn/es-query';
 import {
+  VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
-  VisualizeServices,
 } from '../../types';
 
 export const useLinkedSearchUpdates = (

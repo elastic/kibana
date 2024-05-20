@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { asyncMap } from '@kbn/std';
 import _ from 'lodash';
+import { asyncMap } from '@kbn/std';
 
 function allSeriesContainKey(seriesList, key) {
   const containsKeyInitialValue = true;

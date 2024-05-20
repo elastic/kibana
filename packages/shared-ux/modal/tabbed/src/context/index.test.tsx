@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import React, { type ComponentProps, type ComponentType } from 'react';
-import { ModalContextProvider, useModalContext } from '.';
+import { renderHook, act } from '@testing-library/react-hooks';
+import { useModalContext, ModalContextProvider } from '.';
 
 type ModalContextProviderProps = ComponentProps<typeof ModalContextProvider>;
 

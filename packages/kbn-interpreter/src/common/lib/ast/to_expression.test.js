@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { toExpression } from './to_expression';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, unset } from 'lodash';
-import { toExpression } from './to_expression';
 
 describe('toExpression', () => {
   describe('single expression', () => {

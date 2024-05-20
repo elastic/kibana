@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { get, omit } from 'lodash';
+import { omit, get } from 'lodash';
 import { Filter, FilterStateStore } from '../build_filters';
 
 /**

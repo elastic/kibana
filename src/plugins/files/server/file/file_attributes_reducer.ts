@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FileJSON, UpdatableFileMetadata } from '../../common';
 import { FileHashObj } from '../saved_objects/file';
+import { FileJSON, UpdatableFileMetadata } from '../../common';
 
 export type Action =
   | {

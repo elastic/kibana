@@ -11,16 +11,16 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
-  EuiSelectable,
   useGeneratedHtmlId,
+  EuiSelectable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
-import { useKibana } from '../../../common/lib/kibana';
 import { SEVERITY_UI_SORT_ORDER } from '../../common/utils';
-import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
-import { RiskScoreLevel } from './common';
+import type { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
 import type { SeverityCount } from './types';
+import { RiskScoreLevel } from './common';
+import { ENTITY_RISK_LEVEL } from '../risk_score/translations';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface SeverityItems {
   risk: RiskSeverity;

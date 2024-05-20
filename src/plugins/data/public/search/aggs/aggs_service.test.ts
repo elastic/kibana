@@ -10,17 +10,17 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { BucketAggType, MetricAggType, getAggTypes } from '../../../common';
 import { dataPluginMock } from '../../mocks';
 
-import { createNowProviderMock } from '../../now_provider/mocks';
 import {
   AggsService,
   AggsSetupDependencies,
   AggsStartDependencies,
   createGetConfig,
 } from './aggs_service';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 const { uiSettings } = coreMock.createSetup();
 
@@ -60,11 +60,11 @@ describe('AggsService - public', () => {
       const setup = service.setup(setupDeps);
       setup.types.registerBucket(
         'foo',
-        () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>
+        () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
       );
       setup.types.registerMetric(
         'bar',
-        () => ({ name: 'bar', type: 'metrics' }) as MetricAggType<any>
+        () => ({ name: 'bar', type: 'metrics' } as MetricAggType<any>)
       );
 
       const start = service.start(startDeps);
@@ -104,11 +104,11 @@ describe('AggsService - public', () => {
       const setup = service.setup(setupDeps);
       setup.types.registerBucket(
         'foo',
-        () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>
+        () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
       );
       setup.types.registerMetric(
         'bar',
-        () => ({ name: 'bar', type: 'metrics' }) as MetricAggType<any>
+        () => ({ name: 'bar', type: 'metrics' } as MetricAggType<any>)
       );
 
       const start = service.start(startDeps);

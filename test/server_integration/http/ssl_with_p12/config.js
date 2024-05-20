@@ -7,7 +7,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { CA_CERT_PATH, KBN_P12_PASSWORD, KBN_P12_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH, KBN_P12_PATH, KBN_P12_PASSWORD } from '@kbn/dev-utils';
 import { createKibanaSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { UseAllLiveQueriesConfig, useAllLiveQueries } from './actions/use_all_live_queries';
+import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
+import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type {
   getLazyLiveQueryField,
   getLazyOsqueryAction,
   getLazyOsqueryResponseActionTypeForm,
   getLazyOsqueryResult,
 } from './shared_components';
+import type { useAllLiveQueries, UseAllLiveQueriesConfig } from './actions/use_all_live_queries';
 import type { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

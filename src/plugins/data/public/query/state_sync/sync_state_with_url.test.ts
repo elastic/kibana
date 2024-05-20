@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import {
-  IKbnUrlStateStorage,
-  Storage,
-  createKbnUrlStateStorage,
-} from '@kbn/kibana-utils-plugin/public';
-import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { History, createBrowserHistory } from 'history';
 import { Subscription } from 'rxjs';
-import { UI_SETTINGS } from '../../../common';
-import { createNowProviderMock } from '../../now_provider/mocks';
+import { createBrowserHistory, History } from 'history';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
+import { UI_SETTINGS } from '../../../common';
+import { coreMock } from '@kbn/core/public/mocks';
+import {
+  createKbnUrlStateStorage,
+  IKbnUrlStateStorage,
+  Storage,
+} from '@kbn/kibana-utils-plugin/public';
 import { QueryService, QueryStart } from '../query_service';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
 import { GlobalQueryStateFromUrl } from './types';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();

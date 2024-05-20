@@ -1,5 +1,3 @@
-import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +5,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
  * 2.0.
  */
 import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
-import type { PluginSetupContract, PluginStartContract } from '@kbn/features-plugin/server';
-import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
+import type { PluginSetupContract, PluginStartContract } from '@kbn/features-plugin/server';
 import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
@@ -19,6 +15,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 import type { ProductTier } from '../common/product';

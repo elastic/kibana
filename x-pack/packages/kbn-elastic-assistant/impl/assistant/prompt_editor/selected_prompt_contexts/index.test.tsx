@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
-import { Props, SelectedPromptContexts } from '.';
 import { mockAlertPromptContext, mockEventPromptContext } from '../../../mock/prompt_context';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import type { SelectedPromptContext } from '../../prompt_context/types';
+import { Props, SelectedPromptContexts } from '.';
 
 const defaultProps: Props = {
   isNewConversation: false,

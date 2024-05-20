@@ -7,15 +7,13 @@
 
 import type { Client } from '@elastic/elasticsearch';
 
-import { kibanaPackageJson } from '@kbn/repo-info';
-import type { KbnClient } from '@kbn/test/src/kbn_client';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { DownloadedAgentInfo } from '../../../../scripts/endpoint/common/agent_downloads_service';
-import {
-  downloadAndStoreAgent,
-  isAgentDownloadFromDiskAvailable,
-} from '../../../../scripts/endpoint/common/agent_downloads_service';
+import type { KbnClient } from '@kbn/test/src/kbn_client';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
+import type { HostVm } from '../../../../scripts/endpoint/common/types';
+import type { BaseVmCreateOptions } from '../../../../scripts/endpoint/common/vm_services';
+import { createVm } from '../../../../scripts/endpoint/common/vm_services';
 import {
   fetchAgentPolicyEnrollmentKey,
   fetchFleetAvailableVersions,
@@ -25,9 +23,11 @@ import {
   getOrCreateDefaultAgentPolicy,
   waitForHostToEnroll,
 } from '../../../../scripts/endpoint/common/fleet_services';
-import type { HostVm } from '../../../../scripts/endpoint/common/types';
-import type { BaseVmCreateOptions } from '../../../../scripts/endpoint/common/vm_services';
-import { createVm } from '../../../../scripts/endpoint/common/vm_services';
+import type { DownloadedAgentInfo } from '../../../../scripts/endpoint/common/agent_downloads_service';
+import {
+  downloadAndStoreAgent,
+  isAgentDownloadFromDiskAvailable,
+} from '../../../../scripts/endpoint/common/agent_downloads_service';
 
 export interface CreateAndEnrollEndpointHostCIOptions
   extends Pick<BaseVmCreateOptions, 'disk' | 'cpus' | 'memory'> {

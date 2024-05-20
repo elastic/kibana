@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiSuperSelect } from '@elastic/eui';
-import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/public';
-import { shallow } from 'enzyme';
 import React from 'react';
 import { LegendSizeSettings } from './legend_size_settings';
+import { LegendSize, DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
+import { EuiSuperSelect } from '@elastic/eui';
+import { shallow } from 'enzyme';
 
 describe('legend size settings', () => {
   it('select is disabled if not vertical legend', () => {

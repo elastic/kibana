@@ -16,13 +16,13 @@ import {
   SCHEDULE_CONTINUE_BUTTON,
 } from '../../../../screens/create_new_rule';
 import {
+  MAX_SIGNALS_DETAILS,
   DESCRIPTION_SETUP_GUIDE_BUTTON,
   DESCRIPTION_SETUP_GUIDE_CONTENT,
-  MAX_SIGNALS_DETAILS,
   RULE_NAME_HEADER,
 } from '../../../../screens/rule_details';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createTimeline } from '../../../../tasks/api_calls/timelines';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   expandAdvancedSettings,
@@ -44,8 +44,8 @@ import {
   importSavedQuery,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import { visit } from '../../../../tasks/navigation';
 
 // This test is meant to test touching all the common various components in rule creation
 // to ensure we don't miss any changes that maybe affect one of these more obscure UI components

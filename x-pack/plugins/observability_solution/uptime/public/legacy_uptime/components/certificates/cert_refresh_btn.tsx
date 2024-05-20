@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useContext } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,9 +14,8 @@ import {
   EuiHideFor,
   EuiShowFor,
 } from '@elastic/eui';
-import React, { useContext } from 'react';
-import { UptimeRefreshContext } from '../../contexts';
 import * as labels from '../../pages/translations';
+import { UptimeRefreshContext } from '../../contexts';
 
 export const CertRefreshBtn = () => {
   const { refreshApp } = useContext(UptimeRefreshContext);

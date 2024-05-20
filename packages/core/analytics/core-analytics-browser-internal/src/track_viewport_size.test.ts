@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type Subscription, firstValueFrom, take, toArray } from 'rxjs';
+import { firstValueFrom, take, type Subscription, toArray } from 'rxjs';
 import { analyticsClientMock } from './analytics_service.test.mocks';
 import { trackViewportSize } from './track_viewport_size';
 

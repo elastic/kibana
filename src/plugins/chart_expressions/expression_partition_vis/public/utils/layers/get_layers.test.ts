@@ -9,8 +9,8 @@
 import { ArrayEntry, ArrayNode } from '@elastic/charts';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { BucketColumns, ChartTypes } from '../../../common/types';
-import { getPaletteRegistry } from '../../__mocks__/palettes';
 import { createMockPieParams, createMockVisData } from '../../mocks';
+import { getPaletteRegistry } from '../../__mocks__/palettes';
 import { getLayers } from './get_layers';
 
 describe('getLayers', () => {

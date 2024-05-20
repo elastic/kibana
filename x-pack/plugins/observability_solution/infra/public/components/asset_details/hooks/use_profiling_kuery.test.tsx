@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
-import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useProfilingKuery } from './use_profiling_kuery';
+import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 
 jest.mock('./use_asset_details_render_props');
 

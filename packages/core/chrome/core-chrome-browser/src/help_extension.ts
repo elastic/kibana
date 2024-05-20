@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { EuiButtonEmptyProps } from '@elastic/eui';
 import type React from 'react';
+import type { EuiButtonEmptyProps } from '@elastic/eui';
 
 /** @public */
 export interface ChromeHelpMenuActions {

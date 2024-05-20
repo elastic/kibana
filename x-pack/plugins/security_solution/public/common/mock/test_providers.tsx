@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
 import { euiDarkVars } from '@kbn/ui-theme';
+import { I18nProvider } from '@kbn/i18n-react';
 
+import React from 'react';
 import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
-import type { Capabilities } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
 import { ThemeProvider } from 'styled-components';
+import type { Capabilities } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { TestProvider as ExpandableFlyoutTestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { ASSISTANT_FEATURE_ID, CASES_FEATURE_ID } from '../../../common/constants';
-import { ConsoleManager } from '../../management/components/console';
-import type { FieldHook } from '../../shared_imports';
-import type { StartServices } from '../../types';
-import { MockDiscoverInTimelineContext } from '../components/discover_in_timeline/mocks/discover_in_timeline_provider';
-import { UpsellingProvider } from '../components/upselling_provider';
-import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
 import { useKibana } from '../lib/kibana';
+import { UpsellingProvider } from '../components/upselling_provider';
+import { MockAssistantProvider } from './mock_assistant_provider';
+import { ConsoleManager } from '../../management/components/console';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,
 } from '../lib/kibana/kibana_react.mock';
-import { createMockStore } from './create_store';
-import { MockAssistantProvider } from './mock_assistant_provider';
+import type { FieldHook } from '../../shared_imports';
 import { localStorageMock } from './mock_local_storage';
+import { ASSISTANT_FEATURE_ID, CASES_FEATURE_ID } from '../../../common/constants';
+import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
+import { MockDiscoverInTimelineContext } from '../components/discover_in_timeline/mocks/discover_in_timeline_provider';
+import { createMockStore } from './create_store';
+import type { StartServices } from '../../types';
 
 interface Props {
   children?: React.ReactNode;

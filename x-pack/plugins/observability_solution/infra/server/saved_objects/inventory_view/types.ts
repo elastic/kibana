@@ -6,8 +6,8 @@
  */
 
 import { inRangeRt, isoToEpochRt, nonEmptyStringRt } from '@kbn/io-ts-utils';
-import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import * as rt from 'io-ts';
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 
 export const inventorySavedObjectColorPaletteRT = rt.keyof({
   status: null,

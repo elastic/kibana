@@ -13,16 +13,16 @@ import {
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   ThreatArray,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
-  createNonSecurityRule,
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
-  getCustomQueryRuleParams,
-  installPrebuiltRules,
   installPrebuiltRulesAndTimelines,
+  installPrebuiltRules,
+  getCustomQueryRuleParams,
+  createNonSecurityRule,
 } from '../../../utils';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { getCoverageOverview } from '../../../utils/rules/get_coverage_overview';
 
 export default ({ getService }: FtrProviderContext): void => {

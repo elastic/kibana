@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { BurnRateRuleParams } from '../../../../typings';
+import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { SloRulesBadge as Component, Props } from './slo_rules_badge';
+import { BurnRateRuleParams } from '../../../../typings';
 
 export default {
   component: Component,

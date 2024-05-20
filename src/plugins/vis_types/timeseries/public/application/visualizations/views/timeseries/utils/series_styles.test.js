@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAreaStyles, getBarStyles } from './series_styles';
+import { getBarStyles, getAreaStyles } from './series_styles';
 
 describe('src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js', () => {
   let bars;

@@ -9,9 +9,9 @@ import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { Subscription } from 'rxjs';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { createActionHandler } from './create_action_handler';
 import type { OsqueryActiveLicenses } from './validate_license';
 import { validateLicense } from './validate_license';
+import { createActionHandler } from './create_action_handler';
 
 export const createActionService = (osqueryContext: OsqueryAppContext) => {
   let licenseSubscription: Subscription | null = null;

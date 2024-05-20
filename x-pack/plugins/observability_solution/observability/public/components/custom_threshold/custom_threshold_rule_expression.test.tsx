@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { Query } from '@kbn/data-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { queryClient } from '@kbn/osquery-plugin/public/query_client';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';

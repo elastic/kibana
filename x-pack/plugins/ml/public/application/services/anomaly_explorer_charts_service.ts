@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
+import { map as mapObservable } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import type {
   InfluencersFilterQuery,
   MlEntityField,
   MlRecordForInfluencer,
 } from '@kbn/ml-anomaly-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { Observable } from 'rxjs';
-import { of } from 'rxjs';
-import { map as mapObservable } from 'rxjs';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { SeriesConfigWithMetadata } from '../../../common/types/results';
 
-import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import type { AppStateSelectedCells } from '../explorer/explorer_utils';
+import { SWIM_LANE_LABEL_WIDTH } from '../explorer/constants';
 
 import type { MlApiServices } from './ml_api_service';
 import type { MlResultsService } from './results_service';
@@ -69,7 +69,7 @@ export class AnomalyExplorerChartsService {
     return combinedResults
       .filter(isDefined)
       .filter((r) => r.job !== undefined && r.datafeed !== undefined)
-      .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed }) as CombinedJob);
+      .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed } as CombinedJob));
   }
 
   public loadDataForCharts$(

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { dump } from '../common/utils';
+import { generateVmName } from '../common/vm_services';
 import { createAndEnrollEndpointHost } from '../common/endpoint_host_services';
 import {
   addEndpointIntegrationToAgentPolicy,
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
-import { dump } from '../common/utils';
-import { generateVmName } from '../common/vm_services';
 import { getRuntimeServices } from './runtime';
 
 export const enrollEndpointHost = async (): Promise<string | undefined> => {

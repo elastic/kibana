@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiAccordion, EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { PingHeaders as HeadersProp } from '../../../../../../../common/runtime_types';
 
 interface Props {

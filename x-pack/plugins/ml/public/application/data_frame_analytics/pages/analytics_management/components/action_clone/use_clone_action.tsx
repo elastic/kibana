@@ -13,9 +13,9 @@ import type {
 } from '../analytics_list/common';
 
 import {
-  CloneActionName,
   cloneActionNameText,
   useNavigateToWizardWithClonedJob,
+  CloneActionName,
 } from './clone_action_name';
 
 export type CloneAction = ReturnType<typeof useCloneAction>;

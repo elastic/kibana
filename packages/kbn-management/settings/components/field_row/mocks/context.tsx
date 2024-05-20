@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
 import React, { ReactChild } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { I18nStart } from '@kbn/core-i18n-browser';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 
 import { createFieldInputServicesMock } from '@kbn/management-settings-components-field-input/mocks';
 import { FieldInputServices } from '@kbn/management-settings-components-field-input/mocks';

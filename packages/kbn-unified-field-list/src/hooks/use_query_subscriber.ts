@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useEffect, useState } from 'react';
-import type { SearchMode, TimeRangeUpdatesType } from '../types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getResolvedDateRange } from '../utils/get_resolved_date_range';
+import type { TimeRangeUpdatesType, SearchMode } from '../types';
 
 /**
  * Hook params

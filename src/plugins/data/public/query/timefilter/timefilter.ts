@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { PublicMethodsOf } from '@kbn/utility-types';
 import _ from 'lodash';
+import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
+import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
+import { NowProviderInternalContract } from '../../now_provider';
 import {
-  RefreshInterval,
   calculateBounds,
   getAbsoluteTimeRange,
-  getRelativeTime,
   getTime,
+  getRelativeTime,
+  RefreshInterval,
 } from '../../../common';
-import { NowProviderInternalContract } from '../../now_provider';
-import { AutoRefreshDoneFn, createAutoRefreshLoop } from './lib/auto_refresh_loop';
-import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import { TimeHistoryContract } from './time_history';
-import type { InputTimeRange, TimeRangeBounds, TimefilterConfig } from './types';
+import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 
 export type { AutoRefreshDoneFn };
 

@@ -6,8 +6,8 @@
  */
 
 import {
-  mockMultiIndexResponse,
   mockSingleIndexWithAliasesResponse,
+  mockMultiIndexResponse,
 } from '../../../__mocks__/fetch_indices.mock';
 
 import { IScopedClusterClient } from '@kbn/core/server';

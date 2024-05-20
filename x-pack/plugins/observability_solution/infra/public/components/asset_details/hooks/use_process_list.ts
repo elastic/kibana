@@ -12,9 +12,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../common/http_api';
-import { createPlainError, throwErrors } from '../../../../common/runtime_types';
-import { useSourceContext } from '../../../containers/metrics_source';
+import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
+import { useSourceContext } from '../../../containers/metrics_source';
 
 export interface SortBy {
   name: string;

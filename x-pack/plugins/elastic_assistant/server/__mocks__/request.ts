@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { CAPABILITIES, EVALUATE, KNOWLEDGE_BASE } from '../../common/constants';
 import {
   ConversationCreateProps,
   ConversationUpdateProps,
@@ -21,19 +22,18 @@ import {
   PostEvaluateRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
 import {
-  AnonymizationFieldCreateProps,
-  AnonymizationFieldUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import {
-  PromptCreateProps,
-  PromptUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { CAPABILITIES, EVALUATE, KNOWLEDGE_BASE } from '../../common/constants';
-import {
   getAppendConversationMessagesSchemaMock,
   getCreateConversationSchemaMock,
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
+import {
+  PromptCreateProps,
+  PromptUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import {
+  AnonymizationFieldCreateProps,
+  AnonymizationFieldUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,

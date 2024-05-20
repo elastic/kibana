@@ -11,9 +11,9 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
-import { RefreshInterval } from '@kbn/data-plugin/common';
 import { Serializable } from '@kbn/utility-types';
+import { RefreshInterval } from '@kbn/data-plugin/common';
+import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
 
 import { DashboardContentType } from '../types';
 

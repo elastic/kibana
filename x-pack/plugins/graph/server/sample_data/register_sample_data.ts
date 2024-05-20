@@ -6,10 +6,10 @@
  */
 
 import { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
-import { LicenseState } from '../lib/license_state';
+import { registerLogsSampleData, registerLogsSampleDataLink } from './logs';
 import { registerEcommerceSampleData, registerEcommerceSampleDataLink } from './ecommerce';
 import { registerFlightsSampleData, registerFlightsSampleDataLink } from './flights';
-import { registerLogsSampleData, registerLogsSampleDataLink } from './logs';
+import { LicenseState } from '../lib/license_state';
 
 export function registerSampleData(
   sampleDataRegistry: SampleDataRegistrySetup,

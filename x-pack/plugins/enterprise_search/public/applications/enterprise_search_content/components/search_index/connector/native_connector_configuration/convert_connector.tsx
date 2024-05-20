@@ -10,14 +10,14 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
+  EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiLink,
+  EuiButton,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

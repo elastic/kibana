@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
 import { ATTRIBUTE_SERVICE_KEY, AttributeServiceUnwrapResult } from './attribute_service';
 import { mockAttributeService } from './attribute_service.mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
 
 interface TestAttributes {
   title: string;

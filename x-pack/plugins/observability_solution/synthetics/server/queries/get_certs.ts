@@ -6,11 +6,11 @@
  */
 
 import { PromiseType } from 'utility-types';
+import { CertResult, GetCertsParams, Ping } from '../../common/runtime_types';
 import {
   getCertsRequestBody,
   processCertsResult,
 } from '../../common/requests/get_certs_request_body';
-import { CertResult, GetCertsParams, Ping } from '../../common/runtime_types';
 import type { UptimeEsClient } from '../lib';
 
 export const getSyntheticsCerts = async (

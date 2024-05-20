@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiButtonEmpty, EuiListGroup, EuiListGroupItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItem, EuiTitle, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type {
   ChromeProjectBreadcrumb,
-  CloudLinks,
   SolutionNavigationDefinitions,
+  CloudLinks,
 } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 export const getSolutionNavSwitcherBreadCrumb = ({
   definitions,

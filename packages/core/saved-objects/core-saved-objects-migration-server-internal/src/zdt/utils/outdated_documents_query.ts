@@ -7,8 +7,8 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 
 interface GetOutdatedDocumentsQueryOps {
   types: SavedObjectsType[];

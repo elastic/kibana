@@ -6,18 +6,18 @@
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import {
+  EuiPopover,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiPopover,
   EuiResizeObserver,
 } from '@elastic/eui';
 
-import { IngestionMethod, IngestionStatus } from '@kbn/search-connectors';
+import { IngestionStatus, IngestionMethod } from '@kbn/search-connectors';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../../../common/types/api';

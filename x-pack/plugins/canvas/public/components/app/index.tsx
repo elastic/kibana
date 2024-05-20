@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ScopedHistory } from '@kbn/core/public';
-import PropTypes from 'prop-types';
 import React, { FC, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { ScopedHistory } from '@kbn/core/public';
+import { useNavLinkService } from '../../services';
 // @ts-expect-error
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { CanvasRouter } from '../../routes';
-import { useNavLinkService } from '../../services';
 import { Flyouts } from '../flyouts';
 
 class ShortcutManagerContextWrapper extends React.Component {

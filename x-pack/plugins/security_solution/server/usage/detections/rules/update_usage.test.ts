@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getInitialRulesUsage } from './get_initial_usage';
 import type { RuleMetric, RulesTypeUsage } from './types';
 import { updateRuleUsage } from './update_usage';
+import { getInitialRulesUsage } from './get_initial_usage';
 
 interface StubRuleOptions {
   ruleType: string;

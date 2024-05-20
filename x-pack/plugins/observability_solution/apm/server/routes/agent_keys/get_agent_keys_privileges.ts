@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APMPluginStartDependencies } from '../../types';
 import { ApmPluginRequestHandlerContext } from '../typings';
+import { APMPluginStartDependencies } from '../../types';
 
 export interface AgentKeysPrivilegesResponse {
   areApiKeysEnabled: boolean;

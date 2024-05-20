@@ -6,8 +6,8 @@
  */
 
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../common/constants';
+import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
 import { IField } from '../../fields/field';
-import { StyleFieldsHelper, createStyleFieldsHelper } from './style_fields_helper';
 
 describe('StyleFieldHelper', () => {
   describe('isFieldDataTypeCompatibleWithStyleType', () => {

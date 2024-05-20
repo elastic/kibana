@@ -8,8 +8,8 @@
 import { APP_PATH } from '@kbn/security-solution-plugin/common';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-import { enableManagementCardsLanding } from './management_cards';
 import { initSideNavigation } from './side_navigation';
+import { enableManagementCardsLanding } from './management_cards';
 
 export const startNavigation = (services: Services) => {
   services.serverless.setProjectHome(APP_PATH);

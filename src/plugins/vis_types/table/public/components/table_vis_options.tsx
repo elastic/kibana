@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { get } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
 import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { get } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
 
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import {
-  NumberInputOption,
-  SelectOption,
   SwitchOption,
+  SelectOption,
+  NumberInputOption,
 } from '@kbn/vis-default-editor-plugin/public';
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { TableVisParams } from '../../common';
 import { totalAggregations } from './utils';
 

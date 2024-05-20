@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ServiceStatusLevels } from '@kbn/core-status-common';
+import type {
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+  ISavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsService,
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server-internal';
 import {
-  savedObjectsClientMock,
   savedObjectsRepositoryMock,
+  savedObjectsClientMock,
 } from '@kbn/core-saved-objects-api-server-mocks';
-import { serializerMock, typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { typeRegistryMock, serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
   savedObjectsExporterMock,
   savedObjectsImporterMock,
 } from '@kbn/core-saved-objects-import-export-server-mocks';
 import { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-} from '@kbn/core-saved-objects-server';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type {
-  InternalSavedObjectsServiceSetup,
-  InternalSavedObjectsServiceStart,
-  SavedObjectsService,
-} from '@kbn/core-saved-objects-server-internal';
-import { ServiceStatusLevels } from '@kbn/core-status-common';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 

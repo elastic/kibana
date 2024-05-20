@@ -7,8 +7,8 @@
 
 import { indexPatterns } from '@kbn/data-plugin/public';
 import './mocks';
+import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
 import { RemoteClustersFormField } from '../../app/components';
-import { delay, nextTick, pageHelpers, setupEnvironment } from './helpers';
 
 const { setup } = pageHelpers.followerIndexAdd;
 const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;

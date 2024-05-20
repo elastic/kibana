@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { loadRuleTypes } from '../services/rule_api';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../utils/kibana_react';
+import { loadRuleTypes } from '../services/rule_api';
 
 export const useGetRuleTypes = () => {
   const {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import useAsync from 'react-use/lib/useAsync';
 import type { LensBreakdownConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import useAsync from 'react-use/lib/useAsync';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 
 export const useMetricsCharts = ({ dataViewId }: { dataViewId?: string }) => {

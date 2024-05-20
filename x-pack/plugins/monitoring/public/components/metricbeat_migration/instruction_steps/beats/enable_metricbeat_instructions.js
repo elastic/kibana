@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
+import { EuiSpacer, EuiCodeBlock, EuiLink, EuiCallOut, EuiText } from '@elastic/eui';
+import { Monospace } from '../components/monospace';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { UNDETECTED_BEAT_TYPE } from './common_beats_instructions';
 import { Legacy } from '../../../../legacy_shims';
 import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
-import { Monospace } from '../components/monospace';
-import { UNDETECTED_BEAT_TYPE } from './common_beats_instructions';
 
 export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {
   const metricbeatConfigUrl = Legacy.shims.docLinks.links.metricbeat.configure;

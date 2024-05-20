@@ -8,16 +8,16 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 
+import { i18n } from '@kbn/i18n';
+import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
-import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover } from '@elastic/eui';
-import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import { PartitionVisParams } from '../../common/types';
 import { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
-import { getFilterPopoverTitle, getSeriesValueColumnIndex } from './filter_helpers';
+import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';
 
 const hasFilterCellAction = (actions: CellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);

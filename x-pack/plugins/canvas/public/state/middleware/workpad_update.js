@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { setDocTitle } from '../../lib/doc_title';
-import { getWindow } from '../../lib/get_window';
-import { fetchAllRenderables } from '../actions/elements';
 import { duplicatePage } from '../actions/pages';
+import { fetchAllRenderables } from '../actions/elements';
 import { setWriteable } from '../actions/workpad';
 import { getWorkpadName, isWriteable } from '../selectors/workpad';
+import { getWindow } from '../../lib/get_window';
+import { setDocTitle } from '../../lib/doc_title';
 
 export const workpadUpdate =
   ({ dispatch, getState }) =>

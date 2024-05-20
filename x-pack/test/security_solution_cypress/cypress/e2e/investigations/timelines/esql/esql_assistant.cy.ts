@@ -6,12 +6,12 @@
  */
 
 import { AI_ASSISTANT_BUTTON } from '../../../../screens/ai_assistant';
-import { DISCOVER_CONTAINER, DISCOVER_RESULT_HITS } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
+import { DISCOVER_CONTAINER, DISCOVER_RESULT_HITS } from '../../../../screens/discover';
 import { submitDiscoverSearchBar } from '../../../../tasks/discover';
+import { goToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
-import { goToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';

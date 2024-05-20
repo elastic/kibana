@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { EuiPageHeaderProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory, useRouteMatch } from 'react-router-dom';
 import { SYNTHETICS_SETTINGS_ROUTE } from '../../../../../common/constants';
 
 export type SettingsTabId =

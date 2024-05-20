@@ -11,15 +11,15 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { RISK_SCORE_CREATE_STORED_SCRIPT } from '../../../../common/constants';
 import {
+  serverMock,
   requestContextMock,
   requestMock,
-  serverMock,
 } from '../../detection_engine/routes/__mocks__';
 import { createStoredScriptRoute } from './create_script_route';
+import { RISK_SCORE_CREATE_STORED_SCRIPT } from '../../../../common/constants';
 import { createStoredScript } from './lib/create_script';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 const testScriptId = 'test-script';
 const testScriptSource =

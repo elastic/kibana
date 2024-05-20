@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText } from '@elastic/eui';
 
 export const ActionCompletionReturnButton = React.memo(
   ({ onClick, buttonText }: { onClick: () => void; buttonText: string }) => {

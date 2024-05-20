@@ -8,13 +8,13 @@
 import type {
   HasParentApi,
   HasType,
-  PublishesPanelTitle,
   PublishesUnifiedSearch,
+  PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import {
   apiIsOfType,
-  apiPublishesPanelTitle,
   apiPublishesUnifiedSearch,
+  apiPublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import { LensSavedObjectAttributes, ViewUnderlyingDataArgs } from '../embeddable';
 

@@ -7,12 +7,12 @@
 
 import { act } from 'react-dom/test-utils';
 
+import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common';
-import { TIME_UNITS } from '../../common/constants';
 import { PolicyForm } from '../../public/application/components/policy_form';
-import { pageHelpers, setupEnvironment } from './helpers';
-import { POLICY_EDIT } from './helpers/constant';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
+import { POLICY_EDIT } from './helpers/constant';
+import { TIME_UNITS } from '../../common/constants';
 
 const { setup } = pageHelpers.policyEdit;
 const { setup: setupPolicyAdd } = pageHelpers.policyAdd;

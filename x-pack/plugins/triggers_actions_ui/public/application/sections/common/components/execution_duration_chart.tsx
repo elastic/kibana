@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiEmptyPrompt,
+  EuiTitle,
+  EuiSelect,
+  EuiLoadingChart,
+} from '@elastic/eui';
+import { euiLightVars as lightEuiTheme } from '@kbn/ui-theme';
 import {
   Axis,
   BarSeries,
   Chart,
   CurveType,
-  LEGACY_LIGHT_THEME,
   LineSeries,
   Settings,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiPanel,
-  EuiSelect,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { euiLightVars as lightEuiTheme } from '@kbn/ui-theme';
 import { assign, fill } from 'lodash';
 import moment from 'moment';
-import React, { useCallback } from 'react';
 import { formatMillisForDisplay } from '../../../lib/execution_duration_utils';
 
 export interface ComponentOpts {

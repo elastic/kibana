@@ -6,10 +6,9 @@
  */
 import axios from 'axios';
 
-import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { RawAxiosRequestHeaders } from 'axios';
-import { createUsageCounterLabel } from './helpers';
+import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
 import type {
   ESClusterInfo,
@@ -18,6 +17,7 @@ import type {
   TelemetryChannel,
   TelemetryCounter,
 } from './types';
+import { createUsageCounterLabel } from './helpers';
 
 export interface SenderMetadata {
   telemetryUrl: string;

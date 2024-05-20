@@ -9,15 +9,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import classnames from 'classnames';
-import { useCurrentUser } from '../../../../lib/kibana';
+import {
+  GET_STARTED_PAGE_TITLE,
+  GET_STARTED_PAGE_SUBTITLE,
+  GET_STARTED_PAGE_DESCRIPTION,
+} from '../translations';
+import { useWelcomeHeaderStyles } from '../styles/welcome_header.styles';
 import type { ProductTier } from '../configs';
 import { useProjectFeaturesUrl } from '../hooks/use_project_features_url';
-import { useWelcomeHeaderStyles } from '../styles/welcome_header.styles';
-import {
-  GET_STARTED_PAGE_DESCRIPTION,
-  GET_STARTED_PAGE_SUBTITLE,
-  GET_STARTED_PAGE_TITLE,
-} from '../translations';
+import { useCurrentUser } from '../../../../lib/kibana';
 import { CurrentPlan } from './current_plan';
 
 const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ productTier }) => {

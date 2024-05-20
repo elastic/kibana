@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { ReactWrapper } from 'enzyme';
+import * as RxApi from 'rxjs';
+import { act } from 'react-dom/test-utils';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   stubDataView,
   stubDataViewWithoutTimeField,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { type Filter } from '@kbn/es-query';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import * as RxApi from 'rxjs';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DiscoverNoResults, DiscoverNoResultsProps } from './no_results';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 jest.spyOn(RxApi, 'lastValueFrom').mockImplementation(async () => ({
   rawResponse: {

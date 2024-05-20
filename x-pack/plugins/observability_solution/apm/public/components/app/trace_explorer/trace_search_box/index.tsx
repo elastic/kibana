@@ -1,5 +1,3 @@
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSelectOption } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +5,11 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSelectOption } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { TraceSearchQuery, TraceSearchType } from '../../../../../common/trace_explorer';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 import { EQLCodeEditor } from '../../../shared/monaco_code_editor';
 

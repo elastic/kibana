@@ -9,9 +9,9 @@
 import type { BasePath } from '../base_path_service';
 import { CdnConfig } from '../cdn_config';
 import {
-  removeSurroundingSlashes,
   suffixPathnameToPathname,
   suffixPathnameToURLPathname,
+  removeSurroundingSlashes,
 } from './util';
 
 export interface InternalStaticAssets {

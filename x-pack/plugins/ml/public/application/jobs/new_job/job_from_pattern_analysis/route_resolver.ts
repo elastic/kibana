@@ -6,15 +6,15 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { MlApiServices } from '../../../services/ml_api_service';
 import {
-  CATEGORIZATION_TYPE,
   type CategorizationType,
   QuickCategorizationJobCreator,
+  CATEGORIZATION_TYPE,
 } from './quick_create_job';
+import type { MlApiServices } from '../../../services/ml_api_service';
 
 import { getDefaultDatafeedQuery, getRisonValue } from '../utils/new_job_utils';
 

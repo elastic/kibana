@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { cloneDeep, omit } from 'lodash/fp';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
@@ -17,9 +17,9 @@ import type { OpenTimelineResult } from '../types';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';
 
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 

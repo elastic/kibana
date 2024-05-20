@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiComboBox } from '@elastic/eui';
-import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { EuiComboBox } from '@elastic/eui';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { SecuritySolutionDataViewBase } from '../../../../types';
+import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 import { DROPDOWN_TEST_ID } from './test_ids';
 import { COMBOBOX_PREPEND_LABEL } from './translations';

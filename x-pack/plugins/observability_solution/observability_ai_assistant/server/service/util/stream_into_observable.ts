@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Readable } from 'stream';
 import { Observable } from 'rxjs';
+import type { Readable } from 'stream';
 
 export function streamIntoObservable(readable: Readable): Observable<any> {
   return new Observable<string>((subscriber) => {

@@ -1,11 +1,3 @@
-import {
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiOutsideClickDetector,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,9 +6,17 @@ import { i18n } from '@kbn/i18n';
  * Side Public License, v 1.
  */
 import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  LanguageDocumentationPopoverContent,
+  EuiPopover,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiButtonIconProps,
+  EuiOutsideClickDetector,
+} from '@elastic/eui';
+import {
   type LanguageDocumentationSections,
+  LanguageDocumentationPopoverContent,
 } from './documentation_content';
 
 interface DocumentationPopoverProps {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { FieldDescription } from './field_description';
+import { render, screen } from '@testing-library/react';
 
 describe('FieldDescription', () => {
   it('should render correctly when no custom description', async () => {

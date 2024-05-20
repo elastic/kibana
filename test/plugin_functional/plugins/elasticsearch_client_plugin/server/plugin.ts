@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, ICustomClusterClient, Plugin } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart, ICustomClusterClient } from '@kbn/core/server';
 
 export class ElasticsearchClientPlugin implements Plugin {
   private client?: ICustomClusterClient;

@@ -6,11 +6,11 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { GroupsFilterPopoverComponent } from './groups_filter_popover';
 import { mockSecurityJobs } from '../../api.mock';
 import type { SecurityJob } from '../../types';
-import { GroupsFilterPopoverComponent } from './groups_filter_popover';
+import { cloneDeep } from 'lodash/fp';
 
 describe('GroupsFilterPopover', () => {
   let securityJobs: SecurityJob[];

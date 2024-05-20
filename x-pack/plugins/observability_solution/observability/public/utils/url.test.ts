@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromQuery, toQuery } from './url';
+import { toQuery, fromQuery } from './url';
 
 describe('toQuery', () => {
   it('should parse string to object', () => {

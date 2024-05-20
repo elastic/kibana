@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import { isCategorizationJobCreator } from '../../../../../../../common/job_creator';
+import { i18n } from '@kbn/i18n';
+import { EuiSwitch } from '@elastic/eui';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../../../job_creator_context';
-import { MMLCallout } from '../mml_callout';
 import { Description } from './description';
+import { MMLCallout } from '../mml_callout';
+import { isCategorizationJobCreator } from '../../../../../../../common/job_creator';
 
 export const ModelPlotSwitch: FC = () => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);

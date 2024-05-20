@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
-import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type {
   CoreRequestHandlerContext,
   CustomRequestHandlerContext,
   IRouter,
   KibanaRequest,
 } from '@kbn/core/server';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/lists-plugin/server';
@@ -21,18 +21,18 @@ import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/s
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { Immutable } from '../common/endpoint/types';
-import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
-import type { EndpointInternalFleetServicesInterface } from './endpoint/services/fleet';
 import type {
   IDetectionEngineHealthClient,
   IRuleExecutionLogForRoutes,
 } from './lib/detection_engine/rule_monitoring';
-import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
+import type { FrameworkRequest } from './lib/framework';
+import type { EndpointAuthz } from '../common/endpoint/types/authz';
+import type { EndpointInternalFleetServicesInterface } from './endpoint/services/fleet';
 import type { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
-import type { FrameworkRequest } from './lib/framework';
+import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import * as t from 'io-ts';
 import {
   NonEmptyString,
   operatorExcluded,
   operatorIncluded,
 } from '@kbn/securitysolution-io-ts-types';
-import * as t from 'io-ts';
 
 export const endpointEntryMatchWildcard = t.exact(
   t.type({

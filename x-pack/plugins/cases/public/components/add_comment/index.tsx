@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { isEmpty } from 'lodash';
 import React, {
   useCallback,
   useRef,
@@ -16,27 +13,30 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { css } from '@emotion/react';
+import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 
 import {
   Form,
-  UseField,
   useForm,
+  UseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { AttachmentType } from '../../../common/types/domain';
-import type { CaseUI } from '../../containers/types';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
+import type { CaseUI } from '../../containers/types';
 import type { EuiMarkdownEditorRef } from '../markdown_editor';
 import { MarkdownEditorForm } from '../markdown_editor';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { removeItemFromSessionStorage } from '../utils';
 
-import { MAX_COMMENT_LENGTH } from '../../../common/constants';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { InsertTimeline } from '../insert_timeline';
+import * as i18n from './translations';
 import type { AddCommentFormSchema } from './schema';
 import { schema } from './schema';
-import * as i18n from './translations';
+import { InsertTimeline } from '../insert_timeline';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 const initialCommentValue: AddCommentFormSchema = {
   comment: '',

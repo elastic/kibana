@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
-import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { FormattedEntry, Entry } from './types';
 import * as i18n from './translations';
-import type { Entry, FormattedEntry } from './types';
+import { getEntryOnFieldChange, getEntryOnThreatFieldChange } from './helpers';
 
 interface EntryItemProps {
   entry: FormattedEntry;

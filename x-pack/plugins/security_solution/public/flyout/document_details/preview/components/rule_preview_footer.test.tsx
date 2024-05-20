@@ -8,11 +8,11 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
-import { PreviewPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
-import { RulePreviewFooter } from './rule_preview_footer';
+import { PreviewPanelContext } from '../context';
 import { RULE_PREVIEW_FOOTER_TEST_ID, RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID } from './test_ids';
+import { RulePreviewFooter } from './rule_preview_footer';
+import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 
 jest.mock('../../shared/hooks/use_rule_details_link');
 

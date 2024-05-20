@@ -6,11 +6,11 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import {
-  TRANSFORM_HEALTH_STATUS,
-  mapEsHealthStatus2TransformHealthStatus,
-} from '../../../common/constants';
 import type { TransformHealthIssue } from '../../../common/types/transform_stats';
+import {
+  mapEsHealthStatus2TransformHealthStatus,
+  TRANSFORM_HEALTH_STATUS,
+} from '../../../common/constants';
 import type { TransformListRow } from './transform_list';
 
 export const needsReauthorization = (transform: Partial<TransformListRow>) => {

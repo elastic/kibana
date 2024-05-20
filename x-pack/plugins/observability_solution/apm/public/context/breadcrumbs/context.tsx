@@ -1,5 +1,3 @@
-import { ChromeBreadcrumb } from '@kbn/core/public';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +5,10 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
  * 2.0.
  */
 import { Route, RouteMatch, useMatchRoutes } from '@kbn/typed-react-router-config';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 export interface Breadcrumb {
   title: string;

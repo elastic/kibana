@@ -8,8 +8,8 @@
 
 import { safeDump } from 'js-yaml';
 import { isEmpty } from 'lodash';
-import { Logger } from '../cli/logger';
 import { interactive } from './interactive';
+import { Logger } from '../cli/logger';
 
 export async function generate(encryptionConfig, command) {
   const logger = new Logger();

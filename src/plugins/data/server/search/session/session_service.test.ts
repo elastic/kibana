@@ -12,15 +12,15 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { ElasticsearchClientMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { nodeBuilder } from '@kbn/es-query';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import moment from 'moment';
-import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
-import { ConfigSchema } from '../../../config';
 import { SearchSessionService } from './session_service';
 import { createRequestHash } from './utils';
+import moment from 'moment';
+import { coreMock } from '@kbn/core/server/mocks';
+import { ConfigSchema } from '../../../config';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const MAX_UPDATE_RETRIES = 3;
 

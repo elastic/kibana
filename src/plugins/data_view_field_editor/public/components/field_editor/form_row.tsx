@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { get } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTitle,
+  EuiText,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import { get } from 'lodash';
-import React from 'react';
 
-import { ToggleField, UseField, useFormData } from '../../shared_imports';
+import { UseField, ToggleField, useFormData } from '../../shared_imports';
 
 interface Props {
   title: string;

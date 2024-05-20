@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
+import { addInternalBasePath } from '../../../common/constants';
 import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
 } from '../../../common/api_schemas/delete_transforms';
-import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { type TransformListRow } from '../common';
 import { ToastNotificationText } from '../components';
 
+import { useTransformCapabilities } from './use_transform_capabilities';
 import { useDataViewExists } from './use_data_view_exists';
 import { useRefreshTransformList } from './use_refresh_transform_list';
-import { useTransformCapabilities } from './use_transform_capabilities';
 
 export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
   const {

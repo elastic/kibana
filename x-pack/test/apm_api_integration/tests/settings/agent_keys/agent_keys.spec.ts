@@ -1,5 +1,3 @@
-import { ClusterPrivilegeType, PrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
-import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,8 +6,10 @@ import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_user
  */
 import expect from '@kbn/expect';
 import { first } from 'lodash';
-import { ApmApiError, ApmApiSupertest } from '../../../common/apm_api_supertest';
+import { PrivilegeType, ClusterPrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
+import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { ApmApiError, ApmApiSupertest } from '../../../common/apm_api_supertest';
 import { expectToReject } from '../../../common/utils/expect_to_reject';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

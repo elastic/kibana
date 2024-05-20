@@ -6,12 +6,8 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { JourneyStep } from '../../../../../../common/runtime_types';
-import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
-import { formatMillisecond } from '../step_metrics/step_metrics';
-import { median } from './use_network_timings_prev';
 import { formatBytes } from './use_object_metrics';
+import { formatMillisecond } from '../step_metrics/step_metrics';
 import {
   CLS_LABEL,
   DCL_LABEL,
@@ -20,6 +16,10 @@ import {
   STEP_DURATION_LABEL,
   TRANSFER_SIZE,
 } from './use_step_metrics';
+import { JourneyStep } from '../../../../../../common/runtime_types';
+import { median } from './use_network_timings_prev';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';

@@ -10,8 +10,8 @@
 import type {
   SavedObjectMigrationContext,
   SavedObjectSanitizedDoc,
-  SavedObjectUnsanitizedDoc,
   SavedObjectsMigrationLogger,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import {

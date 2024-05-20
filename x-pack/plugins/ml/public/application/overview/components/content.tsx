@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { useEffect, useState, type FC } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import React, { useEffect, useState, type FC } from 'react';
-import { useMlKibana } from '../../contexts/kibana';
-import { useEnabledFeatures } from '../../contexts/ml';
+import { AnomalyDetectionPanel } from './anomaly_detection_panel';
+import { AnalyticsPanel } from './analytics_panel';
 import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
-import { AnalyticsPanel } from './analytics_panel';
-import { AnomalyDetectionPanel } from './anomaly_detection_panel';
+import { useMlKibana } from '../../contexts/kibana';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;

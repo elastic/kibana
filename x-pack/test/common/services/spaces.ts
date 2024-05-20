@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { format as formatUrl } from 'url';
-import util from 'util';
 import type { Space } from '@kbn/spaces-plugin/common';
 import Axios from 'axios';
+import { format as formatUrl } from 'url';
+import util from 'util';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SpacesServiceProvider({ getService }: FtrProviderContext) {

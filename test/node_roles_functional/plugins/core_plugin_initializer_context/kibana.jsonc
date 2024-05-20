@@ -6,6 +6,8 @@
     "id": "corePluginInitializerContext",
     "server": true,
     "browser": false,
-    "configPath": ["core_plugin_initializer_context"]
+    "configPath": [
+      "core_plugin_initializer_context"
+    ]
   }
 }

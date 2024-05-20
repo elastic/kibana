@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   AlertUtils,
-  ObjectRemover,
   checkAAD,
-  getEventLog,
-  getTestRuleData,
   getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  getEventLog,
 } from '../../../../common/lib';
-import { Spaces } from '../../../scenarios';
 
 const NOW = new Date().toISOString();
 const SNOOZE_SCHEDULE = {

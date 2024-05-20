@@ -6,19 +6,19 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { cloneDeep } from 'lodash';
+import rison from '@kbn/rison';
 import {
-  buildEsQuery,
-  buildQueryFromFilters,
   fromKueryExpression,
   toElasticsearchQuery,
+  buildEsQuery,
+  buildQueryFromFilters,
 } from '@kbn/es-query';
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import rison from '@kbn/rison';
+import type { Filter, Query, DataViewBase } from '@kbn/es-query';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { cloneDeep } from 'lodash';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { getQueryFromSavedSearchObject } from '../../../util/index_utils';
 
 // Provider for creating the items used for searching and job creation.

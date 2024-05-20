@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CoreStatus, ServiceStatus } from '@kbn/core-status-common';
 import type { Observable } from 'rxjs';
+import type { ServiceStatus, CoreStatus } from '@kbn/core-status-common';
 
 /**
  * API for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status.

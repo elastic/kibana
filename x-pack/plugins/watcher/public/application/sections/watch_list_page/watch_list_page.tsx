@@ -11,20 +11,20 @@ import {
   CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCallOut,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiIcon,
   EuiInMemoryTable,
+  EuiIcon,
   EuiLink,
-  EuiPageHeader,
-  EuiPageTemplate,
-  EuiPopover,
-  EuiSearchBarOnChangeArgs,
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPageHeader,
+  EuiPageTemplate,
+  EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,19 +32,19 @@ import { Moment } from 'moment';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { PAGINATION, REFRESH_INTERVALS, WATCH_TYPES } from '../../../../common/constants';
-import { useAppContext } from '../../app_context';
+import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../common/constants';
+import { listBreadcrumb } from '../../lib/breadcrumbs';
 import {
-  DeleteWatchesModal,
-  Error,
-  PageError,
-  SectionLoading,
-  WatchStateBadge,
   getPageErrorCode,
+  PageError,
+  DeleteWatchesModal,
+  WatchStateBadge,
+  SectionLoading,
+  Error,
 } from '../../components';
 import { useLoadWatches } from '../../lib/api';
-import { listBreadcrumb } from '../../lib/breadcrumbs';
-import { goToCreateAdvancedWatch, goToCreateThresholdAlert } from '../../lib/navigation';
+import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../lib/navigation';
+import { useAppContext } from '../../app_context';
 import { PageError as GenericPageError } from '../../shared_imports';
 
 /*

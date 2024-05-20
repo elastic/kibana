@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { JsonFieldWrapper, MustacheTextFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { FunctionComponent } from 'react';
-import { casesVars, commentVars, urlVars } from '../action_variables';
-import * as i18n from '../translations';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { JsonFieldWrapper, MustacheTextFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
 import { containsCommentsOrEmpty, containsTitleAndDesc, isUrlButCanBeEmpty } from '../validator';
+import { casesVars, commentVars, urlVars } from '../action_variables';
 import { HTTP_VERBS } from '../webhook_connectors';
 import { styles } from './update.styles';
+import * as i18n from '../translations';
 const { emptyField, urlField } = fieldValidators;
 
 interface Props {

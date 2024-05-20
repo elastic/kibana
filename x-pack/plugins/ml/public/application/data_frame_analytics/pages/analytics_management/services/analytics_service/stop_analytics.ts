@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ml } from '../../../../../services/ml_api_service';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
+import { ml } from '../../../../../services/ml_api_service';
 
-import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
+import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
 
 import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
 import { isDataFrameAnalyticsFailed } from '../../components/analytics_list/common';

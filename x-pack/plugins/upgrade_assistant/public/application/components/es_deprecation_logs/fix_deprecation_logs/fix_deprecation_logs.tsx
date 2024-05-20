@@ -6,18 +6,18 @@
  */
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
-import { EuiCallOut, EuiCode, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiText, EuiSpacer, EuiLink, EuiCallOut, EuiCode } from '@elastic/eui';
 
-import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
-import { MissingPrivileges, WithPrivileges } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
-import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
-import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
-import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { ExternalLinks } from './external_links';
+import { DeprecationsCountCheckpoint } from './deprecations_count_checkpoint';
 import { useDeprecationLogging } from './use_deprecation_logging';
+import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
+import { loadLogsCheckpoint, saveLogsCheckpoint } from '../../../lib/logs_checkpoint';
+import { DEPRECATION_LOGS_INDEX } from '../../../../../common/constants';
+import { WithPrivileges, MissingPrivileges } from '../../../../shared_imports';
 
 const i18nTexts = {
   analyzeTitle: i18n.translate('xpack.upgradeAssistant.overview.analyzeTitle', {

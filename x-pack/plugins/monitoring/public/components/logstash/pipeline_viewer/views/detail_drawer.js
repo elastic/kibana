@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import { last } from 'lodash';
 import {
   EuiBadge,
   EuiCodeBlock,
@@ -22,11 +24,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { last } from 'lodash';
-import React from 'react';
-import { formatMetric } from '../../../../lib/format_number';
 import { Sparkline } from '../../../sparkline';
+import { formatMetric } from '../../../../lib/format_number';
+import { FormattedMessage } from '@kbn/i18n-react';
 import './detail_drawer.scss';
 
 function renderIcon(vertex) {

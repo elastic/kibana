@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
-import { defaultToEmptyTag } from '../../../../common/components/empty_value';
+import { euiThemeVars } from '@kbn/ui-theme';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
+import type { ManagedUsersTableColumns, ManagedUserTable } from './types';
 import * as i18n from './translations';
-import type { ManagedUserTable, ManagedUsersTableColumns } from './types';
+import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
 const fieldColumn: EuiBasicTableColumn<ManagedUserTable> = {
   name: i18n.FIELD_COLUMN_TITLE,

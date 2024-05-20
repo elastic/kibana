@@ -6,7 +6,7 @@
  */
 
 import '../../__mocks__/shallow_useeffect.mock';
-import { mockKibanaValues, setMockValues } from '../../__mocks__/kea_logic';
+import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 import { mockHistory } from '../../__mocks__/react_router';
 
 import React from 'react';
@@ -20,8 +20,8 @@ jest.mock('./generate_breadcrumbs', () => ({
   useWorkplaceSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
 }));
 import {
-  useAppSearchBreadcrumbs,
   useSearchBreadcrumbs,
+  useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 
@@ -30,9 +30,9 @@ jest.mock('./generate_title', () => ({
   appSearchTitle: jest.fn((title: any) => title),
   workplaceSearchTitle: jest.fn((title: any) => title),
 }));
-import { appSearchTitle, searchTitle, workplaceSearchTitle } from './generate_title';
+import { searchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
-import { SetAppSearchChrome, SetSearchChrome, SetWorkplaceSearchChrome } from '.';
+import { SetSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from '.';
 
 describe('Set Kibana Chrome helpers', () => {
   const mockCurrentPath = (pathname: string) =>

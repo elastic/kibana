@@ -1,5 +1,3 @@
-import { mount } from 'enzyme';
-import React from 'react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import React from 'react';
  * Side Public License, v 1.
  */
 import { LoadingIndicator } from './loading_indicator';
+import React from 'react';
+import { mount } from 'enzyme';
 
 describe('Loading indicator', () => {
   it('default renders correctly', () => {

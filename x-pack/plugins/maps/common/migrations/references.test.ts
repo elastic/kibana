@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SOURCE_TYPES } from '../constants';
 import { extractReferences, injectReferences } from './references';
+import { SOURCE_TYPES } from '../constants';
 
 const layerListJSON = {
   esSearchSource: {

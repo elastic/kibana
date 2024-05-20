@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
 import { of } from 'rxjs';
+import { action } from '@storybook/addon-actions';
 
 import type { ApplicationStart } from '@kbn/core/public';
 

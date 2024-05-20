@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
-import React, { useState } from 'react';
-import { JSON, PDF } from '../../../../i18n/constants';
+import { PDF, JSON } from '../../../../i18n/constants';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { ClosePopoverFn, Popover } from '../../popover';
 import { ShareWebsiteFlyout } from './flyout';

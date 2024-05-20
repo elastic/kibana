@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 // @ts-expect-error
 import fetchMock from 'fetch-mock/es5/client';
-import { Observable } from 'rxjs';
 
+import { loadingServiceMock } from './http_service.test.mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { HttpService } from './http_service';
-import { loadingServiceMock } from './http_service.test.mocks';
 
 describe('interceptors', () => {
   afterEach(() => fetchMock.restore());

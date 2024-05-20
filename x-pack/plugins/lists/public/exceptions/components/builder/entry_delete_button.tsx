@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import type { BuilderEntry } from '@kbn/securitysolution-list-utils';
 import React, { useCallback } from 'react';
+import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import type { BuilderEntry } from '@kbn/securitysolution-list-utils';
 
 const MyFirstRowContainer = styled(EuiFlexItem)`
   padding-top: 25px;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useMutation } from '@tanstack/react-query';
+import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
-import type { PolicyData } from '../../../../common/endpoint/types';
 import { useHttp } from '../../../common/lib/kibana';
+import type { PolicyData } from '../../../../common/endpoint/types';
 import type { UpdatePolicyResponse } from '../../pages/policy/types';
 
 interface UpdateParams {

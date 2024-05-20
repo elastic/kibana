@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect } from 'react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { VisualizeConstants } from '../../../common/constants';
 import { VisualizeServices } from '../types';
+import { VisualizeConstants } from '../../../common/constants';
 
 let bannerId: string;
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ColorMapping, PaletteOutput } from '@kbn/coloring';
-import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { $Values } from '@kbn/utility-types';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { PaletteOutput, ColorMapping } from '@kbn/coloring';
+import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 
 export interface TagcloudState {
   layerId: string;

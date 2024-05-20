@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FILTERS, Filter } from '@kbn/es-query';
-import { find, get, keys } from 'lodash';
+import { find, keys, get } from 'lodash';
+import { Filter, FILTERS } from '@kbn/es-query';
 
 export const mapDefault = (filter: Filter) => {
   const metaProperty = /(^\$|meta)/;

@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/data-plugin/common';
-import { GeoJsonProperties } from 'geojson';
 import { v4 as uuidv4 } from 'uuid';
+import { GeoJsonProperties } from 'geojson';
+import type { Query } from '@kbn/data-plugin/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
 import {
   MapExtent,
   TableSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
+import { ITermJoinSource } from '../types';
 import { BucketProperties, PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { IField } from '../../../fields/field';
-import { InlineField } from '../../../fields/inline_field';
-import { ITooltipProperty, TooltipProperty } from '../../../tooltips/tooltip_property';
-import { DataRequest } from '../../../util/data_request';
 import {
   AbstractVectorSource,
   BoundsRequestMeta,
@@ -26,7 +24,9 @@ import {
   IVectorSource,
   SourceStatus,
 } from '../../vector_source';
-import { ITermJoinSource } from '../types';
+import { DataRequest } from '../../../util/data_request';
+import { InlineField } from '../../../fields/inline_field';
+import { ITooltipProperty, TooltipProperty } from '../../../tooltips/tooltip_property';
 
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;

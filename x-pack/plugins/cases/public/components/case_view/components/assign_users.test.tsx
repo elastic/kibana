@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
-import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
-import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
-import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import type { AssignUsersProps } from './assign_users';
 import { AssignUsers } from './assign_users';
+import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');
 jest.mock('../../../containers/user_profiles/use_get_current_user_profile');

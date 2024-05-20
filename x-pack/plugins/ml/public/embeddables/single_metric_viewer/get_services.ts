@@ -6,10 +6,10 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/public';
-import type { MlDependencies } from '../../application/app';
-import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
-import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
+import type { MlDependencies } from '../../application/app';
+import { HttpService } from '../../application/services/http_service';
+import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 import type { SingleMetricViewerEmbeddableServices } from '../types';
 
 /**

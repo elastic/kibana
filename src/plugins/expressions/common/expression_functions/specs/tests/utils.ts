@@ -7,16 +7,16 @@
  */
 
 import { mapValues } from 'lodash';
+import type { AnyExpressionFunctionDefinition } from '../../types';
 import type { ExecutionContext } from '../../../execution/types';
 import type { Datatable } from '../../../expression_types';
-import type { AnyExpressionFunctionDefinition } from '../../types';
 
 /**
  * Takes a function spec and passes in default args,
  * overriding with any provided args.
  */
 export const functionWrapper = <
-  ExpressionFunctionDefinition extends AnyExpressionFunctionDefinition,
+  ExpressionFunctionDefinition extends AnyExpressionFunctionDefinition
 >(
   spec: ExpressionFunctionDefinition
 ) => {

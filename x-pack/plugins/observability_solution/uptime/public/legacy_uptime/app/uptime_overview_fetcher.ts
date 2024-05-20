@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { FetchDataParams, UptimeFetchDataResponse } from '@kbn/observability-plugin/public';
+import { UptimeFetchDataResponse, FetchDataParams } from '@kbn/observability-plugin/public';
 import moment from 'moment-timezone';
 import { fetchIndexStatus, fetchPingHistogram, fetchSnapshotCount } from '../state/api';
 import { kibanaService } from '../state/kibana_service';

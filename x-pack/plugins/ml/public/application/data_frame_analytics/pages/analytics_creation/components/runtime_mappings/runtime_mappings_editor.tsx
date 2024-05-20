@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { FC } from 'react';
 import React, { memo } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '@kbn/code-editor';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';

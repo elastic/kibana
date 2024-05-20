@@ -6,8 +6,8 @@
  */
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter } from '../../client/utils';
 import type {
@@ -82,14 +82,11 @@ export const getConnectorsTelemetryData = async ({
     SavedObjectsFindResponse<unknown, ReferencesAggregation>
   >;
 
-  const data = connectorData.reduce(
-    (acc, res, currentIndex) => {
-      acc[connectorTypes[currentIndex]] =
-        res.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0;
-      return acc;
-    },
-    {} as Record<(typeof connectorTypes)[number], number>
-  );
+  const data = connectorData.reduce((acc, res, currentIndex) => {
+    acc[connectorTypes[currentIndex]] =
+      res.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0;
+    return acc;
+  }, {} as Record<typeof connectorTypes[number], number>);
 
   const allAttached = all[0].aggregations?.references?.referenceType?.referenceAgg?.value ?? 0;
   const maxAttachedToACase = all[1].aggregations?.references?.cases?.max?.value ?? 0;

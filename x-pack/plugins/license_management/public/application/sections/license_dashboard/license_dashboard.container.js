@@ -6,8 +6,8 @@
  */
 
 import { connect } from 'react-redux';
-import { setBreadcrumb } from '../../store/actions/set_breadcrumb';
 import { LicenseDashboard as PresentationComponent } from './license_dashboard';
+import { setBreadcrumb } from '../../store/actions/set_breadcrumb';
 
 const mapDispatchToProps = {
   setBreadcrumb,

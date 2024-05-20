@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { indexPatterns } from '@kbn/data-plugin/public';
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { GEOHASH_GRID } from './geo_hash';
-import { title } from './tile_map_vis_type';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { TileMapVisParams } from './types';
+import { title } from './tile_map_vis_type';
+import { GEOHASH_GRID } from './geo_hash';
 
 export function extractLayerDescriptorParams(vis: Vis<TileMapVisParams>) {
   const params: { [key: string]: any } = {

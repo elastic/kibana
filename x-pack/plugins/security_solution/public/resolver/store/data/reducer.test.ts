@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { AnyAction, Reducer, Store } from 'redux';
+import type { Store, AnyAction, Reducer } from 'redux';
 import { createStore } from 'redux';
 import { RelatedEventCategory } from '../../../../common/endpoint/generate_data';
-import type { NewResolverTree, ResolverSchema } from '../../../../common/endpoint/types';
-import { generateTreeWithDAL } from '../../data_access_layer/mocks/generator_tree';
-import { endpointSourceSchema, winlogSourceSchema } from '../../mocks/tree_schema';
-import { ancestorsWithAncestryField, descendantsLimit } from '../../models/resolver_tree';
-import type { AnalyzerById, GeneratedTreeMetadata, TimeFilters } from '../../types';
-import { appReceivedNewExternalProperties } from '../actions';
-import { EMPTY_RESOLVER } from '../helpers';
-import { serverReturnedResolverData, userOverrodeDateRange } from './action';
 import { dataReducer } from './reducer';
 import * as selectors from './selectors';
+import type { AnalyzerById, GeneratedTreeMetadata, TimeFilters } from '../../types';
+import { generateTreeWithDAL } from '../../data_access_layer/mocks/generator_tree';
+import { endpointSourceSchema, winlogSourceSchema } from '../../mocks/tree_schema';
+import type { NewResolverTree, ResolverSchema } from '../../../../common/endpoint/types';
+import { ancestorsWithAncestryField, descendantsLimit } from '../../models/resolver_tree';
+import { EMPTY_RESOLVER } from '../helpers';
+import { serverReturnedResolverData, userOverrodeDateRange } from './action';
+import { appReceivedNewExternalProperties } from '../actions';
 
 type SourceAndSchemaFunction = () => { schema: ResolverSchema; dataSource: string };
 

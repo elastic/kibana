@@ -6,10 +6,10 @@
  */
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registerConnectorTypes } from '..';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const CONNECTOR_TYPE_ID = '.xmatters';
 let connectorTypeModel: ConnectorTypeModel;

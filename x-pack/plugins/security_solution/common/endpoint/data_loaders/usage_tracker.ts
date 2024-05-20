@@ -7,10 +7,10 @@
 
 /* eslint-disable max-classes-per-file,@typescript-eslint/no-explicit-any */
 
-import { isPromise } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { once } from 'lodash';
+import { isPromise } from '@kbn/std';
 import moment from 'moment';
+import { once } from 'lodash';
 import { createToolingLogger } from './utils';
 
 interface UsageRecordJson {
@@ -175,8 +175,8 @@ ${this.toText()}`);
 
     return `${'-'.repeat(maxLineLength)}
 ${'Name'.padEnd(width.name)}${separator}${'Count'.padEnd(
-  width.count
-)}${separator}${'Shortest'.padEnd(width.shortest)}${separator}${'longest'.padEnd(width.longest)}
+      width.count
+    )}${separator}${'Shortest'.padEnd(width.shortest)}${separator}${'longest'.padEnd(width.longest)}
 ${'-'.repeat(maxLineLength)}
 ${summaryText.join('\n')}
 ${'-'.repeat(maxLineLength)}
@@ -248,10 +248,7 @@ ${this.toText()}`
       // Get the file/line number where function was defined
       ((new Error('-').stack ?? '').split('\n')[2] || '').trim() ||
       // Last resort: get 50 first char. of function code
-      callback
-        .toString()
-        .trim()
-        .substring(0, 50);
+      callback.toString().trim().substring(0, 50);
 
     const wrappedFunction = ((...args) => {
       const usageRecord = this.create(functionName);

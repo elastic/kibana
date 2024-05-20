@@ -6,14 +6,14 @@
  */
 
 import fs from 'fs';
+import expect from '@kbn/expect';
 import http from 'http';
 import https from 'https';
 import { promisify } from 'util';
-import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import expect from '@kbn/expect';
-import { filter, fromNullable, getOrElse, map } from 'fp-ts/lib/Option';
-import { constant } from 'fp-ts/lib/function';
+import { fromNullable, map, filter, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { constant } from 'fp-ts/lib/function';
+import { KBN_KEY_PATH, KBN_CERT_PATH } from '@kbn/dev-utils';
 
 export async function initPlugin() {
   const httpsServerKey = await promisify(fs.readFile)(KBN_KEY_PATH, 'utf8');

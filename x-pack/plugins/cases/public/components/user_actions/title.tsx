@@ -7,9 +7,9 @@
 
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { TitleUserAction } from '../../../common/types/domain';
+import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
-import type { UserActionBuilder } from './types';
 
 const getLabelTitle = (userAction: SnakeToCamelCase<TitleUserAction>) =>
   `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()} ${i18n.TO} "${

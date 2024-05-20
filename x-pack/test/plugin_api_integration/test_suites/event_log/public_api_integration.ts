@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { merge, omit, chunk, isEmpty } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+import expect from '@kbn/expect';
+import moment from 'moment';
 import { IEvent } from '@kbn/event-log-plugin/server';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
-import expect from '@kbn/expect';
-import { chunk, isEmpty, merge, omit } from 'lodash';
-import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

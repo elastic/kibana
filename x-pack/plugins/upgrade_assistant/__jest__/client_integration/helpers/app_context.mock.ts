@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import SemVer from 'semver/classes/semver';
 import {
-  applicationServiceMock,
-  coreMock,
   deprecationsServiceMock,
   docLinksServiceMock,
-  httpServiceMock,
   notificationServiceMock,
+  applicationServiceMock,
+  httpServiceMock,
+  coreMock,
   scopedHistoryMock,
 } from '@kbn/core/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import SemVer from 'semver/classes/semver';
 
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 const data = dataPluginMock.createStartContract();
 const dataViews = { ...data.dataViews };

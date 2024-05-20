@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 import type { CasesClientArgs } from '../types';
 
-import { ConnectorTypes } from '../../../common';
+import { getConnectors, get, update, create } from './client';
+import { createCasesClientInternalMock, createCasesClientMockArgs } from '../mocks';
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_SUPPORTED_CONNECTORS_RETURNED,
 } from '../../../common/constants';
-import type { ConfigurationRequest } from '../../../common/types/api';
+import { ConnectorTypes } from '../../../common';
 import { CustomFieldTypes } from '../../../common/types/domain';
-import { createCasesClientInternalMock, createCasesClientMockArgs } from '../mocks';
-import { create, get, getConnectors, update } from './client';
+import type { ConfigurationRequest } from '../../../common/types/api';
 
 describe('client', () => {
   const clientArgs = createCasesClientMockArgs();

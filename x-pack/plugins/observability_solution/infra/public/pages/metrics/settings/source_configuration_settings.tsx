@@ -6,33 +6,33 @@
  */
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import {
-  enableInfrastructureContainerAssetView,
-  enableInfrastructureHostsView,
-  enableInfrastructureProfilingIntegration,
-} from '@kbn/observability-plugin/common';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   BottomBarActions,
   Prompt,
   useEditableSettings,
 } from '@kbn/observability-shared-plugin/public';
 import {
+  enableInfrastructureContainerAssetView,
+  enableInfrastructureHostsView,
+  enableInfrastructureProfilingIntegration,
+} from '@kbn/observability-plugin/common';
+import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
+import { HttpSetup } from '@kbn/core-http-browser';
+import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useCallback, useEffect, useState } from 'react';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
-import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { settingsTitle } from '../../../translations';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { MLConfigurationPanel } from './ml_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { settingsTitle } from '../../../translations';
 
 import { MetricsPageTemplate } from '../page_template';
 import { FeaturesConfigurationPanel } from './features_configuration_panel';

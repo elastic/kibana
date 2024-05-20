@@ -5,15 +5,11 @@
  * 2.0.
  */
 
+import React, { Component } from 'react';
 import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
-import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common/constants';
 import { ILayer } from '../../../../../../classes/layers/layer';
-import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
-import { hasVectorLayerMethod } from '../../../../../../classes/layers/vector_layer';
-import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
-import { RemoveLayerConfirmModal } from '../../../../../../components/remove_layer_confirm_modal';
+import { TOCEntryButton } from '../toc_entry_button';
 import {
   EDIT_FEATURES_LABEL,
   EDIT_LAYER_SETTINGS_LABEL,
@@ -21,7 +17,11 @@ import {
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
 } from '../action_labels';
-import { TOCEntryButton } from '../toc_entry_button';
+import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
+import { hasVectorLayerMethod } from '../../../../../../classes/layers/vector_layer';
+import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common/constants';
+import { RemoveLayerConfirmModal } from '../../../../../../components/remove_layer_confirm_modal';
+import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;

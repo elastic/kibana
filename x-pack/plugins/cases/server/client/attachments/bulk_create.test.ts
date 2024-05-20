@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { comment, actionComment } from '../../mocks';
+import { createCasesClientMockArgs } from '../mocks';
 import {
-  MAX_BULK_CREATE_ATTACHMENTS,
   MAX_COMMENT_LENGTH,
+  MAX_BULK_CREATE_ATTACHMENTS,
   MAX_USER_ACTIONS_PER_CASE,
 } from '../../../common/constants';
-import { actionComment, comment } from '../../mocks';
-import { createUserActionServiceMock } from '../../services/mocks';
-import { createCasesClientMockArgs } from '../mocks';
 import { bulkCreate } from './bulk_create';
+import { createUserActionServiceMock } from '../../services/mocks';
 
 describe('bulkCreate', () => {
   const caseId = 'test-case';

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import React from 'react';
 import { TruncateLabelsOption, TruncateLabelsOptionProps } from './truncate_labels';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('TruncateLabelsOption', function () {
   let props: TruncateLabelsOptionProps;

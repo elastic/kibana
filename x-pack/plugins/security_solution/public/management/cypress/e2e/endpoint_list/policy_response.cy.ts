@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EndpointPolicyResponseGenerator } from '../../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
-import type { IndexedEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type { HostMetadata } from '../../../../../common/endpoint/types';
-import { descriptions } from '../../../components/policy_response/policy_response_friendly_names';
 import { navigateToEndpointPolicyResponse } from '../../screens';
-import { navigateToFleetAgentDetails } from '../../screens/fleet/agent_details';
 import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import type { HostMetadata } from '../../../../../common/endpoint/types';
+import type { IndexedEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import { login } from '../../tasks/login';
+import { navigateToFleetAgentDetails } from '../../screens/fleet/agent_details';
+import { EndpointPolicyResponseGenerator } from '../../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
+import { descriptions } from '../../../components/policy_response/policy_response_friendly_names';
 
 describe.skip('Endpoint Policy Response', { tags: ['@ess', '@serverless'] }, () => {
   let loadedEndpoint: CyIndexEndpointHosts;

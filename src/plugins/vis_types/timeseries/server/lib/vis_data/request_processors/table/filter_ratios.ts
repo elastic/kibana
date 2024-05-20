@@ -7,12 +7,12 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import { bucketTransform, overwrite } from '../../helpers';
+import { overwrite, bucketTransform } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 
-import { BASIC_AGGS_TYPES } from '../../../../../common/enums';
-import type { Metric } from '../../../../../common/types';
 import type { TableRequestProcessorsFunction } from './types';
+import type { Metric } from '../../../../../common/types';
+import { BASIC_AGGS_TYPES } from '../../../../../common/enums';
 
 const filter = (metric: Metric) => metric.type === 'filter_ratio';
 

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { createFlagError } from '@kbn/dev-cli-errors';
+import { pickLevelFromFlags, ToolingLog, LogLevel } from '@kbn/tooling-log';
 import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
-import { LogLevel, ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
+import { createFlagError } from '@kbn/dev-cli-errors';
 
-import { Cleanup, CleanupTask } from './cleanup';
-import { DEFAULT_FLAG_ALIASES, FlagOptions, Flags, getFlags } from './flags';
+import { Flags, getFlags, FlagOptions, DEFAULT_FLAG_ALIASES } from './flags';
 import { FlagsReader } from './flags_reader';
 import { getHelp } from './help';
+import { CleanupTask, Cleanup } from './cleanup';
 import { Metrics, MetricsMeta } from './metrics';
 
 export interface RunContext {

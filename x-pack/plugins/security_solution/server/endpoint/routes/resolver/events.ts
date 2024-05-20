@@ -9,8 +9,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler } from '@kbn/core/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../common/constants';
-import type { validateEvents } from '../../../../common/endpoint/schema/resolver';
 import type { ResolverPaginatedEvents, SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { validateEvents } from '../../../../common/endpoint/schema/resolver';
 import { EventsQuery } from './queries/events';
 import { PaginationBuilder } from './utils/pagination';
 

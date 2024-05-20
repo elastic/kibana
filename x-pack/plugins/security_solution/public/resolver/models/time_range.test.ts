@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRange, maxDate } from './time_range';
+import { maxDate, createRange } from './time_range';
 
 describe('range', () => {
   it('creates a range starting from 1970-01-01T00:00:00.000Z to +275760-09-13T00:00:00.000Z by default', () => {

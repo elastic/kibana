@@ -1,5 +1,3 @@
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import moment from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,11 +5,13 @@ import moment from 'moment';
  * 2.0.
  */
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
-import { useKibana } from '../../../../common/lib/kibana';
-import { RuleTableItem, RuleTypeModel } from '../../../../types';
-import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import moment from 'moment';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { CollapsedItemActions } from './collapsed_item_actions';
+import { act } from 'react-dom/test-utils';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { RuleTableItem, RuleTypeModel } from '../../../../types';
+import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
 const onRuleChanged = jest.fn();

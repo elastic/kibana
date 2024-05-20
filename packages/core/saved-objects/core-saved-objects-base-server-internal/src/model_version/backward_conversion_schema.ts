@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { type ObjectType, isConfigSchema } from '@kbn/config-schema';
+import { isConfigSchema, type ObjectType } from '@kbn/config-schema';
 import type {
-  SavedObjectModelVersionForwardCompatibilitySchema,
   SavedObjectUnsanitizedDoc,
+  SavedObjectModelVersionForwardCompatibilitySchema,
 } from '@kbn/core-saved-objects-server';
 
 function isObjectType(

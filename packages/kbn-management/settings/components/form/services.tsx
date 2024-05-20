@@ -8,13 +8,13 @@
 
 import React, { FC, PropsWithChildren, useContext } from 'react';
 
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import {
   FieldCategoryKibanaProvider,
   FieldCategoryProvider,
 } from '@kbn/management-settings-components-field-category';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { FormServices, FormKibanaDependencies, Services } from './types';
 import { reloadPageToast } from './reload_page_toast';
-import type { FormKibanaDependencies, FormServices, Services } from './types';
 
 const FormContext = React.createContext<Services | null>(null);
 

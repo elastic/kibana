@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React, { useState, useEffect, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiIconTip,
+  EuiFormRow,
+  EuiFieldNumber,
   EuiSelect,
+  EuiText,
   EuiSpacer,
   EuiSuperSelect,
   EuiSuperSelectOption,
-  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { filter, map, some } from 'fp-ts/lib/Option';
+import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import React, { useState, useEffect, useCallback } from 'react';
+import { InitialRule } from './rule_reducer';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { RuleNotifyWhenType } from '../../../types';
-import { InitialRule } from './rule_reducer';
 
 const DEFAULT_NOTIFY_WHEN_VALUE: RuleNotifyWhenType = 'onActionGroupChange';
 

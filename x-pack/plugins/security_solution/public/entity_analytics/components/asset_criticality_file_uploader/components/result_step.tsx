@@ -14,10 +14,10 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { buildAnnotationsFromError } from '../helpers';
 

@@ -8,8 +8,8 @@
 
 import { CoreSetup, Plugin } from '@kbn/core/server';
 import { metrics } from '@opentelemetry/api-metrics';
-import { Metrics } from './monitoring/metrics';
 import { generateOtelMetrics } from './routes';
+import { Metrics } from './monitoring/metrics';
 
 export class OpenTelemetryUsageTest implements Plugin {
   private metrics: Metrics;

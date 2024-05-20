@@ -8,10 +8,10 @@
 import { useEffect, useMemo } from 'react';
 import * as i18n from './translations';
 
+import { useSearchStrategy } from '../use_search_strategy';
 import { FirstLastSeenQuery } from '../../../../common/search_strategy';
 import type { Direction } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
-import { useSearchStrategy } from '../use_search_strategy';
 
 export interface FirstLastSeenArgs {
   errorMessage: string | null;

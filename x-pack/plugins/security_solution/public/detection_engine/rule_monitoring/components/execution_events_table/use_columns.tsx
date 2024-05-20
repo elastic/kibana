@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonIcon, EuiScreenReaderOnly, RIGHT_ALIGNMENT } from '@elastic/eui';
-import React, { useMemo } from 'react';
 
 import type {
   LogLevel,

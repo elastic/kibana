@@ -63,7 +63,11 @@
           "tags": [],
           "label": "OsqueryResult",
           "description": [],
-          "signature": ["(props: ", "OsqueryActionResultProps", ") => JSX.Element"],
+          "signature": [
+            "(props: ",
+            "OsqueryActionResultProps",
+            ") => JSX.Element"
+          ],
           "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -76,7 +80,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["OsqueryActionResultProps"],
+              "signature": [
+                "OsqueryActionResultProps"
+              ],
               "path": "x-pack/plugins/osquery/public/shared_components/lazy_osquery_result.tsx",
               "deprecated": false,
               "trackAdoption": false
@@ -90,7 +96,11 @@
           "tags": [],
           "label": "OsqueryResults",
           "description": [],
-          "signature": ["(props: ", "OsqueryActionResultsProps", ") => JSX.Element"],
+          "signature": [
+            "(props: ",
+            "OsqueryActionResultsProps",
+            ") => JSX.Element"
+          ],
           "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -103,7 +113,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["OsqueryActionResultsProps"],
+              "signature": [
+                "OsqueryActionResultsProps"
+              ],
               "path": "x-pack/plugins/osquery/public/shared_components/lazy_osquery_results.tsx",
               "deprecated": false,
               "trackAdoption": false
@@ -135,7 +147,9 @@
           "tags": [],
           "label": "isOsqueryAvailable",
           "description": [],
-          "signature": ["(props: { agentId: string; }) => boolean"],
+          "signature": [
+            "(props: { agentId: string; }) => boolean"
+          ],
           "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -190,7 +204,11 @@
           "tags": [],
           "label": "OsqueryResponseActionTypeForm",
           "description": [],
-          "signature": ["(props: ", "OsqueryResponseActionsParamsFormProps", ") => JSX.Element"],
+          "signature": [
+            "(props: ",
+            "OsqueryResponseActionsParamsFormProps",
+            ") => JSX.Element"
+          ],
           "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -203,7 +221,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["OsqueryResponseActionsParamsFormProps"],
+              "signature": [
+                "OsqueryResponseActionsParamsFormProps"
+              ],
               "path": "x-pack/plugins/osquery/public/shared_components/lazy_osquery_action_params_form.tsx",
               "deprecated": false,
               "trackAdoption": false
@@ -239,7 +259,9 @@
               "tags": [],
               "label": "config",
               "description": [],
-              "signature": ["UseAllLiveQueriesConfig"],
+              "signature": [
+                "UseAllLiveQueriesConfig"
+              ],
               "path": "x-pack/plugins/osquery/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -327,7 +349,9 @@
         "tags": [],
         "label": "BASE_PATH",
         "description": [],
-        "signature": ["\"/app/osquery\""],
+        "signature": [
+          "\"/app/osquery\""
+        ],
         "path": "x-pack/plugins/osquery/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -340,7 +364,9 @@
         "tags": [],
         "label": "OSQUERY_INTEGRATION_NAME",
         "description": [],
-        "signature": ["\"osquery_manager\""],
+        "signature": [
+          "\"osquery_manager\""
+        ],
         "path": "x-pack/plugins/osquery/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -353,7 +379,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"osquery\""],
+        "signature": [
+          "\"osquery\""
+        ],
         "path": "x-pack/plugins/osquery/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -366,7 +394,9 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": ["\"Osquery\""],
+        "signature": [
+          "\"Osquery\""
+        ],
         "path": "x-pack/plugins/osquery/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

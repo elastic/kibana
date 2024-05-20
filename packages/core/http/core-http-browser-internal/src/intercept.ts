@@ -7,9 +7,9 @@
  */
 
 import type {
-  HttpFetchOptionsWithPath,
   HttpInterceptor,
   HttpResponse,
+  HttpFetchOptionsWithPath,
 } from '@kbn/core-http-browser';
 import { HttpInterceptController } from './http_intercept_controller';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';

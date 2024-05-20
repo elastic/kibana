@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import type { UseAssistantParams, UseAssistantResult } from './use_assistant';
 import { useAssistant } from './use_assistant';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { useAssistantOverlay } from '@kbn/elastic-assistant';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 
 jest.mock('../../../../assistant/use_assistant_availability');
 jest.mock('@kbn/elastic-assistant');

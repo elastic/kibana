@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { sortBy } from 'lodash';
-import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { sortBy } from 'lodash';
+import moment from 'moment';
 
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
 
-import { JobIcon } from '../../../../components/job_message_icon';
 import { toLocaleString } from '../../../../util/string_utils';
+import { JobIcon } from '../../../../components/job_message_icon';
 
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 
 import { JobDescription } from './job_description';
 
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiIcon,
   EuiScreenReaderOnly,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isManagedJob } from '../../../jobs_utils';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
+import { isManagedJob } from '../../../jobs_utils';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 

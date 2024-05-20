@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import React, { useCallback } from 'react';
 import { useState } from 'react';
+import { EuiText, EuiButton, EuiLoadingSpinner, EuiCallOut } from '@elastic/eui';
+import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import { Services } from './services';
 
 interface Props {

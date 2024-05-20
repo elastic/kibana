@@ -39,7 +39,9 @@
             "type": "Object",
             "tags": [],
             "label": "roles",
-            "description": ["A list of roles this node has been configured with."],
+            "description": [
+              "A list of roles this node has been configured with."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-node-server",

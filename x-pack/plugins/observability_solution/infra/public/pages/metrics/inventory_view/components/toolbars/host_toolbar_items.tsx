@@ -1,4 +1,3 @@
-import { hostSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { hostSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common'
  * 2.0.
  */
 import React from 'react';
+import { hostSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 

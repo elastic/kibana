@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import { pick } from 'lodash';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
   CoreKibanaRequest,
   FakeRawRequest,
@@ -16,37 +19,34 @@ import {
   SavedObjectReference,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
+  createTaskRunError,
   RunContext,
   TaskErrorSource,
-  createTaskRunError,
   throwRetryableError,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { pick } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
-import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
+import { ActionExecutorContract } from './action_executor';
 import {
   ActionTaskExecutorParams,
   ActionTaskParams,
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
-  SpaceIdToNamespaceFunction,
   isPersistedActionTask,
+  SpaceIdToNamespaceFunction,
 } from '../types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import {
   ActionExecutionSourceType,
   asEmptySource,
   asSavedObjectExecutionSource,
 } from './action_execution_source';
-import { ActionExecutorContract } from './action_executor';
-import { injectSavedObjectReferences } from './action_task_params_utils';
-import { ActionTypeDisabledError } from './errors';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
+import { injectSavedObjectReferences } from './action_task_params_utils';
+import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
+import { ActionTypeDisabledError } from './errors';
 
 export interface TaskRunnerContext {
   logger: Logger;

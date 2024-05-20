@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { calculationsSection } from './calculations';
+import { elasticsearchSection } from './elasticsearch';
 import { commonFormulas } from './common';
 import { comparisonSection } from './comparison';
-import { contextSection } from './context';
-import { elasticsearchSection } from './elasticsearch';
-import { howToSection } from './how_to';
 import { mathSection } from './math';
+import { calculationsSection } from './calculations';
+import { contextSection } from './context';
+import { howToSection } from './how_to';
 
 export const sections = {
   howTo: howToSection,

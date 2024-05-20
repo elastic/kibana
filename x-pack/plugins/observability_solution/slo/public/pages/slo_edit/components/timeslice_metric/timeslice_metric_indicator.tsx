@@ -18,16 +18,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../utils/kibana_react';
-import { COMPARATOR_MAPPING } from '../../constants';
+import { GroupByField } from '../common/group_by_field';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
-import { GroupByField } from '../common/group_by_field';
 import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
+import { COMPARATOR_MAPPING } from '../../constants';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 
 export { NEW_TIMESLICE_METRIC } from './metric_indicator';
 

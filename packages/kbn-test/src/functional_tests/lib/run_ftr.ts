@@ -1,4 +1,3 @@
-import { createFailError } from '@kbn/dev-cli-errors';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +6,9 @@ import { createFailError } from '@kbn/dev-cli-errors';
  * Side Public License, v 1.
  */
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createFailError } from '@kbn/dev-cli-errors';
 
-import { Config, EsVersion, FunctionalTestRunner } from '../../functional_test_runner';
+import { EsVersion, Config, FunctionalTestRunner } from '../../functional_test_runner';
 
 export async function runFtr(options: {
   log: ToolingLog;

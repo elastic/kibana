@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import image from './image.png';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
+import image from './image.png';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;

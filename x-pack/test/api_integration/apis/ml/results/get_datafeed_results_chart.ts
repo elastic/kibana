@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
-import { USER } from '../../../../functional/services/ml/security_common';
+import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

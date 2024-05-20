@@ -6,16 +6,16 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
 import type {
   RuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type SuperTest from 'supertest';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { routeWithNamespace } from '../route_with_namespace';
 import { deleteRule } from './delete_rule';
+import { routeWithNamespace } from '../route_with_namespace';
 
 /**
  * Helper to cut down on the noise in some of the tests. If this detects

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
-import { cleanup, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { cloneDeep, set } from 'lodash';
 import React from 'react';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { ProtectionModes } from '../../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import { PolicySettingsLayout } from './policy_settings_layout';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getUserPrivilegesMockDefaultValue } from '../../../../../common/components/user_privileges/__mocks__';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { allFleetHttpMocks } from '../../../../mocks';
-import { getDeferred } from '../../../../mocks/utils';
+import userEvent from '@testing-library/user-event';
 import {
   expectIsViewOnly,
   getPolicySettingsFormTestSubjects,
   setMalwareMode,
 } from '../policy_settings_form/mocks';
-import { PolicySettingsLayout } from './policy_settings_layout';
+import { cloneDeep, set } from 'lodash';
+import { ProtectionModes } from '../../../../../../common/endpoint/types';
+import { waitFor, cleanup } from '@testing-library/react';
+import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
+import { getPolicyDataForUpdate } from '../../../../../../common/endpoint/service/policy';
+import { getDeferred } from '../../../../mocks/utils';
 
 jest.mock('../../../../../common/hooks/use_license');
 jest.mock('../../../../../common/components/user_privileges');

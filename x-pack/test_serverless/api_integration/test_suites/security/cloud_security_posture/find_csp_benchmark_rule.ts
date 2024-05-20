@@ -1,11 +1,3 @@
-import type {
-  CspBenchmarkRule,
-  FindCspBenchmarkRuleResponse,
-} from '@kbn/cloud-security-posture-plugin/common/types/latest';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,9 +5,17 @@ import {
  * 2.0.
  */
 import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
+import type {
+  CspBenchmarkRule,
+  FindCspBenchmarkRuleResponse,
+} from '@kbn/cloud-security-posture-plugin/common/types/latest';
 
-import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { createPackagePolicy } from '../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

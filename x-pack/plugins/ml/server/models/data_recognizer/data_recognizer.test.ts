@@ -6,13 +6,13 @@
  */
 
 import type {
-  IScopedClusterClient,
-  KibanaRequest,
   SavedObjectsClientContract,
+  KibanaRequest,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import { DataRecognizer } from '.';
 import type { Module } from '../../../common/types/modules';
+import { DataRecognizer } from '.';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { type Config, filterConfigs } from './data_recognizer';

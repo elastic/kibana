@@ -7,8 +7,8 @@
  */
 
 import Fs from 'fs';
-import Path from 'path';
 import Fsp from 'fs/promises';
+import Path from 'path';
 
 /**
  *

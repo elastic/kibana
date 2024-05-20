@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 
 export const querySignalsSchema = t.exact(
   t.partial({

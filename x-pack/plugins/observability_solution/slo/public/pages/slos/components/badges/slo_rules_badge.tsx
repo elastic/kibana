@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { MouseEvent } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { MouseEvent } from 'react';
 import { BurnRateRuleParams } from '../../../../typings';
 
 export interface Props {

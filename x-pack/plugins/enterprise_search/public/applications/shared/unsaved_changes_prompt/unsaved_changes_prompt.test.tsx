@@ -12,7 +12,7 @@ jest.mock('react-router-dom', () => ({
 }));
 import { Prompt } from 'react-router-dom';
 
-import { ReactWrapper, mount, shallow } from 'enzyme';
+import { shallow, mount, ReactWrapper } from 'enzyme';
 
 import { UnsavedChangesPrompt } from './unsaved_changes_prompt';
 

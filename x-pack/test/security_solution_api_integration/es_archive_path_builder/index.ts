@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESS_ES_ARCHIVE_PATH, SERVERLESS_ES_ARCHIVE_PATH } from './constants';
+import { SERVERLESS_ES_ARCHIVE_PATH, ESS_ES_ARCHIVE_PATH } from './constants';
 
 export class EsArchivePathBuilder {
   constructor(private isServerless: boolean) {

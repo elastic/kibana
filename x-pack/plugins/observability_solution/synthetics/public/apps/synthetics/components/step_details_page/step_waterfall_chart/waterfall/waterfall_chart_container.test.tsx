@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
-import { render } from '../../../../utils/testing';
+import { screen } from '@testing-library/react';
 import { WaterfallChartContainer } from './waterfall_chart_container';
+import { render } from '../../../../utils/testing';
 
 const networkEvents = {
   events: [

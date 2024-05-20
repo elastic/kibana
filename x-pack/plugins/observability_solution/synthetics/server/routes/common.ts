@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { RouteContext } from './types';
+import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
+import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
-import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
-import { getAllLocations } from '../synthetics_service/get_all_locations';
-import { RouteContext } from './types';
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])

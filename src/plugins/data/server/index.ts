@@ -7,7 +7,7 @@
  */
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ConfigSchema, configSchema } from '../config';
-import type { DataPluginSetup, DataPluginStart, DataServerPlugin } from './plugin';
+import type { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
 
@@ -17,7 +17,7 @@ export { getRequestAbortedSignal } from './lib';
  * Exporters (CSV)
  */
 
-import { CSV_MIME_TYPE, datatableToCSV } from '../common';
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
@@ -45,11 +45,11 @@ export {
 import {
   // aggs
   CidrMask,
+  dateHistogramInterval,
   IpAddress,
+  parseInterval,
   // tabify
   calcAutoIntervalLessThan,
-  dateHistogramInterval,
-  parseInterval,
 } from '../common';
 import { configDeprecationProvider } from './config_deprecations';
 

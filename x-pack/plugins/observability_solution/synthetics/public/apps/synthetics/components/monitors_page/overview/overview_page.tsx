@@ -1,5 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +5,15 @@ import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
  * 2.0.
  */
 import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
-import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
+import { DisabledCallout } from '../management/disabled_callout';
+import { FilterGroup } from '../common/monitor_filters/filter_group';
+import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
+import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
@@ -18,21 +21,18 @@ import {
   selectServiceLocationsState,
 } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
-import { FilterGroup } from '../common/monitor_filters/filter_group';
-import { DisabledCallout } from '../management/disabled_callout';
-import { OverviewAlerts } from './overview/overview_alerts';
 
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
 
-import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
-import { NoMonitorsFound } from '../common/no_monitors_found';
-import { SearchField } from '../common/search_field';
 import { useMonitorList } from '../hooks/use_monitor_list';
-import { OverviewErrors } from './overview/overview_errors/overview_errors';
+import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
 import { OverviewStatus } from './overview/overview_status';
 import { QuickFilters } from './overview/quick_filters';
-import { useOverviewBreadcrumbs } from './use_breadcrumbs';
+import { SearchField } from '../common/search_field';
+import { NoMonitorsFound } from '../common/no_monitors_found';
+import { OverviewErrors } from './overview/overview_errors/overview_errors';
+import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });

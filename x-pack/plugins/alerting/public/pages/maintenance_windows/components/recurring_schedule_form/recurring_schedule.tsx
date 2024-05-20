@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useMemo, useState } from 'react';
+import moment, { Moment } from 'moment';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -7,33 +15,25 @@ import {
   EuiSpacer,
   EuiSplitPanel,
 } from '@elastic/eui';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   FIELD_TYPES,
   getUseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { Frequency } from '@kbn/rrule';
-import moment, { Moment } from 'moment';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { useMemo, useState } from 'react';
+import { getWeekdayInfo } from '../../helpers/get_weekday_info';
 import {
   DEFAULT_FREQUENCY_OPTIONS,
   DEFAULT_PRESETS,
   EndsOptions,
   RECURRENCE_END_OPTIONS,
 } from '../../constants';
-import { getPresets } from '../../helpers/get_presets';
-import { getWeekdayInfo } from '../../helpers/get_weekday_info';
-import { recurringSummary } from '../../helpers/recurring_summary';
 import * as i18n from '../../translations';
-import { FormProps } from '../schema';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
+import { recurringSummary } from '../../helpers/recurring_summary';
+import { getPresets } from '../../helpers/get_presets';
+import { FormProps } from '../schema';
 
 const UseField = getUseField({ component: Field });
 

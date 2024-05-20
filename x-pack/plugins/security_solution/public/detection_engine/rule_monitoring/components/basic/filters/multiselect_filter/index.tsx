@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFilterButton, EuiFilterGroup, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
-import { noop } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
+import { noop } from 'lodash';
+import { EuiPopover, EuiFilterGroup, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { useBoolState } from '../../../../../../common/hooks/use_bool_state';
 
 /* eslint-disable react/no-unused-prop-types */

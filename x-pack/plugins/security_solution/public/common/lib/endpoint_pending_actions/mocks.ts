@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   PendingActionsRequestQuery,
   PendingActionsResponse,
 } from '../../../../common/endpoint/types';
 import type { ResponseProvidersInterface } from '../../mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../mock/endpoint/http_handler_mock_factory';
+import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 
 export const pendingActionsResponseMock = (): PendingActionsResponse => ({
   data: [

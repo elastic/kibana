@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getMaxY, getResponseTimeTickFormatter } from './helper';
+import { getResponseTimeTickFormatter, getMaxY } from './helper';
 
+import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 import { getDurationFormatter, toMicroseconds } from '../../../../../common/utils/formatters';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 
 describe('transaction chart helper', () => {
   describe('getResponseTimeTickFormatter', () => {

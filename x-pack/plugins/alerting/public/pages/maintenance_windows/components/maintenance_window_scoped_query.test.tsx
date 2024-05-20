@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AlertConsumers } from '@kbn/rule-data-utils';
-import { screen } from '@testing-library/react';
 import React from 'react';
+import { screen } from '@testing-library/react';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 

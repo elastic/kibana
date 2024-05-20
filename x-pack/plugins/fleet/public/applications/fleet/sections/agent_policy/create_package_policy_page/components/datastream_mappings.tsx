@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import {
   EuiBasicTable,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiLink,
+  EuiSpacer,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
+import type { PackageInfo } from '../../../../types';
 import { getComponentTemplateNameForDatastream } from '../../../../../../../common/services';
 import { useGetComponentTemplateQuery, useStartServices } from '../../../../hooks';
-import type { PackageInfo } from '../../../../types';
 
 import { usePackagePolicyEditorPageUrl } from './datastream_hooks';
 

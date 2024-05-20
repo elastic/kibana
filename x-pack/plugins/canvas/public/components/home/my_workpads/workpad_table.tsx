@@ -8,14 +8,14 @@
 import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
 
+import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/app';
 import type { State } from '../../../../types';
 import { usePlatformService } from '../../../services';
-import { canUserWrite as canUserWriteSelector } from '../../../state/selectors/app';
-import { useDownloadWorkpad } from '../../hooks';
 import { useCloneWorkpad } from '../hooks';
+import { useDownloadWorkpad } from '../../hooks';
 
-import { WorkpadsContext } from './my_workpads';
 import { WorkpadTable as Component } from './workpad_table.component';
+import { WorkpadsContext } from './my_workpads';
 
 export const WorkpadTable = () => {
   const platformService = usePlatformService();

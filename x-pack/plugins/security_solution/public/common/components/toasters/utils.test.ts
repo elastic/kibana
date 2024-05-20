@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ToasterError } from './errors';
 import { errorToToaster } from './utils';
+import { ToasterError } from './errors';
 
 const ApiError = class extends Error {
   public body: {} = {};

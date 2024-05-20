@@ -6,8 +6,8 @@
  */
 
 import { RouteDependencies } from '../../../types';
-import { registerDetailsRoute } from './register_details_route';
 import { registerListRoute } from './register_list_route';
+import { registerDetailsRoute } from './register_details_route';
 
 export function registerNodesRoutes(dependencies: RouteDependencies) {
   registerListRoute(dependencies);

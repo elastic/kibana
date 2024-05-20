@@ -6,11 +6,11 @@
  */
 import React from 'react';
 
-import { fireEvent, waitFor } from '@testing-library/react';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { isValidCertVal, SettingsPage } from './settings';
 import { render } from '../lib/helper/rtl_helpers';
+import { fireEvent, waitFor } from '@testing-library/react';
 import * as alertApi from '../state/api/alerts';
-import { SettingsPage, isValidCertVal } from './settings';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
 describe('settings', () => {
   describe('form', () => {

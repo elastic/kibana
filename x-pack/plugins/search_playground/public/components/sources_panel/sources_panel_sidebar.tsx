@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { AddIndicesField } from './add_indices_field';
 import { IndicesList } from './indices_list';

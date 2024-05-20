@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ChromeStart, HttpSetup } from '@kbn/core/public';
 import React, { createContext, ReactNode, useState, useContext } from 'react';
+import { HttpSetup, ChromeStart } from '@kbn/core/public';
 
 import { Links } from '../../links';
-import { Payload, Store, Validation } from '../types';
+import { Store, Payload, Validation } from '../types';
 import { initialPayload } from './initial_payload';
 
 interface AppContextProviderArgs {

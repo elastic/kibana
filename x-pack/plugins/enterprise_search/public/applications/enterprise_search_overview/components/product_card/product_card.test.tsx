@@ -15,7 +15,7 @@ import { snakeCase } from 'lodash';
 
 import { EuiPanel } from '@elastic/eui';
 
-import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
+import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 
 import { ProductCard, ProductCardProps } from './product_card';
 

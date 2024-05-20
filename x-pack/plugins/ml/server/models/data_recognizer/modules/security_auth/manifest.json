@@ -84,5 +84,7 @@
       "job_id": "suspicious_login_activity"
     }
   ],
-  "tags": ["security"]
+  "tags": [
+    "security"
+  ]
 }

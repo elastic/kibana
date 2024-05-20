@@ -9,18 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
-import qs from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import qs from 'query-string';
+import { page } from './page_template';
 import { offsetRt } from '../../../../common/comparison_rt';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { DependenciesInventory } from '../../app/dependencies_inventory';
 import { DependencyDetailOperations } from '../../app/dependency_detail_operations';
 import { DependencyDetailOverview } from '../../app/dependency_detail_overview';
 import { DependencyDetailView } from '../../app/dependency_detail_view';
+import { DependenciesInventory } from '../../app/dependencies_inventory';
 import { DependencyOperationDetailView } from '../../app/dependency_operation_detail_view';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
-import { page } from './page_template';
 
 export const DependenciesInventoryTitle = i18n.translate(
   'xpack.apm.views.dependenciesInventory.title',

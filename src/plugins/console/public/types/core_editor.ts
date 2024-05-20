@@ -8,8 +8,8 @@
 
 import type { Editor } from 'brace';
 import { ResultTerm } from '../lib/autocomplete/types';
-import { Token } from './token';
 import { TokensProvider } from './tokens_provider';
+import { Token } from './token';
 
 type MarkerRef = any;
 

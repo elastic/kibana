@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "addExcludeFrozenToQuery",
-        "description": ["\nExtends an existing query with a clause to exclude the frozen tier.\n"],
+        "description": [
+          "\nExtends an existing query with a clause to exclude the frozen tier.\n"
+        ],
         "signature": [
           "(originalQuery: ",
           "QueryDslQueryContainer",
@@ -43,15 +45,22 @@
             "type": "Object",
             "tags": [],
             "label": "originalQuery",
-            "description": ["- the original query"],
-            "signature": ["QueryDslQueryContainer", " | undefined"],
+            "description": [
+              "- the original query"
+            ],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
+            ],
             "path": "x-pack/packages/ml/query_utils/src/add_exclude_frozen_to_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": ["the original query exluding the frozen tier"],
+        "returnComment": [
+          "the original query exluding the frozen tier"
+        ],
         "initialIsOpen": false
       },
       {
@@ -78,8 +87,12 @@
             "type": "string",
             "tags": [],
             "label": "timeFieldName",
-            "description": ["- optional time field name of the data view"],
-            "signature": ["string | undefined"],
+            "description": [
+              "- optional time field name of the data view"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -91,8 +104,12 @@
             "type": "number",
             "tags": [],
             "label": "earliestMs",
-            "description": ["- optional earliest timestamp of the selected time range"],
-            "signature": ["number | undefined"],
+            "description": [
+              "- optional earliest timestamp of the selected time range"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -104,8 +121,12 @@
             "type": "number",
             "tags": [],
             "label": "latestMs",
-            "description": ["- optional latest timestamp of the selected time range"],
-            "signature": ["number | undefined"],
+            "description": [
+              "- optional latest timestamp of the selected time range"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -117,15 +138,21 @@
             "type": "CompoundType",
             "tags": [],
             "label": "query",
-            "description": ["- optional query"],
-            "signature": ["string | { [key: string]: any; } | undefined"],
+            "description": [
+              "- optional query"
+            ],
+            "signature": [
+              "string | { [key: string]: any; } | undefined"
+            ],
             "path": "x-pack/packages/ml/query_utils/src/build_base_filter_criteria.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": ["filter criteria"],
+        "returnComment": [
+          "filter criteria"
+        ],
         "initialIsOpen": false
       },
       {
@@ -134,8 +161,13 @@
         "type": "Function",
         "tags": [],
         "label": "getDefaultDSLQuery",
-        "description": ["\nDefault DSL query which matches all the results"],
-        "signature": ["() => ", "QueryDslQueryContainer"],
+        "description": [
+          "\nDefault DSL query which matches all the results"
+        ],
+        "signature": [
+          "() => ",
+          "QueryDslQueryContainer"
+        ],
         "path": "x-pack/packages/ml/query_utils/src/get_default_query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -152,7 +184,9 @@
         "description": [
           "\nReturns a name which is safe to use in elasticsearch aggregations for the supplied\nfield name. Aggregation names must be alpha-numeric and can only contain '_' and '-' characters,\nso if the supplied field names contains disallowed characters, the provided index\nidentifier is used to return a safe 'dummy' name in the format 'field_index' e.g. field_0, field_1\n"
         ],
-        "signature": ["(fieldName: string, index: number) => string"],
+        "signature": [
+          "(fieldName: string, index: number) => string"
+        ],
         "path": "x-pack/packages/ml/query_utils/src/get_safe_aggregation_name.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -163,8 +197,12 @@
             "type": "string",
             "tags": [],
             "label": "fieldName",
-            "description": ["- the field name to check"],
-            "signature": ["string"],
+            "description": [
+              "- the field name to check"
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/query_utils/src/get_safe_aggregation_name.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -176,15 +214,21 @@
             "type": "number",
             "tags": [],
             "label": "index",
-            "description": ["- the index number to be used for the safe aggregation name"],
-            "signature": ["number"],
+            "description": [
+              "- the index number to be used for the safe aggregation name"
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/query_utils/src/get_safe_aggregation_name.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["safe aggregation name"],
+        "returnComment": [
+          "safe aggregation name"
+        ],
         "initialIsOpen": false
       },
       {
@@ -217,7 +261,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "query",
-            "description": ["- The query to check."],
+            "description": [
+              "- The query to check."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-query-utils",
@@ -233,7 +279,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["True if the query is a default query, false otherwise."],
+        "returnComment": [
+          "True if the query is a default query, false otherwise."
+        ],
         "initialIsOpen": false
       },
       {
@@ -242,8 +290,12 @@
         "type": "Function",
         "tags": [],
         "label": "isMatchAllQuery",
-        "description": ["\nChecks if an argument is a `match_all` query."],
-        "signature": ["(query: unknown) => boolean"],
+        "description": [
+          "\nChecks if an argument is a `match_all` query."
+        ],
+        "signature": [
+          "(query: unknown) => boolean"
+        ],
         "path": "x-pack/packages/ml/query_utils/src/match_all_query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -254,15 +306,21 @@
             "type": "Unknown",
             "tags": [],
             "label": "query",
-            "description": ["- Argument to check."],
-            "signature": ["unknown"],
+            "description": [
+              "- Argument to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/packages/ml/query_utils/src/match_all_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["True if `query` is a `match_all` query, false otherwise."],
+        "returnComment": [
+          "True if `query` is a `match_all` query, false otherwise."
+        ],
         "initialIsOpen": false
       },
       {
@@ -271,8 +329,12 @@
         "type": "Function",
         "tags": [],
         "label": "isSimpleQuery",
-        "description": ["\nType guard verifying if an argument is a `SimpleQuery`."],
-        "signature": ["(arg: unknown) => boolean"],
+        "description": [
+          "\nType guard verifying if an argument is a `SimpleQuery`."
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
         "path": "x-pack/packages/ml/query_utils/src/simple_query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -283,15 +345,21 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": ["- Argument to check."],
-            "signature": ["unknown"],
+            "description": [
+              "- Argument to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/packages/ml/query_utils/src/simple_query.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["True if `arg` is a `SimpleQuery`, false otherwise."],
+        "returnComment": [
+          "True if `arg` is a `SimpleQuery`, false otherwise."
+        ],
         "initialIsOpen": false
       }
     ],
@@ -302,7 +370,9 @@
         "type": "Interface",
         "tags": [],
         "label": "BoolFilterBasedSimpleQuery",
-        "description": ["\nRepresents simple queries that are based on a boolean filter."],
+        "description": [
+          "\nRepresents simple queries that are based on a boolean filter."
+        ],
         "path": "x-pack/packages/ml/query_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -313,7 +383,9 @@
             "type": "Object",
             "tags": [],
             "label": "bool",
-            "description": ["\nThe container for the boolean filter logic."],
+            "description": [
+              "\nThe container for the boolean filter logic."
+            ],
             "signature": [
               "{ filter: [",
               {
@@ -338,7 +410,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SimpleQuery",
-        "description": ["\nRepresents a simple query structure for searching documents."],
+        "description": [
+          "\nRepresents a simple query structure for searching documents."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-query-utils",
@@ -359,8 +433,14 @@
             "type": "Object",
             "tags": [],
             "label": "query_string",
-            "description": ["\nDefines the query string parameters for the search."],
-            "signature": ["{ query: Q; default_operator?: ", "QueryDslOperator", " | undefined; }"],
+            "description": [
+              "\nDefines the query string parameters for the search."
+            ],
+            "signature": [
+              "{ query: Q; default_operator?: ",
+              "QueryDslOperator",
+              " | undefined; }"
+            ],
             "path": "x-pack/packages/ml/query_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -377,8 +457,12 @@
         "type": "Type",
         "tags": [],
         "label": "SavedSearchQuery",
-        "description": ["\nPlaceholder for the structure for a saved search query."],
-        "signature": ["object"],
+        "description": [
+          "\nPlaceholder for the structure for a saved search query."
+        ],
+        "signature": [
+          "object"
+        ],
         "path": "x-pack/packages/ml/query_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -390,8 +474,12 @@
         "type": "Type",
         "tags": [],
         "label": "SearchQueryLanguage",
-        "description": ["\nType for SearchQueryLanguage"],
-        "signature": ["\"kuery\" | \"lucene\""],
+        "description": [
+          "\nType for SearchQueryLanguage"
+        ],
+        "signature": [
+          "\"kuery\" | \"lucene\""
+        ],
         "path": "x-pack/packages/ml/query_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -438,7 +526,9 @@
         "type": "Object",
         "tags": [],
         "label": "ES_CLIENT_TOTAL_HITS_RELATION",
-        "description": ["\nCustom enum for total hits relation values"],
+        "description": [
+          "\nCustom enum for total hits relation values"
+        ],
         "signature": [
           "{ GTE: ",
           "SearchTotalHitsRelation",
@@ -457,7 +547,9 @@
         "type": "Object",
         "tags": [],
         "label": "matchAllQuery",
-        "description": ["\nRepresents a query that matches all documents."],
+        "description": [
+          "\nRepresents a query that matches all documents."
+        ],
         "path": "x-pack/packages/ml/query_utils/src/match_all_query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -485,8 +577,12 @@
         "type": "Object",
         "tags": [],
         "label": "SEARCH_QUERY_LANGUAGE",
-        "description": ["\nConstant for kuery and lucene string"],
-        "signature": ["{ readonly KUERY: \"kuery\"; readonly LUCENE: \"lucene\"; }"],
+        "description": [
+          "\nConstant for kuery and lucene string"
+        ],
+        "signature": [
+          "{ readonly KUERY: \"kuery\"; readonly LUCENE: \"lucene\"; }"
+        ],
         "path": "x-pack/packages/ml/query_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,

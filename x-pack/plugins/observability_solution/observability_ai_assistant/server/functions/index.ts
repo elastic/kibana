@@ -6,13 +6,13 @@
  */
 
 import dedent from 'dedent';
-import type { RegistrationCallback } from '../service/types';
 import { registerContextFunction } from './context';
+import { registerSummarizationFunction } from './summarize';
+import type { RegistrationCallback } from '../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
-import { registerExecuteConnectorFunction } from './execute_connector';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerKibanaFunction } from './kibana';
-import { registerSummarizationFunction } from './summarize';
+import { registerExecuteConnectorFunction } from './execute_connector';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<RegistrationCallback>[0],

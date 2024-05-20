@@ -8,8 +8,12 @@
       "wait_for_completion": "__flag__",
       "delete_user_annotations": "__flag__"
     },
-    "methods": ["POST"],
-    "patterns": ["_ml/anomaly_detectors/{job_id}/_reset"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/_reset"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-reset-job.html",
     "availability": {
       "stack": true,

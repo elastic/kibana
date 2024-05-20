@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { ClassNames } from '@emotion/react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
-import classNames from 'classnames';
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
+import classNames from 'classnames';
+import { get } from 'lodash';
+import { ClassNames } from '@emotion/react';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 
-import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { ErrorComponent } from '../../error';
-import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
 import { replaceVars } from '../../lib/replace_vars';
+import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
+import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
 import './_markdown.scss';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
 import { uiSettings } from './ui_settings';
 export class DevToolsServerPlugin implements Plugin<object, object> {

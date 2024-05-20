@@ -10,8 +10,8 @@ import { filterCustomIntegrations } from '@kbn/custom-integrations-plugin/public
 
 import { useMemo } from 'react';
 
-import { FLEET_APM_PACKAGE } from '../../../../common/constants';
 import type { PackageListItem } from '../../../../common/types/models';
+import { FLEET_APM_PACKAGE } from '../../../../common/constants';
 
 // Export this as a utility to find replacements for a package (e.g. in the overview-page for an EPR package)
 function findReplacementsForEprPackage(

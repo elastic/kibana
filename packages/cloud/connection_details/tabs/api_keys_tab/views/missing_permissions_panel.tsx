@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import * as React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as React from 'react';
 
 export const MissingPermissionsPanel: React.FC = () => {
   return (

@@ -8,15 +8,15 @@
 import { InventoryMetrics } from '../../types';
 
 import { awsS3BucketSize } from './tsvb/aws_s3_bucket_size';
-import { awsS3DownloadBytes } from './tsvb/aws_s3_download_bytes';
-import { awsS3NumberOfObjects } from './tsvb/aws_s3_number_of_objects';
 import { awsS3TotalRequests } from './tsvb/aws_s3_total_requests';
+import { awsS3NumberOfObjects } from './tsvb/aws_s3_number_of_objects';
+import { awsS3DownloadBytes } from './tsvb/aws_s3_download_bytes';
 import { awsS3UploadBytes } from './tsvb/aws_s3_upload_bytes';
 
 import { s3BucketSize } from './snapshot/s3_bucket_size';
-import { s3DownloadBytes } from './snapshot/s3_download_bytes';
-import { s3NumberOfObjects } from './snapshot/s3_number_of_objects';
 import { s3TotalRequests } from './snapshot/s3_total_requests';
+import { s3NumberOfObjects } from './snapshot/s3_number_of_objects';
+import { s3DownloadBytes } from './snapshot/s3_download_bytes';
 import { s3UploadBytes } from './snapshot/s3_upload_bytes';
 
 const awsS3SnapshotMetrics = {

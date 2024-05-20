@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
+import { registerHelpers } from './rollup.test_helpers';
 import { API_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
-import { registerHelpers } from './rollup.test_helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

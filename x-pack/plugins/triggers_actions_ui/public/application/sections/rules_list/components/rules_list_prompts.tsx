@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { EuiPageTemplate } from '@elastic/eui';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
 
 interface RulesListPromptsProps {

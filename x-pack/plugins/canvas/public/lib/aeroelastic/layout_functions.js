@@ -10,13 +10,13 @@ import { getId as rawGetId } from '../get_id';
 import { insideAABB, landmarkPoint, shapesAt } from './geometry';
 
 import {
-  ORIGIN,
   compositeComponent,
   invert,
   matrixToAngle,
   multiply,
   mvMultiply,
   normalize,
+  ORIGIN,
   reduceTransforms,
   rotateZ,
   scale,
@@ -25,11 +25,11 @@ import {
 } from './matrix';
 
 import {
-  UNITMATRIX as UNITMATRIX2D,
   componentProduct as componentProduct2d,
   multiply as multiply2d,
   mvMultiply as mvMultiply2d,
   translate as translate2d,
+  UNITMATRIX as UNITMATRIX2D,
 } from './matrix2d';
 
 import {

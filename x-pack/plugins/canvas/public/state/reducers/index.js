@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import reduceReducers from 'reduce-reducers';
 import { combineReducers } from 'redux';
+import reduceReducers from 'reduce-reducers';
+import { get } from 'lodash';
 
 import { appReducer } from './app';
-import { assetsReducer } from './assets';
-import { elementsReducer } from './elements';
-import { embeddableReducer } from './embeddable';
-import { flyoutsReducer } from './flyouts';
-import { historyReducer } from './history';
-import { pagesReducer } from './pages';
-import { resolvedArgsReducer } from './resolved_args';
-import { sidebarReducer } from './sidebar';
 import { transientReducer } from './transient';
+import { resolvedArgsReducer } from './resolved_args';
 import { workpadReducer } from './workpad';
+import { pagesReducer } from './pages';
+import { elementsReducer } from './elements';
+import { assetsReducer } from './assets';
+import { historyReducer } from './history';
+import { embeddableReducer } from './embeddable';
+import { sidebarReducer } from './sidebar';
+import { flyoutsReducer } from './flyouts';
 
 export function getRootReducer(initialState) {
   return combineReducers({

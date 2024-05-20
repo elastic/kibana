@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
-import _ from 'lodash';
-import moment from 'moment';
 import fn from './condition';
-import getSeriesList from './test_helpers/get_single_series_list';
+import moment from 'moment';
+import expect from '@kbn/expect';
 import invoke from './test_helpers/invoke_series_fn';
+import getSeriesList from './test_helpers/get_single_series_list';
+import _ from 'lodash';
 
 describe('condition.js', function () {
   let comparable;

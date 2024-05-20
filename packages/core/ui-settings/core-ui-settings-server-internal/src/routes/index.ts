@@ -9,8 +9,8 @@
 import type { InternalUiSettingsRouter } from '../internal_types';
 import { registerDeleteRoute } from './delete';
 import { registerGetRoute } from './get';
-import { registerSetRoute } from './set';
 import { registerSetManyRoute } from './set_many';
+import { registerSetRoute } from './set';
 
 export function registerRoutes(router: InternalUiSettingsRouter) {
   registerGetRoute(router);

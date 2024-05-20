@@ -9,18 +9,18 @@ import { withTimeout } from '@kbn/std';
 import { snakeCase } from 'lodash';
 
 import type {
-  ElasticsearchClient,
-  ExecutionContextSetup,
-  KibanaExecutionContext,
   Logger,
+  ElasticsearchClient,
   SavedObjectsClientContract,
+  KibanaExecutionContext,
+  ExecutionContextSetup,
 } from '@kbn/core/server';
-import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../../common/constants';
 import { Collector } from './collector';
-import { usageCollectorsStatsCollector } from './collector_stats';
-import { createPerformanceObsHook, perfTimerify } from './measure_duration';
-import type { CollectorFetchContext, CollectorOptions, ICollector } from './types';
+import type { ICollector, CollectorOptions, CollectorFetchContext } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
+import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../../common/constants';
+import { createPerformanceObsHook, perfTimerify } from './measure_duration';
+import { usageCollectorsStatsCollector } from './collector_stats';
 
 const SECOND_IN_MS = 1000;
 // Needed for the general array containing all the collectors. We don't really care about their types here

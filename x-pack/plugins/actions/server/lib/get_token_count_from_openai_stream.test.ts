@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { Transform } from 'stream';
-import { loggerMock } from '@kbn/logging-mocks';
 import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
+import { loggerMock } from '@kbn/logging-mocks';
 
 interface StreamMock {
   write: (data: string) => void;

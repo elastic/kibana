@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { EuiTextProps } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
+import type { EuiTextProps } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 const CodeBlock = styled(EuiText)`

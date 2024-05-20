@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { EntryMatchWildcard, entriesMatchWildcard } from '.';
+import { left } from 'fp-ts/lib/Either';
 import { getEntryMatchWildcardMock } from './index.mock';
+import { entriesMatchWildcard, EntryMatchWildcard } from '.';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('entriesMatchWildcard', () => {
   test('it should validate an entry', () => {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getShardTimeout, getDefaultSearchParams } from './request_utils';
 import { IUiSettingsClient, SharedGlobalConfig } from '@kbn/core/server';
-import { getDefaultSearchParams, getShardTimeout } from './request_utils';
 
 describe('request utils', () => {
   describe('getShardTimeout', () => {

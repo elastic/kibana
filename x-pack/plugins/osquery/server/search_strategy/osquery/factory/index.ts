@@ -8,7 +8,7 @@
 import type { FactoryQueryTypes } from '../../../../common/search_strategy/osquery';
 import { OsqueryQueries } from '../../../../common/search_strategy/osquery';
 
-import { actionDetails, actionResults, allActions } from './actions';
+import { allActions, actionDetails, actionResults } from './actions';
 import { allResults } from './results';
 
 import type { OsqueryFactory } from './types';

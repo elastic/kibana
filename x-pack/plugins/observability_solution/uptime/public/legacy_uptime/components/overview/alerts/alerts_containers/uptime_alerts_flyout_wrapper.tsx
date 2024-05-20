@@ -8,8 +8,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAlertFlyoutVisible } from '../../../../state/actions';
-import { selectAlertFlyoutType, selectAlertFlyoutVisibility } from '../../../../state/selectors';
 import { UptimeAlertsFlyoutWrapperComponent } from '../uptime_alerts_flyout_wrapper';
+import { selectAlertFlyoutVisibility, selectAlertFlyoutType } from '../../../../state/selectors';
 
 export const UptimeAlertsFlyoutWrapper: React.FC = () => {
   const dispatch = useDispatch();

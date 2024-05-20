@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
 
 export interface EndzoneTooltipHeaderProps {
   value?: string;

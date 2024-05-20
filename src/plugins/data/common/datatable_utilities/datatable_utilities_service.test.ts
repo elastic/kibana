@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';

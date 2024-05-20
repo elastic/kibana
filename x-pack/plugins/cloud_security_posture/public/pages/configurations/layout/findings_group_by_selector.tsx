@@ -1,6 +1,3 @@
-import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormLabel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,9 +5,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import { EuiComboBox, EuiFormLabel, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
-import { findingsNavigation } from '../../../common/navigation/constants';
+import { i18n } from '@kbn/i18n';
 import type { FindingsGroupByKind } from '../../../common/types';
+import { findingsNavigation } from '../../../common/navigation/constants';
 import * as TEST_SUBJECTS from '../test_subjects';
 
 const getGroupByOptions = (): Array<EuiComboBoxOptionOption<FindingsGroupByKind>> => [

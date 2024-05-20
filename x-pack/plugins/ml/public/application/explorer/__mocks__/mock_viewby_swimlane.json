@@ -1,5 +1,7 @@
 {
-  "laneLabels": ["View by"],
+  "laneLabels": [
+    "View by"
+  ],
   "points": [
     {
       "laneLabel": "test-1",

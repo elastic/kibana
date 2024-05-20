@@ -7,21 +7,21 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../common/constants/synthetics_alerts';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import {
   PopoverState,
-  setAlertFlyoutVisible,
+  toggleIntegrationsPopover,
   setBasePath,
   setEsKueryString,
-  setRefreshIntervalAction,
-  setRefreshPausedAction,
+  setAlertFlyoutVisible,
   setSearchTextAction,
   setSelectedMonitorId,
-  toggleIntegrationsPopover,
+  setRefreshPausedAction,
+  setRefreshIntervalAction,
 } from './actions';
 const { AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } = CLIENT_DEFAULTS_SYNTHETICS;
 

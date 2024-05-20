@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiLink, EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiLink } from '@elastic/eui';
 
 import { DocumentPermissionsCallout } from './document_permissions_callout';
 

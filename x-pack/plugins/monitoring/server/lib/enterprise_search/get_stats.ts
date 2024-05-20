@@ -11,12 +11,12 @@ import { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
 import { LegacyRequest } from '../../types';
 import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import {
   entSearchAggFilterPath,
   entSearchAggResponseHandler,
   entSearchUuidsAgg,
 } from './_enterprise_search_stats';
-import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 
 export async function getStats(
   req: LegacyRequest<unknown, unknown, { ccs?: string; timeRange: TimeRange }>,

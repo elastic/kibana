@@ -7,9 +7,9 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-import { NetworkEvent } from '../../../../../../../common/runtime_types';
-import type { DateFormatter } from '../../../../../../hooks/use_date_format';
 import { MarkerItems } from '../../step_waterfall_chart/waterfall/context/waterfall_context';
+import type { DateFormatter } from '../../../../../../hooks/use_date_format';
+import { NetworkEvent } from '../../../../../../../common/runtime_types';
 import { WaterfallData, WaterfallMetadata } from './types';
 import {
   FriendlyFlyoutLabels,

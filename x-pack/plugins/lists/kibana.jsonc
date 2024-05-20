@@ -6,8 +6,16 @@
     "id": "lists",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "lists"],
-    "optionalPlugins": ["spaces", "security"],
-    "extraPublicDirs": ["common"]
+    "configPath": [
+      "xpack",
+      "lists"
+    ],
+    "optionalPlugins": [
+      "spaces",
+      "security"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

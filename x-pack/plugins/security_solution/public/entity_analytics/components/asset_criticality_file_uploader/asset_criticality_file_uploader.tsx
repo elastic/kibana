@@ -8,13 +8,13 @@
 import { EuiSpacer, EuiStepsHorizontal } from '@elastic/eui';
 import React, { useCallback, useReducer } from 'react';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import { useEntityAnalyticsRoutes } from '../../api/api';
 import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
-import { AssetCriticalityResultStep } from './components/result_step';
 import { AssetCriticalityValidationStep } from './components/validation_step';
-import { isFilePickerStep, isResultStep, isValidationStep } from './helpers';
-import { useFileValidation, useNavigationSteps } from './hooks';
 import { INITIAL_STATE, reducer } from './reducer';
+import { isFilePickerStep, isResultStep, isValidationStep } from './helpers';
+import { AssetCriticalityResultStep } from './components/result_step';
+import { useEntityAnalyticsRoutes } from '../../api/api';
+import { useFileValidation, useNavigationSteps } from './hooks';
 import type { OnCompleteParams } from './types';
 
 export const AssetCriticalityFileUploader: React.FC = () => {

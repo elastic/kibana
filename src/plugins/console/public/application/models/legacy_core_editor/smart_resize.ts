@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Editor } from 'brace';
 import { get, throttle } from 'lodash';
+import type { Editor } from 'brace';
 
 // eslint-disable-next-line import/no-default-export
 export default function (editor: Editor) {

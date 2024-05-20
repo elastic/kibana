@@ -5,36 +5,36 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiIcon,
   EuiModal,
-  EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSwitch,
+  EuiModalBody,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFlexGroup,
   EuiToolTip,
+  EuiIcon,
+  EuiButtonEmpty,
   useEuiTheme,
 } from '@elastic/eui';
-import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { i18n } from '@kbn/i18n';
+import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
 import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
-import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
+import { useDashboardFetcher, FETCH_STATUS } from '../../../hooks/use_dashboards_fetcher';
 import {
-  useCreateCustomDashboard,
   useUpdateCustomDashboard,
+  useCreateCustomDashboard,
 } from '../../../hooks/use_custom_dashboards';
-import { FETCH_STATUS, useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
+import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
 
 interface Props {
   onClose: () => void;

@@ -9,13 +9,13 @@ import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { DataQualitySummary, Props } from '.';
 import { EMPTY_STAT } from '../../helpers';
 import { alertIndexWithAllResults } from '../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { PatternRollup } from '../../types';
+import { Props, DataQualitySummary } from '.';
 import {
   getTotalDocsCount,
   getTotalIncompatible,

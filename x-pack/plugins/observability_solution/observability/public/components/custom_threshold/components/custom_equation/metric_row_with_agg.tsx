@@ -61,20 +61,17 @@ export function MetricRowWithAgg({
 
   const fieldOptions = useMemo(
     () =>
-      fields.reduce(
-        (acc, fieldValue) => {
-          if (
-            aggType &&
-            aggregationTypes[aggType].validNormalizedTypes.includes(
-              fieldValue.normalizedType as ValidNormalizedTypes
-            )
-          ) {
-            acc.push({ label: fieldValue.name });
-          }
-          return acc;
-        },
-        [] as Array<{ label: string }>
-      ),
+      fields.reduce((acc, fieldValue) => {
+        if (
+          aggType &&
+          aggregationTypes[aggType].validNormalizedTypes.includes(
+            fieldValue.normalizedType as ValidNormalizedTypes
+          )
+        ) {
+          acc.push({ label: fieldValue.name });
+        }
+        return acc;
+      }, [] as Array<{ label: string }>),
     [fields, aggregationTypes, aggType]
   );
 

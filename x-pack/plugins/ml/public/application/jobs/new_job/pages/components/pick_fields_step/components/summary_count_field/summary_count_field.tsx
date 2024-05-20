@@ -8,15 +8,15 @@
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 
+import { SummaryCountFieldSelect } from './summary_count_field_select';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import type {
-  AdvancedJobCreator,
   MultiMetricJobCreator,
   PopulationJobCreator,
+  AdvancedJobCreator,
 } from '../../../../../common/job_creator';
-import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
-import { SummaryCountFieldSelect } from './summary_count_field_select';
 
 export const SummaryCountField: FC = () => {
   const {

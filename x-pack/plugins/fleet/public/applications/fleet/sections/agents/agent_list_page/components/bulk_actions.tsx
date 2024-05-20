@@ -5,34 +5,34 @@
  * 2.0.
  */
 
+import React, { useMemo, useState } from 'react';
 import {
-  EuiButton,
-  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
+  EuiContextMenu,
+  EuiButton,
+  EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
 
-import { AGENTS_PREFIX, LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common/constants';
-import { useLicense } from '../../../../hooks';
-import { ExperimentalFeaturesService } from '../../../../services';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
+import { useLicense } from '../../../../hooks';
+import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 import { getCommonTags } from '../utils';
 
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 
-import { TagsAddRemove } from './tags_add_remove';
 import type { SelectionMode } from './types';
+import { TagsAddRemove } from './tags_add_remove';
 
 export interface Props {
   nAgentsInTable: number;

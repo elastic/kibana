@@ -7,19 +7,37 @@
       "pretty": "__flag__",
       "if_primary_term": "",
       "if_seq_no": "",
-      "lang": ["painless"],
-      "refresh": ["true", "false", "wait_for"],
+      "lang": [
+        "painless"
+      ],
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ],
       "require_alias": "__flag__",
       "retry_on_conflict": "",
       "routing": "",
-      "timeout": ["1m", "-1", "0"],
-      "wait_for_active_shards": ["1", "all", "index-setting"],
+      "timeout": [
+        "1m",
+        "-1",
+        "0"
+      ],
+      "wait_for_active_shards": [
+        "1",
+        "all",
+        "index-setting"
+      ],
       "_source": "__flag__",
       "_source_excludes": [],
       "_source_includes": []
     },
-    "methods": ["POST"],
-    "patterns": ["{index}/_update/{id}"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_update/{id}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-update.html",
     "availability": {
       "stack": true,

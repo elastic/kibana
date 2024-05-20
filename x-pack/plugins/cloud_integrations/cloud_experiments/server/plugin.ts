@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Logger,
   Plugin,
-  PluginInitializerContext,
+  Logger,
 } from '@kbn/core/server';
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server/types';
+import { get, has } from 'lodash';
 import type { LogMeta } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { get, has } from 'lodash';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server/types';
 import { filter, map } from 'rxjs';
+import { MetadataService } from '../common/metadata_service';
+import { LaunchDarklyClient } from './launch_darkly_client';
+import { registerUsageCollector } from './usage';
+import type { CloudExperimentsConfigType } from './config';
 import type {
   CloudExperimentsFeatureFlagNames,
   CloudExperimentsMetric,
   CloudExperimentsPluginStart,
 } from '../common';
 import { FEATURE_FLAG_NAMES, METRIC_NAMES } from '../common/constants';
-import { MetadataService } from '../common/metadata_service';
-import type { CloudExperimentsConfigType } from './config';
-import { LaunchDarklyClient } from './launch_darkly_client';
-import { registerUsageCollector } from './usage';
 
 interface CloudExperimentsPluginSetupDeps {
   cloud: CloudSetup;

@@ -1,4 +1,3 @@
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,20 +5,21 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
  * 2.0.
  */
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  HeartbeatConfig,
-  MonitorFields,
   MonitorTypeEnum,
+  MonitorFields,
   ScheduleUnit,
   SourceType,
+  HeartbeatConfig,
 } from '../../../common/runtime_types';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import { SyntheticsServerSetup } from '../../types';
-import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { SyntheticsServerSetup } from '../../types';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {

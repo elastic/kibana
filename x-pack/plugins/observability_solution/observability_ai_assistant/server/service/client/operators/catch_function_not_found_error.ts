@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { OperatorFunction, catchError, of, throwError } from 'rxjs';
+import { catchError, of, OperatorFunction, throwError } from 'rxjs';
 import {
-  MessageAddEvent,
   createFunctionLimitExceededError,
   isFunctionNotFoundError,
+  MessageAddEvent,
 } from '../../../../common/conversation_complete';
 import { createServerSideFunctionResponseError } from '../../util/create_server_side_function_response_error';
 

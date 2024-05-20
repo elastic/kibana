@@ -8,20 +8,20 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
 import { EndpointActionFileDownloadSchema } from '../../../../common/api/endpoint';
+import type { ResponseActionsClient } from '../../services';
+import {
+  getResponseActionsClient,
+  NormalizedExternalConnectorClient,
+  getActionAgentType,
+} from '../../services';
+import { errorHandler } from '../error_handler';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
+import { withEndpointAuthz } from '../with_endpoint_authz';
+import type { EndpointAppContext } from '../../types';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import type { ResponseActionsClient } from '../../services';
-import {
-  NormalizedExternalConnectorClient,
-  getActionAgentType,
-  getResponseActionsClient,
-} from '../../services';
-import type { EndpointAppContext } from '../../types';
-import { errorHandler } from '../error_handler';
-import { withEndpointAuthz } from '../with_endpoint_authz';
 
 export const registerActionFileDownloadRoutes = (
   router: SecuritySolutionPluginRouter,

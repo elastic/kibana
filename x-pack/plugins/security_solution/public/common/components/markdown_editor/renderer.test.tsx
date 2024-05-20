@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { TestProviders } from '../../mock';
-import { UpsellingProvider } from '../upselling_provider';
 import { MarkdownRenderer } from './renderer';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { UpsellingProvider } from '../upselling_provider';
 
 jest.mock('../../utils/default_date_settings', () => {
   const original = jest.requireActual('../../utils/default_date_settings');

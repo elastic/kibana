@@ -8,8 +8,8 @@
 
 import fetch from 'node-fetch';
 import pRetry from 'p-retry';
-import { kibanaHeaders } from '../../shared/client_headers';
 import { Logger } from '../../utils/create_logger';
+import { kibanaHeaders } from '../../shared/client_headers';
 
 export class ApmSynthtraceKibanaClient {
   private readonly logger: Logger;

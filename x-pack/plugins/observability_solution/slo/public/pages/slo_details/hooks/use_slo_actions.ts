@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import path from 'path';
-import { RulesParams, rulesLocatorID } from '@kbn/observability-plugin/public';
+import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import path from 'path';
 import { paths } from '../../../../common/locators/paths';
 import { useSpace } from '../../../hooks/use_space';
 import { BurnRateRuleParams } from '../../../typings';

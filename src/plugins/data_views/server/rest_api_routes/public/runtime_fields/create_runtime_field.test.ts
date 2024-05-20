@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataViewLazy } from '../../../../common';
+import { createRuntimeField } from './create_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { createRuntimeField } from './create_runtime_field';
+import { DataViewLazy } from '../../../../common';
 
 describe('create runtime field', () => {
   it('call usageCollection', async () => {
@@ -25,7 +25,7 @@ describe('create runtime field', () => {
             .mockReturnValueOnce(undefined)
             .mockReturnValueOnce(undefined)
             .mockReturnValueOnce({}),
-        }) as unknown as DataViewLazy
+        } as unknown as DataViewLazy)
     );
 
     await createRuntimeField({

@@ -21,13 +21,13 @@ import {
 import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
 import {
-  CUSTOMIZE_HEADER_DESCRIPTION,
-  CUSTOMIZE_HEADER_TITLE,
-  CUSTOMIZE_NAME_BUTTON,
-  CUSTOMIZE_NAME_LABEL,
   NAV,
+  CUSTOMIZE_HEADER_TITLE,
+  CUSTOMIZE_HEADER_DESCRIPTION,
+  CUSTOMIZE_NAME_LABEL,
+  CUSTOMIZE_NAME_BUTTON,
 } from '../../../constants';
-import { ICON_DESCRIPTION, ICON_HELP_TEXT, LOGO_DESCRIPTION, LOGO_HELP_TEXT } from '../constants';
+import { LOGO_DESCRIPTION, LOGO_HELP_TEXT, ICON_DESCRIPTION, ICON_HELP_TEXT } from '../constants';
 import { SettingsLogic } from '../settings_logic';
 
 import { BrandingSection } from './branding_section';

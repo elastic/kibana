@@ -7,40 +7,41 @@
 
 import {
   EuiBadge,
-  EuiFlexGrid,
+  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
-  EuiLoadingSpinner,
   EuiText,
+  EuiIcon,
   EuiToolTip,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 
-import { FieldIcon } from '@kbn/react-field';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
+import { FieldIcon } from '@kbn/react-field';
 
-import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping, Type, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
+import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
-  AlertSuppressionMissingFieldsStrategy,
   RequiredFieldArray,
   Threshold,
+  AlertSuppressionMissingFieldsStrategy,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
-import { AND, MATCHES, OR } from '../../../../common/components/threat_match/translations';
-import * as i18nRiskScore from '../risk_score_mapping/translations';
 import * as i18nSeverity from '../severity_mapping/translations';
+import * as i18nRiskScore from '../risk_score_mapping/translations';
 
-import { defaultToEmptyTag } from '../../../../common/components/empty_value';
+import * as i18n from './translations';
+import type { BuildQueryBarDescription, ListItems } from './types';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 import type {
   AboutStepRiskScore,
@@ -48,10 +49,9 @@ import type {
   Duration,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
-import { AlertSuppressionLabel } from './alert_suppression_label';
+import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
-import * as i18n from './translations';
-import type { BuildQueryBarDescription, ListItems } from './types';
+import { AlertSuppressionLabel } from './alert_suppression_label';
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;

@@ -6,10 +6,10 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { CreateDataViewResponse, createOrUpdateStaticDataView } from './create_static_data_view';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',

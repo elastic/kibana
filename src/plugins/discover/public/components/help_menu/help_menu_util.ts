@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ChromeStart, DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { ChromeStart, DocLinksStart } from '@kbn/core/public';
 
 export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksStart) {
   chrome.setHelpExtension({

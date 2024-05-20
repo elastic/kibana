@@ -6,18 +6,18 @@
  */
 
 import { DropType } from '@kbn/dom-drag-drop';
-import { generateId } from '../../../../id_generator';
-import { DatasourceDimensionDropHandlerProps, OperationMetadata } from '../../../../types';
-import { FormulaIndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
+import { onDrop } from './on_drop_handler';
 import { FormBasedPrivateState } from '../../types';
+import { OperationMetadata, DatasourceDimensionDropHandlerProps } from '../../../../types';
+import { FormulaIndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
+import { generateId } from '../../../../id_generator';
 import {
   mockDataViews,
-  mockedColumns,
-  mockedDndOperations,
-  mockedDraggedField,
   mockedLayers,
+  mockedDraggedField,
+  mockedDndOperations,
+  mockedColumns,
 } from './mocks';
-import { onDrop } from './on_drop_handler';
 
 jest.mock('../../../../id_generator');
 

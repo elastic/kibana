@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { updateDataView } from './update_data_view';
 import { dataViewsService } from '../../mocks';
 import { getUsageCollection } from './test_utils';
-import { updateDataView } from './update_data_view';
 
 describe('get default data view', () => {
   it('call usageCollection', async () => {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 import {
-  FEED_NAME,
   INDICATOR_MATCHED_TYPE,
+  FEED_NAME,
   INDICATOR_REFERENCE,
 } from '../../../../../../../common/cti/constants';
 import { DraggableBadge } from '../../../../../../common/components/draggables';

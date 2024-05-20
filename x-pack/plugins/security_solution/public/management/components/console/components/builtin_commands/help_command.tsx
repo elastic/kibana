@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { memo, useEffect } from 'react';
-import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
 import { useWithCustomHelpComponent } from '../../hooks/state_selectors/use_with_custom_help_component';
-import type { CommandExecutionComponentProps } from '../../types';
 import { CommandList } from '../command_list';
+import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
+import type { CommandExecutionComponentProps } from '../../types';
 import { HelpOutput } from '../help_output';
 
 export const HelpCommand = memo<CommandExecutionComponentProps>((props) => {

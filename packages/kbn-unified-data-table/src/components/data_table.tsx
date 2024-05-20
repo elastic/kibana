@@ -6,84 +6,84 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import classnames from 'classnames';
 import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import classnames from 'classnames';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import './data_table.scss';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
-  EuiDataGrid,
-  EuiDataGridControlColumn,
-  EuiDataGridCustomBodyProps,
-  EuiDataGridInMemory,
-  EuiDataGridProps,
-  EuiDataGridRefProps,
   EuiDataGridSorting,
-  EuiDataGridStyle,
-  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingSpinner,
+  EuiDataGrid,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
+  EuiLoadingSpinner,
+  EuiIcon,
+  EuiDataGridRefProps,
+  EuiDataGridInMemory,
+  EuiDataGridControlColumn,
+  EuiDataGridCustomBodyProps,
+  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
+  EuiDataGridStyle,
+  EuiDataGridProps,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import {
-  type UseDataGridColumnsCellActionsProps,
-  useDataGridColumnsCellActions,
-} from '@kbn/cell-actions';
-import type { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import {
+  useDataGridColumnsCellActions,
+  type UseDataGridColumnsCellActionsProps,
+} from '@kbn/cell-actions';
+import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import {
+  UnifiedDataTableSettings,
+  ValueToStringConverter,
+  DataTableColumnsMeta,
+  CustomCellRenderer,
+  CustomGridColumnsConfiguration,
+  CustomControlColumnConfiguration,
+} from '../types';
+import { getDisplayedColumns } from '../utils/columns';
+import { convertValueToString } from '../utils/convert_value_to_string';
+import { getRowsPerPageOptions } from '../utils/rows_per_page';
+import { getRenderCellValueFn } from '../utils/get_render_cell_value';
+import {
+  getAllControlColumns,
+  getEuiGridColumns,
+  getLeadControlColumns,
+  getVisibleColumns,
+  canPrependTimeFieldColumn,
+} from './data_table_columns';
+import { UnifiedDataTableContext } from '../table_context';
+import { getSchemaDetectors } from './data_table_schema';
+import {
+  DataTableCompareToolbarBtn,
+  DataTableDocumentToolbarBtn,
+} from './data_table_document_selection';
+import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
 import {
   DEFAULT_ROWS_PER_PAGE,
   GRID_STYLE,
   ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
-import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
-import { useRowHeight } from '../hooks/use_row_height';
-import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
-import { UnifiedDataTableContext } from '../table_context';
-import {
-  CustomCellRenderer,
-  CustomControlColumnConfiguration,
-  CustomGridColumnsConfiguration,
-  DataTableColumnsMeta,
-  UnifiedDataTableSettings,
-  ValueToStringConverter,
-} from '../types';
-import { getDisplayedColumns } from '../utils/columns';
-import { convertValueToString } from '../utils/convert_value_to_string';
-import { getRenderCellValueFn } from '../utils/get_render_cell_value';
-import { getRowsPerPageOptions } from '../utils/rows_per_page';
-import { CompareDocuments } from './compare_documents';
-import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
-import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
-import {
-  canPrependTimeFieldColumn,
-  getAllControlColumns,
-  getEuiGridColumns,
-  getLeadControlColumns,
-  getVisibleColumns,
-} from './data_table_columns';
-import {
-  DataTableCompareToolbarBtn,
-  DataTableDocumentToolbarBtn,
-} from './data_table_document_selection';
 import { UnifiedDataTableFooter } from './data_table_footer';
-import { getSchemaDetectors } from './data_table_schema';
+import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
+import { useRowHeight } from '../hooks/use_row_height';
+import { CompareDocuments } from './compare_documents';
+import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
+import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 
 export type SortOrder = [string, string];
 

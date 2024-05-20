@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { set } from 'lodash';
 import React from 'react';
+import { screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { lensVisualization } from './index.mock';
 import { OpenLensButton } from './open_lens_button';
+import { lensVisualization } from './index.mock';
+import userEvent from '@testing-library/user-event';
 
 describe('OpenLensButton', () => {
   const props = {

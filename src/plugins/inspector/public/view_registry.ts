@@ -7,8 +7,8 @@
  */
 
 import { EventEmitter } from 'events';
-import { Adapters } from '../common';
 import { InspectorViewDescription } from './types';
+import { Adapters } from '../common';
 
 /**
  * @callback viewShouldShowFunc

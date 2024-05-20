@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hasMonitoringCluster, instantiateClient } from './instantiate_client';
+import { instantiateClient, hasMonitoringCluster } from './instantiate_client';
 
 const server = {
   monitoring: {

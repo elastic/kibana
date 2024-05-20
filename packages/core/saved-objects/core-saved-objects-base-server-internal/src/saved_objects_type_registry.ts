@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { deepFreeze } from '@kbn/std';
+import type { SavedObjectsType, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 
 /**
  * Core internal implementation of {@link ISavedObjectTypeRegistry}.

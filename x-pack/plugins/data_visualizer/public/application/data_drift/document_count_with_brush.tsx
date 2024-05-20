@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { BarStyleAccessor } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { BrushSettings } from '@kbn/aiops-components';
 import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
-import type { Filter } from '@kbn/es-query';
-import { isDefined } from '@kbn/ml-is-defined';
-import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import type { FC } from 'react';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import type { BrushSettings } from '@kbn/aiops-components';
+import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import type { Filter } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { BarStyleAccessor } from '@elastic/charts';
+import type { SingleBrushWindowParameters } from './document_count_chart_single_brush/single_brush';
+import { type DataDriftStateManager, useDataDriftStateManagerContext } from './use_state_manager';
+import { useDataVisualizerKibana } from '../kibana_context';
 import { type DocumentCountStats } from '../../../common/types/field_stats';
 import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
 import { SamplingMenu } from '../common/components/random_sampling_menu/random_sampling_menu';
 import { getDataTestSubject } from '../common/util/get_data_test_subject';
-import { useDataVisualizerKibana } from '../kibana_context';
 import { DocumentCountChartWithBrush } from './document_count_chart_single_brush';
 import type { BrushSelectionUpdateHandler } from './document_count_chart_single_brush/document_count_chart_singular';
-import type { SingleBrushWindowParameters } from './document_count_chart_single_brush/single_brush';
-import { type DataDriftStateManager, useDataDriftStateManagerContext } from './use_state_manager';
 
 export interface DocumentCountContentProps {
   brush?: BrushSettings;

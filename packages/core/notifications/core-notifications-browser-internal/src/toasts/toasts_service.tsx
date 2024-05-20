@@ -10,14 +10,14 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { GlobalToastList } from './global_toast_list';
-import { EventReporter } from './telemetry';
 import { ToastsApi } from './toasts_api';
+import { EventReporter } from './telemetry';
 
 interface SetupDeps {
   uiSettings: IUiSettingsClient;

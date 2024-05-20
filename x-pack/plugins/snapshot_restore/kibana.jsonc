@@ -6,9 +6,25 @@
     "id": "snapshotRestore",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "snapshot_restore"],
-    "requiredPlugins": ["licensing", "management", "features", "share"],
-    "optionalPlugins": ["usageCollection", "security", "cloud", "home"],
-    "requiredBundles": ["esUiShared", "kibanaReact"]
+    "configPath": [
+      "xpack",
+      "snapshot_restore"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "features",
+      "share"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "security",
+      "cloud",
+      "home"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "kibanaReact"
+    ]
   }
 }

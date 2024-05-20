@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiCheckbox, EuiFormRow } from '@elastic/eui';
 import React from 'react';
+import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';

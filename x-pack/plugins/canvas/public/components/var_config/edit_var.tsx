@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { useState, FC } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFieldText,
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToken,
+  EuiSuperSelect,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
+  EuiFieldText,
+  EuiButton,
+  EuiButtonEmpty,
   EuiSpacer,
-  EuiSuperSelect,
-  EuiToken,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, FC } from 'react';
 
 import { CanvasVariable } from '../../../types';
 import { VarValueField } from './var_value_field';

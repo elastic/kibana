@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
+import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
-import React, { memo, useState } from 'react';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export interface DateRangePickerValues {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButton, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React from 'react';
 
-import { useAppContext } from '../../../../app_context';
 import { documentationService } from '../../../../services';
+import { useAppContext } from '../../../../app_context';
 
 export const EmptyState = () => {
   const {

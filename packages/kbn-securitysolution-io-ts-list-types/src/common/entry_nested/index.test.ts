@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { EntryNested, entriesNested } from '.';
-import { getEntryExistsMock } from '../entries_exist/index.mock';
-import { getEntryMatchAnyMock } from '../entry_match_any/index.mock';
+import { left } from 'fp-ts/lib/Either';
 import { getEntryNestedMock } from './index.mock';
+import { entriesNested, EntryNested } from '.';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { getEntryMatchAnyMock } from '../entry_match_any/index.mock';
+import { getEntryExistsMock } from '../entries_exist/index.mock';
 
 describe('entriesNested', () => {
   test('it should validate a nested entry', () => {

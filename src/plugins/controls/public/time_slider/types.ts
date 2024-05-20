@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiRangeTick } from '@elastic/eui';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
+import { EuiRangeTick } from '@elastic/eui';
 
+import { ControlOutput } from '../types';
 import { TimeSliderControlEmbeddableInput } from '../../common/time_slider/types';
 import { TimeSlice } from '../../common/types';
-import { ControlOutput } from '../types';
 
 export * from '../../common/time_slider/types';
 

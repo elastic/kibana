@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
 import {
   ColorMapping,
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  DEFAULT_OTHER_ASSIGNMENT_INDEX,
   EUIAmsterdamColorBlindPalette,
   ElasticBrandPalette,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '@kbn/coloring';
 import faker from 'faker';
-import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
 
 const exampleAssignment = (
   valuesCount = 1,

@@ -8,8 +8,8 @@
 import type { Observable } from 'rxjs';
 import { filter } from 'rxjs';
 
-import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { EventEnrichmentRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import type { CtiEventEnrichmentStrategyResponse } from '../../../../../common/search_strategy/security_solution/cti';
 import { CtiQueries } from '../../../../../common/search_strategy/security_solution/cti';

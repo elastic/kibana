@@ -13,17 +13,17 @@ import { i18n } from '@kbn/i18n';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DOC_TYPE as LENS_DOC_TYPE } from '@kbn/lens-plugin/common/constants';
 import {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasType,
-  PublishesDataViews,
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasType,
   apiIsOfType,
   apiPublishesDataViews,
   apiPublishesPartialUnifiedSearch,
+  CanAccessViewMode,
+  EmbeddableApiContext,
   getInheritedViewMode,
+  HasType,
+  PublishesDataViews,
 } from '@kbn/presentation-publishing';
 import { KibanaLocation } from '@kbn/share-plugin/public';
 

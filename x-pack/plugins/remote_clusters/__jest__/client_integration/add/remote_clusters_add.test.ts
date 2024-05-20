@@ -8,9 +8,9 @@
 import { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 
-import { RemoteClustersActions, setupEnvironment } from '../helpers';
+import { setupEnvironment, RemoteClustersActions } from '../helpers';
 import { setup } from './remote_clusters_add.helpers';
-import { ACCENTED_CHARS, NON_ALPHA_NUMERIC_CHARS } from './special_characters';
+import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './special_characters';
 
 const notInArray = (array: string[]) => (value: string) => array.indexOf(value) < 0;
 

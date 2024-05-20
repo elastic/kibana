@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mount, shallow } from 'enzyme';
 
 import { SelectRuleType } from '.';
-import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
+import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 
 jest.mock('../../../../common/hooks/esql/use_esql_availability', () => ({
   useEsqlAvailability: jest.fn().mockReturnValue({ isEsqlRuleTypeEnabled: true }),

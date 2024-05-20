@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
+import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { closeAlertsStepTourIfVisible } from '../../tasks/integrations';
 import {
   inputQuery,
   loadRuleAlerts,
   submitQuery,
   takeOsqueryActionWithParams,
 } from '../../tasks/live_query';
-import { initializeDataViews } from '../../tasks/login';
+import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
+import { closeAlertsStepTourIfVisible } from '../../tasks/integrations';
 
 describe(
   'Alert Event Details - dynamic params',

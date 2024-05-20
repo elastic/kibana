@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { PublicAppDeepLinkInfo, PublicAppInfo } from '@kbn/core-application-browser';
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
-import type { IBasePath } from '@kbn/core-http-browser';
-import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { PublicAppDeepLinkInfo, PublicAppInfo } from '@kbn/core-application-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
 import type { NavLinkWrapper } from './nav_link';
 import { toNavLink } from './to_nav_link';
 

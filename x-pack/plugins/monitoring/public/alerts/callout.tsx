@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
 import {
+  EuiPanel,
+  EuiSpacer,
   EuiAccordion,
-  EuiCodeBlock,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTextColor,
+  EuiCodeBlock,
 } from '@elastic/eui';
-import React, { Fragment } from 'react';
-import { AlertMessage } from '../../common/types/alerts';
-import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
-import { isInSetupMode } from '../lib/setup_mode';
-import { AlertConfiguration } from './configuration';
 import { replaceTokens } from './lib/replace_tokens';
+import { AlertMessage } from '../../common/types/alerts';
 import { AlertsByName } from './types';
+import { isInSetupMode } from '../lib/setup_mode';
+import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
+import { AlertConfiguration } from './configuration';
 
 interface Props {
   alerts: AlertsByName;

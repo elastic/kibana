@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useRef, useCallback, useMemo } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
-import { useCallback, useMemo, useRef } from 'react';
 
 const generateId = htmlIdGenerator();
 

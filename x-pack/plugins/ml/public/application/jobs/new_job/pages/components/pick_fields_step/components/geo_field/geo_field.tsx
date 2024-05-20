@@ -8,11 +8,11 @@
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 
+import { GeoFieldSelect } from './geo_field_select';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import type { GeoJobCreator } from '../../../../../common/job_creator';
-import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
-import { GeoFieldSelect } from './geo_field_select';
 
 export const GeoField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);

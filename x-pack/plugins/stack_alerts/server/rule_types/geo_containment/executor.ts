@@ -16,9 +16,9 @@ import {
   transformResults,
 } from './lib';
 import type {
-  GeoContainmentAlertInstanceContext,
-  GeoContainmentAlertInstanceState,
   GeoContainmentRuleParams,
+  GeoContainmentAlertInstanceState,
+  GeoContainmentAlertInstanceContext,
   GeoContainmentRuleState,
 } from './types';
 

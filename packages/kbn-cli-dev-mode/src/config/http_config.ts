@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue, TypeOf, schema } from '@kbn/config-schema';
+import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { ICorsConfig, IHttpConfig, ISslConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import { Duration } from 'moment';
 

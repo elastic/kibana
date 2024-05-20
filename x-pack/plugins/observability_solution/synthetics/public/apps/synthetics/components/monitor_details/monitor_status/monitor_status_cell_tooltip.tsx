@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiProgress } from '@elastic/eui';
-import moment from 'moment';
 import React from 'react';
+import moment from 'moment';
+import { EuiProgress } from '@elastic/eui';
 
-import { TooltipContainer, TooltipHeader, TooltipTable, TooltipValue } from '@elastic/charts';
+import { TooltipTable, TooltipHeader, TooltipValue, TooltipContainer } from '@elastic/charts';
 
+import { MonitorStatusTimeBin, SUCCESS_VIZ_COLOR, DANGER_VIZ_COLOR } from './monitor_status_data';
 import * as labels from './labels';
-import { DANGER_VIZ_COLOR, MonitorStatusTimeBin, SUCCESS_VIZ_COLOR } from './monitor_status_data';
 
 export const MonitorStatusCellTooltip = ({
   timeBin,

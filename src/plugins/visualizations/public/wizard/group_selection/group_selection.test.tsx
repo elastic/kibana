@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { DocLinksStart } from '@kbn/core/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { VisParams } from '../../../common';
-import { BaseVisType, TypesStart, VisGroups } from '../../vis_types';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
 import { GroupSelection } from './group_selection';
+import { DocLinksStart } from '@kbn/core/public';
+import { VisParams } from '../../../common';
 
 describe('GroupSelection', () => {
   const defaultVisTypeParams = {

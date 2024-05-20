@@ -10,8 +10,8 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiLink,
   EuiPanel,
+  EuiLink,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { LOG_SETTINGS_DOCS_URL } from '../../../routes';
 
-import { LogRetentionLogic, LogRetentionMessage, LogRetentionOptions } from '../../log_retention';
+import { LogRetentionLogic, LogRetentionOptions, LogRetentionMessage } from '../../log_retention';
 
 export const LogRetentionPanel: React.FC = () => {
   const { toggleLogRetention, fetchLogRetention } = useActions(LogRetentionLogic);

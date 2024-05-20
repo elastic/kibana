@@ -20,9 +20,9 @@ import {
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
 import { agentPolicyService, packagePolicyService } from '.';
-import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
-import { bulkInstallPackages } from './epm/packages';
 import { incrementPackageName } from './package_policies';
+import { bulkInstallPackages } from './epm/packages';
+import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 

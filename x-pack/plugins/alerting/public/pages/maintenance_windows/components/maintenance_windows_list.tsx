@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  SearchFilterConfig,
-  formatDate,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import {
-  MAINTENANCE_WINDOW_DATE_FORMAT,
-  MaintenanceWindow,
-  MaintenanceWindowStatus,
-} from '../../../../common';
-import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
-import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
-import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
+  formatDate,
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  SearchFilterConfig,
+  EuiBadge,
+  useEuiTheme,
+  EuiButton,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { SortDirection } from '../types';
+import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
-import * as i18n from '../translations';
-import { SortDirection } from '../types';
+import { UpcomingEventsPopover } from './upcoming_events_popover';
+import {
+  MaintenanceWindowStatus,
+  MAINTENANCE_WINDOW_DATE_FORMAT,
+  MaintenanceWindow,
+} from '../../../../common';
 import { StatusFilter } from './status_filter';
 import { TableActionsPopover } from './table_actions_popover';
-import { UpcomingEventsPopover } from './upcoming_events_popover';
+import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
+import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
+import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
 
 interface MaintenanceWindowsListProps {
   loading: boolean;

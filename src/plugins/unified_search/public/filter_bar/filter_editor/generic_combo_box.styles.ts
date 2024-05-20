@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/css';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 export const genericComboBoxStyle = (euiTheme: EuiThemeComputed) => css`
   .euiComboBoxPlaceholder {

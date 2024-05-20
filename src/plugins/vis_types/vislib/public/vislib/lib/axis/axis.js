@@ -7,14 +7,14 @@
  */
 
 import d3 from 'd3';
-import $ from 'jquery';
 import _ from 'lodash';
-import { VislibError } from '../../errors';
+import $ from 'jquery';
 import { ErrorHandler } from '../_error_handler';
-import { AxisConfig } from './axis_config';
+import { AxisTitle } from './axis_title';
 import { AxisLabels } from './axis_labels';
 import { AxisScale } from './axis_scale';
-import { AxisTitle } from './axis_title';
+import { AxisConfig } from './axis_config';
+import { VislibError } from '../../errors';
 
 export class Axis extends ErrorHandler {
   constructor(visConfig, axisConfigArgs) {

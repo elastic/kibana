@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Services } from '@kbn/actions-plugin/server/types';
+import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { Logger } from '@kbn/core/server';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import axios from 'axios';
 import {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
+  getConnectorType,
   WebhookConnectorType,
   WebhookMethods,
-  getConnectorType,
 } from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
-import { CRT_FILE, KEY_FILE, PFX_FILE } from './mocks';
+import { PFX_FILE, CRT_FILE, KEY_FILE } from './mocks';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {

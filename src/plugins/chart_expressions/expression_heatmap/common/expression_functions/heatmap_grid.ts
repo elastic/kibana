@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { EXPRESSION_HEATMAP_GRID_NAME } from '../constants';
 import { HeatmapGridConfig, HeatmapGridConfigResult } from '../types';
 

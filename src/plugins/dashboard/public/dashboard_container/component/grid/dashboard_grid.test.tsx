@@ -8,13 +8,13 @@
 
 import React from 'react';
 
-import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 
-import { buildMockDashboard } from '../../../mocks';
-import { DashboardContainerContext } from '../../embeddable/dashboard_container';
 import { DashboardGrid } from './dashboard_grid';
+import { buildMockDashboard } from '../../../mocks';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
+import { DashboardContainerContext } from '../../embeddable/dashboard_container';
 
 jest.mock('./dashboard_grid_item', () => {
   return {
@@ -25,8 +25,8 @@ jest.mock('./dashboard_grid_item', () => {
           props.expandedPanelId === undefined
             ? 'regularPanel'
             : props.expandedPanelId === props.id
-              ? 'expandedPanel'
-              : 'hiddenPanel'
+            ? 'expandedPanel'
+            : 'hiddenPanel'
         } ${
           props.focusedPanelId
             ? props.focusedPanelId === props.id

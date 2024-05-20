@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
-import { getActivitiesRouteDefinition } from './activities_route';
 import { getAgentActionConnectRouteDefinition } from './agent_action_connect_route';
 import { getAgentActionDisconnectRouteDefinition } from './agent_action_disconnect_route';
+import { getActivitiesRouteDefinition } from './activities_route';
 import { getAgentsRouteDefinition } from './agents_route';
+import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
 
 export const getSentinelOneRouteDefinitions = (): EmulatorServerRouteDefinition[] => {
   return [

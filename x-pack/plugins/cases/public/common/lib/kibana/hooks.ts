@@ -7,21 +7,21 @@
 
 import moment from 'moment-timezone';
 
-import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
-import type { NavigateToAppOptions } from '@kbn/core/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { CasesPermissions } from '../../../../common';
+import type { NavigateToAppOptions } from '@kbn/core/public';
+import { getUICapabilities } from '../../../client/helpers/capabilities';
+import { convertToCamelCase } from '../../../api/utils';
 import {
+  FEATURE_ID,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
-  FEATURE_ID,
 } from '../../../../common/constants';
-import { convertToCamelCase } from '../../../api/utils';
-import { getUICapabilities } from '../../../client/helpers/capabilities';
+import type { CasesPermissions } from '../../../../common';
 import type { StartServices } from '../../../types';
-import { useKibana, useUiSetting } from './kibana_react';
+import { useUiSetting, useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 

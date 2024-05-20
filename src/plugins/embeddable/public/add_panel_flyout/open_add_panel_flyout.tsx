@@ -8,8 +8,8 @@
 
 import React, { Suspense } from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { OverlayRef } from '@kbn/core/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { PresentationContainer } from '@kbn/presentation-containers';

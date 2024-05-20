@@ -33,8 +33,12 @@
             "type": "string",
             "tags": [],
             "label": "filename",
-            "description": ["full name of the file"],
-            "signature": ["string"],
+            "description": [
+              "full name of the file"
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/share/public/lib/download_as.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -64,7 +68,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["a Promise that resolves when the download has been correctly started"],
+        "returnComment": [
+          "a Promise that resolves when the download has been correctly started"
+        ],
         "initialIsOpen": false
       },
       {
@@ -73,7 +79,9 @@
         "type": "Function",
         "tags": [],
         "label": "downloadMultipleAs",
-        "description": ["\nMultiple files download method"],
+        "description": [
+          "\nMultiple files download method"
+        ],
         "signature": [
           "(files: Record<string, ",
           {
@@ -181,7 +189,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -194,7 +204,10 @@
             "tags": [],
             "label": "getUrlParams",
             "description": [],
-            "signature": ["LocatorGetUrlParams", " | undefined"],
+            "signature": [
+              "LocatorGetUrlParams",
+              " | undefined"
+            ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -207,7 +220,9 @@
             "tags": [],
             "label": "deps",
             "description": [],
-            "signature": ["React.DependencyList"],
+            "signature": [
+              "React.DependencyList"
+            ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -228,7 +243,10 @@
         "description": [
           "\nThis interface represents a location in Kibana to which one can navigate\nusing the `core.application.navigateToApp()` method."
         ],
-        "signature": ["KibanaLocation", "<S>"],
+        "signature": [
+          "KibanaLocation",
+          "<S>"
+        ],
         "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -239,7 +257,9 @@
             "type": "string",
             "tags": [],
             "label": "app",
-            "description": ["\nKibana application ID."],
+            "description": [
+              "\nKibana application ID."
+            ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -250,7 +270,9 @@
             "type": "string",
             "tags": [],
             "label": "path",
-            "description": ["\nA relative URL path within a Kibana application."],
+            "description": [
+              "\nA relative URL path within a Kibana application."
+            ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -264,7 +286,9 @@
             "description": [
               "\nA serializable location state object, which the app can use to determine\nwhat should be displayed on the screen."
             ],
-            "signature": ["S"],
+            "signature": [
+              "S"
+            ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -278,7 +302,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LocatorDefinition",
-        "description": ["\nA convenience interface used to define and register a locator."],
+        "description": [
+          "\nA convenience interface used to define and register a locator."
+        ],
         "signature": [
           {
             "pluginId": "share",
@@ -323,7 +349,11 @@
             "description": [
               "\nReturns a deep link, including location state, which can be used for\nnavigation in Kibana.\n"
             ],
-            "signature": ["(params: P) => Promise<", "KibanaLocation", "<object>>"],
+            "signature": [
+              "(params: P) => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -334,8 +364,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["Parameters from which to generate a Kibana location."],
-                "signature": ["P"],
+                "description": [
+                  "Parameters from which to generate a Kibana location."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -353,7 +387,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LocatorPublic",
-        "description": ["\nPublic interface of a registered locator."],
+        "description": [
+          "\nPublic interface of a registered locator."
+        ],
         "signature": [
           {
             "pluginId": "share",
@@ -393,8 +429,14 @@
             "type": "Function",
             "tags": [],
             "label": "getLocation",
-            "description": ["\nReturns a reference to a Kibana client-side location.\n"],
-            "signature": ["(params: P) => Promise<", "KibanaLocation", "<object>>"],
+            "description": [
+              "\nReturns a reference to a Kibana client-side location.\n"
+            ],
+            "signature": [
+              "(params: P) => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -405,8 +447,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["URL locator parameters."],
-                "signature": ["P"],
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -439,8 +485,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["URL locator parameters."],
-                "signature": ["P"],
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -452,8 +502,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "getUrlParams",
-                "description": ["URL construction parameters."],
-                "signature": ["LocatorGetUrlParams", " | undefined"],
+                "description": [
+                  "URL construction parameters."
+                ],
+                "signature": [
+                  "LocatorGetUrlParams",
+                  " | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -486,8 +541,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["URL locator parameters."],
-                "signature": ["P"],
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -499,8 +558,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["URL serialization options."],
-                "signature": ["FormatSearchParamsOptions", " | undefined"],
+                "description": [
+                  "URL serialization options."
+                ],
+                "signature": [
+                  "FormatSearchParamsOptions",
+                  " | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -533,8 +597,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["URL locator parameters."],
-                "signature": ["P"],
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -546,8 +614,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "navigationParams",
-                "description": ["Navigation parameters."],
-                "signature": ["LocatorNavigationParams", " | undefined"],
+                "description": [
+                  "Navigation parameters."
+                ],
+                "signature": [
+                  "LocatorNavigationParams",
+                  " | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -580,8 +653,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["URL locator parameters."],
-                "signature": ["P"],
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -593,8 +670,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "navigationParams",
-                "description": ["Navigation parameters."],
-                "signature": ["LocatorNavigationParams", " | undefined"],
+                "description": [
+                  "Navigation parameters."
+                ],
+                "signature": [
+                  "LocatorNavigationParams",
+                  " | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -628,7 +710,9 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -641,7 +725,10 @@
                 "tags": [],
                 "label": "getUrlParams",
                 "description": [],
-                "signature": ["LocatorGetUrlParams", " | undefined"],
+                "signature": [
+                  "LocatorGetUrlParams",
+                  " | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -654,7 +741,9 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "signature": ["React.DependencyList | undefined"],
+                "signature": [
+                  "React.DependencyList | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -673,7 +762,10 @@
         "tags": [],
         "label": "RedirectOptions",
         "description": [],
-        "signature": ["RedirectOptions", "<P>"],
+        "signature": [
+          "RedirectOptions",
+          "<P>"
+        ],
         "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -684,7 +776,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["Locator ID."],
+            "description": [
+              "Locator ID."
+            ],
             "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -695,7 +789,9 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": ["Kibana version when locator params were generated."],
+            "description": [
+              "Kibana version when locator params were generated."
+            ],
             "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -706,8 +802,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
-            "description": ["Locator params."],
-            "signature": ["P"],
+            "description": [
+              "Locator params."
+            ],
+            "signature": [
+              "P"
+            ],
             "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -746,7 +846,9 @@
             "description": [
               "\nAllows for passing contextual information that each consumer can provide to customize the share menu"
             ],
-            "signature": ["{ title: string; }"],
+            "signature": [
+              "{ title: string; }"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -758,7 +860,9 @@
             "tags": [],
             "label": "objectId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -772,7 +876,9 @@
             "description": [
               "\nCurrent url for sharing. This can be set in cases where `window.location.href`\ndoes not contain a shareable URL (e.g. if using session storage to store the current\napp state is enabled). In these cases the property should contain the URL in a\nformat which makes it possible to use it without having access to any other state\nlike the current session.\n\nIf not set it will default to `window.location.href`"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -781,10 +887,14 @@
             "parentPluginId": "share",
             "id": "def-public.ShareContext.shareableUrlForSavedObject",
             "type": "string",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "shareableUrlForSavedObject",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -829,10 +939,16 @@
             "parentPluginId": "share",
             "id": "def-public.ShareContext.delegatedShareUrlHandler",
             "type": "Function",
-            "tags": ["description"],
+            "tags": [
+              "description"
+            ],
             "label": "delegatedShareUrlHandler",
-            "description": ["\n"],
-            "signature": ["(() => string) | undefined"],
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "(() => string) | undefined"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -846,7 +962,9 @@
             "tags": [],
             "label": "sharingData",
             "description": [],
-            "signature": ["{ [key: string]: unknown; }"],
+            "signature": [
+              "{ [key: string]: unknown; }"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -869,7 +987,9 @@
             "tags": [],
             "label": "onClose",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -929,7 +1049,9 @@
             "tags": [],
             "label": "disabledShareUrl",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -998,7 +1120,9 @@
             "tags": [],
             "label": "sortOrder",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1113,7 +1237,9 @@
             "tags": [],
             "label": "anchorElement",
             "description": [],
-            "signature": ["HTMLElement"],
+            "signature": [
+              "HTMLElement"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1147,7 +1273,10 @@
             "tags": [],
             "label": "embedUrlParamExtensions",
             "description": [],
-            "signature": ["UrlParamExtension", "[] | undefined"],
+            "signature": [
+              "UrlParamExtension",
+              "[] | undefined"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1159,7 +1288,9 @@
             "tags": [],
             "label": "snapshotShareWarning",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1171,7 +1302,9 @@
             "tags": [],
             "label": "onClose",
             "description": [],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1191,7 +1324,12 @@
         "tags": [],
         "label": "BrowserUrlService",
         "description": [],
-        "signature": ["UrlService", "<null, ", "BrowserShortUrlClient", ">"],
+        "signature": [
+          "UrlService",
+          "<null, ",
+          "BrowserShortUrlClient",
+          ">"
+        ],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1204,7 +1342,9 @@
         "tags": [],
         "label": "ConfigSchema",
         "description": [],
-        "signature": ["{ readonly new_version: Readonly<{} & { enabled: boolean; }>; }"],
+        "signature": [
+          "{ readonly new_version: Readonly<{} & { enabled: boolean; }>; }"
+        ],
         "path": "src/plugins/share/common/config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1217,7 +1357,9 @@
         "tags": [],
         "label": "CSV_QUOTE_VALUES_SETTING",
         "description": [],
-        "signature": ["\"csv:quoteValues\""],
+        "signature": [
+          "\"csv:quoteValues\""
+        ],
         "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1230,7 +1372,9 @@
         "tags": [],
         "label": "CSV_SEPARATOR_SETTING",
         "description": [],
-        "signature": ["\"csv:separator\""],
+        "signature": [
+          "\"csv:separator\""
+        ],
         "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1243,7 +1387,9 @@
         "tags": [],
         "label": "DownloadableContent",
         "description": [],
-        "signature": ["Blob | { content: string; type: string; }"],
+        "signature": [
+          "Blob | { content: string; type: string; }"
+        ],
         "path": "src/plugins/share/public/lib/download_as.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1256,7 +1402,10 @@
         "tags": [],
         "label": "ShareMenuItem",
         "description": [],
-        "signature": ["ShareMenuItemLegacy | ", "ShareMenuItemV2"],
+        "signature": [
+          "ShareMenuItemLegacy | ",
+          "ShareMenuItemV2"
+        ],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1370,7 +1519,9 @@
         "tags": [],
         "label": "CSV_QUOTE_VALUES_SETTING",
         "description": [],
-        "signature": ["\"csv:quoteValues\""],
+        "signature": [
+          "\"csv:quoteValues\""
+        ],
         "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1383,7 +1534,9 @@
         "tags": [],
         "label": "CSV_SEPARATOR_SETTING",
         "description": [],
-        "signature": ["\"csv:separator\""],
+        "signature": [
+          "\"csv:separator\""
+        ],
         "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1524,7 +1677,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1537,7 +1692,10 @@
             "tags": [],
             "label": "getUrlParams",
             "description": [],
-            "signature": ["LocatorGetUrlParams", " | undefined"],
+            "signature": [
+              "LocatorGetUrlParams",
+              " | undefined"
+            ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1550,7 +1708,9 @@
             "tags": [],
             "label": "deps",
             "description": [],
-            "signature": ["React.DependencyList"],
+            "signature": [
+              "React.DependencyList"
+            ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1581,7 +1741,9 @@
             "type": "Function",
             "tags": [],
             "label": "getState",
-            "description": ["\nThis function returns the current state of anonymous access."],
+            "description": [
+              "\nThis function returns the current state of anonymous access."
+            ],
             "signature": [
               "() => Promise<",
               {
@@ -1634,7 +1796,9 @@
         "type": "Interface",
         "tags": [],
         "label": "AnonymousAccessState",
-        "description": ["\nThe state of anonymous access."],
+        "description": [
+          "\nThe state of anonymous access."
+        ],
         "path": "src/plugins/share/common/anonymous_access/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1645,7 +1809,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isEnabled",
-            "description": ["\nWhether anonymous access is enabled or not."],
+            "description": [
+              "\nWhether anonymous access is enabled or not."
+            ],
             "path": "src/plugins/share/common/anonymous_access/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1659,7 +1825,9 @@
             "description": [
               "\nIf anonymous access is enabled, this reflects what URL parameters need to be added to a Kibana link to make it publicly accessible.\nNote that if anonymous access is the only authentication method, this will be null."
             ],
-            "signature": ["Record<string, string> | null"],
+            "signature": [
+              "Record<string, string> | null"
+            ],
             "path": "src/plugins/share/common/anonymous_access/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1673,7 +1841,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LocatorDefinition",
-        "description": ["\nA convenience interface used to define and register a locator."],
+        "description": [
+          "\nA convenience interface used to define and register a locator."
+        ],
         "signature": [
           {
             "pluginId": "share",
@@ -1718,7 +1888,11 @@
             "description": [
               "\nReturns a deep link, including location state, which can be used for\nnavigation in Kibana.\n"
             ],
-            "signature": ["(params: P) => Promise<", "KibanaLocation", "<object>>"],
+            "signature": [
+              "(params: P) => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1729,8 +1903,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["Parameters from which to generate a Kibana location."],
-                "signature": ["P"],
+                "description": [
+                  "Parameters from which to generate a Kibana location."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1748,7 +1926,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LocatorPublic",
-        "description": ["\nPublic interface of a registered locator."],
+        "description": [
+          "\nPublic interface of a registered locator."
+        ],
         "signature": [
           {
             "pluginId": "share",
@@ -1788,8 +1968,14 @@
             "type": "Function",
             "tags": [],
             "label": "getLocation",
-            "description": ["\nReturns a reference to a Kibana client-side location.\n"],
-            "signature": ["(params: P) => Promise<", "KibanaLocation", "<object>>"],
+            "description": [
+              "\nReturns a reference to a Kibana client-side location.\n"
+            ],
+            "signature": [
+              "(params: P) => Promise<",
+              "KibanaLocation",
+              "<object>>"
+            ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1800,8 +1986,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["URL locator parameters."],
-                "signature": ["P"],
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1834,8 +2024,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["URL locator parameters."],
-                "signature": ["P"],
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1847,8 +2041,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "getUrlParams",
-                "description": ["URL construction parameters."],
-                "signature": ["LocatorGetUrlParams", " | undefined"],
+                "description": [
+                  "URL construction parameters."
+                ],
+                "signature": [
+                  "LocatorGetUrlParams",
+                  " | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1881,8 +2080,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["URL locator parameters."],
-                "signature": ["P"],
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1894,8 +2097,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["URL serialization options."],
-                "signature": ["FormatSearchParamsOptions", " | undefined"],
+                "description": [
+                  "URL serialization options."
+                ],
+                "signature": [
+                  "FormatSearchParamsOptions",
+                  " | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1928,8 +2136,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["URL locator parameters."],
-                "signature": ["P"],
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1941,8 +2153,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "navigationParams",
-                "description": ["Navigation parameters."],
-                "signature": ["LocatorNavigationParams", " | undefined"],
+                "description": [
+                  "Navigation parameters."
+                ],
+                "signature": [
+                  "LocatorNavigationParams",
+                  " | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1975,8 +2192,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",
-                "description": ["URL locator parameters."],
-                "signature": ["P"],
+                "description": [
+                  "URL locator parameters."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1988,8 +2209,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "navigationParams",
-                "description": ["Navigation parameters."],
-                "signature": ["LocatorNavigationParams", " | undefined"],
+                "description": [
+                  "Navigation parameters."
+                ],
+                "signature": [
+                  "LocatorNavigationParams",
+                  " | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2023,7 +2249,9 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2036,7 +2264,10 @@
                 "tags": [],
                 "label": "getUrlParams",
                 "description": [],
-                "signature": ["LocatorGetUrlParams", " | undefined"],
+                "signature": [
+                  "LocatorGetUrlParams",
+                  " | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2049,7 +2280,9 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "signature": ["React.DependencyList | undefined"],
+                "signature": [
+                  "React.DependencyList | undefined"
+                ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,

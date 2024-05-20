@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { defaults, get, omit } from 'lodash';
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject } from 'rxjs';
+import { omit, defaults, get } from 'lodash';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger, SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
+import type { SavedObjectsBulkDeleteResponse, Logger } from '@kbn/core/server';
 
 import {
-  ElasticsearchClient,
-  ISavedObjectsRepository,
-  ISavedObjectsSerializer,
   SavedObject,
+  ISavedObjectsSerializer,
   SavedObjectsRawDoc,
+  ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 
 import { RequestTimeoutsConfig } from './config';
-import { Result, asErr, asOk } from './lib/result_type';
+import { asOk, asErr, Result } from './lib/result_type';
 
 import {
   ConcreteTaskInstance,
-  SerializedConcreteTaskInstance,
   TaskInstance,
   TaskLifecycle,
   TaskLifecycleResult,
+  SerializedConcreteTaskInstance,
 } from './task';
 
-import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
 
 export interface StoreOpts {

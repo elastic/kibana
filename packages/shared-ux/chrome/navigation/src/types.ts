@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { IBasePath } from '@kbn/core-http-browser';
 import type { Observable } from 'rxjs';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 
 import type {
   ChromeNavLink,

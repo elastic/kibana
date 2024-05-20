@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { ElementType, useCallback, useEffect, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -16,18 +18,7 @@ import {
   EuiText,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import { HttpStart } from '@kbn/core/public';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  AutocompleteFieldExistsComponent,
-  AutocompleteFieldListsComponent,
-  AutocompleteFieldMatchAnyComponent,
-  AutocompleteFieldMatchComponent,
-  AutocompleteFieldWildcardComponent,
-  FieldComponent,
-  OperatorComponent,
-} from '@kbn/securitysolution-autocomplete';
+import styled from 'styled-components';
 import {
   ExceptionListType,
   ListSchema,
@@ -52,18 +43,27 @@ import {
   getOperatorOptions,
 } from '@kbn/securitysolution-list-utils';
 import {
+  AutocompleteFieldExistsComponent,
+  AutocompleteFieldListsComponent,
+  AutocompleteFieldMatchAnyComponent,
+  AutocompleteFieldMatchComponent,
+  AutocompleteFieldWildcardComponent,
+  FieldComponent,
+  OperatorComponent,
+} from '@kbn/securitysolution-autocomplete';
+import {
   OperatingSystem,
   WILDCARD_WARNING,
   validatePotentialWildcardInput,
 } from '@kbn/securitysolution-utils';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
-import React, { ElementType, useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { HttpStart } from '@kbn/core/public';
 
 import { getEmptyValue } from '../../../common/empty_value';
 
-import { EntryFieldError } from './reducer';
 import * as i18n from './translations';
+import { EntryFieldError } from './reducer';
 
 const FieldFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
@@ -333,13 +333,13 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     const operatorOptions = augmentedOperatorsList
       ? augmentedOperatorsList
       : onlyShowListOperators
-        ? EXCEPTION_OPERATORS_ONLY_LISTS
-        : getOperatorOptions(
-            entry,
-            listType,
-            entry.field != null && entry.field.type === 'boolean',
-            isFirst
-          );
+      ? EXCEPTION_OPERATORS_ONLY_LISTS
+      : getOperatorOptions(
+          entry,
+          listType,
+          entry.field != null && entry.field.type === 'boolean',
+          isFirst
+        );
 
     const comboBox = (
       <OperatorComponent

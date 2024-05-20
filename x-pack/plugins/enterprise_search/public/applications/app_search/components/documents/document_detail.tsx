@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiButton, EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiButton, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DELETE_BUTTON_LABEL } from '../../../shared/constants';

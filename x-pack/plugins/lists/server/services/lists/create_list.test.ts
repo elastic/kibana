@@ -8,8 +8,8 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { LIST_ID, LIST_INDEX } from '../../../common/constants.mock';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
+import { LIST_ID, LIST_INDEX } from '../../../common/constants.mock';
 import { getIndexESListMock } from '../../schemas/elastic_query/index_es_list_schema.mock';
 
 import { CreateListOptions, createList } from './create_list';

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
+import { uniq } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
+  EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiButtonEmpty,
-  EuiInMemoryTable,
   EuiSearchBarProps,
   SearchFilterConfig,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { uniq } from 'lodash';
-import React from 'react';
 
 import { CanvasTemplate } from '../../../../types';
 import { tagsRegistry } from '../../../lib/tags_registry';

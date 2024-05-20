@@ -14,11 +14,11 @@ import type {
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
 import { IndexPatternsForm } from './forms/index_patterns_form';
-import { InvestigationFieldsForm } from './forms/investigation_fields_form';
-import { RuleActionsForm } from './forms/rule_actions_form';
-import { ScheduleForm } from './forms/schedule_form';
 import { TagsForm } from './forms/tags_form';
 import { TimelineTemplateForm } from './forms/timeline_template_form';
+import { RuleActionsForm } from './forms/rule_actions_form';
+import { ScheduleForm } from './forms/schedule_form';
+import { InvestigationFieldsForm } from './forms/investigation_fields_form';
 
 interface BulkEditFlyoutProps {
   onClose: () => void;

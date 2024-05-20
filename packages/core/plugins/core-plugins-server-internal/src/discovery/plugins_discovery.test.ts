@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { Package } from '@kbn/repo-packages';
-import mockFs from 'mock-fs';
 import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
+import mockFs from 'mock-fs';
+import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { Package } from '@kbn/repo-packages';
 
-import { resolve } from 'path';
-import { ConfigService, Env } from '@kbn/config';
-import { PluginType } from '@kbn/core-base-common';
-import type { CoreContext } from '@kbn/core-base-server-internal';
-import type { NodeInfo } from '@kbn/core-node-server';
 import { firstValueFrom, from } from 'rxjs';
 import { map, toArray } from 'rxjs';
-import type { InstanceInfo } from '../plugin_context';
+import { resolve } from 'path';
+import { ConfigService, Env } from '@kbn/config';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
+import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
+import { PluginType } from '@kbn/core-base-common';
 
 jest.mock('@kbn/repo-packages', () => ({
   ...jest.requireActual('@kbn/repo-packages'),

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import {
   documentationMap,
-  sections as formulasSections,
   tinymathFunctions,
+  sections as formulasSections,
 } from '@kbn/lens-formula-docs';
-import { Markdown } from '@kbn/shared-ux-markdown';
 import { groupBy } from 'lodash';
-import React from 'react';
 import type { IndexPattern } from '../../../../../../types';
-import { hasFunctionFieldArgument } from '../validation';
 import { getPossibleFunctions } from './math_completion';
+import { hasFunctionFieldArgument } from '../validation';
 
 import type {
-  GenericIndexPatternColumn,
   GenericOperationDefinition,
+  GenericIndexPatternColumn,
   OperationDefinition,
   ParamEditorProps,
 } from '../..';

@@ -7,7 +7,9 @@
     "id": "uiActionsExamples",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["uiActions"],
+    "requiredPlugins": [
+      "uiActions"
+    ],
     "requiredBundles": []
   }
 }

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { EuiAccordionProps, UseEuiTheme } from '@elastic/eui';
-import { EuiAccordion, EuiCodeBlock, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import type { EuiAccordionProps, UseEuiTheme } from '@elastic/eui';
+import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
-import type { LiveQueryFormFields } from '.';
+import { i18n } from '@kbn/i18n';
 import { QUERY_TIMEOUT } from '../../../common/constants';
-import { useKibana } from '../../common/lib/kibana';
-import { OsqueryEditor } from '../../editor';
 import { TimeoutField } from '../../form/timeout_field';
+import type { LiveQueryFormFields } from '.';
+import { OsqueryEditor } from '../../editor';
+import { useKibana } from '../../common/lib/kibana';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import type { SavedQueriesDropdownProps } from '../../saved_queries/saved_queries_dropdown';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';

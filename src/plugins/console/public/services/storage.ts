@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { transform, keys, startsWith } from 'lodash';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { keys, startsWith, transform } from 'lodash';
 
 type IStorageEngine = typeof window.localStorage;
 
@@ -18,10 +18,7 @@ export enum StorageKeys {
 }
 
 export class Storage {
-  constructor(
-    private readonly engine: IStorageEngine,
-    private readonly prefix: string
-  ) {}
+  constructor(private readonly engine: IStorageEngine, private readonly prefix: string) {}
 
   encode(val: unknown) {
     return JSON.stringify(val);

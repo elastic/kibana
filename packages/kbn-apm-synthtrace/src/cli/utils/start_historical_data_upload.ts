@@ -1,5 +1,3 @@
-import { cpus } from 'os';
-import Path from 'path';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +7,8 @@ import Path from 'path';
  */
 import { range } from 'lodash';
 import moment from 'moment';
+import { cpus } from 'os';
+import Path from 'path';
 import { Worker } from 'worker_threads';
 import { LogLevel } from '../../..';
 import { bootstrap } from './bootstrap';

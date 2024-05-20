@@ -7,8 +7,8 @@
  */
 
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsPluginStartDeps } from '../../types';
 import { ControlsEmbeddableService } from './types';
+import { ControlsPluginStartDeps } from '../../types';
 
 export type EmbeddableServiceFactory = KibanaPluginServiceFactory<
   ControlsEmbeddableService,

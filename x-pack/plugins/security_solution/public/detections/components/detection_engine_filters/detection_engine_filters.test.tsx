@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
-import { render } from '@testing-library/react';
 import React, { useEffect } from 'react';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
+import { render } from '@testing-library/react';
 import type { DetectionEngineFiltersProps } from './detection_engine_filters';
 import { DetectionEngineFilters } from './detection_engine_filters';
+import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage';
 
 jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls');
 jest.mock(

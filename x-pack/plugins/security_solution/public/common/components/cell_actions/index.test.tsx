@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CellActions } from '@kbn/cell-actions';
-import { render } from '@testing-library/react';
 import React from 'react';
-import { CellActionsMode, SecurityCellActions } from '.';
+import { render } from '@testing-library/react';
 import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
+import { CellActionsMode, SecurityCellActions } from '.';
+import { CellActions } from '@kbn/cell-actions';
 
 const MockCellActions = CellActions as jest.Mocked<typeof CellActions>;
 jest.mock('@kbn/cell-actions', () => ({

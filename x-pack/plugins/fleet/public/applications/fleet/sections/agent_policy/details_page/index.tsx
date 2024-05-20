@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useMemo, useState, useCallback } from 'react';
-import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
+import { Redirect, useRouteMatch, useLocation } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { EuiPortal } from '@elastic/eui';
-import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPortal } from '@elastic/eui';
+import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 
-import { AgentEnrollmentFlyout, Error, Loading } from '../../../components';
+import type { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
 import {
   AgentPolicyRefreshContext,
-  useBreadcrumbs,
-  useFleetStatus,
   useGetOneAgentPolicy,
-  useIntraAppState,
   useLink,
+  useBreadcrumbs,
   useStartServices,
+  useFleetStatus,
+  useIntraAppState,
 } from '../../../hooks';
+import { Loading, Error, AgentEnrollmentFlyout } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
-import type { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
 
 import {
-  HeaderLeftContent,
-  HeaderRightContent,
   PackagePoliciesView,
   SettingsView,
+  HeaderRightContent,
+  HeaderLeftContent,
 } from './components';
 
 export const AgentPolicyDetailsPage: React.FunctionComponent = () => {

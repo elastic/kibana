@@ -6,26 +6,26 @@
  */
 
 import {
-  Plugin as CorePlugin,
   CoreSetup,
   CoreStart,
-  IClusterClient,
   Logger,
+  Plugin as CorePlugin,
   PluginInitializerContext,
+  IClusterClient,
 } from '@kbn/core/server';
-import { ServerlessPluginSetup } from '@kbn/serverless/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { ServerlessPluginSetup } from '@kbn/serverless/server';
 
-import { EsContext, createEsContext } from './es';
-import { EventLogService } from './event_log_service';
-import { EventLogClientService } from './event_log_start_service';
-import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 import type {
-  IEventLogClientService,
   IEventLogConfig,
   IEventLogService,
   IEventLogger,
+  IEventLogClientService,
 } from './types';
+import { EventLogService } from './event_log_service';
+import { createEsContext, EsContext } from './es';
+import { EventLogClientService } from './event_log_start_service';
+import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
 
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 

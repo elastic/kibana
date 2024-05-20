@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Datatable, DatatableColumn } from '../../expression_types';
 import { ExpressionFunctionDefinition } from '../types';
+import { Datatable, DatatableColumn } from '../../expression_types';
 
 export interface CreateTableArguments {
   ids?: string[];

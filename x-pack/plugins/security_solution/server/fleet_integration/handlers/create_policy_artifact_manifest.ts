@@ -6,12 +6,12 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ManifestSchema } from '../../../common/endpoint/schema/manifest';
-import { manifestDispatchSchema } from '../../../common/endpoint/schema/manifest';
+import { ManifestManager } from '../../endpoint/services';
 import type { Manifest } from '../../endpoint/lib/artifacts';
 import { reportErrors } from '../../endpoint/lib/artifacts';
 import type { InternalArtifactCompleteSchema } from '../../endpoint/schemas';
-import { ManifestManager } from '../../endpoint/services';
+import type { ManifestSchema } from '../../../common/endpoint/schema/manifest';
+import { manifestDispatchSchema } from '../../../common/endpoint/schema/manifest';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;

@@ -6,6 +6,13 @@
  */
 
 import {
+  AggDescriptor,
+  ColorDynamicOptions,
+  LayerDescriptor,
+  SizeDynamicOptions,
+  VectorStylePropertiesDescriptor,
+} from '../../../common/descriptor_types';
+import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
   DEFAULT_PERCENTILE,
@@ -15,21 +22,14 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../common/constants';
-import {
-  AggDescriptor,
-  ColorDynamicOptions,
-  LayerDescriptor,
-  SizeDynamicOptions,
-  VectorStylePropertiesDescriptor,
-} from '../../../common/descriptor_types';
-import { getSourceAggKey } from '../../../common/get_agg_key';
-import { ESGeoGridSource } from '../sources/es_geo_grid_source';
-import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
 import { VectorStyle } from '../styles/vector/vector_style';
-import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
-import { isMetricCountable } from '../util/is_metric_countable';
-import { HeatmapLayer } from './heatmap_layer';
+import { ESGeoGridSource } from '../sources/es_geo_grid_source';
 import { GeoJsonVectorLayer } from './vector_layer';
+import { HeatmapLayer } from './heatmap_layer';
+import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
+import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
+import { getSourceAggKey } from '../../../common/get_agg_key';
+import { isMetricCountable } from '../util/is_metric_countable';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 

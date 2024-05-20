@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
 import { cloneDeep } from 'lodash';
-import { CLUSTER_SHARD_LIMIT_EXCEEDED_REASON } from '../../../common/constants';
-import { throwBadResponse } from '../../../model/helpers';
+import * as Either from 'fp-ts/lib/Either';
 import { delayRetryState } from '../../../model/retry_state';
+import { throwBadResponse } from '../../../model/helpers';
+import { CLUSTER_SHARD_LIMIT_EXCEEDED_REASON } from '../../../common/constants';
 import { isTypeof } from '../../actions';
 import type { ModelStage } from '../types';
 

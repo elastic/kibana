@@ -1,4 +1,3 @@
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +7,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { AgentConfigInstructions } from './agent_config_instructions';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as getCommands from './commands/get_apm_agent_commands';
 
 function Wrapper({ children }: { children?: ReactNode }) {

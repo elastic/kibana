@@ -8,11 +8,11 @@
 
 import { MyImageMetadata } from '../common';
 import type {
-  DeveloperExamplesSetup,
-  FilesClient,
   FilesSetup,
   FilesStart,
   ScopedFilesClient,
+  FilesClient,
+  DeveloperExamplesSetup,
 } from './imports';
 
 export interface FilesExamplePluginsSetup {

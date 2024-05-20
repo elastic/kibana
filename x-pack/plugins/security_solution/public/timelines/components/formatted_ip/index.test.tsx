@@ -1,5 +1,3 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +5,14 @@ import userEvent from '@testing-library/user-event';
  * 2.0.
  */
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { FormattedIp } from '.';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { TestProviders } from '../../../common/mock';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { timelineActions } from '../../store';
+import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');

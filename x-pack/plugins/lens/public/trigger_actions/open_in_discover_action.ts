@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';

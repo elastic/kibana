@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { EuiLink, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -16,12 +18,10 @@ import {
   isClassificationFeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { FC } from 'react';
-import React, { useState } from 'react';
-import { useMlKibana } from '../../../../../contexts/kibana';
-import { ClassificationDecisionPath } from './decision_path_classification';
-import { DecisionPathJSONViewer } from './decision_path_json_viewer';
 import { RegressionDecisionPath } from './decision_path_regression';
+import { DecisionPathJSONViewer } from './decision_path_json_viewer';
+import { ClassificationDecisionPath } from './decision_path_classification';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { getStringBasedClassName } from './use_classification_path_data';
 
 interface DecisionPathPopoverProps {

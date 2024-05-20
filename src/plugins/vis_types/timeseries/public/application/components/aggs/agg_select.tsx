@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import React, { useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
 
-import { getAggsByPredicate, getAggsByType } from '../../../../common/agg_utils';
-import type { Agg } from '../../../../common/agg_utils';
 import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
-import type { Metric } from '../../../../common/types';
 import { VisDataContext } from '../../contexts/vis_data_context';
+import { getAggsByType, getAggsByPredicate } from '../../../../common/agg_utils';
+import type { Agg } from '../../../../common/agg_utils';
+import type { Metric } from '../../../../common/types';
 
 type AggSelectOption = EuiComboBoxOptionOption;
 

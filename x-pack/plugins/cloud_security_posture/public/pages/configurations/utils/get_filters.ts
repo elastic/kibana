@@ -7,12 +7,12 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
-  FILTERS,
   type Filter,
-  FilterCompareOptions,
-  FilterStateStore,
   buildFilter,
+  FILTERS,
+  FilterStateStore,
   compareFilters,
+  FilterCompareOptions,
 } from '@kbn/es-query';
 import type { Serializable } from '@kbn/utility-types';
 

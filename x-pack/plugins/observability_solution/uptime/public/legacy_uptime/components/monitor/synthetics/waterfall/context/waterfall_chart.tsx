@@ -6,10 +6,10 @@
  */
 
 import React, { createContext, useContext, Context, FC, PropsWithChildren } from 'react';
-import { JourneyStep } from '../../../../../../../common/runtime_types';
-import { SidebarItems } from '../../step_detail/waterfall/types';
-import { OnElementClick, OnProjectionClick, OnSidebarClick } from '../components/use_flyout';
 import { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
+import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../components/use_flyout';
+import { SidebarItems } from '../../step_detail/waterfall/types';
+import { JourneyStep } from '../../../../../../../common/runtime_types';
 
 export type MarkerItems = Array<{
   id:

@@ -8,7 +8,7 @@
 
 import type { PaletteOutput } from '@kbn/coloring';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { SchemaConfig, VisToExpressionAst, getVisSchemas } from '@kbn/visualizations-plugin/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { TagCloudVisParams } from './types';
 
 const prepareDimension = (params: SchemaConfig) => {

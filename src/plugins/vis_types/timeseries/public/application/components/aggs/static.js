@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiSpacer,
-  htmlIdGenerator,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { AggSelect } from './agg_select';
+import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
-import { AggRow } from './agg_row';
-import { AggSelect } from './agg_select';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiFieldNumber,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const Static = (props) => {
   const handleChange = createChangeHandler(props.onChange, props.model);

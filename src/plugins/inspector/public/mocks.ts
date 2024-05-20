@@ -9,8 +9,8 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { Setup as PluginSetup, Start as PluginStart } from '.';
-import { plugin as pluginInitializer } from '.';
 import { InspectorViewRegistry } from './view_registry';
+import { plugin as pluginInitializer } from '.';
 
 export type Setup = jest.Mocked<PluginSetup>;
 export type Start = jest.Mocked<PluginStart>;

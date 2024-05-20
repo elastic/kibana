@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import faker from 'faker';
 import React from 'react';
 import { FieldPicker, FieldPickerProps } from './field_picker';
+import { render, screen } from '@testing-library/react';
+import faker from 'faker';
+import userEvent from '@testing-library/user-event';
 import { DataType, FieldOptionValue } from './types';
 
 const generateFieldWithLabelOfLength = (length: number) => ({
@@ -53,7 +53,7 @@ const generateProps = (customField = generateFieldWithLabelOfLength(20)) =>
     ],
     onChoose: jest.fn(),
     fieldIsInvalid: false,
-  }) as unknown as FieldPickerProps<FieldOptionValue>;
+  } as unknown as FieldPickerProps<FieldOptionValue>);
 
 describe('field picker', () => {
   const renderAndOpenFieldPicker = (customField = generateFieldWithLabelOfLength(20)) => {

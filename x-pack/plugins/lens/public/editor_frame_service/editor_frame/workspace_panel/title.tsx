@@ -7,9 +7,9 @@
 
 import './workspace_panel_wrapper.scss';
 
-import { EuiScreenReaderOnly } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 import { LensState, useLensSelector } from '../../../state_management';
 
 export function WorkspaceTitle() {

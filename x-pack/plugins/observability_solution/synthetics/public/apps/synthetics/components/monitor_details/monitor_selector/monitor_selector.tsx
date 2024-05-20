@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Fragment, useState } from 'react';
+import { EuiPopover, EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MonitorSearchableList } from './monitor_searchable_list';
 
 export const MonitorSelector = () => {

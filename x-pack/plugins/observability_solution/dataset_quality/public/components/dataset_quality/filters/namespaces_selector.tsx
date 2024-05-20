@@ -6,9 +6,9 @@
  */
 
 import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable, EuiText } from '@elastic/eui';
+import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 
 const namespacesSelectorLabel = i18n.translate('xpack.datasetQuality.namespacesSelectorLabel', {
   defaultMessage: 'Namespaces',

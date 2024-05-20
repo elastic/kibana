@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { BaseValidator } from './base_validator';
+import type { ExceptionItemLikeOptions } from '../types';
+import type { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
 import {
   getDuplicateFields,
   isValidHash,
 } from '../../../../common/endpoint/service/artifacts/validations';
-import type { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
-import type { ExceptionItemLikeOptions } from '../types';
-import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 
 const ProcessHashField = schema.oneOf([
@@ -46,7 +46,7 @@ type ConditionEntryFieldAllowedType =
   | TypeOf<typeof ProcessCodeSigner>;
 
 type TrustedAppConditionEntry<
-  T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType,
+  T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType
 > =
   | {
       field: T;

@@ -1,4 +1,3 @@
-import type { EuiThemeComputed } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +7,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
  */
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 export const badgePaddingCss = (euiTheme: EuiThemeComputed) => css`
   padding: calc(${euiTheme.size.xs} + ${euiTheme.size.xxs});

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { format, parse } from 'url';
+import { parse, format } from 'url';
 
 export function parseIndexUrl(url: string): { node: string; index: string } {
   const parsed = parse(url);

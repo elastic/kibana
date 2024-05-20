@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { keyBy, omit } from 'lodash';
-import { getJobConfig } from '.';
+import { omit, keyBy } from 'lodash';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getJobConfig } from '.';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

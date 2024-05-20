@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { CaseUserActionsStats } from '../../containers/types';
 import { FilterActivity } from './filter_activity';
 import { SortActivity } from './sort_activity';
-import type { UserActivityFilter, UserActivityParams, UserActivitySortOrder } from './types';
+import type { UserActivityFilter, UserActivitySortOrder, UserActivityParams } from './types';
+import type { CaseUserActionsStats } from '../../containers/types';
 
 interface UserActionsActivityProps {
   isLoading?: boolean;

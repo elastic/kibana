@@ -139,7 +139,9 @@
                     "tags": [],
                     "label": "options",
                     "description": [],
-                    "signature": ["(string | undefined)[]"],
+                    "signature": [
+                      "(string | undefined)[]"
+                    ],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -151,7 +153,9 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "signature": ["undefined"],
+                    "signature": [
+                      "undefined"
+                    ],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -370,7 +374,10 @@
         "tags": [],
         "label": "getServicesMock",
         "description": [],
-        "signature": ["() => ", "NoDataCardServices"],
+        "signature": [
+          "() => ",
+          "NoDataCardServices"
+        ],
         "path": "packages/shared-ux/page/no_data_config/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,

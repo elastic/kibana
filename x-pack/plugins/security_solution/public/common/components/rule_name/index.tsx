@@ -6,10 +6,10 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface RuleNameProps {
   name: string;

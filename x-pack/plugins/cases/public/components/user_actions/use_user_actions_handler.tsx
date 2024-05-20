@@ -8,14 +8,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCaseViewParams } from '../../common/navigation';
 import type { CaseUI } from '../../containers/types';
-import { useDeleteComment } from '../../containers/use_delete_comment';
+import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import type { AddCommentRefObject } from '../add_comment';
-import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
-import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
-import { NEW_COMMENT_ID } from './constants';
 import type { UserActionMarkdownRefObject } from './markdown_form';
 import type { UserActionBuilderArgs } from './types';
+import { NEW_COMMENT_ID } from './constants';
+import { useDeleteComment } from '../../containers/use_delete_comment';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
 export type UseUserActionsHandler = Pick<
   UserActionBuilderArgs,

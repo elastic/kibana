@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import { BurnRateRuleParams } from '../../../../typings';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../../utils/kibana_react';
+import { BurnRateRuleParams } from '../../../../typings';
 
 export function EditBurnRateRuleFlyout({
   refetchRules,

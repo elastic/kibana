@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { Spaces, Superuser } from '../../../scenarios';
 import {
-  ObjectRemover,
-  TaskManagerDoc,
+  getUrlPrefix,
   getEventLog,
   getTestRuleData,
-  getUrlPrefix,
+  TaskManagerDoc,
+  ObjectRemover,
 } from '../../../../common/lib';
-import { Spaces, Superuser } from '../../../scenarios';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertingAndActionsTelemetryTests({ getService }: FtrProviderContext) {

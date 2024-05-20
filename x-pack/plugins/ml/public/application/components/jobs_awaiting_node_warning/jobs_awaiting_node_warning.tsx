@@ -10,8 +10,8 @@ import React from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useEnabledFeatures } from '../../contexts/ml';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface Props {
   jobCount: number;

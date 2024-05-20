@@ -8,8 +8,8 @@
 import React, { useCallback } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { SnoozeSchedule } from '../../../../../types';
-import { snoozeRule as snoozeRuleApi } from '../../../../lib/rule_api/snooze';
 import { unsnoozeRule as unsnoozeRuleApi } from '../../../../lib/rule_api/unsnooze';
+import { snoozeRule as snoozeRuleApi } from '../../../../lib/rule_api/snooze';
 import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListNotifyBadgePropsWithApi } from './types';
 

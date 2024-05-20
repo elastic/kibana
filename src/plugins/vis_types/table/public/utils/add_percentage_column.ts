@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { findIndex } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getFormatService } from '../services';
 import { FormattedColumns, TableContext } from '../types';
 

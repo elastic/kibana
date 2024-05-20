@@ -7,9 +7,9 @@
  */
 
 import {
+  getCustomDropTarget,
   getAdditionalClassesOnDroppable,
   getAdditionalClassesOnEnter,
-  getCustomDropTarget,
 } from './swap_duplicate_combine';
 
 /**

@@ -1,5 +1,3 @@
-import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { RequestStatus } from '@kbn/inspector-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,17 +6,19 @@ import { RequestStatus } from '@kbn/inspector-plugin/public';
  * Side Public License, v 1.
  */
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { Subject, of } from 'rxjs';
-import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
-import { getLensVisMock } from '../__mocks__/lens_vis';
-import { unifiedHistogramServicesMock } from '../__mocks__/services';
-import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../types';
 import { Histogram } from './histogram';
-import { getLensProps } from './hooks/use_lens_props';
-import * as useTimeRange from './hooks/use_time_range';
+import React from 'react';
+import { of, Subject } from 'rxjs';
+import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { getLensVisMock } from '../__mocks__/lens_vis';
+import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../types';
+import { act } from 'react-dom/test-utils';
 import * as buildBucketInterval from './utils/build_bucket_interval';
+import * as useTimeRange from './hooks/use_time_range';
+import { RequestStatus } from '@kbn/inspector-plugin/public';
+import { getLensProps } from './hooks/use_lens_props';
 
 const mockBucketInterval = { description: '1 minute', scale: undefined, scaled: false };
 jest.spyOn(buildBucketInterval, 'buildBucketInterval').mockReturnValue(mockBucketInterval);

@@ -8,9 +8,9 @@
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
-import { EuiSuperSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PainlessContext } from '@kbn/monaco';
+import { EuiSuperSelectOption } from '@elastic/eui';
 
 const defaultLabel = i18n.translate('xpack.painlessLab.contextDefaultLabel', {
   defaultMessage: 'Basic',

@@ -6,16 +6,7 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import example2SampleCodePart1 from '!!raw-loader!../common/example_currency_format';
-// @ts-ignore
-import example2SampleCodePart3 from '!!raw-loader!../server/examples/2_creating_custom_formatter';
-// @ts-ignore
-import example1SampleCode from '!!raw-loader!./examples/1_using_existing_format';
-// @ts-ignore
-import example2SampleCodePart2 from '!!raw-loader!./examples/2_creating_custom_formatter';
-// @ts-ignore
-import example3SampleCode from '!!raw-loader!./examples/3_creating_custom_format_editor';
+import React from 'react';
 import {
   EuiBasicTable,
   EuiCallOut,
@@ -29,9 +20,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import React from 'react';
 import * as example1 from './examples/1_using_existing_format';
 import * as example2 from './examples/2_creating_custom_formatter';
+// @ts-ignore
+import example1SampleCode from '!!raw-loader!./examples/1_using_existing_format';
+// @ts-ignore
+import example2SampleCodePart1 from '!!raw-loader!../common/example_currency_format';
+// @ts-ignore
+import example2SampleCodePart2 from '!!raw-loader!./examples/2_creating_custom_formatter';
+// @ts-ignore
+import example2SampleCodePart3 from '!!raw-loader!../server/examples/2_creating_custom_formatter';
+// @ts-ignore
+import example3SampleCode from '!!raw-loader!./examples/3_creating_custom_format_editor';
 
 export interface Deps {
   fieldFormats: FieldFormatsStart;

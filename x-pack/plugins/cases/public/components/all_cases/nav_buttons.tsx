@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { isEmpty } from 'lodash/fp';
 import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
-import { useCreateCaseNavigation } from '../../common/navigation';
-import { useCasesContext } from '../cases_context/use_cases_context';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
+import { css } from '@emotion/react';
+import * as i18n from './translations';
 import { ConfigureCaseButton, LinkButton } from '../links';
 import type { ErrorMessage } from '../use_push_to_service/callout/types';
-import * as i18n from './translations';
+import { useCreateCaseNavigation } from '../../common/navigation';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface OwnProps {
   actionsErrors: ErrorMessage[];

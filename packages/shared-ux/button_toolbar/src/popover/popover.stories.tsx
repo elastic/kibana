@@ -10,8 +10,8 @@ import React from 'react';
 
 import { EuiContextMenu } from '@elastic/eui';
 
-import mdx from '../../README.mdx';
 import { ToolbarPopover as Component } from './popover';
+import mdx from '../../README.mdx';
 
 const argTypes = {
   showIcon: {

@@ -10,8 +10,8 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
-  TaskErrorSource,
   createTaskRunError,
+  TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import { some } from 'lodash';
 import { IAlertsClient } from '../alerts_client/types';
@@ -40,7 +40,7 @@ interface ConstructorOpts<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData,
+  AlertData extends RuleAlertData
 > {
   context: TaskRunnerContext;
   logger: Logger;
@@ -77,7 +77,7 @@ interface RunOpts<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData,
+  AlertData extends RuleAlertData
 > {
   context: RuleTypeRunnerContext;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
@@ -120,7 +120,7 @@ export class RuleTypeRunner<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData,
+  AlertData extends RuleAlertData
 > {
   private cancelled: boolean = false;
 
@@ -331,8 +331,9 @@ export class RuleTypeRunner<
     });
 
     await this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
-      const updateAlertsMaintenanceWindowResult =
-        await alertsClient.persistAlerts(maintenanceWindows);
+      const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts(
+        maintenanceWindows
+      );
 
       // Set the event log MW ids again, this time including the ids that matched alerts with
       // scoped query

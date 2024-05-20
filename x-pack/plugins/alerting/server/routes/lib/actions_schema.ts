@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { FilterStateStore } from '@kbn/es-query';
+import { validateTimezone } from './validate_timezone';
 import { validateDurationSchema } from '../../lib';
 import { validateHours } from './validate_hours';
-import { validateTimezone } from './validate_timezone';
 
 export const actionsSchema = schema.arrayOf(
   schema.object({

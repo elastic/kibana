@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { Fragment, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useState } from 'react';
 
 import { deleteDataStreams } from '../../../../services/api';
 import { notificationService } from '../../../../services/notification';

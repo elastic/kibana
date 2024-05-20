@@ -1,6 +1,3 @@
-import { EuiPopover, EuiPopoverTitle, EuiSuperDatePicker } from '@elastic/eui';
-import type { ShortDate } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,13 +5,16 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React, { useCallback, memo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import { EuiPopover, EuiPopoverTitle, EuiSuperDatePicker } from '@elastic/eui';
+import type { ShortDate } from '@elastic/eui';
 import { formatDate } from '../../../common/components/super_date_picker';
-import type { State } from '../../../common/store/types';
-import { userOverrodeDateRange } from '../../store/data/action';
-import * as selectors from '../../store/selectors';
-import { useColors } from '../use_colors';
 import { StyledEuiButtonIcon } from './styles';
+import { useColors } from '../use_colors';
+import * as selectors from '../../store/selectors';
+import { userOverrodeDateRange } from '../../store/data/action';
+import type { State } from '../../../common/store/types';
 
 interface DurationRange {
   end: ShortDate;

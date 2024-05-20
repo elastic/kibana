@@ -6,9 +6,9 @@
  */
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import { JobList } from '../../../crud_app/sections/job_list';
 import { registerRouter } from '../../../crud_app/services';
 import { createRollupJobsStore } from '../../../crud_app/store';
+import { JobList } from '../../../crud_app/sections/job_list';
 
 import { wrapComponent } from './setup_context';
 

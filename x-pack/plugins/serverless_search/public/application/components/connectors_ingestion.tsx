@@ -8,11 +8,11 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
+  EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GithubLink } from '@kbn/search-api-panels';

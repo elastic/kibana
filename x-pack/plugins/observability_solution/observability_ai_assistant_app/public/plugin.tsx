@@ -1,14 +1,3 @@
-import {
-  type AppMountParameters,
-  type CoreSetup,
-  type CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  type Plugin,
-  type PluginInitializerContext,
-} from '@kbn/core/public';
-import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
-import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -17,16 +6,27 @@ import type { Logger } from '@kbn/logging';
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { LazyNavControl } from './components/nav_control/lazy_nav_control';
-import { getObsAIAssistantConnectorType } from './rule_connector';
-import { ObservabilityAIAssistantAppService, createAppService } from './service/create_app_service';
+import {
+  type AppMountParameters,
+  DEFAULT_APP_CATEGORIES,
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  type PluginInitializerContext,
+} from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
+import { i18n } from '@kbn/i18n';
+import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
   ObservabilityAIAssistantAppPublicSetup,
   ObservabilityAIAssistantAppPublicStart,
 } from './types';
+import { createAppService, ObservabilityAIAssistantAppService } from './service/create_app_service';
 import { SharedProviders } from './utils/shared_providers';
+import { LazyNavControl } from './components/nav_control/lazy_nav_control';
+import { getObsAIAssistantConnectorType } from './rule_connector';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ConfigSchema {}

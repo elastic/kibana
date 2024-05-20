@@ -24,7 +24,9 @@
         "type": "Class",
         "tags": [],
         "label": "DocumentMigrator",
-        "description": ["\nA concrete implementation of the {@link IDocumentMigrator} interface."],
+        "description": [
+          "\nA concrete implementation of the {@link IDocumentMigrator} interface."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -50,10 +52,19 @@
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-common.DocumentMigrator.Unnamed",
             "type": "Function",
-            "tags": ["prop", "prop", "prop", "prop"],
+            "tags": [
+              "prop",
+              "prop",
+              "prop",
+              "prop"
+            ],
             "label": "Constructor",
-            "description": ["\nCreates an instance of DocumentMigrator.\n"],
-            "signature": ["any"],
+            "description": [
+              "\nCreates an instance of DocumentMigrator.\n"
+            ],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -65,7 +76,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["DocumentMigratorOptions"],
+                "signature": [
+                  "DocumentMigratorOptions"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -104,7 +117,9 @@
                 "tags": [],
                 "label": "{\n    includeDeferred = true,\n    migrationType = 'type',\n  }",
                 "description": [],
-                "signature": ["MigrationVersionParams"],
+                "signature": [
+                  "MigrationVersionParams"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -119,8 +134,12 @@
             "type": "Function",
             "tags": [],
             "label": "prepareMigrations",
-            "description": ["\nPrepares active migrations and document transformer function."],
-            "signature": ["() => void"],
+            "description": [
+              "\nPrepares active migrations and document transformer function."
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/document_migrator/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -133,7 +152,9 @@
             "type": "Function",
             "tags": [],
             "label": "migrate",
-            "description": ["\nMigrates a document to the latest version."],
+            "description": [
+              "\nMigrates a document to the latest version."
+            ],
             "signature": [
               "(doc: ",
               {
@@ -355,7 +376,9 @@
         "type": "Class",
         "tags": [],
         "label": "KibanaMigrator",
-        "description": ["\nManages the shape of mappings and documents in the Kibana index."],
+        "description": [
+          "\nManages the shape of mappings and documents in the Kibana index."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -388,8 +411,12 @@
             "type": "Function",
             "tags": [],
             "label": "Constructor",
-            "description": ["\nCreates an instance of KibanaMigrator."],
-            "signature": ["any"],
+            "description": [
+              "\nCreates an instance of KibanaMigrator."
+            ],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -475,7 +502,9 @@
                     "tags": [],
                     "label": "rerun",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -492,7 +521,9 @@
             "tags": [],
             "label": "prepareMigrations",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -506,7 +537,13 @@
             "tags": [],
             "label": "getStatus$",
             "description": [],
-            "signature": ["() => ", "Observable", "<", "KibanaMigratorStatus", ">"],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "KibanaMigratorStatus",
+              ">"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -520,7 +557,10 @@
             "tags": [],
             "label": "getActiveMappings",
             "description": [],
-            "signature": ["() => ", "IndexMapping"],
+            "signature": [
+              "() => ",
+              "IndexMapping"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -588,7 +628,9 @@
                 "tags": [],
                 "label": "{ allowDowngrade = false }",
                 "description": [],
-                "signature": ["MigrateDocumentOptions"],
+                "signature": [
+                  "MigrateDocumentOptions"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -627,8 +669,12 @@
             "type": "Array",
             "tags": [],
             "label": "types",
-            "description": ["the types to be filtered out"],
-            "signature": ["string[]"],
+            "description": [
+              "the types to be filtered out"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -640,15 +686,22 @@
             "type": "Object",
             "tags": [],
             "label": "boolQuery",
-            "description": ["the bool query to be enriched"],
-            "signature": ["QueryDslBoolQuery", " | undefined"],
+            "description": [
+              "the bool query to be enriched"
+            ],
+            "signature": [
+              "QueryDslBoolQuery",
+              " | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": ["a new query container with the enriched query"],
+        "returnComment": [
+          "a new query container with the enriched query"
+        ],
         "initialIsOpen": false
       },
       {
@@ -686,7 +739,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "typeDefinitions",
-            "description": ["- the type definitions to build mapping from."],
+            "description": [
+              "- the type definitions to build mapping from."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -710,7 +765,10 @@
             "tags": [],
             "label": "_meta",
             "description": [],
-            "signature": ["IndexMappingMeta", " | undefined"],
+            "signature": [
+              "IndexMappingMeta",
+              " | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/build_active_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -726,7 +784,9 @@
         "type": "Function",
         "tags": [],
         "label": "buildTypesMappings",
-        "description": ["\nMerge mappings from all registered saved object types."],
+        "description": [
+          "\nMerge mappings from all registered saved object types."
+        ],
         "signature": [
           "(types: ",
           {
@@ -804,7 +864,9 @@
             "tags": [],
             "label": "{\n    client,\n    index,\n    operations,\n    refresh = false,\n    useAliasToPreventAutoCreate = false,\n  }",
             "description": [],
-            "signature": ["BulkOverwriteTransformedDocumentsParams"],
+            "signature": [
+              "BulkOverwriteTransformedDocumentsParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -843,7 +905,9 @@
             "tags": [],
             "label": "{\n    client,\n    excludeFromUpgradeFilterHooks,\n    hookTimeoutMs = 30_000, // default to 30s, exposed for testing\n  }",
             "description": [],
-            "signature": ["CalculateExcludeFiltersParams"],
+            "signature": [
+              "CalculateExcludeFiltersParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/calculate_exclude_filters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -882,7 +946,9 @@
             "tags": [],
             "label": "{\n    client,\n    indexName,\n    excludeOnUpgradeQuery,\n    knownTypes,\n  }",
             "description": [],
-            "signature": ["CheckForUnknownDocsParams"],
+            "signature": [
+              "CheckForUnknownDocsParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/check_for_unknown_docs.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -898,7 +964,9 @@
         "type": "Function",
         "tags": [],
         "label": "cloneIndex",
-        "description": ["\nMakes a clone of the source index into the target.\n"],
+        "description": [
+          "\nMakes a clone of the source index into the target.\n"
+        ],
         "signature": [
           "({ client, esCapabilities, source, target, timeout, }: ",
           "CloneIndexParams",
@@ -929,7 +997,9 @@
             "tags": [],
             "label": "{\n  client,\n  esCapabilities,\n  source,\n  target,\n  timeout = DEFAULT_TIMEOUT,\n}",
             "description": [],
-            "signature": ["CloneIndexParams"],
+            "signature": [
+              "CloneIndexParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/clone_index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -966,7 +1036,9 @@
             "tags": [],
             "label": "{ client, pitId }",
             "description": [],
-            "signature": ["ClosePitParams"],
+            "signature": [
+              "ClosePitParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/close_pit.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -985,7 +1057,10 @@
         "description": [
           "\nGiven a document id, creates a valid body to delete the document using the Bulk API."
         ],
-        "signature": ["(_id: string) => ", "BulkOperationContainer"],
+        "signature": [
+          "(_id: string) => ",
+          "BulkOperationContainer"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -997,7 +1072,9 @@
             "tags": [],
             "label": "_id",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1060,7 +1137,9 @@
             "tags": [],
             "label": "typeIndexMap",
             "description": [],
-            "signature": ["Record<string, string>"],
+            "signature": [
+              "Record<string, string>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1076,7 +1155,9 @@
         "type": "Function",
         "tags": [],
         "label": "createIndex",
-        "description": ["\nCreates an index with the given mappings\n"],
+        "description": [
+          "\nCreates an index with the given mappings\n"
+        ],
         "signature": [
           "({ client, indexName, mappings, esCapabilities, aliases, timeout, waitForIndexStatusTimeout, }: ",
           "CreateIndexParams",
@@ -1103,7 +1184,9 @@
             "tags": [],
             "label": "{\n  client,\n  indexName,\n  mappings,\n  esCapabilities,\n  aliases = [],\n  timeout = DEFAULT_TIMEOUT,\n  waitForIndexStatusTimeout = DEFAULT_TIMEOUT,\n}",
             "description": [],
-            "signature": ["CreateIndexParams"],
+            "signature": [
+              "CreateIndexParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/create_index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1144,7 +1227,9 @@
             "tags": [],
             "label": "{\n    client,\n    indices,\n  }",
             "description": [],
-            "signature": ["FetchIndicesParams"],
+            "signature": [
+              "FetchIndicesParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/fetch_indices.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1185,7 +1270,9 @@
             "tags": [],
             "label": "{\n  client,\n  indices,\n}",
             "description": [],
-            "signature": ["InitActionParams"],
+            "signature": [
+              "InitActionParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/initialize_action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1202,7 +1289,11 @@
         "tags": [],
         "label": "isClusterShardLimitExceeded",
         "description": [],
-        "signature": ["(errorCause?: ", "ErrorCause", " | undefined) => boolean"],
+        "signature": [
+          "(errorCause?: ",
+          "ErrorCause",
+          " | undefined) => boolean"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1214,7 +1305,10 @@
             "tags": [],
             "label": "errorCause",
             "description": [],
-            "signature": ["ErrorCause", " | undefined"],
+            "signature": [
+              "ErrorCause",
+              " | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1231,7 +1325,11 @@
         "tags": [],
         "label": "isIncompatibleMappingException",
         "description": [],
-        "signature": ["(errorCause?: ", "ErrorCause", " | undefined) => boolean"],
+        "signature": [
+          "(errorCause?: ",
+          "ErrorCause",
+          " | undefined) => boolean"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1243,7 +1341,10 @@
             "tags": [],
             "label": "errorCause",
             "description": [],
-            "signature": ["ErrorCause", " | undefined"],
+            "signature": [
+              "ErrorCause",
+              " | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1260,7 +1361,11 @@
         "tags": [],
         "label": "isIndexNotFoundException",
         "description": [],
-        "signature": ["(errorCause?: ", "ErrorCause", " | undefined) => boolean"],
+        "signature": [
+          "(errorCause?: ",
+          "ErrorCause",
+          " | undefined) => boolean"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1272,7 +1377,10 @@
             "tags": [],
             "label": "errorCause",
             "description": [],
-            "signature": ["ErrorCause", " | undefined"],
+            "signature": [
+              "ErrorCause",
+              " | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1289,7 +1397,11 @@
         "tags": [],
         "label": "isWriteBlockException",
         "description": [],
-        "signature": ["(errorCause?: ", "ErrorCause", " | undefined) => boolean"],
+        "signature": [
+          "(errorCause?: ",
+          "ErrorCause",
+          " | undefined) => boolean"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1301,7 +1413,10 @@
             "tags": [],
             "label": "errorCause",
             "description": [],
-            "signature": ["ErrorCause", " | undefined"],
+            "signature": [
+              "ErrorCause",
+              " | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1340,7 +1455,9 @@
             "tags": [],
             "label": "{\n    client,\n    index,\n  }",
             "description": [],
-            "signature": ["OpenPitParams"],
+            "signature": [
+              "OpenPitParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/open_pit.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1416,7 +1533,9 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1429,7 +1548,9 @@
             "tags": [],
             "label": "batchSize",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1442,7 +1563,10 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": ["QueryDslQueryContainer", " | undefined"],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1489,7 +1613,9 @@
             "tags": [],
             "label": "{\n    client,\n    pitId,\n    query,\n    batchSize,\n    searchAfter,\n    seqNoPrimaryTerm,\n    maxResponseSizeBytes,\n  }",
             "description": [],
-            "signature": ["ReadWithPitParams"],
+            "signature": [
+              "ReadWithPitParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/read_with_pit.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1505,7 +1631,9 @@
         "type": "Function",
         "tags": [],
         "label": "refreshIndex",
-        "description": ["\nWait for Elasticsearch to reindex all the changes."],
+        "description": [
+          "\nWait for Elasticsearch to reindex all the changes."
+        ],
         "signature": [
           "({ client, index, }: ",
           "RefreshIndexParams",
@@ -1526,7 +1654,9 @@
             "tags": [],
             "label": "{\n    client,\n    index,\n  }",
             "description": [],
-            "signature": ["RefreshIndexParams"],
+            "signature": [
+              "RefreshIndexParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/refresh_index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1567,7 +1697,9 @@
             "tags": [],
             "label": "{\n    client,\n    sourceIndex,\n    targetIndex,\n    reindexScript,\n    requireAlias,\n    excludeOnUpgradeQuery,\n    batchSize,\n  }",
             "description": [],
-            "signature": ["ReindexParams"],
+            "signature": [
+              "ReindexParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/reindex.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1583,7 +1715,9 @@
         "type": "Function",
         "tags": [],
         "label": "removeWriteBlock",
-        "description": ["\nRemoves a write block from an index"],
+        "description": [
+          "\nRemoves a write block from an index"
+        ],
         "signature": [
           "({ client, index, timeout, }: ",
           "RemoveWriteBlockParams",
@@ -1604,7 +1738,9 @@
             "tags": [],
             "label": "{\n    client,\n    index,\n    timeout = DEFAULT_TIMEOUT,\n  }",
             "description": [],
-            "signature": ["RemoveWriteBlockParams"],
+            "signature": [
+              "RemoveWriteBlockParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/remove_write_block.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1645,7 +1781,9 @@
             "tags": [],
             "label": "{\n    client,\n    index,\n    timeout = DEFAULT_TIMEOUT,\n  }",
             "description": [],
-            "signature": ["SetWriteBlockParams"],
+            "signature": [
+              "SetWriteBlockParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/set_write_block.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1696,7 +1834,9 @@
             "tags": [],
             "label": "{\n  transformRawDocs,\n  outdatedDocuments,\n}",
             "description": [],
-            "signature": ["TransformDocsParams"],
+            "signature": [
+              "TransformDocsParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/transform_docs.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1741,7 +1881,9 @@
             "tags": [],
             "label": "{\n    client,\n    aliasActions,\n    timeout = DEFAULT_TIMEOUT,\n  }",
             "description": [],
-            "signature": ["UpdateAliasesParams"],
+            "signature": [
+              "UpdateAliasesParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_aliases.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1782,7 +1924,9 @@
             "tags": [],
             "label": "{\n  client,\n  index,\n  mappings,\n  batchSize,\n  query,\n}",
             "description": [],
-            "signature": ["UpdateAndPickupMappingsParams"],
+            "signature": [
+              "UpdateAndPickupMappingsParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_and_pickup_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1823,7 +1967,9 @@
             "tags": [],
             "label": "{\n  client,\n  index,\n  mappings,\n}",
             "description": [],
-            "signature": ["UpdateMappingsParams"],
+            "signature": [
+              "UpdateMappingsParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1862,7 +2008,10 @@
             "tags": [],
             "label": "{\n  client,\n  index,\n  timeout,\n  status,\n}",
             "description": [],
-            "signature": ["WaitForIndexStatusParams", " & { status: \"yellow\"; }"],
+            "signature": [
+              "WaitForIndexStatusParams",
+              " & { status: \"yellow\"; }"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1901,7 +2050,10 @@
             "tags": [],
             "label": "{\n  client,\n  index,\n  timeout,\n  status,\n}",
             "description": [],
-            "signature": ["WaitForIndexStatusParams", " & { status: \"green\"; }"],
+            "signature": [
+              "WaitForIndexStatusParams",
+              " & { status: \"green\"; }"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1944,7 +2096,9 @@
             "tags": [],
             "label": "{\n  client,\n  index,\n  timeout = DEFAULT_TIMEOUT,\n  status,\n}",
             "description": [],
-            "signature": ["WaitForIndexStatusParams"],
+            "signature": [
+              "WaitForIndexStatusParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1984,7 +2138,9 @@
             "tags": [],
             "label": "a",
             "description": [],
-            "signature": ["A"],
+            "signature": [
+              "A"
+            ],
             "path": "node_modules/fp-ts/lib/function.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2028,7 +2184,9 @@
             "tags": [],
             "label": "a",
             "description": [],
-            "signature": ["A"],
+            "signature": [
+              "A"
+            ],
             "path": "node_modules/fp-ts/lib/function.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2069,7 +2227,9 @@
             "tags": [],
             "label": "{\n    client,\n    taskId,\n    timeout,\n  }",
             "description": [],
-            "signature": ["WaitForTaskParams"],
+            "signature": [
+              "WaitForTaskParams"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_task.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2110,7 +2270,9 @@
             "tags": [],
             "label": "corruptDocumentIds",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2122,7 +2284,10 @@
             "tags": [],
             "label": "transformErrors",
             "description": [],
-            "signature": ["TransformErrorObjects", "[]"],
+            "signature": [
+              "TransformErrorObjects",
+              "[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2204,7 +2369,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"es_response_too_large\""],
+            "signature": [
+              "\"es_response_too_large\""
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3497,7 +3664,9 @@
             "tags": [],
             "label": "defaultIndexTypesMap",
             "description": [],
-            "signature": ["{ [x: string]: string[]; }"],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3509,7 +3678,9 @@
             "tags": [],
             "label": "hashToVersionMap",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3694,8 +3865,12 @@
         "type": "Array",
         "tags": [],
         "label": "REMOVED_TYPES",
-        "description": ["\nTypes that are no longer registered and need to be removed"],
-        "signature": ["string[]"],
+        "description": [
+          "\nTypes that are no longer registered and need to be removed"
+        ],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/unused_types.ts",
         "deprecated": false,
         "trackAdoption": false,

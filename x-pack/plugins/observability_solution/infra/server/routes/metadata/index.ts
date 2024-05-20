@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
+import Boom from '@hapi/boom';
+import { get } from 'lodash';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { get } from 'lodash';
 import {
   InfraMetadataFeature,
-  InfraMetadataRT,
   InfraMetadataRequestRT,
+  InfraMetadataRT,
 } from '../../../common/http_api/metadata_api';
-import { throwErrors } from '../../../common/runtime_types';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getMetricMetadata } from './lib/get_metric_metadata';
-import { getNodeInfo } from './lib/get_node_info';
 import { pickFeatureName } from './lib/pick_feature_name';
+import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
+import { getNodeInfo } from './lib/get_node_info';
+import { throwErrors } from '../../../common/runtime_types';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 

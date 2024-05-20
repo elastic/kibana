@@ -7,16 +7,16 @@
  */
 
 import {
+  createStackFrameMetadata,
   FrameSymbolStatus,
   FrameType,
-  StackFrameMetadata,
-  createStackFrameMetadata,
   getCalleeFunction,
   getCalleeLabel,
   getCalleeSource,
   getFrameSymbolStatus,
   getLanguageType,
   normalizeFrameType,
+  StackFrameMetadata,
 } from './profiling';
 
 describe('Stack frame metadata operations', () => {

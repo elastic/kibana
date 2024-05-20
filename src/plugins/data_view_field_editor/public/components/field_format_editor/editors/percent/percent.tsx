@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { defaultState } from '../default';
 import { NumberFormatEditor } from '../number/number';
+import { defaultState } from '../default';
 import { formatId } from './constants';
 
 export class PercentFormatEditor extends NumberFormatEditor {

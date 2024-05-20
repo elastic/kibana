@@ -90,7 +90,9 @@
             "tags": [],
             "label": "isDeprecated",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -102,7 +104,9 @@
             "tags": [],
             "label": "spaceId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -114,7 +118,9 @@
             "tags": [],
             "label": "browserTimezone",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -150,7 +156,10 @@
             "tags": [],
             "label": "pagingStrategy",
             "description": [],
-            "signature": ["CsvPagingStrategy", " | undefined"],
+            "signature": [
+              "CsvPagingStrategy",
+              " | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -184,7 +193,9 @@
             "tags": [],
             "label": "created_by",
             "description": [],
-            "signature": ["string | false"],
+            "signature": [
+              "string | false"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -207,7 +218,9 @@
             "tags": [],
             "label": "started_at",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -219,7 +232,9 @@
             "tags": [],
             "label": "completed_at",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -262,7 +277,9 @@
             "tags": [],
             "label": "max_attempts",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -274,7 +291,9 @@
             "tags": [],
             "label": "timeout",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -286,7 +305,9 @@
             "tags": [],
             "label": "kibana_name",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -298,7 +319,9 @@
             "tags": [],
             "label": "kibana_id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -310,7 +333,9 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -322,7 +347,9 @@
             "tags": [],
             "label": "content_type",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -334,7 +361,9 @@
             "tags": [],
             "label": "csv_contains_formulas",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -346,7 +375,9 @@
             "tags": [],
             "label": "max_size_reached",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -358,7 +389,10 @@
             "tags": [],
             "label": "metrics",
             "description": [],
-            "signature": ["TaskRunMetrics", " | undefined"],
+            "signature": [
+              "TaskRunMetrics",
+              " | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -370,7 +404,9 @@
             "tags": [],
             "label": "warnings",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -382,7 +418,9 @@
             "tags": [],
             "label": "error_code",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -417,7 +455,9 @@
             "tags": [],
             "label": "queue_time_ms",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -429,7 +469,9 @@
             "tags": [],
             "label": "execution_time_ms",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -441,7 +483,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -453,7 +497,9 @@
                 "tags": [],
                 "label": "report",
                 "description": [],
-                "signature": ["ReportApiJSON"],
+                "signature": [
+                  "ReportApiJSON"
+                ],
                 "path": "packages/kbn-reporting/public/job.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -469,7 +515,9 @@
             "tags": [],
             "label": "isSearch",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -483,7 +531,9 @@
             "tags": [],
             "label": "getStatusMessage",
             "description": [],
-            "signature": ["() => JSX.Element | null"],
+            "signature": [
+              "() => JSX.Element | null"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -530,7 +580,9 @@
             "tags": [],
             "label": "prettyJobTypeName",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -552,8 +604,12 @@
             "type": "Function",
             "tags": [],
             "label": "getCreatedAtDate",
-            "description": ["\nReturns a user friendly version of the report job creation date"],
-            "signature": ["() => string"],
+            "description": [
+              "\nReturns a user friendly version of the report job creation date"
+            ],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -569,7 +625,9 @@
             "description": [
               "\nReturns a user friendly version of the user that created the report job"
             ],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -583,7 +641,9 @@
             "tags": [],
             "label": "getCreatedAtLabel",
             "description": [],
-            "signature": ["() => string | JSX.Element"],
+            "signature": [
+              "() => string | JSX.Element"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -597,7 +657,9 @@
             "tags": [],
             "label": "getError",
             "description": [],
-            "signature": ["() => string[] | undefined"],
+            "signature": [
+              "() => string[] | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -611,7 +673,9 @@
             "tags": [],
             "label": "getDeprecatedMessage",
             "description": [],
-            "signature": ["() => string | undefined"],
+            "signature": [
+              "() => string | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -625,7 +689,9 @@
             "tags": [],
             "label": "getWarnings",
             "description": [],
-            "signature": ["() => JSX.Element | undefined"],
+            "signature": [
+              "() => JSX.Element | undefined"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -639,7 +705,9 @@
             "tags": [],
             "label": "getPrettyStatusTimestamp",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/kbn-reporting/public/job.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -653,9 +721,13 @@
         "parentPluginId": "@kbn/reporting-public",
         "id": "def-public.ReportingAPIClient",
         "type": "Class",
-        "tags": ["implements"],
+        "tags": [
+          "implements"
+        ],
         "label": "ReportingAPIClient",
-        "description": ["\nClient class for interacting with Reporting APIs"],
+        "description": [
+          "\nClient class for interacting with Reporting APIs"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/reporting-public",
@@ -677,7 +749,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -731,7 +805,9 @@
                 "tags": [],
                 "label": "kibanaVersion",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -792,8 +868,12 @@
             "type": "Function",
             "tags": [],
             "label": "getReportURL",
-            "description": ["\nGet the internal URL"],
-            "signature": ["(jobId: string) => string"],
+            "description": [
+              "\nGet the internal URL"
+            ],
+            "signature": [
+              "(jobId: string) => string"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -805,7 +885,9 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -821,7 +903,9 @@
             "tags": [],
             "label": "downloadReport",
             "description": [],
-            "signature": ["(jobId: string) => void"],
+            "signature": [
+              "(jobId: string) => void"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -833,7 +917,9 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -849,7 +935,9 @@
             "tags": [],
             "label": "deleteReport",
             "description": [],
-            "signature": ["(jobId: string) => Promise<void>"],
+            "signature": [
+              "(jobId: string) => Promise<void>"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -861,7 +949,9 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -899,7 +989,9 @@
                 "tags": [],
                 "label": "page",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -912,7 +1004,9 @@
                 "tags": [],
                 "label": "jobIds",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -928,7 +1022,9 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "signature": ["() => Promise<number>"],
+            "signature": [
+              "() => Promise<number>"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -942,7 +1038,9 @@
             "tags": [],
             "label": "getError",
             "description": [],
-            "signature": ["(jobId: string) => Promise<string>"],
+            "signature": [
+              "(jobId: string) => Promise<string>"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -954,7 +1052,9 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -992,7 +1092,9 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1030,7 +1132,9 @@
                 "tags": [],
                 "label": "jobIds",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1048,7 +1152,11 @@
             "description": [
               "\nReturns a string for the public API endpoint used to automate the generation of reports\nThis string must be shown when the user selects the option to view/copy the POST URL"
             ],
-            "signature": ["(exportType: string, jobParams: ", "BaseParams", ") => string"],
+            "signature": [
+              "(exportType: string, jobParams: ",
+              "BaseParams",
+              ") => string"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1060,7 +1168,9 @@
                 "tags": [],
                 "label": "exportType",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1073,7 +1183,9 @@
                 "tags": [],
                 "label": "jobParams",
                 "description": [],
-                "signature": ["BaseParams"],
+                "signature": [
+                  "BaseParams"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1113,7 +1225,9 @@
                 "tags": [],
                 "label": "exportType",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1126,7 +1240,9 @@
                 "tags": [],
                 "label": "jobParams",
                 "description": [],
-                "signature": ["BaseParams"],
+                "signature": [
+                  "BaseParams"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1141,7 +1257,9 @@
             "type": "Function",
             "tags": [],
             "label": "createReportingJob",
-            "description": ["\nCalls the internal API to generate a report job on-demand"],
+            "description": [
+              "\nCalls the internal API to generate a report job on-demand"
+            ],
             "signature": [
               "(exportType: string, jobParams: ",
               "BaseParams",
@@ -1166,7 +1284,9 @@
                 "tags": [],
                 "label": "exportType",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1179,7 +1299,9 @@
                 "tags": [],
                 "label": "jobParams",
                 "description": [],
-                "signature": ["BaseParams"],
+                "signature": [
+                  "BaseParams"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1192,7 +1314,9 @@
             "parentPluginId": "@kbn/reporting-public",
             "id": "def-public.ReportingAPIClient.createImmediateReport",
             "type": "Function",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "createImmediateReport",
             "description": [],
             "signature": [
@@ -1229,7 +1353,9 @@
                 "tags": [],
                 "label": "baseParams",
                 "description": [],
-                "signature": ["BaseParams"],
+                "signature": [
+                  "BaseParams"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1245,7 +1371,10 @@
             "tags": [],
             "label": "getDecoratedJobParams",
             "description": [],
-            "signature": ["<T extends AppParams>(baseParams: T) => ", "BaseParams"],
+            "signature": [
+              "<T extends AppParams>(baseParams: T) => ",
+              "BaseParams"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1257,7 +1386,9 @@
                 "tags": [],
                 "label": "baseParams",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1273,7 +1404,9 @@
             "tags": [],
             "label": "getManagementLink",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1287,7 +1420,9 @@
             "tags": [],
             "label": "getDownloadLink",
             "description": [],
-            "signature": ["(jobId: string) => string"],
+            "signature": [
+              "(jobId: string) => string"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1299,7 +1434,9 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/public/reporting_api_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1315,7 +1452,9 @@
             "tags": [],
             "label": "getServerBasePath",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1329,7 +1468,11 @@
             "tags": [],
             "label": "verifyBrowser",
             "description": [],
-            "signature": ["() => Promise<", "DiagnoseResponse", ">"],
+            "signature": [
+              "() => Promise<",
+              "DiagnoseResponse",
+              ">"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1343,7 +1486,11 @@
             "tags": [],
             "label": "verifyScreenCapture",
             "description": [],
-            "signature": ["() => Promise<", "DiagnoseResponse", ">"],
+            "signature": [
+              "() => Promise<",
+              "DiagnoseResponse",
+              ">"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1357,7 +1504,9 @@
             "tags": [],
             "label": "migrateReportingIndicesIlmPolicy",
             "description": [],
-            "signature": ["() => Promise<unknown>"],
+            "signature": [
+              "() => Promise<unknown>"
+            ],
             "path": "packages/kbn-reporting/public/reporting_api_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1376,7 +1525,12 @@
         "tags": [],
         "label": "checkLicense",
         "description": [],
-        "signature": ["(checkResults: ", "LicenseCheck", ") => ", "LicenseCheckResults"],
+        "signature": [
+          "(checkResults: ",
+          "LicenseCheck",
+          ") => ",
+          "LicenseCheckResults"
+        ],
         "path": "packages/kbn-reporting/public/license_check.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1388,7 +1542,9 @@
             "tags": [],
             "label": "checkResults",
             "description": [],
-            "signature": ["LicenseCheck"],
+            "signature": [
+              "LicenseCheck"
+            ],
             "path": "packages/kbn-reporting/public/license_check.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1514,7 +1670,9 @@
         "tags": [],
         "label": "useInternalApiClient",
         "description": [],
-        "signature": ["() => ContextValue"],
+        "signature": [
+          "() => ContextValue"
+        ],
         "path": "packages/kbn-reporting/public/context.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1611,7 +1769,9 @@
             "tags": [],
             "label": "roles",
             "description": [],
-            "signature": ["{ enabled: boolean; }"],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
             "path": "packages/kbn-reporting/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1637,7 +1797,9 @@
             "tags": [],
             "label": "statefulSettings",
             "description": [],
-            "signature": ["{ enabled: boolean; }"],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
             "path": "packages/kbn-reporting/public/types.ts",
             "deprecated": false,
             "trackAdoption": false

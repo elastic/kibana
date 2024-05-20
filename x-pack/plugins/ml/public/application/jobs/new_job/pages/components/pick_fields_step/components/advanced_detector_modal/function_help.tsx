@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiButtonIcon,
-  EuiLink,
-  EuiPanel,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiText,
-} from '@elastic/eui';
+import React, { useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, memo } from 'react';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiBasicTable,
+  EuiPanel,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 export const FunctionHelpPopover = memo(() => {

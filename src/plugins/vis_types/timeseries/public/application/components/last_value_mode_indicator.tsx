@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import type { PanelData } from '../../../common/types';
+import { EuiFlexItem, EuiToolTip, EuiFlexGroup, EuiBadge } from '@elastic/eui';
 import { getUISettings } from '../../services';
-import { createIntervalBasedFormatter } from './lib/create_interval_based_formatter';
 import { convertIntervalIntoUnit, isAutoInterval, isGteInterval } from './lib/get_interval';
+import { createIntervalBasedFormatter } from './lib/create_interval_based_formatter';
+import type { PanelData } from '../../../common/types';
 
 interface LastValueModeIndicatorProps {
   seriesData?: PanelData['data'];

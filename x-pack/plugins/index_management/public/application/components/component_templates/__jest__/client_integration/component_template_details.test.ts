@@ -7,9 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ComponentTemplateDeserialized } from '../../shared_imports';
-import { pageHelpers, setupEnvironment } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { ComponentTemplateDetailsTestBed } from './helpers/component_template_details.helpers';
+import { ComponentTemplateDeserialized } from '../../shared_imports';
 
 const { setup } = pageHelpers.componentTemplateDetails;
 

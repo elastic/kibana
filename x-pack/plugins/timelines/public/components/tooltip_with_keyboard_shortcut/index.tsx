@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiScreenReaderOnly, EuiText } from '@elastic/eui';
+import { EuiText, EuiBadge, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 

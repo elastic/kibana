@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import type { IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
-import {
-  DataPublicPluginStart,
-  SearchRequest,
-  getSearchParamsFromRequest,
-} from '@kbn/data-plugin/public';
-import { search as dataPluginSearch } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { RequestResponder } from '@kbn/inspector-plugin/public';
-import type { IEsSearchResponse } from '@kbn/search-types';
 import { combineLatest, from } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs';
+import { map, tap, switchMap } from 'rxjs';
+import type { IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import {
+  getSearchParamsFromRequest,
+  SearchRequest,
+  DataPublicPluginStart,
+} from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { search as dataPluginSearch } from '@kbn/data-plugin/public';
+import type { RequestResponder } from '@kbn/inspector-plugin/public';
 import type { VegaInspectorAdapters } from '../vega_inspector';
 
 /** @internal **/

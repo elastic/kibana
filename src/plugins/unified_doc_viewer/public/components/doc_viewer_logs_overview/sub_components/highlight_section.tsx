@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import React, { PropsWithChildren, useReducer } from 'react';
 import {
   EuiAccordion,
-  EuiButtonEmpty,
   EuiFlexGrid,
   EuiHorizontalRule,
   EuiTitle,
   useGeneratedHtmlId,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { PropsWithChildren, useReducer } from 'react';
+import { css } from '@emotion/react';
 
 interface HighlightSectionProps {
   title: string;

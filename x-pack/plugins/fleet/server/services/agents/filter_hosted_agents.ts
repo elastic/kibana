@@ -7,8 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import type { Agent } from '../../types';
+import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 

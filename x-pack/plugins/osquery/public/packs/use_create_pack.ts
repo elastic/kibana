@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 
-import { PLUGIN_ID } from '../../common';
 import { API_VERSIONS } from '../../common/constants';
-import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
+import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 import type { PackItem, PackSavedObject } from './types';
 
 interface UseCreatePackProps {

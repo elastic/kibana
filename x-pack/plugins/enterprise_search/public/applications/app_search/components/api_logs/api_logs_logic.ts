@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import { flashAPIErrors, flashErrorToast } from '../../../shared/flash_messages';
@@ -13,8 +13,8 @@ import { HttpLogic } from '../../../shared/http';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import { EngineLogic } from '../engine';
 
-import { POLLING_DURATION, POLLING_ERROR_TEXT, POLLING_ERROR_TITLE } from './constants';
-import { ApiLog, ApiLogsData } from './types';
+import { POLLING_DURATION, POLLING_ERROR_TITLE, POLLING_ERROR_TEXT } from './constants';
+import { ApiLogsData, ApiLog } from './types';
 import { getDateString } from './utils';
 
 interface ApiLogsValues {

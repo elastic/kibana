@@ -8,11 +8,11 @@
 
 import { Observable, Subscriber } from 'rxjs';
 import { first } from 'rxjs';
-import { parseExpression } from '../ast';
-import { ExpressionFunctionDefinition } from '../expression_functions';
-import { createUnitTestExecutor } from '../test_helpers';
 import { Execution } from './execution';
+import { parseExpression } from '../ast';
+import { createUnitTestExecutor } from '../test_helpers';
 import { ExecutionContract } from './execution_contract';
+import { ExpressionFunctionDefinition } from '../expression_functions';
 
 const createExecution = (
   expression: string = 'foo bar=123',

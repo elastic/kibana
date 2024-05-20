@@ -5,46 +5,46 @@
  * 2.0.
  */
 
+import React, { useState, useMemo, Suspense } from 'react';
 import {
-  EuiBadge,
-  EuiBetaBadge,
-  EuiCheckboxGroup,
-  EuiComboBox,
   EuiDescribedFormGroup,
+  EuiFormRow,
+  EuiSpacer,
+  EuiComboBox,
+  EuiIconTip,
+  EuiCheckboxGroup,
+  EuiLink,
   EuiFieldNumber,
   EuiFieldText,
+  EuiSuperSelect,
+  EuiToolTip,
+  EuiRadioGroup,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiLink,
-  EuiRadioGroup,
-  EuiSpacer,
-  EuiSuperSelect,
+  EuiBetaBadge,
+  EuiBadge,
   EuiSwitch,
-  EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useMemo, Suspense } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
   dataTypes,
+  DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
 } from '../../../../../../../common/constants';
+import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import {
+  useStartServices,
   useConfig,
   useGetAgentPolicies,
   useLicense,
-  useStartServices,
   useUIExtension,
 } from '../../../../hooks';
-import type { AgentPolicy, NewAgentPolicy } from '../../../../types';
 
-import { UninstallCommandFlyout } from '../../../../../../components';
 import { AgentPolicyPackageBadge } from '../../../../components';
+import { UninstallCommandFlyout } from '../../../../../../components';
 
 import type { ValidationResults } from '../agent_policy_validation';
 
@@ -53,10 +53,10 @@ import { ExperimentalFeaturesService } from '../../../../services';
 import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
 import {
-  DEFAULT_SELECT_VALUE,
-  useDownloadSourcesOptions,
-  useFleetServerHostsOptions,
   useOutputOptions,
+  useDownloadSourcesOptions,
+  DEFAULT_SELECT_VALUE,
+  useFleetServerHostsOptions,
 } from './hooks';
 
 interface Props {

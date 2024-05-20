@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import type { CallOutMessage } from '../../../../common/components/callouts';
 import { CallOutPersistentSwitcher } from '../../../../common/components/callouts';
 import { useUserData } from '../../user_info';

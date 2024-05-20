@@ -8,13 +8,13 @@
 
 import { buildProcessorFunction } from '../build_processor_function';
 import {
-  dropLastBucketFn,
-  math,
   percentile,
   percentileRank,
-  seriesAgg,
   stdMetric,
   stdSibling,
+  math,
+  seriesAgg,
+  dropLastBucketFn,
 } from '../response_processors/table';
 
 import type {

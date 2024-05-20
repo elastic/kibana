@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { useContext } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,16 +16,15 @@ import {
   useEuiBackgroundColor,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import { cx } from '@emotion/css';
-import { BooleanRelation, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useContext } from 'react';
-import { getBooleanRelationType } from '../utils';
-import { FiltersBuilderContextType } from './context';
-import { delimiterCss } from './filter_group.styles';
-import { FilterItem } from './filter_item';
+import { BooleanRelation, type Filter } from '@kbn/es-query';
+import { cx } from '@emotion/css';
 import type { Path } from './types';
+import { getBooleanRelationType } from '../utils';
+import { FilterItem } from './filter_item';
+import { FiltersBuilderContextType } from './context';
 import { getPathInArray } from './utils';
+import { delimiterCss } from './filter_group.styles';
 
 export const strings = {
   getDelimiterLabel: (booleanRelation: BooleanRelation) =>

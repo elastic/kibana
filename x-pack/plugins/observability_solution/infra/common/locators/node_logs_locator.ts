@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import {
   INFRA_NODE_LOGS_LOCATOR_ID,
   NodeLogsLocatorParams,
   createNodeLogsQuery,
 } from '@kbn/logs-shared-plugin/common';
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { InfraLogsLocatorDependencies } from './logs_locator';
 
 export type InfraNodeLogsLocator = LocatorPublic<NodeLogsLocatorParams>;

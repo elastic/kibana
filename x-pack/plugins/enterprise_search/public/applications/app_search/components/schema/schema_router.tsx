@@ -9,13 +9,13 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { ENGINE_REINDEX_JOB_PATH } from '../../routes';
 import { EngineLogic } from '../engine';
 
 import { ReindexJob } from './reindex_job';
-import { MetaEngineSchema, Schema } from './views';
+import { Schema, MetaEngineSchema } from './views';
 
 export const SchemaRouter: React.FC = () => {
   const { isMetaEngine } = useValues(EngineLogic);

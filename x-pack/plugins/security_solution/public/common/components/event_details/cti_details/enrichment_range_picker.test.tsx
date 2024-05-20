@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../mock';
 import { EnrichmentRangePicker } from './enrichment_range_picker';

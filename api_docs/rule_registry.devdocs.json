@@ -30,7 +30,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -42,7 +44,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["ConstructorOptions"],
+                "signature": [
+                  "ConstructorOptions"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -58,7 +62,9 @@
             "tags": [],
             "label": "ensureAllAlertsAuthorizedRead",
             "description": [],
-            "signature": ["({ alerts }: { alerts: MgetAndAuditAlert[]; }) => Promise<void>"],
+            "signature": [
+              "({ alerts }: { alerts: MgetAndAuditAlert[]; }) => Promise<void>"
+            ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -81,7 +87,9 @@
                     "tags": [],
                     "label": "alerts",
                     "description": [],
-                    "signature": ["MgetAndAuditAlert[]"],
+                    "signature": [
+                      "MgetAndAuditAlert[]"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -112,7 +120,9 @@
                 "tags": [],
                 "label": "{ id, index }",
                 "description": [],
-                "signature": ["GetAlertParams"],
+                "signature": [
+                  "GetAlertParams"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -150,7 +160,9 @@
                 "tags": [],
                 "label": "{\n    gte,\n    lte,\n    featureIds,\n    filter,\n    fixedInterval = '1m',\n  }",
                 "description": [],
-                "signature": ["GetAlertSummaryParams"],
+                "signature": [
+                  "GetAlertSummaryParams"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -196,7 +208,10 @@
                 "tags": [],
                 "label": "{\n    id,\n    status,\n    _version,\n    index,\n  }",
                 "description": [],
-                "signature": ["UpdateOptions", "<Params>"],
+                "signature": [
+                  "UpdateOptions",
+                  "<Params>"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -240,7 +255,10 @@
                 "tags": [],
                 "label": "{\n    ids,\n    query,\n    index,\n    status,\n  }",
                 "description": [],
-                "signature": ["BulkUpdateOptions", "<Params>"],
+                "signature": [
+                  "BulkUpdateOptions",
+                  "<Params>"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -276,7 +294,9 @@
                 "tags": [],
                 "label": "{ alerts, caseIds }",
                 "description": [],
-                "signature": ["BulkUpdateCasesOptions"],
+                "signature": [
+                  "BulkUpdateCasesOptions"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -308,7 +328,9 @@
                 "tags": [],
                 "label": "{ caseId, alerts }",
                 "description": [],
-                "signature": ["RemoveCaseIdFromAlertsOptions"],
+                "signature": [
+                  "RemoveCaseIdFromAlertsOptions"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -324,7 +346,9 @@
             "tags": [],
             "label": "removeCaseIdsFromAllAlerts",
             "description": [],
-            "signature": ["({ caseIds }: { caseIds: string[]; }) => Promise<void>"],
+            "signature": [
+              "({ caseIds }: { caseIds: string[]; }) => Promise<void>"
+            ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -347,7 +371,9 @@
                     "tags": [],
                     "label": "caseIds",
                     "description": [],
-                    "signature": ["string[]"],
+                    "signature": [
+                      "string[]"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -411,7 +437,9 @@
                     "tags": [],
                     "label": "aggs",
                     "description": [],
-                    "signature": ["object | undefined"],
+                    "signature": [
+                      "object | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -423,7 +451,9 @@
                     "tags": [],
                     "label": "featureIds",
                     "description": [],
-                    "signature": ["string[] | undefined"],
+                    "signature": [
+                      "string[] | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -435,7 +465,9 @@
                     "tags": [],
                     "label": "index",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -447,7 +479,9 @@
                     "tags": [],
                     "label": "query",
                     "description": [],
-                    "signature": ["object | undefined"],
+                    "signature": [
+                      "object | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -459,7 +493,9 @@
                     "tags": [],
                     "label": "search_after",
                     "description": [],
-                    "signature": ["(string | number)[] | undefined"],
+                    "signature": [
+                      "(string | number)[] | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -471,7 +507,9 @@
                     "tags": [],
                     "label": "size",
                     "description": [],
-                    "signature": ["number | undefined"],
+                    "signature": [
+                      "number | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -483,7 +521,10 @@
                     "tags": [],
                     "label": "sort",
                     "description": [],
-                    "signature": ["SortOptions", "[] | undefined"],
+                    "signature": [
+                      "SortOptions",
+                      "[] | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -495,7 +536,9 @@
                     "tags": [],
                     "label": "track_total_hits",
                     "description": [],
-                    "signature": ["number | boolean | undefined"],
+                    "signature": [
+                      "number | boolean | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -507,7 +550,9 @@
                     "tags": [],
                     "label": "_source",
                     "description": [],
-                    "signature": ["string[] | undefined"],
+                    "signature": [
+                      "string[] | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -524,7 +569,9 @@
             "tags": [],
             "label": "getAuthorizedAlertsIndices",
             "description": [],
-            "signature": ["(featureIds: string[]) => Promise<string[] | undefined>"],
+            "signature": [
+              "(featureIds: string[]) => Promise<string[] | undefined>"
+            ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -536,7 +583,9 @@
                 "tags": [],
                 "label": "featureIds",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -552,7 +601,9 @@
             "tags": [],
             "label": "getFeatureIdsByRegistrationContexts",
             "description": [],
-            "signature": ["(RegistrationContexts: string[]) => Promise<string[]>"],
+            "signature": [
+              "(RegistrationContexts: string[]) => Promise<string[]>"
+            ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -564,7 +615,9 @@
                 "tags": [],
                 "label": "RegistrationContexts",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -621,7 +674,9 @@
                     "tags": [],
                     "label": "featureIds",
                     "description": [],
-                    "signature": ["string[]"],
+                    "signature": [
+                      "string[]"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -633,7 +688,9 @@
                     "tags": [],
                     "label": "indices",
                     "description": [],
-                    "signature": ["string[]"],
+                    "signature": [
+                      "string[]"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -645,7 +702,9 @@
                     "tags": [],
                     "label": "metaFields",
                     "description": [],
-                    "signature": ["string[]"],
+                    "signature": [
+                      "string[]"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -753,7 +812,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -811,7 +872,9 @@
             "tags": [],
             "label": "indexNameWithNamespace",
             "description": [],
-            "signature": ["(namespace: string) => string"],
+            "signature": [
+              "(namespace: string) => string"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -823,7 +886,9 @@
                 "tags": [],
                 "label": "namespace",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -839,7 +904,9 @@
             "tags": [],
             "label": "isWriteEnabled",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -853,7 +920,9 @@
             "tags": [],
             "label": "isUsingDataStreams",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -899,7 +968,9 @@
                     "tags": [],
                     "label": "namespace",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -949,7 +1020,9 @@
                     "tags": [],
                     "label": "namespace",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -997,7 +1070,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1009,7 +1084,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["ConstructorOptions"],
+                "signature": [
+                  "ConstructorOptions"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1025,7 +1102,9 @@
             "tags": [],
             "label": "getResourcePrefix",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1039,7 +1118,9 @@
             "tags": [],
             "label": "getResourceName",
             "description": [],
-            "signature": ["(relativeName: string) => string"],
+            "signature": [
+              "(relativeName: string) => string"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1051,7 +1132,9 @@
                 "tags": [],
                 "label": "relativeName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1067,7 +1150,9 @@
             "tags": [],
             "label": "isWriteEnabled",
             "description": [],
-            "signature": ["(registrationContext: string) => boolean"],
+            "signature": [
+              "(registrationContext: string) => boolean"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1079,7 +1164,9 @@
                 "tags": [],
                 "label": "registrationContext",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1095,7 +1182,9 @@
             "tags": [],
             "label": "isRegistrationContextDisabled",
             "description": [],
-            "signature": ["(registrationContext: string) => boolean"],
+            "signature": [
+              "(registrationContext: string) => boolean"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1107,7 +1196,9 @@
                 "tags": [],
                 "label": "registrationContext",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1125,7 +1216,9 @@
             "description": [
               "\nIf writer cache is enabled (the default), the writer will be cached\nafter being initialized. Disabling this is useful for tests, where we\nexpect to easily be able to clean up after ourselves between test cases."
             ],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1141,7 +1234,9 @@
             "description": [
               "\nInstalls common Elasticsearch resources used by all alerts-as-data indices."
             ],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1232,7 +1327,9 @@
                 "tags": [],
                 "label": "registrationContext",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1269,7 +1366,9 @@
             "tags": [],
             "label": "findFeatureIdsByRegistrationContexts",
             "description": [],
-            "signature": ["(registrationContexts: string[]) => string[]"],
+            "signature": [
+              "(registrationContexts: string[]) => string[]"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1281,7 +1380,9 @@
                 "tags": [],
                 "label": "registrationContexts",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1398,7 +1499,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1421,7 +1524,9 @@
                     "tags": [],
                     "label": "reason",
                     "description": [],
-                    "signature": ["\"config\" | \"error\""],
+                    "signature": [
+                      "\"config\" | \"error\""
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1433,7 +1538,9 @@
                     "tags": [],
                     "label": "registrationContext",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1445,7 +1552,9 @@
                     "tags": [],
                     "label": "message",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1486,7 +1595,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1498,7 +1609,9 @@
                 "tags": [],
                 "label": "resourceType",
                 "description": [],
-                "signature": ["\"namespace\" | \"index\""],
+                "signature": [
+                  "\"namespace\" | \"index\""
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1511,7 +1624,9 @@
                 "tags": [],
                 "label": "registrationContext",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1524,7 +1639,9 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": ["string | Error"],
+                "signature": [
+                  "string | Error"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2065,7 +2182,9 @@
             "tags": [],
             "label": "outcome",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2077,7 +2196,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2089,7 +2210,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["Error | undefined"],
+            "signature": [
+              "Error | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/alert_data_client/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2128,7 +2251,10 @@
             "tags": [],
             "label": "mappings",
             "description": [],
-            "signature": ["MappingTypeMapping", " | undefined"],
+            "signature": [
+              "MappingTypeMapping",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2140,7 +2266,10 @@
             "tags": [],
             "label": "settings",
             "description": [],
-            "signature": ["IndicesIndexSettings", " | undefined"],
+            "signature": [
+              "IndicesIndexSettings",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2152,7 +2281,10 @@
             "tags": [],
             "label": "_meta",
             "description": [],
-            "signature": ["Metadata", " | undefined"],
+            "signature": [
+              "Metadata",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2208,7 +2340,9 @@
             "type": "Enum",
             "tags": [],
             "label": "dataset",
-            "description": ["\nDataset suffix. Restricted to a few values."],
+            "description": [
+              "\nDataset suffix. Restricted to a few values."
+            ],
             "signature": [
               {
                 "pluginId": "ruleRegistry",
@@ -2231,7 +2365,9 @@
             "description": [
               "\nA list of references to external component templates. Those can be\nthe common ones shared between all solutions, or special ones\nshared between some of them.\n\nIMPORTANT: These names should be relative.\n- correct: 'my-mappings'\n- incorrect: '.alerts-my-mappings'\n"
             ],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2265,7 +2401,9 @@
             "type": "Object",
             "tags": [],
             "label": "indexTemplate",
-            "description": ["\nAdditional properties for the namespaced index template."],
+            "description": [
+              "\nAdditional properties for the namespaced index template."
+            ],
             "signature": [
               {
                 "pluginId": "ruleRegistry",
@@ -2312,7 +2450,9 @@
             "description": [
               "\nOptional secondary alias that will be applied to concrete indices in\naddition to the primary one '.alerts-{reg. context}.{dataset}-{namespace}'\n\nIMPORTANT: It should not include the namespace. It will be added\nautomatically.\n- correct: '.siem-signals'\n- incorrect: '.siem-signals-default'\n"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2326,7 +2466,9 @@
             "description": [
               "\nOptional prefix name that will be prepended to indices in addition to\nprimary dataset and context naming convention.\n\nCurrently used only for creating a preview index for the purpose of\npreviewing alerts from a rule. The documents are identical to alerts, but\nshouldn't exist on an alert index and shouldn't be queried together with\nreal alerts in any way, because the rule that created them doesn't exist"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2354,7 +2496,10 @@
             "tags": [],
             "label": "_meta",
             "description": [],
-            "signature": ["Metadata", " | undefined"],
+            "signature": [
+              "Metadata",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2391,7 +2536,9 @@
             "tags": [],
             "label": "indexNameWithNamespace",
             "description": [],
-            "signature": ["(namespace: string) => string"],
+            "signature": [
+              "(namespace: string) => string"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2403,7 +2550,9 @@
                 "tags": [],
                 "label": "namespace",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2430,7 +2579,9 @@
             "tags": [],
             "label": "isWriteEnabled",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2444,7 +2595,9 @@
             "tags": [],
             "label": "isUsingDataStreams",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2490,7 +2643,9 @@
                     "tags": [],
                     "label": "namespace",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2540,7 +2695,9 @@
                     "tags": [],
                     "label": "namespace",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2603,7 +2760,9 @@
                 "tags": [],
                 "label": "request",
                 "description": [],
-                "signature": ["TSearchRequest"],
+                "signature": [
+                  "TSearchRequest"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2641,7 +2800,9 @@
                 "tags": [],
                 "label": "target",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2675,7 +2836,9 @@
             "description": [
               "\nReturns a prefix used in the naming scheme of index aliases, templates\nand other Elasticsearch resources that this service creates\nfor alerts-as-data indices."
             ],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2688,8 +2851,12 @@
             "type": "Function",
             "tags": [],
             "label": "getResourceName",
-            "description": ["\nPrepends a relative resource name with the resource prefix."],
-            "signature": ["(relativeName: string) => string"],
+            "description": [
+              "\nPrepends a relative resource name with the resource prefix."
+            ],
+            "signature": [
+              "(relativeName: string) => string"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2701,14 +2868,18 @@
                 "tags": [],
                 "label": "relativeName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["Full name of the resource."]
+            "returnComment": [
+              "Full name of the resource."
+            ]
           },
           {
             "parentPluginId": "ruleRegistry",
@@ -2719,7 +2890,9 @@
             "description": [
               "\nIf write is enabled for the specified registration context, everything works as usual.\nIf it's disabled, writing to the registration context's alerts-as-data indices will be disabled,\nand also Elasticsearch resources associated with the indices will not be\ninstalled."
             ],
-            "signature": ["(registrationContext: string) => boolean"],
+            "signature": [
+              "(registrationContext: string) => boolean"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2731,7 +2904,9 @@
                 "tags": [],
                 "label": "registrationContext",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2749,7 +2924,9 @@
             "description": [
               "\nIf writer cache is enabled (the default), the writer will be cached\nafter being initialized. Disabling this is useful for tests, where we\nexpect to easily be able to clean up after ourselves between test cases."
             ],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2765,7 +2942,9 @@
             "description": [
               "\nInstalls common Elasticsearch resources used by all alerts-as-data indices."
             ],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2809,7 +2988,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "indexOptions",
-                "description": ["Index parameters: names and resources."],
+                "description": [
+                  "Index parameters: names and resources."
+                ],
                 "signature": [
                   {
                     "pluginId": "ruleRegistry",
@@ -2825,7 +3006,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["Client for reading and writing data to this index."]
+            "returnComment": [
+              "Client for reading and writing data to this index."
+            ]
           },
           {
             "parentPluginId": "ruleRegistry",
@@ -2860,7 +3043,9 @@
                 "tags": [],
                 "label": "registrationContext",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2978,7 +3163,9 @@
             "description": [
               "\nLooks up Kibana \"feature\" associated with the given registration context.\nNote: features are used in RBAC."
             ],
-            "signature": ["(registrationContexts: string[]) => string[]"],
+            "signature": [
+              "(registrationContexts: string[]) => string[]"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2990,7 +3177,9 @@
                 "tags": [],
                 "label": "registrationContexts",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3040,7 +3229,10 @@
                 "tags": [],
                 "label": "request",
                 "description": [],
-                "signature": ["BulkRequest", "<unknown, unknown>"],
+                "signature": [
+                  "BulkRequest",
+                  "<unknown, unknown>"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3103,7 +3295,9 @@
                 "tags": [],
                 "label": "alert",
                 "description": [],
-                "signature": ["{ id: string; fields: ExplicitAlertFields; }"],
+                "signature": [
+                  "{ id: string; fields: ExplicitAlertFields; }"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3117,7 +3311,9 @@
             "tags": [],
             "label": "getAlertStartedDate",
             "description": [],
-            "signature": ["(alertInstanceId: string) => string | null"],
+            "signature": [
+              "(alertInstanceId: string) => string | null"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3129,7 +3325,9 @@
                 "tags": [],
                 "label": "alertInstanceId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3145,7 +3343,9 @@
             "tags": [],
             "label": "getAlertUuid",
             "description": [],
-            "signature": ["(alertInstanceId: string) => string"],
+            "signature": [
+              "(alertInstanceId: string) => string"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3157,7 +3357,9 @@
                 "tags": [],
                 "label": "alertInstanceId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3195,7 +3397,9 @@
                 "tags": [],
                 "label": "alertUuid",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3253,7 +3457,9 @@
             "tags": [],
             "label": "errors",
             "description": [],
-            "signature": ["{ [x: string]: { count: number; statusCode: number; }; }"],
+            "signature": [
+              "{ [x: string]: { count: number; statusCode: number; }; }"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3313,7 +3519,9 @@
                 "tags": [],
                 "label": "alerts",
                 "description": [],
-                "signature": ["{ _id: string; _source: T; }[]"],
+                "signature": [
+                  "{ _id: string; _source: T; }[]"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3325,7 +3533,9 @@
                 "tags": [],
                 "label": "refresh",
                 "description": [],
-                "signature": ["boolean | \"wait_for\""],
+                "signature": [
+                  "boolean | \"wait_for\""
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3337,7 +3547,9 @@
                 "tags": [],
                 "label": "maxAlerts",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3363,7 +3575,9 @@
                 "tags": [],
                 "label": "currentTimeOverride",
                 "description": [],
-                "signature": ["Date | undefined"],
+                "signature": [
+                  "Date | undefined"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3402,7 +3616,9 @@
                 "tags": [],
                 "label": "alerts",
                 "description": [],
-                "signature": ["{ _id: string; _source: T; }[]"],
+                "signature": [
+                  "{ _id: string; _source: T; }[]"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3439,7 +3655,9 @@
                 "tags": [],
                 "label": "currentTimeOverride",
                 "description": [],
-                "signature": ["Date | undefined"],
+                "signature": [
+                  "Date | undefined"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3451,7 +3669,9 @@
                 "tags": [],
                 "label": "isRuleExecutionOnly",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3463,7 +3683,9 @@
                 "tags": [],
                 "label": "maxAlerts",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3529,7 +3751,9 @@
             "tags": [],
             "label": "indexInfo",
             "description": [],
-            "signature": ["IndexInfo"],
+            "signature": [
+              "IndexInfo"
+            ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3688,7 +3912,9 @@
             "tags": [],
             "label": "suppressedAlerts",
             "description": [],
-            "signature": ["{ _id: string; _source: T; }[]"],
+            "signature": [
+              "{ _id: string; _source: T; }[]"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3856,7 +4082,13 @@
         "description": [
           "\nWhen initializing an index, a plugin/solution can provide a custom\nILM policy that will be applied to concrete indices of this index.\n\nNote that policy will be shared between all namespaces of the index."
         ],
-        "signature": ["{ phases: ", "IlmPhases", "; _meta?: ", "Metadata", " | undefined; }"],
+        "signature": [
+          "{ phases: ",
+          "IlmPhases",
+          "; _meta?: ",
+          "Metadata",
+          " | undefined; }"
+        ],
         "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3869,7 +4101,9 @@
         "tags": [],
         "label": "INDEX_PREFIX",
         "description": [],
-        "signature": ["\".alerts\""],
+        "signature": [
+          "\".alerts\""
+        ],
         "path": "x-pack/plugins/rule_registry/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3905,7 +4139,9 @@
             "tags": [],
             "label": "alert",
             "description": [],
-            "signature": ["{ id: string; fields: ExplicitAlertFields; }"],
+            "signature": [
+              "{ id: string; fields: ExplicitAlertFields; }"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3994,7 +4230,9 @@
         "tags": [],
         "label": "Mappings",
         "description": [],
-        "signature": ["MappingTypeMapping"],
+        "signature": [
+          "MappingTypeMapping"
+        ],
         "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4007,7 +4245,9 @@
         "tags": [],
         "label": "Meta",
         "description": [],
-        "signature": ["{ [x: string]: any; }"],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
         "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4043,7 +4283,9 @@
             "tags": [],
             "label": "alerts",
             "description": [],
-            "signature": ["{ _id: string; _source: T; }[]"],
+            "signature": [
+              "{ _id: string; _source: T; }[]"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4055,7 +4297,9 @@
             "tags": [],
             "label": "refresh",
             "description": [],
-            "signature": ["boolean | \"wait_for\""],
+            "signature": [
+              "boolean | \"wait_for\""
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4067,7 +4311,9 @@
             "tags": [],
             "label": "maxAlerts",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4093,7 +4339,9 @@
             "tags": [],
             "label": "currentTimeOverride",
             "description": [],
-            "signature": ["Date | undefined"],
+            "signature": [
+              "Date | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4176,7 +4424,9 @@
         "tags": [],
         "label": "RuleRegistryPluginConfig",
         "description": [],
-        "signature": ["any"],
+        "signature": [
+          "any"
+        ],
         "path": "x-pack/plugins/rule_registry/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4189,7 +4439,10 @@
         "tags": [],
         "label": "Settings",
         "description": [],
-        "signature": ["IndicesIndexSettingsKeys", " & { [property: string]: any; }"],
+        "signature": [
+          "IndicesIndexSettingsKeys",
+          " & { [property: string]: any; }"
+        ],
         "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4227,7 +4480,9 @@
             "tags": [],
             "label": "alerts",
             "description": [],
-            "signature": ["{ _id: string; _source: T; }[]"],
+            "signature": [
+              "{ _id: string; _source: T; }[]"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4264,7 +4519,9 @@
             "tags": [],
             "label": "currentTimeOverride",
             "description": [],
-            "signature": ["Date | undefined"],
+            "signature": [
+              "Date | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4276,7 +4533,9 @@
             "tags": [],
             "label": "isRuleExecutionOnly",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4288,7 +4547,9 @@
             "tags": [],
             "label": "maxAlerts",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4303,7 +4564,9 @@
         "tags": [],
         "label": "Version",
         "description": [],
-        "signature": ["number"],
+        "signature": [
+          "number"
+        ],
         "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4686,7 +4949,9 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4699,7 +4964,9 @@
             "tags": [],
             "label": "partial",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4751,7 +5018,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4763,7 +5032,9 @@
             "tags": [],
             "label": "example",
             "description": [],
-            "signature": ["string | number | null | undefined"],
+            "signature": [
+              "string | number | null | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4797,7 +5068,9 @@
             "tags": [],
             "label": "format",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4809,7 +5082,9 @@
             "tags": [],
             "label": "indexes",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/rule_registry/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4977,7 +5252,10 @@
             "tags": [],
             "label": "inspect",
             "description": [],
-            "signature": ["RuleRegistryInspect", " | undefined"],
+            "signature": [
+              "RuleRegistryInspect",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4995,7 +5273,9 @@
         "tags": [],
         "label": "BASE_RAC_ALERTS_API_PATH",
         "description": [],
-        "signature": ["\"/internal/rac/alerts\""],
+        "signature": [
+          "\"/internal/rac/alerts\""
+        ],
         "path": "x-pack/plugins/rule_registry/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

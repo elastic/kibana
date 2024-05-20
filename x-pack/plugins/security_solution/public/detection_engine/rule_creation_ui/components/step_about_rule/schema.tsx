@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { isUrlInvalid } from '../../../../common/utils/validators';
+import type { FormSchema, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
+import { FIELD_TYPES, fieldValidators, VALIDATION_TYPES } from '../../../../shared_imports';
 import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
-import { FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../../../shared_imports';
 import { OptionalFieldLabel } from '../optional_field_label';
+import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;

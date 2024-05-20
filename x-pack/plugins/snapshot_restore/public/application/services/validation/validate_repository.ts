@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { REPOSITORY_TYPES } from '../../../../common/constants';
+import { textService } from '../text';
 import {
-  EmptyRepository,
-  FSRepository,
-  GCSRepository,
-  HDFSRepository,
-  ReadonlyRepository,
   Repository,
   RepositoryType,
+  FSRepository,
+  ReadonlyRepository,
   S3Repository,
+  GCSRepository,
+  HDFSRepository,
+  EmptyRepository,
 } from '../../../../common/types';
-import { textService } from '../text';
+import { REPOSITORY_TYPES } from '../../../../common/constants';
 
 export interface RepositoryValidation {
   isValid: boolean;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { createEsContext } from './context';
 import { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '../lib/ready_signal';
 import { GetDataStreamsResponse } from './cluster_client_adapter.test';
-import { createEsContext } from './context';
 
 jest.mock('../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');

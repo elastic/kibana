@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 
 import type {
-  DeleteDownloadSourceResponse,
-  GetDownloadSourceResponse,
+  GetOneDownloadSourcesRequestSchema,
+  PutDownloadSourcesRequestSchema,
+  PostDownloadSourcesRequestSchema,
+  DeleteDownloadSourcesRequestSchema,
+} from '../../types';
+import type {
   GetOneDownloadSourceResponse,
+  DeleteDownloadSourceResponse,
   PutDownloadSourceResponse,
+  GetDownloadSourceResponse,
 } from '../../../common/types';
+import { downloadSourceService } from '../../services/download_source';
 import { defaultFleetErrorHandler } from '../../errors';
 import { agentPolicyService } from '../../services';
-import { downloadSourceService } from '../../services/download_source';
-import type {
-  DeleteDownloadSourcesRequestSchema,
-  GetOneDownloadSourcesRequestSchema,
-  PostDownloadSourcesRequestSchema,
-  PutDownloadSourcesRequestSchema,
-} from '../../types';
 
 export const getDownloadSourcesHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;

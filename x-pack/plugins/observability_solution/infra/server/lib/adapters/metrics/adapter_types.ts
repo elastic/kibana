@@ -7,11 +7,11 @@
 
 import { KibanaRequest } from '@kbn/core/server';
 import { InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
-import {
-  NodeDetailsMetricData,
-  NodeDetailsRequest,
-} from '../../../../common/http_api/node_details_api';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
+import {
+  NodeDetailsRequest,
+  NodeDetailsMetricData,
+} from '../../../../common/http_api/node_details_api';
 import { InfraSourceConfiguration } from '../../sources';
 
 export interface InfraMetricsRequestOptions

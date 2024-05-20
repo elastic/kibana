@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { Component } from 'react';
 import { EuiFormRow, EuiPanel } from '@elastic/eui';
 import { DataView } from '@kbn/data-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { SCALING_TYPES } from '../../../../common/constants';
 import { ESSearchSourceDescriptor } from '../../../../common/descriptor_types';
-import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
+import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
+import { SCALING_TYPES } from '../../../../common/constants';
 import { getGeoFields } from '../../../index_pattern_util';
 
 interface Props {

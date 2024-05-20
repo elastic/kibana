@@ -1,7 +1,3 @@
-import { EuiButton, EuiButtonGroup, EuiEmptyPrompt, EuiHorizontalRule } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { groupBy } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,10 +5,14 @@ import { groupBy } from 'lodash';
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
+import { EuiEmptyPrompt, EuiButtonGroup, EuiHorizontalRule, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { groupBy } from 'lodash';
 import type { ProcessEvent } from '../../../common';
-import { DetailPanelAlertGroupItem } from '../detail_panel_alert_group_item';
-import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
 import { useStyles } from './styles';
+import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
+import { DetailPanelAlertGroupItem } from '../detail_panel_alert_group_item';
 
 export const ALERTS_TAB_EMPTY_STATE_TEST_ID = 'sessionView:detailPanelAlertsEmptyState';
 export const INVESTIGATED_ALERT_TEST_ID = 'sessionView:detailPanelInvestigatedAlert';

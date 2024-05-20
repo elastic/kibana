@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { CodeEditorProps } from './code_editor';
+import { render, fireEvent } from '@testing-library/react';
 import { FieldInput, FieldInputProps } from './field_input';
+import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { TEST_SUBJ_PREFIX_FIELD } from './input';
 import { wrap } from './mocks';
+import { CodeEditorProps } from './code_editor';
 
 const name = 'test';
 

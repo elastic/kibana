@@ -6,14 +6,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import { ENDPOINT_ACTIONS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX } from '../constants';
-import { EndpointActionGenerator } from '../data_generators/endpoint_action_generator';
-import { FleetActionGenerator } from '../data_generators/fleet_action_generator';
-import { EndpointError } from '../errors';
+import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ResponseActionsApiCommandNames } from '../service/response_actions/constants';
+import { EndpointError } from '../errors';
+import { usageTracker } from './usage_tracker';
 import type {
   EndpointAction,
   EndpointActionResponse,
@@ -21,8 +19,10 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../types';
-import { usageTracker } from './usage_tracker';
+import { ENDPOINT_ACTION_RESPONSES_INDEX, ENDPOINT_ACTIONS_INDEX } from '../constants';
+import { FleetActionGenerator } from '../data_generators/fleet_action_generator';
 import { wrapErrorAndRejectPromise } from './utils';
+import { EndpointActionGenerator } from '../data_generators/endpoint_action_generator';
 
 const fleetActionGenerator = new FleetActionGenerator();
 const endpointActionGenerator = new EndpointActionGenerator();

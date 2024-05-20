@@ -6,44 +6,44 @@
  * Side Public License, v 1.
  */
 
+import { snakeCase } from 'lodash';
+import React, { FC, useState, useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import {
-  FeatureCatalogueCategory,
-  FeatureCatalogueEntry,
-  FeatureCatalogueSolution,
-} from '@kbn/home-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  OverviewPageFooter,
-  overviewPageActions,
   useKibana,
+  overviewPageActions,
+  OverviewPageFooter,
 } from '@kbn/kibana-react-plugin/public';
-import { FetchResult } from '@kbn/newsfeed-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import {
   RedirectAppLinksContainer as RedirectAppLinks,
   RedirectAppLinksKibanaProvider,
 } from '@kbn/shared-ux-link-redirect-app';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { FetchResult } from '@kbn/newsfeed-plugin/public';
+import {
+  FeatureCatalogueEntry,
+  FeatureCatalogueSolution,
+  FeatureCatalogueCategory,
+} from '@kbn/home-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { snakeCase } from 'lodash';
-import React, { FC, useState, useEffect } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
-import { METRIC_TYPE, trackUiMetric } from '../../lib/ui_metric';
 import { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
 import { ManageData } from '../manage_data';
 import { NewsFeed } from '../news_feed';
+import { METRIC_TYPE, trackUiMetric } from '../../lib/ui_metric';
 
 const sortByOrder = (featureA: FeatureCatalogueEntry, featureB: FeatureCatalogueEntry) =>
   (featureA.order || Infinity) - (featureB.order || Infinity);

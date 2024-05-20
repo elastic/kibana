@@ -6,10 +6,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { DropSpecialLocations } from '../constants';
-import { ProcessorInternal, ProcessorSelector } from '../types';
-import { checkIfSamePath, getValue } from '../utils';
 import { State } from './processors_reducer';
+import { ProcessorInternal, ProcessorSelector } from '../types';
+import { DropSpecialLocations } from '../constants';
+import { checkIfSamePath, getValue } from '../utils';
 
 import { ON_FAILURE_STATE_SCOPE } from './constants';
 

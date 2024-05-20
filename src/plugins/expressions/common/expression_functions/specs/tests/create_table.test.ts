@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createTable } from '../create_table';
 import { functionWrapper } from './utils';
+import { createTable } from '../create_table';
 
 describe('clear', () => {
   const fn = functionWrapper(createTable);

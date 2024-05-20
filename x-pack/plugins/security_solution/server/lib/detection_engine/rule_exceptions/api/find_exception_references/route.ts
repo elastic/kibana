@@ -6,12 +6,12 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../routes/utils';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import type {
   FindExceptionReferencesOnRuleSchemaDecoded,

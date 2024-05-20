@@ -6,17 +6,17 @@
  */
 
 import { Readable } from 'stream';
-import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { createRulesAndExceptionsStreamFromNdJson } from './create_rules_stream_from_ndjson';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 
-import type { InvestigationFields } from '../../../../../../common/api/detection_engine';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import {
   getOutputDetailsSample,
   getSampleDetailsAsNdjson,
 } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import type { RuleExceptionsPromiseFromStreams } from './import_rules_utils';
+import type { InvestigationFields } from '../../../../../../common/api/detection_engine';
 
 export const getOutputSample = (): Partial<RuleToImport> => ({
   rule_id: 'rule-1',

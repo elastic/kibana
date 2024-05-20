@@ -12,7 +12,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import { PRECONFIGURATION_API_ROUTES } from '../../constants';
 import { PostResetOnePreconfiguredAgentPoliciesSchema } from '../../types';
 
-import { resetOnePreconfigurationHandler, resetPreconfigurationHandler } from './handler';
+import { resetPreconfigurationHandler, resetOnePreconfigurationHandler } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned

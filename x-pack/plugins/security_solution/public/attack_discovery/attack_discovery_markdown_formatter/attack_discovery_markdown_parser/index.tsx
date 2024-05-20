@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RemarkTokenizer } from '@elastic/eui';
 import type { Plugin } from 'unified';
+import type { RemarkTokenizer } from '@elastic/eui';
 
-import type { ParsedField } from '../types';
 import { getIconFromFieldName } from './helpers';
+import type { ParsedField } from '../types';
 
 export const AttackDiscoveryMarkdownParser: Plugin = function () {
   // NOTE: the use of `this.Parse` and the other idioms below required by the Remark `Plugin` should NOT be replicated outside this file

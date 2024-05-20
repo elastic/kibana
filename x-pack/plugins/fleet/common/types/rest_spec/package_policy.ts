@@ -6,12 +6,12 @@
  */
 
 import type {
-  DryRunPackagePolicy,
-  FullAgentPolicyInput,
-  NewPackagePolicy,
   PackagePolicy,
-  PackagePolicyPackage,
+  NewPackagePolicy,
   UpdatePackagePolicy,
+  DryRunPackagePolicy,
+  PackagePolicyPackage,
+  FullAgentPolicyInput,
 } from '../models';
 
 import type { BulkGetResult, ListResult, ListWithKuery } from './common';

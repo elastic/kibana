@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiText, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 
 interface Row {
   name: string;

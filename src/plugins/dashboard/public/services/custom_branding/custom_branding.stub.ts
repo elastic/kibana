@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DashboardCustomBrandingService } from './types';
 
 type CustomBrandingServiceFactory = PluginServiceFactory<DashboardCustomBrandingService>;

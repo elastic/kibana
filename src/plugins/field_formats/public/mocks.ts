@@ -7,10 +7,10 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
-import type { FieldFormatsSetup, FieldFormatsStart } from '.';
-import { FORMATS_UI_SETTINGS, FieldFormatsRegistry } from '../common';
-import { fieldFormatsMock } from '../common/mocks';
 import { baseFormattersPublic } from './lib/constants';
+import { FieldFormatsRegistry, FORMATS_UI_SETTINGS } from '../common';
+import type { FieldFormatsSetup, FieldFormatsStart } from '.';
+import { fieldFormatsMock } from '../common/mocks';
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
   const fieldFormatsRegistry = new FieldFormatsRegistry();

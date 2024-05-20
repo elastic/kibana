@@ -8,27 +8,27 @@
 
 import './timeseries_visualization.scss';
 
-import { GeometryValue, XYChartSeriesIdentifier } from '@elastic/charts';
+import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import React, { Suspense, useCallback, useEffect, useState } from 'react';
-import { AUTO_INTERVAL } from '../../../common/constants';
-import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../common/enums';
-import { fetchIndexPattern } from '../../../common/index_patterns_utils';
-import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';
-import { isVisTableData } from '../../../common/vis_data_utils';
-import { getCharts, getDataViewsStart } from '../../services';
-import { TimeseriesVisParams } from '../../types';
-import { X_ACCESSOR_INDEX } from '../visualizations/constants';
-import { LastValueModeIndicator } from './last_value_mode_indicator';
-import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
-import { getClickFilterData } from './lib/get_click_filter_data';
-import { getInterval } from './lib/get_interval';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
+import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';
+import { isVisTableData } from '../../../common/vis_data_utils';
+import { TimeseriesVisParams } from '../../types';
+import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
+import { getClickFilterData } from './lib/get_click_filter_data';
+import { X_ACCESSOR_INDEX } from '../visualizations/constants';
+import { LastValueModeIndicator } from './last_value_mode_indicator';
+import { getInterval } from './lib/get_interval';
+import { AUTO_INTERVAL } from '../../../common/constants';
+import { TIME_RANGE_DATA_MODES, PANEL_TYPES } from '../../../common/enums';
+import { fetchIndexPattern } from '../../../common/index_patterns_utils';
+import { getCharts, getDataViewsStart } from '../../services';
 
 interface TimeseriesVisualizationProps {
   getConfig: IUiSettingsClient['get'];

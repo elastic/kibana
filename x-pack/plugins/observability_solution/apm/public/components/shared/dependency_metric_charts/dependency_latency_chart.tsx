@@ -1,4 +1,3 @@
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,18 +5,19 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { getDurationFormatter } from '../../../../common/utils/formatters';
-import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
-import { useSearchServiceDestinationMetrics } from '../../../context/time_range_metadata/use_search_service_destination_metrics';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { i18n } from '@kbn/i18n';
 import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
+import { isTimeComparison } from '../time_comparison/get_comparison_options';
+import { getDurationFormatter } from '../../../../common/utils/formatters';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
+import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { TimeseriesChartWithContext } from '../charts/timeseries_chart_with_context';
 import { getMaxY, getResponseTimeTickFormatter } from '../charts/transaction_charts/helper';
+import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { getComparisonChartTheme } from '../time_comparison/get_comparison_chart_theme';
-import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { DependencyMetricChartsRouteParams } from './dependency_metric_charts_route_params';
+import { useSearchServiceDestinationMetrics } from '../../../context/time_range_metadata/use_search_service_destination_metrics';
 
 export function DependencyLatencyChart({
   height,

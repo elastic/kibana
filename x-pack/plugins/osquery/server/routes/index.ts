@@ -7,14 +7,14 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
-import { initAssetRoutes } from './asset';
-import { initFleetWrapperRoutes } from './fleet_wrapper';
 import { initLiveQueryRoutes } from './live_query';
-import { initPackRoutes } from './pack';
-import { initPrivilegesCheckRoutes } from './privileges_check';
+import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { initSavedQueryRoutes } from './saved_query';
 import { initStatusRoutes } from './status';
+import { initFleetWrapperRoutes } from './fleet_wrapper';
+import { initPackRoutes } from './pack';
+import { initPrivilegesCheckRoutes } from './privileges_check';
+import { initAssetRoutes } from './asset';
 
 export const defineRoutes = (
   router: IRouter<DataRequestHandlerContext>,

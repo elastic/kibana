@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { IEsSearchResponse } from '@kbn/search-types';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { getOr } from 'lodash/fp';
+import type { RiskSeverity } from '../../../../../../common/search_strategy/security_solution/risk_score/all';
+import type { SecuritySolutionFactory } from '../../types';
 import type { RelatedEntitiesQueries } from '../../../../../../common/search_strategy/security_solution/related_entities';
 import type {
   HostsRelatedUsersStrategyResponse,
-  RelatedUser,
   RelatedUserBucket,
+  RelatedUser,
 } from '../../../../../../common/search_strategy/security_solution/related_entities/related_users';
-import type { RiskSeverity } from '../../../../../../common/search_strategy/security_solution/risk_score/all';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import type { SecuritySolutionFactory } from '../../types';
-import { getUserRiskData } from '../../users/all';
 import { buildRelatedUsersQuery } from './query.related_users.dsl';
+import { getUserRiskData } from '../../users/all';
 
 export const hostsRelatedUsers: SecuritySolutionFactory<RelatedEntitiesQueries.relatedUsers> = {
   buildDsl: (options) => buildRelatedUsersQuery(options),

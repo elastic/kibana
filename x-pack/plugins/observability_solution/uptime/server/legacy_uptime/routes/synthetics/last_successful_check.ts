@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { API_URLS } from '../../../../common/constants';
-import { Ping } from '../../../../common/runtime_types/ping/ping';
-import { isFullScreenshot, isRefResult } from '../../../../common/runtime_types/ping/synthetics';
-import { UMServerLibs } from '../../lib/lib';
 import { getJourneyScreenshot } from '../../lib/requests/get_journey_screenshot';
-import { getLastSuccessfulCheck } from '../../lib/requests/get_last_successful_check';
+import { isRefResult, isFullScreenshot } from '../../../../common/runtime_types/ping/synthetics';
+import { Ping } from '../../../../common/runtime_types/ping/ping';
+import { UMServerLibs } from '../../lib/lib';
 import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
+import { API_URLS } from '../../../../common/constants';
+import { getLastSuccessfulCheck } from '../../lib/requests/get_last_successful_check';
 
 export const createLastSuccessfulCheckRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',

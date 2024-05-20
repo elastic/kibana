@@ -8,22 +8,22 @@
 
 import React, { memo, useState, useCallback } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
-  EuiCode,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
-  EuiText,
-  EuiToolTip,
   useEuiTheme,
+  EuiLink,
+  EuiCode,
+  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 import type { MonacoMessage } from './helpers';
-import { QueryHistory, QueryHistoryAction } from './query_history';
+import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
+import { QueryHistoryAction, QueryHistory } from './query_history';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -214,18 +214,18 @@ export const EditorFooter = memo(function EditorFooter({
                           {isSpaceReduced
                             ? '@timestamp'
                             : detectTimestamp
-                              ? i18n.translate(
-                                  'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
-                                  {
-                                    defaultMessage: '@timestamp found',
-                                  }
-                                )
-                              : i18n.translate(
-                                  'textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected',
-                                  {
-                                    defaultMessage: '@timestamp not found',
-                                  }
-                                )}
+                            ? i18n.translate(
+                                'textBasedEditor.query.textBasedLanguagesEditor.timestampDetected',
+                                {
+                                  defaultMessage: '@timestamp found',
+                                }
+                              )
+                            : i18n.translate(
+                                'textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected',
+                                {
+                                  defaultMessage: '@timestamp not found',
+                                }
+                              )}
                         </p>
                       </EuiText>
                     </EuiFlexItem>
@@ -337,8 +337,8 @@ export const EditorFooter = memo(function EditorFooter({
                           allowQueryCancellation && isLoading
                             ? 'cross'
                             : queryHasChanged
-                              ? 'play'
-                              : 'refresh'
+                            ? 'play'
+                            : 'refresh'
                         }
                         size="s"
                         isLoading={isLoading && !allowQueryCancellation}

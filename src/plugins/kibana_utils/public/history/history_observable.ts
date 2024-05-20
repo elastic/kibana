@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import deepEqual from 'fast-deep-equal';
 import { Action, History, Location } from 'history';
-import { ParsedQuery } from 'query-string';
 import { Observable } from 'rxjs';
+import { ParsedQuery } from 'query-string';
+import deepEqual from 'fast-deep-equal';
 import { map } from 'rxjs';
-import { distinctUntilChangedWithInitialValue } from '../../common';
 import { getQueryParams } from './get_query_params';
+import { distinctUntilChangedWithInitialValue } from '../../common';
 
 /**
  * Convert history.listen into an observable

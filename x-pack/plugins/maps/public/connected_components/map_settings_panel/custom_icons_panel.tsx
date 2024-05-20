@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { Component, Fragment } from 'react';
 import {
   EuiButtonEmpty,
   EuiListGroup,
@@ -17,12 +18,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Component, Fragment } from 'react';
 import { DEFAULT_CUSTOM_ICON_CUTOFF, DEFAULT_CUSTOM_ICON_RADIUS } from '../../../common/constants';
-import { CustomIcon } from '../../../common/descriptor_types';
+import { getIsDarkMode } from '../../kibana_services';
 import { SymbolIcon } from '../../classes/styles/vector/components/legend/symbol_icon';
 import { CustomIconModal } from '../../classes/styles/vector/components/symbol/custom_icon_modal';
-import { getIsDarkMode } from '../../kibana_services';
+import { CustomIcon } from '../../../common/descriptor_types';
 
 interface Props {
   customIcons: CustomIcon[];

@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton, EuiButtonEmpty, EuiSteps } from '@elastic/eui';
+import { EuiSteps, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { ApiKey } from '../../../../components/shared/api_key';
 import { staticSourceData } from '../../source_data';

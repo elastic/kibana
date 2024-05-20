@@ -15,16 +15,16 @@ import { WSRoleMapping } from '../../workplace_search/types';
 import { SingleUserRoleMapping } from '../types';
 
 import {
-  ALL_LABEL,
-  DEACTIVATED_LABEL,
-  EMAIL_LABEL,
-  ENGINES_LABEL,
-  FILTER_USERS_LABEL,
-  GROUPS_LABEL,
   INVITATION_PENDING_LABEL,
+  DEACTIVATED_LABEL,
+  ALL_LABEL,
+  FILTER_USERS_LABEL,
   NO_USERS_LABEL,
   ROLE_LABEL,
   USERNAME_LABEL,
+  EMAIL_LABEL,
+  GROUPS_LABEL,
+  ENGINES_LABEL,
 } from './constants';
 
 import { UsersAndRolesRowActions } from '.';

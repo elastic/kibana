@@ -7,20 +7,20 @@
 
 import React from 'react';
 import {
-  ControllerFieldState,
+  UseFormReturn,
   ControllerRenderProps,
-  FieldValues,
+  ControllerFieldState,
   FormState,
   UseControllerProps,
-  UseFormReturn,
+  FieldValues,
 } from 'react-hook-form';
 import {
   ConfigKey,
+  ServiceLocation,
   FormMonitorType,
   MonitorFields,
-  RequestBodyCheck,
   ResponseCheckJSON,
-  ServiceLocation,
+  RequestBodyCheck,
 } from '../../../../../common/runtime_types/monitor_management';
 import { AlertConfigKey } from './constants';
 

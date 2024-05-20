@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { URL } from 'url';
 import { Server } from '@hapi/hapi';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { duration } from 'moment';
+import { URL } from 'url';
 import fetch, { Response } from 'node-fetch';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type { KibanaConfig } from '../kibana_config';
 import { StatusHandler } from './status';
 

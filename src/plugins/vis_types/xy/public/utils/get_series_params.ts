@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import type { AggConfigs } from '@kbn/data-plugin/public';
+import { ValueAxis, SeriesParam, ChartMode, InterpolationMode } from '../types';
 import { ChartType } from '../../common';
-import { ChartMode, InterpolationMode, SeriesParam, ValueAxis } from '../types';
 
 const makeSerie = (
   id: string,

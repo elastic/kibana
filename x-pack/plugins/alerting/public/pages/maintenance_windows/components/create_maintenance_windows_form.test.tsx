@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor, within } from '@testing-library/react';
 import React from 'react';
+import { within, fireEvent, waitFor } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import {
-  CreateMaintenanceWindowForm,
   CreateMaintenanceWindowFormProps,
+  CreateMaintenanceWindowForm,
 } from './create_maintenance_windows_form';
 
 jest.mock('../../../utils/kibana_react');

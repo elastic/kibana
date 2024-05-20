@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { Observable, combineLatest, defer } from 'rxjs';
 import { defaultIfEmpty, map } from 'rxjs';
-import { Datatable, DatatableColumnType, getType } from '../../expression_types';
+import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
+import { Datatable, DatatableColumnType, getType } from '../../expression_types';
 
 export interface MapColumnArguments {
   id?: string | null;

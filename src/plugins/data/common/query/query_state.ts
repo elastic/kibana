@@ -7,8 +7,8 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type { RefreshInterval, TimeRange } from './timefilter/types';
-import type { AggregateQuery, Query } from './types';
+import type { TimeRange, RefreshInterval } from './timefilter/types';
+import type { Query, AggregateQuery } from './types';
 
 /**
  * All query state service state

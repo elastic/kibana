@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
+import expect from 'expect';
 
 import {
-  ALERT_LAST_DETECTED,
-  ALERT_SUPPRESSION_DOCS_COUNT,
-  ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_TERMS,
+  ALERT_LAST_DETECTED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
@@ -25,17 +25,17 @@ import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { createRule } from '../../../../../../../common/utils/security_solution';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
-  dataGeneratorFactory,
   getAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
-  patchRule,
   previewRule,
+  patchRule,
   setAlertStatus,
+  dataGeneratorFactory,
 } from '../../../../utils';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -7,53 +7,53 @@
 
 import type {
   ElasticsearchClient,
-  ISavedObjectsImporter,
   Logger,
   SavedObject,
   SavedObjectsClientContract,
+  ISavedObjectsImporter,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
-import { getNormalizedDataStreams } from '../../../../common/services';
 import type { PackageInstallContext } from '../../../../common/types';
+import { getNormalizedDataStreams } from '../../../../common/services';
 
-import { appContextService, packagePolicyService } from '../..';
 import {
-  ASSETS_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
+  ASSETS_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
-import { FLEET_INSTALL_FORMAT_VERSION, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { ConcurrentInstallOperationError, PackageSavedObjectConflictError } from '../../../errors';
+import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
 import type {
   AssetReference,
-  IndexTemplateEntry,
-  InstallSource,
-  InstallType,
   Installation,
+  InstallType,
+  InstallSource,
   PackageAssetReference,
   PackageVerificationResult,
+  IndexTemplateEntry,
 } from '../../../types';
-import { saveArchiveEntriesFromAssetsMap } from '../archive/storage';
-import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
-import { installILMPolicy } from '../elasticsearch/ilm/install';
-import { deletePreviousPipelines, isTopLevelPipeline } from '../elasticsearch/ingest_pipeline';
-import { installMlModel } from '../elasticsearch/ml_model';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
+import { isTopLevelPipeline, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline';
+import { installILMPolicy } from '../elasticsearch/ilm/install';
+import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installTransforms } from '../elasticsearch/transform/install';
-import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
+import { installMlModel } from '../elasticsearch/ml_model';
+import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
+import { saveArchiveEntriesFromAssetsMap } from '../archive/storage';
+import { ConcurrentInstallOperationError, PackageSavedObjectConflictError } from '../../../errors';
+import { appContextService, packagePolicyService } from '../..';
 
 import { auditLoggingService } from '../../audit_logging';
 
 import { createInstallation, restartInstallation } from './install';
+import { withPackageSpan } from './utils';
 import { clearLatestFailedAttempts } from './install_errors_helpers';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
-import { withPackageSpan } from './utils';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path

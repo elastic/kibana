@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { cidrFunction } from './cidr';
 import { functionWrapper } from './utils';
+import { cidrFunction } from './cidr';
 
 describe('interpreter/functions#cidr', () => {
   const fn = functionWrapper(cidrFunction);

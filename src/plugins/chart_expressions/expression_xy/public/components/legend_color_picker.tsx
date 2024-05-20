@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { LegendColorPicker, Position, XYChartSeriesIdentifier } from '@elastic/charts';
-import { EuiOutsideClickDetector, EuiWrappingPopover, PopoverAnchorPosition } from '@elastic/eui';
-import { ColorPicker } from '@kbn/charts-plugin/public';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import React, { createContext, useCallback, useContext } from 'react';
-import type { CommonXYDataLayerConfig } from '../../common/types';
+import { LegendColorPicker, Position, XYChartSeriesIdentifier } from '@elastic/charts';
+import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { ColorPicker } from '@kbn/charts-plugin/public';
 import {
   DatatablesWithFormatInfo,
-  LayersAccessorsTitles,
-  LayersFieldFormats,
   getMetaFromSeriesId,
   getSeriesName,
   hasMultipleLayersWithSplits,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
 } from '../helpers';
+import type { CommonXYDataLayerConfig } from '../../common/types';
 
 const KEY_CODE_ENTER = 13;
 

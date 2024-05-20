@@ -6,14 +6,14 @@
  */
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { sloListLocatorID } from '@kbn/observability-plugin/common';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import deepmerge from 'deepmerge';
+import { sloListLocatorID } from '@kbn/observability-plugin/common';
 import {
   DEFAULT_STATE,
-  SLO_LIST_SEARCH_URL_STORAGE_KEY,
   SearchState,
+  SLO_LIST_SEARCH_URL_STORAGE_KEY,
 } from '../pages/slos/hooks/use_url_search_state';
 
 export interface SloListLocatorParams extends SerializableRecord {

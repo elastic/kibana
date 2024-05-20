@@ -13,10 +13,10 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
 
-import { licenseMock } from '../../../common/licensing/index.mock';
 import type { Props as EditRolePageProps } from './edit_role/edit_role_page';
 import type { Props as RolesGridPageProps } from './roles_grid/roles_grid_page';
 import { rolesManagementApp } from './roles_management_app';
+import { licenseMock } from '../../../common/licensing/index.mock';
 
 jest.mock('./roles_grid', () => ({
   RolesGridPage: ({

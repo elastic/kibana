@@ -1,7 +1,3 @@
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { includes } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,10 +5,14 @@ import { includes } from 'lodash';
  * 2.0.
  */
 import React from 'react';
-import { ML_SUPPORTED_LICENSES } from '../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { includes } from 'lodash';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { MonitoringStartServices } from '../../../types';
 import { PageTemplate } from '../page_template';
-import { PageTemplateProps, TabMenuItem } from '../page_template';
+import { TabMenuItem, PageTemplateProps } from '../page_template';
+import { ML_SUPPORTED_LICENSES } from '../../../../common/constants';
 import { ingestPipelineTabOnClick } from './ingest_pipeline_modal';
 
 interface ElasticsearchTemplateProps extends PageTemplateProps {

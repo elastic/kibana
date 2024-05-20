@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "FieldInput",
-        "description": ["\nAn input that allows one to change a setting in Kibana.\n"],
+        "description": [
+          "\nAn input that allows one to change a setting in Kibana.\n"
+        ],
         "signature": [
           "React.ForwardRefExoticComponent<",
           {
@@ -64,8 +66,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
-            "description": ["The props for the {@link FieldInput } component."],
-            "signature": ["P"],
+            "description": [
+              "The props for the {@link FieldInput } component."
+            ],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -143,7 +149,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldInputProps",
-        "description": ["\nThe props that are passed to the {@link FieldInput} component."],
+        "description": [
+          "\nThe props that are passed to the {@link FieldInput} component."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-input",
@@ -164,7 +172,9 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": ["The {@link FieldDefinition} for the component."],
+            "description": [
+              "The {@link FieldDefinition} for the component."
+            ],
             "signature": [
               "{ id: string; type: T; name: string; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; }"
             ],
@@ -178,7 +188,9 @@
             "type": "Object",
             "tags": [],
             "label": "unsavedChange",
-            "description": ["An {@link UnsavedFieldChange} for the component, if any."],
+            "description": [
+              "An {@link UnsavedFieldChange} for the component, if any."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-types",
@@ -199,7 +211,9 @@
             "type": "Function",
             "tags": [],
             "label": "onInputChange",
-            "description": ["The `onInputChange` handler for the input."],
+            "description": [
+              "The `onInputChange` handler for the input."
+            ],
             "signature": [
               "(change?: ",
               {
@@ -245,7 +259,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isSavingEnabled",
-            "description": ["True if the input can be saved, false otherwise."],
+            "description": [
+              "True if the input can be saved, false otherwise."
+            ],
             "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -256,8 +272,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isInvalid",
-            "description": ["True if the value within the input is invalid, false otherwise."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "True if the value within the input is invalid, false otherwise."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -271,7 +291,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldInputServices",
-        "description": ["\nContextual services used by a {@link FieldInput} component."],
+        "description": [
+          "\nContextual services used by a {@link FieldInput} component."
+        ],
         "path": "packages/kbn-management/settings/components/field_input/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -282,8 +304,12 @@
             "type": "Function",
             "tags": [],
             "label": "showDanger",
-            "description": ["\nDisplays a danger toast message."],
-            "signature": ["(value: string) => void"],
+            "description": [
+              "\nDisplays a danger toast message."
+            ],
+            "signature": [
+              "(value: string) => void"
+            ],
             "path": "packages/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -294,8 +320,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "value",
-                "description": ["The message to display."],
-                "signature": ["string"],
+                "description": [
+                  "The message to display."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-management/settings/components/field_input/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -311,7 +341,11 @@
             "tags": [],
             "label": "validateChange",
             "description": [],
-            "signature": ["(key: string, value: any) => Promise<", "ValueValidation", ">"],
+            "signature": [
+              "(key: string, value: any) => Promise<",
+              "ValueValidation",
+              ">"
+            ],
             "path": "packages/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -323,7 +357,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-management/settings/components/field_input/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -336,7 +372,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/kbn-management/settings/components/field_input/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -354,7 +392,9 @@
         "type": "Interface",
         "tags": [],
         "label": "InputProps",
-        "description": ["\nProps passed to a {@link FieldInput} component."],
+        "description": [
+          "\nProps passed to a {@link FieldInput} component."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-input",
@@ -437,7 +477,9 @@
             "type": "Function",
             "tags": [],
             "label": "onInputChange",
-            "description": ["The `onInputChange` handler."],
+            "description": [
+              "The `onInputChange` handler."
+            ],
             "signature": [
               "(change?: ",
               {

@@ -61,7 +61,9 @@
                 "tags": [],
                 "label": "client",
                 "description": [],
-                "signature": ["default"],
+                "signature": [
+                  "default"
+                ],
                 "path": "x-pack/packages/kbn-data-forge/src/cleanup.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -113,7 +115,9 @@
         "tags": [],
         "label": "cli",
         "description": [],
-        "signature": ["() => Promise<string[]>"],
+        "signature": [
+          "() => Promise<string[]>"
+        ],
         "path": "x-pack/packages/kbn-data-forge/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -196,7 +200,9 @@
                 "tags": [],
                 "label": "client",
                 "description": [],
-                "signature": ["default"],
+                "signature": [
+                  "default"
+                ],
                 "path": "x-pack/packages/kbn-data-forge/src/generate.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -262,7 +268,9 @@
             "tags": [],
             "label": "filePath",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/kbn-data-forge/src/lib/create_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -318,7 +326,9 @@
             "tags": [],
             "label": "client",
             "description": [],
-            "signature": ["default"],
+            "signature": [
+              "default"
+            ],
             "path": "x-pack/packages/kbn-data-forge/src/run.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -375,7 +385,9 @@
         "tags": [],
         "label": "Dataset",
         "description": [],
-        "signature": ["\"fake_hosts\" | \"fake_logs\" | \"fake_stack\""],
+        "signature": [
+          "\"fake_hosts\" | \"fake_logs\" | \"fake_stack\""
+        ],
         "path": "x-pack/packages/kbn-data-forge/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -448,7 +460,9 @@
         "tags": [],
         "label": "TransitionMethod",
         "description": [],
-        "signature": ["\"linear\" | \"exp\" | \"sine\""],
+        "signature": [
+          "\"linear\" | \"exp\" | \"sine\""
+        ],
         "path": "x-pack/packages/kbn-data-forge/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,

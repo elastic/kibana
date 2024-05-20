@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import type { CasePostRequest } from '../../../common/types/api';
+import { createCaseSavedObjectResponse } from '../test_utils';
+import { transformSavedObjectToExternalModel } from '../cases/transform';
+import { alertComment, comment } from '../../mocks';
+import type { UserActionsDict } from './types';
 import {
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
   CustomFieldTypes,
 } from '../../../common/types/domain';
-import { alertComment, comment } from '../../mocks';
-import { transformSavedObjectToExternalModel } from '../cases/transform';
 import type { PatchCasesArgs } from '../cases/types';
-import { createCaseSavedObjectResponse } from '../test_utils';
-import type { UserActionsDict } from './types';
 
 export const casePayload: CasePostRequest = {
   title: 'Case SIR',

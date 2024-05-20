@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { type FC } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { type FC } from 'react';
 
 import { PLUGIN } from '../../../../../../common/constants';
-import { useAppDependencies } from '../../../../app_dependencies';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import type { StepDefineFormHook } from '../step_define';
 import { QUERY_LANGUAGE_KUERY } from '../step_define';
+import { useAppDependencies } from '../../../../app_dependencies';
 
 interface SourceSearchBarProps {
   dataView: SearchItems['dataView'];

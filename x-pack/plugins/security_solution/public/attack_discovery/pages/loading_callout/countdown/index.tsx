@@ -15,8 +15,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { getTimerPrefix } from './last_times_popover/helpers';

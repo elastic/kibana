@@ -1,5 +1,3 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,7 +5,9 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render } from '@testing-library/react';
 import { AssistantOverlay } from './overlay';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const mockAssistantAvailability = jest.fn(() => ({
   hasAssistantPrivilege: true,

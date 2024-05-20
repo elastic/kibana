@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { AggTypesDependencies } from './agg_types';
 import type { BucketAggType } from './buckets/bucket_agg_type';
 import type { MetricAggType } from './metrics/metric_agg_type';
+import type { AggTypesDependencies } from './agg_types';
 
 export type AggTypesRegistrySetup = ReturnType<AggTypesRegistry['setup']>;
 export type AggTypesRegistryStart = ReturnType<AggTypesRegistry['start']>;
@@ -22,7 +22,7 @@ export class AggTypesRegistry {
     return {
       registerBucket: <
         N extends string,
-        T extends (deps: AggTypesDependencies) => BucketAggType<any>,
+        T extends (deps: AggTypesDependencies) => BucketAggType<any>
       >(
         name: N,
         type: T
@@ -35,7 +35,7 @@ export class AggTypesRegistry {
       },
       registerMetric: <
         N extends string,
-        T extends (deps: AggTypesDependencies) => MetricAggType<any>,
+        T extends (deps: AggTypesDependencies) => MetricAggType<any>
       >(
         name: N,
         type: T
@@ -47,7 +47,7 @@ export class AggTypesRegistry {
       },
       registerLegacy: <
         N extends string,
-        T extends (deps: AggTypesDependencies) => BucketAggType<any> | MetricAggType<any>,
+        T extends (deps: AggTypesDependencies) => BucketAggType<any> | MetricAggType<any>
       >(
         name: N,
         type: T

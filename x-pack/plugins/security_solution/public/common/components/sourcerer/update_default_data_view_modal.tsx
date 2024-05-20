@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -16,11 +17,10 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import styled from 'styled-components';
-import { Blockquote, ResetButton } from './helpers';
 import * as i18n from './translations';
+import { Blockquote, ResetButton } from './helpers';
 
 interface Props {
   isShowing: boolean;

@@ -11,10 +11,10 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { DecoratedError } from '@kbn/core-saved-objects-server';
 import type {
   CasesConnectorConfigSchema,
-  CasesConnectorParamsSchema,
-  CasesConnectorRuleActionParamsSchema,
-  CasesConnectorRunParamsSchema,
   CasesConnectorSecretsSchema,
+  CasesConnectorRunParamsSchema,
+  CasesConnectorRuleActionParamsSchema,
+  CasesConnectorParamsSchema,
 } from './schema';
 
 export type CasesConnectorConfig = TypeOf<typeof CasesConnectorConfigSchema>;

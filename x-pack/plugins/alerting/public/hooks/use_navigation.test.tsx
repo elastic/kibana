@@ -7,13 +7,13 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { MAINTENANCE_WINDOWS_APP_ID, MANAGEMENT_APP_ID } from '../../common';
-import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 import {
   useCreateMaintenanceWindowNavigation,
   useEditMaintenanceWindowsNavigation,
   useMaintenanceWindowsNavigation,
 } from './use_navigation';
+import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
+import { MANAGEMENT_APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../../common';
 
 const mockNavigateTo = jest.fn();
 const mockGetAppUrl = jest.fn();

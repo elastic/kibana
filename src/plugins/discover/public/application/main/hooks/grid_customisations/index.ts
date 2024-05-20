@@ -7,8 +7,8 @@
  */
 
 import { useMemo } from 'react';
-import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useDiscoverCustomization } from '../../../../customizations';
 import { getLogsVirtualColumnsConfiguration } from './logs';
 
 export * from './logs';

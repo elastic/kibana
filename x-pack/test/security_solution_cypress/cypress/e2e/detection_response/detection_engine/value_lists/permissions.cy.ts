@@ -7,10 +7,10 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../../../screens/lists';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
+import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../../../screens/lists';
 
 describe('value list permissions', { tags: ['@ess', '@skipInServerless'] }, () => {
   describe('user with restricted access role', () => {

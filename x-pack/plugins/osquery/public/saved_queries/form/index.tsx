@@ -6,31 +6,31 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiText,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   IntervalField,
-  QueryDescriptionField,
   QueryIdField,
+  QueryDescriptionField,
+  VersionField,
   ResultsTypeField,
   TimeoutField,
-  VersionField,
 } from '../../form';
+import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
-import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
-import { overflowCss } from '../../packs/utils';
-import { CodeEditorField } from './code_editor_field';
 import { PlaygroundFlyout } from './playground_flyout';
+import { CodeEditorField } from './code_editor_field';
+import { overflowCss } from '../../packs/utils';
 
 interface SavedQueryFormProps {
   viewMode?: boolean;

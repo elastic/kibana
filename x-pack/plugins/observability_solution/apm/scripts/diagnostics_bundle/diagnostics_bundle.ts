@@ -8,9 +8,9 @@
 /* eslint-disable no-console */
 
 import { Client } from '@elastic/elasticsearch';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import axios, { AxiosRequestConfig } from 'axios';
 import fs from 'fs/promises';
+import axios, { AxiosRequestConfig } from 'axios';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APIReturnType } from '../../public/services/rest/create_call_apm_api';
 import { getDiagnosticsBundle } from '../../server/routes/diagnostics/get_diagnostics_bundle';
 

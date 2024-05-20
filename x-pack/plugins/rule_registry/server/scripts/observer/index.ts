@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import * as observerRole from './detections_role.json';
 import * as observerUser from './detections_user.json';
+import * as observerRole from './detections_role.json';
 export { observerUser, observerRole };

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ContentMessage } from '..';
-import { RegenerateResponseButton } from './buttons/regenerate_response_button';
+import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
+import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
-import { useStream } from './use_stream';
 
 interface Props {
   abortStream: () => void;

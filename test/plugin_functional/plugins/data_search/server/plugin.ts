@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 
 export interface DataSearchTestStartDeps {

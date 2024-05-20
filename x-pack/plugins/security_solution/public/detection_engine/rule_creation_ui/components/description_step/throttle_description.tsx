@@ -7,8 +7,8 @@
 
 import { find } from 'lodash/fp';
 import {
-  DEFAULT_THROTTLE_OPTION,
   THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING,
+  DEFAULT_THROTTLE_OPTION,
 } from '../throttle_select_field';
 
 export const buildThrottleDescription = (value = DEFAULT_THROTTLE_OPTION.value, title: string) => {

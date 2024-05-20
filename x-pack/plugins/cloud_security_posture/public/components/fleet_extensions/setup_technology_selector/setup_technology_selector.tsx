@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiFormRow,
@@ -16,8 +18,6 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,

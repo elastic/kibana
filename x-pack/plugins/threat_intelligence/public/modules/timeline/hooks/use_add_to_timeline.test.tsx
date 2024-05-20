@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { RenderHookResult, Renderer, renderHook } from '@testing-library/react-hooks';
+import { EMPTY_VALUE } from '../../../constants/common';
+import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
 import {
-  Indicator,
   generateMockIndicator,
   generateMockUrlIndicator,
+  Indicator,
 } from '../../../../common/types/indicator';
-import { EMPTY_VALUE } from '../../../constants/common';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
-import { UseAddToTimelineValue, useAddToTimeline } from './use_add_to_timeline';
+import { useAddToTimeline, UseAddToTimelineValue } from './use_add_to_timeline';
 
 describe('useInvestigateInTimeline()', () => {
   let hookResult: RenderHookResult<{}, UseAddToTimelineValue, Renderer<unknown>>;

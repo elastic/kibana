@@ -7,10 +7,10 @@
 import { merge } from 'lodash';
 
 import type { SingleCaseMetricsResponse } from '../../../common/types/api';
-import { SingleCaseMetricsRequestRt, SingleCaseMetricsResponseRt } from '../../../common/types/api';
+import { SingleCaseMetricsResponseRt, SingleCaseMetricsRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import type { GetCaseMetricsParams } from './types';

@@ -1,5 +1,3 @@
-import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,11 +5,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React from 'react';
-import { InvestigationGuideView } from '../../../../common/components/event_details/investigation_guide_view';
-import { FlyoutLoading } from '../../../shared/components/flyout_loading';
+import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useLeftPanelContext } from '../context';
-import { INVESTIGATION_GUIDE_LOADING_TEST_ID, INVESTIGATION_GUIDE_TEST_ID } from './test_ids';
+import { INVESTIGATION_GUIDE_TEST_ID, INVESTIGATION_GUIDE_LOADING_TEST_ID } from './test_ids';
+import { InvestigationGuideView } from '../../../../common/components/event_details/investigation_guide_view';
+import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 
 /**
  * Investigation guide displayed in the left panel.

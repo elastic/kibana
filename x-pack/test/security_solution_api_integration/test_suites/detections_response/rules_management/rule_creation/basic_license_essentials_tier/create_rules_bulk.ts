@@ -7,11 +7,6 @@
 
 import expect from 'expect';
 
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../../common/utils/security_solution';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
@@ -24,6 +19,11 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');

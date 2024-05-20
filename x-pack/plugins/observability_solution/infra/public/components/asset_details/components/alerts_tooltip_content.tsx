@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiText, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERTS_DOC_HREF } from '../../shared/alerts/constants';
 import { LinkToAlertsHomePage } from '../../shared/alerts/links/link_to_alerts_page';
 

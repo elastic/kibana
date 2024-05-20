@@ -6,10 +6,10 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { AssistantAvailability } from '@kbn/elastic-assistant';
-import { AssistantProvider } from '@kbn/elastic-assistant';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import React from 'react';
+import type { AssistantAvailability } from '@kbn/elastic-assistant';
+import { AssistantProvider } from '@kbn/elastic-assistant';
 import { BASE_SECURITY_CONVERSATIONS } from '../../assistant/content/conversations';
 
 interface Props {

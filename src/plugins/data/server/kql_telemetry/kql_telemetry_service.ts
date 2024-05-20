@@ -8,9 +8,9 @@
 
 import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { kqlTelemetry } from '../saved_objects';
 import { registerKqlTelemetryRoute } from './route';
 import { makeKQLUsageCollector } from './usage_collector';
+import { kqlTelemetry } from '../saved_objects';
 
 export class KqlTelemetryService implements Plugin<void> {
   constructor(private initializerContext: PluginInitializerContext) {}

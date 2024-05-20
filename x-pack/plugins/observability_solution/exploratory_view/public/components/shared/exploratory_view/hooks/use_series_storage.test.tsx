@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import * as useTrackMetric from '@kbn/observability-shared-plugin/public/hooks/use_track_metric';
-import { Route, Router } from '@kbn/shared-ux-router';
-import { render } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
 import React, { useEffect } from 'react';
-import { ReportTypes } from '../configurations/constants';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { Router, Route } from '@kbn/shared-ux-router';
+import { render } from '@testing-library/react';
+import { UrlStorageContextProvider, useSeriesStorage, reportTypeKey } from './use_series_storage';
 import { getHistoryFromUrl } from '../rtl_helpers';
 import type { AppDataType } from '../types';
-import { UrlStorageContextProvider, reportTypeKey, useSeriesStorage } from './use_series_storage';
+import { ReportTypes } from '../configurations/constants';
+import * as useTrackMetric from '@kbn/observability-shared-plugin/public/hooks/use_track_metric';
 
 const mockSingleSeries = [
   {

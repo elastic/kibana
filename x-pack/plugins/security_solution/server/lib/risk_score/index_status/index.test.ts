@@ -7,9 +7,9 @@
 
 import { getRiskScoreIndexStatusRoute } from '.';
 import {
-  requestContextMock,
   requestMock,
   serverMock,
+  requestContextMock,
 } from '../../detection_engine/routes/__mocks__';
 
 import { RISK_SCORE_INDEX_STATUS_API_URL } from '../../../../common/constants';

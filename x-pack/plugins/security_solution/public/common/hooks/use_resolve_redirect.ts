@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { encode, safeDecode } from '@kbn/rison';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { safeDecode, encode } from '@kbn/rison';
+import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineSelectors } from '../../timelines/store';
 import { timelineDefaults } from '../../timelines/store/defaults';
-import type { TimelineUrl } from '../../timelines/store/model';
 import { useKibana } from '../lib/kibana';
-import { useDeepEqualSelector } from './use_selector';
+import type { TimelineUrl } from '../../timelines/store/model';
 import { URL_PARAM_KEY } from './use_url_state';
 
 /**

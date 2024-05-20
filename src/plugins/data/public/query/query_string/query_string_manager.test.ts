@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
+import { QueryStringManager } from './query_string_manager';
 import { Storage } from '@kbn/kibana-utils-plugin/public/storage';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { AggregateQuery, Query } from '../../../common/query';
-import { QueryStringManager } from './query_string_manager';
+import { coreMock } from '@kbn/core/public/mocks';
+import { Query, AggregateQuery } from '../../../common/query';
 
 describe('QueryStringManager', () => {
   let service: QueryStringManager;

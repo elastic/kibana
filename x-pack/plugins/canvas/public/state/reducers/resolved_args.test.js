@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { flushContextAfterIndex } from '../actions/elements';
 import * as actions from '../actions/resolved_args';
-import { actionCreator } from './__fixtures__/action_creator';
+import { flushContextAfterIndex } from '../actions/elements';
 import { resolvedArgsReducer } from './resolved_args';
+import { actionCreator } from './__fixtures__/action_creator';
 
 describe('resolved args reducer', () => {
   let state;

@@ -7,15 +7,15 @@
 
 import { assign } from 'lodash';
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
 import type {
-  ConcreteTaskInstance,
   TaskManagerSetupContract,
+  ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { ProductLine, ProductTier } from '../../common/product';

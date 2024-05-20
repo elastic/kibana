@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { ToolingLog } from '@kbn/tooling-log';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 
 import { ApmClient } from './apm_client';
 

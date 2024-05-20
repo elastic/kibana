@@ -9,13 +9,13 @@ import Boom from '@hapi/boom';
 import type { CasesMetricsRequest, SingleCaseMetricsRequest } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
-import { Actions } from './actions';
 import { AlertsCount } from './alerts/count';
 import { AlertDetails } from './alerts/details';
-import { MTTR } from './all_cases/mttr';
+import { Actions } from './actions';
 import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
 import type { GetCaseMetricsParams, MetricsHandler } from './types';
+import { MTTR } from './all_cases/mttr';
 
 const isSingleCaseMetrics = (
   params: GetCaseMetricsParams | CasesMetricsRequest

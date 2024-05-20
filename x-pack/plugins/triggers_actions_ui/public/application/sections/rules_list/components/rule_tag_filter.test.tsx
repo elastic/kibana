@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleTagFilter } from './rule_tag_filter';
 
 const onChangeMock = jest.fn();

@@ -10,8 +10,8 @@ import React, { FC, PropsWithChildren, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import {
-  RedirectAppLinksKibanaDependencies,
   RedirectAppLinksServices,
+  RedirectAppLinksKibanaDependencies,
 } from '@kbn/shared-ux-link-redirect-app-types';
 
 const RedirectAppLinksContext = React.createContext<RedirectAppLinksServices | null>(null);

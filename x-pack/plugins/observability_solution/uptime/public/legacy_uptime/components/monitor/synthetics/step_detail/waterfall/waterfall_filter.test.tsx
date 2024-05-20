@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { act, fireEvent } from '@testing-library/react';
 import React, { useState } from 'react';
+import { act, fireEvent } from '@testing-library/react';
 
 import { render } from '../../../../../lib/helper/rtl_helpers';
 
 import 'jest-canvas-mock';
+import { MIME_FILTERS, WaterfallFilter } from './waterfall_filter';
 import {
+  FILTER_REQUESTS_LABEL,
   FILTER_COLLAPSE_REQUESTS_LABEL,
   FILTER_POPOVER_OPEN_LABEL,
-  FILTER_REQUESTS_LABEL,
 } from '../../waterfall/components/translations';
-import { MIME_FILTERS, WaterfallFilter } from './waterfall_filter';
 
 describe('waterfall filter', () => {
   jest.useFakeTimers({ legacyFakeTimers: true });

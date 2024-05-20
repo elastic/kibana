@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
+import { metaFields } from '@kbn/config-schema';
 
 export const stripBadDefault = (schema: OpenAPIV3.SchemaObject): void => {
   if (schema.default?.special === 'deep') {

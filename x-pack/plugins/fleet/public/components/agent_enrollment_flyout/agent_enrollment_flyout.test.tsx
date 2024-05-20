@@ -7,20 +7,20 @@
 
 import './agent_enrollment_flyout.test.mocks';
 
+import React from 'react';
 import { act, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
-import React from 'react';
 
-import type { AgentPolicy } from '../../../common';
-import { useAgentEnrollmentFlyoutData, useFleetServerStandalone } from '../../hooks';
-import { sendGetOneAgentPolicy } from '../../hooks/use_request';
 import { createFleetTestRendererMock } from '../../mock';
+import type { AgentPolicy } from '../../../common';
+import { sendGetOneAgentPolicy } from '../../hooks/use_request';
+import { useAgentEnrollmentFlyoutData, useFleetServerStandalone } from '../../hooks';
 
 import { useAdvancedForm } from '../../applications/fleet/components/fleet_server_instructions/hooks';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
-import { AgentEnrollmentFlyout } from '.';
 import type { FlyOutProps } from './types';
+import { AgentEnrollmentFlyout } from '.';
 
 const render = (props?: Partial<FlyOutProps>) => {
   cleanup();

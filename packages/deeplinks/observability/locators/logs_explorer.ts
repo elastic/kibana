@@ -1,4 +1,3 @@
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
  * Side Public License, v 1.
  */
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RefreshInterval = {

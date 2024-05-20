@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { createEsParams } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Ping } from '../../../../common/runtime_types';
+import { createEsParams } from '@kbn/observability-shared-plugin/public';
 import { useReduxEsSearch } from './use_redux_es_search';
+import { Ping } from '../../../../common/runtime_types';
 
-import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
-  FINAL_SUMMARY_FILTER,
   getLocationFilter,
+  FINAL_SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { useSyntheticsRefreshContext } from '../contexts/synthetics_refresh_context';
 import { selectServiceLocationsState } from '../state';
+import { useSyntheticsRefreshContext } from '../contexts/synthetics_refresh_context';
+import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 
 export const getTimeRangeFilter = (schedule: string) => {
   const inMinutes = Number(schedule);

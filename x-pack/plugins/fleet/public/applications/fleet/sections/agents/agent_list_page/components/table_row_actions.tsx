@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
 
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
+import type { Agent, AgentPolicy } from '../../../../types';
+import { useLink } from '../../../../hooks';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { ContextMenuActions } from '../../../../components';
-import { useLink } from '../../../../hooks';
 import { isAgentUpgradeable } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
-import type { Agent, AgentPolicy } from '../../../../types';
 
 export const TableRowActions: React.FunctionComponent<{
   agent: Agent;

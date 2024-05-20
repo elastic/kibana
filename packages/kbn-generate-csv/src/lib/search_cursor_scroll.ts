@@ -7,16 +7,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { lastValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import {
   ES_SEARCH_STRATEGY,
   type ISearchSource,
   type SearchRequest,
 } from '@kbn/data-plugin/common';
-import type { IEsSearchResponse } from '@kbn/search-types';
-import { lastValueFrom } from 'rxjs';
-import { i18nTexts } from './i18n_texts';
 import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
+import { i18nTexts } from './i18n_texts';
 
 export class SearchCursorScroll extends SearchCursor {
   constructor(

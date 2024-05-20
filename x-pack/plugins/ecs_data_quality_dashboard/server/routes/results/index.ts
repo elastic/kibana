@@ -7,9 +7,9 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import type { DataQualityDashboardRequestHandlerContext } from '../../types';
-import { getResultsRoute } from './get_results';
 import { postResultsRoute } from './post_results';
+import { getResultsRoute } from './get_results';
+import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 
 export const resultsRoutes = (
   router: IRouter<DataQualityDashboardRequestHandlerContext>,

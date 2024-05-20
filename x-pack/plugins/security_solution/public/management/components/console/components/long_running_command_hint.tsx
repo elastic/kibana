@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ConsoleText } from './console_text';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const LongRunningCommandHint = memo(() => {
   const getTestId = useTestIdGenerator(useDataTestSubj());

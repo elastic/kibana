@@ -8,31 +8,31 @@
 import { getNewThresholdRule } from '../../../../objects/rule';
 
 import {
+  SUPPRESS_FOR_DETAILS,
   DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
-  SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
 
 import {
   ALERT_SUPPRESSION_DURATION_INPUT,
+  THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
   ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL,
   ALERT_SUPPRESSION_FIELDS,
-  THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
 } from '../../../../screens/create_new_rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
+import { getDetails, assertDetailsNotExist } from '../../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
-import { assertDetailsNotExist, getDetails } from '../../../../tasks/rule_details';
-import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 
+import { saveEditedRule, goBackToRuleDetails } from '../../../../tasks/edit_rule';
 import { enablesAndPopulatesThresholdSuppression } from '../../../../tasks/create_new_rule';
-import { goBackToRuleDetails, saveEditedRule } from '../../../../tasks/edit_rule';
 import { visit } from '../../../../tasks/navigation';
 
 const rule = getNewThresholdRule();

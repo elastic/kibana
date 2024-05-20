@@ -8,15 +8,15 @@
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import {
   getDocCountFieldForServiceDestinationStatistics,
   getDocumentTypeFilterForServiceDestinationStatistics,
   getLatencyFieldForServiceDestinationStatistics,
   getProcessorEventForServiceDestinationStatistics,
 } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface Options {
   dependencyName: string;

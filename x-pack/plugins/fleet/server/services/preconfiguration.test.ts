@@ -18,7 +18,7 @@ import type {
   PreconfiguredAgentPolicy,
   RegistrySearchResult,
 } from '../../common/types';
-import type { AgentPolicy, DownloadSource, NewPackagePolicy, Output } from '../types';
+import type { AgentPolicy, NewPackagePolicy, Output, DownloadSource } from '../types';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -26,13 +26,13 @@ import { appContextService } from './app_context';
 
 import * as agentPolicy from './agent_policy';
 
-import { getBundledPackages } from './epm/packages/bundled_packages';
-import { type InstallPackageParams, installPackage } from './epm/packages/install';
-import { packagePolicyService } from './package_policy';
 import {
-  comparePreconfiguredPolicyToCurrent,
   ensurePreconfiguredPackagesAndPolicies,
+  comparePreconfiguredPolicyToCurrent,
 } from './preconfiguration';
+import { packagePolicyService } from './package_policy';
+import { getBundledPackages } from './epm/packages/bundled_packages';
+import { installPackage, type InstallPackageParams } from './epm/packages/install';
 
 jest.mock('./agent_policy_update');
 jest.mock('./output');

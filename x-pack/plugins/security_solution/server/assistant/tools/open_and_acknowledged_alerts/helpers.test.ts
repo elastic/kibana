@@ -6,10 +6,10 @@
  */
 
 import {
-  MAX_SIZE,
-  MIN_SIZE,
   getRawDataOrDefault,
   isRawDataValid,
+  MAX_SIZE,
+  MIN_SIZE,
   sizeIsOutOfRange,
 } from './helpers';
 

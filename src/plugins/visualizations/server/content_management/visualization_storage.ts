@@ -9,11 +9,11 @@
 import { SOContentStorage } from '@kbn/content-management-utils';
 
 import { Logger } from '@kbn/logging';
+import { cmServicesDefinition } from '../../common/content_management/cm_services';
 import type {
   VisualizationContentType,
   VisualizationCrudTypes,
 } from '../../common/content_management';
-import { cmServicesDefinition } from '../../common/content_management/cm_services';
 
 const SO_TYPE: VisualizationContentType = 'visualization';
 

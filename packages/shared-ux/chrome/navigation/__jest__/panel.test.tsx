@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import './setup_jest_mocks';
+import React from 'react';
+import { BehaviorSubject, of } from 'rxjs';
 import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
-import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
 
 import { PanelContentProvider } from '../src/ui';
 import { renderNavigation } from './utils';

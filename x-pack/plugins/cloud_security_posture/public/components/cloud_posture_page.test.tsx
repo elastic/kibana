@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { NoDataPage } from '@kbn/kibana-react-plugin/public';
-import { UseQueryResult } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
-import Chance from 'chance';
-import React, { ComponentProps } from 'react';
-import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
-import { createReactQueryResponse } from '../test/fixtures/react_query';
-import { TestProvider } from '../test/test_provider';
+import Chance from 'chance';
 import {
   DEFAULT_NO_DATA_TEST_SUBJECT,
   ERROR_STATE_TEST_SUBJECT,
+  isCommonError,
   LOADING_STATE_TEST_SUBJECT,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
   SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
-  isCommonError,
 } from './cloud_posture_page';
+import { createReactQueryResponse } from '../test/fixtures/react_query';
+import { TestProvider } from '../test/test_provider';
+import { coreMock } from '@kbn/core/public/mocks';
+import { render, screen } from '@testing-library/react';
+import React, { ComponentProps } from 'react';
+import { UseQueryResult } from '@tanstack/react-query';
 import { CloudPosturePage } from './cloud_posture_page';
+import { NoDataPage } from '@kbn/kibana-react-plugin/public';
+import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 const chance = new Chance();
 

@@ -6,8 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { GeoEcs, HostEcs } from '@kbn/securitysolution-ecs';
-import type { Hit, Inspect, Maybe, ShardsResponse, TotalValue } from '../../../common';
+import type { HostEcs, GeoEcs } from '@kbn/securitysolution-ecs';
+import type { Inspect, Maybe, TotalValue, Hit, ShardsResponse } from '../../../common';
 
 export interface NetworkDetailsStrategyResponse extends IEsSearchResponse {
   networkDetails: {

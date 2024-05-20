@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiAccordion,
+  EuiToolTip,
   EuiButtonIcon,
   EuiButtonIconProps,
   EuiSpacer,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useCallback } from 'react';
 
-import { IAggConfig } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { getSchemaByName } from '../schemas';
+import { IAggConfig } from '@kbn/data-plugin/public';
+import { DefaultEditorAggParams } from './agg_params';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
 import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
-import { DefaultEditorAggParams } from './agg_params';
-import { buildAggDescription } from './agg_params_helper';
-import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
 import { RowsOrColumnsControl } from './controls/rows_or_columns';
+import { RadiusRatioOptionControl } from './controls/radius_ratio_option';
+import { getSchemaByName } from '../schemas';
+import { buildAggDescription } from './agg_params_helper';
 
 export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   agg: IAggConfig;

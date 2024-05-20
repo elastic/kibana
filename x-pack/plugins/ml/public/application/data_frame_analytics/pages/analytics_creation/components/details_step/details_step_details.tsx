@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiDescriptionList,
@@ -12,9 +15,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
 import type { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
 

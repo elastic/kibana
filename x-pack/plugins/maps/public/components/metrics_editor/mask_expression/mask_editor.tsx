@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React, { ChangeEvent, Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldNumber,
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
   EuiFormRow,
   EuiPopoverFooter,
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, Component } from 'react';
 import { MASK_OPERATOR } from '../../../../common/constants';
 import { AggDescriptor } from '../../../../common/descriptor_types';
-import { ABOVE, BELOW } from '../../../classes/layers/vector_layer/mask';
 import { panelStrings } from '../../../connected_components/panel_strings';
+import { ABOVE, BELOW } from '../../../classes/layers/vector_layer/mask';
 
 const operatorOptions = [
   {

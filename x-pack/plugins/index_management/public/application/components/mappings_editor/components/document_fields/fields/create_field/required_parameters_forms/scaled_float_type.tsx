@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { PARAMETERS_DEFINITION } from '../../../../../constants';
+import { FormRow, UseField, Field } from '../../../../../shared_imports';
 import { getFieldConfig } from '../../../../../lib';
-import { Field, FormRow, UseField } from '../../../../../shared_imports';
+import { PARAMETERS_DEFINITION } from '../../../../../constants';
 
 export const ScaledFloatTypeRequiredParameters = () => {
   return (

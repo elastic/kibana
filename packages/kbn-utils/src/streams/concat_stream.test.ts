@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createConcatStream, createListStream, createPromiseFromStreams } from '.';
+import { createListStream, createPromiseFromStreams, createConcatStream } from '.';
 
 describe('concatStream', () => {
   test('accepts an initial value', async () => {

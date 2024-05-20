@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import styled from 'styled-components';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import styled from 'styled-components';
+import { EuiIcon } from '@elastic/eui';
 import type { LinkToAppProps } from '../../../../../../common/components/endpoint/link_to_app';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 

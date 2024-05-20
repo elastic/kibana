@@ -6,15 +6,15 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { MetricsAPIRequestRT, MetricsAPIResponseRT } from '../../../common/http_api';
+import { schema } from '@kbn/config-schema';
+import { InfraBackendLibs } from '../../lib/infra_types';
 import { throwErrors } from '../../../common/runtime_types';
 import { createSearchClient } from '../../lib/create_search_client';
-import { InfraBackendLibs } from '../../lib/infra_types';
 import { query } from '../../lib/metrics';
+import { MetricsAPIRequestRT, MetricsAPIResponseRT } from '../../../common/http_api';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 

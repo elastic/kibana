@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { Query } from '@kbn/es-query';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import {
   SavedObjectManagementTypeInfo,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
+import { Query } from '@kbn/es-query';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
 export interface TestPluginReturn {
   plugin: EmbeddablePublicPlugin;

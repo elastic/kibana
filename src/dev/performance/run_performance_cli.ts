@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import path from 'path';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+import fs from 'fs';
+import path from 'path';
 
 const JOURNEY_BASE_PATH = 'x-pack/performance/journeys_e2e';
 

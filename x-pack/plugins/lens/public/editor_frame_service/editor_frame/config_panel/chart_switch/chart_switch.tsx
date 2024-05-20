@@ -6,41 +6,41 @@
  */
 
 import './chart_switch.scss';
+import React, { useState, useMemo, memo } from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSelectable,
   EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
-import React, { useState, useMemo, memo } from 'react';
-import { generateId } from '../../../../id_generator/id_generator';
-import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
 import {
-  DatasourceStates,
-  VisualizationState,
-  insertLayer,
-  removeLayers,
-  selectActiveDatasourceId,
-  selectDatasourceStates,
-  selectVisualization,
-  useLensDispatch,
-  useLensSelector,
-} from '../../../../state_management';
-import {
-  DatasourceMap,
-  FramePublicAPI,
-  Suggestion,
   Visualization,
-  VisualizationMap,
+  FramePublicAPI,
   VisualizationType,
+  VisualizationMap,
+  DatasourceMap,
+  Suggestion,
 } from '../../../../types';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
+import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
+import {
+  insertLayer,
+  removeLayers,
+  useLensDispatch,
+  useLensSelector,
+  VisualizationState,
+  DatasourceStates,
+  selectActiveDatasourceId,
+  selectVisualization,
+  selectDatasourceStates,
+} from '../../../../state_management';
+import { generateId } from '../../../../id_generator/id_generator';
 import { ChartOptionAppend } from './chart_option_append';
 
 interface VisualizationSelection {

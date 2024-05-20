@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import React, { Component, RefObject } from 'react';
 import { first } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor, MapCenterAndZoom, MapSettings } from '../../common/descriptor_types';
+import { MapEmbeddable } from './map_embeddable';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { MapApi } from './map_api';
-import { MapEmbeddable } from './map_embeddable';
 
 export interface Props {
   title?: string;

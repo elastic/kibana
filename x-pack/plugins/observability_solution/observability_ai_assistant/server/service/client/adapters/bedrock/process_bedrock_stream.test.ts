@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
 import { fromUtf8 } from '@smithy/util-utf8';
 import { lastValueFrom, of } from 'rxjs';
-import { MessageRole } from '../../../../../common';
+import { Logger } from '@kbn/logging';
 import { concatenateChatCompletionChunks } from '../../../../../common/utils/concatenate_chat_completion_chunks';
-import { withoutTokenCountEvents } from '../../../../../common/utils/without_token_count_events';
+import { processBedrockStream } from './process_bedrock_stream';
+import { MessageRole } from '../../../../../common';
 import { TOOL_USE_END, TOOL_USE_START } from '../simulate_function_calling/constants';
 import { parseInlineFunctionCalls } from '../simulate_function_calling/parse_inline_function_calls';
-import { processBedrockStream } from './process_bedrock_stream';
+import { withoutTokenCountEvents } from '../../../../../common/utils/without_token_count_events';
 
 describe('processBedrockStream', () => {
   const encodeChunk = (body: unknown) => {

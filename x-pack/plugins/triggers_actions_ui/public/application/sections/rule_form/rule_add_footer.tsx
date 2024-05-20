@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutFooter,
+  EuiButtonEmpty,
+  EuiButton,
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { useHealthContext } from '../../context/health_context';
 
 interface RuleAddFooterProps {

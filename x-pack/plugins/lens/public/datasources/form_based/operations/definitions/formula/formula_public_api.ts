@@ -7,11 +7,11 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Query } from '@kbn/es-query';
-import type { TimeScaleUnit } from '../../../../../../common/expressions';
 import type { DateRange } from '../../../../../../common/types';
 import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_service/loader';
 import type { IndexPattern } from '../../../../../types';
 import type { PersistedIndexPatternLayer } from '../../../types';
+import type { TimeScaleUnit } from '../../../../../../common/expressions';
 
 import { insertOrReplaceFormulaColumn } from './parse';
 

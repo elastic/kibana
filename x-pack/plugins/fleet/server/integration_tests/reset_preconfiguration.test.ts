@@ -14,11 +14,11 @@ import {
   createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
 
+import type { AgentPolicySOAttributes } from '../types';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';
 import { API_VERSIONS } from '../../common/constants';
-import type { AgentPolicySOAttributes } from '../types';
 
-import { getSupertestWithAdminUser, useDockerRegistry, waitForFleetSetup } from './helpers';
+import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 

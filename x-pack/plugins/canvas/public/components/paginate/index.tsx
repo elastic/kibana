@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React, { useState, useEffect, useRef } from 'react';
-import { Paginate as Component, PaginateChildProps, PaginateProps } from './paginate';
+import PropTypes from 'prop-types';
+import { Paginate as Component, PaginateProps, PaginateChildProps } from './paginate';
 
 export type { PaginateProps, PaginateChildProps };
 export interface InPaginateProps {

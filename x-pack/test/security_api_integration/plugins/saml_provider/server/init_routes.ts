@@ -7,8 +7,8 @@
 
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 import {
-  getSAMLRequestId,
   getSAMLResponse,
+  getSAMLRequestId,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { PluginSetupDependencies } from '.';
 

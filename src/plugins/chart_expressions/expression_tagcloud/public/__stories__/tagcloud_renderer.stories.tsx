@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { from } from 'rxjs';
-import { Orientation, ScaleOptions } from '../../common/constants';
-import { TagcloudRendererConfig } from '../../common/types';
-import { palettes } from '../__mocks__/palettes';
 import { tagcloudRenderer } from '../expression_renderers';
+import { TagcloudRendererConfig } from '../../common/types';
+import { ScaleOptions, Orientation } from '../../common/constants';
+import { palettes } from '../__mocks__/palettes';
 import { ExpressionTagcloudRendererDependencies } from '../plugin';
 
 const config: TagcloudRendererConfig = {

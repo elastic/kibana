@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { XYChartSeriesIdentifier } from '@elastic/charts';
-import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
-import { shallow } from 'enzyme';
 import React from 'react';
-import { sampleArgs, sampleLayer } from '../../../common/__mocks__';
-import { LayersAccessorsTitles, LayersFieldFormats, generateSeriesId } from '../../helpers';
+import { shallow } from 'enzyme';
 import { Tooltip } from './tooltip';
+import { generateSeriesId, LayersAccessorsTitles, LayersFieldFormats } from '../../helpers';
+import { XYChartSeriesIdentifier } from '@elastic/charts';
+import { sampleArgs, sampleLayer } from '../../../common/__mocks__';
+import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 
 const getSeriesIdentifier = ({
   layerId,
@@ -101,7 +101,7 @@ describe('Tooltip', () => {
   const formatFactory: FormatFactory = (format) =>
     ({
       convert: (value) => `formatted-${format?.id}-${value}`,
-    }) as FieldFormat;
+    } as FieldFormat);
 
   it('should render plain tooltip', () => {
     const tooltip = shallow(

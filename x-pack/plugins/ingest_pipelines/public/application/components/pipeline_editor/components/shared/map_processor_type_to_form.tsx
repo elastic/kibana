@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { ReactNode } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCode, EuiLink } from '@elastic/eui';
 
 import { LicenseType } from '../../../../../types';
 
@@ -16,12 +16,12 @@ import {
   Append,
   Attachment,
   Bytes,
-  CSV,
   Circle,
   CommunityId,
   Convert,
-  DateIndexName,
+  CSV,
   DateProcessor,
+  DateIndexName,
   Dissect,
   DotExpander,
   Drop,
@@ -29,7 +29,6 @@ import {
   Fail,
   Fingerprint,
   Foreach,
-  FormFieldsComponent,
   GeoGrid,
   GeoIP,
   Grok,
@@ -46,17 +45,18 @@ import {
   RegisteredDomain,
   Remove,
   Rename,
-  Reroute,
   Script,
   SetProcessor,
   SetSecurityUser,
-  Sort,
   Split,
+  Sort,
   Trim,
   Uppercase,
-  UriParts,
   UrlDecode,
   UserAgent,
+  FormFieldsComponent,
+  UriParts,
+  Reroute,
 } from '../processor_form/processors';
 
 const processorCategories = {

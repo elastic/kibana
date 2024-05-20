@@ -8,9 +8,9 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   PERFORM_RULE_UPGRADE_URL,
+  SkipRuleUpgradeReason,
   PerformRuleUpgradeRequestBody,
   PickVersionValues,
-  SkipRuleUpgradeReason,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   PerformRuleUpgradeResponseBody,
@@ -22,7 +22,6 @@ import { buildRouteValidation } from '../../../../../utils/build_validation/rout
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
 import { internalRuleToAPIResponse } from '../../../rule_management/normalization/rule_converters';
-import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
@@ -31,6 +30,7 @@ import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 
 export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

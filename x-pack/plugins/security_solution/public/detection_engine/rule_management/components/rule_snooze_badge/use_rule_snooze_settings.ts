@@ -6,8 +6,8 @@
  */
 
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useFetchRulesSnoozeSettingsQuery } from '../../api/hooks/use_fetch_rules_snooze_settings_query';
+import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import * as i18n from './translations';
 
 interface UseRuleSnoozeSettingsResult {

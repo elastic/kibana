@@ -6,20 +6,20 @@
  */
 
 import moment from 'moment';
+import { isCustom, isNotCountOrCustom } from './metric_expression_params';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { createCustomMetricsAggregations } from '../../../create_custom_metrics_aggregations';
 import {
+  hasAdditionalContext,
   KUBERNETES_POD_UID,
   NUMBER_OF_DOCUMENTS,
-  hasAdditionalContext,
   shouldTermsAggOnContainer,
   termsAggField,
   validGroupByForContext,
 } from '../../common/utils';
 import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
-import { createRateAggsBucketScript, createRateAggsBuckets } from './create_rate_aggregation';
-import { isCustom, isNotCountOrCustom } from './metric_expression_params';
+import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 import { wrapInCurrentPeriod } from './wrap_in_period';
 
 const getParsedFilterQuery: (filterQuery: string | undefined) => Array<Record<string, any>> = (
@@ -100,22 +100,22 @@ export const getElasticsearchMetricQuery = (
     aggType === Aggregators.COUNT
       ? {}
       : aggType === Aggregators.RATE
-        ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
-        : aggType === Aggregators.P95 || aggType === Aggregators.P99
-          ? createPercentileAggregation(aggType, metricParams.metric)
-          : isCustom(metricParams)
-            ? createCustomMetricsAggregations(
-                'aggregatedValue',
-                metricParams.customMetrics,
-                metricParams.equation
-              )
-            : {
-                aggregatedValue: {
-                  [aggType]: {
-                    field: metricParams.metric,
-                  },
-                },
-              };
+      ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
+      : aggType === Aggregators.P95 || aggType === Aggregators.P99
+      ? createPercentileAggregation(aggType, metricParams.metric)
+      : isCustom(metricParams)
+      ? createCustomMetricsAggregations(
+          'aggregatedValue',
+          metricParams.customMetrics,
+          metricParams.equation
+        )
+      : {
+          aggregatedValue: {
+            [aggType]: {
+              field: metricParams.metric,
+            },
+          },
+        };
 
   const bucketSelectorAggregations = createBucketSelector(
     metricParams,

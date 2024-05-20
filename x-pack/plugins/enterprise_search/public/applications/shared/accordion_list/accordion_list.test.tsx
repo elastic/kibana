@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiAccordion, EuiIcon, EuiInMemoryTable, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiIcon, EuiTitle, EuiInMemoryTable } from '@elastic/eui';
 
 import { AccordionList } from './accordion_list';
 

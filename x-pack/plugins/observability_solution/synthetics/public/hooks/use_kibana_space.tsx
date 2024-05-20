@@ -1,5 +1,3 @@
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
  * 2.0.
  */
 import type { Space } from '@kbn/spaces-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ClientPluginsStart } from '../plugin';
 

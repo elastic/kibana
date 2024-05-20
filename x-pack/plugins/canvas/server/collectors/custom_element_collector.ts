@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { parseExpression } from '@kbn/expressions-plugin/common';
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { parseExpression } from '@kbn/expressions-plugin/common';
+import { collectFns } from './collector_helpers';
 import {
   TelemetryCollector,
   TelemetryCustomElement,
   TelemetryCustomElementDocument,
 } from '../../types';
-import { collectFns } from './collector_helpers';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {

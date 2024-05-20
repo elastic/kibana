@@ -10,13 +10,13 @@ import {
   ConfigSchema,
   DashboardActionParamsSchema,
   DashboardActionResponseSchema,
-  InvokeAIActionParamsSchema,
-  InvokeAIActionResponseSchema,
+  SecretsSchema,
   RunActionParamsSchema,
   RunActionResponseSchema,
-  RunApiLatestResponseSchema,
-  SecretsSchema,
+  InvokeAIActionParamsSchema,
+  InvokeAIActionResponseSchema,
   StreamingResponseSchema,
+  RunApiLatestResponseSchema,
 } from './schema';
 
 export type Config = TypeOf<typeof ConfigSchema>;

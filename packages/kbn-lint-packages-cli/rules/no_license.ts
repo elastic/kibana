@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getProp, setProp } from '@kbn/json-ast';
 import { PackageRule } from '@kbn/repo-linter';
+import { setProp, getProp } from '@kbn/json-ast';
 
 const DEFAULT_LICENSE = 'SSPL-1.0 OR Elastic License 2.0';
 const XPACK_LICENSE = 'Elastic License 2.0';
@@ -25,8 +25,8 @@ export const noLicenseRule = PackageRule.create('noLicense', {
     const expected = exception
       ? exception[0]
       : pkg.normalizedRepoRelativeDir.startsWith('x-pack')
-        ? XPACK_LICENSE
-        : DEFAULT_LICENSE;
+      ? XPACK_LICENSE
+      : DEFAULT_LICENSE;
 
     if (pkg.pkg.license !== expected) {
       this.err(`The "license" in the package.json file must be ${expected}`, {

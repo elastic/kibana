@@ -6,25 +6,25 @@
  */
 
 import {
+  copyToClipboard,
   EuiButtonEmpty,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiEmptyPrompt,
   EuiSpacer,
-  copyToClipboard,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
+import { CustomCallout } from '../callouts/custom_callout';
 import { CompareFieldsTable } from '../../../compare_fields_table';
 import { getCustomTableColumns } from '../../../compare_fields_table/helpers';
+import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
+import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
+import { getAllCustomMarkdownComments, showCustomCallout } from './helpers';
+import * as i18n from '../../index_properties/translations';
 import { COPIED_RESULTS_TOAST_TITLE } from '../../../translations';
 import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
 import { useDataQualityContext } from '../../data_quality_context';
-import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
-import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
-import * as i18n from '../../index_properties/translations';
-import { CustomCallout } from '../callouts/custom_callout';
-import { getAllCustomMarkdownComments, showCustomCallout } from './helpers';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;

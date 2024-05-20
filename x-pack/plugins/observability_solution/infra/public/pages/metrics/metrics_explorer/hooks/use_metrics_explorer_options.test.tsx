@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import {
-  DEFAULT_OPTIONS,
-  DEFAULT_TIMERANGE,
+  useMetricsExplorerOptions,
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-  useMetricsExplorerOptions,
+  DEFAULT_OPTIONS,
+  DEFAULT_TIMERANGE,
 } from './use_metrics_explorer_options';
 
 let PREFILL: Record<string, any> = {};

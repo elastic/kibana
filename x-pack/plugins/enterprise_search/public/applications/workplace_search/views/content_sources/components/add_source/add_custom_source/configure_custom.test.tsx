@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiFieldText, EuiForm } from '@elastic/eui';
+import { EuiForm, EuiFieldText } from '@elastic/eui';
 
 import { staticSourceData } from '../../../source_data';
 

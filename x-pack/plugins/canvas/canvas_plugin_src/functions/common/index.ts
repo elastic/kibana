@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { all } from './all';
 import { alterColumn } from './alterColumn';
+import { all } from './all';
 import { any } from './any';
 import { asFn } from './as';
 import { axisConfig } from './axisConfig';
-import { caseFn } from './case';
 import { clear } from './clear';
-import { columns } from './columns';
 import { compare } from './compare';
 import { containerStyle } from './containerStyle';
 import { context } from './context';
+import { columns } from './columns';
 import { csv } from './csv';
 import { date } from './date';
 import { doFn } from './do';
@@ -44,12 +43,13 @@ import { seriesStyle } from './seriesStyle';
 import { sort } from './sort';
 import { staticColumn } from './staticColumn';
 import { string } from './string';
-import { switchFn } from './switch';
 import { table } from './table';
 import { tail } from './tail';
 import { timerange } from './time_range';
 import { timefilter } from './timefilter';
 import { timefilterControl } from './timefilterControl';
+import { switchFn } from './switch';
+import { caseFn } from './case';
 
 export const functions = [
   all,

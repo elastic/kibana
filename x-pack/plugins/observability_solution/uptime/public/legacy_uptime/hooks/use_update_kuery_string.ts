@@ -7,10 +7,10 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { useEffect, useState } from 'react';
-import { combineFiltersAndUserSearch, stringifyKueries } from '../../../common/lib';
-import { TAG_KEY_FOR_AND_CONDITION } from '../components/overview/filter_group/filter_group';
-import { useUptimeDataView } from '../contexts/uptime_data_view_context';
 import { useUptimeRefreshContext } from '../contexts/uptime_refresh_context';
+import { useUptimeDataView } from '../contexts/uptime_data_view_context';
+import { TAG_KEY_FOR_AND_CONDITION } from '../components/overview/filter_group/filter_group';
+import { combineFiltersAndUserSearch, stringifyKueries } from '../../../common/lib';
 
 const getKueryString = (
   urlFilters: string,

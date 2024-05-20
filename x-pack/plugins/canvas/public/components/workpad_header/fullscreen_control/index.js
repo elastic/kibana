@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React, { useContext, useCallback } from 'react';
-import { compose, getContext, withHandlers, withProps, withState } from 'react-recompose';
 import { connect, useDispatch } from 'react-redux';
+import PropTypes from 'prop-types';
+import { withState, withProps, withHandlers, compose, getContext } from 'react-recompose';
+import { selectToplevelNodes } from '../../../state/actions/transient';
+import { getSelectedPageIndex, getPages, getWorkpad } from '../../../state/selectors/workpad';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
 import {
   LAUNCHED_FULLSCREEN,
   LAUNCHED_FULLSCREEN_AUTOPLAY,
 } from '../../../../common/lib/constants';
 import { transitionsRegistry } from '../../../lib/transitions_registry';
-import { METRIC_TYPE, trackCanvasUiMetric } from '../../../lib/ui_metric';
-import { WorkpadRoutingContext } from '../../../routes/workpad/workpad_routing_context';
 import { fetchAllRenderables } from '../../../state/actions/elements';
-import { selectToplevelNodes } from '../../../state/actions/transient';
-import { getPages, getSelectedPageIndex, getWorkpad } from '../../../state/selectors/workpad';
+import { WorkpadRoutingContext } from '../../../routes/workpad/workpad_routing_context';
 import { FullscreenControl as Component } from './fullscreen_control';
 
 // TODO: a lot of this is borrowed code from `/components/workpad/index.js`.

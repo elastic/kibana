@@ -1,8 +1,3 @@
-import type { TimeRange } from '@kbn/es-query';
-import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
-import { useTimeBuckets } from '@kbn/observability-plugin/public';
-import { getAlertSummaryTimeRange } from '@kbn/observability-plugin/public';
-import { calculateTimeRangeBucketSize } from '@kbn/observability-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +5,11 @@ import { calculateTimeRangeBucketSize } from '@kbn/observability-plugin/public';
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import type { TimeRange } from '@kbn/es-query';
+import { useTimeBuckets } from '@kbn/observability-plugin/public';
+import { getAlertSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { calculateTimeRangeBucketSize } from '@kbn/observability-plugin/public';
+import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
 import { useSloAlertsQuery } from './slo_alerts_table';
 
 import { SloEmbeddableDeps } from '../slo_alerts_embeddable';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
 import type { ISavedObjectsImporter, Logger } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import pRetry from 'p-retry';
+import { Readable } from 'stream';
 
 import sourceRuleMonitoringDashboard from './dashboard_rule_monitoring.json';
 import sourceKibanaEventLogDataView from './data_view_kibana_event_log.json';

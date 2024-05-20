@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { findKey, get, isPlainObject, keys } from 'lodash';
+import { get, isPlainObject, keys, findKey } from 'lodash';
 import moment from 'moment-timezone';
 import { IAggConfig, parseInterval } from '../aggs';
 import { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation } from './types';

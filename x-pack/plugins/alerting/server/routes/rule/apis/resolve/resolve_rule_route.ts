@@ -7,15 +7,15 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import {
-  ResolveRuleResponseV1,
-  resolveParamsSchemaV1,
-} from '../../../../../common/routes/rule/apis/resolve';
 import { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
+import {
+  resolveParamsSchemaV1,
+  ResolveRuleResponseV1,
+} from '../../../../../common/routes/rule/apis/resolve';
 import { ILicenseState } from '../../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformResolveResponseV1 } from './transforms';
 
 export type ResolveRuleRequestParamsV1 = TypeOf<typeof resolveParamsSchemaV1>;

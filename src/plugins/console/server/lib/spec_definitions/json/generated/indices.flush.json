@@ -6,13 +6,25 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "allow_no_indices": "__flag__",
-      "expand_wildcards": ["all", "open", "closed", "hidden", "none"],
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
       "force": "__flag__",
       "ignore_unavailable": "__flag__",
       "wait_if_ongoing": "__flag__"
     },
-    "methods": ["POST", "GET"],
-    "patterns": ["_flush", "{index}/_flush"],
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "_flush",
+      "{index}/_flush"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-flush.html",
     "availability": {
       "stack": true,

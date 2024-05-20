@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import React from 'react';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { ObservabilityLogsExplorerPageTemplate } from '../components/page_template';
 
 export const NotFoundPage = () => {

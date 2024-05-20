@@ -5,47 +5,47 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { UseQueryResult } from '@tanstack/react-query';
 import { EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { UseQueryResult } from '@tanstack/react-query';
-import React, { useMemo } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
-import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
-import type {
-  BaseCspSetupStatus,
-  ComplianceDashboardDataV2,
-  PosturePolicyTemplate,
-} from '../../../common/types_old';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useCspmStatsApi, useKspmStatsApi } from '../../common/api/use_stats_api';
-import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
-import { useKibana } from '../../common/hooks/use_kibana';
-import { cloudPosturePages, cspIntegrationDocsNavigation } from '../../common/navigation/constants';
-import { encodeQuery } from '../../common/navigation/query_utils';
+import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
+import type {
+  PosturePolicyTemplate,
+  ComplianceDashboardDataV2,
+  BaseCspSetupStatus,
+} from '../../../common/types_old';
+import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import {
-  CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
   CloudPosturePage,
   CspNoDataPage,
   CspNoDataPageProps,
   KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
+  CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
 } from '../../components/cloud_posture_page';
-import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
-import { NoFindingsStates } from '../../components/no_findings_states';
-import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
-import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
-import { SummarySection } from './dashboard_sections/summary_section';
 import {
   CLOUD_DASHBOARD_CONTAINER,
-  CLOUD_DASHBOARD_TAB,
-  CLOUD_POSTURE_DASHBOARD_PAGE_HEADER,
   DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_TAB,
+  CLOUD_DASHBOARD_TAB,
+  CLOUD_POSTURE_DASHBOARD_PAGE_HEADER,
 } from './test_subjects';
+import { useCspmStatsApi, useKspmStatsApi } from '../../common/api/use_stats_api';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { NoFindingsStates } from '../../components/no_findings_states';
+import { SummarySection } from './dashboard_sections/summary_section';
+import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import { cloudPosturePages, cspIntegrationDocsNavigation } from '../../common/navigation/constants';
+import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
+import { encodeQuery } from '../../common/navigation/query_utils';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const POSTURE_TYPE_CSPM = CSPM_POLICY_TEMPLATE;
 const POSTURE_TYPE_KSPM = KSPM_POLICY_TEMPLATE;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Doc, DocAnnotation } from '../types';
+import { DocAnnotation, Doc } from '../types';
 
 export const transformAnnotationToDoc = (docAnnotation: DocAnnotation): Doc => ({
   content: docAnnotation.pageContent,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useRef } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { CLEAR_CHAT, SUBMIT_MESSAGE } from '../translations';
 
 interface OwnProps {

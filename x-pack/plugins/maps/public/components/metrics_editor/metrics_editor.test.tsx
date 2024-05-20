@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { AGG_TYPE } from '../../../common/constants';
+import { shallow } from 'enzyme';
 import { MetricsEditor } from './metrics_editor';
+import { AGG_TYPE } from '../../../common/constants';
 
 const defaultProps = {
   metrics: [

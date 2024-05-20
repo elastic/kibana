@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { createContext, useContext } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { createContext, useContext } from 'react';
 
 export const DataSourceContext = createContext<{
   dataView: DataView | never;

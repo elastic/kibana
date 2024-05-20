@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'url';
-import type { App } from '@kbn/core-application-browser';
-import type { IBasePath } from '@kbn/core-http-browser';
 import { getUrlOrigin } from '@kbn/std';
+import { resolve } from 'url';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { App } from '@kbn/core-application-browser';
 import type { ParsedAppUrl } from '../types';
 
 /**

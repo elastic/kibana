@@ -108,7 +108,11 @@
             "tags": [],
             "label": "specInfo",
             "description": [],
-            "signature": ["Omit<Partial<", "OpenAPIV3", ".InfoObject>, \"version\"> | undefined"],
+            "signature": [
+              "Omit<Partial<",
+              "OpenAPIV3",
+              ".InfoObject>, \"version\"> | undefined"
+            ],
             "path": "packages/kbn-openapi-bundler/src/openapi_bundler.ts",
             "deprecated": false,
             "trackAdoption": false

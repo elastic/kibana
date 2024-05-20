@@ -6,8 +6,13 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["PUT", "POST"],
-    "patterns": ["_watcher/watch/{watch_id}/_activate"],
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_watcher/watch/{watch_id}/_activate"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-activate-watch.html",
     "availability": {
       "stack": true,

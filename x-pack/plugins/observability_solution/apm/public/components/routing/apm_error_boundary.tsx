@@ -1,6 +1,3 @@
-import { EuiErrorBoundary } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,7 +5,10 @@ import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
  * 2.0.
  */
 import { NotFoundRouteException } from '@kbn/typed-react-router-config';
+import { EuiErrorBoundary } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { useLocation } from 'react-router-dom';
 import { ApmPluginStartDeps } from '../../plugin';
 

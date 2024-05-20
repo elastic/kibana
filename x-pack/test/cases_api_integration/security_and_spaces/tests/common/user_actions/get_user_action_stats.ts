@@ -5,30 +5,20 @@
  * 2.0.
  */
 
-import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
+import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  bulkCreateAttachments,
-  createCase,
-  createComment,
-  deleteAllCaseItems,
-  getCaseUserActionStats,
-  superUserSpace1Auth,
-  updateCase,
-} from '../../../../common/lib/api';
 import {
   globalRead,
-  noKibanaPrivileges,
-  obsOnly,
-  obsOnlyRead,
   obsSec,
   obsSecRead,
+  noKibanaPrivileges,
   secOnly,
   secOnlyRead,
   superUser,
+  obsOnly,
+  obsOnlyRead,
 } from '../../../../common/lib/authentication/users';
 import {
   getPostCaseRequest,
@@ -39,6 +29,16 @@ import {
   postCommentUserReq,
   postExternalReferenceESReq,
 } from '../../../../common/lib/mock';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  bulkCreateAttachments,
+  createCase,
+  createComment,
+  deleteAllCaseItems,
+  updateCase,
+  superUserSpace1Auth,
+  getCaseUserActionStats,
+} from '../../../../common/lib/api';
 
 const getCaseUpdateData = (id: string, version: string) => ({
   status: CaseStatuses.open,

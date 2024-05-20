@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { Logger } from '@kbn/core/server';
 import { map } from 'lodash';
-import { Subject, from, race } from 'rxjs';
-import { bufferCount, bufferWhen, filter, first, flatMap, mapTo } from 'rxjs';
-import { Err, Ok, Result, asErr, asOk, either } from './result_type';
+import { Subject, race, from } from 'rxjs';
+import { bufferWhen, filter, bufferCount, flatMap, mapTo, first } from 'rxjs';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { either, Result, asOk, asErr, Ok, Err } from './result_type';
 
 export interface BufferOptions {
   bufferMaxDuration?: number;

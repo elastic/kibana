@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiCollapsibleNavItem, type EuiCollapsibleNavItemProps } from '@elastic/eui';
-import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
 import React, { FC, useMemo } from 'react';
+import { EuiCollapsibleNavItem, type EuiCollapsibleNavItemProps } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
 import { useNavigation as useServices } from '../../services';

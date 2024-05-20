@@ -1,12 +1,3 @@
-import {
-  EuiButtonIcon,
-  EuiCopy,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,6 +6,15 @@ import { i18n } from '@kbn/i18n';
  * Side Public License, v 1.
  */
 import React, { type FC } from 'react';
+import {
+  EuiFormRow,
+  EuiFieldText,
+  EuiCopy,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const DeploymentDetailsEsInput: FC<{ elasticsearchUrl: string }> = ({
   elasticsearchUrl,

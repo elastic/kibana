@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
 import { SeverityMapping } from '../severity_mapping';
 
 /**

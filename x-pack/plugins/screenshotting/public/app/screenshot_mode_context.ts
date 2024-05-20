@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import { createContext } from 'react';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
 export const ScreenshotModeContext = createContext<ScreenshotModePluginSetup | undefined>(
   undefined

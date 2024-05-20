@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { FlagsReader, getFlags } from '@kbn/dev-cli-runner';
 import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/jest-serializers';
+import { FlagsReader, getFlags } from '@kbn/dev-cli-runner';
 
 import { EsVersion } from '../../functional_test_runner';
-import { FLAG_OPTIONS, parseFlags } from './flags';
+import { parseFlags, FLAG_OPTIONS } from './flags';
 
 jest.mock('uuid', () => ({ v4: () => 'some-uuid' }));
 
@@ -79,9 +79,8 @@ describe('parse runTest flags', () => {
       ]
     `);
 
-    expect(
-      test({ config: undefined, journey: ['foo', 'bar', 'baz'] }).configs
-    ).toMatchInlineSnapshot(`
+    expect(test({ config: undefined, journey: ['foo', 'bar', 'baz'] }).configs)
+      .toMatchInlineSnapshot(`
       Array [
         <absolute path>/foo,
         <absolute path>/bar,

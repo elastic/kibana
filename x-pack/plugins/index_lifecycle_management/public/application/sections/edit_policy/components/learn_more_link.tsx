@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { ReactNode } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ReactNode } from 'react';
 
 interface Props {
   docPath: string;

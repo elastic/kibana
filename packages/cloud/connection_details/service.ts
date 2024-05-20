@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import type { Format } from './tabs/api_keys_tab/views/success_form/format_select';
+import { i18n } from '@kbn/i18n';
 import { ApiKey } from './tabs/api_keys_tab/views/success_form/types';
+import type { Format } from './tabs/api_keys_tab/views/success_form/format_select';
 import type { ConnectionDetailsOpts, TabID } from './types';
 
 export class ConnectionDetailsService {

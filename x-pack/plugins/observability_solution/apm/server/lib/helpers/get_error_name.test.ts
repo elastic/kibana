@@ -1,4 +1,3 @@
-import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
  * 2.0.
  */
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
+import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { getErrorName } from './get_error_name';
 
 describe('getErrorName', () => {

@@ -12,12 +12,12 @@ import React from 'react';
 import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_critical_path_feature_enabled_setting';
 import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
 import { Waterfall } from './waterfall';
-import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning';
 import {
   type IWaterfall,
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
 import { WaterfallLegends } from './waterfall_legends';
+import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning';
 
 interface Props {
   waterfallItemId?: string;
@@ -43,15 +43,12 @@ export function WaterfallContainer({
 
   // Service colors are needed to color the dot in the error popover
   const serviceLegends = legends.filter(({ type }) => type === WaterfallLegendType.ServiceName);
-  const serviceColors = serviceLegends.reduce(
-    (colorMap, legend) => {
-      return {
-        ...colorMap,
-        [legend.value!]: legend.color,
-      };
-    },
-    {} as Record<string, string>
-  );
+  const serviceColors = serviceLegends.reduce((colorMap, legend) => {
+    return {
+      ...colorMap,
+      [legend.value!]: legend.color,
+    };
+  }, {} as Record<string, string>);
 
   // only color by span type if there are only events for one service
   const colorBy =

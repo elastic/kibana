@@ -8,8 +8,8 @@
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import type {
-  RegisterFunction,
   RegistrationCallback,
+  RegisterFunction,
 } from '@kbn/observability-ai-assistant-plugin/server/service/types';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMConfig } from '..';

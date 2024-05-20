@@ -41,7 +41,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<CoreAppContract>"],
+            "signature": [
+              "() => jest.Mocked<CoreAppContract>"
+            ],
             "path": "packages/core/apps/core-apps-browser-mocks/src/core_app.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

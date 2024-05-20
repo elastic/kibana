@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
-  EuiSkeletonRectangle,
-  EuiSkeletonTitle,
-  EuiText,
   EuiTitle,
+  EuiText,
+  EuiLink,
   useEuiTheme,
+  EuiSkeletonTitle,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
-import React from 'react';
 
 export function FlyoutSummaryKpiItem({
   title,

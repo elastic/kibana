@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { LARGE_BYTES, LARGE_FLOAT } from '../../../../common/formatting';
+import { ApmMetric, ApmCpuUtilizationMetric, ApmEventsRateClusterMetric } from './classes';
 import { QuotaMetric } from '../classes';
-import { ApmCpuUtilizationMetric, ApmEventsRateClusterMetric, ApmMetric } from './classes';
 
 const instanceSystemLoadTitle = i18n.translate(
   'xpack.monitoring.metrics.apmInstance.systemLoadTitle',

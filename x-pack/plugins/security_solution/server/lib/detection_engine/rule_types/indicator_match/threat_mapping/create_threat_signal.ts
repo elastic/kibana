@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SearchAfterAndBulkCreateReturnType } from '../../types';
-import { getFilter } from '../../utils/get_filter';
-import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
-import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
-import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
+import { getFilter } from '../../utils/get_filter';
+import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
+import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
 import type { CreateThreatSignalOptions } from './types';
+import type { SearchAfterAndBulkCreateReturnType } from '../../types';
+import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { buildThreatEnrichment } from './build_threat_enrichment';
 export const createThreatSignal = async ({

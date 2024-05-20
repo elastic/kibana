@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useStorage } from '@kbn/ml-local-storage';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { of, throwError } from 'rxjs';
+import { useMlNotifications, MlNotificationsContextProvider } from './ml_notifications_context';
+import { useStorage } from '@kbn/ml-local-storage';
 import { useMlKibana } from '../kibana';
-import { MlNotificationsContextProvider, useMlNotifications } from './ml_notifications_context';
 
 const mockCountMessages = jest.fn(() => {
   return of({ info: 1, error: 0, warning: 0 });

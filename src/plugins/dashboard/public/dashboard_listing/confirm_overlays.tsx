@@ -9,7 +9,6 @@
 import React from 'react';
 
 import {
-  EUI_MODAL_CANCEL_BUTTON,
   EuiButton,
   EuiButtonEmpty,
   EuiFocusTrap,
@@ -19,6 +18,7 @@ import {
   EuiModalHeaderTitle,
   EuiOutsideClickDetector,
   EuiText,
+  EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';

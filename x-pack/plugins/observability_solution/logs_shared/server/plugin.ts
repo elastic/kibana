@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { LogsSharedConfig } from '../common/plugin_config';
-import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
-import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
-import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
-import { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_types';
-import { initLogsSharedServer } from './logs_shared_server';
-import { logViewSavedObjectType } from './saved_objects';
-import { LogEntriesService } from './services/log_entries';
-import { LogViewsService } from './services/log_views';
 import {
   LogsSharedPluginCoreSetup,
   LogsSharedPluginSetup,
@@ -24,6 +15,15 @@ import {
   LogsSharedServerPluginStartDeps,
   UsageCollector,
 } from './types';
+import { logViewSavedObjectType } from './saved_objects';
+import { initLogsSharedServer } from './logs_shared_server';
+import { LogViewsService } from './services/log_views';
+import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
+import { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_types';
+import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
+import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
+import { LogEntriesService } from './services/log_entries';
+import { LogsSharedConfig } from '../common/plugin_config';
 
 export class LogsSharedPlugin
   implements

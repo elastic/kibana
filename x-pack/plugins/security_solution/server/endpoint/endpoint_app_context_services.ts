@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
-import type { CasesClient, CasesServerStart } from '@kbn/cases-plugin/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   ElasticsearchClient,
   KibanaRequest,
@@ -16,20 +12,20 @@ import type {
   LoggerFactory,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
+import type { CasesClient, CasesServerStart } from '@kbn/cases-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   FleetFromHostFileClientInterface,
   FleetStartContract,
   MessageSigningServiceInterface,
 } from '@kbn/fleet-plugin/server';
+import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
-import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
-import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
-import type { EndpointAuthz } from '../../common/endpoint/types/authz';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
-import type { LicenseService } from '../../common/license';
-import type { ConfigType } from '../config';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { ResponseActionsClient } from './services';
+import { getResponseActionsClient, NormalizedExternalConnectorClient } from './services';
 import {
   getAgentPolicyCreateCallback,
   getAgentPolicyUpdateCallback,
@@ -38,22 +34,26 @@ import {
   getPackagePolicyPostCreateCallback,
   getPackagePolicyUpdateCallback,
 } from '../fleet_integration/fleet_integration';
-import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
-import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
+import type { ManifestManager } from './services/artifacts';
+import type { ConfigType } from '../config';
 import type { IRequestContextFactory } from '../request_context_factory';
+import type { LicenseService } from '../../common/license';
+import type { EndpointMetadataService } from './services/metadata';
 import {
   EndpointAppContentServicesNotSetUpError,
   EndpointAppContentServicesNotStartedError,
 } from './errors';
-import type { ResponseActionsClient } from './services';
-import { NormalizedExternalConnectorClient, getResponseActionsClient } from './services';
-import type { ManifestManager } from './services/artifacts';
-import type { FeatureUsageService } from './services/feature_usage/service';
 import type {
   EndpointFleetServicesFactoryInterface,
   EndpointInternalFleetServicesInterface,
 } from './services/fleet/endpoint_fleet_services_factory';
-import type { EndpointMetadataService } from './services/metadata';
+import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
+import type { EndpointAuthz } from '../../common/endpoint/types/authz';
+import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
+import type { FeatureUsageService } from './services/feature_usage/service';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
+import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
+import type { ResponseActionAgentType } from '../../common/endpoint/service/response_actions/constants';
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
   cloud: CloudSetup;

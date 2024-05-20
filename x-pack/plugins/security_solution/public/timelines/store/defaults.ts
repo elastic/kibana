@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
 import { TimelineTabs } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
 
-import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
+import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false

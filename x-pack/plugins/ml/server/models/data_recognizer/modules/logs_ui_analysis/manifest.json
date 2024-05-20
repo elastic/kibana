@@ -17,5 +17,9 @@
       "job_id": "log-entry-rate"
     }
   ],
-  "tags": ["logs", "observability", "security"]
+  "tags": [
+    "logs",
+    "observability",
+    "security"
+  ]
 }

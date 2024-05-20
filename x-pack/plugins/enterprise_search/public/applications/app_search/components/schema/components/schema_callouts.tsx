@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { SchemaErrorsCallout } from '../../../../shared/schema';
 import { AppLogic } from '../../../app_logic';
-import { ENGINE_REINDEX_JOB_PATH, ENGINE_RELEVANCE_TUNING_PATH } from '../../../routes';
+import { ENGINE_RELEVANCE_TUNING_PATH, ENGINE_REINDEX_JOB_PATH } from '../../../routes';
 import { generateEnginePath } from '../../engine';
 
 import { SchemaLogic } from '../schema_logic';

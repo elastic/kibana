@@ -5,9 +5,9 @@
  * 2.0.
  */
 import React from 'react';
+import { LocationStatusBadges } from '../../common/components/location_status_badges';
 import { EncryptedSyntheticsSavedMonitor } from '../../../../../../common/runtime_types';
 import { useStatusByLocation } from '../../../hooks/use_status_by_location';
-import { LocationStatusBadges } from '../../common/components/location_status_badges';
 
 export const LocationsStatus = ({
   configId,

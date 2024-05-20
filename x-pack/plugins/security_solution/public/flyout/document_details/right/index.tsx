@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
-import { useKibana } from '../../../common/lib/kibana';
-import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
+import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
-import { RightPanelTour } from './components/tour';
-import { PanelContent } from './content';
-import { useRightPanelContext } from './context';
-import { PanelFooter } from './footer';
-import { PanelHeader } from './header';
-import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
 import { useTabs } from './hooks/use_tabs';
+import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
+import { useKibana } from '../../../common/lib/kibana';
+import { useRightPanelContext } from './context';
 import { PanelNavigation } from './navigation';
+import { PanelHeader } from './header';
+import { PanelContent } from './content';
+import { RightPanelTour } from './components/tour';
 import type { RightPanelTabType } from './tabs';
+import { PanelFooter } from './footer';
+import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 

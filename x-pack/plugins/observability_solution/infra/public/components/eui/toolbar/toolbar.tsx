@@ -6,9 +6,9 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { EuiTheme, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FunctionComponent } from 'react';
 import { StyledComponent } from 'styled-components';
+import { euiStyled, EuiTheme } from '@kbn/kibana-react-plugin/common';
 
 // The return type of this component needs to be specified because the inferred
 // return type depends on types that are not exported from EUI. You get a TS4023

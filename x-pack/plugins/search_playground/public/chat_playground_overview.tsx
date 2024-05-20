@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PlaygroundProvider } from './providers/playground_provider';
 
 import { App } from './components/app';
-import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 import { PlaygroundToolbar } from './embeddable';
+import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 import { useKibana } from './hooks/use_kibana';
 
 export const ChatPlaygroundOverview: React.FC = () => {

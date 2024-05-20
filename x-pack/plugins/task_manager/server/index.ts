@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { get } from 'lodash';
-import { MAX_WORKERS_LIMIT, TaskManagerConfig, configSchema } from './config';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { TaskManagerPlugin } = await import('./plugin');

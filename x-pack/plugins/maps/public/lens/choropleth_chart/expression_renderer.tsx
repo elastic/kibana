@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { FileLayer } from '@elastic/ems-client';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ChartSizeEvent } from '@kbn/chart-expressions-common';
-import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { CoreSetup, CoreStart } from '@kbn/core/public';
-import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { FileLayer } from '@elastic/ems-client';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import type { ChoroplethChartProps } from './types';
 

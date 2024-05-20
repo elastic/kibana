@@ -5,12 +5,12 @@
  * 2.0.
  */
 import expect from 'expect';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { deleteAllPrebuiltRuleAssets } from '../../../../utils/rules/prebuilt_rules/delete_all_prebuilt_rule_assets';
 import { deleteAllTimelines } from '../../../../utils/rules/prebuilt_rules/delete_all_timelines';
 import { deletePrebuiltRulesFleetPackage } from '../../../../utils/rules/prebuilt_rules/delete_prebuilt_rules_fleet_package';

@@ -13,17 +13,17 @@ import { Direction, EuiFormRow, EuiLoadingSpinner, EuiRadioGroup, EuiSwitch } fr
 
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 import {
-  OptionsListSearchTechnique,
   getCompatibleSearchTechniques,
+  OptionsListSearchTechnique,
 } from '../../../common/options_list/suggestions_searching';
 import {
-  OPTIONS_LIST_DEFAULT_SORT,
-  OptionsListSortBy,
   getCompatibleSortingTypes,
+  OptionsListSortBy,
+  OPTIONS_LIST_DEFAULT_SORT,
 } from '../../../common/options_list/suggestions_sorting';
-import { ControlSettingTooltipLabel } from '../../components/control_setting_tooltip_label';
 import { pluginServices } from '../../services';
 import { OptionsListStrings } from './options_list_strings';
+import { ControlSettingTooltipLabel } from '../../components/control_setting_tooltip_label';
 
 const selectionOptions = [
   {

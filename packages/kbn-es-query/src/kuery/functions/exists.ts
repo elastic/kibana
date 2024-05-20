@@ -7,14 +7,14 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataViewBase, DataViewFieldBase, KueryQueryOptions } from '../../..';
+import type { DataViewFieldBase, DataViewBase, KueryQueryOptions } from '../../..';
 import type { KqlFunctionNode, KqlLiteralNode } from '../node_types';
+import type { KqlContext } from '../types';
 import {
   buildNode as buildLiteralNode,
   toElasticsearchQuery as literalToElasticsearchQuery,
   toKqlExpression as literalToKqlExpression,
 } from '../node_types/literal';
-import type { KqlContext } from '../types';
 
 export const KQL_FUNCTION_EXISTS = 'exists';
 

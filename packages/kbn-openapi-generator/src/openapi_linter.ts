@@ -9,10 +9,10 @@
 /* eslint-disable no-console */
 
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
-import chalk from 'chalk';
-import execa from 'execa';
 import globby from 'globby';
+import execa from 'execa';
+import chalk from 'chalk';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 export interface LinterConfig {
   rootDir: string;

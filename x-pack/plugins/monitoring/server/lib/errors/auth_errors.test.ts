@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import { forbidden, unauthorized } from '@hapi/boom';
-import { handleAuthError, isAuthError } from './auth_errors';
+import { errors } from '@elastic/elasticsearch';
+import { isAuthError, handleAuthError } from './auth_errors';
 
 describe('Error handling for 401/403 errors', () => {
   it('ignores an unknown type', () => {

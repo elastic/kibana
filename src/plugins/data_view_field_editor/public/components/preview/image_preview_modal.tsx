@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiModal, EuiModalBody } from '@elastic/eui';
 import React from 'react';
+import { EuiModal, EuiModalBody } from '@elastic/eui';
 
 /**
  * By default the image formatter sets the max-width to "none" on the <img /> tag

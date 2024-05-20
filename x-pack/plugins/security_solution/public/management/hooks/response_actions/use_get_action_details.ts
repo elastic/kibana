@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
+import { useHttp } from '../../../common/lib/kibana';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   ActionDetailsApiResponse,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
 } from '../../../../common/endpoint/types';
-import { useHttp } from '../../../common/lib/kibana';
-import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 
 export const useGetActionDetails = <
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 >(
   actionId: string,
   options: UseQueryOptions<

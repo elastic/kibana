@@ -7,20 +7,20 @@
 
 import { DataViewListItem, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import { colorChoices, getIcon, getSuitableIcon } from '../../helpers/style_choices';
 import {
+  SerializedNode,
+  UrlTemplate,
+  SerializedUrlTemplate,
+  WorkspaceField,
+  GraphWorkspaceSavedObject,
+  SerializedWorkspaceState,
   AdvancedSettings,
   GraphData,
-  GraphWorkspaceSavedObject,
-  SerializedField,
-  SerializedNode,
-  SerializedUrlTemplate,
-  SerializedWorkspaceState,
-  UrlTemplate,
   Workspace,
-  WorkspaceField,
+  SerializedField,
 } from '../../types';
+import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { getSuitableIcon, colorChoices, getIcon } from '../../helpers/style_choices';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,

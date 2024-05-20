@@ -6,33 +6,33 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import {
-  ISavedObjectsRepository,
-  SavedObject,
   SavedObjectsClientContract,
+  SavedObject,
+  ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import moment from 'moment';
-import { FILE_SO_TYPE } from '../../common/constants';
 import type {
-  FileShare,
+  Pagination,
   FileShareJSON,
   FileShareJSONWithToken,
-  Pagination,
+  FileShare,
   UpdatableFileShareMetadata,
 } from '../../common/types';
+import { FILE_SO_TYPE } from '../../common/constants';
 import type { File } from '../../common/types';
 import { fileShareObjectType } from '../saved_objects';
-import { Counters, getCounters } from '../usage';
+import { getCounters, Counters } from '../usage';
+import { generateShareToken } from './generate_share_token';
+import { FileShareServiceStart } from './types';
 import {
   ExpiryDateInThePastError,
   FileShareNotFoundError,
   FileShareTokenInvalidError,
 } from './errors';
-import { generateShareToken } from './generate_share_token';
-import { FileShareServiceStart } from './types';
 
 /**
  * Arguments for a creating a file share

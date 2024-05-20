@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { isValidInterval } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { isValidInterval } from '@kbn/data-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { AxisExtentModes, SeriesTypes, ValueLabelModes } from '../constants';
-import { isTimeChart } from '../helpers';
+import { AxisExtentModes, ValueLabelModes, SeriesTypes } from '../constants';
 import {
-  AxisExtentConfigResult,
-  CommonXYDataLayerConfig,
-  CommonXYDataLayerConfigResult,
-  DataLayerConfigResult,
-  ExtendedDataLayerConfigResult,
   SeriesType,
+  AxisExtentConfigResult,
+  DataLayerConfigResult,
+  CommonXYDataLayerConfigResult,
   ValueLabelMode,
-  XAxisConfigResult,
+  CommonXYDataLayerConfig,
   YAxisConfigResult,
+  ExtendedDataLayerConfigResult,
+  XAxisConfigResult,
 } from '../types';
+import { isTimeChart } from '../helpers';
 
 export const errors = {
   markSizeAccessorForNonLineOrAreaChartsError: () =>

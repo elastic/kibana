@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { getFields } from './get_fields';
 import { DataViewBase, DataViewFieldBase, KueryNode } from '../../../..';
 import { getDataViewFieldSubtypeNested } from '../../../utils';
 import { isNode as isWildcardNode } from '../../node_types/wildcard';
-import { getFields } from './get_fields';
 
 export function getFullFieldNameNode(
   rootNameNode: any,

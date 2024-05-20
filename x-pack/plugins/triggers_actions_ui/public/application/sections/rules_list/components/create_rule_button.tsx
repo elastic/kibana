@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton } from '@elastic/eui';
 
 export interface CreateRuleButtonProps {
   openFlyout: () => void;

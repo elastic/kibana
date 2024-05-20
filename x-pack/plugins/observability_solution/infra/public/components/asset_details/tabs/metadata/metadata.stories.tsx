@@ -8,11 +8,11 @@
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
-import {
-  DecorateWithAssetDetailsStateContext,
-  DecorateWithKibanaContext,
-} from '../../__stories__/decorator';
 import { Metadata } from './metadata';
+import {
+  DecorateWithKibanaContext,
+  DecorateWithAssetDetailsStateContext,
+} from '../../__stories__/decorator';
 
 const stories: Meta = {
   title: 'infra/Asset Details View/Components/Metadata',

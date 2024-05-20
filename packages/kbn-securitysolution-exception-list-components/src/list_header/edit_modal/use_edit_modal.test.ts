@@ -1,4 +1,3 @@
-import { act, renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
  * Side Public License, v 1.
  */
 import { ChangeEvent, SyntheticEvent } from 'react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useEditModal } from './use_edit_modal';
 
 const listDetails = { name: 'test-name', description: 'test-description' };

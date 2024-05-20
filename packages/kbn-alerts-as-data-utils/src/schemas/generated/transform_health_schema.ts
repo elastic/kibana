@@ -1,4 +1,3 @@
-import { Either } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +9,7 @@ import { Either } from 'fp-ts/lib/Either';
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
 import { AlertSchema } from './alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
@@ -66,7 +66,8 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const TransformHealthAlertRequired = rt.type({});
+const TransformHealthAlertRequired = rt.type({
+});
 // prettier-ignore
 const TransformHealthAlertOptional = rt.partial({
   'kibana.alert.results': rt.array(
@@ -82,10 +83,6 @@ const TransformHealthAlertOptional = rt.partial({
 });
 
 // prettier-ignore
-export const TransformHealthAlertSchema = rt.intersection([
-  TransformHealthAlertRequired,
-  TransformHealthAlertOptional,
-  AlertSchema,
-]);
+export const TransformHealthAlertSchema = rt.intersection([TransformHealthAlertRequired, TransformHealthAlertOptional, AlertSchema]);
 // prettier-ignore
 export type TransformHealthAlert = rt.TypeOf<typeof TransformHealthAlertSchema>;

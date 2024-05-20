@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import type { TagsListProps } from '@kbn/observability-shared-plugin/public';
-import React, { useCallback } from 'react';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 
 export function SloTagsList(props: TagsListProps) {

@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import React, { useMemo } from 'react';
-import { hostDetailsTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
-import { AssetDetails } from '../../../../../components/asset_details';
-import { ContentTabIds } from '../../../../../components/asset_details/types';
-import { useSourceContext } from '../../../../../containers/metrics_source';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { ContentTabIds } from '../../../../../components/asset_details/types';
+import { AssetDetails } from '../../../../../components/asset_details';
+import { useSourceContext } from '../../../../../containers/metrics_source';
+import { hostDetailsTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 
 interface Props {
   assetName: string;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 
-import { useKibana } from '../../../common/lib/kibana';
 import type { AppMockRenderer } from '../../../common/mock';
-import { TestProviders, createAppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../../common/mock';
+import { useKibana } from '../../../common/lib/kibana';
 import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
 
 const props = {

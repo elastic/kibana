@@ -1,5 +1,3 @@
-import { FindRulesResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { DETECTION_ENGINE_RULES_URL_FIND } from '@kbn/security-solution-plugin/common/constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { DETECTION_ENGINE_RULES_URL_FIND } from '@kbn/security-solution-plugin/c
  * 2.0.
  */
 import type SuperTest from 'supertest';
+import { DETECTION_ENGINE_RULES_URL_FIND } from '@kbn/security-solution-plugin/common/constants';
+import { FindRulesResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * Get all installed security rules (both prebuilt + custom)

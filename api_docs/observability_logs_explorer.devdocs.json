@@ -62,7 +62,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"ALL_DATASETS_LOCATOR\""],
+            "signature": [
+              "\"ALL_DATASETS_LOCATOR\""
+            ],
             "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -74,7 +76,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -86,7 +90,9 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "signature": ["ObsLogsExplorerLocatorDependencies"],
+                "signature": [
+                  "ObsLogsExplorerLocatorDependencies"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -188,7 +194,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"SINGLE_DATASET_LOCATOR\""],
+            "signature": [
+              "\"SINGLE_DATASET_LOCATOR\""
+            ],
             "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -200,7 +208,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -212,7 +222,9 @@
                 "tags": [],
                 "label": "deps",
                 "description": [],
-                "signature": ["ObsLogsExplorerLocatorDependencies"],
+                "signature": [
+                  "ObsLogsExplorerLocatorDependencies"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -279,7 +291,9 @@
         "tags": [],
         "label": "deepCompactObject",
         "description": [],
-        "signature": ["<Value extends Record<string, any>>(obj: Value) => Value"],
+        "signature": [
+          "<Value extends Record<string, any>>(obj: Value) => Value"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/utils/deep_compact_object.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -291,7 +305,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["Value"],
+            "signature": [
+              "Value"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/utils/deep_compact_object.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -443,7 +459,9 @@
         "tags": [],
         "label": "OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY",
         "description": [],
-        "signature": ["\"pageState\""],
+        "signature": [
+          "\"pageState\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/url_schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -456,7 +474,9 @@
         "tags": [],
         "label": "OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY",
         "description": [],
-        "signature": ["\"pageState\""],
+        "signature": [
+          "\"pageState\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/url_schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -11,8 +11,8 @@ import React, { FunctionComponent, createContext, useContext } from 'react';
 import { useFormData } from '../../../../shared_imports';
 
 import {
-  isUsingCustomRolloverPath,
   isUsingDefaultRolloverPath,
+  isUsingCustomRolloverPath,
   isUsingDownsamplePath,
 } from '../constants';
 

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import {
-  IndicesDataStreamIndex,
-  IndicesGetDataStreamResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import {
+  IndicesGetDataStreamResponse,
+  IndicesDataStreamIndex,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
+import { AlertsService } from './alerts_service';
+import { IRuleTypeAlerts, RecoveredActionGroup } from '../types';
+import { retryUntil } from './test_utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsClient } from '../alerts_client';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { IRuleTypeAlerts, RecoveredActionGroup } from '../types';
-import { AlertsService } from './alerts_service';
 import { getDataStreamAdapter } from './lib/data_stream_adapter';
-import { retryUntil } from './test_utils';
 
 jest.mock('../alerts_client');
 
-let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
+let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const SimulateTemplateResponse = {

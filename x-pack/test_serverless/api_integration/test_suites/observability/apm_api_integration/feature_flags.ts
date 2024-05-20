@@ -6,8 +6,8 @@
  */
 
 import expect from 'expect';
-import { ApmApiClient } from './common/apm_api_supertest';
 import { APMFtrContextProvider } from './common/services';
+import { ApmApiClient } from './common/apm_api_supertest';
 
 const fleetMigrationResponse = {
   statusCode: 404,

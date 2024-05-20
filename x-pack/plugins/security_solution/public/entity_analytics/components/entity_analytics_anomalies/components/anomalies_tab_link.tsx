@@ -7,13 +7,13 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import { AnomalyEntity } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import { SecurityPageName } from '../../../../app/types';
+import { usersActions } from '../../../../explore/users/store';
 import { hostsActions } from '../../../../explore/hosts/store';
 import { HostsType } from '../../../../explore/hosts/store/model';
-import { usersActions } from '../../../../explore/users/store';
 import { UsersType } from '../../../../explore/users/store/model';
+import { AnomalyEntity } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 
 export const AnomaliesTabLink = ({
   count,

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { Headers } from 'node-fetch';
 
+import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_packages';
+import { getFile, getInstallation } from '../../services/epm/packages/get';
 import type { FleetRequestHandlerContext } from '../..';
 import { appContextService } from '../../services';
 import { unpackBufferEntries } from '../../services/epm/archive';
 import { getAsset } from '../../services/epm/archive/storage';
-import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_packages';
-import { getFile, getInstallation } from '../../services/epm/packages/get';
 
 import { getFileHandler } from './file_handler';
 

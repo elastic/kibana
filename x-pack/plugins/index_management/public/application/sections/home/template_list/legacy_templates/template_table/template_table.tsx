@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiButton, EuiInMemoryTable, EuiLink } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ScopedHistory } from '@kbn/core/public';
+import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, Fragment } from 'react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { EuiInMemoryTable, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
+import { UseRequestResponse, reactRouterNavigate } from '../../../../../../shared_imports';
 import { TemplateListItem } from '../../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../../common/constants';
-import { UseRequestResponse, reactRouterNavigate } from '../../../../../../shared_imports';
-import { useServices } from '../../../../../app_context';
 import { TemplateDeleteModal } from '../../../../../components';
-import { TemplateContentIndicator } from '../../../../../components/shared';
 import { getTemplateDetailsLink } from '../../../../../services/routing';
+import { useServices } from '../../../../../app_context';
+import { TemplateContentIndicator } from '../../../../../components/shared';
 import { TemplateTypeIndicator } from '../../components';
 
 interface Props {

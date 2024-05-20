@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { random, mean } from 'lodash';
+import { SanitizedRule, AlertSummary } from '../types';
 import { IValidatedEvent, millisToNanos, nanosToMillis } from '@kbn/event-log-plugin/server';
-import { mean, random } from 'lodash';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
-import { AlertSummary, SanitizedRule } from '../types';
 import { alertSummaryFromEventLog } from './alert_summary_from_event_log';
 
 const ONE_HOUR_IN_MILLIS = 60 * 60 * 1000;

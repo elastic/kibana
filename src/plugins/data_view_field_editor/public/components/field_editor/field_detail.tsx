@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { EuiCode } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { useFieldEditorContext } from '../field_editor_context';
+import { EuiCode } from '@elastic/eui';
 import { AdvancedParametersSection } from './advanced_parameters_section';
-import {
-  CustomDescriptionField,
-  CustomLabelField,
-  FormatField,
-  PopularityField,
-  ScriptField,
-} from './form_fields';
 import { FormRow } from './form_row';
+import {
+  PopularityField,
+  FormatField,
+  ScriptField,
+  CustomLabelField,
+  CustomDescriptionField,
+} from './form_fields';
+import { useFieldEditorContext } from '../field_editor_context';
 
 const geti18nTexts = (): {
   [key: string]: { title: string; description: JSX.Element | string };

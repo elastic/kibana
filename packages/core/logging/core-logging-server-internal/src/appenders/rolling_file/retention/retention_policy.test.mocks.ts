@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { listFilesOlderThan, listFilesExceedingSize } from './utils';
 import type { deleteFiles } from './fs';
-import type { listFilesExceedingSize, listFilesOlderThan } from './utils';
 
 export const listFilesExceedingSizeMock: jest.MockedFn<typeof listFilesExceedingSize> = jest.fn();
 export const listFilesOlderThanMock: jest.MockedFn<typeof listFilesOlderThan> = jest.fn();

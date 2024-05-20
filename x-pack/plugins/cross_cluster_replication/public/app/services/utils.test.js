@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { arrayToObject, objectToArray } from './utils';
+import { objectToArray, arrayToObject } from './utils';
 
 describe('utils', () => {
   describe('objectToArray()', () => {

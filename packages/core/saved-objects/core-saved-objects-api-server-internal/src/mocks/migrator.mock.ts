@@ -7,8 +7,8 @@
  */
 
 import type {
-  IDocumentMigrator,
   IKibanaMigrator,
+  IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 
 export type KibanaMigratorMock = jest.Mocked<IKibanaMigrator>;

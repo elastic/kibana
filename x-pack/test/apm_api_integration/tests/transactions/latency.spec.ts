@@ -1,11 +1,3 @@
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import {
-  APIClientRequestParamsOf,
-  APIReturnType,
-} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,10 +5,18 @@ import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { buildQueryFromFilters } from '@kbn/es-query';
 import expect from '@kbn/expect';
-import { meanBy } from 'lodash';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import moment from 'moment';
+import {
+  APIClientRequestParamsOf,
+  APIReturnType,
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { meanBy } from 'lodash';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type LatencyChartReturnType =

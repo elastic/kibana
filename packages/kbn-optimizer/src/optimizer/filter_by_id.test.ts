@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HasId, filterById } from './filter_by_id';
+import { filterById, HasId } from './filter_by_id';
 
 const bundles: HasId[] = [
   { id: 'foo' },

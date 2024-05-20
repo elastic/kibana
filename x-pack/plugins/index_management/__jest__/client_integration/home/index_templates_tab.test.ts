@@ -7,13 +7,13 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH } from '../../../common/constants';
-import {
-  IndexManagementBreadcrumb,
-  breadcrumbService,
-} from '../../../public/application/services/breadcrumbs';
 import * as fixtures from '../../../test/fixtures';
-import { getRandomString, setupEnvironment } from '../helpers';
+import {
+  breadcrumbService,
+  IndexManagementBreadcrumb,
+} from '../../../public/application/services/breadcrumbs';
+import { API_BASE_PATH } from '../../../common/constants';
+import { setupEnvironment, getRandomString } from '../helpers';
 
 import { IndexTemplatesTabTestBed, setup } from './index_templates_tab.helpers';
 

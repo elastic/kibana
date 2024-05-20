@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "getCodeOwnersForFile",
-        "description": ["\nGet the GitHub CODEOWNERS for a file in the repository"],
+        "description": [
+          "\nGet the GitHub CODEOWNERS for a file in the repository"
+        ],
         "signature": [
           "(filePath: string, reversedCodeowners: ",
           {
@@ -47,8 +49,12 @@
             "type": "string",
             "tags": [],
             "label": "filePath",
-            "description": ["the file to get code owners for"],
-            "signature": ["string"],
+            "description": [
+              "the file to get code owners for"
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-code-owners/src/file_code_owner.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -151,7 +157,9 @@
             "tags": [],
             "label": "ignorePattern",
             "description": [],
-            "signature": ["Ignore"],
+            "signature": [
+              "Ignore"
+            ],
             "path": "packages/kbn-code-owners/src/file_code_owner.ts",
             "deprecated": false,
             "trackAdoption": false

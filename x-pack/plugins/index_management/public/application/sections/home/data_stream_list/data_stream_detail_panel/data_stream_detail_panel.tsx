@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import React, { useState, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { omit } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -20,37 +21,36 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiIcon,
   EuiIconTip,
   EuiLink,
-  EuiPopover,
-  EuiSpacer,
   EuiTextColor,
   EuiTitle,
+  EuiIcon,
   EuiToolTip,
+  EuiPopover,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { omit } from 'lodash';
-import React, { useState, Fragment } from 'react';
 
-import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
-import { useAppContext } from '../../../../app_context';
-import { DataHealth, Error, SectionError } from '../../../../components';
-import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
-import { getLifecycleValue } from '../../../../lib/data_streams';
-import {
-  isDataStreamFullyManagedByDSL,
-  isDataStreamFullyManagedByILM,
-} from '../../../../lib/data_streams';
 import { DiscoverLink } from '../../../../lib/discover_link';
+import { getLifecycleValue } from '../../../../lib/data_streams';
+import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
+import { SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
-import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
-import { useIlmLocator } from '../../../../services/use_ilm_locator';
-import { DataStreamsBadges } from '../data_stream_badges';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { EditDataRetentionModal } from '../edit_data_retention_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
+import { getIndexListUri, getTemplateDetailsLink } from '../../../../services/routing';
+import { ILM_PAGES_POLICY_EDIT } from '../../../../constants';
+import {
+  isDataStreamFullyManagedByILM,
+  isDataStreamFullyManagedByDSL,
+} from '../../../../lib/data_streams';
+import { useAppContext } from '../../../../app_context';
+import { DataStreamsBadges } from '../data_stream_badges';
+import { useIlmLocator } from '../../../../services/use_ilm_locator';
 
 interface DetailsListProps {
   details: Array<{

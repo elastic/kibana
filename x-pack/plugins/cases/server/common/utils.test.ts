@@ -8,8 +8,29 @@
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import {
+  flattenCaseSavedObject,
+  transformNewComment,
+  countAlerts,
+  countAlertsForID,
+  groupTotalAlertsByID,
+  transformCases,
+  transformComments,
+  flattenCommentSavedObjects,
+  flattenCommentSavedObject,
+  extractLensReferencesFromCommentString,
+  getOrUpdateLensReferences,
+  asArray,
+  transformNewCase,
+  getApplicationRoute,
+  getCaseViewPath,
+  countUserAttachments,
+  isPersistableStateOrExternalReference,
+} from './utils';
+import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AttachmentRequest } from '../../common/types/api';
+import { mockCases, mockCaseComments } from '../mocks';
+import { createAlertAttachment, createUserAttachment } from '../services/attachments/test_utils';
 import type {
   AttachmentAttributes,
   Case,
@@ -17,39 +38,18 @@ import type {
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
 import {
-  AttachmentType,
-  CaseSeverity,
   ConnectorTypes,
+  CaseSeverity,
+  AttachmentType,
   CustomFieldTypes,
 } from '../../common/types/domain';
-import { mockCaseComments, mockCases } from '../mocks';
-import { newCase } from '../routes/api/__mocks__/request_responses';
-import { createAlertAttachment, createUserAttachment } from '../services/attachments/test_utils';
+import type { AttachmentRequest } from '../../common/types/api';
 import {
   createAlertRequests,
   createExternalReferenceRequests,
   createPersistableStateRequests,
   createUserRequests,
 } from './limiter_checker/test_utils';
-import {
-  asArray,
-  countAlerts,
-  countAlertsForID,
-  countUserAttachments,
-  extractLensReferencesFromCommentString,
-  flattenCaseSavedObject,
-  flattenCommentSavedObject,
-  flattenCommentSavedObjects,
-  getApplicationRoute,
-  getCaseViewPath,
-  getOrUpdateLensReferences,
-  groupTotalAlertsByID,
-  isPersistableStateOrExternalReference,
-  transformCases,
-  transformComments,
-  transformNewCase,
-  transformNewComment,
-} from './utils';
 
 interface CommentReference {
   ids: string[];

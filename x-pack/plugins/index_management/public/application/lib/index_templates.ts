@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Location } from 'history';
 import { parse } from 'query-string';
+import { Location } from 'history';
 
 export const getIsLegacyFromQueryParams = (location: Location): boolean => {
   const { legacy } = parse(location.search.substring(1));

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import Boom from '@hapi/boom';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AuthFilterHelpers, OwnerEntity } from './types';
+import { getOwnersFilter, groupByAuthorization } from './utils';
 import type { OperationDetails } from '.';
 import { AuthorizationAuditLogger } from '.';
 import { createCaseError } from '../common/error';
-import type { AuthFilterHelpers, OwnerEntity } from './types';
-import { getOwnersFilter, groupByAuthorization } from './utils';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import { Legacy } from '../../../legacy_shims';
+import moment from 'moment';
+import numeral from '@elastic/numeral';
+import { capitalize, partial } from 'lodash';
 import {
-  EuiCallOut,
   EuiHealth,
-  EuiIcon,
   EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPanel,
+  EuiCallOut,
   EuiSpacer,
+  EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { capitalize, partial } from 'lodash';
-import moment from 'moment';
-import React, { Fragment } from 'react';
-import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
-import { AlertsStatus } from '../../../alerts/status';
-import { Legacy } from '../../../legacy_shims';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { EuiMonitoringTable } from '../../table';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { AlertsStatus } from '../../../alerts/status';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import './listing.scss';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type SuperTest from 'supertest';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type SuperTest from 'supertest';
-import { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
+import { ObjectRemover } from './object_remover';
 
 const connectorSetup = {
   bedrock: {

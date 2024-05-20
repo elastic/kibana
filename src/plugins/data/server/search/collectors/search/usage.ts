@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { once, debounce } from 'lodash';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { IEsSearchResponse, ISearchOptions } from '@kbn/search-types';
-import { debounce, once } from 'lodash';
+import { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '../../../../common';
 import { CollectedUsage } from './register';
 

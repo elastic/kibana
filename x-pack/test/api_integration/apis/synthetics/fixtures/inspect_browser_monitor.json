@@ -65,7 +65,11 @@
   "ssl.key": "",
   "ssl.key_passphrase": "",
   "ssl.verification_mode": "full",
-  "ssl.supported_protocols": ["TLSv1.1", "TLSv1.2", "TLSv1.3"],
+  "ssl.supported_protocols": [
+    "TLSv1.1",
+    "TLSv1.2",
+    "TLSv1.3"
+  ],
   "original_space": "default",
   "custom_heartbeat_id": "bb82f7de-d832-4b14-8097-38a464d5fe49-test-project-cb47c83a-45e7-416a-9301-cb476b5bff01-default",
   "revision": 1,

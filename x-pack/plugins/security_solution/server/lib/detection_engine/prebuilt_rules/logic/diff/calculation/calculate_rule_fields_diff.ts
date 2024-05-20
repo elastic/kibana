@@ -10,8 +10,6 @@ import { invariant } from '../../../../../../../common/utils/invariant';
 
 import type {
   AllFieldsDiff,
-  CommonFieldsDiff,
-  CustomQueryFieldsDiff,
   DiffableAllFields,
   DiffableCommonFields,
   DiffableCustomQueryFields,
@@ -23,6 +21,8 @@ import type {
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
   DiffableThresholdFields,
+  CommonFieldsDiff,
+  CustomQueryFieldsDiff,
   EqlFieldsDiff,
   EsqlFieldsDiff,
   MachineLearningFieldsDiff,
@@ -36,8 +36,8 @@ import type {
 import type { FieldsDiffAlgorithmsFor } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/fields_diff';
 import type { ThreeVersionsOf } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
-import { simpleDiffAlgorithm } from './algorithms/simple_diff_algorithm';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
+import { simpleDiffAlgorithm } from './algorithms/simple_diff_algorithm';
 
 const BASE_TYPE_ERROR = `Base version can't be of different rule type`;
 const TARGET_TYPE_ERROR = `Target version can't be of different rule type`;

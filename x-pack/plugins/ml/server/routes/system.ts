@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { capabilitiesProvider } from '../lib/capabilities';
 import { mlLog } from '../lib/log';
-import { getMlNodeCount } from '../lib/node_utils';
+import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import type { RouteInitialization, SystemRouteDeps } from '../types';
+import { getMlNodeCount } from '../lib/node_utils';
 
 /**
  * System routes
@@ -272,13 +272,10 @@ export function systemRoutes(
             )
           );
 
-          const result = indices.reduce(
-            (acc, cur, i) => {
-              acc[cur] = { exists: results[i] };
-              return acc;
-            },
-            {} as Record<string, { exists: boolean }>
-          );
+          const result = indices.reduce((acc, cur, i) => {
+            acc[cur] = { exists: results[i] };
+            return acc;
+          }, {} as Record<string, { exists: boolean }>);
 
           return response.ok({
             body: result,

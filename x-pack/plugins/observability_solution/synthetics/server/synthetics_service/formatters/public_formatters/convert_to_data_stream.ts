@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants/monitor_defaults';
-import { MonitorFields, MonitorTypeEnum } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
 
 export interface DataStreamConfig {
   type: MonitorTypeEnum;
@@ -22,7 +22,7 @@ export interface DataStreamConfig {
         dataset: MonitorTypeEnum;
         type: 'synthetics';
       };
-    } & Partial<MonitorFields>,
+    } & Partial<MonitorFields>
   ];
 }
 

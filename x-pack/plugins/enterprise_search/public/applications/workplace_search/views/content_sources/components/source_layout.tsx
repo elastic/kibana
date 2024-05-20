@@ -14,14 +14,14 @@ import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eu
 import { docLinks } from '../../../../shared/doc_links';
 import { PageTemplateProps } from '../../../../shared/layout';
 import { AppLogic } from '../../../app_logic';
-import { PersonalDashboardLayout, WorkplaceSearchPageTemplate } from '../../../components/layout';
+import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../../components/layout';
 import { NAV } from '../../../constants';
 
 import {
   DOWNLOAD_DIAGNOSTIC_BUTTON,
-  SOURCE_DISABLED_CALLOUT_BUTTON,
-  SOURCE_DISABLED_CALLOUT_DESCRIPTION,
   SOURCE_DISABLED_CALLOUT_TITLE,
+  SOURCE_DISABLED_CALLOUT_DESCRIPTION,
+  SOURCE_DISABLED_CALLOUT_BUTTON,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 

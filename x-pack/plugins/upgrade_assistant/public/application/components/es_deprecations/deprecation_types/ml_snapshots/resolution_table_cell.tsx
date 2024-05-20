@@ -8,12 +8,12 @@
 import React from 'react';
 
 import {
-  EuiFlexGroup,
+  EuiToolTip,
   EuiFlexItem,
+  EuiText,
+  EuiFlexGroup,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

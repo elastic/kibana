@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import moment from 'moment';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
-  EuiButton,
   EuiDatePicker,
   EuiDatePickerRange,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
-import moment from 'moment';
-import React, { useMemo, useState, useCallback } from 'react';
 
+import * as i18n from './translations';
 import {
   DEFAULT_EVENT_ENRICHMENT_FROM,
   DEFAULT_EVENT_ENRICHMENT_TO,
 } from '../../../../../common/cti/constants';
-import * as i18n from './translations';
 
 export interface RangePickerProps {
   range: { to: string; from: string };

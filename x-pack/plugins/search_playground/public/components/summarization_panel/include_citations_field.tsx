@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AnalyticsEvents } from '../../analytics/constants';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface IncludeCitationsFieldProps {
   checked: boolean;

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { wrap } from '../mocks';
+import { fireEvent, render } from '@testing-library/react';
 import {
   BottomBar,
   BottomBarProps,
-  DATA_TEST_SUBJ_CANCEL_BUTTON,
   DATA_TEST_SUBJ_SAVE_BUTTON,
+  DATA_TEST_SUBJ_CANCEL_BUTTON,
 } from './bottom_bar';
+import { wrap } from '../mocks';
 
 const saveAll = jest.fn();
 const clearAllUnsaved = jest.fn();

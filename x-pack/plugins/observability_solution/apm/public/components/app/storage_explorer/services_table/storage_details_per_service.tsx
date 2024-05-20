@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { Chart, Datum, Partition, PartitionLayout, Settings } from '@elastic/charts';
+import React from 'react';
 import {
-  EuiFlexGrid,
+  EuiSkeletonText,
+  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPanel,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiTitle,
   euiPaletteColorBlind,
+  EuiPanel,
+  EuiFlexGrid,
+  EuiSpacer,
 } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { Chart, Partition, Settings, Datum, PartitionLayout } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
-import { asDynamicBytes } from '../../../../../common/utils/formatters';
-import { asInteger } from '../../../../../common/utils/formatters/formatters';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { isPending } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { asInteger } from '../../../../../common/utils/formatters/formatters';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
-import { IndexStatsPerService } from './index_stats_per_service';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { SizeLabel } from './size_label';
+import { IndexStatsPerService } from './index_stats_per_service';
 
 interface Props {
   serviceName: string;

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
 import {
-  CUSTOM_PALETTE,
-  CustomPaletteParams,
   DataBounds,
-  PaletteOutput,
   PaletteRegistry,
-  enforceColorContrast,
+  PaletteOutput,
+  CustomPaletteParams,
   getFallbackDataBounds,
-  getPaletteStops,
   reversePalette,
+  getPaletteStops,
+  CUSTOM_PALETTE,
+  enforceColorContrast,
 } from '@kbn/coloring';
 import { Datatable } from '@kbn/expressions-plugin/common';
 

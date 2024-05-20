@@ -23,7 +23,7 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableAppContext } from '@kbn/presentation-publishing';
 
 import { DASHBOARD_CONTAINER_TYPE } from '..';
-import { DashboardContainerInput, createExtract, createInject } from '../../../common';
+import { createExtract, createInject, DashboardContainerInput } from '../../../common';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
 import {
   LoadDashboardReturn,

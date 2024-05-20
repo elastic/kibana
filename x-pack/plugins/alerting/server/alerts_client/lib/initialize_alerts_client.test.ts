@@ -6,22 +6,22 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { alertsServiceMock } from '../../alerts_service/alerts_service.mock';
-import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
-import { ruleRunMetricsStoreMock } from '../../lib/rule_run_metrics_store.mock';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
+  mockTaskInstance,
+  ruleType,
   RULE_ID,
   RULE_NAME,
   RULE_TYPE_ID,
-  mockTaskInstance,
-  ruleType,
 } from '../../task_runner/fixtures';
+import * as LegacyAlertsClientModule from '../legacy_alerts_client';
+import { alertsServiceMock } from '../../alerts_service/alerts_service.mock';
+import { ruleRunMetricsStoreMock } from '../../lib/rule_run_metrics_store.mock';
+import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../types';
 import { alertsClientMock } from '../alerts_client.mock';
-import * as LegacyAlertsClientModule from '../legacy_alerts_client';
+import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { legacyAlertsClientMock } from '../legacy_alerts_client.mock';
-import { RuleData, initializeAlertsClient } from './initialize_alerts_client';
+import { initializeAlertsClient, RuleData } from './initialize_alerts_client';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();

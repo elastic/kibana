@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import React, { useMemo, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { css } from '@emotion/react';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -15,19 +17,17 @@ import {
   EuiPageSection,
   EuiPanel,
   EuiSpacer,
+  EuiButton,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import React, { useMemo, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { StartDependencies } from './plugin';
 import { LensChart } from './embeddable';
 import { MultiPaneFlyout } from './flyout';
-import type { StartDependencies } from './plugin';
 
 export const App = (props: {
   core: CoreStart;

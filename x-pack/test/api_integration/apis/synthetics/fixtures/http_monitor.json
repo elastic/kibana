@@ -6,7 +6,10 @@
       "enabled": true
     }
   },
-  "tags": ["tag1", "tag2"],
+  "tags": [
+    "tag1",
+    "tag2"
+  ],
   "schedule": {
     "number": "5",
     "unit": "m"
@@ -33,7 +36,10 @@
     "sampleHeader": "sampleHeaderValue"
   },
   "response.include_headers": true,
-  "check.response.status": ["200", "201"],
+  "check.response.status": [
+    "200",
+    "201"
+  ],
   "check.request.body": {
     "value": "testValue",
     "type": "json"
@@ -46,7 +52,10 @@
   "ssl.key": "t.string",
   "ssl.key_passphrase": "t.string",
   "ssl.verification_mode": "certificate",
-  "ssl.supported_protocols": ["TLSv1.1", "TLSv1.2"],
+  "ssl.supported_protocols": [
+    "TLSv1.1",
+    "TLSv1.2"
+  ],
   "name": "test-monitor-name",
   "locations": [
     {

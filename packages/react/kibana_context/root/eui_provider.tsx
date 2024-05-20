@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import createCache from '@emotion/cache';
 import React, { FC, PropsWithChildren, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import createCache from '@emotion/cache';
 
 import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
-import { defaultTheme, getColorMode } from '@kbn/react-kibana-context-common';
+import { getColorMode, defaultTheme } from '@kbn/react-kibana-context-common';
 import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
 /**

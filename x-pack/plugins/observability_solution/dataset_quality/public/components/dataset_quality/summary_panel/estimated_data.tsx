@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { formatNumber } from '@elastic/eui';
 import React from 'react';
+import { formatNumber } from '@elastic/eui';
 
+import { useSummaryPanelContext } from '../../../hooks';
 import { BYTE_NUMBER_FORMAT } from '../../../../common/constants';
 import {
   summaryPanelEstimatedDataText,
   summaryPanelEstimatedDataTooltipText,
 } from '../../../../common/translations';
-import { useSummaryPanelContext } from '../../../hooks';
 import { DataPlaceholder } from './data_placeholder';
 
 export function EstimatedData() {

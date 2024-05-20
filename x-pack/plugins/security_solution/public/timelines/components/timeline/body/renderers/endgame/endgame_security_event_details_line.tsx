@@ -9,7 +9,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 
 import { DraggableBadge } from '../../../../../../common/components/draggables';
-import { TokensFlexItem, isNillEmptyOrNotFinite } from '../helpers';
+import { isNillEmptyOrNotFinite, TokensFlexItem } from '../helpers';
 import { ProcessDraggableWithNonExistentProcess } from '../process_draggable';
 import { UserHostWorkingDir } from '../user_host_working_dir';
 
@@ -17,9 +17,9 @@ import {
   getEventDetails,
   getHostNameSeparator,
   getHumanReadableLogonType,
-  getTargetUserAndTargetDomain,
   getUserDomainField,
   getUserNameField,
+  getTargetUserAndTargetDomain,
 } from './helpers';
 
 import * as i18n from './translations';

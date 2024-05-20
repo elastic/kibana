@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { startCase } from 'lodash';
 import React from 'react';
+import { startCase } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButtonEmpty,
@@ -16,18 +16,18 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiIcon,
-  EuiInMemoryTable,
   EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiText,
+  EuiIcon,
+  EuiSpacer,
+  EuiInMemoryTable,
 } from '@elastic/eui';
 
 import {
-  MIGRATION_STATUS,
-  SystemIndicesMigrationFeature,
   SystemIndicesMigrationStatus,
+  SystemIndicesMigrationFeature,
+  MIGRATION_STATUS,
 } from '../../../../../common/types';
 
 export interface SystemIndicesFlyoutProps {

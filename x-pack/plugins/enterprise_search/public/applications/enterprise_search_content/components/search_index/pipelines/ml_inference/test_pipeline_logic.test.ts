@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { mockMlInferenceValues } from './__mocks__/ml_inference_logic.mock';
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 import { nerModel } from '../../../../__mocks__/ml_models.mock';
-import { mockMlInferenceValues } from './__mocks__/ml_inference_logic.mock';
 
 import { HttpError, Status } from '../../../../../../../common/types/api';
 import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';

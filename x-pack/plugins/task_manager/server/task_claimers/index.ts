@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Observable, Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 
-import { CLAIM_STRATEGY_DEFAULT } from '../config';
+import { TaskStore } from '../task_store';
+import { TaskClaim, TaskTiming } from '../task_events';
+import { TaskTypeDictionary } from '../task_type_dictionary';
 import { TaskClaimingBatches } from '../queries/task_claiming';
 import { ConcreteTaskInstance } from '../task';
-import { TaskClaim, TaskTiming } from '../task_events';
-import { TaskStore } from '../task_store';
-import { TaskTypeDictionary } from '../task_type_dictionary';
 import { claimAvailableTasksDefault } from './strategy_default';
+import { CLAIM_STRATEGY_DEFAULT } from '../config';
 
 export interface TaskClaimerOpts {
   getCapacity: (taskType?: string | undefined) => number;

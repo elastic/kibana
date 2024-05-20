@@ -13,9 +13,9 @@ import {
   EuiListGroupItem,
   EuiLoadingSpinner,
   EuiPanel,
+  euiScrollBarStyles,
   EuiSpacer,
   EuiText,
-  euiScrollBarStyles,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';

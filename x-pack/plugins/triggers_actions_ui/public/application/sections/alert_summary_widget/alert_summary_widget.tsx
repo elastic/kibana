@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { AlertSummaryWidgetProps } from '.';
 import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
+import { AlertSummaryWidgetProps } from '.';
 import {
-  AlertSummaryWidgetCompact,
   AlertSummaryWidgetError,
+  AlertSummaryWidgetCompact,
   AlertSummaryWidgetFullSize,
   AlertSummaryWidgetLoader,
 } from './components';

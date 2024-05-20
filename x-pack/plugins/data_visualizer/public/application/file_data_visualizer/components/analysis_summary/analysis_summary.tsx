@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { FILE_FORMATS } from '../../../../../common/constants';
 

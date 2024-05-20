@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { lazy, Suspense } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 const queryClient = new QueryClient();
 

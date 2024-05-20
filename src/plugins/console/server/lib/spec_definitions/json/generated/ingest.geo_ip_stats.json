@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["GET"],
-    "patterns": ["_ingest/geoip/stats"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ingest/geoip/stats"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/geoip-processor.html",
     "availability": {
       "stack": true,

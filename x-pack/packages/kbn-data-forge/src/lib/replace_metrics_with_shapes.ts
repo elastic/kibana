@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
-import { has, isNumber } from 'lodash';
 import { Moment } from 'moment';
+import { has, isNumber } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { Doc, ParsedSchedule } from '../types';
 import { createDataShapeFunction } from './data_shapes';
 

@@ -12,9 +12,9 @@ import { EuiSideNavItemType } from '@elastic/eui';
 import { generateNavLink } from '../../../../../shared/layout';
 import { NAV } from '../../../../constants';
 import {
-  ASSETS_AND_OBJECTS_PATH,
-  SYNC_FREQUENCY_PATH,
   getContentSourcePath,
+  SYNC_FREQUENCY_PATH,
+  ASSETS_AND_OBJECTS_PATH,
 } from '../../../../routes';
 import { SourceLogic } from '../../source_logic';
 

@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["POST"],
-    "patterns": ["_ml/anomaly_detectors/_validate/detector"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/_validate/detector"
+    ],
     "documentation": "https://www.elastic.co/guide/en/machine-learning/current/ml-jobs.html",
     "availability": {
       "stack": false,

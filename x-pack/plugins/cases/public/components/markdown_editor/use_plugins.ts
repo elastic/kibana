@@ -11,11 +11,11 @@ import {
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
 import { useMemo } from 'react';
-import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
+import type { TemporaryProcessingPluginsType } from './types';
+import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
 import * as lensMarkdownPlugin from './plugins/lens';
 import { ID as LensPluginId } from './plugins/lens/constants';
-import type { TemporaryProcessingPluginsType } from './types';
 
 export const usePlugins = (disabledPlugins?: string[]) => {
   const kibanaConfig = KibanaServices.getConfig();

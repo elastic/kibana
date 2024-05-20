@@ -6,13 +6,13 @@
  */
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
   INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
 } from '@kbn/securitysolution-list-constants';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { ExceptionsListApiClient } from './exceptions_list_api_client';
 

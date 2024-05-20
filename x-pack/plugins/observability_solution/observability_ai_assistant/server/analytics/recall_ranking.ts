@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventTypeOpts, RootSchema } from '@kbn/analytics-client';
+import { RootSchema, EventTypeOpts } from '@kbn/analytics-client';
 
 interface ScoredDocument {
   content: string;

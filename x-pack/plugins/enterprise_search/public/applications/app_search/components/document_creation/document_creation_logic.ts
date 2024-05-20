@@ -6,8 +6,8 @@
  */
 
 import dedent from 'dedent';
-import { MakeLogicType, kea } from 'kea';
-import { chunk, isPlainObject, uniq } from 'lodash';
+import { kea, MakeLogicType } from 'kea';
+import { isPlainObject, chunk, uniq } from 'lodash';
 
 import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';

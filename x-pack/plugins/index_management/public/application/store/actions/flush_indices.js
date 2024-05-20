@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { createAction } from 'redux-actions';
-import { clearRowStatus, reloadIndices } from '.';
+import { i18n } from '@kbn/i18n';
 import { flushIndices as request } from '../../services';
+import { clearRowStatus, reloadIndices } from '.';
 import { notificationService } from '../../services/notification';
 
 export const flushIndicesStart = createAction('INDEX_MANAGEMENT_FLUSH_INDICES_START');

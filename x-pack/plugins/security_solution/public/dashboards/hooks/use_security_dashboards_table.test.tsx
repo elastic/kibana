@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { EuiBasicTable } from '@elastic/eui';
-import type { HttpStart } from '@kbn/core/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { render } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { SecurityPageName } from '../../../common/constants';
-import * as linkTo from '../../common/components/link_to';
-import { DEFAULT_DASHBOARDS_RESPONSE } from '../../common/containers/dashboards/__mocks__/api';
-import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
+import { renderHook, act } from '@testing-library/react-hooks';
+import { render } from '@testing-library/react';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { EuiBasicTable } from '@elastic/eui';
 import { useKibana } from '../../common/lib/kibana';
-import { METRIC_TYPE, TELEMETRY_EVENT } from '../../common/lib/telemetry/constants';
-import * as telemetry from '../../common/lib/telemetry/track';
 import { TestProviders } from '../../common/mock/test_providers';
-import { DashboardContextProvider } from '../context/dashboard_context';
 import {
   useSecurityDashboardsTableColumns,
   useSecurityDashboardsTableItems,
 } from './use_security_dashboards_table';
+import { METRIC_TYPE, TELEMETRY_EVENT } from '../../common/lib/telemetry/constants';
+import * as telemetry from '../../common/lib/telemetry/track';
+import { SecurityPageName } from '../../../common/constants';
+import * as linkTo from '../../common/components/link_to';
+import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
+import { DEFAULT_DASHBOARDS_RESPONSE } from '../../common/containers/dashboards/__mocks__/api';
+import { DashboardContextProvider } from '../context/dashboard_context';
+import type { HttpStart } from '@kbn/core/public';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/tags/api');

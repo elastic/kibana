@@ -1,17 +1,17 @@
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { RenderHookOptions, act, renderHook } from '@testing-library/react-hooks';
-import { createMockGraphStore } from '../state_management/mocks';
-import { Workspace } from '../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UseWorkspaceLoaderProps, useWorkspaceLoader } from './use_workspace_loader';
+import { useWorkspaceLoader, UseWorkspaceLoaderProps } from './use_workspace_loader';
+import { coreMock } from '@kbn/core/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createMockGraphStore } from '../state_management/mocks';
+import { Workspace } from '../types';
+import { renderHook, act, RenderHookOptions } from '@testing-library/react-hooks';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({

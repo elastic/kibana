@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiFieldNumber, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiButtonEmpty, EuiFieldNumber, EuiFlexItem } from '@elastic/eui';
 import { ColorMapping } from '../../config';
 
 export const Range: React.FC<{

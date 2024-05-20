@@ -6,8 +6,8 @@
  */
 
 import {
-  INTERNAL_DETECTION_ENGINE_URL as INTERNAL,
   DETECTION_ENGINE_RULES_URL as RULES,
+  INTERNAL_DETECTION_ENGINE_URL as INTERNAL,
 } from '../../../constants';
 
 const OLD_BASE_URL = `${RULES}/prepackaged` as const;

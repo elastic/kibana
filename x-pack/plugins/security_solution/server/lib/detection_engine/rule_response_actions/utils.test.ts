@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AlertWithAgent } from './types';
 import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
+import type { AlertWithAgent } from './types';
 
 const getSampleAlerts = (): AlertWithAgent[] => {
   const alert = {

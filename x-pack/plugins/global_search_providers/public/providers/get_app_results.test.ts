@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { AppStatus, DEFAULT_APP_CATEGORIES, PublicAppInfo } from '@kbn/core/public';
+import { AppStatus, PublicAppInfo, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import {
   AppLink,
   appToResult,
   getAppResults,
-  keywordScoreWeighting,
   scoreApp,
+  keywordScoreWeighting,
 } from './get_app_results';
 
 const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({

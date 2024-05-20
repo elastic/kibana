@@ -15,11 +15,11 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, UseLensAttributesProps } from './types';
 import {
-  fieldNameExistsFilter,
   getDetailsPageFilter,
+  sourceOrDestinationIpExistsFilter,
   getIndexFilters,
   getNetworkDetailsPageFilter,
-  sourceOrDestinationIpExistsFilter,
+  fieldNameExistsFilter,
 } from './utils';
 
 export const useLensAttributes = ({

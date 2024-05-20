@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiAccordion, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 
 import { SelectOption, SwitchOption, TextInputOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { SetParamByIndex } from '.';
 import { ValueAxis } from '../../../../types';
-import { getConfigCollections } from '../../../collections';
-import { CustomExtentsOptions } from './custom_extents_options';
 import { LabelOptions, SetAxisLabel } from './label_options';
+import { CustomExtentsOptions } from './custom_extents_options';
+import { SetParamByIndex } from '.';
+import { getConfigCollections } from '../../../collections';
 
 const collections = getConfigCollections();
 

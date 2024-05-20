@@ -67,7 +67,11 @@
         "tags": [],
         "label": "decodeRequestParams",
         "description": [],
-        "signature": ["(params: KibanaRequestParams, paramsRt: T) => ", "OutputOf", "<T>"],
+        "signature": [
+          "(params: KibanaRequestParams, paramsRt: T) => ",
+          "OutputOf",
+          "<T>"
+        ],
         "path": "packages/kbn-server-route-repository/src/decode_request_params.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -79,7 +83,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["KibanaRequestParams"],
+            "signature": [
+              "KibanaRequestParams"
+            ],
             "path": "packages/kbn-server-route-repository/src/decode_request_params.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -92,7 +98,9 @@
             "tags": [],
             "label": "paramsRt",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-server-route-repository/src/decode_request_params.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -123,7 +131,9 @@
             "tags": [],
             "label": "endpoint",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-server-route-repository/src/format_request.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -136,7 +146,9 @@
             "tags": [],
             "label": "pathParams",
             "description": [],
-            "signature": ["Record<string, any>"],
+            "signature": [
+              "Record<string, any>"
+            ],
             "path": "packages/kbn-server-route-repository/src/format_request.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -167,7 +179,9 @@
             "tags": [],
             "label": "endpoint",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-server-route-repository/src/parse_endpoint.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -284,7 +298,9 @@
                 "tags": [],
                 "label": "dependencies",
                 "description": [],
-                "signature": ["{ [x: string]: any; }"],
+                "signature": [
+                  "{ [x: string]: any; }"
+                ],
                 "path": "packages/kbn-server-route-repository/src/register_routes.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -315,7 +331,9 @@
             "tags": [],
             "label": "[endpoint: string]: any",
             "description": [],
-            "signature": ["[endpoint: string]:  any"],
+            "signature": [
+              "[endpoint: string]:  any"
+            ],
             "path": "packages/kbn-server-route-repository/src/typings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -399,7 +417,9 @@
         "tags": [],
         "label": "EndpointOf",
         "description": [],
-        "signature": ["keyof TServerRouteRepository"],
+        "signature": [
+          "keyof TServerRouteRepository"
+        ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -499,7 +519,9 @@
             "tags": [],
             "label": "endpoint",
             "description": [],
-            "signature": ["TEndpoint"],
+            "signature": [
+              "TEndpoint"
+            ],
             "path": "packages/kbn-server-route-repository/src/typings.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -14,9 +14,9 @@ import {
   getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 import { LibraryNotificationPopover } from './library_notification_popover';
-import { UnlinkFromLibraryAction, isApiCompatible } from './unlink_from_library_action';
+import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
+import { isApiCompatible, UnlinkFromLibraryAction } from './unlink_from_library_action';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 

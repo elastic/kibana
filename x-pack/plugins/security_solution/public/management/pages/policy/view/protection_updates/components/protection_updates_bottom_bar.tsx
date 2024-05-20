@@ -12,14 +12,14 @@ import {
   EuiFlexItem,
   EuiPageTemplate,
 } from '@elastic/eui';
-import type { ApplicationStart } from '@kbn/core-application-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { APP_UI_ID } from '../../../../../../../common';
-import type { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { APP_UI_ID } from '../../../../../../../common';
 import { getPoliciesPath } from '../../../../../common/routing';
+import type { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
 
 interface ProtectionUpdatesBottomBarProps {
   saveButtonDisabled: boolean;

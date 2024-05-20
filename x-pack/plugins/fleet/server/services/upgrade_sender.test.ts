@@ -8,10 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import type { TelemetryEventsSender } from '../telemetry/sender';
+import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 
-import { UpdateEventType, capErrorSize, sendTelemetryEvents } from './upgrade_sender';
+import { sendTelemetryEvents, capErrorSize, UpdateEventType } from './upgrade_sender';
 import type { PackageUpdateEvent } from './upgrade_sender';
 
 describe('sendTelemetryEvents', () => {

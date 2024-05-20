@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AsApiContract } from '@kbn/actions-plugin/common';
-import {
-  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
-  MaintenanceWindow,
-} from '@kbn/alerting-plugin/common';
 import { HttpStart } from '@kbn/core-http-browser';
+import {
+  MaintenanceWindow,
+  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
+} from '@kbn/alerting-plugin/common';
+import { AsApiContract } from '@kbn/actions-plugin/common';
 
 export interface BulkGetMaintenanceWindowsParams {
   http: HttpStart;

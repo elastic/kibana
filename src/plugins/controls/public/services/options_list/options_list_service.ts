@@ -8,21 +8,21 @@
 
 import { memoize } from 'lodash';
 
+import dateMath from '@kbn/datemath';
 import { CoreStart } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import dateMath from '@kbn/datemath';
-import { type TimeRange, buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, type TimeRange } from '@kbn/es-query';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import {
-  OptionsListFailureResponse,
   OptionsListRequest,
-  OptionsListRequestBody,
   OptionsListResponse,
+  OptionsListRequestBody,
+  OptionsListFailureResponse,
 } from '../../../common/options_list/types';
-import { ControlsPluginStartDeps } from '../../types';
-import { ControlsDataService } from '../data/types';
 import { ControlsHTTPService } from '../http/types';
+import { ControlsDataService } from '../data/types';
+import { ControlsPluginStartDeps } from '../../types';
 import { ControlsOptionsListService } from './types';
 
 class OptionsListService implements ControlsOptionsListService {

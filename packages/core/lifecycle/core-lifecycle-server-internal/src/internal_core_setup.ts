@@ -8,26 +8,26 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
-import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
-import type { InternalDeprecationsServiceSetup } from '@kbn/core-deprecations-server-internal';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { InternalContextSetup } from '@kbn/core-http-context-server-internal';
+import type { InternalDeprecationsServiceSetup } from '@kbn/core-deprecations-server-internal';
 import type { InternalHttpResourcesSetup } from '@kbn/core-http-resources-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 import type { InternalRenderingServiceSetup } from '@kbn/core-rendering-server-internal';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
-import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
 import type { InternalUiSettingsServiceSetup } from '@kbn/core-ui-settings-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-server-internal';
+import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
+import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
+import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-server-internal';
 
 /** @internal */
 export interface InternalCoreSetup {

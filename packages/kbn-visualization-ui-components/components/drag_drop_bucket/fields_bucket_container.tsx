@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -14,9 +16,7 @@ import {
   EuiPanel,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import React from 'react';
 import type { BucketContainerProps } from './types';
 
 export const FieldsBucketContainer = ({

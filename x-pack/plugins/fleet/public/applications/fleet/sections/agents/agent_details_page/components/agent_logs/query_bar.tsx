@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { memo, useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -14,8 +14,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { useStartServices } from '../../../../../hooks';
 
 import {
-  AGENT_ID_FIELD,
   AGENT_LOG_INDEX_PATTERN,
+  AGENT_ID_FIELD,
   DATASET_FIELD,
   LOG_LEVEL_FIELD,
 } from './constants';

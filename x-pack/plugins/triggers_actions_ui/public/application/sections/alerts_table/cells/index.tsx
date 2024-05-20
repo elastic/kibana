@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_STATUS } from '@kbn/rule-data-utils';
 import React, { memo, useMemo } from 'react';
+import { ALERT_STATUS, ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import { CellComponentProps, SystemCellComponentMap, SystemCellId } from '../types';
+import { DefaultCell } from './default_cell';
+import { AlertLifecycleStatusCell } from './alert_lifecycle_status_cell';
 import { CasesCell } from '../cases/cell';
 import { MaintenanceWindowCell } from '../maintenance_windows/cell';
-import { CellComponentProps, SystemCellComponentMap, SystemCellId } from '../types';
-import { AlertLifecycleStatusCell } from './alert_lifecycle_status_cell';
-import { DefaultCell } from './default_cell';
 
 export const systemCells: SystemCellId[] = [
   ALERT_STATUS,

@@ -1,8 +1,3 @@
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { ESSearchResponse } from '@kbn/es-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +5,11 @@ import { ESSearchResponse } from '@kbn/es-types';
  * 2.0.
  */
 import { reject } from 'lodash';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { ESSearchResponse } from '@kbn/es-types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export function isUndefinedOrNull(value: any): value is undefined | null {
   return value === undefined || value === null;
@@ -94,7 +94,7 @@ export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
 
 export async function typedSearch<
   DocumentSource extends unknown,
-  TParams extends estypes.SearchRequest,
+  TParams extends estypes.SearchRequest
 >(
   esClient: ElasticsearchClient,
   params: TParams

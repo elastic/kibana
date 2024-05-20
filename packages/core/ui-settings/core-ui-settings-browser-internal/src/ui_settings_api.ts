@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import { BehaviorSubject } from 'rxjs';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 
 import type { UiSettingsState } from '@kbn/core-ui-settings-browser';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';

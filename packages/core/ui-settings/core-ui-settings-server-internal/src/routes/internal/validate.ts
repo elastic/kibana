@@ -9,11 +9,11 @@
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { ValidationBadValueError, ValidationSettingNotFoundError } from '../../ui_settings_errors';
 import type {
   InternalUiSettingsRequestHandlerContext,
   InternalUiSettingsRouter,
 } from '../../internal_types';
-import { ValidationBadValueError, ValidationSettingNotFoundError } from '../../ui_settings_errors';
 
 export function registerInternalValidateRoute(router: InternalUiSettingsRouter) {
   const validateFromRequest = async (

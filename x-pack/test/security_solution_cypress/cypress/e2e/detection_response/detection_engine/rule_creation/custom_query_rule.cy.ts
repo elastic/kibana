@@ -6,29 +6,29 @@
  */
 
 import { getNewRule } from '../../../../objects/rule';
-import { ALERT_SUPPRESSION_FIELDS } from '../../../../screens/create_new_rule';
 import {
-  DEFINITION_DETAILS,
-  DETAILS_TITLE,
   RULE_NAME_HEADER,
-  SUPPRESS_BY_DETAILS,
+  DEFINITION_DETAILS,
   SUPPRESS_FOR_DETAILS,
+  SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
+  DETAILS_TITLE,
 } from '../../../../screens/rule_details';
+import { ALERT_SUPPRESSION_FIELDS } from '../../../../screens/create_new_rule';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../../screens/search_bar';
 
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
-  continueFromDefineStep,
-  createRuleWithoutEnabling,
-  fillAboutRuleMinimumAndContinue,
-  fillAlertSuppressionFields,
-  fillCustomQueryInput,
-  fillDefineCustomRule,
-  fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
+  fillAboutRuleMinimumAndContinue,
+  fillDefineCustomRuleAndContinue,
+  createRuleWithoutEnabling,
+  fillDefineCustomRule,
   openAddFilterPopover,
+  fillAlertSuppressionFields,
   skipScheduleRuleAction,
+  continueFromDefineStep,
+  fillCustomQueryInput,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { usePartitionActions } from '../hooks/actions';
-import { useLoadActions } from '../hooks/use_load_actions';
-import type { CellActionExecutionContext } from '../types';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ActionItem } from './cell_action_item';
-import { ExtraActionsButton } from './extra_actions_button';
+import { usePartitionActions } from '../hooks/actions';
 import { ExtraActionsPopOver } from './extra_actions_popover';
+import { ExtraActionsButton } from './extra_actions_button';
+import type { CellActionExecutionContext } from '../types';
+import { useLoadActions } from '../hooks/use_load_actions';
 
 interface InlineActionsProps {
   actionContext: CellActionExecutionContext;

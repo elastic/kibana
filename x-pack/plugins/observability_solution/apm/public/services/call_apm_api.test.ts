@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
 import * as callApiExports from './rest/call_api';
-import { callApmApi, createCallApmApi } from './rest/create_call_apm_api';
+import { createCallApmApi, callApmApi } from './rest/create_call_apm_api';
+import { CoreStart } from '@kbn/core/public';
 
 const callApi = jest
   .spyOn(callApiExports, 'callApi')

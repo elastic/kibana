@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { services as xPackFunctionalServices } from '../../functional/services';
-import { DetectionsTestService } from '../../security_solution_ftr/services/detections';
-import { TimelineTestService } from '../../security_solution_ftr/services/timeline';
-import { EndpointTestResources } from './endpoint';
-import { EndpointArtifactsTestResources } from './endpoint_artifacts';
-import { EndpointPolicyTestResourcesProvider } from './endpoint_policy';
+import { IngestManagerProvider } from '../../common/services/ingest_manager';
 import { EndpointTelemetryTestResourcesProvider } from './endpoint_telemetry';
+import { EndpointTestResources } from './endpoint';
+import { TimelineTestService } from '../../security_solution_ftr/services/timeline';
+import { DetectionsTestService } from '../../security_solution_ftr/services/detections';
+import { EndpointPolicyTestResourcesProvider } from './endpoint_policy';
+import { EndpointArtifactsTestResources } from './endpoint_artifacts';
 import {
   KibanaSupertestWithCertProvider,
   KibanaSupertestWithCertWithoutAuthProvider,

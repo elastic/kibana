@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import { taskStoreMock } from '../task_store.mock';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { TaskClaiming } from './task_claiming';
+import { taskStoreMock } from '../task_store.mock';
+import apm from 'elastic-apm-node';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [

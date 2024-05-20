@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
-import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { uiSettingsServiceMock, settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { securityServiceMock } from '@kbn/core-security-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { settingsServiceMock, uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { createCoreStartMock } from './core_start.mock';
 

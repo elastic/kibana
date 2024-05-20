@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { useState, Fragment, memo, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiText,
+  EuiSpacer,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, Fragment, memo, useMemo } from 'react';
 
 import type { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../../../types';
 import type { PackagePolicyConfigValidationResults } from '../../../services';

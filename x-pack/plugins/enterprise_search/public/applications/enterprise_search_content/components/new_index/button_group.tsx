@@ -10,13 +10,13 @@ import React from 'react';
 import classNames from 'classnames';
 
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiSplitPanel,
-  EuiText,
   EuiTitle,
+  EuiText,
+  EuiSplitPanel,
+  EuiButtonIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import './button_group.scss';

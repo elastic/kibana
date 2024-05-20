@@ -5,61 +5,61 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import type { Screen } from '@testing-library/react';
-import { act, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
+import type { Screen } from '@testing-library/react';
+import { waitFor, within, screen, act } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { useKibana } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { usePostCase } from '../../containers/use_post_case';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
 
-import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 
-import userEvent from '@testing-library/user-event';
-import {
-  AttachmentType,
-  CaseSeverity,
-  ConnectorTypes,
-  CustomFieldTypes,
-} from '../../../common/types/domain';
-import { connectorsMock } from '../../common/mock/connectors';
-import { waitForComponentToUpdate } from '../../common/test_utils';
-import { useLicense } from '../../common/use_license';
-import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { categories, customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
-import { useGetCategories } from '../../containers/use_get_categories';
-import { useGetTags } from '../../containers/use_get_tags';
-import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
-import type { CaseAttachments } from '../../types';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
+import { useGetSeverity } from '../connectors/resilient/use_get_severity';
+import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
+import { useGetChoices } from '../connectors/servicenow/use_get_choices';
+import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
 import {
   useCaseConfigureResponse,
   useGetAllCaseConfigurationsResponse,
 } from '../configure_cases/__mock__';
-import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
-import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
-import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
-import { useGetSeverity } from '../connectors/resilient/use_get_severity';
-import { useGetChoices } from '../connectors/servicenow/use_get_choices';
-import type { CreateCaseFormFieldsProps } from './form';
-import { CreateCaseFormFields } from './form';
-import { FormContext } from './form_context';
 import {
   sampleConnectorData,
   sampleData,
   sampleTags,
-  useGetChoicesResponse,
-  useGetFieldsByIssueTypeResponse,
   useGetIncidentTypesResponse,
-  useGetIssueTypesResponse,
   useGetSeverityResponse,
+  useGetIssueTypesResponse,
+  useGetFieldsByIssueTypeResponse,
+  useGetChoicesResponse,
 } from './mock';
+import { FormContext } from './form_context';
+import type { CreateCaseFormFieldsProps } from './form';
+import { CreateCaseFormFields } from './form';
 import { SubmitCaseButton } from './submit_button';
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import userEvent from '@testing-library/user-event';
+import { connectorsMock } from '../../common/mock/connectors';
+import type { CaseAttachments } from '../../types';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import { useGetTags } from '../../containers/use_get_tags';
+import { waitForComponentToUpdate } from '../../common/test_utils';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { useLicense } from '../../common/use_license';
+import { useGetCategories } from '../../containers/use_get_categories';
+import { categories, customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
+import {
+  CaseSeverity,
+  AttachmentType,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');

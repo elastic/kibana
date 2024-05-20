@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '../common/lib/kibana';
 
 import { queryClient } from '../query_client';

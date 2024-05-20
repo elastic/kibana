@@ -10,9 +10,9 @@ import React from 'react';
 
 import type { TimelineModel } from '../../../store/model';
 
-import { StatefulOpenTimeline } from '..';
 import * as i18n from '../translations';
 import type { ActionTimelineToShow } from '../types';
+import { StatefulOpenTimeline } from '..';
 
 export interface OpenTimelineModalProps {
   onClose: () => void;

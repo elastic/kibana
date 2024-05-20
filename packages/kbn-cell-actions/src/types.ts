@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { PropsWithChildren } from 'react';
 import type {
   Action,
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { Serializable } from '@kbn/utility-types';
-import type { PropsWithChildren } from 'react';
 import type { CellActionsMode } from './constants';
 
 export * from './actions/types';
@@ -107,7 +107,7 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
  */
 
 export interface CellActionCompatibilityContext<
-  C extends CellActionExecutionContext = CellActionExecutionContext,
+  C extends CellActionExecutionContext = CellActionExecutionContext
 > extends ActionExecutionContext {
   /**
    * CellActionsData containing the field spec but not the value for the compatibility check

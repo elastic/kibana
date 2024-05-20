@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SortOptions } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IRouter } from '@kbn/core/server';
+import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
-import * as t from 'io-ts';
+import { SortOptions } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { bucketAggsSchemas, metricsAggsSchemas } from '../../common/types';
 import { RacRequestHandlerContext } from '../types';
+import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
+import { bucketAggsSchemas, metricsAggsSchemas } from '../../common/types';
 
 export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(

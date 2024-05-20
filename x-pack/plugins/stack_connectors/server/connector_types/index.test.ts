@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { registerConnectorTypes } from '.';
 import { allowedExperimentalValues } from '../../common/experimental_features';
+import { registerConnectorTypes } from '.';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 const ACTION_TYPE_IDS = [
   '.index',

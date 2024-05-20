@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React, { useMemo, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiAccordion,
-  EuiIconTip,
-  EuiLoadingSpinner,
+  EuiText,
   EuiNotificationBadge,
   EuiSpacer,
-  EuiText,
+  EuiAccordion,
+  EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
-import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import React, { useMemo, Fragment } from 'react';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListItem, FieldsGroupNames, type RenderFieldItemParams } from '../../types';
 import './fields_accordion.scss';
 

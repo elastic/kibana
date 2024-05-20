@@ -7,6 +7,9 @@
     "id": "customBranding",
     "server": true,
     "browser": false,
-    "requiredPlugins": ["licensing", "licenseApiGuard"]
+    "requiredPlugins": [
+      "licensing",
+      "licenseApiGuard"
+    ]
   }
 }

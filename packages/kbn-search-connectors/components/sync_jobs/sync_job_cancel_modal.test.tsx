@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { CancelSyncJobModal } from './sync_job_cancel_modal';
 import '@testing-library/jest-dom/extend-expect';

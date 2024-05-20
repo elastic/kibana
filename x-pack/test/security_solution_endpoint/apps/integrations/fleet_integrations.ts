@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
-  deleteAllDocsFromMetadataCurrentIndex,
-  deleteMetadataStream,
-} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  deleteMetadataStream,
+  deleteAllDocsFromMetadataCurrentIndex,
+} from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
 import { targetTags } from '../../target_tags';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

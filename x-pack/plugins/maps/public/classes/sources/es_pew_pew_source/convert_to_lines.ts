@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
+import { FeatureCollection } from 'geojson';
 import { extractPropertiesFromBucket } from '../../../../common/elasticsearch_util';
 
 const LAT_INDEX = 0;

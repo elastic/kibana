@@ -23,7 +23,9 @@
     "/health_check": {
       "post": {
         "summary": "Fleet Server health check",
-        "tags": ["Fleet internals"],
+        "tags": [
+          "Fleet internals"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -76,7 +78,9 @@
     "/setup": {
       "post": {
         "summary": "Initiate Fleet setup",
-        "tags": ["Fleet internals"],
+        "tags": [
+          "Fleet internals"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -118,7 +122,9 @@
     "/settings": {
       "get": {
         "summary": "Get settings",
-        "tags": ["Fleet internals"],
+        "tags": [
+          "Fleet internals"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -138,7 +144,9 @@
       },
       "put": {
         "summary": "Update settings",
-        "tags": ["Fleet internals"],
+        "tags": [
+          "Fleet internals"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -190,7 +198,9 @@
       ],
       "get": {
         "summary": "Get enrollment settings",
-        "tags": ["Fleet internals"],
+        "tags": [
+          "Fleet internals"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -223,7 +233,9 @@
     "/service-tokens": {
       "post": {
         "summary": "Create service token",
-        "tags": ["Service tokens"],
+        "tags": [
+          "Service tokens"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -259,7 +271,9 @@
     "/service_tokens": {
       "post": {
         "summary": "Create service token",
-        "tags": ["Service tokens"],
+        "tags": [
+          "Service tokens"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -294,7 +308,9 @@
     "/epm/verification_key_id": {
       "get": {
         "summary": "Get package signature verification key ID",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -335,7 +351,9 @@
     "/epm/bulk_assets": {
       "post": {
         "summary": "Bulk get assets",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -374,7 +392,9 @@
                     "description": "list of items necessary to fetch assets"
                   }
                 },
-                "required": ["assetIds"]
+                "required": [
+                  "assetIds"
+                ]
               }
             }
           }
@@ -384,7 +404,9 @@
     "/epm/categories": {
       "get": {
         "summary": "List package categories",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -434,7 +456,9 @@
     "/epm/packages/limited": {
       "get": {
         "summary": "Get limited package list",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -465,7 +489,9 @@
     "/epm/packages": {
       "get": {
         "summary": "List packages",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -521,7 +547,9 @@
       },
       "post": {
         "summary": "Install by package by direct upload",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -549,7 +577,10 @@
                             ]
                           }
                         },
-                        "required": ["id", "type"]
+                        "required": [
+                          "id",
+                          "type"
+                        ]
                       }
                     },
                     "_meta": {
@@ -557,12 +588,18 @@
                       "properties": {
                         "install_source": {
                           "type": "string",
-                          "enum": ["upload", "registry", "bundled"]
+                          "enum": [
+                            "upload",
+                            "registry",
+                            "bundled"
+                          ]
                         }
                       }
                     }
                   },
-                  "required": ["items"]
+                  "required": [
+                    "items"
+                  ]
                 }
               }
             }
@@ -617,7 +654,9 @@
     "/epm/packages/_bulk": {
       "post": {
         "summary": "Bulk install packages",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -681,7 +720,9 @@
                     "description": "force install to ignore package verification errors"
                   }
                 },
-                "required": ["packages"]
+                "required": [
+                  "packages"
+                ]
               }
             }
           }
@@ -691,7 +732,9 @@
     "/epm/packages/{pkgkey}": {
       "get": {
         "summary": "Get package",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -711,13 +754,21 @@
                       "properties": {
                         "status": {
                           "type": "string",
-                          "enum": ["installed", "installing", "install_failed", "not_installed"]
+                          "enum": [
+                            "installed",
+                            "installing",
+                            "install_failed",
+                            "not_installed"
+                          ]
                         },
                         "savedObject": {
                           "type": "string"
                         }
                       },
-                      "required": ["status", "savedObject"]
+                      "required": [
+                        "status",
+                        "savedObject"
+                      ]
                     }
                   ]
                 }
@@ -757,7 +808,9 @@
       },
       "post": {
         "summary": "Install package",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -785,11 +838,16 @@
                             ]
                           }
                         },
-                        "required": ["id", "type"]
+                        "required": [
+                          "id",
+                          "type"
+                        ]
                       }
                     }
                   },
-                  "required": ["response"]
+                  "required": [
+                    "response"
+                  ]
                 }
               }
             }
@@ -849,7 +907,9 @@
       },
       "delete": {
         "summary": "Delete ackage",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -877,11 +937,16 @@
                             ]
                           }
                         },
-                        "required": ["id", "type"]
+                        "required": [
+                          "id",
+                          "type"
+                        ]
                       }
                     }
                   },
-                  "required": ["response"]
+                  "required": [
+                    "response"
+                  ]
                 }
               }
             }
@@ -924,7 +989,9 @@
     "/epm/packages/{pkgName}/{pkgVersion}": {
       "get": {
         "summary": "Get package",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -944,7 +1011,12 @@
                       "properties": {
                         "status": {
                           "type": "string",
-                          "enum": ["installed", "installing", "install_failed", "not_installed"]
+                          "enum": [
+                            "installed",
+                            "installing",
+                            "install_failed",
+                            "not_installed"
+                          ]
                         },
                         "savedObject": {
                           "type": "object",
@@ -963,7 +1035,10 @@
                           "type": "string"
                         }
                       },
-                      "required": ["status", "savedObject"]
+                      "required": [
+                        "status",
+                        "savedObject"
+                      ]
                     }
                   ]
                 }
@@ -1026,7 +1101,9 @@
       ],
       "post": {
         "summary": "Install package",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1054,7 +1131,10 @@
                             ]
                           }
                         },
-                        "required": ["id", "type"]
+                        "required": [
+                          "id",
+                          "type"
+                        ]
                       }
                     },
                     "_meta": {
@@ -1062,12 +1142,18 @@
                       "properties": {
                         "install_source": {
                           "type": "string",
-                          "enum": ["registry", "upload", "bundled"]
+                          "enum": [
+                            "registry",
+                            "upload",
+                            "bundled"
+                          ]
                         }
                       }
                     }
                   },
-                  "required": ["items"]
+                  "required": [
+                    "items"
+                  ]
                 }
               }
             }
@@ -1121,7 +1207,9 @@
       },
       "put": {
         "summary": "Update package settings",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1149,11 +1237,16 @@
                             ]
                           }
                         },
-                        "required": ["id", "type"]
+                        "required": [
+                          "id",
+                          "type"
+                        ]
                       }
                     }
                   },
-                  "required": ["items"]
+                  "required": [
+                    "items"
+                  ]
                 }
               }
             }
@@ -1181,7 +1274,9 @@
       },
       "delete": {
         "summary": "Delete package",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1209,11 +1304,16 @@
                             ]
                           }
                         },
-                        "required": ["id", "type"]
+                        "required": [
+                          "id",
+                          "type"
+                        ]
                       }
                     }
                   },
-                  "required": ["items"]
+                  "required": [
+                    "items"
+                  ]
                 }
               }
             }
@@ -1256,7 +1356,9 @@
     "/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize": {
       "post": {
         "summary": "Authorize transforms",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1280,11 +1382,16 @@
                             "type": "string"
                           }
                         },
-                        "required": ["transformId", "error"]
+                        "required": [
+                          "transformId",
+                          "error"
+                        ]
                       }
                     }
                   },
-                  "required": ["items"]
+                  "required": [
+                    "items"
+                  ]
                 }
               }
             }
@@ -1352,7 +1459,9 @@
     "/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
         "summary": "Get package file",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1411,7 +1520,9 @@
     "/epm/packages/{pkgName}/stats": {
       "get": {
         "summary": "Get package stats",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1424,7 +1535,9 @@
                       "$ref": "#/components/schemas/package_usage_stats"
                     }
                   },
-                  "required": ["response"]
+                  "required": [
+                    "response"
+                  ]
                 }
               }
             }
@@ -1454,7 +1567,9 @@
     "/epm/templates/{pkgName}/{pkgVersion}/inputs": {
       "get": {
         "summary": "Get inputs template",
-        "tags": ["Elastic Package Manager (EPM)"],
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1490,7 +1605,11 @@
         {
           "schema": {
             "type": "string",
-            "enum": ["json", "yaml", "yml"]
+            "enum": [
+              "json",
+              "yaml",
+              "yml"
+            ]
           },
           "name": "format",
           "description": "Format of response - json or yaml",
@@ -1509,7 +1628,9 @@
     "/agents/setup": {
       "get": {
         "summary": "Get agent setup info",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1534,7 +1655,9 @@
       },
       "post": {
         "summary": "Initiate agent setup",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "operationId": "setup-agents",
         "responses": {
           "200": {
@@ -1564,7 +1687,10 @@
                     "type": "string"
                   }
                 },
-                "required": ["admin_username", "admin_password"]
+                "required": [
+                  "admin_username",
+                  "admin_password"
+                ]
               }
             }
           }
@@ -1579,7 +1705,9 @@
     "/agent-status": {
       "get": {
         "summary": "Get agent status summary",
-        "tags": ["Agent status"],
+        "tags": [
+          "Agent status"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1648,7 +1776,9 @@
     "/agent_status": {
       "get": {
         "summary": "Get agent status summary",
-        "tags": ["Agent status"],
+        "tags": [
+          "Agent status"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1737,7 +1867,9 @@
     "/agent_status/data": {
       "get": {
         "summary": "Get incoming agent data",
-        "tags": ["Agent status"],
+        "tags": [
+          "Agent status"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1788,7 +1920,9 @@
     "/agents": {
       "get": {
         "summary": "List agents",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1847,7 +1981,9 @@
       },
       "post": {
         "summary": "List agents by action ids",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1883,7 +2019,9 @@
                     }
                   }
                 },
-                "required": ["policy_id"]
+                "required": [
+                  "policy_id"
+                ]
               }
             }
           }
@@ -1893,7 +2031,9 @@
     "/agents/bulk_upgrade": {
       "post": {
         "summary": "Bulk upgrade agents",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1931,7 +2071,10 @@
                 "version": "8.4.0",
                 "source_uri": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
                 "rollout_duration_seconds": 3600,
-                "agents": ["agent1", "agent2"],
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ],
                 "start_time": "2022-08-03T14:00:00.000Z"
               }
             }
@@ -1942,7 +2085,9 @@
     "/agents/action_status": {
       "get": {
         "summary": "Get agent action status",
-        "tags": ["Agent actions"],
+        "tags": [
+          "Agent actions"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/page_size"
@@ -2083,7 +2228,9 @@
                       }
                     }
                   },
-                  "required": ["items"]
+                  "required": [
+                    "items"
+                  ]
                 }
               }
             }
@@ -2108,7 +2255,9 @@
       ],
       "get": {
         "summary": "Get agent by ID",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2121,7 +2270,9 @@
                       "$ref": "#/components/schemas/agent"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -2139,7 +2290,9 @@
       },
       "put": {
         "summary": "Update agent by ID",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2152,7 +2305,9 @@
                       "$ref": "#/components/schemas/agent"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -2191,7 +2346,9 @@
       },
       "delete": {
         "summary": "Delete agent by ID",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2202,10 +2359,14 @@
                   "properties": {
                     "action": {
                       "type": "string",
-                      "enum": ["deleted"]
+                      "enum": [
+                        "deleted"
+                      ]
                     }
                   },
-                  "required": ["action"]
+                  "required": [
+                    "action"
+                  ]
                 }
               }
             }
@@ -2235,7 +2396,9 @@
       ],
       "post": {
         "summary": "Create agent action",
-        "tags": ["Agent actions"],
+        "tags": [
+          "Agent actions"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2309,7 +2472,9 @@
       ],
       "post": {
         "summary": "Cancel agent action",
-        "tags": ["Agent actions"],
+        "tags": [
+          "Agent actions"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2359,7 +2524,9 @@
       ],
       "get": {
         "summary": "Get file uploaded by agent",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2405,7 +2572,9 @@
       ],
       "post": {
         "summary": "Reassign agent",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2438,7 +2607,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["policy_id"]
+                "required": [
+                  "policy_id"
+                ]
               }
             }
           }
@@ -2446,7 +2617,9 @@
       },
       "put": {
         "summary": "Reassign agent",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2479,7 +2652,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["policy_id"]
+                "required": [
+                  "policy_id"
+                ]
               }
             }
           }
@@ -2500,7 +2675,9 @@
       ],
       "post": {
         "summary": "Unenroll agent",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2527,7 +2704,9 @@
                     },
                     "statusCode": {
                       "type": "number",
-                      "enum": [400]
+                      "enum": [
+                        400
+                      ]
                     }
                   }
                 }
@@ -2573,7 +2752,9 @@
       ],
       "post": {
         "summary": "Upgrade agent",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2620,7 +2801,9 @@
       ],
       "get": {
         "summary": "List agent uploads",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2655,7 +2838,9 @@
     "/agents/bulk_reassign": {
       "post": {
         "summary": "Bulk reassign agents",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2708,7 +2893,10 @@
                     ]
                   }
                 },
-                "required": ["policy_id", "agents"]
+                "required": [
+                  "policy_id",
+                  "agents"
+                ]
               },
               "example": {
                 "policy_id": "policy_id",
@@ -2722,7 +2910,9 @@
     "/agents/bulk_unenroll": {
       "post": {
         "summary": "Bulk unenroll agents",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2783,12 +2973,17 @@
                     "description": "When passing agents by KQL query, unenrolls inactive agents too"
                   }
                 },
-                "required": ["agents"]
+                "required": [
+                  "agents"
+                ]
               },
               "example": {
                 "revoke": true,
                 "force": false,
-                "agents": ["agent1", "agent2"]
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ]
               }
             }
           }
@@ -2798,7 +2993,9 @@
     "/agents/bulk_update_agent_tags": {
       "post": {
         "summary": "Bulk update agent tags",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2862,12 +3059,21 @@
                     "type": "number"
                   }
                 },
-                "required": ["agents"]
+                "required": [
+                  "agents"
+                ]
               },
               "example": {
-                "agents": ["agent1", "agent2"],
-                "tagsToAdd": ["newTag"],
-                "tagsToRemove": ["existingTag"]
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ],
+                "tagsToAdd": [
+                  "newTag"
+                ],
+                "tagsToRemove": [
+                  "existingTag"
+                ]
               }
             }
           }
@@ -2877,7 +3083,9 @@
     "/agents/tags": {
       "get": {
         "summary": "List agent tags",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2909,7 +3117,9 @@
       ],
       "post": {
         "summary": "Request agent diagnostics",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2922,7 +3132,9 @@
                       "oneOf": [
                         {
                           "type": "string",
-                          "enum": ["CPU"]
+                          "enum": [
+                            "CPU"
+                          ]
                         }
                       ]
                     }
@@ -2963,7 +3175,9 @@
     "/agents/bulk_request_diagnostics": {
       "post": {
         "summary": "Bulk request diagnostics from agents",
-        "tags": ["Agents"],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3020,13 +3234,17 @@
                       "oneOf": [
                         {
                           "type": "string",
-                          "enum": ["CPU"]
+                          "enum": [
+                            "CPU"
+                          ]
                         }
                       ]
                     }
                   }
                 },
-                "required": ["agents"]
+                "required": [
+                  "agents"
+                ]
               },
               "example": {
                 "agents": "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"
@@ -3039,7 +3257,9 @@
     "/agent_policies": {
       "get": {
         "summary": "List agent policies",
-        "tags": ["Agent policies"],
+        "tags": [
+          "Agent policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3064,7 +3284,12 @@
                       "type": "number"
                     }
                   },
-                  "required": ["items", "total", "page", "perPage"]
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "perPage"
+                  ]
                 }
               }
             }
@@ -3105,7 +3330,9 @@
       },
       "post": {
         "summary": "Create agent policy",
-        "tags": ["Agent policies"],
+        "tags": [
+          "Agent policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3157,7 +3384,9 @@
       ],
       "get": {
         "summary": "Get agent policy by ID",
-        "tags": ["Agent policies"],
+        "tags": [
+          "Agent policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3170,7 +3399,9 @@
                       "$ref": "#/components/schemas/agent_policy"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -3185,7 +3416,9 @@
       },
       "put": {
         "summary": "Update agent policy by ID",
-        "tags": ["Agent policies"],
+        "tags": [
+          "Agent policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3198,7 +3431,9 @@
                       "$ref": "#/components/schemas/agent_policy"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -3237,7 +3472,9 @@
       ],
       "post": {
         "summary": "Copy agent policy by ID",
-        "tags": ["Agent policies"],
+        "tags": [
+          "Agent policies"
+        ],
         "operationId": "agent-policy-copy",
         "parameters": [
           {
@@ -3256,7 +3493,9 @@
                       "$ref": "#/components/schemas/agent_policy"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -3278,7 +3517,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["name"]
+                "required": [
+                  "name"
+                ]
               }
             }
           },
@@ -3289,7 +3530,9 @@
     "/agent_policies/{agentPolicyId}/full": {
       "get": {
         "summary": "Get full agent policy by ID",
-        "tags": ["Agent policies"],
+        "tags": [
+          "Agent policies"
+        ],
         "operationId": "agent-policy-full",
         "responses": {
           "200": {
@@ -3357,7 +3600,9 @@
     "/agent_policies/{agentPolicyId}/download": {
       "get": {
         "summary": "Download agent policy by ID",
-        "tags": ["Agent policies"],
+        "tags": [
+          "Agent policies"
+        ],
         "operationId": "agent-policy-download",
         "responses": {
           "200": {
@@ -3418,7 +3663,9 @@
     "/agent_policies/_bulk_get": {
       "post": {
         "summary": "Bulk get agent policies",
-        "tags": ["Agent policies"],
+        "tags": [
+          "Agent policies"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3440,7 +3687,9 @@
                     "type": "boolean"
                   }
                 },
-                "required": ["ids"]
+                "required": [
+                  "ids"
+                ]
               }
             }
           }
@@ -3460,7 +3709,9 @@
                       }
                     }
                   },
-                  "required": ["items"]
+                  "required": [
+                    "items"
+                  ]
                 }
               }
             }
@@ -3477,7 +3728,9 @@
     "/agent_policies/delete": {
       "post": {
         "summary": "Delete agent policy by ID",
-        "tags": ["Agent policies"],
+        "tags": [
+          "Agent policies"
+        ],
         "operationId": "delete-agent-policy",
         "responses": {
           "200": {
@@ -3494,7 +3747,10 @@
                       "type": "boolean"
                     }
                   },
-                  "required": ["id", "success"]
+                  "required": [
+                    "id",
+                    "success"
+                  ]
                 }
               }
             }
@@ -3513,7 +3769,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["agentPolicyId"]
+                "required": [
+                  "agentPolicyId"
+                ]
               }
             }
           }
@@ -3529,7 +3787,9 @@
     "/data_streams": {
       "get": {
         "summary": "List data streams",
-        "tags": ["Data streams"],
+        "tags": [
+          "Data streams"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3560,7 +3820,9 @@
     "/enrollment-api-keys": {
       "get": {
         "summary": "List enrollment API keys",
-        "tags": ["Enrollment API keys"],
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3592,7 +3854,12 @@
                       "type": "number"
                     }
                   },
-                  "required": ["items", "page", "perPage", "total"]
+                  "required": [
+                    "items",
+                    "page",
+                    "perPage",
+                    "total"
+                  ]
                 }
               }
             }
@@ -3607,7 +3874,9 @@
       },
       "post": {
         "summary": "Create enrollment API key",
-        "tags": ["Enrollment API keys"],
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3621,7 +3890,9 @@
                     },
                     "action": {
                       "type": "string",
-                      "enum": ["created"]
+                      "enum": [
+                        "created"
+                      ]
                     }
                   }
                 }
@@ -3654,7 +3925,9 @@
       ],
       "get": {
         "summary": "Get enrollment API key by ID",
-        "tags": ["Enrollment API keys"],
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3667,7 +3940,9 @@
                       "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -3681,7 +3956,9 @@
       },
       "delete": {
         "summary": "Delete enrollment API key by ID",
-        "tags": ["Enrollment API keys"],
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3692,10 +3969,14 @@
                   "properties": {
                     "action": {
                       "type": "string",
-                      "enum": ["deleted"]
+                      "enum": [
+                        "deleted"
+                      ]
                     }
                   },
-                  "required": ["action"]
+                  "required": [
+                    "action"
+                  ]
                 }
               }
             }
@@ -3716,7 +3997,9 @@
     "/enrollment_api_keys": {
       "get": {
         "summary": "List enrollment API keys",
-        "tags": ["Enrollment API keys"],
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3748,7 +4031,12 @@
                       "type": "number"
                     }
                   },
-                  "required": ["items", "page", "perPage", "total"]
+                  "required": [
+                    "items",
+                    "page",
+                    "perPage",
+                    "total"
+                  ]
                 }
               }
             }
@@ -3762,7 +4050,9 @@
       },
       "post": {
         "summary": "Create enrollment API key",
-        "tags": ["Enrollment API keys"],
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3776,7 +4066,9 @@
                     },
                     "action": {
                       "type": "string",
-                      "enum": ["created"]
+                      "enum": [
+                        "created"
+                      ]
                     }
                   }
                 }
@@ -3808,7 +4100,9 @@
       ],
       "get": {
         "summary": "Get enrollment API key by ID",
-        "tags": ["Enrollment API keys"],
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3821,7 +4115,9 @@
                       "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -3834,7 +4130,9 @@
       },
       "delete": {
         "summary": "Delete enrollment API key by ID",
-        "tags": ["Enrollment API keys"],
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3845,10 +4143,14 @@
                   "properties": {
                     "action": {
                       "type": "string",
-                      "enum": ["deleted"]
+                      "enum": [
+                        "deleted"
+                      ]
                     }
                   },
-                  "required": ["action"]
+                  "required": [
+                    "action"
+                  ]
                 }
               }
             }
@@ -3868,7 +4170,9 @@
     "/package_policies": {
       "get": {
         "summary": "List package policies",
-        "tags": ["Package policies"],
+        "tags": [
+          "Package policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3893,7 +4197,9 @@
                       "type": "number"
                     }
                   },
-                  "required": ["items"]
+                  "required": [
+                    "items"
+                  ]
                 }
               }
             }
@@ -3922,7 +4228,9 @@
       "parameters": [],
       "post": {
         "summary": "Create package policy",
-        "tags": ["Package policies"],
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "create-package-policy",
         "responses": {
           "200": {
@@ -3936,7 +4244,9 @@
                       "$ref": "#/components/schemas/package_policy"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -3971,7 +4281,9 @@
     "/package_policies/_bulk_get": {
       "post": {
         "summary": "Bulk get package policies",
-        "tags": ["Package policies"],
+        "tags": [
+          "Package policies"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3989,7 +4301,9 @@
                     "type": "boolean"
                   }
                 },
-                "required": ["ids"]
+                "required": [
+                  "ids"
+                ]
               }
             }
           }
@@ -4009,7 +4323,9 @@
                       }
                     }
                   },
-                  "required": ["items"]
+                  "required": [
+                    "items"
+                  ]
                 }
               }
             }
@@ -4030,7 +4346,9 @@
     "/package_policies/delete": {
       "post": {
         "summary": "Delete package policy",
-        "tags": ["Package policies"],
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "post-delete-package-policy",
         "requestBody": {
           "content": {
@@ -4048,7 +4366,9 @@
                     "type": "boolean"
                   }
                 },
-                "required": ["packagePolicyIds"]
+                "required": [
+                  "packagePolicyIds"
+                ]
               }
             }
           }
@@ -4073,7 +4393,10 @@
                         "type": "boolean"
                       }
                     },
-                    "required": ["id", "success"]
+                    "required": [
+                      "id",
+                      "success"
+                    ]
                   }
                 }
               }
@@ -4093,7 +4416,9 @@
     "/package_policies/upgrade": {
       "post": {
         "summary": "Upgrade package policy to a newer package version",
-        "tags": ["Package policies"],
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "upgrade-package-policy",
         "requestBody": {
           "content": {
@@ -4108,7 +4433,9 @@
                     }
                   }
                 },
-                "required": ["packagePolicyIds"]
+                "required": [
+                  "packagePolicyIds"
+                ]
               }
             }
           }
@@ -4133,7 +4460,10 @@
                         "type": "boolean"
                       }
                     },
-                    "required": ["id", "success"]
+                    "required": [
+                      "id",
+                      "success"
+                    ]
                   }
                 }
               }
@@ -4151,7 +4481,9 @@
     "/package_policies/upgrade/dryrun": {
       "post": {
         "summary": "Dry run package policy upgrade",
-        "tags": ["Package policies"],
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "upgrade-package-policy-dry-run",
         "requestBody": {
           "content": {
@@ -4169,7 +4501,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["packagePolicyIds"]
+                "required": [
+                  "packagePolicyIds"
+                ]
               }
             }
           }
@@ -4194,7 +4528,9 @@
                         "$ref": "#/components/schemas/upgrade_agent_diff"
                       }
                     },
-                    "required": ["hasErrors"]
+                    "required": [
+                      "hasErrors"
+                    ]
                   }
                 }
               }
@@ -4219,7 +4555,9 @@
       ],
       "get": {
         "summary": "Get package policy by ID",
-        "tags": ["Package policies"],
+        "tags": [
+          "Package policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4232,7 +4570,9 @@
                       "$ref": "#/components/schemas/package_policy"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -4250,7 +4590,9 @@
       },
       "put": {
         "summary": "Update package policy by ID",
-        "tags": ["Package policies"],
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "update-package-policy",
         "requestBody": {
           "content": {
@@ -4276,7 +4618,10 @@
                       "type": "boolean"
                     }
                   },
-                  "required": ["item", "sucess"]
+                  "required": [
+                    "item",
+                    "sucess"
+                  ]
                 }
               }
             }
@@ -4296,7 +4641,9 @@
       },
       "delete": {
         "summary": "Delete package policy by ID",
-        "tags": ["Package policies"],
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "delete-package-policy",
         "responses": {
           "200": {
@@ -4310,7 +4657,9 @@
                       "type": "string"
                     }
                   },
-                  "required": ["id"]
+                  "required": [
+                    "id"
+                  ]
                 }
               }
             }
@@ -4333,7 +4682,9 @@
     "/outputs": {
       "get": {
         "summary": "List outputs",
-        "tags": ["Outputs"],
+        "tags": [
+          "Outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4370,7 +4721,9 @@
       },
       "post": {
         "summary": "Create output",
-        "tags": ["Outputs"],
+        "tags": [
+          "Outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4407,7 +4760,9 @@
     "/outputs/{outputId}": {
       "get": {
         "summary": "Get output by ID",
-        "tags": ["Outputs"],
+        "tags": [
+          "Outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4442,7 +4797,9 @@
       ],
       "delete": {
         "summary": "Delete output by ID",
-        "tags": ["Outputs"],
+        "tags": [
+          "Outputs"
+        ],
         "operationId": "delete-output",
         "responses": {
           "200": {
@@ -4456,7 +4813,9 @@
                       "type": "string"
                     }
                   },
-                  "required": ["id"]
+                  "required": [
+                    "id"
+                  ]
                 }
               }
             }
@@ -4473,7 +4832,9 @@
       },
       "put": {
         "summary": "Update output by ID",
-        "tags": ["Outputs"],
+        "tags": [
+          "Outputs"
+        ],
         "operationId": "update-output",
         "requestBody": {
           "content": {
@@ -4514,7 +4875,9 @@
     "/outputs/{outputId}/health": {
       "get": {
         "summary": "Get latest output health",
-        "tags": ["Outputs"],
+        "tags": [
+          "Outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4560,7 +4923,9 @@
     "/logstash_api_keys": {
       "post": {
         "summary": "Generate Logstash API key",
-        "tags": ["Outputs"],
+        "tags": [
+          "Outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4592,7 +4957,9 @@
     "/agent_download_sources": {
       "get": {
         "summary": "List agent binary download sources",
-        "tags": ["Agent binary download sources"],
+        "tags": [
+          "Agent binary download sources"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4629,7 +4996,9 @@
       },
       "post": {
         "summary": "Create agent binary download source",
-        "tags": ["Agent binary download sources"],
+        "tags": [
+          "Agent binary download sources"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4669,7 +5038,11 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "host", "is_default"]
+                "required": [
+                  "name",
+                  "host",
+                  "is_default"
+                ]
               }
             }
           }
@@ -4680,7 +5053,9 @@
     "/agent_download_sources/{sourceId}": {
       "get": {
         "summary": "Get agent binary download source by ID",
-        "tags": ["Agent binary download sources"],
+        "tags": [
+          "Agent binary download sources"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4693,7 +5068,9 @@
                       "$ref": "#/components/schemas/download_sources"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -4716,7 +5093,9 @@
       ],
       "delete": {
         "summary": "Delete agent binary download source by ID",
-        "tags": ["Agent binary download sources"],
+        "tags": [
+          "Agent binary download sources"
+        ],
         "operationId": "delete-download-source",
         "responses": {
           "200": {
@@ -4730,7 +5109,9 @@
                       "type": "string"
                     }
                   },
-                  "required": ["id"]
+                  "required": [
+                    "id"
+                  ]
                 }
               }
             }
@@ -4747,7 +5128,9 @@
       },
       "put": {
         "summary": "Update agent binary download source by ID",
-        "tags": ["Agent binary download sources"],
+        "tags": [
+          "Agent binary download sources"
+        ],
         "operationId": "update-download-source",
         "requestBody": {
           "content": {
@@ -4765,7 +5148,11 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "is_default", "host"]
+                "required": [
+                  "name",
+                  "is_default",
+                  "host"
+                ]
               }
             }
           }
@@ -4782,7 +5169,9 @@
                       "$ref": "#/components/schemas/download_sources"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -4801,7 +5190,9 @@
     "/fleet_server_hosts": {
       "get": {
         "summary": "List Fleet Server hosts",
-        "tags": ["Fleet Server hosts"],
+        "tags": [
+          "Fleet Server hosts"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4838,7 +5229,9 @@
       },
       "post": {
         "summary": "Create Fleet Server host",
-        "tags": ["Fleet Server hosts"],
+        "tags": [
+          "Fleet Server hosts"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4888,7 +5281,10 @@
                     }
                   }
                 },
-                "required": ["name", "host_urls"]
+                "required": [
+                  "name",
+                  "host_urls"
+                ]
               }
             }
           }
@@ -4899,7 +5295,9 @@
     "/fleet_server_hosts/{itemId}": {
       "get": {
         "summary": "Get Fleet Server host by ID",
-        "tags": ["Fleet Server hosts"],
+        "tags": [
+          "Fleet Server hosts"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4912,7 +5310,9 @@
                       "$ref": "#/components/schemas/fleet_server_host"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -4935,7 +5335,9 @@
       ],
       "delete": {
         "summary": "Delete Fleet Server host by ID",
-        "tags": ["Fleet Server hosts"],
+        "tags": [
+          "Fleet Server hosts"
+        ],
         "operationId": "delete-fleet-server-hosts",
         "responses": {
           "200": {
@@ -4949,7 +5351,9 @@
                       "type": "string"
                     }
                   },
-                  "required": ["id"]
+                  "required": [
+                    "id"
+                  ]
                 }
               }
             }
@@ -4966,7 +5370,9 @@
       },
       "put": {
         "summary": "Update Fleet Server host by ID",
-        "tags": ["Fleet Server hosts"],
+        "tags": [
+          "Fleet Server hosts"
+        ],
         "operationId": "update-fleet-server-hosts",
         "requestBody": {
           "content": {
@@ -5011,7 +5417,9 @@
                       "$ref": "#/components/schemas/fleet_server_host"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -5030,7 +5438,9 @@
     "/proxies": {
       "get": {
         "summary": "List proxies",
-        "tags": ["Proxies"],
+        "tags": [
+          "Proxies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -5067,7 +5477,9 @@
       },
       "post": {
         "summary": "Create proxy",
-        "tags": ["Proxies"],
+        "tags": [
+          "Proxies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -5116,7 +5528,10 @@
                     "type": "string"
                   }
                 },
-                "required": ["name", "url"]
+                "required": [
+                  "name",
+                  "url"
+                ]
               }
             }
           }
@@ -5127,7 +5542,9 @@
     "/proxies/{itemId}": {
       "get": {
         "summary": "Get proxy by ID",
-        "tags": ["Proxies"],
+        "tags": [
+          "Proxies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -5140,7 +5557,9 @@
                       "$ref": "#/components/schemas/proxies"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -5163,7 +5582,9 @@
       ],
       "delete": {
         "summary": "Delete proxy by ID",
-        "tags": ["Proxies"],
+        "tags": [
+          "Proxies"
+        ],
         "operationId": "delete-fleet-proxies",
         "responses": {
           "200": {
@@ -5177,7 +5598,9 @@
                       "type": "string"
                     }
                   },
-                  "required": ["id"]
+                  "required": [
+                    "id"
+                  ]
                 }
               }
             }
@@ -5194,7 +5617,9 @@
       },
       "put": {
         "summary": "Update proxy by ID",
-        "tags": ["Proxies"],
+        "tags": [
+          "Proxies"
+        ],
         "operationId": "update-fleet-proxies",
         "requestBody": {
           "content": {
@@ -5237,7 +5662,9 @@
                       "$ref": "#/components/schemas/proxies"
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -5256,7 +5683,9 @@
     "/kubernetes": {
       "get": {
         "summary": "Get full K8s agent manifest",
-        "tags": ["Kubernetes"],
+        "tags": [
+          "Kubernetes"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -5309,7 +5738,9 @@
     "/uninstall_tokens": {
       "get": {
         "summary": "List metadata for latest uninstall tokens per agent policy",
-        "tags": ["Uninstall tokens"],
+        "tags": [
+          "Uninstall tokens"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -5333,7 +5764,11 @@
                             "type": "string"
                           }
                         },
-                        "required": ["id", "policy_id", "created_at"]
+                        "required": [
+                          "id",
+                          "policy_id",
+                          "created_at"
+                        ]
                       }
                     },
                     "total": {
@@ -5346,7 +5781,12 @@
                       "type": "number"
                     }
                   },
-                  "required": ["items", "total", "page", "perPage"]
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "perPage"
+                  ]
                 }
               }
             }
@@ -5386,7 +5826,9 @@
     "/uninstall_tokens/{uninstallTokenId}": {
       "get": {
         "summary": "Get one decrypted uninstall token by its ID",
-        "tags": ["Uninstall tokens"],
+        "tags": [
+          "Uninstall tokens"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -5411,10 +5853,17 @@
                           "type": "string"
                         }
                       },
-                      "required": ["id", "token", "policy_id", "created_at"]
+                      "required": [
+                        "id",
+                        "token",
+                        "policy_id",
+                        "created_at"
+                      ]
                     }
                   },
-                  "required": ["item"]
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -5524,7 +5973,10 @@
         "required": false,
         "schema": {
           "type": "string",
-          "enum": ["asc", "desc"]
+          "enum": [
+            "asc",
+            "desc"
+          ]
         }
       },
       "with_metrics": {
@@ -5543,7 +5995,10 @@
         "required": false,
         "schema": {
           "type": "string",
-          "enum": ["simplified", "legacy"]
+          "enum": [
+            "simplified",
+            "legacy"
+          ]
         }
       }
     },
@@ -5590,11 +6045,17 @@
                   "type": "string"
                 }
               },
-              "required": ["name", "message"]
+              "required": [
+                "name",
+                "message"
+              ]
             }
           }
         },
-        "required": ["isInitialized", "nonFatalErrors"]
+        "required": [
+          "isInitialized",
+          "nonFatalErrors"
+        ]
       },
       "settings": {
         "title": "Settings",
@@ -5617,7 +6078,10 @@
             "type": "boolean"
           }
         },
-        "required": ["fleet_server_hosts", "id"]
+        "required": [
+          "fleet_server_hosts",
+          "id"
+        ]
       },
       "fleet_settings_response": {
         "title": "Fleet settings response",
@@ -5627,7 +6091,9 @@
             "$ref": "#/components/schemas/settings"
           }
         },
-        "required": ["item"]
+        "required": [
+          "item"
+        ]
       },
       "fleet_server_host": {
         "title": "Fleet Server Host",
@@ -5658,7 +6124,13 @@
             }
           }
         },
-        "required": ["fleet_server_hosts", "id", "is_default", "is_preconfigured", "host_urls"]
+        "required": [
+          "fleet_server_hosts",
+          "id",
+          "is_default",
+          "is_preconfigured",
+          "host_urls"
+        ]
       },
       "proxies": {
         "title": "Fleet Proxy",
@@ -5686,7 +6158,10 @@
             "type": "string"
           }
         },
-        "required": ["name", "url"]
+        "required": [
+          "name",
+          "url"
+        ]
       },
       "download_sources": {
         "title": "Download Source",
@@ -5710,7 +6185,11 @@
             "nullable": true
           }
         },
-        "required": ["is_default", "name", "host"]
+        "required": [
+          "is_default",
+          "name",
+          "host"
+        ]
       },
       "fleet_settings_enrollment_response": {
         "title": "Fleet settings response",
@@ -5746,7 +6225,11 @@
                       "type": "string"
                     }
                   },
-                  "required": ["id", "name", "is_managed"]
+                  "required": [
+                    "id",
+                    "name",
+                    "is_managed"
+                  ]
                 }
               },
               "has_active": {
@@ -5759,13 +6242,18 @@
                 "$ref": "#/components/schemas/proxies"
               }
             },
-            "required": ["agent_policies", "has_active"]
+            "required": [
+              "agent_policies",
+              "has_active"
+            ]
           },
           "download_source": {
             "$ref": "#/components/schemas/download_sources"
           }
         },
-        "required": ["fleet_server"]
+        "required": [
+          "fleet_server"
+        ]
       },
       "saved_object_type": {
         "title": "Saved Object type",
@@ -5839,7 +6327,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "get_categories_response": {
         "title": "Get categories response",
@@ -5861,7 +6351,11 @@
                   "type": "number"
                 }
               },
-              "required": ["id", "title", "count"]
+              "required": [
+                "id",
+                "title",
+                "count"
+              ]
             }
           },
           "items": {
@@ -5879,11 +6373,17 @@
                   "type": "number"
                 }
               },
-              "required": ["id", "title", "count"]
+              "required": [
+                "id",
+                "title",
+                "count"
+              ]
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "kibana_saved_object_type": {
         "title": "Kibana saved object asset type",
@@ -5964,11 +6464,19 @@
           },
           "install_status": {
             "type": "string",
-            "enum": ["installed", "installing", "install_failed"]
+            "enum": [
+              "installed",
+              "installing",
+              "install_failed"
+            ]
           },
           "install_source": {
             "type": "string",
-            "enum": ["registry", "upload", "bundled"]
+            "enum": [
+              "registry",
+              "upload",
+              "bundled"
+            ]
           },
           "install_kibana_space_id": {
             "type": "string"
@@ -6035,7 +6543,11 @@
           },
           "verification_status": {
             "type": "string",
-            "enum": ["verified", "unverified", "unknown"]
+            "enum": [
+              "verified",
+              "unverified",
+              "unknown"
+            ]
           },
           "verification_key_id": {
             "type": "string",
@@ -6153,7 +6665,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "bulk_install_packages_response": {
         "title": "Bulk install packages response",
@@ -6189,7 +6703,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "package_info": {
         "title": "Package information",
@@ -6208,14 +6724,21 @@
             "type": "string",
             "deprecated": true,
             "description": "release label is deprecated, derive from the version instead (packages follow semver)",
-            "enum": ["experimental", "beta", "ga"]
+            "enum": [
+              "experimental",
+              "beta",
+              "ga"
+            ]
           },
           "source": {
             "type": "object",
             "properties": {
               "license": {
                 "type": "string",
-                "enum": ["Apache-2.0", "Elastic-2.0"]
+                "enum": [
+                  "Apache-2.0",
+                  "Elastic-2.0"
+                ]
               }
             }
           },
@@ -6250,7 +6773,12 @@
                 "properties": {
                   "subscription": {
                     "type": "string",
-                    "enum": ["basic", "gold", "platinum", "enterprise"]
+                    "enum": [
+                      "basic",
+                      "gold",
+                      "platinum",
+                      "enterprise"
+                    ]
                   }
                 }
               }
@@ -6277,7 +6805,10 @@
                   "type": "string"
                 }
               },
-              "required": ["src", "path"]
+              "required": [
+                "src",
+                "path"
+              ]
             }
           },
           "icons": {
@@ -6327,7 +6858,10 @@
                         "type": "string"
                       }
                     },
-                    "required": ["name", "default"]
+                    "required": [
+                      "name",
+                      "default"
+                    ]
                   }
                 },
                 "type": {
@@ -6337,7 +6871,14 @@
                   "type": "string"
                 }
               },
-              "required": ["title", "name", "release", "ingeset_pipeline", "type", "package"]
+              "required": [
+                "title",
+                "name",
+                "release",
+                "ingeset_pipeline",
+                "type",
+                "package"
+              ]
             }
           },
           "download": {
@@ -6385,7 +6926,9 @@
             "type": "integer"
           }
         },
-        "required": ["agent_policy_count"]
+        "required": [
+          "agent_policy_count"
+        ]
       },
       "fleet_status_response": {
         "title": "Fleet status response",
@@ -6398,26 +6941,41 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["tls_required", "api_keys", "fleet_admin_user", "fleet_server"]
+              "enum": [
+                "tls_required",
+                "api_keys",
+                "fleet_admin_user",
+                "fleet_server"
+              ]
             }
           },
           "missing_optional_features": {
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["encrypted_saved_object_encryption_key_required"]
+              "enum": [
+                "encrypted_saved_object_encryption_key_required"
+              ]
             }
           },
           "package_verification_key_id": {
             "type": "string"
           }
         },
-        "required": ["isReady", "missing_requirements", "missing_optional_features"]
+        "required": [
+          "isReady",
+          "missing_requirements",
+          "missing_optional_features"
+        ]
       },
       "agent_type": {
         "type": "string",
         "title": "Agent type",
-        "enum": ["PERMANENT", "EPHEMERAL", "TEMPORARY"]
+        "enum": [
+          "PERMANENT",
+          "EPHEMERAL",
+          "TEMPORARY"
+        ]
       },
       "agent_metadata": {
         "title": "Agent metadata",
@@ -6426,17 +6984,34 @@
       "agent_status": {
         "type": "string",
         "title": "Agent status",
-        "enum": ["offline", "error", "online", "inactive", "warning"]
+        "enum": [
+          "offline",
+          "error",
+          "online",
+          "inactive",
+          "warning"
+        ]
       },
       "agent_component_status": {
         "title": "Agent component status",
         "type": "string",
-        "enum": ["starting", "configuring", "healthy", "degraded", "failed", "stopping", "stopped"]
+        "enum": [
+          "starting",
+          "configuring",
+          "healthy",
+          "degraded",
+          "failed",
+          "stopping",
+          "stopped"
+        ]
       },
       "agent_component_unit_type": {
         "title": "Agent component unit type",
         "type": "string",
-        "enum": ["input", "output"]
+        "enum": [
+          "input",
+          "output"
+        ]
       },
       "agent_component_unit": {
         "title": "Agent component unit",
@@ -6555,7 +7130,13 @@
             }
           }
         },
-        "required": ["type", "active", "enrolled_at", "id", "status"]
+        "required": [
+          "type",
+          "active",
+          "enrolled_at",
+          "id",
+          "status"
+        ]
       },
       "get_agents_response": {
         "title": "Get Agent response",
@@ -6616,7 +7197,12 @@
             }
           }
         },
-        "required": ["items", "total", "page", "perPage"]
+        "required": [
+          "items",
+          "total",
+          "page",
+          "perPage"
+        ]
       },
       "agent_get_by_actions": {
         "title": "Agents get by action ids",
@@ -6672,7 +7258,10 @@
             "description": "Skip rate limit check for upgrade"
           }
         },
-        "required": ["agents", "version"]
+        "required": [
+          "agents",
+          "version"
+        ]
       },
       "agent_action": {
         "title": "Agent action",
@@ -6687,7 +7276,11 @@
               },
               "type": {
                 "type": "string",
-                "enum": ["UNENROLL", "UPGRADE", "POLICY_REASSIGN"]
+                "enum": [
+                  "UNENROLL",
+                  "UPGRADE",
+                  "POLICY_REASSIGN"
+                ]
               }
             }
           },
@@ -6702,7 +7295,12 @@
                   "log_level": {
                     "type": "string",
                     "nullable": true,
-                    "enum": ["debug", "info", "warning", "error"]
+                    "enum": [
+                      "debug",
+                      "info",
+                      "warning",
+                      "error"
+                    ]
                   }
                 }
               }
@@ -6729,7 +7327,9 @@
             "description": "Skip rate limit check for upgrade"
           }
         },
-        "required": ["version"]
+        "required": [
+          "version"
+        ]
       },
       "agent_diagnostics": {
         "title": "Agent diagnostics",
@@ -6751,10 +7351,22 @@
             "type": "string"
           },
           "status": {
-            "enum": ["READY", "AWAITING_UPLOAD", "DELETED", "IN_PROGRESS"]
+            "enum": [
+              "READY",
+              "AWAITING_UPLOAD",
+              "DELETED",
+              "IN_PROGRESS"
+            ]
           }
         },
-        "required": ["id", "name", "createTime", "filePath", "actionId", "status"]
+        "required": [
+          "id",
+          "name",
+          "createTime",
+          "filePath",
+          "actionId",
+          "status"
+        ]
       },
       "get_agent_tags_response": {
         "title": "Get Agent Tags response",
@@ -6789,7 +7401,10 @@
                 "type": "string"
               }
             },
-            "required": ["name", "version"]
+            "required": [
+              "name",
+              "version"
+            ]
           },
           "namespace": {
             "type": "string"
@@ -6826,7 +7441,10 @@
                   "type": "object"
                 }
               },
-              "required": ["type", "enabled"]
+              "required": [
+                "type",
+                "enabled"
+              ]
             }
           },
           "policy_id": {
@@ -6842,7 +7460,10 @@
             "type": "object"
           }
         },
-        "required": ["inputs", "name"]
+        "required": [
+          "inputs",
+          "name"
+        ]
       },
       "package_policy": {
         "title": "Package policy",
@@ -6868,7 +7489,10 @@
                 ]
               }
             },
-            "required": ["id", "revision"]
+            "required": [
+              "id",
+              "revision"
+            ]
           },
           {
             "$ref": "#/components/schemas/new_package_policy"
@@ -6895,7 +7519,10 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["metrics", "logs"]
+              "enum": [
+                "metrics",
+                "logs"
+              ]
             }
           },
           "keep_monitoring_alive": {
@@ -6960,7 +7587,10 @@
                   "type": "boolean"
                 }
               },
-              "required": ["name", "enabled"]
+              "required": [
+                "name",
+                "enabled"
+              ]
             }
           },
           "is_protected": {
@@ -6982,7 +7612,12 @@
             "description": "Indicates whether the agent policy supports agentless integrations. Only allowed in a serverless environment."
           }
         },
-        "required": ["id", "status", "name", "namespace"]
+        "required": [
+          "id",
+          "status",
+          "name",
+          "namespace"
+        ]
       },
       "agent_policy_create_request": {
         "title": "Create agent policy request",
@@ -7004,7 +7639,10 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["metrics", "logs"]
+              "enum": [
+                "metrics",
+                "logs"
+              ]
             }
           },
           "data_output_id": {
@@ -7041,7 +7679,10 @@
                   "type": "boolean"
                 }
               },
-              "required": ["name", "enabled"]
+              "required": [
+                "name",
+                "enabled"
+              ]
             }
           },
           "is_protected": {
@@ -7052,7 +7693,10 @@
             "description": "Force agent policy creation even if packages are not verified."
           }
         },
-        "required": ["name", "namespace"]
+        "required": [
+          "name",
+          "namespace"
+        ]
       },
       "agent_policy_update_request": {
         "title": "Update agent policy request",
@@ -7071,7 +7715,10 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["metrics", "logs"]
+              "enum": [
+                "metrics",
+                "logs"
+              ]
             }
           },
           "data_output_id": {
@@ -7108,7 +7755,10 @@
                   "type": "boolean"
                 }
               },
-              "required": ["name", "enabled"]
+              "required": [
+                "name",
+                "enabled"
+              ]
             }
           },
           "is_protected": {
@@ -7119,7 +7769,10 @@
             "description": "Force agent policy creation even if packages are not verified."
           }
         },
-        "required": ["name", "namespace"]
+        "required": [
+          "name",
+          "namespace"
+        ]
       },
       "full_agent_policy_output": {
         "title": "Full agent policy",
@@ -7147,7 +7800,11 @@
             }
           }
         },
-        "required": ["type", "hosts", "ca_sha256"]
+        "required": [
+          "type",
+          "hosts",
+          "ca_sha256"
+        ]
       },
       "full_agent_policy_output_permissions": {
         "title": "Full agent policy output permissions",
@@ -7304,7 +7961,11 @@
             }
           }
         },
-        "required": ["id", "outputs", "inputs"]
+        "required": [
+          "id",
+          "outputs",
+          "inputs"
+        ]
       },
       "agent_policy_full": {
         "title": "Agent policy full response",
@@ -7401,7 +8062,13 @@
             "type": "string"
           }
         },
-        "required": ["id", "api_key_id", "api_key", "active", "created_at"]
+        "required": [
+          "id",
+          "api_key_id",
+          "api_key",
+          "active",
+          "created_at"
+        ]
       },
       "package_policy_request": {
         "title": "Package Policy Request",
@@ -7445,7 +8112,10 @@
                 "example": "1.6.0"
               }
             },
-            "required": ["name", "version"]
+            "required": [
+              "name",
+              "version"
+            ]
           },
           "vars": {
             "type": "object",
@@ -7461,8 +8131,12 @@
                   "nginx.access": {
                     "enabled": true,
                     "vars": {
-                      "paths": ["/var/log/nginx/access.log*"],
-                      "tags": ["nginx-access"],
+                      "paths": [
+                        "/var/log/nginx/access.log*"
+                      ],
+                      "tags": [
+                        "nginx-access"
+                      ],
                       "preserve_original_event": false,
                       "ignore_older": "72h"
                     }
@@ -7516,7 +8190,11 @@
             "description": "Force package policy creation even if package is not verified, or if the agent policy is managed."
           }
         },
-        "required": ["name", "policy_id", "package"]
+        "required": [
+          "name",
+          "policy_id",
+          "package"
+        ]
       },
       "upgrade_diff": {
         "title": "Package policy Upgrade dryrun",
@@ -7582,10 +8260,16 @@
                     "type": "string"
                   }
                 },
-                "required": ["dataset", "type"]
+                "required": [
+                  "dataset",
+                  "type"
+                ]
               }
             },
-            "required": ["id", "data_stream"]
+            "required": [
+              "id",
+              "data_stream"
+            ]
           }
         ]
       },
@@ -7615,7 +8299,9 @@
                     "type": "string"
                   }
                 },
-                "required": ["namespace"]
+                "required": [
+                  "namespace"
+                ]
               },
               "use_output": {
                 "type": "string"
@@ -7634,7 +8320,10 @@
                         "type": "string"
                       }
                     },
-                    "required": ["name", "version"]
+                    "required": [
+                      "name",
+                      "version"
+                    ]
                   }
                 }
               },
@@ -7642,7 +8331,14 @@
                 "$ref": "#/components/schemas/full_agent_policy_input_stream"
               }
             },
-            "required": ["id", "name", "revision", "type", "data_stream", "use_output"]
+            "required": [
+              "id",
+              "name",
+              "revision",
+              "type",
+              "data_stream",
+              "use_output"
+            ]
           }
         ]
       },
@@ -7677,7 +8373,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["elasticsearch"]
+            "enum": [
+              "elasticsearch"
+            ]
           },
           "hosts": {
             "type": "array",
@@ -7696,7 +8394,13 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["balanced", "custom", "throughput", "scale", "latency"]
+            "enum": [
+              "balanced",
+              "custom",
+              "throughput",
+              "scale",
+              "latency"
+            ]
           },
           "config_yaml": {
             "type": "string"
@@ -7748,7 +8452,9 @@
             }
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "output_create_request_kafka": {
         "title": "kafka",
@@ -7771,7 +8477,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["kafka"]
+            "enum": [
+              "kafka"
+            ]
           },
           "hosts": {
             "type": "array",
@@ -7808,7 +8516,12 @@
               },
               "verification_mode": {
                 "type": "string",
-                "enum": ["none", "full", "certificate", "strict"]
+                "enum": [
+                  "none",
+                  "full",
+                  "certificate",
+                  "strict"
+                ]
               }
             }
           },
@@ -7861,7 +8574,10 @@
           },
           "connection_type": {
             "type": "string",
-            "enum": ["plaintext", "encryption"]
+            "enum": [
+              "plaintext",
+              "encryption"
+            ]
           },
           "username": {
             "type": "string"
@@ -7965,7 +8681,13 @@
             }
           }
         },
-        "required": ["name", "type", "topics", "auth_type", "hosts"]
+        "required": [
+          "name",
+          "type",
+          "topics",
+          "auth_type",
+          "hosts"
+        ]
       },
       "output_create_request_logstash": {
         "title": "logstash",
@@ -7988,7 +8710,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["logstash"]
+            "enum": [
+              "logstash"
+            ]
           },
           "hosts": {
             "type": "array",
@@ -8068,7 +8792,11 @@
             }
           }
         },
-        "required": ["name", "hosts", "type"]
+        "required": [
+          "name",
+          "hosts",
+          "type"
+        ]
       },
       "output_create_request_remote_elasticsearch": {
         "title": "remote_elasticsearch",
@@ -8091,7 +8819,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["remote_elasticsearch"]
+            "enum": [
+              "remote_elasticsearch"
+            ]
           },
           "hosts": {
             "type": "array",
@@ -8111,7 +8841,9 @@
             }
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "output_create_request": {
         "title": "Output",
@@ -8160,7 +8892,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["elasticsearch"]
+            "enum": [
+              "elasticsearch"
+            ]
           },
           "hosts": {
             "type": "array",
@@ -8179,7 +8913,13 @@
           },
           "preset": {
             "type": "string",
-            "enum": ["balanced", "custom", "throughput", "scale", "latency"]
+            "enum": [
+              "balanced",
+              "custom",
+              "throughput",
+              "scale",
+              "latency"
+            ]
           },
           "config_yaml": {
             "type": "string"
@@ -8231,7 +8971,11 @@
             }
           }
         },
-        "required": ["name", "hosts", "type"]
+        "required": [
+          "name",
+          "hosts",
+          "type"
+        ]
       },
       "output_update_request_kafka": {
         "title": "kafka",
@@ -8254,7 +8998,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["kafka"]
+            "enum": [
+              "kafka"
+            ]
           },
           "hosts": {
             "type": "array",
@@ -8291,7 +9037,12 @@
               },
               "verification_mode": {
                 "type": "string",
-                "enum": ["none", "full", "certificate", "strict"]
+                "enum": [
+                  "none",
+                  "full",
+                  "certificate",
+                  "strict"
+                ]
               }
             }
           },
@@ -8344,7 +9095,10 @@
           },
           "connection_type": {
             "type": "string",
-            "enum": ["plaintext", "encryption"]
+            "enum": [
+              "plaintext",
+              "encryption"
+            ]
           },
           "username": {
             "type": "string"
@@ -8432,7 +9186,9 @@
             "type": "number"
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "output_update_request_logstash": {
         "title": "logstash",
@@ -8455,7 +9211,9 @@
           },
           "type": {
             "type": "string",
-            "enum": ["logstash"]
+            "enum": [
+              "logstash"
+            ]
           },
           "hosts": {
             "type": "array",
@@ -8522,7 +9280,9 @@
             }
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "output_update_request": {
         "title": "Output",

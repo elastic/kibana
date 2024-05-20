@@ -55,7 +55,9 @@
             "tags": [],
             "label": "filters",
             "description": [],
-            "signature": ["Filters | undefined"],
+            "signature": [
+              "Filters | undefined"
+            ],
             "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -97,8 +99,12 @@
             "type": "string",
             "tags": [],
             "label": "dataset",
-            "description": ["\nDataset name to be selected."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nDataset name to be selected."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -140,7 +146,9 @@
             "type": "Object",
             "tags": [],
             "label": "timeRange",
-            "description": ["\nOptionally set the time range in the time picker."],
+            "description": [
+              "\nOptionally set the time range in the time picker."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -161,7 +169,9 @@
             "type": "Object",
             "tags": [],
             "label": "refreshInterval",
-            "description": ["\nOptionally set the refresh interval."],
+            "description": [
+              "\nOptionally set the refresh interval."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/deeplinks-observability",
@@ -182,7 +192,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "query",
-            "description": ["\nOptionally set a query."],
+            "description": [
+              "\nOptionally set a query."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -211,7 +223,9 @@
             "type": "Array",
             "tags": [],
             "label": "columns",
-            "description": ["\nColumns displayed in the table"],
+            "description": [
+              "\nColumns displayed in the table"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/deeplinks-observability",
@@ -232,7 +246,9 @@
             "type": "Array",
             "tags": [],
             "label": "filters",
-            "description": ["\nOptionally apply free-form filters."],
+            "description": [
+              "\nOptionally apply free-form filters."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -253,7 +269,9 @@
             "type": "Object",
             "tags": [],
             "label": "filterControls",
-            "description": ["\nOptionally apply curated filter controls"],
+            "description": [
+              "\nOptionally apply curated filter controls"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/deeplinks-observability",
@@ -274,8 +292,12 @@
             "type": "string",
             "tags": [],
             "label": "breakdownField",
-            "description": ["\nOptionally set chart's breakdown field"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptionally set chart's breakdown field"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -318,7 +340,9 @@
             "tags": [],
             "label": "origin",
             "description": [],
-            "signature": ["{ id: \"application-log-onboarding\"; } | undefined"],
+            "signature": [
+              "{ id: \"application-log-onboarding\"; } | undefined"
+            ],
             "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -363,7 +387,9 @@
             "description": [
               "If given, it will load the given map else will load the create a new map page."
             ],
-            "signature": ["\"customLogs\" | \"systemLogs\" | undefined"],
+            "signature": [
+              "\"customLogs\" | \"systemLogs\" | undefined"
+            ],
             "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -405,7 +431,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nData view id to select"],
+            "description": [
+              "\nData view id to select"
+            ],
             "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -447,8 +475,12 @@
             "type": "string",
             "tags": [],
             "label": "integration",
-            "description": ["\nIntegration name to be selected."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nIntegration name to be selected."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -459,7 +491,9 @@
             "type": "string",
             "tags": [],
             "label": "dataset",
-            "description": ["\nDataset name to be selected.\nex: system.syslog"],
+            "description": [
+              "\nDataset name to be selected.\nex: system.syslog"
+            ],
             "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -477,7 +511,9 @@
         "tags": [],
         "label": "AI_ASSISTANT_APP_ID",
         "description": [],
-        "signature": ["\"observabilityAIAssistant\""],
+        "signature": [
+          "\"observabilityAIAssistant\""
+        ],
         "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -490,7 +526,9 @@
         "tags": [],
         "label": "ALL_DATASETS_LOCATOR_ID",
         "description": [],
-        "signature": ["\"ALL_DATASETS_LOCATOR\""],
+        "signature": [
+          "\"ALL_DATASETS_LOCATOR\""
+        ],
         "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -547,7 +585,9 @@
         "tags": [],
         "label": "DATASET_QUALITY_LOCATOR_ID",
         "description": [],
-        "signature": ["\"DATASET_QUALITY_LOCATOR\""],
+        "signature": [
+          "\"DATASET_QUALITY_LOCATOR\""
+        ],
         "path": "packages/deeplinks/observability/locators/dataset_quality.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -611,7 +651,9 @@
         "tags": [],
         "label": "DocumentFieldGridColumnOptions",
         "description": [],
-        "signature": ["{ type: \"document-field\"; field: string; width?: number | undefined; }"],
+        "signature": [
+          "{ type: \"document-field\"; field: string; width?: number | undefined; }"
+        ],
         "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -676,7 +718,9 @@
         "tags": [],
         "label": "ListFilterControl",
         "description": [],
-        "signature": ["{ mode: \"include\"; values: string[]; }"],
+        "signature": [
+          "{ mode: \"include\"; values: string[]; }"
+        ],
         "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -689,7 +733,9 @@
         "tags": [],
         "label": "LOGS_APP_ID",
         "description": [],
-        "signature": ["\"logs\""],
+        "signature": [
+          "\"logs\""
+        ],
         "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -702,7 +748,9 @@
         "tags": [],
         "label": "LOGS_EXPLORER_LOCATOR_ID",
         "description": [],
-        "signature": ["\"LOGS_EXPLORER_LOCATOR\""],
+        "signature": [
+          "\"LOGS_EXPLORER_LOCATOR\""
+        ],
         "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -715,7 +763,9 @@
         "tags": [],
         "label": "OBLT_PROFILING_APP_ID",
         "description": [],
-        "signature": ["\"profiling\""],
+        "signature": [
+          "\"profiling\""
+        ],
         "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -728,7 +778,9 @@
         "tags": [],
         "label": "OBLT_UX_APP_ID",
         "description": [],
-        "signature": ["\"ux\""],
+        "signature": [
+          "\"ux\""
+        ],
         "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -741,7 +793,9 @@
         "tags": [],
         "label": "OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR_ID",
         "description": [],
-        "signature": ["\"OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR\""],
+        "signature": [
+          "\"OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR\""
+        ],
         "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -754,7 +808,9 @@
         "tags": [],
         "label": "OBSERVABILITY_LOGS_EXPLORER_APP_ID",
         "description": [],
-        "signature": ["\"observability-logs-explorer\""],
+        "signature": [
+          "\"observability-logs-explorer\""
+        ],
         "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -767,7 +823,9 @@
         "tags": [],
         "label": "OBSERVABILITY_ONBOARDING_APP_ID",
         "description": [],
-        "signature": ["\"observabilityOnboarding\""],
+        "signature": [
+          "\"observabilityOnboarding\""
+        ],
         "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -780,7 +838,9 @@
         "tags": [],
         "label": "OBSERVABILITY_ONBOARDING_LOCATOR",
         "description": [],
-        "signature": ["\"OBSERVABILITY_ONBOARDING_LOCATOR\""],
+        "signature": [
+          "\"OBSERVABILITY_ONBOARDING_LOCATOR\""
+        ],
         "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -793,7 +853,9 @@
         "tags": [],
         "label": "OBSERVABILITY_OVERVIEW_APP_ID",
         "description": [],
-        "signature": ["\"observability-overview\""],
+        "signature": [
+          "\"observability-overview\""
+        ],
         "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -806,7 +868,9 @@
         "tags": [],
         "label": "RefreshInterval",
         "description": [],
-        "signature": ["{ pause: boolean; value: number; }"],
+        "signature": [
+          "{ pause: boolean; value: number; }"
+        ],
         "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -819,7 +883,9 @@
         "tags": [],
         "label": "SINGLE_DATASET_LOCATOR_ID",
         "description": [],
-        "signature": ["\"SINGLE_DATASET_LOCATOR\""],
+        "signature": [
+          "\"SINGLE_DATASET_LOCATOR\""
+        ],
         "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -11,19 +11,19 @@ import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasType,
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
+  CanAccessViewMode,
+  EmbeddableApiContext,
   getInheritedViewMode,
+  HasType,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import type { DiscoverAppLocator } from '../../common';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
-import { HasSavedSearch, apiHasSavedSearch } from './types';
+import { apiHasSavedSearch, HasSavedSearch } from './types';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
 import React, { useReducer } from 'react';
+import { mount, shallow } from 'enzyme';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -15,11 +15,11 @@ import { fetchExceptionListsItemsByListIds } from '@kbn/securitysolution-list-ap
 import { ExceptionsViewer } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
-import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import type { Rule } from '../../../rule_management/logic/types';
 import { mockRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import * as i18n from './translations';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 
 jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 jest.mock('../../../../common/lib/kibana');

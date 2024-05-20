@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import * as Either from 'fp-ts/lib/Either';
 import { chain } from 'lodash';
-import { getBaseMappings } from '../core';
+import * as Either from 'fp-ts/lib/Either';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
-  type UpdateSourceMappingsPropertiesParams,
   updateSourceMappingsProperties,
+  type UpdateSourceMappingsPropertiesParams,
 } from './update_source_mappings_properties';
+import { getBaseMappings } from '../core';
 
 describe('updateSourceMappingsProperties', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createInternalClient>;

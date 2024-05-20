@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import { isEqual } from 'lodash';
-import type { Moment } from 'moment';
 import React, { useCallback, useEffect, useMemo, useRef, useState, type FC } from 'react';
+import { EuiButton, EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import type { Moment } from 'moment';
 
-import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import { type GroupTableItem, useLogRateAnalysisStateContext } from '@kbn/aiops-components';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  getWindowParametersForTrigger,
+  getSnappedTimestamps,
+  getSnappedWindowParameters,
   LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
   LOG_RATE_ANALYSIS_TYPE,
   type LogRateAnalysisType,
   type WindowParameters,
-  getSnappedTimestamps,
-  getSnappedWindowParameters,
-  getWindowParametersForTrigger,
 } from '@kbn/aiops-log-rate-analysis';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
+import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
 
 import { useData } from '../../../hooks/use_data';
 import { useDataSource } from '../../../hooks/use_data_source';

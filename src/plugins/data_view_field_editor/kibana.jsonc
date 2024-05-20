@@ -7,8 +7,17 @@
     "id": "dataViewFieldEditor",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["data", "fieldFormats", "dataViews"],
-    "optionalPlugins": ["usageCollection"],
-    "requiredBundles": ["kibanaReact", "esUiShared"]
+    "requiredPlugins": [
+      "data",
+      "fieldFormats",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
   }
 }

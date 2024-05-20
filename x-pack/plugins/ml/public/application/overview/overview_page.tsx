@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { useStorage } from '@kbn/ml-local-storage';
 import type { FC } from 'react';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { useStorage } from '@kbn/ml-local-storage';
+import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
 import { ML_PAGES } from '../../../common/constants/locator';
 import type { MlStorageKey, TMlStorageMapped } from '../../../common/types/storage';
 import { ML_OVERVIEW_PANELS } from '../../../common/types/storage';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { CollapsiblePanel } from '../components/collapsible_panel';
-import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
-import { HelpMenu } from '../components/help_menu';
-import { JobsAwaitingNodeWarning } from '../components/jobs_awaiting_node_warning';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
+import { mlNodesAvailable } from '../ml_nodes_check';
+import { OverviewContent } from './components/content';
 import { NodeAvailableWarning } from '../components/node_available_warning';
-import { MlPageHeader } from '../components/page_header';
-import { PageTitle } from '../components/page_title';
+import { JobsAwaitingNodeWarning } from '../components/jobs_awaiting_node_warning';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
+import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useMlLink } from '../contexts/kibana';
 import { NodesList } from '../memory_usage/nodes_overview';
-import { mlNodesAvailable } from '../ml_nodes_check';
+import { MlPageHeader } from '../components/page_header';
+import { PageTitle } from '../components/page_title';
 import { getMlNodesCount } from '../ml_nodes_check/check_ml_nodes';
-import { OverviewContent } from './components/content';
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageSection } from '@elastic/eui';
 import React, { useEffect } from 'react';
+import { EuiPageSection, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { AddLicense } from './add_license';
-import { LicensePageHeader } from './license_page_header';
-import { RequestTrialExtension } from './request_trial_extension';
-import { RevertToBasic } from './revert_to_basic';
 import { StartTrial } from './start_trial';
+import { LicensePageHeader } from './license_page_header';
+import { AddLicense } from './add_license';
+import { RevertToBasic } from './revert_to_basic';
+import { RequestTrialExtension } from './request_trial_extension';
 
 export const LicenseDashboard = ({ setBreadcrumb, telemetry } = { setBreadcrumb: () => {} }) => {
   useEffect(() => {

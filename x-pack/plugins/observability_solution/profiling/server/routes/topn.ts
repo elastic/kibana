@@ -7,17 +7,17 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
-import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import {
-  ProfilingESField,
-  TopNType,
   getFieldNameForTopNType,
   groupStackFrameMetadataByStackTrace,
+  ProfilingESField,
+  TopNType,
 } from '@kbn/profiling-utils';
+import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
-import { INDEX_EVENTS, getRoutePaths } from '../../common';
+import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
-import { TopNResponse, createTopNSamples, getTopNAggregationRequest } from '../../common/topn';
+import { createTopNSamples, getTopNAggregationRequest, TopNResponse } from '../../common/topn';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';

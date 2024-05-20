@@ -7,29 +7,29 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { DataViewSpecRestResponse } from '../route_types';
 import { DataViewsService } from '../../../common/data_views';
+import { DataViewSpec } from '../../../common/types';
+import { handleErrors } from './util/handle_errors';
 import {
   fieldSpecSchema,
   runtimeFieldSchema,
   serializedFieldFormatSchema,
 } from '../../../common/schemas';
-import { DataViewSpec } from '../../../common/types';
+import { dataViewSpecSchema } from '../schema';
+import type {
+  DataViewsServerPluginStartDependencies,
+  DataViewsServerPluginStart,
+} from '../../types';
 import {
-  INITIAL_REST_VERSION,
-  SERVICE_KEY,
-  SERVICE_KEY_LEGACY,
   SPECIFIC_DATA_VIEW_PATH,
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+  INITIAL_REST_VERSION,
 } from '../../constants';
-import type {
-  DataViewsServerPluginStart,
-  DataViewsServerPluginStartDependencies,
-} from '../../types';
-import { DataViewSpecRestResponse } from '../route_types';
-import { dataViewSpecSchema } from '../schema';
-import { handleErrors } from './util/handle_errors';
 
 const indexPatternUpdateSchema = schema.object({
   title: schema.maybe(schema.string()),

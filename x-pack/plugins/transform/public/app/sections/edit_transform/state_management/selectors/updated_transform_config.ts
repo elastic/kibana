@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createSelector } from '@reduxjs/toolkit';
 import { useMemo } from 'react';
+import { createSelector } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';

@@ -11,11 +11,11 @@ import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool } from 'langchain/tools/chain';
 
 import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
-import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { APMTracer } from '../tracers/apm_tracer';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
+import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from './types';
+import { withAssistantSpan } from '../tracers/with_assistant_span';
+import { APMTracer } from '../tracers/apm_tracer';
 
 export const OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID =
   'Elastic AI Assistant Agent Executor (OpenAI Functions)';

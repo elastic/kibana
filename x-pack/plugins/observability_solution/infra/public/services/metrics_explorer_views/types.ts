@@ -7,10 +7,10 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
-  CreateMetricsExplorerViewResponsePayload,
   FindMetricsExplorerViewResponsePayload,
-  GetMetricsExplorerViewResponsePayload,
+  CreateMetricsExplorerViewResponsePayload,
   UpdateMetricsExplorerViewResponsePayload,
+  GetMetricsExplorerViewResponsePayload,
 } from '../../../common/http_api';
 import { MetricsExplorerViewAttributes } from '../../../common/metrics_explorer_views';
 

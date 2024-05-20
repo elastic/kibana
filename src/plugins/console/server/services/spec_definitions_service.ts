@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { readFileSync } from 'fs';
-import { basename, join } from 'path';
-import globby from 'globby';
 import _, { merge } from 'lodash';
+import globby from 'globby';
+import { basename, join } from 'path';
 import normalizePath from 'normalize-path';
+import { readFileSync } from 'fs';
 
+import { EndpointDefinition, EndpointDescription, EndpointsAvailability } from '../../common/types';
 import {
   AUTOCOMPLETE_DEFINITIONS_FOLDER,
   GENERATED_SUBFOLDER,
   MANUAL_SUBFOLDER,
   OVERRIDES_SUBFOLDER,
 } from '../../common/constants';
-import { EndpointDefinition, EndpointDescription, EndpointsAvailability } from '../../common/types';
 import { jsSpecLoaders } from '../lib';
 
 export interface SpecDefinitionsDependencies {

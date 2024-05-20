@@ -9,9 +9,9 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import { useAppToasts } from '../../hooks/use_app_toasts';
 import { suggestUsers } from './api';
 import { USER_PROFILES_FAILURE } from './translations';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export interface SuggestUserProfilesArgs {
   searchTerm: string;

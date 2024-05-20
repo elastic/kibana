@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { Connector } from '@kbn/search-connectors';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiFieldText,
+  EuiForm,
+  EuiButton,
+  EuiSpacer,
+  EuiFormRow,
+  EuiText,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Connector } from '@kbn/search-connectors';
 import { CANCEL_LABEL, EDIT_LABEL, SAVE_LABEL } from '../../../../common/i18n_string';
-import { useConnector } from '../../hooks/api/use_connector';
 import { useKibanaServices } from '../../hooks/use_kibana';
+import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditDescriptionProps {
   connector: Connector;

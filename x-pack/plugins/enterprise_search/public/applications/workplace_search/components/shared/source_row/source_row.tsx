@@ -35,11 +35,11 @@ import { SourceIcon } from '../source_icon';
 import './source_row.scss';
 
 import {
-  SOURCE_ROW_DETAILS_LABEL,
   SOURCE_ROW_REAUTHENTICATE_STATUS_LINK_LABEL,
   SOURCE_ROW_REMOTE_LABEL,
   SOURCE_ROW_REMOTE_TOOLTIP,
   SOURCE_ROW_SEARCHABLE_TOGGLE_LABEL,
+  SOURCE_ROW_DETAILS_LABEL,
 } from './constants';
 
 // i18n is not needed here because this is only used to check against the server error, which

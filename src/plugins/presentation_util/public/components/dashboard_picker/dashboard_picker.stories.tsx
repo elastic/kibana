@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
 import React from 'react';
+import { action } from '@storybook/addon-actions';
 
 import { DashboardPicker } from './dashboard_picker';
 

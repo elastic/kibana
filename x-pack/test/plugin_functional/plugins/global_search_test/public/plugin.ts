@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { map, reduce } from 'rxjs';
+import { Plugin, CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
+import { lastValueFrom } from 'rxjs';
 import {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
   GlobalSearchResult,
 } from '@kbn/global-search-plugin/public';
-import { map, reduce } from 'rxjs';
-import { lastValueFrom } from 'rxjs';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GlobalSearchTestPluginSetup {}

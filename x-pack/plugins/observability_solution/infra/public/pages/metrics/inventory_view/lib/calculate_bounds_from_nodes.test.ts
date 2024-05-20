@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { calculateBoundsFromNodes } from './calculate_bounds_from_nodes';
+import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 const nodes: SnapshotNode[] = [
   {
     name: 'host-01',

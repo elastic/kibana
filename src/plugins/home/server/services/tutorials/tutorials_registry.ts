@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, IStaticAssets, PluginInitializerContext } from '@kbn/core/server';
-import { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+import { CoreSetup, CoreStart, PluginInitializerContext, IStaticAssets } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-import { HOME_APP_BASE_PATH } from '../../../common/constants';
-import { builtInTutorials } from '../../tutorials/register';
-import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
+import { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import {
+  TutorialProvider,
+  TutorialContextFactory,
   ScopedTutorialContextFactory,
   TutorialContext,
-  TutorialContextFactory,
-  TutorialProvider,
 } from './lib/tutorials_registry_types';
+import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
+import { builtInTutorials } from '../../tutorials/register';
+import { HOME_APP_BASE_PATH } from '../../../common/constants';
 
 function registerTutorialWithCustomIntegrations(
   customIntegrations: CustomIntegrationsPluginSetup,

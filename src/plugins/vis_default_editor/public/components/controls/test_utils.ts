@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { AggParam, IAggConfig } from '@kbn/data-plugin/public';
-import { EditorVisState } from '../sidebar/state/reducers';
+import { IAggConfig, AggParam } from '@kbn/data-plugin/public';
 import { EditorConfig } from '../utils';
+import { EditorVisState } from '../sidebar/state/reducers';
 
 export const aggParamCommonPropsMock = {
   agg: {} as IAggConfig,

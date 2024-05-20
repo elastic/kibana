@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiFilterButton,
@@ -14,24 +15,23 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
 
+import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
-import type { Agent, AgentPolicy } from '../../../../types';
 
 import { useAuthz, useStartServices } from '../../../../hooks';
 
-import { AgentActivityBadge } from './agent_activity_badge';
+import { AgentBulkActions } from './bulk_actions';
+import type { SelectionMode } from './types';
 import { AgentActivityButton } from './agent_activity_button';
 import { AgentStatusFilter } from './agent_status_filter';
-import { AgentBulkActions } from './bulk_actions';
 import { DashboardsButtons } from './dashboards_buttons';
 import { AgentPolicyFilter } from './filter_bar/agent_policy_filter';
 import { TagsFilter } from './filter_bar/tags_filter';
-import type { SelectionMode } from './types';
+import { AgentActivityBadge } from './agent_activity_badge';
 
 export interface SearchAndFilterBarProps {
   agentPolicies: AgentPolicy[];

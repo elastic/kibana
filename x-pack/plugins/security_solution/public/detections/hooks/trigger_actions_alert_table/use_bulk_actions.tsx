@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Filter } from '@kbn/es-query';
-import type { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
+import type { Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
+import type { TableId } from '@kbn/securitysolution-data-table';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
 

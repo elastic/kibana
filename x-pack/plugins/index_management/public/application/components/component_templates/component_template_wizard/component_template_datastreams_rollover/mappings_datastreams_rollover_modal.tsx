@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiCode, EuiConfirmModal, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiConfirmModal, EuiCode, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { documentationService } from '../../../../services/documentation';
 import type { useComponentTemplatesContext } from '../../component_templates_context';
+import { documentationService } from '../../../../services/documentation';
 import type { Error } from '../../shared_imports';
 
 interface Props {

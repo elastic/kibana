@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { checkReferences, checkForDataLayerType } from './utils';
 import { operationDefinitionMap } from '..';
 import { createMockedFullReference } from '../../mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
-import { checkForDataLayerType, checkReferences } from './utils';
 
 // Mock prevents issue with circular loading
 jest.mock('..');

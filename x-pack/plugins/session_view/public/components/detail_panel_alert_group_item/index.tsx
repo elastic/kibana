@@ -1,4 +1,3 @@
-import { EuiAccordion, EuiIcon, EuiNotificationBadge, EuiText } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import { EuiAccordion, EuiIcon, EuiNotificationBadge, EuiText } from '@elastic/e
  * 2.0.
  */
 import React from 'react';
+import { EuiIcon, EuiText, EuiAccordion, EuiNotificationBadge } from '@elastic/eui';
 import type { ProcessEvent } from '../../../common';
 import { dataOrDash } from '../../utils/data_or_dash';
-import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
 import { useStyles } from '../detail_panel_alert_list_item/styles';
+import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
 
 export const ALERT_GROUP_ITEM_TEST_ID = 'sessionView:detailPanelAlertGroupItem';
 export const ALERT_GROUP_ITEM_COUNT_TEST_ID = 'sessionView:detailPanelAlertGroupCount';

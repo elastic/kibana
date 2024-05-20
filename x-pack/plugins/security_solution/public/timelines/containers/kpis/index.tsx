@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isRunningResponse } from '@kbn/data-plugin/public';
 import { TimelineEventsQueries } from '@kbn/timelines-plugin/common';
+import type { inputsModel } from '../../../common/store';
+import { useKibana } from '../../../common/lib/kibana';
 import type {
   TimelineKpiRequestOptionsInput,
   TimelineKpiStrategyResponse,
@@ -19,8 +21,6 @@ import type {
 } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useKibana } from '../../../common/lib/kibana';
-import type { inputsModel } from '../../../common/store';
 import * as i18n from './translations';
 
 export interface UseTimelineKpiProps {

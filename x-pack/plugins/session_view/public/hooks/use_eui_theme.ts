@@ -6,7 +6,7 @@
  */
 
 import { shade, useEuiTheme as useEuiThemeHook } from '@elastic/eui';
-import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { useMemo } from 'react';
 
 type EuiThemeProps = Parameters<typeof useEuiThemeHook>;

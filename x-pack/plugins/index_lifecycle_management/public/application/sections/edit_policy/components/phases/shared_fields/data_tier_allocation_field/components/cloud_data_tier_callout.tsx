@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.title', {

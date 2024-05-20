@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { FindConnectorsSoResult, FindConnectorsSoParams } from './types';
 import { MAX_ACTIONS_RETURNED } from './constants';
-import { FindConnectorsSoParams, FindConnectorsSoResult } from './types';
 
 export const findConnectorsSo = async ({
   savedObjectsClient,

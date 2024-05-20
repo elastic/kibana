@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateIndexTemplate } from './create_or_update_index_template';
 
 const randomDelayMultiplier = 0.01;

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import sinon from 'sinon';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import moment from 'moment';
 
-import { omit } from 'lodash';
-import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
-import { createInitialMiddleware } from './lib/middleware';
-import { asErr, asOk } from './lib/result_type';
-import { taskManagerMock } from './mocks';
+import { asTaskRunEvent, TaskPersistence } from './task_events';
 import { TaskLifecycleEvent } from './polling_lifecycle';
-import { TaskStatus } from './task';
-import { TaskPersistence, asTaskRunEvent } from './task_events';
-import { TaskRunResult } from './task_running';
 import { TaskScheduling } from './task_scheduling';
+import { asErr, asOk } from './lib/result_type';
+import { TaskStatus } from './task';
+import { createInitialMiddleware } from './lib/middleware';
 import { taskStoreMock } from './task_store.mock';
-import { TaskTypeDictionary } from './task_type_dictionary';
+import { TaskRunResult } from './task_running';
 import { mockLogger } from './test_utils';
+import { TaskTypeDictionary } from './task_type_dictionary';
+import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
+import { taskManagerMock } from './mocks';
+import { omit } from 'lodash';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({

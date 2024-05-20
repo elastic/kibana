@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -21,12 +21,12 @@ import {
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 
-import { SectionLoading, extractQueryParams } from '../../../shared_imports';
+import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { getRouterLinkProps, listBreadcrumb } from '../../services';
 import { documentationLinks } from '../../services/documentation_links';
 
-import { DetailPanel } from './detail_panel';
 import { JobTable } from './job_table';
+import { DetailPanel } from './detail_panel';
 
 const REFRESH_RATE_MS = 30000;
 

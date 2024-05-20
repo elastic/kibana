@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React from 'react';
 import { IWaterfallContext } from '../context/waterfall_chart';
 import { WaterfallChartProps } from './waterfall_chart';
 

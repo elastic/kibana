@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCard, EuiIcon } from '@elastic/eui';
-import styled from '@emotion/styled';
-import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
+import { EuiCard, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import styled from '@emotion/styled';
 
 const BADGE_TEXT = i18n.translate(
   'xpack.securitySolutionServerless.rules.endpointSecurity.endpointExceptions.badgeText',

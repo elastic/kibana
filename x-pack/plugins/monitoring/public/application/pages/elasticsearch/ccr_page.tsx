@@ -1,6 +1,3 @@
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,16 +5,19 @@ import { find } from 'lodash';
  * 2.0.
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
-import { ELASTICSEARCH_SYSTEM_ID, RULE_CCR_READ_EXCEPTIONS } from '../../../../common/constants';
-import { AlertsByName } from '../../../alerts/types';
+import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ElasticsearchTemplate } from './elasticsearch_template';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { Ccr } from '../../../components/elasticsearch/ccr';
+import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { GlobalStateContext } from '../../contexts/global_state_context';
+import { ELASTICSEARCH_SYSTEM_ID, RULE_CCR_READ_EXCEPTIONS } from '../../../../common/constants';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { ComponentProps } from '../../route_init';
-import { ElasticsearchTemplate } from './elasticsearch_template';
 interface SetupModeProps {
   setupMode: any;
   flyoutComponent: any;

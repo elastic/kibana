@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 import { KibanaPageTemplateSolutionNavAvatar } from './solution_nav_avatar';
 
 describe('KibanaPageTemplateSolutionNavAvatar', () => {

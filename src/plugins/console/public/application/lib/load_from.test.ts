@@ -7,7 +7,7 @@
  */
 
 import { compressToEncodedURIComponent } from 'lz-string';
-import { removeLoadFromParameter, setLoadFromParameter } from './load_from';
+import { setLoadFromParameter, removeLoadFromParameter } from './load_from';
 
 const baseMockWindow = () => {
   return {

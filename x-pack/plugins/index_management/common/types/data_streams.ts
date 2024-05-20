@@ -8,10 +8,10 @@
 import {
   ByteSize,
   IndicesDataStream,
-  IndicesDataStreamIndex,
-  IndicesDataStreamLifecycleWithRollover,
   IndicesDataStreamsStatsDataStreamsStatsItem,
   Metadata,
+  IndicesDataStreamIndex,
+  IndicesDataStreamLifecycleWithRollover,
 } from '@elastic/elasticsearch/lib/api/types';
 
 interface TimestampFieldFromEs {

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { DRAW_MODE } from '../../../common/constants';
-import { LayerDescriptor } from '../../../common/descriptor_types';
+import { connect } from 'react-redux';
+import { AddLayerPanel } from './view';
+import { FLYOUT_STATE } from '../../reducers/ui';
 import {
   addPreviewLayers,
   promotePreviewLayers,
   removePreviewLayers,
-  setAutoOpenLayerWizardId,
   setDrawMode,
-  setEditLayerToSelectedLayer,
   setFirstPreviewLayerToSelectedLayer,
+  setEditLayerToSelectedLayer,
   updateFlyout,
+  setAutoOpenLayerWizardId,
 } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
-import { FLYOUT_STATE } from '../../reducers/ui';
+import { LayerDescriptor } from '../../../common/descriptor_types';
 import { hasPreviewLayers } from '../../selectors/map_selectors';
+import { DRAW_MODE } from '../../../common/constants';
 import { getAutoOpenLayerWizardId } from '../../selectors/ui_selectors';
-import { AddLayerPanel } from './view';
 
 function mapStateToProps(state: MapStoreState) {
   return {

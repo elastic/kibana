@@ -6,13 +6,27 @@
  * Side Public License, v 1.
  */
 
+import { share } from 'rxjs';
 import { HttpStart, IUiSettingsClient } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { TimeRange, buildEsQuery } from '@kbn/es-query';
 import { PersistableStateService, VersionedState } from '@kbn/kibana-utils-plugin/common';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { share } from 'rxjs';
+import { buildEsQuery, TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { FilterManager } from './filter_manager';
+import { createAddToQueryLog } from './lib';
+import type { TimefilterSetup } from './timefilter';
+import { TimefilterService } from './timefilter';
+import { createSavedQueryService } from './saved_query/saved_query_service';
+import {
+  createQueryStateObservable,
+  QueryState$,
+} from './state_sync/create_query_state_observable';
+import { getQueryState, QueryState } from './query_state';
+import type { QueryStringContract } from './query_string';
+import { QueryStringManager } from './query_string';
 import { getEsQueryConfig } from '../../common';
+import { getUiSettings } from '../services';
+import { NowProviderInternalContract } from '../now_provider';
 import {
   extract,
   getAllMigrations,
@@ -20,20 +34,6 @@ import {
   migrateToLatest,
   telemetry,
 } from '../../common/query/persistable_state';
-import { NowProviderInternalContract } from '../now_provider';
-import { getUiSettings } from '../services';
-import { FilterManager } from './filter_manager';
-import { createAddToQueryLog } from './lib';
-import { QueryState, getQueryState } from './query_state';
-import type { QueryStringContract } from './query_string';
-import { QueryStringManager } from './query_string';
-import { createSavedQueryService } from './saved_query/saved_query_service';
-import {
-  QueryState$,
-  createQueryStateObservable,
-} from './state_sync/create_query_state_observable';
-import type { TimefilterSetup } from './timefilter';
-import { TimefilterService } from './timefilter';
 
 interface QueryServiceSetupDependencies {
   storage: IStorageWrapper;

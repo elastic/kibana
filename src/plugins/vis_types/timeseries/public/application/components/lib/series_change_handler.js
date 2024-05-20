@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { newMetricAggFn } from './new_metric_agg_fn';
 import { isBasicAgg } from '../../../../common/agg_utils';
 import { handleAdd, handleChange } from './collection_actions';
-import { newMetricAggFn } from './new_metric_agg_fn';
 
 export const seriesChangeHandler = (props, items) => (doc) => {
   // If we only have one sibling and the user changes to a pipeline

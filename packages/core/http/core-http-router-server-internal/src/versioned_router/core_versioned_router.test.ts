@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreVersionedRouter } from '.';
 import { Router } from '../router';
+import { CoreVersionedRouter } from '.';
 import { createRouter } from './mocks';
 
 describe('Versioned router', () => {

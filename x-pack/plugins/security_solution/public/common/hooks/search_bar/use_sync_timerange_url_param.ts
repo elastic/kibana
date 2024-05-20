@@ -6,10 +6,10 @@
  */
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { inputsSelectors } from '../../store/inputs';
-import type { UrlInputsModel } from '../../store/inputs/model';
-import { useUpdateUrlParam } from '../../utils/global_query_string';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
+import type { UrlInputsModel } from '../../store/inputs/model';
+import { inputsSelectors } from '../../store/inputs';
+import { useUpdateUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../use_url_state';
 
 export const useSyncTimerangeUrlParam = () => {

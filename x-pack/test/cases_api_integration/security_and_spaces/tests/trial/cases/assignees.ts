@@ -7,17 +7,17 @@
 
 import expect from '@kbn/expect';
 
-import {
-  bulkGetUserProfiles,
-  createCase,
-  deleteAllCaseItems,
-  findCases,
-  generateFakeAssignees,
-  getCase,
-  suggestUserProfiles,
-  updateCase,
-} from '../../../../common/lib/api';
 import { findCasesResp, getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
+import {
+  createCase,
+  getCase,
+  findCases,
+  updateCase,
+  deleteAllCaseItems,
+  generateFakeAssignees,
+  suggestUserProfiles,
+  bulkGetUserProfiles,
+} from '../../../../common/lib/api';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../../common/lib/authentication/users';

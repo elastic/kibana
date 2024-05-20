@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 
 import { waitFor } from '@testing-library/react';
+import { JobSwitchComponent } from './job_switch';
 import { cloneDeep } from 'lodash/fp';
 import { mockSecurityJobs } from '../api.mock';
 import type { SecurityJob } from '../types';
-import { JobSwitchComponent } from './job_switch';
 
 describe('JobSwitch', () => {
   let securityJobs: SecurityJob[];

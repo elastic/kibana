@@ -7,8 +7,8 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { getPipelineSeriesFormula } from './pipeline_formula';
 
 describe('getParentPipelineSeriesFormula', () => {
@@ -117,9 +117,9 @@ describe('getParentPipelineSeriesFormula', () => {
         Metric,
         Metric[],
         Metric,
-        { metaValue?: number; reducedTimeRange?: string; timeShift?: string },
+        { metaValue?: number; reducedTimeRange?: string; timeShift?: string }
       ],
-      string | null,
+      string | null
     ]
   >([
     [

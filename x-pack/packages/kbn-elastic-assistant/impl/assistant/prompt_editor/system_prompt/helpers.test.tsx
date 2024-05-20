@@ -11,7 +11,7 @@ import React from 'react';
 import { mockSuperheroSystemPrompt, mockSystemPrompt } from '../../../mock/system_prompt';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 
-import { getOptionFromPrompt, getOptions } from './helpers';
+import { getOptions, getOptionFromPrompt } from './helpers';
 
 describe('helpers', () => {
   describe('getOptionFromPrompt', () => {

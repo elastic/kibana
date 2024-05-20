@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { type FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
 
-import { TRANSFORM_STATE } from '../../../../../../common/constants';
-import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
 import { missingTransformStats } from '../../../../common/transform_list';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
+import { useTransformCapabilities } from '../../../../hooks';
 import type { TransformListRow } from '../../../../common';
 import { isCompletedBatchTransform } from '../../../../common';
-import { useTransformCapabilities } from '../../../../hooks';
 
 export const startActionNameText = i18n.translate(
   'xpack.transform.transformList.startActionNameText',

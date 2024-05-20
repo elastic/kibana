@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { core, render } from '../../test/test_utils';
+import { render, core } from '../../test/test_utils';
 import { ElasticsearchOverview as Overview } from './overview';
 
 jest.mock('react-router-dom', () => ({

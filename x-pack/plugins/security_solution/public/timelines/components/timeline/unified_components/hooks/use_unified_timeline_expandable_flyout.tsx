@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useLocation } from 'react-router-dom';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 
 const EMPTY_TIMELINE_FLYOUT_SEARCH_PARAMS = '()';

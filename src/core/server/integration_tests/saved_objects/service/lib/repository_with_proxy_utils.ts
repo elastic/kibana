@@ -1,4 +1,3 @@
-import { IncomingMessage } from 'http';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { IncomingMessage } from 'http';
  * Side Public License, v 1.
  */
 import Hapi from '@hapi/hapi';
+import { IncomingMessage } from 'http';
 
 // proxy setup
 const defaultProxyOptions = (hostname: string, port: string) => ({

@@ -1,6 +1,3 @@
-import { render, screen } from '@testing-library/react';
-import Chance from 'chance';
-import moment from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,8 +5,11 @@ import moment from 'moment';
  * 2.0.
  */
 import React from 'react';
-import { PoliciesTable } from '.';
+import Chance from 'chance';
+import { render, screen } from '@testing-library/react';
+import moment from 'moment';
 import { createCloudDefendIntegrationFixture } from '../../test/fixtures/cloud_defend_integration';
+import { PoliciesTable } from '.';
 import { TestProvider } from '../../test/test_provider';
 
 describe('<PoliciesTable />', () => {

@@ -8,22 +8,17 @@
 import expect from '@kbn/expect';
 
 import { BaseFilesClient } from '@kbn/shared-ux-file-types';
-import {
-  createAndUploadFile,
-  createFile,
-  deleteAllFilesForKind,
-  deleteFileForFileKind,
-  downloadFile,
-  getFileById,
-  listFiles,
-  uploadFile,
-} from '../../../cases_api_integration/common/lib/api';
 import { User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
-  CASES_FILE_KIND,
-  OBSERVABILITY_FILE_KIND,
-  SECURITY_SOLUTION_FILE_KIND,
-} from '../../../cases_api_integration/common/lib/constants';
+  createFile,
+  uploadFile,
+  downloadFile,
+  createAndUploadFile,
+  listFiles,
+  getFileById,
+  deleteAllFilesForKind,
+  deleteFileForFileKind,
+} from '../../../cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   casesAllUser,
@@ -33,6 +28,11 @@ import {
   secAllUser,
   secReadCasesReadUser,
 } from './common/users';
+import {
+  CASES_FILE_KIND,
+  OBSERVABILITY_FILE_KIND,
+  SECURITY_SOLUTION_FILE_KIND,
+} from '../../../cases_api_integration/common/lib/constants';
 
 interface TestScenario {
   user: User;

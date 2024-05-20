@@ -10,8 +10,8 @@ import React from 'react';
 import { SecurityPageName } from '../../../../common/constants';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useGetSecuritySolutionLinkProps } from '../../../common/components/links';
-import { mockSeverityCount } from './__mocks__';
 import { RiskScoreHeaderContent } from './header_content';
+import { mockSeverityCount } from './__mocks__';
 
 jest.mock('../../../common/components/links', () => {
   const actual = jest.requireActual('../../../common/components/links');

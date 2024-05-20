@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../common/constants';
 
-import { pageHelpers, setupEnvironment } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { PipelineCreateFromCsvTestBed } from './helpers/pipelines_create_from_csv.helpers';
 
 const { setup } = pageHelpers.pipelinesCreateFromCsv;

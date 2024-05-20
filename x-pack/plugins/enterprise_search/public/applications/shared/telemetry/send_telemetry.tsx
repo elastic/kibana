@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions } from 'kea';
 
-import { SendTelemetryHelper, TelemetryLogic } from './telemetry_logic';
+import { TelemetryLogic, SendTelemetryHelper } from './telemetry_logic';
 
 /**
  * React component helpers - useful for on-page-load/views

@@ -7,26 +7,26 @@
 
 import React, { useState } from 'react';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiCallOut,
+  EuiLink,
+  EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
-import { documentationService } from '../../../../../services/documentation';
+import { UseField, Field, UseMultiFields, FieldHook } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
-import { Field, FieldHook, UseField, UseMultiFields } from '../../../shared_imports';
 import { NormalizedField } from '../../../types';
 import { EditFieldFormRow } from '../fields/edit_field';
-import { FielddataFrequencyFilterAbsolute } from './fielddata_frequency_filter_absolute';
+import { documentationService } from '../../../../../services/documentation';
 import { FielddataFrequencyFilterPercentage } from './fielddata_frequency_filter_percentage';
+import { FielddataFrequencyFilterAbsolute } from './fielddata_frequency_filter_absolute';
 
 interface Props {
   defaultToggleValue: boolean;

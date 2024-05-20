@@ -9,10 +9,10 @@
 import { schema } from '@kbn/config-schema';
 
 import type { FilesClient } from '../../../../common/files_client';
-import type { FileKind, FileShareJSON } from '../../../../common/types';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../../api_routes';
-import * as cs from '../../common_schemas';
+import type { FileKind, FileShareJSON } from '../../../../common/types';
 import { CreateHandler, FileKindRouter } from '../types';
+import * as cs from '../../common_schemas';
 
 export const method = 'get' as const;
 

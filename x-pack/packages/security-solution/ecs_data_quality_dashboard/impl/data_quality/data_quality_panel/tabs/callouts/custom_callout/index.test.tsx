@@ -9,13 +9,13 @@ import { EcsVersion } from '@elastic/ecs';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { CustomCallout } from '.';
+import { ECS_IS_A_PERMISSIVE_SCHEMA } from '../../../index_properties/translations';
 import {
   hostNameKeyword,
   someField,
 } from '../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { TestProviders } from '../../../../mock/test_providers/test_providers';
-import { ECS_IS_A_PERMISSIVE_SCHEMA } from '../../../index_properties/translations';
+import { CustomCallout } from '.';
 
 const content = 'you are reviewing a pull request';
 

@@ -9,17 +9,17 @@
 import Path from 'path';
 import Fsp from 'fs/promises';
 
-import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { SomeDevLog } from '@kbn/some-dev-log';
 import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
-import { TS_PROJECTS, type TsProject } from '@kbn/ts-projects';
+import { SomeDevLog } from '@kbn/some-dev-log';
+import { type TsProject, TS_PROJECTS } from '@kbn/ts-projects';
 
 import {
-  ROOT_REFS_CONFIG_PATH,
-  cleanupRootRefsConfig,
   updateRootRefsConfig,
+  cleanupRootRefsConfig,
+  ROOT_REFS_CONFIG_PATH,
 } from './root_refs_config';
 
 const rel = (from: string, to: string) => {

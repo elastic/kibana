@@ -14,11 +14,11 @@ import {
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
 } from '../../common/constants';
-import { IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
 import type { Owner } from '../../common/constants/types';
 import { HttpApiTagOperation } from '../../common/constants/types';
-import { constructFileKindIdByOwner, constructFilesHttpOperationTag } from '../../common/files';
+import { IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
 import type { FilesConfig } from './types';
+import { constructFileKindIdByOwner, constructFilesHttpOperationTag } from '../../common/files';
 
 const buildFileKind = (config: FilesConfig, owner: Owner): FileKind => {
   return {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { STATUS } from '../../../../../../common/constants';
+import { EuiBadge } from '@elastic/eui';
 import { StatusTag } from './location_status_tags';
+import { STATUS } from '../../../../../../common/constants';
 
 const BadgeItem = styled.div`
   white-space: nowrap;

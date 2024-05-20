@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import React, { useEffect, useRef, useState } from 'react';
+import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 
 export const HoverPopover = ({
   children,

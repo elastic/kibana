@@ -1,6 +1,3 @@
-import { createHttpService } from '@kbn/core-http-server-mocks';
-import { contextServiceMock, executionContextServiceMock } from '@kbn/core/server/mocks';
-import supertest from 'supertest';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import supertest from 'supertest';
  * 2.0.
  */
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
+import { contextServiceMock, executionContextServiceMock } from '@kbn/core/server/mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
+import supertest from 'supertest';
 import { APMEventClient } from '.';
 
 describe('APMEventClient', () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Type, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type { ExceptionListItemSchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 
 export interface FilterEventsAgainstListOptions<T> {
@@ -18,7 +18,7 @@ export interface FilterEventsAgainstListOptions<T> {
 
 export type FilterEventsAgainstListReturn<T> = [
   Array<estypes.SearchHit<T>>,
-  Array<estypes.SearchHit<T>>,
+  Array<estypes.SearchHit<T>>
 ];
 
 export interface CreateSetToFilterAgainstOptions<T> {

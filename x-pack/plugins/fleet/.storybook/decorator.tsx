@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DecoratorFn } from '@storybook/react';
 import React from 'react';
+import type { DecoratorFn } from '@storybook/react';
 
 import { StorybookContext } from './context';
 

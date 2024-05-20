@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import React, { CSSProperties, ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
-import React, { CSSProperties, ReactElement } from 'react';
+import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
+import {
+  getDefaultStaticProperties,
+  LABEL_STYLES,
+  LINE_STYLES,
+  POLYGON_STYLES,
+} from './vector_style_defaults';
 import {
   DEFAULT_ICON,
   FIELD_ORIGIN,
@@ -17,6 +24,28 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
+import { StyleMeta } from './style_meta';
+import { getMakiSymbol } from './symbol_utils';
+import { VectorIcon } from './components/legend/vector_icon';
+import { VectorStyleLegend } from './components/legend/vector_style_legend';
+import { getHasLabel } from './style_util';
+import { StaticStyleProperty } from './properties/static_style_property';
+import { DynamicStyleProperty, IDynamicStyleProperty } from './properties/dynamic_style_property';
+import { DynamicSizeProperty } from './properties/dynamic_size_property';
+import { StaticSizeProperty } from './properties/static_size_property';
+import { StaticColorProperty } from './properties/static_color_property';
+import { DynamicColorProperty } from './properties/dynamic_color_property';
+import { StaticOrientationProperty } from './properties/static_orientation_property';
+import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
+import { StaticTextProperty } from './properties/static_text_property';
+import { DynamicTextProperty } from './properties/dynamic_text_property';
+import { LabelZoomRangeProperty } from './properties/label_zoom_range_property';
+import { LabelBorderSizeProperty } from './properties/label_border_size_property';
+import { LabelPositionProperty } from './properties/label_position_property';
+import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
+import { SymbolizeAsProperty } from './properties/symbolize_as_property';
+import { StaticIconProperty } from './properties/static_icon_property';
+import { DynamicIconProperty } from './properties/dynamic_icon_property';
 import {
   ColorDynamicOptions,
   ColorStaticOptions,
@@ -42,42 +71,13 @@ import {
   VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
-import { IESAggField } from '../../fields/agg';
+import { IStyle } from '../style';
+import { IStyleProperty } from './properties/style_property';
 import { IField } from '../../fields/field';
 import { IVectorLayer } from '../../layers/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
-import { IStyle } from '../style';
-import { extractColorFromStyleProperty } from './components/legend/extract_color_from_style_property';
-import { VectorIcon } from './components/legend/vector_icon';
-import { VectorStyleLegend } from './components/legend/vector_style_legend';
-import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
-import { DynamicColorProperty } from './properties/dynamic_color_property';
-import { DynamicIconProperty } from './properties/dynamic_icon_property';
-import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
-import { DynamicSizeProperty } from './properties/dynamic_size_property';
-import { DynamicStyleProperty, IDynamicStyleProperty } from './properties/dynamic_style_property';
-import { DynamicTextProperty } from './properties/dynamic_text_property';
-import { LabelBorderSizeProperty } from './properties/label_border_size_property';
-import { LabelPositionProperty } from './properties/label_position_property';
-import { LabelZoomRangeProperty } from './properties/label_zoom_range_property';
-import { StaticColorProperty } from './properties/static_color_property';
-import { StaticIconProperty } from './properties/static_icon_property';
-import { StaticOrientationProperty } from './properties/static_orientation_property';
-import { StaticSizeProperty } from './properties/static_size_property';
-import { StaticStyleProperty } from './properties/static_style_property';
-import { StaticTextProperty } from './properties/static_text_property';
-import { IStyleProperty } from './properties/style_property';
-import { SymbolizeAsProperty } from './properties/symbolize_as_property';
-import { StyleFieldsHelper, createStyleFieldsHelper } from './style_fields_helper';
-import { StyleMeta } from './style_meta';
-import { getHasLabel } from './style_util';
-import { getMakiSymbol } from './symbol_utils';
-import {
-  LABEL_STYLES,
-  LINE_STYLES,
-  POLYGON_STYLES,
-  getDefaultStaticProperties,
-} from './vector_style_defaults';
+import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
+import { IESAggField } from '../../fields/agg';
 
 export interface IVectorStyle extends IStyle {
   getAllStyleProperties(): Array<IStyleProperty<StylePropertyOptions>>;

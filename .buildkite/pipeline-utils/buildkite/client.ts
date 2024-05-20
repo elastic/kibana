@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExecSyncOptions, execSync } from 'child_process';
 import axios, { AxiosInstance } from 'axios';
+import { execSync, ExecSyncOptions } from 'child_process';
 import { dump } from 'js-yaml';
 import { parseLinkHeader } from './parse_link_header';
 import { Artifact } from './types/artifact';

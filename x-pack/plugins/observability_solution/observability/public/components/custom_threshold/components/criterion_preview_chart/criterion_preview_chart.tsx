@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { niceTimeFormatter } from '@elastic/charts';
-import { LEGACY_DARK_THEME, LEGACY_LIGHT_THEME, Theme } from '@elastic/charts';
-import { EuiLoadingChart, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { max as getMax, min as getMin, sum } from 'lodash';
 import React, { useMemo } from 'react';
+import { niceTimeFormatter } from '@elastic/charts';
+import { Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
+import { EuiLoadingChart, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { sum, min as getMin, max as getMax } from 'lodash';
 import { formatNumber } from '../../../../../common/custom_threshold_rule/formatters/number';
 
 interface Point {

@@ -7,9 +7,9 @@
 
 import type {
   SignificantItem,
+  SignificantItemHistogram,
   SignificantItemGroup,
   SignificantItemGroupHistogram,
-  SignificantItemHistogram,
 } from '@kbn/ml-agg-utils';
 
 export const API_ACTION_NAME = {
@@ -30,7 +30,7 @@ export const API_ACTION_NAME = {
   SET_ZERO_DOCS_FALLBACK: 'set_zero_docs_fallback',
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
-export type ApiActionName = (typeof API_ACTION_NAME)[keyof typeof API_ACTION_NAME];
+export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
 
 interface ApiActionAddSignificantItems {
   type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS;

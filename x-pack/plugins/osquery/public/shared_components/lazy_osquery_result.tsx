@@ -6,8 +6,8 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { StartServices } from '../types';
 import type { OsqueryActionResultProps } from './osquery_results/types';
+import type { StartServices } from '../types';
 
 interface BigServices extends StartServices {
   kibanaVersion: string;
@@ -18,8 +18,9 @@ const OsqueryResult = lazy(() => import('./osquery_results/osquery_result_wrappe
 
 export const getLazyOsqueryResult =
   // eslint-disable-next-line react/display-name
-  (services: BigServices) => (props: OsqueryActionResultProps) => (
-    <Suspense fallback={null}>
-      <OsqueryResult services={services} {...props} />
-    </Suspense>
-  );
+  (services: BigServices) => (props: OsqueryActionResultProps) =>
+    (
+      <Suspense fallback={null}>
+        <OsqueryResult services={services} {...props} />
+      </Suspense>
+    );

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
+import { TestBed } from '@kbn/test-jest-helpers';
 
-import { Cluster } from '../../../common/lib';
 import { RemoteClusterForm } from '../../../public/application/sections/components/remote_cluster_form';
-import { setup as setupRemoteClustersAdd } from '../add/remote_clusters_add.helpers';
 import { RemoteClustersActions, setupEnvironment } from '../helpers';
+import { setup as setupRemoteClustersAdd } from '../add/remote_clusters_add.helpers';
 import {
+  setup,
   REMOTE_CLUSTER_EDIT,
   REMOTE_CLUSTER_EDIT_NAME,
-  setup,
 } from './remote_clusters_edit.helpers';
+import { Cluster } from '../../../common/lib';
 
 let component: TestBed['component'];
 let actions: RemoteClustersActions;

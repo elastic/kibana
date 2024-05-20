@@ -56,7 +56,9 @@
             "type": "Object",
             "tags": [],
             "label": "coreStart",
-            "description": ["Kibana CoreStart"],
+            "description": [
+              "Kibana CoreStart"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-lifecycle-server",
@@ -77,8 +79,12 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["Context name, usually the plugin id"],
-            "signature": ["string"],
+            "description": [
+              "Context name, usually the plugin id"
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -93,7 +99,9 @@
             "description": [
               "Optional context id, can be used to override the default usage of page as id"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -105,8 +113,12 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["Optional context type, defaults to `application`."],
-            "signature": ["string"],
+            "description": [
+              "Optional context type, defaults to `application`."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,

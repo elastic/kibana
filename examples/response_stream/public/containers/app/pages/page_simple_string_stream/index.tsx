@@ -22,8 +22,8 @@ import { useFetchStream } from '@kbn/ml-response-stream/client';
 
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
 
-import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
+import { Page } from '../../../../components/page';
 
 export const PageSimpleStringStream: FC = () => {
   const { core } = useDeps();

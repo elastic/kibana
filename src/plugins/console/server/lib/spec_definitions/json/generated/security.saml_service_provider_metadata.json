@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["GET"],
-    "patterns": ["_security/saml/metadata/{realm_name}"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_security/saml/metadata/{realm_name}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-saml-sp-metadata.html",
     "availability": {
       "stack": true,

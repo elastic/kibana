@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { History, Location } from 'history';
 import { stringify } from 'query-string';
+import { History, Location } from 'history';
 import { url } from '../../common';
 import { getQueryParams } from './get_query_params';
 

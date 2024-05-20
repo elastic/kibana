@@ -8,8 +8,8 @@
 import React from 'react';
 
 import { Forms } from '../../../../../shared_imports';
-import { StepAliases } from './step_aliases';
 import { CommonWizardSteps } from './types';
+import { StepAliases } from './step_aliases';
 
 interface Props {
   esDocsBase: string;

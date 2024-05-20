@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { SavedObjectsInstaller } from './saved_objects_installer';
 

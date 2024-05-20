@@ -8,20 +8,6 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { Metric } from '../../../../common/types';
-import {
-  SUPPORTED_METRICS,
-  SupportedMetric,
-  getFilterRatioFormula,
-  getFormulaFromMetric,
-  getPipelineSeriesFormula,
-} from '../metrics';
-import { createColumn, getFormat } from './column';
-import { createFormulaColumn } from './formula';
-import { convertToMovingAverageParams } from './moving_average';
-import { convertToPercentileColumn } from './percentile';
-import { convertToPercentileRankColumn } from './percentile_rank';
 import {
   AvgColumn,
   CardinalityColumn,
@@ -31,7 +17,6 @@ import {
   CounterRateColumn,
   CumulativeSumColumn,
   DerivativeColumn,
-  FormulaColumn,
   LastValueColumn,
   MaxColumn,
   MinColumn,
@@ -39,7 +24,22 @@ import {
   PercentileColumn,
   PercentileRanksColumn,
   SumColumn,
+  FormulaColumn,
 } from './types';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { Metric } from '../../../../common/types';
+import {
+  getFilterRatioFormula,
+  getFormulaFromMetric,
+  SupportedMetric,
+  SUPPORTED_METRICS,
+  getPipelineSeriesFormula,
+} from '../metrics';
+import { createColumn, getFormat } from './column';
+import { createFormulaColumn } from './formula';
+import { convertToMovingAverageParams } from './moving_average';
+import { convertToPercentileColumn } from './percentile';
+import { convertToPercentileRankColumn } from './percentile_rank';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE

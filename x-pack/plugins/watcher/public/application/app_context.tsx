@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DocLinksStart } from '@kbn/core/public';
 import React, { createContext, useContext } from 'react';
+import { DocLinksStart } from '@kbn/core/public';
 import { ACTION_TYPES } from '../../common/constants';
 import { AppDeps } from './app';
 

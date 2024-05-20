@@ -7,14 +7,14 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
   FieldFormatsContentType,
   HtmlContextTypeOptions,
   TextContextTypeOptions,
 } from '@kbn/field-formats-plugin/common/types';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available

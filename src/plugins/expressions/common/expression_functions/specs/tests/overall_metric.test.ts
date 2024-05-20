@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { functionWrapper } from './utils';
 import { ExecutionContext } from '../../../execution/types';
 import { Datatable } from '../../../expression_types/specs/datatable';
-import { OverallMetricArgs, overallMetric } from '../overall_metric';
-import { functionWrapper } from './utils';
+import { overallMetric, OverallMetricArgs } from '../overall_metric';
 
 describe('interpreter/functions#overall_metric', () => {
   const fn = functionWrapper(overallMetric);

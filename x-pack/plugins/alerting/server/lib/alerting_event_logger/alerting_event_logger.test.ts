@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { schema } from '@kbn/config-schema';
-import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { RULE_SAVED_OBJECT_TYPE } from '../..';
-import { EVENT_LOG_ACTIONS } from '../../plugin';
+import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
+import {
+  AlertingEventLogger,
+  ContextOpts,
+  Context,
+  RuleContext,
+  initializeExecuteRecord,
+  createExecuteTimeoutRecord,
+  createAlertRecord,
+  createActionExecuteRecord,
+  updateEvent,
+  executionType,
+  initializeExecuteBackfillRecord,
+  SavedObjects,
+  updateEventWithRuleData,
+} from './alerting_event_logger';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
 import {
   RecoveredActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
 } from '../../types';
 import { RuleRunMetrics } from '../rule_run_metrics_store';
-import {
-  AlertingEventLogger,
-  Context,
-  ContextOpts,
-  RuleContext,
-  SavedObjects,
-  createActionExecuteRecord,
-  createAlertRecord,
-  createExecuteTimeoutRecord,
-  executionType,
-  initializeExecuteBackfillRecord,
-  initializeExecuteRecord,
-  updateEvent,
-  updateEventWithRuleData,
-} from './alerting_event_logger';
+import { EVENT_LOG_ACTIONS } from '../../plugin';
+import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
+import { schema } from '@kbn/config-schema';
+import { RULE_SAVED_OBJECT_TYPE } from '../..';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();

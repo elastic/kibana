@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
 
 export interface SetupDependencies {

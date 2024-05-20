@@ -17,19 +17,19 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../../../common/latency_aggregation_types';
-import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { AlertsOverview } from '../../app/alerts_overview';
-import { CrashGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/crash_group_details';
-import { ErrorGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/error_group_details';
-import { MobileErrorCrashesOverview } from '../../app/mobile/errors_and_crashes_overview';
+import { ServiceMapServiceDetail } from '../../app/service_map';
+import { MobileServiceTemplate } from '../templates/mobile_service_template';
 import { MobileServiceOverview } from '../../app/mobile/service_overview';
 import { MobileTransactionOverview } from '../../app/mobile/transaction_overview';
-import { ServiceDashboards } from '../../app/service_dashboards';
-import { ServiceDependencies } from '../../app/service_dependencies';
-import { ServiceMapServiceDetail } from '../../app/service_map';
 import { TransactionDetails } from '../../app/transaction_details';
 import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
-import { MobileServiceTemplate } from '../templates/mobile_service_template';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { ErrorGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/error_group_details';
+import { CrashGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/crash_group_details';
+import { MobileErrorCrashesOverview } from '../../app/mobile/errors_and_crashes_overview';
+import { ServiceDependencies } from '../../app/service_dependencies';
+import { ServiceDashboards } from '../../app/service_dashboards';
 export function page({
   title,
   tabKey,

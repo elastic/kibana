@@ -6,7 +6,7 @@
  */
 
 import { setMockValues } from '../../../../__mocks__/kea_logic';
-import { mockUseParams, mockUseRouteMatch } from '../../../../__mocks__/react_router';
+import { mockUseRouteMatch, mockUseParams } from '../../../../__mocks__/react_router';
 
 import { isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 

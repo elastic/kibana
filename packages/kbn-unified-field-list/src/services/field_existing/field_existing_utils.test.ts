@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { buildFieldList, existingFields } from './field_existing_utils';
+import { existingFields, buildFieldList } from './field_existing_utils';
 
 describe('existingFields', () => {
   it('should remove missing fields by matching names', () => {

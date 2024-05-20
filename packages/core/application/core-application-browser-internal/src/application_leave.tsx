@@ -7,9 +7,9 @@
  */
 import type { EuiButtonColor } from '@elastic/eui';
 import {
-  type AppLeaveAction,
-  type AppLeaveActionFactory,
   AppLeaveActionType,
+  type AppLeaveActionFactory,
+  type AppLeaveAction,
   type AppLeaveConfirmAction,
   type AppLeaveHandler,
 } from '@kbn/core-application-browser';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
 import React from 'react';
+import { EuiBadge } from '@elastic/eui';
 import type { RuleExecutionEventType } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { getBadgeIcon, getBadgeText } from './utils';
 

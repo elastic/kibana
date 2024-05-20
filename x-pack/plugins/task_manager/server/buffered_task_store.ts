@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { BufferOptions, Entity, Operation, createBuffer } from './lib/bulk_operation_buffer';
-import { asErr, asOk, unwrapPromise } from './lib/result_type';
+import { TaskStore } from './task_store';
 import { ConcreteTaskInstance } from './task';
 import { Updatable } from './task_running';
-import { TaskStore } from './task_store';
+import { createBuffer, Operation, BufferOptions, Entity } from './lib/bulk_operation_buffer';
+import { unwrapPromise, asErr, asOk } from './lib/result_type';
 
 // by default allow updates to be buffered for up to 50ms
 const DEFAULT_BUFFER_MAX_DURATION = 50;
@@ -18,10 +18,7 @@ export class BufferedTaskStore implements Updatable {
   private bufferedUpdate: Operation<ConcreteTaskInstance>;
   private bufferedRemove: Operation<Entity>;
 
-  constructor(
-    private readonly taskStore: TaskStore,
-    options: BufferOptions
-  ) {
+  constructor(private readonly taskStore: TaskStore, options: BufferOptions) {
     this.bufferedUpdate = createBuffer<ConcreteTaskInstance>(
       // Setting validate: false because we'll validate per update call
       //

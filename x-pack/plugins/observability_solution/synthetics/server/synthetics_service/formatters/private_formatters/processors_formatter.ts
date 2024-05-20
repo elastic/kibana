@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
 import { ProcessorFields } from './format_synthetics_policy';
+import { HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
 
 interface FieldProcessor {
   add_fields: {

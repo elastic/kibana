@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 

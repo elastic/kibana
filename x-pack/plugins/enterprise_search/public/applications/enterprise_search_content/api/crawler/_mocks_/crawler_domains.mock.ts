@@ -8,17 +8,17 @@
 import { Meta } from '../../../../../../common/types';
 
 import {
-  CrawlRule,
   CrawlerDomain,
-  CrawlerDomainFromServer,
-  CrawlerDomainsWithMeta,
-  CrawlerDomainsWithMetaFromServer,
   CrawlerPolicies,
+  CrawlRule,
   CrawlerRules,
-  DomainConfig,
-  DomainConfigFromServer,
   EntryPoint,
   Sitemap,
+  CrawlerDomainFromServer,
+  DomainConfigFromServer,
+  DomainConfig,
+  CrawlerDomainsWithMeta,
+  CrawlerDomainsWithMetaFromServer,
 } from '../types';
 
 export const CRAWL_RULE: CrawlRule = {

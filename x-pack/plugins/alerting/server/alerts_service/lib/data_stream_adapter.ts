@@ -7,8 +7,8 @@
 
 // eslint-disable-next-line max-classes-per-file
 import {
-  ConcreteIndexInfo,
   CreateConcreteWriteIndexOpts,
+  ConcreteIndexInfo,
   updateIndexMappings,
 } from './create_concrete_write_index';
 import { retryTransientEsErrors } from './retry_transient_es_errors';

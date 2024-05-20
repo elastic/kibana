@@ -18,16 +18,16 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { CodeEditor } from '@kbn/code-editor';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
+import { type InferecePipelineCreationState } from './state';
+import { EDIT_MESSAGE, CANCEL_EDIT_MESSAGE } from '../../components/ml_inference/constants';
 import { isValidJson } from '../../../../common/util/validation_utils';
+import { useTestTrainedModelsContext } from '../test_models/test_trained_models_context';
 import { SaveChangesButton } from '../../components/ml_inference/components/save_changes_button';
-import { CANCEL_EDIT_MESSAGE, EDIT_MESSAGE } from '../../components/ml_inference/constants';
 import { validatePipelineProcessors } from '../../components/ml_inference/validation';
 import { PipelineDetailsTitle, PipelineNameAndDescription } from '../../components/shared';
-import { useTestTrainedModelsContext } from '../test_models/test_trained_models_context';
-import { type InferecePipelineCreationState } from './state';
 
 interface Props {
   handlePipelineConfigUpdate: (configUpdate: Partial<InferecePipelineCreationState>) => void;

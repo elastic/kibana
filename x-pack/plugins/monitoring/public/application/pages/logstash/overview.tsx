@@ -1,6 +1,3 @@
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,12 +5,15 @@ import { find } from 'lodash';
  * 2.0.
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
-import { Overview } from '../../../components/logstash/overview';
+import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { useCharts } from '../../hooks/use_charts';
 import { ComponentProps } from '../../route_init';
+import { useCharts } from '../../hooks/use_charts';
+import { Overview } from '../../../components/logstash/overview';
 import { LogstashTemplate } from './logstash_template';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);

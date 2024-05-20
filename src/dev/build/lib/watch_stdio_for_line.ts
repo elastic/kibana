@@ -9,7 +9,7 @@
 import { Transform } from 'stream';
 import { ExecaChildProcess } from 'execa';
 
-import { createMapStream, createPromiseFromStreams, createSplitStream } from '@kbn/utils';
+import { createPromiseFromStreams, createSplitStream, createMapStream } from '@kbn/utils';
 
 // creates a stream that skips empty lines unless they are followed by
 // another line, preventing the empty lines produced by splitStream

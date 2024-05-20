@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import httpProxy from 'http-proxy';
 import http from 'http';
+import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
+import getPort from 'get-port';
+import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import {
-  ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
+  ExternalServiceSimulator,
   getWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
-import expect from '@kbn/expect';
-import getPort from 'get-port';
-import httpProxy from 'http-proxy';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const defaultValues: Record<string, any> = {

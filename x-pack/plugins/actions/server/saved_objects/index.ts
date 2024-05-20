@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type {
   SavedObject,
   SavedObjectsExportTransformContext,
@@ -13,18 +12,19 @@ import type {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { actionMappings, actionTaskParamsMappings, connectorTokenMappings } from './mappings';
+import { getActionsMigrations } from './actions_migrations';
+import { getActionTaskParamsMigrations } from './action_task_params_migrations';
+import { InMemoryConnector, RawAction } from '../types';
+import { getImportWarnings } from './get_import_warnings';
+import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { ActionTypeRegistry } from '../action_type_registry';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
-import { InMemoryConnector, RawAction } from '../types';
-import { getActionTaskParamsMigrations } from './action_task_params_migrations';
-import { getActionsMigrations } from './actions_migrations';
-import { getImportWarnings } from './get_import_warnings';
-import { actionMappings, actionTaskParamsMappings, connectorTokenMappings } from './mappings';
-import { transformConnectorsForExport } from './transform_connectors_for_export';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,

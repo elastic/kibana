@@ -29,7 +29,9 @@
         "description": [
           "\nA {@link https://handlebarsjs.com/api-reference/helpers.html helper-function} type.\n\nWhen registering a helper function, it should be of this type."
         ],
-        "signature": ["HelperDelegate"],
+        "signature": [
+          "HelperDelegate"
+        ],
         "path": "packages/kbn-handlebars/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -41,7 +43,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -92,7 +96,10 @@
             "tags": [],
             "label": "fn",
             "description": [],
-            "signature": ["TemplateDelegate", "<any>"],
+            "signature": [
+              "TemplateDelegate",
+              "<any>"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -105,7 +112,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["T | undefined"],
+                "signature": [
+                  "T | undefined"
+                ],
                 "path": "packages/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -140,7 +149,10 @@
             "tags": [],
             "label": "inverse",
             "description": [],
-            "signature": ["TemplateDelegate", "<any>"],
+            "signature": [
+              "TemplateDelegate",
+              "<any>"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -153,7 +165,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["T | undefined"],
+                "signature": [
+                  "T | undefined"
+                ],
                 "path": "packages/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -188,7 +202,9 @@
             "tags": [],
             "label": "loc",
             "description": [],
-            "signature": ["{ start: hbs.AST.Position; end: hbs.AST.Position; }"],
+            "signature": [
+              "{ start: hbs.AST.Position; end: hbs.AST.Position; }"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -200,7 +216,9 @@
             "tags": [],
             "label": "lookupProperty",
             "description": [],
-            "signature": ["<T = any>(parent: Record<string, any>, propertyName: string) => T"],
+            "signature": [
+              "<T = any>(parent: Record<string, any>, propertyName: string) => T"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -213,7 +231,9 @@
                 "tags": [],
                 "label": "parent",
                 "description": [],
-                "signature": ["{ [x: string]: any; }"],
+                "signature": [
+                  "{ [x: string]: any; }"
+                ],
                 "path": "packages/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -266,7 +286,10 @@
             "tags": [],
             "label": "helpers",
             "description": [],
-            "signature": ["HelpersHash", " | undefined"],
+            "signature": [
+              "HelpersHash",
+              " | undefined"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -278,7 +301,10 @@
             "tags": [],
             "label": "partials",
             "description": [],
-            "signature": ["PartialsHash", " | undefined"],
+            "signature": [
+              "PartialsHash",
+              " | undefined"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -290,7 +316,10 @@
             "tags": [],
             "label": "decorators",
             "description": [],
-            "signature": ["DecoratorsHash", " | undefined"],
+            "signature": [
+              "DecoratorsHash",
+              " | undefined"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -307,7 +336,10 @@
         "description": [
           "\nA template-function type.\n\nThis type is primarily used for the return value of by calls to\n{@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-compile-template-options Handlebars.compile},\nHandlebars.compileAST and {@link https://handlebarsjs.com/api-reference/compilation.html#handlebars-precompile-template-options Handlebars.template}."
         ],
-        "signature": ["TemplateDelegate", "<T>"],
+        "signature": [
+          "TemplateDelegate",
+          "<T>"
+        ],
         "path": "packages/kbn-handlebars/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -319,7 +351,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -331,7 +365,9 @@
             "tags": [],
             "label": "blockParams",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -343,7 +379,10 @@
             "tags": [],
             "label": "partials",
             "description": [],
-            "signature": ["PartialsHash", " | undefined"],
+            "signature": [
+              "PartialsHash",
+              " | undefined"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -363,7 +402,9 @@
         "description": [
           "\nIf the `unsafe-eval` CSP is set, this string constant will be `compile`,\notherwise `compileAST`.\n\nThis can be used to call the more optimized `compile` function in\nenvironments that support it, or fall back to `compileAST` on environments\nthat don't."
         ],
-        "signature": ["\"compile\" | \"compileAST\""],
+        "signature": [
+          "\"compile\" | \"compileAST\""
+        ],
         "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -414,7 +455,10 @@
             "tags": [],
             "label": "prog",
             "description": [],
-            "signature": ["TemplateDelegate", "<any>"],
+            "signature": [
+              "TemplateDelegate",
+              "<any>"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -427,7 +471,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["T | undefined"],
+                "signature": [
+                  "T | undefined"
+                ],
                 "path": "packages/kbn-handlebars/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -462,7 +508,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["{ [x: string]: any; }"],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -474,7 +522,9 @@
             "tags": [],
             "label": "container",
             "description": [],
-            "signature": ["Container"],
+            "signature": [
+              "Container"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -486,7 +536,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-handlebars/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -505,7 +557,10 @@
         "description": [
           "\nA custom version of the Handlebars module with an extra `compileAST` function and fixed typings."
         ],
-        "signature": ["typeof ", "node_modules/handlebars/types/index.d.ts"],
+        "signature": [
+          "typeof ",
+          "node_modules/handlebars/types/index.d.ts"
+        ],
         "path": "packages/kbn-handlebars/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -518,7 +573,10 @@
         "tags": [],
         "label": "Handlebars",
         "description": [],
-        "signature": ["typeof ", "node_modules/handlebars/types/index.d.ts"],
+        "signature": [
+          "typeof ",
+          "node_modules/handlebars/types/index.d.ts"
+        ],
         "path": "node_modules/handlebars/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,

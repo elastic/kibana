@@ -1,6 +1,3 @@
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import { i18n } from '@kbn/i18n';
  */
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useController } from 'react-hook-form';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useAgentPolicies } from '../../../agent_policies';
 import type { ShardsFormReturn } from './shards_form';
 
@@ -26,9 +26,7 @@ const ShardsPolicyFieldComponent = ({
   hideLabel,
   options,
 }: ShardsPolicyFieldComponent) => {
-  const {
-    data: { agentPoliciesById } = {},
-  } = useAgentPolicies();
+  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
 
   const policyFieldValidator = useCallback(
     (policy: { key: string; label: string }) =>

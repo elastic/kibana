@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';

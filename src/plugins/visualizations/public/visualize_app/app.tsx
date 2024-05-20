@@ -7,26 +7,26 @@
  */
 
 import './app.scss';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { Route, Routes } from '@kbn/shared-ux-router';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { useEffect, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { VisualizeConstants } from '../../common/constants';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { VisualizeServices } from './types';
 import {
-  VisualizeByValueEditor,
   VisualizeEditor,
   VisualizeListing,
   VisualizeNoMatch,
+  VisualizeByValueEditor,
 } from './components';
-import { VisualizeServices } from './types';
+import { VisualizeConstants } from '../../common/constants';
 
 export interface VisualizeAppProps {
   onAppLeave: AppMountParameters['onAppLeave'];

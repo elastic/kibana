@@ -7,13 +7,13 @@
 
 import { logEntryContextRT, persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import * as rt from 'io-ts';
+import { idFormatRT } from '../../id_formats/v1/id_formats';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
   routeTimingMetadataRT,
   timeRangeRT,
 } from '../../../shared';
-import { idFormatRT } from '../../id_formats/v1/id_formats';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_EXAMPLES_PATH =
   '/api/infra/log_analysis/results/log_entry_category_examples';

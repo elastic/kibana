@@ -1,6 +1,3 @@
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,22 +5,24 @@ import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
  * 2.0.
  */
 import { useCallback, useContext, useEffect, useMemo } from 'react';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
   Alerts,
   AlertsTableConfigurationRegistry,
   BulkActionsConfig,
   BulkActionsPanelConfig,
-  BulkActionsReducerAction,
   BulkActionsState,
   BulkActionsVerbs,
+  BulkActionsReducerAction,
   UseBulkActionsRegistry,
 } from '../../../../types';
-import { TimelineItem } from '../bulk_actions/components/toolbar';
 import {
-  GetLeadingControlColumn,
   getLeadingControlColumn as getBulkActionsLeadingControlColumn,
+  GetLeadingControlColumn,
 } from '../bulk_actions/get_leading_control_column';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { CasesService } from '../types';
 import {
   ADD_TO_EXISTING_CASE,
@@ -32,6 +31,7 @@ import {
   MARK_AS_UNTRACKED,
   NO_ALERTS_ADDED_TO_CASE,
 } from './translations';
+import { TimelineItem } from '../bulk_actions/components/toolbar';
 import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 

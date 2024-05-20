@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import React from 'react';
-import { ActionTypeModel } from '../../../..';
 import { ReadOnlyConnectorMessage } from './read_only';
+import { ActionTypeModel } from '../../../..';
 
 const ExtraComponent = jest.fn(() => (
   <div>Extra Component</div>

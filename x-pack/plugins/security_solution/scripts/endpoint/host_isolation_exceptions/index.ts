@@ -50,10 +50,7 @@ export const cli = () => {
 };
 
 class HostIsolationExceptionDataLoaderError extends Error {
-  constructor(
-    message: string,
-    public readonly meta: unknown
-  ) {
+  constructor(message: string, public readonly meta: unknown) {
     super(message);
   }
 }

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { MultiSelectPicker } from '../multi_select_picker';
 import type {
   FileBasedFieldVisConfig,
   FileBasedUnknownFieldVisConfig,
 } from '../../../../../common/types/field_vis_config';
-import { MultiSelectPicker } from '../multi_select_picker';
 
 interface Props {
   fields: Array<FileBasedFieldVisConfig | FileBasedUnknownFieldVisConfig>;

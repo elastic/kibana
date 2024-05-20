@@ -8,22 +8,22 @@
 
 import _ from 'lodash';
 
-import { UI_SETTINGS } from '../../common/constants';
-import { PANEL_TYPES } from '../../common/enums';
-import { TimeFieldNotSpecifiedError } from '../../common/errors';
 import { validateField } from '../../common/fields_utils';
-import type { FetchedIndexPattern, Series, TimeseriesVisData } from '../../common/types';
+import { TimeFieldNotSpecifiedError } from '../../common/errors';
 import { Framework } from '../plugin';
+import type { TimeseriesVisData, FetchedIndexPattern, Series } from '../../common/types';
+import { PANEL_TYPES } from '../../common/enums';
 import type {
+  VisTypeTimeseriesVisDataRequest,
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
-  VisTypeTimeseriesVisDataRequest,
 } from '../types';
-import { getCachedIndexPatternFetcher } from './search_strategies/lib/cached_index_pattern_fetcher';
-import { getInterval } from './vis_data/get_interval';
 import { getSeriesData } from './vis_data/get_series_data';
 import { getTableData } from './vis_data/get_table_data';
 import { getEsQueryConfig } from './vis_data/helpers/get_es_query_uisettings';
+import { getCachedIndexPatternFetcher } from './search_strategies/lib/cached_index_pattern_fetcher';
+import { getInterval } from './vis_data/get_interval';
+import { UI_SETTINGS } from '../../common/constants';
 
 export async function getVisData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,

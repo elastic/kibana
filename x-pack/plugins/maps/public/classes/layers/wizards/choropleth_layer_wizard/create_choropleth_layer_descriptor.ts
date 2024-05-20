@@ -16,6 +16,7 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
+import { getJoinAggKey } from '../../../../../common/get_agg_key';
 import {
   ColorDynamicOptions,
   CountAggDescriptor,
@@ -24,12 +25,11 @@ import {
   JoinDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
-import { getJoinAggKey } from '../../../../../common/get_agg_key';
+import { VectorStyle } from '../../../styles/vector/vector_style';
+import { GeoJsonVectorLayer, MvtVectorLayer } from '../../vector_layer';
 import { EMSFileSource } from '../../../sources/ems_file_source';
 import { ESSearchSource } from '../../../sources/es_search_source';
-import { VectorStyle } from '../../../styles/vector/vector_style';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
-import { GeoJsonVectorLayer, MvtVectorLayer } from '../../vector_layer';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 

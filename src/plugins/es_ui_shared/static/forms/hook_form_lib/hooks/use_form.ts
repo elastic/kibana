@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@kbn/safer-lodash-set';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { get, mergeWith } from 'lodash';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { set } from '@kbn/safer-lodash-set';
 
-import { createArrayItem, getInternalArrayFieldPath } from '../components/use_array';
+import { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
 import {
+  mapFormFields,
+  unflattenObject,
+  flattenObject,
+  stripOutUndefinedValues,
   Subject,
   Subscription,
-  flattenObject,
-  mapFormFields,
-  stripOutUndefinedValues,
-  unflattenObject,
 } from '../lib';
-import { FieldHook, FieldsMap, FormConfig, FormData, FormHook } from '../types';
+import { createArrayItem, getInternalArrayFieldPath } from '../components/use_array';
 
 const DEFAULT_OPTIONS = {
   valueChangeDebounceTime: 500,
@@ -356,13 +356,10 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
       const areFieldsValid = validationResult.every((res) => res.isValid);
 
-      const validationResultByPath = fieldsToValidate.reduce(
-        (acc, field, i) => {
-          acc[field.path] = validationResult[i].isValid;
-          return acc;
-        },
-        {} as { [fieldPath: string]: boolean }
-      );
+      const validationResultByPath = fieldsToValidate.reduce((acc, field, i) => {
+        acc[field.path] = validationResult[i].isValid;
+        return acc;
+      }, {} as { [fieldPath: string]: boolean });
 
       // At this stage we have an updated field validation state inside the "validationResultByPath" object.
       // The fields object in "fieldsRefs.current" have not been updated yet with their new validation state

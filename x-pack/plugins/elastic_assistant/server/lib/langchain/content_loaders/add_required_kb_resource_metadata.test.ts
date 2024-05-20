@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mockExampleQueryDocsFromDirectoryLoader } from '../../../__mocks__/docs_from_directory_loader';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
+import { mockExampleQueryDocsFromDirectoryLoader } from '../../../__mocks__/docs_from_directory_loader';
 
 describe('addRequiredKbResourceMetadata', () => {
   const kbResource = 'esql';

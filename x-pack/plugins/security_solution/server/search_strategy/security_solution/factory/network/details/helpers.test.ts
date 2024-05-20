@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formattedSearchStrategyResponse, mockSearchStrategyResponse } from './__mocks__';
+import { mockSearchStrategyResponse, formattedSearchStrategyResponse } from './__mocks__';
 import { getNetworkDetailsAgg } from './helpers';
 
 describe('getNetworkDetailsAgg', () => {

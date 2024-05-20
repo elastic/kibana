@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { find, isString } from 'lodash';
 import { useMemo } from 'react';
-import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { find, isString } from 'lodash';
+import type { AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useAgentPolicy } from '../agent_policies';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { useAgentDetails } from '../agents/use_agent_details';
 
 interface IIsOsqueryAvailable {

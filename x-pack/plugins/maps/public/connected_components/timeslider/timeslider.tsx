@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  type AwaitingControlGroupAPI,
-  type ControlGroupInput,
-  type ControlGroupInputBuilder,
-  ControlGroupRenderer,
-} from '@kbn/controls-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import {
+  type ControlGroupInput,
+  type ControlGroupInputBuilder,
+  type AwaitingControlGroupAPI,
+  ControlGroupRenderer,
+} from '@kbn/controls-plugin/public';
 import { first } from 'rxjs';
+import type { TimeRange } from '@kbn/es-query';
 import { Timeslice } from '../../../common/descriptor_types';
 
 export interface Props {

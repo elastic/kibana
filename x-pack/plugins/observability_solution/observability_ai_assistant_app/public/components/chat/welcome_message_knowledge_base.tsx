@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+import { noop } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,15 +18,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { noop } from 'lodash';
-import React, { useEffect, useState } from 'react';
-import useInterval from 'react-use/lib/useInterval';
 import usePrevious from 'react-use/lib/usePrevious';
 import useTimeoutFn from 'react-use/lib/useTimeoutFn';
-import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import useInterval from 'react-use/lib/useInterval';
 import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
+import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 
 export function WelcomeMessageKnowledgeBase({
   connectors,

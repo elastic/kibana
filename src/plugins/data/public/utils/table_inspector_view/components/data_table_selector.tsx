@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React, { Component } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
-  EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
 
 interface TableSelectorState {
   isPopoverOpen: boolean;

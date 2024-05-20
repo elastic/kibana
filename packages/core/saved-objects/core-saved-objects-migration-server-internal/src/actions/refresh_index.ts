@@ -1,4 +1,3 @@
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,10 +7,11 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
  */
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import {
-  type RetryableEsClientError,
   catchRetryableEsClientErrors,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
 /** @internal */

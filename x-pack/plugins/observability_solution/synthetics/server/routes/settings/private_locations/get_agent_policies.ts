@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { AgentPolicyInfo } from '../../../../common/types';
 import { SyntheticsServerSetup } from '../../../types';
 import { SyntheticsRestApiRouteFactory } from '../../types';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 
 export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

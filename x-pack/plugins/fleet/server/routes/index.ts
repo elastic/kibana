@@ -9,22 +9,22 @@ import type { FleetAuthzRouter } from '../services/security';
 
 import type { FleetConfigType } from '../config';
 
-import { registerAPIRoutes as registerAgentAPIRoutes } from './agent';
 import { registerRoutes as registerAgentPolicyRoutes } from './agent_policy';
-import { registerRoutes as registerAppRoutes } from './app';
-import { registerRoutes as registerDataStreamRoutes } from './data_streams';
-import { registerRoutes as registerDownloadSourcesRoutes } from './download_source';
-import { registerRoutes as registerEnrollmentApiKeyRoutes } from './enrollment_api_key';
-import { registerRoutes as registerEPMRoutes } from './epm';
-import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
-import { registerRoutes as registerFleetServerHostRoutes } from './fleet_server_hosts';
-import { registerRoutes as registerHealthCheckRoutes } from './health_check';
-import { registerRoutes as registerMessageSigningServiceRoutes } from './message_signing_service';
-import { registerRoutes as registerOutputRoutes } from './output';
 import { registerRoutes as registerPackagePolicyRoutes } from './package_policy';
-import { registerRoutes as registerPreconfigurationRoutes } from './preconfiguration';
-import { registerRoutes as registerSettingsRoutes } from './settings';
+import { registerRoutes as registerDataStreamRoutes } from './data_streams';
+import { registerRoutes as registerEPMRoutes } from './epm';
 import { registerRoutes as registerSetupRoutes } from './setup';
+import { registerAPIRoutes as registerAgentAPIRoutes } from './agent';
+import { registerRoutes as registerEnrollmentApiKeyRoutes } from './enrollment_api_key';
+import { registerRoutes as registerOutputRoutes } from './output';
+import { registerRoutes as registerSettingsRoutes } from './settings';
+import { registerRoutes as registerAppRoutes } from './app';
+import { registerRoutes as registerPreconfigurationRoutes } from './preconfiguration';
+import { registerRoutes as registerDownloadSourcesRoutes } from './download_source';
+import { registerRoutes as registerHealthCheckRoutes } from './health_check';
+import { registerRoutes as registerFleetServerHostRoutes } from './fleet_server_hosts';
+import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
+import { registerRoutes as registerMessageSigningServiceRoutes } from './message_signing_service';
 import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
 
 export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {

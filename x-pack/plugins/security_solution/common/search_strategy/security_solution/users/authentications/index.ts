@@ -7,17 +7,17 @@
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 
-import type { HostEcs, SourceEcs, UserEcs } from '@kbn/securitysolution-ecs';
-import type { CommonFields } from '../..';
+import type { UserEcs, SourceEcs, HostEcs } from '@kbn/securitysolution-ecs';
 import type {
   CursorType,
-  Hit,
   Inspect,
   Maybe,
   PageInfoPaginated,
   StringOrNumber,
+  Hit,
   TotalHit,
 } from '../../../common';
+import type { CommonFields } from '../..';
 
 export interface UserAuthenticationsStrategyResponse extends IEsSearchResponse {
   edges: AuthenticationsEdges[];

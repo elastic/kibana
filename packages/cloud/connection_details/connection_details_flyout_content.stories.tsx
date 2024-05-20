@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
-import { ConnectionDetailsFlyoutContent } from './connection_details_flyout_content';
+import { EuiFlyout } from '@elastic/eui';
 import {
   StoriesProvider,
   StoriesProviderKeyCreationError,
   StoriesProviderNoKeyPermissions,
 } from './stories';
+import { ConnectionDetailsFlyoutContent } from './connection_details_flyout_content';
 
 export default {
   title: 'Connection Details/Flyout',

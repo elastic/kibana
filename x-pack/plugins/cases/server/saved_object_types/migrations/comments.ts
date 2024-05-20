@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
+import { trimEnd, cloneDeep, unset } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import type {
-  SavedObjectMigrationContext,
-  SavedObjectMigrationMap,
-  SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationContext,
 } from '@kbn/core/server';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
-import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { cloneDeep, trimEnd, unset } from 'lodash';
-import type { SanitizedCaseOwner } from '.';
-import { addOwnerToSO } from '.';
+import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
 import type {
   PersistableStateAttachmentAttributes,
   UserCommentAttachmentAttributes,
@@ -30,13 +28,8 @@ import {
   parseCommentString,
   stringifyMarkdownComment,
 } from '../../../common/utils/markdown_plugins/utils';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
-import {
-  GENERATED_ALERT,
-  MIN_COMMENTS_DEFERRED_KIBANA_VERSION,
-  SUB_CASE_SAVED_OBJECT,
-} from './constants';
+import type { SanitizedCaseOwner } from '.';
+import { addOwnerToSO } from '.';
 import {
   getLensMigrations,
   isDeferredMigration,
@@ -44,6 +37,13 @@ import {
   isUserCommentSO,
   logError,
 } from './utils';
+import {
+  GENERATED_ALERT,
+  MIN_COMMENTS_DEFERRED_KIBANA_VERSION,
+  SUB_CASE_SAVED_OBJECT,
+} from './constants';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
 interface UnsanitizedComment {
   comment: string;

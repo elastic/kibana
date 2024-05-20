@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { I18nProvider } from '@kbn/i18n-react';
 import { LastUpdatedAt } from '.';
 
 jest.mock('@kbn/i18n-react', () => {

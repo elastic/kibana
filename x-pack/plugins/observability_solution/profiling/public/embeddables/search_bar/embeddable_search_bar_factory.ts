@@ -10,8 +10,8 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import {
-  EMBEDDABLE_PROFILING_SEARCH_BAR,
   EmbeddableProfilingSearchBarProps,
+  EMBEDDABLE_PROFILING_SEARCH_BAR,
 } from '@kbn/observability-shared-plugin/public';
 import type { GetProfilingEmbeddableDependencies } from '../profiling_embeddable_provider';
 

@@ -8,12 +8,12 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { DataVisualizer } from '../data_visualizer';
 
-import type { JobValidationMessage, MessageId } from '../../../common/constants/messages';
+import { validateJobObject } from './validate_job_object';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { Detector } from '../../../common/types/anomaly_detection_jobs';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import type { MessageId, JobValidationMessage } from '../../../common/constants/messages';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
-import { validateJobObject } from './validate_job_object';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
 function isValidCategorizationConfig(job: CombinedJob, fieldName: string): boolean {
   return (

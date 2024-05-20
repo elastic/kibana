@@ -33,8 +33,8 @@ import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import { AppLogic } from '../../../../app_logic';
 
 import {
-  SCHEMA_FIELD_ADDED_MESSAGE,
   SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
+  SCHEMA_FIELD_ADDED_MESSAGE,
   SCHEMA_UPDATED_MESSAGE,
 } from './constants';
 import { SchemaLogic, dataTypeOptions } from './schema_logic';

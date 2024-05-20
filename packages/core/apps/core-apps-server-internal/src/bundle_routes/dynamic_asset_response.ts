@@ -7,14 +7,14 @@
  */
 
 import { createReadStream } from 'fs';
-import { extname, resolve } from 'path';
-import agent from 'elastic-apm-node';
+import { resolve, extname } from 'path';
 import mime from 'mime-types';
+import agent from 'elastic-apm-node';
 
 import type { RequestHandler } from '@kbn/core-http-server';
-import { getFileHash } from './file_hash';
+import { fstat, close } from './fs';
 import type { IFileHashCache } from './file_hash_cache';
-import { close, fstat } from './fs';
+import { getFileHash } from './file_hash';
 import { selectCompressedFile } from './select_compressed_file';
 
 const MINUTE = 60;

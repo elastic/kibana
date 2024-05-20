@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { SetupResult, getProcessorValue, setup, setupEnvironment } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 // Default parameter values automatically added to the URI parts processor when saved
 const defaultUriPartsParameters = {

@@ -11,8 +11,8 @@ import styled from 'styled-components';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 
-import type { KqlMode } from '../../../store/model';
 import * as i18n from './translations';
+import type { KqlMode } from '../../../store/model';
 
 const AndOrContainer = styled.div`
   position: relative;

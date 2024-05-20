@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import color from 'color';
-import { PaletteConfig, getStopsWithColorsFromRanges } from '../../../utils';
-import { PercentageModeConfig, PercentageModeConfigWithMinMax } from '../../types';
+import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { getStopsWithColorsFromRanges, PaletteConfig } from '../../../utils';
 import { PaletteParams } from './types';
+import { PercentageModeConfig, PercentageModeConfigWithMinMax } from '../../types';
 
 type ColorStopsWithMinMax = Pick<
   CustomPaletteParams,

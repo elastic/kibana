@@ -11,8 +11,8 @@ import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { TestProviders, createMockStore } from '../../../../common/mock';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
+import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';

@@ -8,7 +8,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LayerDescriptor } from '../../../common/descriptor_types';
 import { createTileMapLayerDescriptor } from '../../classes/layers/create_tile_map_layer_descriptor';
-import type { MapsAppTileMapLocatorDependencies, MapsAppTileMapLocatorParams } from './types';
+import type { MapsAppTileMapLocatorParams, MapsAppTileMapLocatorDependencies } from './types';
 
 export async function getLocation(
   params: MapsAppTileMapLocatorParams,

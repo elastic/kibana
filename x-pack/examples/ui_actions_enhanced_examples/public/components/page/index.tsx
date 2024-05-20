@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiPageBody, EuiPageHeader, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
 import * as React from 'react';
+import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 
 export interface PageProps {
   children: React.ReactNode;

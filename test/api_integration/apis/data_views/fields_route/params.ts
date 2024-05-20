@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

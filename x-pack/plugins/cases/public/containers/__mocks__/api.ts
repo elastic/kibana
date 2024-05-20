@@ -5,52 +5,52 @@
  * 2.0.
  */
 
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import type { UserProfile } from '@kbn/security-plugin/common';
 import type {
-  AttachmentRequest,
-  CasePatchRequest,
-  CasePostRequest,
-  SingleCaseMetricsResponse,
-} from '../../../common/types/api';
-import { CaseStatuses } from '../../../common/types/domain';
-import type {
-  CaseConnectors,
-  CaseUpdateRequest,
-  CaseUserActionsStats,
-  CaseUsers,
-  ResolvedCase,
-} from '../../../common/ui/types';
-import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+  ActionLicense,
+  CasesFindResponseUI,
+  CaseUI,
+  CasesUI,
+  CasesStatus,
+  FetchCasesProps,
+  FindCaseUserActions,
+  CaseUICustomField,
+} from '../types';
+import { SortFieldCase } from '../types';
 import {
   actionLicenses,
   allCases,
   basicCase,
-  basicCaseCommentPatch,
   basicCaseMetrics,
+  basicCaseCommentPatch,
   basicCasePost,
   basicResolvedCase,
   casesStatus,
+  pushedCase,
+  tags,
   categories,
-  customFieldsMock,
   findCaseUserActionsResponse,
   getCaseUserActionsStatsResponse,
   getCaseUsersMockResponse,
-  pushedCase,
-  tags,
+  customFieldsMock,
 } from '../mock';
 import type {
-  ActionLicense,
-  CaseUI,
-  CaseUICustomField,
-  CasesFindResponseUI,
-  CasesStatus,
-  CasesUI,
-  FetchCasesProps,
-  FindCaseUserActions,
-} from '../types';
-import { SortFieldCase } from '../types';
+  CaseConnectors,
+  CaseUpdateRequest,
+  CaseUsers,
+  ResolvedCase,
+  CaseUserActionsStats,
+} from '../../../common/ui/types';
+import type {
+  SingleCaseMetricsResponse,
+  CasePostRequest,
+  CasePatchRequest,
+  AttachmentRequest,
+} from '../../../common/types/api';
+import { CaseStatuses } from '../../../common/types/domain';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
 export const getCase = async (
   caseId: string,

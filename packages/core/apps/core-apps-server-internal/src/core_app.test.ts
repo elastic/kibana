@@ -8,14 +8,14 @@
 
 import { registerBundleRoutesMock } from './core_app.test.mocks';
 
-import { PluginType } from '@kbn/core-base-common';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
+import { PluginType } from '@kbn/core-base-common';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { of } from 'rxjs';
 import { CoreAppsService } from './core_app';
 

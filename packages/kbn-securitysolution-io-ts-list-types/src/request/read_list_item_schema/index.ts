@@ -8,9 +8,9 @@
 
 import * as t from 'io-ts';
 
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { id } from '../../common/id';
 import { list_id } from '../../common/list_id';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { value } from '../../common/value';
 
 export const readListItemSchema = t.exact(t.partial({ id, list_id, value }));

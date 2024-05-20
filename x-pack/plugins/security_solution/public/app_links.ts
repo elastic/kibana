@@ -7,18 +7,18 @@
 import type { CoreStart } from '@kbn/core/public';
 
 import { links as attackDiscoveryLinks } from './attack_discovery/links';
-import { links as casesLinks } from './cases/links';
-import { findingsLinks } from './cloud_security_posture/links';
 import type { AppLinkItems } from './common/links/types';
-import { dashboardsLinks } from './dashboards/links';
-import { links as alertsLinks } from './detections/links';
-import { exploreLinks } from './explore/links';
-import { getManagementFilteredLinks, links as managementLinks } from './management/links';
-import { gettingStartedLinks } from './overview/links';
-import { links as rulesLinks } from './rules/links';
 import { indicatorsLinks } from './threat_intelligence/links';
+import { links as alertsLinks } from './detections/links';
+import { links as rulesLinks } from './rules/links';
 import { links as timelinesLinks } from './timelines/links';
+import { links as casesLinks } from './cases/links';
+import { links as managementLinks, getManagementFilteredLinks } from './management/links';
+import { exploreLinks } from './explore/links';
+import { gettingStartedLinks } from './overview/links';
+import { findingsLinks } from './cloud_security_posture/links';
 import type { StartPlugins } from './types';
+import { dashboardsLinks } from './dashboards/links';
 
 // TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
 export { solutionAppLinksSwitcher } from './app/solution_navigation/links/app_links';

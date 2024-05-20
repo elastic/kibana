@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  EuiAccordion,
-  EuiBasicTable,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
-  EuiTextColor,
   EuiTitle,
+  EuiBasicTable,
+  EuiCodeBlock,
+  EuiTextColor,
+  EuiHorizontalRule,
+  EuiAccordion,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { Fragment } from 'react';
-import { formatDateTimeLocal } from '../../../../common/formatting';
-import { AlertsCallout } from '../../../alerts/callout';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
+import { formatDateTimeLocal } from '../../../../common/formatting';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { AlertsCallout } from '../../../alerts/callout';
 
 export function CcrShard(props) {
   const { services } = useKibana();

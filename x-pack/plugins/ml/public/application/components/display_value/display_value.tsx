@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
+import { EuiToolTip } from '@elastic/eui';
 
 const MAX_CHARS = 12;
 

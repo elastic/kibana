@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   APM_SYSTEM_ID,
-  BEATS_SYSTEM_ID,
+  LOGSTASH_SYSTEM_ID,
   ELASTICSEARCH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
 } from '../../../common/constants';
 
 const NODE_IDENTIFIER_SINGULAR = i18n.translate('xpack.monitoring.setupMode.node', {

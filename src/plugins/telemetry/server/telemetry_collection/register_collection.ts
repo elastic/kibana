@@ -7,8 +7,8 @@
  */
 
 import { TelemetryCollectionManagerPluginSetup } from '@kbn/telemetry-collection-manager-plugin/server';
-import { getClusterUuids } from './get_cluster_stats';
 import { getLocalStats } from './get_local_stats';
+import { getClusterUuids } from './get_cluster_stats';
 
 export function registerCollection(
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup

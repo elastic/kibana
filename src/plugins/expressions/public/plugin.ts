@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { pick } from 'lodash';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
-import type { IExpressionLoader } from './loader';
-import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
-import type { IExpressionRenderer } from './render';
 import {
   ExpressionsService,
-  setExpressionsService,
-  setNotifications,
   setRenderersRegistry,
+  setNotifications,
+  setExpressionsService,
 } from './services';
+import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
+import type { IExpressionLoader } from './loader';
+import type { IExpressionRenderer } from './render';
 
 /**
  * Expressions public setup contract, extends {@link ExpressionsServiceSetup}

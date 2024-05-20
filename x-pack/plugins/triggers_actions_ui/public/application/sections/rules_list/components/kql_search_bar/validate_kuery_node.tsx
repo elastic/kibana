@@ -1,4 +1,3 @@
-import { alertMappings } from '@kbn/alerting-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { alertMappings } from '@kbn/alerting-plugin/common';
  */
 import { KueryNode } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import { alertMappings } from '@kbn/alerting-plugin/common';
 import { get } from 'lodash';
 
 const astFunctionType = ['is', 'range', 'nested'];

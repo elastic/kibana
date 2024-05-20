@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import dateMath from '@kbn/datemath';
 import createContainer from 'constate';
+import { useState, useCallback, useEffect } from 'react';
+import moment from 'moment';
+import dateMath from '@kbn/datemath';
+import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
-import moment from 'moment';
-import { useCallback, useEffect, useState } from 'react';
 import { replaceStateKeyInQueryString } from '../../../../../common/url_state_storage_service';
 import { useUrlState } from '../../../../utils/use_url_state';
 

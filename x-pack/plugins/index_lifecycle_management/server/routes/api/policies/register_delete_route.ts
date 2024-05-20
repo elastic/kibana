@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../../../services';
 
 async function deletePolicies(client: ElasticsearchClient, policyName: string): Promise<any> {
   const options = {

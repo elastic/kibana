@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { memo } from 'react';
 
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import * as i18n from './translations';

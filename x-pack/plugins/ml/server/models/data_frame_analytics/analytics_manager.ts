@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import {
-  type AnalyticsMapEdgeElement,
-  type AnalyticsMapNodeElement,
-  type AnalyticsMapReturnType,
+  getAnalysisType,
   INDEX_CREATED_BY,
   JOB_MAP_NODE_TYPES,
   type JobMapNodeTypes,
+  type AnalyticsMapEdgeElement,
+  type AnalyticsMapReturnType,
+  type AnalyticsMapNodeElement,
   type MapElements,
-  getAnalysisType,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { MlFeatures } from '../../../common/constants/app';
-import type { MlClient } from '../../lib/ml_client';
-import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
-import { modelsProvider } from '../model_management';
 import type { ModelService } from '../model_management/models_provider';
+import { modelsProvider } from '../model_management';
 import {
   type ExtendAnalyticsMapArgs,
-  type GetAnalyticsJobIdArg,
   type GetAnalyticsMapArgs,
-  type GetAnalyticsModelIdArg,
   type InitialElementsReturnType,
   type NextLinkReturnType,
+  type GetAnalyticsJobIdArg,
+  type GetAnalyticsModelIdArg,
+  isCompleteInitialReturnType,
   isAnalyticsMapEdgeElement,
   isAnalyticsMapNodeElement,
-  isCompleteInitialReturnType,
   isIndexPatternLinkReturnType,
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
 } from './types';
+import type { MlClient } from '../../lib/ml_client';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
 
 export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];

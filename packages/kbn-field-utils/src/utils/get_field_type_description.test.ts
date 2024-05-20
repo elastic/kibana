@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getFieldTypeDescription, UNKNOWN_FIELD_TYPE_DESC } from './get_field_type_description';
 import { KNOWN_FIELD_TYPES } from './field_types';
-import { UNKNOWN_FIELD_TYPE_DESC, getFieldTypeDescription } from './get_field_type_description';
 
 describe('FieldUtils getFieldTypeDescription()', () => {
   describe('known field types should be recognized', () => {

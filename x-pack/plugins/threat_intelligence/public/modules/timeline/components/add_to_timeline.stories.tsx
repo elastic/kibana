@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanel } from '@elastic/eui';
+import React from 'react';
+import { Story } from '@storybook/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { Story } from '@storybook/react';
-import React from 'react';
-import { Indicator, generateMockIndicator } from '../../../../common/types/indicator';
+import { EuiContextMenuPanel } from '@elastic/eui';
 import { mockKibanaTimelinesService } from '../../../mocks/mock_kibana_timelines_service';
+import { generateMockIndicator, Indicator } from '../../../../common/types/indicator';
 import { AddToTimelineButtonIcon, AddToTimelineContextMenu } from './add_to_timeline';
 
 export default {

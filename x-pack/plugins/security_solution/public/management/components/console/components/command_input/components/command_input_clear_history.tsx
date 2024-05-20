@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useState } from 'react';
+import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
+import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 
 export const CommandInputClearHistory = memo(() => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);

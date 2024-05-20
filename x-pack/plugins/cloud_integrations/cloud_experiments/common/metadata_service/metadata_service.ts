@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
-import { type Duration } from 'moment';
 import {
   BehaviorSubject,
-  type Observable,
-  Subject,
   debounceTime,
   distinct,
   exhaustMap,
   filter,
+  type Observable,
   shareReplay,
+  Subject,
   takeUntil,
   takeWhile,
   timer,
 } from 'rxjs';
+import { type Duration } from 'moment';
+import type { Logger } from '@kbn/logging';
 
 export interface MetadataServiceStartContract {
   hasDataFetcher: () => Promise<{ hasData: boolean }>;
@@ -44,10 +44,7 @@ export class MetadataService {
   private readonly _userMetadata$ = new BehaviorSubject<UserMetadata | undefined>(undefined);
   private readonly stop$ = new Subject<void>();
 
-  constructor(
-    private readonly config: MetadataServiceConfig,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly config: MetadataServiceConfig, private readonly logger: Logger) {}
 
   public setup(initialUserMetadata: UserMetadata) {
     this._userMetadata$.next(initialUserMetadata);

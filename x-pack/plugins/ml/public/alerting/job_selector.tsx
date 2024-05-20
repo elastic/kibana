@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC, ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
-import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
-import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../application/contexts/kibana';
+import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlApiServices } from '../application/services/ml_api_service';
+import { ALL_JOBS_SELECTION } from '../../common/constants/alerts';
 
 interface JobSelection {
   jobIds?: JobId[];

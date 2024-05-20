@@ -6,12 +6,12 @@
  */
 
 import { StartServicesAccessor } from '@kbn/core/server';
-import { FeatureUsageServiceSetup } from '../services';
 import { LicensingPluginStart } from '../types';
-import { LicensingRouter } from '../types';
-import { registerFeatureUsageRoute } from './feature_usage';
+import { FeatureUsageServiceSetup } from '../services';
 import { registerInfoRoute } from './info';
+import { registerFeatureUsageRoute } from './feature_usage';
 import { registerNotifyFeatureUsageRoute, registerRegisterFeatureRoute } from './internal';
+import { LicensingRouter } from '../types';
 
 export function registerRoutes(
   router: LicensingRouter,

@@ -7,9 +7,9 @@
 
 export { mockHttpRequest } from './setup_environment';
 
-import { setup as jobCloneSetup } from './job_clone.helpers';
 import { setup as jobCreateSetup } from './job_create.helpers';
 import { setup as jobListSetup } from './job_list.helpers';
+import { setup as jobCloneSetup } from './job_clone.helpers';
 
 export { getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 

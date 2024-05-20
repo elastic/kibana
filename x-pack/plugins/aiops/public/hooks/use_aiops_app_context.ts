@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { type FC, type PropsWithChildren, createContext, useContext } from 'react';
+import { createContext, type FC, type PropsWithChildren, useContext } from 'react';
 
-import { type EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   AnalyticsServiceStart,
   CoreSetup,
@@ -19,22 +22,19 @@ import type {
   IUiSettingsClient,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { type EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
+import { type DataView } from '@kbn/data-views-plugin/common';
 import type {
   FieldStatsProps,
   FieldStatsServices,
 } from '@kbn/unified-field-list/src/components/field_stats';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /**
  * AIOps App Dependencies to be provided via React context.

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import {
   fetchJourneyAction,
   selectBrowserJourney,
   selectBrowserJourneyLoading,
 } from '../../../state';
-import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 
 export const useJourneySteps = (
   checkGroup?: string,

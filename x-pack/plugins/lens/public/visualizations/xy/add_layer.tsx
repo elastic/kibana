@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiPopover,
+  EuiIcon,
+  EuiContextMenu,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { ExperimentalBadge } from '../../shared_components';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
-import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
-import { SeriesType, XYState, visualizationTypes } from './types';
 import type { ExtraAppendLayerArg } from './visualization';
+import { SeriesType, XYState, visualizationTypes } from './types';
+import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
+import { ExperimentalBadge } from '../../shared_components';
 
 interface AddLayerButtonProps {
   state: XYState;
@@ -56,7 +56,7 @@ export function AddLayerButton({
     icon,
     disabled,
     toolTipContent,
-  }: (typeof supportedLayers)[0]) => {
+  }: typeof supportedLayers[0]) => {
     return {
       panel: AddLayerPanelType.selectAnnotationMethod,
       toolTipContent,
@@ -83,7 +83,7 @@ export function AddLayerButton({
     icon,
     disabled,
     toolTipContent,
-  }: (typeof supportedLayers)[0]) => {
+  }: typeof supportedLayers[0]) => {
     return {
       panel: AddLayerPanelType.selectVisualizationType,
       toolTipContent,

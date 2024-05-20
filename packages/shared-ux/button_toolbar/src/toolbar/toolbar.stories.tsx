@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenu } from '@elastic/eui';
-import { action } from '@storybook/addon-actions';
-import { Story } from '@storybook/react';
 import React from 'react';
+import { Story } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import { EuiContextMenu } from '@elastic/eui';
 
+import { Toolbar } from './toolbar';
 import { AddFromLibraryButton, IconButtonGroup, ToolbarButton } from '../buttons';
 import { ToolbarPopover } from '../popover';
-import { Toolbar } from './toolbar';
 
 const iconButtons = [
   {

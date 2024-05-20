@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
-import { ResponseActionsNotSupportedError } from '../errors';
 import type { ResponseActionsClient } from '../lib/types';
 import { responseActionsClientMock } from '../mocks';
 import { CrowdstrikeActionsClient } from './crowdstrike_actions_client';
+import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
+import { ResponseActionsNotSupportedError } from '../errors';
 import type { CrowdstrikeActionsClientOptionsMock } from './mocks';
 import { CrowdstrikeMock } from './mocks';
 
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { NormalizedExternalConnectorClient } from '../../..';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
-import { deserializeSnapshotDetails } from '../../../common/lib';
+import { schema, TypeOf } from '@kbn/config-schema';
 import type { SnapshotDetailsEs } from '../../../common/types';
-import { getManagedRepositoryName } from '../../lib';
-import { getSnapshotSearchWildcard } from '../../lib/get_snapshot_search_wildcard';
+import { deserializeSnapshotDetails } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
+import { getManagedRepositoryName } from '../../lib';
 import { addBasePath } from '../helpers';
 import { snapshotListSchema } from './validate_schemas';
+import { getSnapshotSearchWildcard } from '../../lib/get_snapshot_search_wildcard';
 
 const sortFieldToESParams = {
   snapshot: 'name',

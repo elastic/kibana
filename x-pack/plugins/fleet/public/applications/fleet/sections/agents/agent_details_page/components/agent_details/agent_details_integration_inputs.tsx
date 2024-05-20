@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { memo, useMemo } from 'react';
 import {
   EuiHealth,
   EuiLink,
   EuiNotificationBadge,
-  EuiText,
   EuiToolTip,
+  EuiText,
   EuiTreeView,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useLink } from '../../../../../hooks';
 import type { Agent, PackagePolicy } from '../../../../../types';
+import { useLink } from '../../../../../hooks';
 
 import { AgentDetailsIntegrationInputStatus } from './agent_details_integration_input_status';
-import { InputStatusFormatter, getInputUnitsByPackage } from './input_status_utils';
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
+import { getInputUnitsByPackage, InputStatusFormatter } from './input_status_utils';
 
 const StyledEuiLink = styled(EuiLink)`
   font-size: ${(props) => props.theme.eui.euiFontSizeS};

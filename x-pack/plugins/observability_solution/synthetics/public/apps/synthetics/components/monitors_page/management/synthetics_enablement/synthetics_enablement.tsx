@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLink, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { EuiEmptyPrompt, EuiTitle, EuiLink } from '@elastic/eui';
 import { useEnablement } from '../../../../hooks/use_enablement';
 import * as labels from './labels';
 

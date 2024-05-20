@@ -8,17 +8,17 @@
 
 import { createHash } from 'crypto';
 import { PackageInfo } from '@kbn/config';
-import type { HttpAuth, KibanaRequest } from '@kbn/core-http-server';
-import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import { type DarkModeValue, parseDarkModeValue } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
-import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
-import { getBundlesHref } from '../render_utils';
-import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
+import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { getThemeTag } from './get_theme_tag';
 import { renderTemplate } from './render_template';
+import { getBundlesHref } from '../render_utils';
 
 export type BootstrapRendererFactory = (factoryOptions: FactoryOptions) => BootstrapRenderer;
 export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererResult>;

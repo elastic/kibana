@@ -13,14 +13,14 @@ import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import {
-  type Adapters,
-  HasInspectorAdapters,
   apiHasInspectorAdapters,
+  HasInspectorAdapters,
+  type Adapters,
 } from '@kbn/inspector-plugin/public';
 import {
   EmbeddableApiContext,
-  PublishesPanelTitle,
   getPanelTitle,
+  PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';

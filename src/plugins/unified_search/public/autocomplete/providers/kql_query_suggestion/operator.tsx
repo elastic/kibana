@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { flatten } from 'lodash';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { $Keys } from 'utility-types';
+import { flatten } from 'lodash';
 
-import { QuerySuggestionTypes } from '../query_suggestion_provider';
 import { KqlQuerySuggestionProvider } from './types';
+import { QuerySuggestionTypes } from '../query_suggestion_provider';
 
 const equalsText = (
   <FormattedMessage

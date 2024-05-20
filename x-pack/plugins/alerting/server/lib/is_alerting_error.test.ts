@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from './is_alerting_error';
+import { ErrorWithReason } from './error_with_reason';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { RuleExecutionStatusErrorReasons } from '../types';
-import { ErrorWithReason } from './error_with_reason';
-import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from './is_alerting_error';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 describe('isAlertSavedObjectNotFoundError', () => {
   const id = uuidv4();

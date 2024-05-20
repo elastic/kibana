@@ -7,7 +7,7 @@
 
 import Url from 'url';
 
-import { maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
+import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { createToolingLogger } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import { prefixedOutputLogger } from '@kbn/security-solution-plugin/scripts/endpoint/common/utils';
 import { FtrProviderContext } from './ftr_provider_context';

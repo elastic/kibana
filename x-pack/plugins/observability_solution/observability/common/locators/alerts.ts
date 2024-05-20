@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { url as urlUtils } from '@kbn/kibana-utils-plugin/common';
+import { stringify } from 'query-string';
 import rison from '@kbn/rison';
-import type { LocatorDefinition } from '@kbn/share-plugin/public';
+import { url as urlUtils } from '@kbn/kibana-utils-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { stringify } from 'query-string';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { alertsLocatorID } from '..';
 import { ALERTS_URL_STORAGE_KEY } from '../constants';
 import type { AlertStatus } from '../typings';

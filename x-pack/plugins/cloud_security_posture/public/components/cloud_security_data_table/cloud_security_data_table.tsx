@@ -1,12 +1,3 @@
-import { EuiDataGridCellValueElementProps, EuiDataGridStyle, EuiProgress } from '@elastic/eui';
-import { CellActionsProvider } from '@kbn/cell-actions';
-import { generateFilters } from '@kbn/data-plugin/public';
-import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { DataTableRecord } from '@kbn/discover-utils/types';
-import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
-import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { AddFieldFilterHandler } from '@kbn/unified-field-list';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,14 +5,23 @@ import { AddFieldFilterHandler } from '@kbn/unified-field-list';
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
+import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
+import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import { DataTableRecord } from '@kbn/discover-utils/types';
+import { EuiDataGridCellValueElementProps, EuiDataGridStyle, EuiProgress } from '@elastic/eui';
+import { AddFieldFilterHandler } from '@kbn/unified-field-list';
+import { generateFilters } from '@kbn/data-plugin/public';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
-import { useDataViewContext } from '../../common/contexts/data_view_context';
-import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
-import { AdditionalControls } from './additional_controls';
+import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
+import { AdditionalControls } from './additional_controls';
+import { useDataViewContext } from '../../common/contexts/data_view_context';
 
 export interface CloudSecurityDefaultColumn {
   id: string;
@@ -111,14 +111,11 @@ export const CloudSecurityDataTable = ({
   const [settings, setSettings] = useLocalStorage<UnifiedDataTableSettings>(
     `${columnsLocalStorageKey}:settings`,
     {
-      columns: defaultColumns.reduce(
-        (prev, curr) => {
-          const columnDefaultSettings = curr.width ? { width: curr.width } : {};
-          const newColumn = { [curr.id]: columnDefaultSettings };
-          return { ...prev, ...newColumn };
-        },
-        {} as UnifiedDataTableSettings['columns']
-      ),
+      columns: defaultColumns.reduce((prev, curr) => {
+        const columnDefaultSettings = curr.width ? { width: curr.width } : {};
+        const newColumn = { [curr.id]: columnDefaultSettings };
+        return { ...prev, ...newColumn };
+      }, {} as UnifiedDataTableSettings['columns']),
     }
   );
 

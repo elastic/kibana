@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { HeadlessChromiumDriver } from '../browsers';
 import { Actions, EventLogger } from './event_logger';
+import type { HeadlessChromiumDriver } from '../browsers';
 import type { Screenshot } from './types';
 
 export async function getPdf(

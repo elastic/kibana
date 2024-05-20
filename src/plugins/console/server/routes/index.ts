@@ -9,15 +9,15 @@
 import { IRouter, Logger } from '@kbn/core/server';
 import { SemVer } from 'semver';
 
-import { ProxyConfigCollection } from '../lib';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../services';
-import { handleEsError } from '../shared_imports';
 import { ESConfigForProxy } from '../types';
+import { ProxyConfigCollection } from '../lib';
+import { handleEsError } from '../shared_imports';
 
-import { registerAutocompleteEntitiesRoute } from './api/console/autocomplete_entities';
 import { registerEsConfigRoute } from './api/console/es_config';
 import { registerProxyRoute } from './api/console/proxy';
 import { registerSpecDefinitionsRoute } from './api/console/spec_definitions';
+import { registerAutocompleteEntitiesRoute } from './api/console/autocomplete_entities';
 
 export interface ProxyDependencies {
   readLegacyESConfig: () => Promise<ESConfigForProxy>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NETWORK_PATH_WITHOUT_ANOMALIES, NETWORK_PATH_WITH_ANOMALIES } from '../constants';
+import { NETWORK_PATH_WITH_ANOMALIES, NETWORK_PATH_WITHOUT_ANOMALIES } from '../constants';
 import type { GetNetworkRoutePath } from './types';
 
 export const getNetworkRoutePath: GetNetworkRoutePath = (

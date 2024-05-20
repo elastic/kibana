@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EuiMarkdownAstNodePosition, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useState } from 'react';
+import type { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
 import type { Plugin } from 'unified';
 /**
  * @description - manage the plugins, hooks, and ui components needed to enable timeline functionality within the cases plugin

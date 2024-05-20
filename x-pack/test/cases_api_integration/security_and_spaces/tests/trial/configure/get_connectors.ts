@@ -10,15 +10,15 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
-  createConnector,
-  getCaseConnectors,
-  getCasesWebhookConnector,
-  getEmailConnector,
+  getServiceNowConnector,
+  getServiceNowSIRConnector,
+  getServiceNowOAuthConnector,
   getJiraConnector,
   getResilientConnector,
-  getServiceNowConnector,
-  getServiceNowOAuthConnector,
-  getServiceNowSIRConnector,
+  createConnector,
+  getEmailConnector,
+  getCaseConnectors,
+  getCasesWebhookConnector,
 } from '../../../../common/lib/api';
 import { noCasesConnectors } from '../../../../common/lib/authentication/users';
 

@@ -8,8 +8,8 @@
 import type { TransportResult } from '@elastic/elasticsearch';
 import { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { FieldDescriptor } from '@kbn/data-plugin/server';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { FieldDescriptor } from '@kbn/data-plugin/server';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 
@@ -26,8 +26,10 @@ export interface IRuleDataClient {
 export interface IRuleDataReader {
   search<
     TSearchRequest extends ESSearchRequest,
-    TAlertDoc = Partial<ParsedTechnicalFields & ParsedExperimentalFields>,
-  >(request: TSearchRequest): Promise<ESSearchResponse<TAlertDoc, TSearchRequest>>;
+    TAlertDoc = Partial<ParsedTechnicalFields & ParsedExperimentalFields>
+  >(
+    request: TSearchRequest
+  ): Promise<ESSearchResponse<TAlertDoc, TSearchRequest>>;
 
   getDynamicIndexPattern(target?: string): Promise<{
     title: string;

@@ -6,7 +6,10 @@
     "id": "watcher",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "watcher"],
+    "configPath": [
+      "xpack",
+      "watcher"
+    ],
     "requiredPlugins": [
       "home",
       "licensing",
@@ -16,7 +19,13 @@
       "data",
       "features"
     ],
-    "optionalPlugins": ["licenseManagement"],
-    "requiredBundles": ["esUiShared", "kibanaReact", "fieldFormats"]
+    "optionalPlugins": [
+      "licenseManagement"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "kibanaReact",
+      "fieldFormats"
+    ]
   }
 }

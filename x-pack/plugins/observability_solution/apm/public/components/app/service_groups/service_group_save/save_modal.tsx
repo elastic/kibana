@@ -6,14 +6,14 @@
  */
 import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { SavedServiceGroup, ServiceGroup } from '../../../../../common/service_groups';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import React, { useCallback, useEffect, useState } from 'react';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
-import { refreshServiceGroups } from '../refresh_service_groups_subscriber';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { GroupDetails } from './group_details';
 import { SelectServices } from './select_services';
+import { ServiceGroup, SavedServiceGroup } from '../../../../../common/service_groups';
+import { refreshServiceGroups } from '../refresh_service_groups_subscriber';
 
 interface Props {
   onClose: () => void;

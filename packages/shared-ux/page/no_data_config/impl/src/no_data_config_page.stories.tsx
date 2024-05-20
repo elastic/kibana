@@ -13,8 +13,8 @@ import type { NoDataConfigPageStorybookParams } from '@kbn/shared-ux-page-no-dat
 
 import { NoDataConfigPage as Component } from './no_data_config_page';
 
-import mdx from '../README.mdx';
 import { NoDataConfigPageProvider } from './services';
+import mdx from '../README.mdx';
 
 const mock = new NoDataConfigPageStorybookMock();
 

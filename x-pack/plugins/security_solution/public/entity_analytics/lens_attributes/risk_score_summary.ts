@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import capitalize from 'lodash/capitalize';
-import { v4 as uuidv4 } from 'uuid';
+import { SEVERITY_UI_SORT_ORDER, RISK_SEVERITY_COLOUR, RISK_SCORE_RANGES } from '../common/utils';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../common/search_strategy';
-import { RISK_SCORE_RANGES, RISK_SEVERITY_COLOUR, SEVERITY_UI_SORT_ORDER } from '../common/utils';
 
 interface GetRiskScoreSummaryAttributesProps {
   query?: string;

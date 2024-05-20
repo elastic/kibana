@@ -6,7 +6,7 @@
  */
 
 import { UMServerLibs } from '../lib/lib';
-import { UMRestApiRouteFactory, UMRouteHandler, UptimeRoute } from './types';
+import { UptimeRoute, UMRestApiRouteFactory, UMRouteHandler } from './types';
 
 export const createRouteWithAuth = (
   libs: UMServerLibs,

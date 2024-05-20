@@ -1,13 +1,3 @@
-import {
-  euiAnimFadeIn,
-  euiAnimSlideInUp,
-  euiBackgroundColor,
-  euiCanAnimate,
-  transparentize,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
-import { Global } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,6 +5,16 @@ import { Global } from '@emotion/react';
  * 2.0.
  */
 import React from 'react';
+import { css } from '@emotion/css';
+import { Global } from '@emotion/react';
+import {
+  useEuiTheme,
+  euiAnimFadeIn,
+  transparentize,
+  euiBackgroundColor,
+  euiCanAnimate,
+  euiAnimSlideInUp,
+} from '@elastic/eui';
 
 export const usePaneStyles = () => {
   const EuiTheme = useEuiTheme();
@@ -28,7 +28,8 @@ export const usePaneStyles = () => {
     right: 0;
     bottom: 0;
     background: ${transparentize(euiTheme.colors.ink, 0.5)};
-    z-index: ${(euiTheme.levels.flyout as number) + 1}; // this z-index needs to be between the eventFlyout (set at 1000) and the timelineFlyout (set at 1002)
+    z-index: ${(euiTheme.levels.flyout as number) +
+    1}; // this z-index needs to be between the eventFlyout (set at 1000) and the timelineFlyout (set at 1002)
 
     ${euiCanAnimate} {
       animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;

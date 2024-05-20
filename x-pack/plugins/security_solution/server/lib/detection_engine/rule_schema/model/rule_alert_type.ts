@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { PartialRule } from '@kbn/alerting-plugin/server';
-import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { RuleParams } from './rule_schemas';
 
 export type RuleAlertType = SanitizedRule<RuleParams>;

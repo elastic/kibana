@@ -7,8 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { type SignificantItemGroup, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-import { SIGNIFICANT_ITEM_TYPE, type SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 // Transforms a list of significant items from a group in a query filter.
 // Uses a `term` filter for single field value combinations.

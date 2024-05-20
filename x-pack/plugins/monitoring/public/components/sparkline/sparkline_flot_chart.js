@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { last, isFunction, debounce } from 'lodash';
 import $ from 'jquery';
-import { debounce, isFunction, last } from 'lodash';
 import { DEBOUNCE_FAST_MS } from '../../../common/constants';
 
 /**

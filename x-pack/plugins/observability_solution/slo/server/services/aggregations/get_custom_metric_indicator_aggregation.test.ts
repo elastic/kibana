@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createMetricCustomIndicator } from '../fixtures/slo';
 import { GetCustomMetricIndicatorAggregation } from './get_custom_metric_indicator_aggregation';
+import { createMetricCustomIndicator } from '../fixtures/slo';
 
 describe('GetHistogramIndicatorAggregation', () => {
   it('should generate a aggregation for good events', () => {

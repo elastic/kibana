@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBadge,
   EuiPopover,
+  EuiButtonIcon,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
 import { useMeasure } from 'react-use';
 
 import { css } from '@emotion/react';
 import { QuickPrompt } from '../../..';
+import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { QUICK_PROMPTS_TAB } from '../settings/assistant_settings';
-import * as i18n from './translations';
 
 export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
 

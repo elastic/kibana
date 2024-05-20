@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ValidationError, schema } from '@kbn/config-schema';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import { schema, ValidationError } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { InternalUiSettingsRouter } from '../internal_types';
-import { InternalUiSettingsRequestHandlerContext } from '../internal_types';
 import { CannotOverrideError } from '../ui_settings_errors';
+import { InternalUiSettingsRequestHandlerContext } from '../internal_types';
 
 const validate = {
   body: schema.object({

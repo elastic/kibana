@@ -7,6 +7,11 @@
     "id": "embeddableEnhanced",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["embeddable", "kibanaReact", "uiActions", "uiActionsEnhanced"]
+    "requiredPlugins": [
+      "embeddable",
+      "kibanaReact",
+      "uiActions",
+      "uiActionsEnhanced"
+    ]
   }
 }

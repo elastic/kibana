@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { uniq } from 'lodash';
 import React from 'react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
-import { MIDDLE_TRUNCATION_PROPS, SINGLE_SELECTION_AS_TEXT_PROPS } from './lib/helpers';
-import { PhraseSuggestorProps, PhraseSuggestorUI } from './phrase_suggestor';
+import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
+import { MIDDLE_TRUNCATION_PROPS, SINGLE_SELECTION_AS_TEXT_PROPS } from './lib/helpers';
 
 interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;

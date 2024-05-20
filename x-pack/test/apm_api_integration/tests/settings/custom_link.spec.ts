@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CustomLink } from '@kbn/apm-plugin/common/custom_link/custom_link_types';
 import expect from '@kbn/expect';
-import { ApmApiError } from '../../common/apm_api_supertest';
+import { CustomLink } from '@kbn/apm-plugin/common/custom_link/custom_link_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ApmApiError } from '../../common/apm_api_supertest';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');

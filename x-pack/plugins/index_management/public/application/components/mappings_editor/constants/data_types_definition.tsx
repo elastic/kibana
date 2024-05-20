@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiCode, EuiLink } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../services/documentation';
-import { DataType, DataTypeDefinition, MainType, SubType } from '../types';
+import { MainType, SubType, DataType, DataTypeDefinition } from '../types';
 
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
   text: {

@@ -6,8 +6,8 @@
  */
 
 import type { ExceptionsListPreImportServerExtension } from '@kbn/lists-plugin/server';
-import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { EndpointArtifactExceptionValidationError } from '../validators/errors';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 
 type ValidatorCallback = ExceptionsListPreImportServerExtension['callback'];
 export const getExceptionsPreImportHandler = (): ValidatorCallback => {

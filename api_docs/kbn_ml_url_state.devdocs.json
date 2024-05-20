@@ -24,7 +24,9 @@
         "type": "Class",
         "tags": [],
         "label": "PageUrlStateService",
-        "description": ["\nService for managing URL state of particular page."],
+        "description": [
+          "\nService for managing URL state of particular page."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-url-state",
@@ -45,8 +47,14 @@
             "type": "Function",
             "tags": [],
             "label": "getPageUrlState$",
-            "description": ["\nProvides updates for the page URL state."],
-            "signature": ["() => ", "Observable", "<T>"],
+            "description": [
+              "\nProvides updates for the page URL state."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<T>"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -60,7 +68,9 @@
             "tags": [],
             "label": "getPageUrlState",
             "description": [],
-            "signature": ["() => T | null"],
+            "signature": [
+              "() => T | null"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -74,7 +84,9 @@
             "tags": [],
             "label": "updateUrlState",
             "description": [],
-            "signature": ["(update: Partial<T>, replaceState?: boolean | undefined) => void"],
+            "signature": [
+              "(update: Partial<T>, replaceState?: boolean | undefined) => void"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -86,7 +98,9 @@
                 "tags": [],
                 "label": "update",
                 "description": [],
-                "signature": ["Partial<T>"],
+                "signature": [
+                  "Partial<T>"
+                ],
                 "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -99,7 +113,9 @@
                 "tags": [],
                 "label": "replaceState",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -114,8 +130,12 @@
             "type": "Function",
             "tags": [],
             "label": "setCurrentState",
-            "description": ["\nPopulates internal subject with currently active state."],
-            "signature": ["(currentState: T) => void"],
+            "description": [
+              "\nPopulates internal subject with currently active state."
+            ],
+            "signature": [
+              "(currentState: T) => void"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -127,7 +147,9 @@
                 "tags": [],
                 "label": "currentState",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -142,7 +164,9 @@
             "type": "Function",
             "tags": [],
             "label": "setUpdateCallback",
-            "description": ["\nSets the callback for the state update."],
+            "description": [
+              "\nSets the callback for the state update."
+            ],
             "signature": [
               "(callback: (update: Partial<T>, replaceState?: boolean | undefined) => void) => void"
             ],
@@ -157,7 +181,9 @@
                 "tags": [],
                 "label": "callback",
                 "description": [],
-                "signature": ["(update: Partial<T>, replaceState?: boolean | undefined) => void"],
+                "signature": [
+                  "(update: Partial<T>, replaceState?: boolean | undefined) => void"
+                ],
                 "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -177,8 +203,12 @@
         "type": "Function",
         "tags": [],
         "label": "isRisonSerializationRequired",
-        "description": ["\nChecks if the URL query parameter requires rison serialization."],
-        "signature": ["(queryParam: string) => boolean"],
+        "description": [
+          "\nChecks if the URL query parameter requires rison serialization."
+        ],
+        "signature": [
+          "(queryParam: string) => boolean"
+        ],
         "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -190,7 +220,9 @@
             "tags": [],
             "label": "queryParam",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -229,7 +261,9 @@
             "tags": [],
             "label": "search",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -246,7 +280,11 @@
         "tags": [],
         "label": "Provider",
         "description": [],
-        "signature": ["React.ProviderExoticComponent<React.ProviderProps<", "UrlState", ">>"],
+        "signature": [
+          "React.ProviderExoticComponent<React.ProviderProps<",
+          "UrlState",
+          ">>"
+        ],
         "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -259,7 +297,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -274,7 +314,9 @@
         "tags": [],
         "label": "UrlStateProvider",
         "description": [],
-        "signature": ["({ children }: { children?: React.ReactNode; }) => JSX.Element"],
+        "signature": [
+          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+        ],
         "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -286,7 +328,9 @@
             "tags": [],
             "label": "{ children }",
             "description": [],
-            "signature": ["{ children?: React.ReactNode; }"],
+            "signature": [
+              "{ children?: React.ReactNode; }"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -302,7 +346,9 @@
         "type": "Function",
         "tags": [],
         "label": "usePageUrlState",
-        "description": ["\nHook for managing the URL state of the page."],
+        "description": [
+          "\nHook for managing the URL state of the page."
+        ],
         "signature": [
           "<T extends PageUrlState>(pageKey: T[\"pageKey\"], defaultState?: T[\"pageUrlState\"] | undefined) => [T[\"pageUrlState\"], (update: Partial<T[\"pageUrlState\"]>, replaceState?: boolean | undefined) => void, ",
           {
@@ -325,7 +371,9 @@
             "tags": [],
             "label": "pageKey",
             "description": [],
-            "signature": ["T[\"pageKey\"]"],
+            "signature": [
+              "T[\"pageKey\"]"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -338,7 +386,9 @@
             "tags": [],
             "label": "defaultState",
             "description": [],
-            "signature": ["T[\"pageUrlState\"] | undefined"],
+            "signature": [
+              "T[\"pageUrlState\"] | undefined"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -433,7 +483,9 @@
             "tags": [],
             "label": "[id: string]: TValue",
             "description": [],
-            "signature": ["[id: string]:  TValue"],
+            "signature": [
+              "[id: string]:  TValue"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -451,7 +503,9 @@
         "tags": [],
         "label": "Accessor",
         "description": [],
-        "signature": ["\"_a\" | \"_g\""],
+        "signature": [
+          "\"_a\" | \"_g\""
+        ],
         "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -495,7 +549,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["\"_a\" | \"_g\""],
+            "signature": [
+              "\"_a\" | \"_g\""
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -529,7 +585,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -541,7 +599,9 @@
             "tags": [],
             "label": "replaceState",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/ml/url_state/src/url_state.tsx",
             "deprecated": false,
             "trackAdoption": false

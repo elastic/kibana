@@ -8,7 +8,7 @@
 
 import React, { useEffect, useCallback, createContext, useContext, useRef } from 'react';
 
-import { Content, HookProps, MultiContent, useMultiContent } from './use_multi_content';
+import { useMultiContent, HookProps, Content, MultiContent } from './use_multi_content';
 
 const multiContentContext = createContext<MultiContent<any>>({} as MultiContent<any>);
 

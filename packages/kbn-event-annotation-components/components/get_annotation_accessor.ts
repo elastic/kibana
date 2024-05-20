@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import { annotationsIconSet } from './annotation_editor_controls/icon_set';
 
 export const getAnnotationAccessor = (annotation: EventAnnotationConfig): AccessorConfig => {

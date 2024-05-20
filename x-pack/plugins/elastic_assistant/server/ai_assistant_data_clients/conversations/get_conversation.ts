@@ -8,8 +8,8 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { transformESSearchToConversations } from './transforms';
 import { EsConversationSchema } from './types';
+import { transformESSearchToConversations } from './transforms';
 
 export interface GetConversationParams {
   esClient: ElasticsearchClient;

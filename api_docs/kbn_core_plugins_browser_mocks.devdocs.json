@@ -41,7 +41,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<PluginsServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<PluginsServiceContract>"
+            ],
             "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,7 +57,10 @@
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [],
-            "signature": ["() => ", "InternalPluginsServiceSetup"],
+            "signature": [
+              "() => ",
+              "InternalPluginsServiceSetup"
+            ],
             "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -69,7 +74,10 @@
             "tags": [],
             "label": "createInternalStartContract",
             "description": [],
-            "signature": ["() => ", "InternalPluginsServiceSetup"],
+            "signature": [
+              "() => ",
+              "InternalPluginsServiceSetup"
+            ],
             "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -114,7 +122,9 @@
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "signature": ["unknown"],
+                "signature": [
+                  "unknown"
+                ],
                 "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

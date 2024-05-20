@@ -8,7 +8,7 @@
 import type { RisonValue } from '@kbn/rison';
 import deepEqual from 'fast-deep-equal';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { deregisterUrlParam, registerUrlParam, updateUrlParam } from './actions';
+import { registerUrlParam, updateUrlParam, deregisterUrlParam } from './actions';
 
 export type GlobalUrlParam = Record<string, RisonValue | null>;
 

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { IKibanaMigrator, IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type {
   ISavedObjectTypeRegistry,
-  ISavedObjectsSerializer,
   SavedObjectsExtensions,
+  ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import type { Logger } from '@kbn/logging';
-import type { RepositoryEsClient } from '../repository_es_client';
+import type { IKibanaMigrator, IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { RepositoryHelpers } from './helpers';
+import type { RepositoryEsClient } from '../repository_es_client';
 
 /**
  * Context passed from the SO repository to the API execution handlers.

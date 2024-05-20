@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as rx from 'rxjs';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
+import * as rx from 'rxjs';
 
 describe('telemetry.helpers.rxjs.retryOnError$', () => {
   const retries = 5;

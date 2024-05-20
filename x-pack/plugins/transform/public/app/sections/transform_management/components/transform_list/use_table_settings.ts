@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 import { useState } from 'react';
+import type { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 
 const PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];

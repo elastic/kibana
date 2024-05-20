@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+import Path from 'path';
 import { Project } from 'ts-morph';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { findPlugins } from './find_plugins';
 import { getPluginApi } from './get_plugin_api';
 import { getKibanaPlatformPlugin } from './integration_tests/kibana_platform_plugin_mock';
 import { PluginApi, PluginOrPackage } from './types';
-import { getFileName, getPluginForPath, getServiceForPath, removeBrokenLinks } from './utils';
+import { getPluginForPath, getServiceForPath, removeBrokenLinks, getFileName } from './utils';
 
 const log = new ToolingLog({
   level: 'debug',

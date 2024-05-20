@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { HostIsolationPanel } from '.';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient({
   logger: {

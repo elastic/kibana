@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
-import { cloneDeep, set } from 'lodash';
-import React from 'react';
-import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
-import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { exactMatchText, expectIsViewOnly } from '../mocks';
+import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import React from 'react';
+import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
+import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import type { NotifyUserOptionProps } from './notify_user_option';
 import {
   CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
@@ -23,6 +19,10 @@ import {
   NOTIFY_USER_SECTION_TITLE,
   NotifyUserOption,
 } from './notify_user_option';
+import { expectIsViewOnly, exactMatchText } from '../mocks';
+import { cloneDeep, set } from 'lodash';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../../../common/hooks/use_license');
 

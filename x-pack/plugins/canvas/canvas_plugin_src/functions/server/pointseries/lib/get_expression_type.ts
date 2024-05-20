@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { parse } from '@kbn/tinymath';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getFieldType } from '../../../../../common/lib/get_field_type';
-import { getFieldNames } from './get_field_names';
 import { isColumnReference } from './is_column_reference';
+import { getFieldNames } from './get_field_names';
 
 export function getExpressionType(columns: DatatableColumn[], mathExpression: string) {
   // if isColumnReference returns true, then mathExpression is just a string

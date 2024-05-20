@@ -7,14 +7,14 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import { flatten, uniqBy } from 'lodash';
 import type { $Keys } from 'utility-types';
+import { flatten, uniqBy } from 'lodash';
 import type { UnifiedSearchPublicPluginStart } from '../../../types';
 
 import type {
   QuerySuggestion,
-  QuerySuggestionGetFn,
   QuerySuggestionGetFnArgs,
+  QuerySuggestionGetFn,
 } from '../query_suggestion_provider';
 
 const cursorSymbol = '@kuery-cursor@';

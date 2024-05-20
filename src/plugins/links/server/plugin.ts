@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksAttributes } from '../common/content_management';
 import { LinksStorage } from './content_management';

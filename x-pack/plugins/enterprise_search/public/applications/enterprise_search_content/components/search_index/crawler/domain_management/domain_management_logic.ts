@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../../../common/types';
 import { Status } from '../../../../../../../common/types/api';

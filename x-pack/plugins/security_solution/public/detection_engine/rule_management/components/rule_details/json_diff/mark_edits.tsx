@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { findIndex, flatMap, flatten } from 'lodash';
 import * as diff from 'diff';
 import type { Change as DiffJsChange } from 'diff';
-import { findIndex, flatMap, flatten } from 'lodash';
 import { isDelete, isInsert, isNormal, pickRanges } from 'react-diff-view';
 import type { ChangeData, HunkData, RangeTokenNode, TokenizeEnhancer } from 'react-diff-view';
 

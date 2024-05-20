@@ -6,14 +6,14 @@
  */
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiButton, EuiButtonGroup, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover, EuiButtonGroup } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type { AlertViewSelection } from './helpers';
 import { getButtonProperties, getContextMenuPanels, getOptionProperties } from './helpers';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 interface Props {
   alertViewSelection: AlertViewSelection;
   setAlertViewSelection: (alertViewSelection: AlertViewSelection) => void;

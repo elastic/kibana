@@ -7,9 +7,9 @@
  */
 
 import { getDefaultDecoration } from '../../helpers/get_default_decoration';
+import { getSplits } from '../../helpers/get_splits';
 import { getLastMetric } from '../../helpers/get_last_metric';
 import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
-import { getSplits } from '../../helpers/get_splits';
 
 export function stdSibling(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {

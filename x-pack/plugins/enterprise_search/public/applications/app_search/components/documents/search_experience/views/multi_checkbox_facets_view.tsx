@@ -8,13 +8,13 @@
 import React from 'react';
 
 import {
-  EuiButtonEmpty,
+  htmlIdGenerator,
   EuiCheckboxGroup,
   EuiFlexGroup,
+  EuiButtonEmpty,
   EuiSpacer,
-  htmlIdGenerator,
 } from '@elastic/eui';
-import type { FacetValue, FieldValue } from '@elastic/search-ui';
+import type { FieldValue, FacetValue } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {

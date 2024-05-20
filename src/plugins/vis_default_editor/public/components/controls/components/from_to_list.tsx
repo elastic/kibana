@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
 
 import { search } from '@kbn/data-plugin/public';
-import { InputItem, InputList, InputListConfig, InputModel, InputObject } from './input_list';
+import { InputList, InputListConfig, InputModel, InputObject, InputItem } from './input_list';
 
 const EMPTY_STRING = '';
 

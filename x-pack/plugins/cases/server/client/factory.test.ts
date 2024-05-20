@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import type { FakeRawRequest } from '@kbn/core-http-server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { createCasesClient } from './client';
 import { CasesClientFactory } from './factory';
 import { createCasesClientFactoryMockArgs } from './mocks';
+import { createCasesClient } from './client';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 
 jest.mock('./client');
 

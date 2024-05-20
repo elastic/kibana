@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
+import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 
-import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import type { TimeRange } from '@kbn/es-query';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 import { getTimeScale } from './time_scale';
-import { getTimeBounds } from './time_scale_fn';
 import type { TimeScaleArgs } from './types';
+import { getTimeBounds } from './time_scale_fn';
 
 describe('time_scale', () => {
   let timeScaleWrapped: (

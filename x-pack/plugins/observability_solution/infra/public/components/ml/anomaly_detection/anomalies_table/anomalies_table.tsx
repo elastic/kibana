@@ -5,50 +5,50 @@
  * 2.0.
  */
 
-import {
-  Criteria,
-  EuiBasicTable,
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiEmptyPrompt,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiSuperDatePicker,
-  EuiTableActionsColumnType,
-  EuiTableFieldDataColumnType,
-  type OnTimeChangeProps,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
-import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  EuiSuperDatePicker,
+  useEuiTheme,
+  EuiFlexItem,
+  EuiFieldSearch,
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiTableFieldDataColumnType,
+  EuiTableActionsColumnType,
+  Criteria,
+  EuiContextMenuItem,
+  EuiComboBox,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  type OnTimeChangeProps,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
+import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { css } from '@emotion/react';
+import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { BehaviorSubject } from 'rxjs';
+import { datemathToEpochMillis } from '../../../../utils/datemath';
+import { useSorting } from '../../../../hooks/use_sorting';
+import { useMetricsK8sAnomaliesResults } from '../../../../pages/metrics/inventory_view/hooks/use_metrics_k8s_anomalies';
+import { useMetricsHostsAnomaliesResults } from '../../../../pages/metrics/inventory_view/hooks/use_metrics_hosts_anomalies';
 import type {
   Metric,
   MetricsHostsAnomaly,
   Sort,
 } from '../../../../../common/http_api/infra_ml/results';
-import { useSourceContext } from '../../../../containers/metrics_source';
-import { useSorting } from '../../../../hooks/use_sorting';
-import { useMetricsHostsAnomaliesResults } from '../../../../pages/metrics/inventory_view/hooks/use_metrics_hosts_anomalies';
-import { useMetricsK8sAnomaliesResults } from '../../../../pages/metrics/inventory_view/hooks/use_metrics_k8s_anomalies';
-import {
-  WaffleViewState,
-  useWaffleViewState,
-} from '../../../../pages/metrics/inventory_view/hooks/use_waffle_view_state';
-import { datemathToEpochMillis } from '../../../../utils/datemath';
-import { AnomalySeverityIndicator } from '../../../logging/log_analysis_results/anomaly_severity_indicator';
-import { createResultsUrl } from '../flyout_home';
-import { AnomalySummary } from './annomaly_summary';
 import { PaginationControls } from './pagination';
+import { AnomalySummary } from './annomaly_summary';
+import { AnomalySeverityIndicator } from '../../../logging/log_analysis_results/anomaly_severity_indicator';
+import { useSourceContext } from '../../../../containers/metrics_source';
+import { createResultsUrl } from '../flyout_home';
+import {
+  useWaffleViewState,
+  WaffleViewState,
+} from '../../../../pages/metrics/inventory_view/hooks/use_waffle_view_state';
 
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';

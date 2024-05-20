@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import { useCallback } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import { useKibana } from '../utils/kibana_react';
 
 interface UseLicenseReturnValue {

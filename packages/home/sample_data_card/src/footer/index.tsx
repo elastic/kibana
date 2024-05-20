@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { InstalledStatus, SampleDataSet } from '@kbn/home-sample-data-types';
 import React, { useCallback } from 'react';
+import { SampleDataSet, InstalledStatus } from '@kbn/home-sample-data-types';
 import { INSTALLED_STATUS, UNINSTALLED_STATUS } from '../constants';
 
 import { DisabledFooter } from './disabled_footer';

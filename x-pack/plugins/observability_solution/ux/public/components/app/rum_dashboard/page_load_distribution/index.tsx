@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageLoadDistChart } from '../charts/page_load_dist_chart';
-import { I18LABELS } from '../translations';
 import { ResetPercentileZoom } from './reset_percentile_zoom';
+import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { PercentileRange } from './types';
 
 export function PageLoadDistribution() {

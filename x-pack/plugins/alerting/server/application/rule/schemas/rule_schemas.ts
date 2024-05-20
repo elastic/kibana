@@ -6,16 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { rRuleSchema } from '../../r_rule/schemas';
 import {
-  ruleExecutionStatusErrorReason,
-  ruleExecutionStatusValues,
-  ruleExecutionStatusWarningReason,
   ruleLastRunOutcomeValues,
+  ruleExecutionStatusValues,
+  ruleExecutionStatusErrorReason,
+  ruleExecutionStatusWarningReason,
 } from '../constants';
-import { actionSchema, systemActionSchema } from './action_schemas';
+import { rRuleSchema } from '../../r_rule/schemas';
 import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
+import { actionSchema, systemActionSchema } from './action_schemas';
 
 export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));

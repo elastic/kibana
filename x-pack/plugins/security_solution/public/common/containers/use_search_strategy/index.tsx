@@ -1,8 +1,3 @@
-import { isRunningResponse } from '@kbn/data-plugin/public';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
-import { useObservable } from '@kbn/securitysolution-hook-utils';
-import { noop, omit } from 'lodash/fp';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,20 +5,25 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
  * 2.0.
  */
 import { catchError, filter, tap } from 'rxjs';
+import { noop, omit } from 'lodash/fp';
+import { useCallback, useEffect, useRef, useMemo } from 'react';
 import type { Observable } from 'rxjs';
+import { useObservable } from '@kbn/securitysolution-hook-utils';
+import { isRunningResponse } from '@kbn/data-plugin/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import * as i18n from './translations';
 
-import { APP_UI_ID } from '../../../../common/constants';
 import type {
   FactoryQueryTypes,
   StrategyRequestInputType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
 import { getInspectResponse } from '../../../helpers';
+import type { inputsModel } from '../../store';
+import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
-import { useKibana } from '../../lib/kibana';
-import type { inputsModel } from '../../store';
+import { APP_UI_ID } from '../../../../common/constants';
 
 interface UseSearchFunctionParams<QueryType extends FactoryQueryTypes> {
   request: Omit<StrategyRequestInputType<QueryType>, 'factoryQueryType'>;

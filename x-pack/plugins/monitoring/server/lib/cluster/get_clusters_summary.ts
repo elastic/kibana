@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { get, omit } from 'lodash';
+import { omit, get } from 'lodash';
 import {
-  ElasticsearchLegacySource,
-  ElasticsearchMetricbeatSource,
   ElasticsearchModifiedSource,
+  ElasticsearchLegacySource,
   ElasticsearchSourceKibanaStats,
+  ElasticsearchMetricbeatSource,
 } from '../../../common/types/es';
 import { calculateOverallStatus } from '../calculate_overall_status';
 import { MonitoringLicenseError } from '../errors/custom_errors';

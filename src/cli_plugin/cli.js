@@ -8,8 +8,8 @@
 
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import Command from '../cli/command';
-import { installCommand } from './install';
 import { listCommand } from './list';
+import { installCommand } from './install';
 import { removeCommand } from './remove';
 
 const argv = process.argv.slice();

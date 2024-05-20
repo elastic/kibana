@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
-import { EnhancementRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { dynamicActionFactoriesCollector } from './telemetry/dynamic_action_factories_collector';
-import { dynamicActionsCollector } from './telemetry/dynamic_actions_collector';
+import { EnhancementRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import { SavedObjectReference } from '@kbn/core/types';
 import { ActionFactory, DynamicActionsState, SerializedEvent } from './types';
+import { dynamicActionsCollector } from './telemetry/dynamic_actions_collector';
+import { dynamicActionFactoriesCollector } from './telemetry/dynamic_action_factories_collector';
 
 export const dynamicActionEnhancement = (
   getActionFactory: (id: string) => undefined | ActionFactory

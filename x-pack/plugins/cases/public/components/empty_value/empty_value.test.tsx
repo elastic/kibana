@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ThemeProvider } from '@emotion/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { ThemeProvider } from '@emotion/react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import {
   defaultToEmptyTag,
-  getEmptyCellValue,
   getEmptyString,
   getEmptyStringTag,
+  getEmptyCellValue,
   getEmptyValue,
   getOrEmptyTag,
 } from '.';

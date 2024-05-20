@@ -1,9 +1,3 @@
-import {
-  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
-import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,8 +8,14 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import {
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+} from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
 import Chance from 'chance';
+import { CspBenchmarkRule } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const chance = new Chance();

@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  type ChartSizeEvent,
-  type ChartSizeSpec,
-  extractContainerType,
-  extractVisualizationType,
-} from '@kbn/chart-expressions-common';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type {
@@ -23,17 +21,19 @@ import type {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { PersistedState } from '@kbn/visualizations-plugin/public';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import {
+  type ChartSizeEvent,
+  type ChartSizeSpec,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
 
-import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
-import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { getDataLayers } from '../helpers';
+import { LayerTypes, SeriesTypes } from '../../common/constants';
+import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
 import type {
   BrushEvent,
   FilterEvent,

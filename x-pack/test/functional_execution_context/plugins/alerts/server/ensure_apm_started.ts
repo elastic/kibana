@@ -1,5 +1,3 @@
-import { initApm } from '@kbn/apm-config-loader';
-import { REPO_ROOT } from '@kbn/repo-info';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
  * 2.0.
  */
 import apmAgent from 'elastic-apm-node';
+import { initApm } from '@kbn/apm-config-loader';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 if (!apmAgent.isStarted()) {
   initApm(process.argv, REPO_ROOT, false, 'test-plugin');

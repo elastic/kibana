@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useRef, useState, useCallback } from 'react';
+import { EuiConfirmModal, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
 

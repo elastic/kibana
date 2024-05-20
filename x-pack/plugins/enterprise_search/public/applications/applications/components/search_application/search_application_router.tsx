@@ -10,7 +10,7 @@ import { Redirect, useParams } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import {

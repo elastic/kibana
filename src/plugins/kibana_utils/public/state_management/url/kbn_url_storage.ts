@@ -7,15 +7,15 @@
  */
 
 import { format as formatUrl } from 'url';
-import { History, createBrowserHistory } from 'history';
 import { stringify } from 'query-string';
-import { url as urlUtils } from '../../../common';
+import { createBrowserHistory, History } from 'history';
 import { parseUrl, parseUrlHash } from '../../../common/state_management/parse';
-import {
-  SetStateToKbnUrlHashOptions,
-  createSetStateToKbnUrl,
-} from '../../../common/state_management/set_state_to_kbn_url';
 import { decodeState } from '../state_encoder';
+import { url as urlUtils } from '../../../common';
+import {
+  createSetStateToKbnUrl,
+  SetStateToKbnUrlHashOptions,
+} from '../../../common/state_management/set_state_to_kbn_url';
 import { persistState } from '../state_hash';
 
 export const getCurrentUrl = (history: History) => history.createHref(history.location);

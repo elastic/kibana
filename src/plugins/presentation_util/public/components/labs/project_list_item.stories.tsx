@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { mapValues } from 'lodash';
-import React from 'react';
 
 import { EnvironmentStatus, ProjectConfig, ProjectID, ProjectStatus } from '../../../common';
 import { applyProjectStatus } from '../../services/labs/types';

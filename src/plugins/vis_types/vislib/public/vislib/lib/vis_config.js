@@ -11,8 +11,8 @@
  */
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { Data } from './data';
 import { vislibTypesConfig as visTypes } from './types';
+import { Data } from './data';
 
 const DEFAULT_VIS_CONFIG = {
   style: {

@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { History } from 'history';
 import { map } from 'rxjs';
+import { History } from 'history';
 
-import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
-import type { Query } from '@kbn/es-query';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import {
+  getQueryParams,
   IKbnUrlStateStorage,
   createQueryParamObservable,
-  getQueryParams,
 } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import type { Query } from '@kbn/es-query';
+import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { convertPanelMapToSavedPanels } from '../../../common';
 import { SEARCH_SESSION_ID } from '../../dashboard_constants';
 import { DashboardContainer, DashboardLocatorParams } from '../../dashboard_container';
+import { convertPanelMapToSavedPanels } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {

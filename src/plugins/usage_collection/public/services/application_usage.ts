@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationUsageTracker } from '@kbn/analytics';
 import { Observable, fromEvent } from 'rxjs';
-import { distinctUntilChanged, filter } from 'rxjs';
+import { filter, distinctUntilChanged } from 'rxjs';
+import { ApplicationUsageTracker } from '@kbn/analytics';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '../../common/constants';
 
 /**

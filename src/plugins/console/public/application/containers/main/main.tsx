@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageTemplate } from '@elastic/eui';
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
 import { Variables } from '../variables';
 
 import {
-  HelpPanel,
-  NetworkRequestStatusBar,
-  SomethingWentWrongCallout,
   TopNavMenu,
   WelcomePanel,
+  HelpPanel,
+  SomethingWentWrongCallout,
+  NetworkRequestStatusBar,
 } from '../../components';
 
-import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
+import { useServicesContext, useEditorReadContext, useRequestReadContext } from '../../contexts';
 import { useDataInit } from '../../hooks';
 
-import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
-import type { SenseEditor } from '../../models/sense_editor';
 import { getTopNavConfig } from './get_top_nav';
+import type { SenseEditor } from '../../models/sense_editor';
+import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 export interface MainProps {
   hideWelcome?: boolean;

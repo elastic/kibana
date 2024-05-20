@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
  * Given a single rule id this will return the number of event-log execution

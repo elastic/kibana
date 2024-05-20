@@ -12,8 +12,8 @@ import {
   unsnoozeParamsSchema,
 } from '../../../../../common/routes/rule/apis/unsnooze';
 import { ILicenseState, RuleMutedError } from '../../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformUnsnoozeBodyV1 } from './transforms';
 
 export type UnsnoozeRuleRequestParamsV1 = TypeOf<typeof unsnoozeParamsSchema>;

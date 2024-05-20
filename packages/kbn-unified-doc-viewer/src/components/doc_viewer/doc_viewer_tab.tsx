@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
 import React from 'react';
-import type { DocViewRenderFn, DocViewRenderProps } from '../../types';
-import { DocViewerError } from './doc_viewer_error';
+import { isEqual } from 'lodash';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
+import { DocViewerError } from './doc_viewer_error';
+import type { DocViewRenderFn, DocViewRenderProps } from '../../types';
 
 interface Props {
   id: string;

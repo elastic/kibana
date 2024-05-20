@@ -9,13 +9,13 @@ import { HttpSetup } from '@kbn/core/public';
 
 import {
   ActionTypeExecutorResult,
-  BASE_ACTION_API_PATH,
   INTERNAL_BASE_ACTION_API_PATH,
+  BASE_ACTION_API_PATH,
 } from '@kbn/actions-plugin/common';
 import { snExternalServiceConfig } from '../../../../common/servicenow_config';
-import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
 import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
+import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
 import { Choice } from './types';
 
 export async function getChoices({

@@ -7,12 +7,12 @@
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { BooleanRelation, Filter } from '@kbn/es-query';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { BytesFormat, FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import { createFiltersFromMultiValueClickAction } from './create_filters_from_multi_value_click';
+import { FieldFormatsGetConfigFn, BytesFormat } from '@kbn/field-formats-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { BooleanRelation, Filter } from '@kbn/es-query';
 
 const mockField = {
   name: 'bytes',

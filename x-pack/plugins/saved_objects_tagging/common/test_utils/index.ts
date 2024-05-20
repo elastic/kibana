@@ -6,9 +6,9 @@
  */
 
 import { SavedObject, SavedObjectReference } from '@kbn/core/types';
-import { AssignableObject } from '../assignments';
-import { TagsCapabilities } from '../capabilities';
 import { Tag, TagAttributes } from '../types';
+import { TagsCapabilities } from '../capabilities';
+import { AssignableObject } from '../assignments';
 
 export const createReference = (type: string, id: string): SavedObjectReference => ({
   type,

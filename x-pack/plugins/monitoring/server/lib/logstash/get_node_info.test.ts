@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
 import { unset } from 'lodash';
-import moment from 'moment';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { ElasticsearchResponseHit } from '../../../common/types/es';
+import { handleResponse, getNodeInfo } from './get_node_info';
 import { LegacyRequest } from '../../types';
+import { ElasticsearchResponseHit } from '../../../common/types/es';
 import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
-import { getNodeInfo, handleResponse } from './get_node_info';
 
 interface HitParams {
   path: string;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BurnRatesClient } from '../burn_rates_client';
 import { ResourceInstaller } from '../resource_installer';
+import { BurnRatesClient } from '../burn_rates_client';
 import { SLORepository } from '../slo_repository';
 import { SummaryClient } from '../summary_client';
 import { SummarySearchClient } from '../summary_search_client';

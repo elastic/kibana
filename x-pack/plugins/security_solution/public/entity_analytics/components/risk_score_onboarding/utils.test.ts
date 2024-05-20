@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { HttpSetup } from '@kbn/core/public';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {
   getIngestPipelineName,
@@ -15,8 +15,8 @@ import {
   getRiskScorePivotTransformId,
 } from '../../../../common/utils/risk_score_modules';
 import {
-  bulkCreatePrebuiltSavedObjects,
   bulkDeletePrebuiltSavedObjects,
+  bulkCreatePrebuiltSavedObjects,
 } from '../../deprecated_risk_engine/api';
 
 import * as api from '../../deprecated_risk_engine/api';

@@ -1,14 +1,3 @@
-import {
-  EuiBasicTable,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  useCurrentEuiBreakpoint,
-} from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -17,26 +6,37 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
  */
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import {
+  EuiButtonIcon,
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  useCurrentEuiBreakpoint,
+} from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { X509Expiry } from '../../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../../common/runtime_types';
-import { TAGS_LABEL, URL_LABEL } from '../../../../../common/translations/translations';
-import { MonitorList } from '../../../state/reducers/monitor_list';
-import { MonitorBarSeries } from '../../common/charts';
-import { MonitorTags } from '../../common/monitor_tags';
-import { CertStatusColumn } from './columns/cert_status_column';
-import { EnableMonitorAlert } from './columns/enable_alert';
-import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorListStatusColumn } from './columns/monitor_status_column';
-import { MonitorListProps } from './monitor_list_container';
-import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
-import { MonitorListHeader } from './monitor_list_header';
-import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
-import { NoItemsMessage } from './no_items_message';
+import { ExpandedRowMap } from './types';
+import { MonitorBarSeries } from '../../common/charts';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
+import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
+import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
+import { MonitorListProps } from './monitor_list_container';
+import { MonitorList } from '../../../state/reducers/monitor_list';
+import { CertStatusColumn } from './columns/cert_status_column';
+import { MonitorListHeader } from './monitor_list_header';
+import { TAGS_LABEL, URL_LABEL } from '../../../../../common/translations/translations';
+import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
-import { ExpandedRowMap } from './types';
+import { MonitorNameColumn } from './columns/monitor_name_col';
+import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
+import { NoItemsMessage } from './no_items_message';
 
 interface Props extends MonitorListProps {
   pageSize: number;

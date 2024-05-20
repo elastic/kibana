@@ -40,7 +40,9 @@
             "tags": [],
             "label": "fields",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/kbn-alerts-as-data-utils/src/search/security/build_fields_request.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -53,7 +55,9 @@
             "tags": [],
             "label": "excludeEcsData",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-alerts-as-data-utils/src/search/security/build_fields_request.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -84,7 +88,9 @@
             "tags": [],
             "label": "{\n  outputFile,\n  fieldMap,\n  schemaPrefix,\n  useAlert = false,\n  useEcs = false,\n  useLegacyAlerts = false,\n  flattened = true,\n}",
             "description": [],
-            "signature": ["CreateSchemaFromFieldMapOpts"],
+            "signature": [
+              "CreateSchemaFromFieldMapOpts"
+            ],
             "path": "packages/kbn-alerts-as-data-utils/src/schemas/create_schema_from_field_map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -219,7 +225,9 @@
         "tags": [],
         "label": "ALERT_EVENTS_FIELDS",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/kbn-alerts-as-data-utils/src/search/security/fields.ts",
         "deprecated": false,
         "trackAdoption": false,

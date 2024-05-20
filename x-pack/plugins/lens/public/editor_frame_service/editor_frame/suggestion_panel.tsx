@@ -7,68 +7,68 @@
 
 import './suggestion_panel.scss';
 
-import {
-  EuiAccordion,
-  EuiButtonEmpty,
-  EuiIcon,
-  EuiIconTip,
-  EuiNotificationBadge,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
-import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { camelCase, pick } from 'lodash';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { CoreStart } from '@kbn/core/public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import {
+  EuiIcon,
+  EuiTitle,
+  EuiPanel,
+  EuiIconTip,
+  EuiToolTip,
+  EuiButtonEmpty,
+  EuiAccordion,
+  EuiText,
+  EuiNotificationBadge,
+} from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
+import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ExecutionContextSearch } from '@kbn/es-query';
 import {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
-import { euiThemeVars } from '@kbn/ui-theme';
-import classNames from 'classnames';
-import { camelCase, pick } from 'lodash';
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
-import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { CoreStart } from '@kbn/core/public';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
 import {
-  DatasourceStates,
-  applyChanges,
+  Datasource,
+  Visualization,
+  FramePublicAPI,
+  DatasourceMap,
+  VisualizationMap,
+  DatasourceLayers,
+  UserMessagesGetter,
+} from '../../types';
+import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
+import { getDatasourceExpressionsByLayers } from './expression_helpers';
+import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
+import { getMissingIndexPattern } from './state_helpers';
+import {
   rollbackSuggestion,
-  selectActiveDatasourceId,
-  selectChangesApplied,
-  selectCurrentDatasourceStates,
-  selectCurrentVisualization,
-  selectDatasourceStates,
   selectExecutionContextSearch,
-  selectFramePublicAPI,
-  selectIsFullscreenDatasource,
-  selectSearchSessionId,
-  selectStagedActiveData,
   submitSuggestion,
   useLensDispatch,
   useLensSelector,
+  selectCurrentVisualization,
+  selectCurrentDatasourceStates,
+  DatasourceStates,
+  selectIsFullscreenDatasource,
+  selectSearchSessionId,
+  selectActiveDatasourceId,
+  selectDatasourceStates,
+  selectChangesApplied,
+  applyChanges,
+  selectStagedActiveData,
+  selectFramePublicAPI,
 } from '../../state_management';
-import {
-  Datasource,
-  DatasourceLayers,
-  DatasourceMap,
-  FramePublicAPI,
-  UserMessagesGetter,
-  Visualization,
-  VisualizationMap,
-} from '../../types';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../utils';
-import { getDatasourceExpressionsByLayers } from './expression_helpers';
-import { getMissingIndexPattern } from './state_helpers';
-import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
+import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 const LOCAL_STORAGE_SUGGESTIONS_PANEL = 'LENS_SUGGESTIONS_PANEL_HIDDEN';

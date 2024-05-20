@@ -9,10 +9,10 @@ import { TooltipInfo } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { getServiceNodeName } from '../../../../../common/service_nodes';
-import { TimeFormatter, asTransactionRate } from '../../../../../common/utils/formatters';
-import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { getServiceNodeName } from '../../../../../common/service_nodes';
+import { asTransactionRate, TimeFormatter } from '../../../../../common/utils/formatters';
+import { useTheme } from '../../../../hooks/use_theme';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;

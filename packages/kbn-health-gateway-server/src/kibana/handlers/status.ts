@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { capitalize, chain, memoize } from 'lodash';
 import { Agent, AgentOptions } from 'https';
 import { URL } from 'url';
 import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
-import type { Logger } from '@kbn/logging';
-import { capitalize, chain, memoize } from 'lodash';
 import nodeFetch, { Response } from 'node-fetch';
+import type { Logger } from '@kbn/logging';
 import type { KibanaConfig } from '../kibana_config';
 
 type Status = 'healthy' | 'unhealthy' | 'failure' | 'timeout';
@@ -49,10 +49,7 @@ export class StatusHandler {
     timeout: 504,
   };
 
-  constructor(
-    private kibanaConfig: KibanaConfig,
-    private logger: Logger
-  ) {
+  constructor(private kibanaConfig: KibanaConfig, private logger: Logger) {
     this.handler = this.handler.bind(this);
   }
 

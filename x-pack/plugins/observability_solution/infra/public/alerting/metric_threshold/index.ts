@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import { lazy } from 'react';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import {
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
   MetricExpressionParams,
+  METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
 import { formatReason } from './rule_data_formatters';

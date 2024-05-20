@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiFieldSearch,
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
+  EuiButton,
+  EuiFilterGroup,
   EuiSpacer,
+  EuiLink,
+  EuiFieldSearch,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { ActionType, RulesListFilters, UpdateFiltersProps } from '../../../../types';
-import { ActionTypeFilter } from './action_type_filter';
-import { KqlSearchBar } from './kql_search_bar';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { RulesListStatuses } from './rules_list_statuses';
+import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { RuleExecutionStatusFilter } from './rule_execution_status_filter';
 import { RuleLastRunOutcomeFilter } from './rule_last_run_outcome_filter';
-import { RuleStatusFilter } from './rule_status_filter';
-import { RuleTagFilter } from './rule_tag_filter';
-import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { RulesListErrorBanner } from './rules_list_error_banner';
-import { RulesListStatuses } from './rules_list_statuses';
 import { TypeFilter, TypeFilterProps } from './type_filter';
+import { ActionTypeFilter } from './action_type_filter';
+import { RuleTagFilter } from './rule_tag_filter';
+import { RuleStatusFilter } from './rule_status_filter';
+import { KqlSearchBar } from './kql_search_bar';
 
 interface RulesListFiltersBarProps {
   actionTypes: ActionType[];

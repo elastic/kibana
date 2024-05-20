@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
 describe('ConfirmDeleteModal component', () => {

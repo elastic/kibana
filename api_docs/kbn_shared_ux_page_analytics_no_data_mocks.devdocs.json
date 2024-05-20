@@ -234,7 +234,11 @@
             "tags": [],
             "label": "getProps",
             "description": [],
-            "signature": ["() => { onDataViewCreated: ", "HandlerFunction", "; }"],
+            "signature": [
+              "() => { onDataViewCreated: ",
+              "HandlerFunction",
+              "; }"
+            ],
             "path": "packages/shared-ux/page/analytics_no_data/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -253,7 +257,10 @@
         "tags": [],
         "label": "getServicesMock",
         "description": [],
-        "signature": ["() => ", "AnalyticsNoDataPageServices"],
+        "signature": [
+          "() => ",
+          "AnalyticsNoDataPageServices"
+        ],
         "path": "packages/shared-ux/page/analytics_no_data/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -268,7 +275,10 @@
         "tags": [],
         "label": "getServicesMockCustomBranding",
         "description": [],
-        "signature": ["() => ", "AnalyticsNoDataPageServices"],
+        "signature": [
+          "() => ",
+          "AnalyticsNoDataPageServices"
+        ],
         "path": "packages/shared-ux/page/analytics_no_data/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,

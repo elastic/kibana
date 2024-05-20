@@ -8,8 +8,8 @@
 import { processFieldsMap } from '@kbn/securitysolution-ecs';
 
 import type {
-  HostsUncommonProcessHit,
   HostsUncommonProcessesEdges,
+  HostsUncommonProcessHit,
 } from '../../../../../../common/search_strategy';
 
 import type { UncommonProcessBucket } from './helpers';

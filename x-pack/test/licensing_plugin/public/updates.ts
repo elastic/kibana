@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import { createScenario } from '../scenario';
 import { FtrProviderContext } from '../services';
+import { createScenario } from '../scenario';
 import '@kbn/core-provider-plugin/types';
 
 // eslint-disable-next-line import/no-default-export

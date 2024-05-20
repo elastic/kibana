@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import { aggTopMetricsFnName } from './top_metrics_fn';
+import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { METRIC_TYPES } from './metric_agg_types';
 import { DataViewField, KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
 import { createTopHitFilter } from './lib/create_filter';
-import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { METRIC_TYPES } from './metric_agg_types';
-import { aggTopMetricsFnName } from './top_metrics_fn';
 
 export interface BaseAggParamsTopMetrics extends BaseAggParams {
   field: string;

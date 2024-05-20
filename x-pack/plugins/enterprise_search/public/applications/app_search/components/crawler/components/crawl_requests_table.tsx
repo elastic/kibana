@@ -12,10 +12,10 @@ import { useActions, useValues } from 'kea';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType,
   EuiEmptyPrompt,
   EuiLink,
-  EuiTableComputedColumnType,
-  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

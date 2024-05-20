@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Listing } from '../../../components/cluster/listing';
-import { fetchClusters } from '../../../lib/fetch_clusters';
-import { ExternalConfigContext } from '../../contexts/external_config_context';
+import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { useTable } from '../../hooks/use_table';
+import { ExternalConfigContext } from '../../contexts/external_config_context';
 import { ComponentProps } from '../../route_init';
+import { useTable } from '../../hooks/use_table';
 import { PageTemplate, TabMenuItem } from '../page_template';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { fetchClusters } from '../../../lib/fetch_clusters';
 
 const pageTitle = i18n.translate('xpack.monitoring.cluster.listing.pageTitle', {
   defaultMessage: 'Cluster listing',

@@ -13,39 +13,39 @@ import { Subscription } from 'rxjs';
 
 import type { DataView } from '@kbn/data-plugin/common';
 import { isRunningResponse } from '@kbn/data-plugin/common';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import type {
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
 } from '@kbn/timelines-plugin/common/api/search_strategy';
-import { DataLoadingState } from '@kbn/unified-data-table';
 import type { ESQuery } from '../../../common/typed_json';
 
-import { APP_UI_ID } from '../../../common/constants';
+import type { inputsModel } from '../../common/store';
+import type { RunTimeMappings } from '../../common/store/sourcerer/model';
+import { useKibana } from '../../common/lib/kibana';
+import { createFilter } from '../../common/containers/helpers';
+import { timelineActions } from '../store';
+import { detectionsTimelineIds } from './helpers';
+import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
-  TimelineEdges,
   TimelineEventsAllStrategyResponse,
+  TimelineEdges,
   TimelineItem,
   TimelineRequestSortField,
 } from '../../../common/search_strategy';
 import { Direction, TimelineEventsQueries } from '../../../common/search_strategy';
+import type { InspectResponse } from '../../types';
+import type { KueryFilterQueryKind } from '../../../common/types/timeline';
+import { TimelineId } from '../../../common/types/timeline';
+import { useRouteSpy } from '../../common/utils/route/use_route_spy';
+import { activeTimeline } from './active_timeline_context';
 import type {
   EqlOptionsSelected,
   TimelineEqlResponse,
 } from '../../../common/search_strategy/timeline/events/eql';
-import type { KueryFilterQueryKind } from '../../../common/types/timeline';
-import { TimelineId } from '../../../common/types/timeline';
-import { createFilter } from '../../common/containers/helpers';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
-import { useKibana } from '../../common/lib/kibana';
-import type { inputsModel } from '../../common/store';
-import type { RunTimeMappings } from '../../common/store/sourcerer/model';
-import { useRouteSpy } from '../../common/utils/route/use_route_spy';
-import { getInspectResponse } from '../../helpers';
-import type { InspectResponse } from '../../types';
-import { timelineActions } from '../store';
-import { activeTimeline } from './active_timeline_context';
-import { detectionsTimelineIds } from './helpers';
+import { APP_UI_ID } from '../../../common/constants';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -67,18 +67,18 @@ type LoadPage = (newActivePage: number) => void;
 type TimelineRequest<T extends KueryFilterQueryKind> = T extends 'kuery'
   ? TimelineEventsAllOptionsInput
   : T extends 'lucene'
-    ? TimelineEventsAllOptionsInput
-    : T extends 'eql'
-      ? TimelineEqlRequestOptionsInput
-      : TimelineEventsAllOptionsInput;
+  ? TimelineEventsAllOptionsInput
+  : T extends 'eql'
+  ? TimelineEqlRequestOptionsInput
+  : TimelineEventsAllOptionsInput;
 
 type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   ? TimelineEventsAllStrategyResponse
   : T extends 'lucene'
-    ? TimelineEventsAllStrategyResponse
-    : T extends 'eql'
-      ? TimelineEqlResponse
-      : TimelineEventsAllStrategyResponse;
+  ? TimelineEventsAllStrategyResponse
+  : T extends 'eql'
+  ? TimelineEqlResponse
+  : TimelineEventsAllStrategyResponse;
 
 export interface UseTimelineEventsProps {
   dataViewId: string | null;

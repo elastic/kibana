@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { FilterValueLabel } from '@kbn/exploratory-view-plugin/public';
-import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
+import { FilterValueLabel } from '@kbn/exploratory-view-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FiltersUIHook } from '../hooks/use_local_uifilters';
 import { SelectedWildcards } from './selected_wildcards';
+import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 
 interface Props {
   indexPattern?: DataView;

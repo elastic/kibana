@@ -8,8 +8,8 @@
 import { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
 import { BaseMessage } from '@langchain/core/messages';
-import { AgentExecutorEvaluator } from '../langchain/executors/types';
 import { ResponseBody } from '../langchain/types';
+import { AgentExecutorEvaluator } from '../langchain/executors/types';
 
 export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

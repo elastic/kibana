@@ -38,7 +38,7 @@ export type ControlFactory<T extends ControlInput = ControlInput> = EmbeddableFa
 
 export type ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
-  TControlEmbeddableOutput extends ControlOutput = ControlOutput,
+  TControlEmbeddableOutput extends ControlOutput = ControlOutput
 > = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
   isChained?: () => boolean;
   renderPrepend?: () => ReactNode | undefined;
@@ -48,7 +48,7 @@ export type ControlEmbeddable<
 };
 
 export interface IClearableControl<
-  TClearableControlEmbeddableInput extends ControlInput = ControlInput,
+  TClearableControlEmbeddableInput extends ControlInput = ControlInput
 > extends ControlEmbeddable {
   clearSelections: () => void;
 }

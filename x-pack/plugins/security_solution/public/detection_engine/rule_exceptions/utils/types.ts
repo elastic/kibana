@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CodeSignature, EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
+import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
 
 export interface ExceptionListItemIdentifiers {
   id: string;
@@ -31,10 +31,10 @@ export type Flattened<T> = {
     ? AliasType extends CodeSignature[]
       ? FlattenedCodeSignature[]
       : AliasType extends Array<infer rawType>
-        ? rawType
-        : AliasType extends object
-          ? Flattened<AliasType>
-          : AliasType
+      ? rawType
+      : AliasType extends object
+      ? Flattened<AliasType>
+      : AliasType
     : never;
 };
 

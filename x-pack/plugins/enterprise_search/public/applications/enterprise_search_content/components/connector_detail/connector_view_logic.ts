@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import {
   Connector,
@@ -31,8 +31,8 @@ import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_ind
 import { ElasticsearchViewIndex } from '../../types';
 
 import {
-  ConnectorNameAndDescriptionActions,
   ConnectorNameAndDescriptionLogic,
+  ConnectorNameAndDescriptionActions,
 } from './connector_name_and_description_logic';
 
 export interface ConnectorViewActions {

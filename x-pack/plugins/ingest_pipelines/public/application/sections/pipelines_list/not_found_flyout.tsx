@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
-import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlyout, EuiFlyoutBody, EuiCallOut } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 interface Props {
   onClose: () => void;

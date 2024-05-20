@@ -7,64 +7,64 @@
  */
 
 import {
-  mockDeleteLegacyUrlAliases,
+  pointInTimeFinderMock,
   mockGetCurrentTime,
   mockGetSearchDsl,
+  mockDeleteLegacyUrlAliases,
   mockPreflightCheckForCreate,
-  pointInTimeFinderMock,
 } from './repository.test.mock';
 
+import { SavedObjectsRepository } from './repository';
+import { loggerMock } from '@kbn/logging-mocks';
 import { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  AuthorizationTypeEntry,
   ISavedObjectsSecurityExtension,
-  SavedObject,
   SavedObjectsRawDocSource,
+  AuthorizationTypeEntry,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
-import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
-import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { kibanaMigratorMock } from '../mocks';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import {
-  MULTI_NAMESPACE_CUSTOM_INDEX_TYPE,
-  MULTI_NAMESPACE_TYPE,
-  NAMESPACE_AGNOSTIC_TYPE,
-  REMOVE_REFS_COUNT,
-  authMap,
-  bulkCreateSuccess,
-  bulkDeleteSuccess,
-  bulkGetSuccess,
-  bulkUpdateSuccess,
-  checkAuthError,
-  checkConflictsSuccess,
-  createBulkDeleteSuccessStatus,
-  createDocumentMigrator,
   createRegistry,
-  createSpySerializer,
-  deleteSuccess,
-  enforceError,
-  expectBulkGetResult,
-  expectCreateResult,
-  expectUpdateResult,
-  findSuccess,
-  generateIndexPatternSearchResults,
-  getSuccess,
+  createDocumentMigrator,
   mappings,
+  createSpySerializer,
   mockTimestamp,
+  checkAuthError,
+  getSuccess,
+  enforceError,
+  setupRedactPassthrough,
+  MULTI_NAMESPACE_CUSTOM_INDEX_TYPE,
+  authMap,
+  updateSuccess,
+  deleteSuccess,
+  removeReferencesToSuccess,
+  checkConflictsSuccess,
+  findSuccess,
   mockTimestampFields,
   mockVersion,
-  removeReferencesToSuccess,
-  setupAuthorizeFind,
-  setupAuthorizeFunc,
+  NAMESPACE_AGNOSTIC_TYPE,
+  bulkGetSuccess,
+  expectBulkGetResult,
+  bulkCreateSuccess,
+  expectCreateResult,
+  MULTI_NAMESPACE_TYPE,
+  bulkUpdateSuccess,
+  expectUpdateResult,
+  bulkDeleteSuccess,
+  createBulkDeleteSuccessStatus,
+  REMOVE_REFS_COUNT,
   setupGetFindRedactTypeMap,
-  setupRedactPassthrough,
-  updateSuccess,
+  generateIndexPatternSearchResults,
+  setupAuthorizeFunc,
+  setupAuthorizeFind,
 } from '../test_helpers/repository.test.common';
-import { SavedObjectsRepository } from './repository';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 
 describe('SavedObjectsRepository Security Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiComboBox,
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiSpacer,
-  htmlIdGenerator,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
 import React, { Fragment, useCallback, useState } from 'react';
-import { MODEL_TYPES, TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
-import { createChangeHandler } from '../lib/create_change_handler';
-import { createNumberHandler } from '../lib/create_number_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 import { MetricSelect } from './metric_select';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createNumberHandler } from '../lib/create_number_handler';
+import { TSVB_METRIC_TYPES, MODEL_TYPES } from '../../../../common/enums';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiComboBox,
+  EuiSpacer,
+  EuiFormRow,
+  EuiFieldNumber,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const DEFAULTS = {
   model_type: MODEL_TYPES.UNWEIGHTED,

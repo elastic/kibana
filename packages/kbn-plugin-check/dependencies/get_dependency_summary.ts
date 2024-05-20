@@ -7,7 +7,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { DependencyState, PluginInfo, PluginStatuses } from '../types';
+import { PluginInfo, DependencyState, PluginStatuses } from '../types';
 
 import { PLUGIN_LAYERS, PLUGIN_LIFECYCLES } from '../const';
 
@@ -42,10 +42,10 @@ export const getDependencySummary = (pluginInfo: PluginInfo, log: ToolingLog): P
       manifestState: manifest.required.includes(name)
         ? 'required'
         : manifest.optional.includes(name)
-          ? 'optional'
-          : manifest.bundle.includes(name)
-            ? 'bundle'
-            : 'missing',
+        ? 'optional'
+        : manifest.bundle.includes(name)
+        ? 'bundle'
+        : 'missing',
     };
 
     // For each plugin layer...
@@ -75,8 +75,8 @@ export const getDependencySummary = (pluginInfo: PluginInfo, log: ToolingLog): P
           const pluginState = pluginLifecycle?.required.includes(name)
             ? 'required'
             : pluginLifecycle?.optional.includes(name)
-              ? 'optional'
-              : 'missing';
+            ? 'optional'
+            : 'missing';
           plugins[name][layer][lifecycle] = { typeName, pluginState, source };
         }
       });

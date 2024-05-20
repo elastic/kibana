@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiResizeObserver } from '@elastic/eui';
-import { css } from '@emotion/react';
-import classNames from 'classnames';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { EuiResizeObserver } from '@elastic/eui';
+import { css } from '@emotion/react';
+import classNames from 'classnames';
+import { isBackgroundInverted, isBackgroundDark } from '../../lib/set_is_reversed';
 import { getLastValue } from '../../../../common/last_value_utils';
-import { isBackgroundDark, isBackgroundInverted } from '../../lib/set_is_reversed';
-import { calculateCoordinates } from '../lib/calculate_coordinates';
 import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';
+import { calculateCoordinates } from '../lib/calculate_coordinates';
 
 import './_gauge.scss';
 

@@ -6,9 +6,9 @@
  */
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
+import { ExpressionValueRender, ContainerStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
-import { ContainerStyle, ExpressionValueRender } from '../../../types';
+import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
 
 interface ContainerStyleArgument extends ContainerStyle {
   type: 'containerStyle';

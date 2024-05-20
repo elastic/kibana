@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { WithHeaderLayout } from '../../../../layouts';
-import { useAuthz, useConfig, useLink } from '../../hooks';
 import type { Section } from '../../sections';
+import { useLink, useConfig, useAuthz } from '../../hooks';
+import { WithHeaderLayout } from '../../../../layouts';
 
 import { ExperimentalFeaturesService } from '../../services';
 

@@ -6,10 +6,10 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
 import { transparentize } from 'polished';
 import React from 'react';
+import { QuerySuggestion, QuerySuggestionTypes } from '@kbn/unified-search-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 interface Props {
   isSelected?: boolean;

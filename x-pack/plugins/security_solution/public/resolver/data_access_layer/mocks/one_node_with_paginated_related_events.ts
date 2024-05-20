@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import * as eventModel from '../../../../common/endpoint/models/event';
-import type {
-  ResolverEntityIndex,
-  ResolverNode,
-  ResolverRelatedEvents,
-  ResolverSchema,
-  SafeResolverEvent,
-} from '../../../../common/endpoint/types';
-import { mockTreeWithOneNodeAndTwoPagesOfRelatedEvents } from '../../mocks/resolver_tree';
 import type { DataAccessLayer, TimeRange } from '../../types';
+import { mockTreeWithOneNodeAndTwoPagesOfRelatedEvents } from '../../mocks/resolver_tree';
+import type {
+  ResolverRelatedEvents,
+  ResolverEntityIndex,
+  SafeResolverEvent,
+  ResolverNode,
+  ResolverSchema,
+} from '../../../../common/endpoint/types';
+import * as eventModel from '../../../../common/endpoint/models/event';
 
 interface Metadata {
   /**

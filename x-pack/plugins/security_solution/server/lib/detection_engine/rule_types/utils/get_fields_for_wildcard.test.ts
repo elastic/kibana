@@ -7,8 +7,8 @@
 
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { getFieldsForWildcard } from './get_fields_for_wildcard';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
 const mockFields = [
   {

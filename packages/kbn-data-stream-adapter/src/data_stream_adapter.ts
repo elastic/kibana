@@ -12,12 +12,12 @@ import type {
   IndicesPutIndexTemplateIndexTemplateMapping,
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { Subject } from 'rxjs';
+import type { FieldMap } from './field_maps/types';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
 import { createOrUpdateDataStream } from './create_or_update_data_stream';
 import { createOrUpdateIndexTemplate } from './create_or_update_index_template';
-import type { FieldMap } from './field_maps/types';
 import { InstallShutdownError, installWithTimeout } from './install_with_timeout';
 import { getComponentTemplate, getIndexTemplate } from './resource_installer_utils';
 
@@ -60,10 +60,7 @@ export class DataStreamAdapter {
   protected indexTemplates: IndicesPutIndexTemplateRequest[] = [];
   protected installed: boolean;
 
-  constructor(
-    protected readonly name: string,
-    options: DataStreamAdapterParams
-  ) {
+  constructor(protected readonly name: string, options: DataStreamAdapterParams) {
     this.installed = false;
     this.kibanaVersion = options.kibanaVersion;
     this.totalFieldsLimit = options.totalFieldsLimit ?? DEFAULT_FIELDS_LIMIT;

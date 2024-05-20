@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema, configSchema } from './config';
+import { configSchema, ConfigSchema } from './config';
 
 export type { PluginStartContract } from './plugin';
 export type { TimeSeriesQuery, CoreQueryParams } from './data';

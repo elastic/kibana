@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '../../monaco_imports';
 import { consoleSharedLanguageConfiguration, consoleSharedLexerRules } from './shared';
+import { monaco } from '../../monaco_imports';
 
 export const consoleOutputLanguageConfiguration: monaco.languages.LanguageConfiguration = {
   ...consoleSharedLanguageConfiguration,

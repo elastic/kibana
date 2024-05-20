@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { FunctionComponent } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
 
 const strings = {
   getSaveGroupDescription: () =>

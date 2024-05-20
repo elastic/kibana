@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent } from 'react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useCore } from '../../../../app_context';
 
 const i18nTexts = {

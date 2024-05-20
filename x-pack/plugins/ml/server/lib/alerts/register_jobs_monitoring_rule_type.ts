@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ByteSize,
   DateTime,
@@ -19,14 +22,11 @@ import type {
   RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import type { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorOptions, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { MlAnomalyDetectionHealthAlert } from '@kbn/alerts-as-data-utils';
-import type { KibanaRequest } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { i18n } from '@kbn/i18n';
 import type { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   ALERT_DATAFEED_RESULTS,
   ALERT_DELAYED_DATA_RESULTS,
@@ -36,12 +36,12 @@ import {
 } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
-import type { JobMessage } from '../../../common/types/audit_message';
 import {
-  type AnomalyDetectionJobsHealthRuleParams,
   anomalyDetectionJobsHealthRuleParams,
+  type AnomalyDetectionJobsHealthRuleParams,
 } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
+import type { JobMessage } from '../../../common/types/audit_message';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
 

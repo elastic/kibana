@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
-import { MatchAllFilter, PhraseFilter } from '../filters';
+import { isEqual, cloneDeep } from 'lodash';
+import { migrateFilter, DeprecatedMatchPhraseFilter } from './migrate_filter';
+import { PhraseFilter, MatchAllFilter } from '../filters';
 import { Filter } from '../filters';
-import { DeprecatedMatchPhraseFilter, migrateFilter } from './migrate_filter';
 
 describe('migrateFilter', function () {
   const oldMatchPhraseFilter = {

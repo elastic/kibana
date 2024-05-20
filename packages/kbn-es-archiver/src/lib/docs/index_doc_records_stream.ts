@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
-import { ES_CLIENT_HEADERS } from '../../client_headers';
-import { Progress } from '../progress';
+import { Writable } from 'stream';
 import { Stats } from '../stats';
+import { Progress } from '../progress';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 enum BulkOperation {
   Create = 'create',

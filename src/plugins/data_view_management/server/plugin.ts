@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
 
 import { registerPreviewScriptedFieldRoute, registerResolveIndexRoute } from './routes';
 

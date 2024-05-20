@@ -13,10 +13,10 @@ import {
   getEntityFieldName,
   getEntityFieldValue,
   getSeverityWithLow,
-  isMultiBucketAnomaly,
   isRuleSupported,
   showActualForFunction,
   showTypicalForFunction,
+  isMultiBucketAnomaly,
 } from './anomaly_utils';
 
 describe('ML - anomaly utils', () => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { allRangesValid, validateColorRanges } from './color_ranges_validation';
+import { validateColorRanges, allRangesValid } from './color_ranges_validation';
 
 describe('Color ranges validation', () => {
   describe('validateColorRanges', () => {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import immutable from 'object-path-immutable';
 import { handleActions } from 'redux-actions';
+import immutable from 'object-path-immutable';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import { getId } from '../../lib/get_id';
-import { isGroupId } from '../../lib/workpad';
-import * as actions from '../actions/pages';
 import { getDefaultPage } from '../defaults';
+import * as actions from '../actions/pages';
 import { getSelectedPageIndex } from '../selectors/workpad';
+import { isGroupId } from '../../lib/workpad';
 
 const { set, del, insert } = immutable;
 

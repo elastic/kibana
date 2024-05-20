@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import React from 'react';
 import { HttpSetup } from '@kbn/core/public';
 import {
-  docLinksServiceMock,
-  fatalErrorsServiceMock,
   notificationServiceMock,
+  fatalErrorsServiceMock,
+  docLinksServiceMock,
 } from '@kbn/core/public/mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import React from 'react';
 import { AppContextProvider } from '../../../public/application/app_context';
 
 import { init as initBreadcrumb } from '../../../public/application/services/breadcrumb';
-import { init as initDocumentation } from '../../../public/application/services/documentation';
 import { init as initHttp } from '../../../public/application/services/http';
 import { init as initNotification } from '../../../public/application/services/notification';
 import { init as initUiMetric } from '../../../public/application/services/ui_metric';
+import { init as initDocumentation } from '../../../public/application/services/documentation';
 import { init as initHttpRequests } from './http_requests';
 
 export const WithAppDependencies =

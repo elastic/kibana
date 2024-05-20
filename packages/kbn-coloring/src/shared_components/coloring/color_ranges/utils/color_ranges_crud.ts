@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CustomPaletteParams, DataBounds, getDataMinMax, roundValue } from '../../../../palettes';
+import { DataBounds, roundValue, getDataMinMax, CustomPaletteParams } from '../../../../palettes';
 import type { ColorRange, ColorRangeAccessor } from '../types';
 
 /**

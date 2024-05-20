@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { ConditionalToolTip } from './conditional_tooltip';
 import { SnapshotNodeResponse } from '../../../../../../common/http_api';
 import { InfraWaffleMapNode } from '../../../../../lib/lib';
-import { ConditionalToolTip } from './conditional_tooltip';
 
 jest.mock('../../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({ sourceId: 'default' }),
 }));
 
 jest.mock('../../hooks/use_snaphot');
-import { UseSnapshotRequest, useSnapshot } from '../../hooks/use_snaphot';
+import { useSnapshot, UseSnapshotRequest } from '../../hooks/use_snaphot';
 jest.mock('../../hooks/use_waffle_options');
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 

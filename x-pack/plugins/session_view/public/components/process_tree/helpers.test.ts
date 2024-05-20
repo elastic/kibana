@@ -5,24 +5,24 @@
  * 2.0.
  */
 import { cloneDeep } from 'lodash';
+import {
+  mockEvents,
+  mockAlerts,
+  mockProcessMap,
+} from '../../../common/mocks/constants/session_view_process.mock';
 import type {
   AlertStatusEventEntityIdMap,
   Process,
-  ProcessEvent,
   ProcessMap,
+  ProcessEvent,
 } from '../../../common';
 import { ALERT_STATUS } from '../../../common/constants';
 import {
-  mockAlerts,
-  mockEvents,
-  mockProcessMap,
-} from '../../../common/mocks/constants/session_view_process.mock';
-import {
-  autoExpandProcessTree,
-  buildProcessTree,
-  searchProcessTree,
   updateAlertEventStatus,
   updateProcessMap,
+  buildProcessTree,
+  searchProcessTree,
+  autoExpandProcessTree,
 } from './helpers';
 
 const SESSION_ENTITY_ID = '3d0192c6-7c54-5ee6-a110-3539a7cf42bc';

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { AssigneesSelectable } from './assignees_selectable';
 
-import { TestProviders } from '../../mock';
-import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../user_profiles/use_get_current_user_profile';
+import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../user_profiles/use_suggest_users';
-import { mockUserProfiles } from './mocks';
+import { TestProviders } from '../../mock';
 import * as i18n from './translations';
+import { mockUserProfiles } from './mocks';
 
 jest.mock('../user_profiles/use_get_current_user_profile');
 jest.mock('../user_profiles/use_bulk_get_user_profiles');

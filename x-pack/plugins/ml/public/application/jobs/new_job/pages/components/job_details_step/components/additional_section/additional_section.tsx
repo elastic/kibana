@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CalendarsSelection } from './components/calendars';
 import { CustomUrlsSelection } from './components/custom_urls';
 

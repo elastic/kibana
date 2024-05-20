@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { Serializable } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
+import { Serializable } from '@kbn/utility-types';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 /**
  * Options provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method.

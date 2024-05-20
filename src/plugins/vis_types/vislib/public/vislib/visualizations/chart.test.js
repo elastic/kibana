@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import d3 from 'd3';
+import $ from 'jquery';
 import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
 } from '@kbn/test-jest-helpers';
-import d3 from 'd3';
-import $ from 'jquery';
-import { getMockUiState } from '../../fixtures/mocks';
 import { Chart } from './_chart';
+import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
 
 describe('Vislib _chart Test Suite', function () {

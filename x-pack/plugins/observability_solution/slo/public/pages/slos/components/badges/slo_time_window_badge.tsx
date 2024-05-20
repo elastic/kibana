@@ -8,9 +8,9 @@
 import { EuiBadge, EuiBadgeProps, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  rollingTimeWindowTypeSchema,
   SLODefinitionResponse,
   SLOWithSummaryResponse,
-  rollingTimeWindowTypeSchema,
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import moment from 'moment';

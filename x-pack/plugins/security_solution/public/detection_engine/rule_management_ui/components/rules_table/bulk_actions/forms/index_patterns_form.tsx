@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
 
@@ -19,12 +19,12 @@ import type { BulkActionEditPayload } from '../../../../../../../common/api/dete
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
-  FIELD_TYPES,
   Field,
-  fieldValidators,
   getUseField,
-  useForm,
   useFormData,
+  useForm,
+  FIELD_TYPES,
+  fieldValidators,
 } from '../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';

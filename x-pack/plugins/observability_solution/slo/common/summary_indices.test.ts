@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { getListOfSloSummaryIndices } from './summary_indices';
 import {
   DEFAULT_STALE_SLO_THRESHOLD_HOURS,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from './constants';
-import { getListOfSloSummaryIndices } from './summary_indices';
 
 describe('getListOfSloSummaryIndices', () => {
   it('should return default index if disabled', function () {

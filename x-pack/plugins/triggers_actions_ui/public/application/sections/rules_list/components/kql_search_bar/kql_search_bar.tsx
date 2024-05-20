@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { KueryNode, Query, fromKueryExpression } from '@kbn/es-query';
 import React, { useMemo } from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { fromKueryExpression, KueryNode, Query } from '@kbn/es-query';
 
-import { isEmpty } from 'lodash';
 import useAsync from 'react-use/lib/useAsync';
+import { isEmpty } from 'lodash';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { NO_INDEX_PATTERNS } from '../../../alerts_search_bar/constants';
+import { validateFieldsKueryNode } from './validate_kuery_node';
 import { suggestionsAbstraction } from './constants';
 import { enhanceSuggestionAbstractionFields } from './helpers';
-import { validateFieldsKueryNode } from './validate_kuery_node';
 
 export interface KqlSearchBarProps {
   onQuerySubmit: (kueryNode: KueryNode) => void;

@@ -6,11 +6,11 @@
  */
 
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import { mockGlobalState } from '../../../../common/mock';
-import type { SecurityAppStore } from '../../../../common/store/types';
-import { usersActions } from '../../../../explore/users/store';
-import { UserAssetTableType } from '../../../../explore/users/store/model';
 import { createToggleUserAssetFieldCellActionFactory } from './toggle_asset_column';
+import type { SecurityAppStore } from '../../../../common/store/types';
+import { mockGlobalState } from '../../../../common/mock';
+import { UserAssetTableType } from '../../../../explore/users/store/model';
+import { usersActions } from '../../../../explore/users/store';
 
 const existingFieldName = 'existing.field';
 const fieldName = 'user.name';

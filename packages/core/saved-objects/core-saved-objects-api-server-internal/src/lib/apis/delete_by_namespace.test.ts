@@ -9,28 +9,28 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import {
+  pointInTimeFinderMock,
   mockGetCurrentTime,
   mockGetSearchDsl,
-  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsDeleteByNamespaceOptions } from '@kbn/core-saved-objects-api-server';
-import {
-  LEGACY_URL_ALIAS_TYPE,
-  SavedObjectsSerializer,
-} from '@kbn/core-saved-objects-base-server-internal';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { loggerMock } from '@kbn/logging-mocks';
-import { kibanaMigratorMock } from '../../mocks';
 import { SavedObjectsRepository } from '../repository';
+import { loggerMock } from '@kbn/logging-mocks';
+import {
+  SavedObjectsSerializer,
+  LEGACY_URL_ALIAS_TYPE,
+} from '@kbn/core-saved-objects-base-server-internal';
+import { kibanaMigratorMock } from '../../mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
-  createDocumentMigrator,
-  createRegistry,
-  createSpySerializer,
-  mappings,
   mockTimestamp,
+  mappings,
+  createRegistry,
+  createDocumentMigrator,
+  createSpySerializer,
 } from '../../test_helpers/repository.test.common';
 
 describe('#deleteByNamespace', () => {

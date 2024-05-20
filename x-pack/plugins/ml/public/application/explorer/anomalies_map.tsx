@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
   EuiIconTip,
@@ -13,22 +17,18 @@ import {
   EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common';
 import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import {
-  COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
+  COLOR_MAP_TYPE,
 } from '@kbn/maps-plugin/common';
 import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
-import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { useMlKibana } from '../contexts/kibana';
 
 const MAX_ENTITY_VALUES = 3;

@@ -9,7 +9,7 @@ import React from 'react';
 
 import moment from 'moment';
 
-import { EuiIcon, EuiTableRow, EuiTableRowCell } from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { MANAGE_BUTTON_LABEL } from '../../../../shared/constants';

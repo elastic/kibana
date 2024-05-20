@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Aliases } from './aliases';
 import { DataRetention, DataStream } from './data_streams';
 import { IndexSettings } from './indices';
+import { Aliases } from './aliases';
 import { Mappings } from './mappings';
 
 /**

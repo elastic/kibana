@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { countDownES } from '../count_down_es';
 
 export const downgradeImmutableRule = async (

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
-import { getDefaultConfigs } from '../../configurations/default_configs';
-import { obsvReportConfigMap } from '../../obsv_exploratory_view';
+import { screen, waitFor } from '@testing-library/react';
 import { mockAppDataView, mockDataView, mockUxSeries, render } from '../../rtl_helpers';
 import { SelectedFilters } from './selected_filters';
+import { getDefaultConfigs } from '../../configurations/default_configs';
+import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
+import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 
 describe('SelectedFilters', function () {
   mockAppDataView();

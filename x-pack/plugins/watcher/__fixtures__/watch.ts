@@ -6,8 +6,8 @@
  */
 
 import { getRandomString } from '@kbn/test-jest-helpers';
-import { WATCH_STATES, WATCH_STATE_COMMENTS } from '../common/constants';
 import { ClientWatchStatusModel } from '../common/types';
+import { WATCH_STATES, WATCH_STATE_COMMENTS } from '../common/constants';
 
 interface Watch {
   id: string;

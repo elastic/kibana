@@ -1,4 +1,3 @@
-import { ColorPalette } from '../../../../common/lib/palettes';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { ColorPalette } from '../../../../common/lib/palettes';
  * 2.0.
  */
 import { CustomColorPalette } from '../types';
+import { ColorPalette } from '../../../../common/lib/palettes';
 
 export type Palette = ColorPalette | CustomColorPalette;
 export type PaletteColorStops = Pick<Palette, 'stops' | 'colors'>;

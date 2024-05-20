@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { History } from 'history';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { Observable } from 'rxjs';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type {
-  AppMountParameters,
   ApplicationStart,
+  AppMountParameters,
   ChromeStart,
   CoreStart,
   CoreTheme,
@@ -21,46 +22,45 @@ import type {
   NotificationsStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
-import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
+  VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
   UiActionsStart,
-  VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
-import type { History } from 'history';
-import { Observable } from 'rxjs';
-import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
-import type { IndexPatternServiceAPI } from '../data_views_service/service';
-import type { LensEmbeddableInput } from '../embeddable/embeddable';
-import type { LensAttributeService } from '../lens_attribute_service';
-import type { LensInspector } from '../lens_inspector_service';
-import type { Document, SavedObjectIndexStore } from '../persistence/saved_object_store';
+import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
   DatasourceMap,
   EditorFrameInstance,
-  LensTopNavMenuEntryGenerator,
-  StartServices,
-  UserMessagesGetter,
-  VisualizationMap,
   VisualizeEditorContext,
+  LensTopNavMenuEntryGenerator,
+  VisualizationMap,
+  UserMessagesGetter,
+  StartServices,
 } from '../types';
+import type { LensAttributeService } from '../lens_attribute_service';
+import type { LensEmbeddableInput } from '../embeddable/embeddable';
+import type { LensInspector } from '../lens_inspector_service';
+import type { IndexPatternServiceAPI } from '../data_views_service/service';
+import type { Document, SavedObjectIndexStore } from '../persistence/saved_object_store';
+import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
 
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;

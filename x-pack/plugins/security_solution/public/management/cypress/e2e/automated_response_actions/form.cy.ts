@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
-import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
-import { ROLE, login } from '../../tasks/login';
 import {
   addEndpointResponseAction,
   fillUpNewRule,
@@ -16,6 +13,9 @@ import {
   validateAvailableCommands,
   visitRuleActions,
 } from '../../tasks/response_actions';
+import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
+import { ResponseActionTypesEnum } from '../../../../../common/api/detection_engine';
+import { login, ROLE } from '../../tasks/login';
 
 export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
 

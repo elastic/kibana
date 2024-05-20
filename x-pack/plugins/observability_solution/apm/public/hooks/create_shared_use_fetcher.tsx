@@ -7,7 +7,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import type { APIEndpoint } from '../../server';
 import type { APIClientRequestParamsOf, APIReturnType } from '../services/rest/create_call_apm_api';
-import { FetcherResult, useFetcher } from './use_fetcher';
+import { useFetcher, FetcherResult } from './use_fetcher';
 
 interface SharedUseFetcher<TEndpoint extends APIEndpoint> {
   useFetcherResult: () => FetcherResult<APIReturnType<TEndpoint>> & {

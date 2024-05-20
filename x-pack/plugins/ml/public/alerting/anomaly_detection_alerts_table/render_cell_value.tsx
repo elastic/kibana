@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
+import React from 'react';
 import type { RenderCellValue } from '@elastic/eui';
-import { EuiHealth } from '@elastic/eui';
+import { isDefined } from '@kbn/ml-is-defined';
+import { ALERT_DURATION, ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { getFormattedSeverityScore, getSeverityColor } from '@kbn/ml-anomaly-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import { ALERT_DURATION, ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
-import { isEmpty } from 'lodash';
-import React from 'react';
+import { EuiHealth } from '@elastic/eui';
 import {
+  alertFieldNameMap,
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
-  alertFieldNameMap,
 } from '../../../common/constants/alerts';
 import { getFieldFormatterProvider } from '../../application/contexts/kibana/use_field_formatter';
 

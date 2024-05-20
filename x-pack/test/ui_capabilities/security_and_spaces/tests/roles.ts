@@ -10,9 +10,9 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import {
   GlobalAll as GlobalAllUser,
-  ManageSecurity as ManageSecurityRoleUser,
-  ReadSecurity as ReadSecurityRoleUser,
   Superuser,
+  ReadSecurity as ReadSecurityRoleUser,
+  ManageSecurity as ManageSecurityRoleUser,
 } from '../scenarios';
 
 export default function fooTests({ getService }: FtrProviderContext) {

@@ -6,20 +6,20 @@
  */
 
 import type {
-  CaseUserActionStatsResponse,
   CaseUserActionsDeprecatedResponse,
+  CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
   UserActionFindResponse,
 } from '../../../common/types/api';
-import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
-import { getConnectors } from './connectors';
-import { find } from './find';
 import { get } from './get';
+import { getConnectors } from './connectors';
 import { getStats } from './stats';
-import type { GetConnectorsRequest, GetUsersRequest, UserActionFind, UserActionGet } from './types';
 import { getUsers } from './users';
+import type { GetConnectorsRequest, UserActionFind, UserActionGet, GetUsersRequest } from './types';
+import { find } from './find';
+import type { CasesClient } from '../client';
 
 /**
  * API for interacting the actions performed by a user when interacting with the cases entities.

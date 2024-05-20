@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
+import { EuiBadge, EuiText } from '@elastic/eui';
 
 export interface RuleActionErrorBadge {
   totalErrors: number;

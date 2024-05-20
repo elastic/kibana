@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { FieldError, useFormContext } from 'react-hook-form';
-import { Field } from '../form/field';
-import { FORM_CONFIG } from '../form/form_config';
-import { ConfigKey, FormMonitorType, StepKey } from '../types';
+import { EuiText } from '@elastic/eui';
+import { useFormContext, FieldError } from 'react-hook-form';
 import { Step } from './step';
+import { FORM_CONFIG } from '../form/form_config';
+import { Field } from '../form/field';
+import { ConfigKey, FormMonitorType, StepKey } from '../types';
 
 export const StepFields = ({
   description,

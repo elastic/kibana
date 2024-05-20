@@ -1,5 +1,3 @@
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +5,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { actionResponsesMapping } from './action_responses_mapping';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { actionsMapping } from './actions_mapping';
+import { actionResponsesMapping } from './action_responses_mapping';
 
 export const ACTIONS_INDEX_NAME = 'osquery_manager.actions';
 export const ACTIONS_INDEX_DEFAULT_NS = '.logs-' + ACTIONS_INDEX_NAME + '-default';

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { getTestScenarios, testCaseFailures } from '../../common/lib/saved_object_test_utils';
-import { ALL_SPACES_ID, SPACES } from '../../common/lib/spaces';
+import { SPACES, ALL_SPACES_ID } from '../../common/lib/spaces';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
+  bulkGetTestSuiteFactory,
+  TEST_CASES as CASES,
   BulkGetTestCase,
   BulkGetTestDefinition,
-  TEST_CASES as CASES,
-  bulkGetTestSuiteFactory,
 } from '../../common/suites/bulk_get';
 
 const {

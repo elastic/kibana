@@ -6,8 +6,8 @@
  */
 
 import { format as formatUrl } from 'url';
-import { ProvidedType } from '@kbn/test';
 import supertest from 'supertest';
+import { ProvidedType } from '@kbn/test';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 export type SupertestWithoutAuthType = ProvidedType<typeof SupertestWithoutAuthProvider>;
 /**

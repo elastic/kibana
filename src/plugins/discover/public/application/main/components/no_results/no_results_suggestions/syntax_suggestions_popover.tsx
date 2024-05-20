@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiCode,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
-  EuiSpacer,
+  EuiCode,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 
 interface SyntaxExample {
   label: string;

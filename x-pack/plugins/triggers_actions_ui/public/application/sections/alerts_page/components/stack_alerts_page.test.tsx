@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
 import * as React from 'react';
+import { waitFor } from '@testing-library/react';
 
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { ruleTypesIndex } from '../../../mock/rule_types_index';
-import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { StackAlertsPage } from './stack_alerts_page';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { ruleTypesIndex } from '../../../mock/rule_types_index';
 
 jest.mock('../../../../common/get_experimental_features');
 jest.mock('../../../../common/lib/kibana');

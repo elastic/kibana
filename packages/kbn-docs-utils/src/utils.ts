@@ -9,12 +9,12 @@ import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
   ApiDeclaration,
-  ApiScope,
-  Lifecycle,
-  PluginApi,
-  PluginOrPackage,
   ScopeApi,
   TypeKind,
+  Lifecycle,
+  PluginApi,
+  ApiScope,
+  PluginOrPackage,
 } from './types';
 
 function capitalize(str: string): string {

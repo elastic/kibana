@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
+import { set } from '@kbn/safer-lodash-set';
 import { Root } from '@kbn/core-root-server-internal';
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
-import { set } from '@kbn/safer-lodash-set';
+import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 
 describe('checking migration metadata changes on all registered SO types', () => {
   let root: Root;

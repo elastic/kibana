@@ -8,11 +8,11 @@
 import React, { useState, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { Form } from '../components/form';
-import { UseField } from '../components/use_field';
 import { registerTestBed } from '../shared_imports';
 import { useForm } from './use_form';
 import { useFormIsModified } from './use_form_is_modified';
+import { Form } from '../components/form';
+import { UseField } from '../components/use_field';
 
 describe('useFormIsModified()', () => {
   interface Props {

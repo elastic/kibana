@@ -15,9 +15,9 @@ import {
 import { Dictionary, groupBy, keyBy } from 'lodash';
 import moment from 'moment';
 import {
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { SLODefinition } from '../domain/models';
 import { HealthStatus, State } from '../domain/models/health';
@@ -28,10 +28,7 @@ const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
 
 export class GetSLOHealth {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private repository: SLORepository
-  ) {}
+  constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
     const sloIds = params.list.map(({ sloId }) => sloId);

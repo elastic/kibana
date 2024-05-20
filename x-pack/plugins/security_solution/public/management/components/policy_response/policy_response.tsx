@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiHealth, EuiNotificationBadge, EuiText, EuiTreeView } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiHealth, EuiText, EuiTreeView, EuiNotificationBadge } from '@elastic/eui';
+import { useKibana } from '../../../common/lib/kibana';
 import type {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
@@ -17,9 +18,8 @@ import type {
   ImmutableObject,
 } from '../../../../common/endpoint/types';
 import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
-import { useKibana } from '../../../common/lib/kibana';
+import { formatResponse, PolicyResponseActionFormatter } from './policy_response_friendly_names';
 import { PolicyResponseActionItem } from './policy_response_action_item';
-import { PolicyResponseActionFormatter, formatResponse } from './policy_response_friendly_names';
 
 // Most of them are needed in order to display large react nodes (PolicyResponseActionItem) in child levels.
 const StyledEuiTreeView = styled(EuiTreeView)`

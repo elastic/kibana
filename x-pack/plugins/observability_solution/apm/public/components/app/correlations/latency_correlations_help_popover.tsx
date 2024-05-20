@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 import { HelpPopover, HelpPopoverButton } from '../help_popover/help_popover';
 
 export function LatencyCorrelationsHelpPopover() {

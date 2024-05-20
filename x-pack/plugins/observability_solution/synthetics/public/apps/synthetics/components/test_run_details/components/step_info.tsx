@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,13 +15,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { useParams } from 'react-router-dom';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { ErrorDetailsButton } from '../../common/links/error_details_link';
 import { StepDetailsLinkIcon } from '../../common/links/step_details_link';
-import { StatusBadge, parseBadgeStatus } from '../../common/monitor_test_result/status_badge';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 
 export const StepMetaInfo = ({
   step,

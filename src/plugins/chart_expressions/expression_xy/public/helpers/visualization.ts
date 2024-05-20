@@ -7,20 +7,20 @@
  */
 
 import {
-  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
   LayerTypes,
   REFERENCE_LINE,
   REFERENCE_LINE_LAYER,
+  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
 } from '../../common/constants';
 import {
-  CommonXYAnnotationLayerConfig,
-  CommonXYDataLayerConfig,
   CommonXYLayerConfig,
+  CommonXYDataLayerConfig,
   CommonXYReferenceLineLayerConfig,
-  ExtendedReferenceLineDecorationConfig,
+  CommonXYAnnotationLayerConfig,
+  ReferenceLineLayerConfig,
   ReferenceLineConfig,
   ReferenceLineDecorationConfigResult,
-  ReferenceLineLayerConfig,
+  ExtendedReferenceLineDecorationConfig,
 } from '../../common/types';
 
 export const isDataLayer = (layer: CommonXYLayerConfig): layer is CommonXYDataLayerConfig =>

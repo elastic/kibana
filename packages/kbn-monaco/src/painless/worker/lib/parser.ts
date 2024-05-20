@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CharStreams, CommonTokenStream } from 'antlr4';
-import { ANTLRErrorListener } from '../../../common/error_listener';
-import { MonacoEditorError } from '../../../types';
+import { CommonTokenStream, CharStreams } from 'antlr4';
 import { default as PainlessParser, SourceContext } from '../../antlr/painless_parser';
 import { PainlessLexerEnhanced } from './lexer';
+import { MonacoEditorError } from '../../../types';
+import { ANTLRErrorListener } from '../../../common/error_listener';
 
 const parse = (
   code: string

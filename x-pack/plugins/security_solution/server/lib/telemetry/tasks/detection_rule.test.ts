@@ -6,12 +6,12 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createTelemetryDetectionRuleListsTaskConfig } from './detection_rule';
 import {
-  createMockTaskMetrics,
   createMockTelemetryEventsSender,
   createMockTelemetryReceiver,
+  createMockTaskMetrics,
 } from '../__mocks__';
-import { createTelemetryDetectionRuleListsTaskConfig } from './detection_rule';
 
 describe('security detection rule task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

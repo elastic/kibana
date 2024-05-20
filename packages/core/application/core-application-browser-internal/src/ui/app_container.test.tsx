@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { type AppMountParameters, AppStatus } from '@kbn/core-application-browser';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import { AppContainer } from './app_container';
+import type { Mounter } from '../types';
 import { createMemoryHistory } from 'history';
 import { CoreScopedHistory as ScopedHistory } from '../scoped_history';
-import type { Mounter } from '../types';
-import { AppContainer } from './app_container';
 
 describe('AppContainer', () => {
   const appId = 'someApp';

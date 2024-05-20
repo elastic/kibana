@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
-  KibanaMigratorTestKit,
+  readLog,
   clearLog,
   createBaseline,
   currentVersion,
@@ -17,8 +17,8 @@ import {
   getCompatibleMappingsMigrator,
   getIdenticalMappingsMigrator,
   getIncompatibleMappingsMigrator,
-  readLog,
   startElasticsearch,
+  KibanaMigratorTestKit,
 } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
 

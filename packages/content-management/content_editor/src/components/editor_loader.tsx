@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
 import React, { useState, useCallback, useEffect } from 'react';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
 import type { Props } from './editor_flyout_content_container';
 
 export const ContentEditorLoader: React.FC<Props> = (props) => {

@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import type { ResponseActionsClient, ProcessPendingActionsMethodOptions } from '../lib/types';
+import { responseActionsClientMock } from '../mocks';
+import { SentinelOneActionsClient } from './sentinel_one_actions_client';
+import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
+import { ResponseActionsNotSupportedError } from '../errors';
+import type { SentinelOneActionsClientOptionsMock } from './mocks';
+import { sentinelOneMock } from './mocks';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../../../common/endpoint/constants';
 import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../../..';
+import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
-import type { ResponseActionGetFileRequestBody } from '../../../../../../common/api/endpoint';
-import {
-  ENDPOINT_ACTIONS_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-} from '../../../../../../common/endpoint/constants';
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
-import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  SentinelOneActivityEsDoc,
+  SentinelOneIsolationRequestMeta,
+  SentinelOneActivityDataForType80,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  SentinelOneActivityDataForType80,
-  SentinelOneActivityEsDoc,
   SentinelOneGetFileRequestMeta,
-  SentinelOneIsolationRequestMeta,
 } from '../../../../../../common/endpoint/types';
-import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
-import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
+import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ResponseActionGetFileRequestBody } from '../../../../../../common/api/endpoint';
+import { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
-import { ResponseActionsNotSupportedError } from '../errors';
-import type { ProcessPendingActionsMethodOptions, ResponseActionsClient } from '../lib/types';
-import { responseActionsClientMock } from '../mocks';
-import type { SentinelOneActionsClientOptionsMock } from './mocks';
-import { sentinelOneMock } from './mocks';
-import { SentinelOneActionsClient } from './sentinel_one_actions_client';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { Readable } from 'stream';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -164,7 +164,8 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should write action request (only) to endpoint indexes when `responseActionsSentinelOneV2Enabled` FF is Enabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled = true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
+        true;
       await s1ActionsClient.isolate(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
@@ -293,7 +294,8 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should write action request (only) to endpoint indexes when `` is Enabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled = true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneV2Enabled =
+        true;
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(classConstructorOptions.esClient.index).toHaveBeenCalledTimes(1);
@@ -730,14 +732,16 @@ describe('SentinelOneActionsClient class', () => {
 
     beforeEach(() => {
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
 
       getFileReqOptions = responseActionsClientMock.createGetFileOptions();
     });
 
     it('should error if feature flag is not enabled', async () => {
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        false;
 
       await expect(s1ActionsClient.getFile(getFileReqOptions)).rejects.toHaveProperty(
         'message',
@@ -786,7 +790,8 @@ describe('SentinelOneActionsClient class', () => {
         responseActionsClientMock.createNormalizedExternalConnectorClient(subActionsClient);
       connectorActionsMock = classConstructorOptions.connectorActions;
       // @ts-expect-error readonly prop assignment
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
       s1ActionsClient = new SentinelOneActionsClient(classConstructorOptions);
 
       const executeMockFn = (subActionsClient.execute as jest.Mock).getMockImplementation();
@@ -939,12 +944,14 @@ describe('SentinelOneActionsClient class', () => {
   describe('#getFileInfo()', () => {
     beforeEach(() => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
     });
 
     it('should throw error if feature flag is disabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        false;
 
       await expect(s1ActionsClient.getFileInfo('acb', '123')).rejects.toThrow(
         'File downloads are not supported for sentinel_one agent type. Feature disabled'
@@ -999,7 +1006,8 @@ describe('SentinelOneActionsClient class', () => {
       s1DataGenerator = new SentinelOneDataGenerator('seed');
 
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = true;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
 
       const esHit = s1DataGenerator.generateResponseEsHit({
         agent: { id: '123' },
@@ -1032,7 +1040,8 @@ describe('SentinelOneActionsClient class', () => {
 
     it('should throw error if feature flag is disabled', async () => {
       // @ts-expect-error updating readonly attribute
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled = false;
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        false;
 
       await expect(s1ActionsClient.getFileDownload('acb', '123')).rejects.toThrow(
         'File downloads are not supported for sentinel_one agent type. Feature disabled'

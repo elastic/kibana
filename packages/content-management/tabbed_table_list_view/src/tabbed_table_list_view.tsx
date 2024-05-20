@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { TableListViewProps } from '@kbn/content-management-table-list-view';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useState } from 'react';
+import type { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 
 export type TableListTabParentProps<T extends UserContentCommonSchema = UserContentCommonSchema> =
   Pick<TableListViewTableProps<T>, 'onFetchSuccess' | 'setPageDataTestSubject'>;

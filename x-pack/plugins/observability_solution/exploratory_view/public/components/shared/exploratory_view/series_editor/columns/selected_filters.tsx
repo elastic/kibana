@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
 import { FilterLabel } from '../../components/filter_label';
+import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
 
 interface Props {
   seriesId: number;

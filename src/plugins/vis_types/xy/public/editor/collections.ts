@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { Fit } from '@elastic/charts';
 
 import { LabelRotation } from '@kbn/charts-plugin/public';
-import { ChartType } from '../../common';
 import { AxisMode, ChartMode, InterpolationMode, ThresholdLineStyle } from '../types';
-import { getPositions } from './positions';
+import { ChartType } from '../../common';
 import { getScaleTypes } from './scale_types';
+import { getPositions } from './positions';
 
 export { getScaleTypes, getPositions };
 

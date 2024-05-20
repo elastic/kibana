@@ -6,21 +6,21 @@
  */
 
 import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { schema } from '@kbn/config-schema';
+import { InfraBackendLibs } from '../../lib/infra_types';
 import {
-  MetricsExplorerPageInfo,
   metricsExplorerRequestBodyRT,
   metricsExplorerResponseRT,
+  MetricsExplorerPageInfo,
 } from '../../../common/http_api';
 import { throwErrors } from '../../../common/runtime_types';
-import { createSearchClient } from '../../lib/create_search_client';
-import { InfraBackendLibs } from '../../lib/infra_types';
-import { query } from '../../lib/metrics';
 import { convertRequestToMetricsAPIOptions } from './lib/convert_request_to_metrics_api_options';
+import { createSearchClient } from '../../lib/create_search_client';
 import { findIntervalForMetrics } from './lib/find_interval_for_metrics';
+import { query } from '../../lib/metrics';
 import { queryTotalGroupings } from './lib/query_total_groupings';
 import { transformSeries } from './lib/transform_series';
 

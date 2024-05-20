@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { readRules } from './read_rules';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import {
-  getFindResultWithSingleHit,
-  getRuleMock,
   resolveRuleMock,
+  getRuleMock,
+  getFindResultWithSingleHit,
 } from '../../../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
-import { readRules } from './read_rules';
 
 export class TestError extends Error {
   constructor() {

@@ -12,8 +12,8 @@ import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import { getKibanaSavedObjectCounts, registerKibanaUsageCollector } from './kibana_usage_collector';
 import { getSavedObjectsCountsMock } from './saved_objects_count.test.mocks';
+import { getKibanaSavedObjectCounts, registerKibanaUsageCollector } from './kibana_usage_collector';
 
 const logger = loggingSystemMock.createLogger();
 

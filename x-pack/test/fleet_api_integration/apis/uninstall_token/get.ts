@@ -6,22 +6,22 @@
  */
 
 import expect from '@kbn/expect';
-import { AgentPolicy } from '@kbn/fleet-plugin/common';
+import {
+  GetUninstallTokensMetadataResponse,
+  GetUninstallTokenResponse,
+} from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import {
   agentPolicyRouteService,
   uninstallTokensRouteService,
 } from '@kbn/fleet-plugin/common/services';
-import {
-  GetUninstallTokenResponse,
-  GetUninstallTokensMetadataResponse,
-} from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
+import { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { testUsers } from '../test_users';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import {
   addUninstallTokenToPolicy,
   generateAgentPolicy,
   generateNAgentPolicies,
 } from '../../helpers';
-import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

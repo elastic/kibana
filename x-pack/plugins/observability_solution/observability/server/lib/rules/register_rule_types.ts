@@ -7,8 +7,8 @@
 
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
-import { ObservabilityConfig } from '../..';
 import { CustomThresholdLocators } from './custom_threshold/custom_threshold_executor';
+import { ObservabilityConfig } from '../..';
 import { thresholdRuleType } from './custom_threshold/register_custom_threshold_rule_type';
 
 export function registerRuleTypes(

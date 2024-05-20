@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
-import { useSetAlertTags } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_tags';
-import { useUiSetting$ } from '../../../../common/lib/kibana';
-import { TestProviders } from '../../../../common/mock';
-import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
-import type { AlertTableContextMenuItem } from '../types';
 import type { UseAlertTagsActionsProps } from './use_alert_tags_actions';
 import { useAlertTagsActions } from './use_alert_tags_actions';
+import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
+import type { AlertTableContextMenuItem } from '../types';
+import { render } from '@testing-library/react';
+import React from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { TestProviders } from '../../../../common/mock';
+import { useSetAlertTags } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_tags';
+import { useUiSetting$ } from '../../../../common/lib/kibana';
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_tags');

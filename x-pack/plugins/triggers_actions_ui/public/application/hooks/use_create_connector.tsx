@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { useRef, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useEffect, useRef, useState } from 'react';
-import { useKibana } from '../../common/lib/kibana';
 import { ActionConnector, ActionConnectorWithoutId } from '../../types';
 import { createActionConnector } from '../lib/action_connector_api';
+import { useKibana } from '../../common/lib/kibana';
 
 type CreateConnectorSchema = Pick<
   ActionConnectorWithoutId,

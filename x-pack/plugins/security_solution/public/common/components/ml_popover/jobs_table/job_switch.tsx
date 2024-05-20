@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
+import React, { useState, useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import {
-  isJobFailed,
   isJobLoading,
+  isJobFailed,
   isJobStarted,
 } from '../../../../../common/machine_learning/helpers';
 import type { SecurityJob } from '../types';

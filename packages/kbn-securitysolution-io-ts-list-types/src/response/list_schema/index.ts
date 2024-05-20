@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { version } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { version } from '@kbn/securitysolution-io-ts-types';
+import { _versionOrUndefined } from '../../common/underscore_version';
+import { deserializerOrUndefined } from '../../common/deserializer';
+import { metaOrUndefined } from '../../common/meta';
+import { serializerOrUndefined } from '../../common/serializer';
 import { created_at } from '../../common/created_at';
+import { timestampOrUndefined } from '../../common/timestamp';
 import { created_by } from '../../common/created_by';
 import { description } from '../../common/description';
-import { deserializerOrUndefined } from '../../common/deserializer';
 import { id } from '../../common/id';
 import { immutable } from '../../common/immutable';
-import { metaOrUndefined } from '../../common/meta';
 import { name } from '../../common/name';
-import { serializerOrUndefined } from '../../common/serializer';
 import { tie_breaker_id } from '../../common/tie_breaker_id';
-import { timestampOrUndefined } from '../../common/timestamp';
 import { type } from '../../common/type';
-import { _versionOrUndefined } from '../../common/underscore_version';
 import { updated_at } from '../../common/updated_at';
 import { updated_by } from '../../common/updated_by';
 

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Cookie } from 'tough-cookie';
-import * as helper from './helper';
 import { Session } from './saml_auth';
-import * as samlAuth from './saml_auth';
 import { SamlSessionManager } from './session_manager';
+import * as samlAuth from './saml_auth';
+import * as helper from './helper';
 import { Role, User } from './types';
+import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 
 const log = new ToolingLog();
 

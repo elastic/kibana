@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { constants, accessSync, readFileSync, statSync } from 'fs';
+import { accessSync, constants, readFileSync, statSync } from 'fs';
+import { safeLoad } from 'js-yaml';
 import { dirname, join } from 'path';
+import { Observable, firstValueFrom } from 'rxjs';
 import { ensureDeepObject } from '@kbn/std';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { safeLoad } from 'js-yaml';
-import { Observable, firstValueFrom } from 'rxjs';
 
 import { TelemetryConfigType } from '../../config';
 

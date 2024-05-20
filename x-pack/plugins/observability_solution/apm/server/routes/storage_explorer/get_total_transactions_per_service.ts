@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  getProcessorEventForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
+} from '../../lib/helpers/transactions';
 import { SERVICE_NAME, TIER } from '../../../common/es_fields/apm';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import {
-  getBackwardCompatibleDocumentTypeFilter,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTotalTransactionsPerService({
   apmEventClient,
@@ -74,12 +74,9 @@ export async function getTotalTransactionsPerService({
   });
 
   return (
-    response.aggregations?.sample.services.buckets.reduce(
-      (transactionsPerService, bucket) => {
-        transactionsPerService[bucket.key as string] = bucket.doc_count;
-        return transactionsPerService;
-      },
-      {} as Record<string, number>
-    ) ?? {}
+    response.aggregations?.sample.services.buckets.reduce((transactionsPerService, bucket) => {
+      transactionsPerService[bucket.key as string] = bucket.doc_count;
+      return transactionsPerService;
+    }, {} as Record<string, number>) ?? {}
   );
 }

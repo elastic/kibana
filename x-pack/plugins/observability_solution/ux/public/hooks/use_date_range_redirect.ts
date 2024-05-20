@@ -1,4 +1,3 @@
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
  */
 import qs from 'query-string';
 import { useHistory, useLocation } from 'react-router-dom';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useKibanaServices } from './use_kibana_services';
 
 export interface TimePickerTimeDefaults {

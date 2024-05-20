@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { shallow, mount } from 'enzyme';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { SeriesParam } from '../../../../types';
-import { seriesParam } from './mocks';
 import { PointOptions, PointOptionsParams } from './point_options';
+import { seriesParam } from './mocks';
 
 describe('PointOptions component', () => {
   let setChart: jest.Mock;

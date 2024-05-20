@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BareNote, Note } from '../../../../common/api/timeline';
 import { NOTE_URL } from '../../../../common/constants';
+import type { BareNote, Note } from '../../../../common/api/timeline';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistNote = async ({

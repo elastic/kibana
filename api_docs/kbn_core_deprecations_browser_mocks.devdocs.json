@@ -73,7 +73,9 @@
             "tags": [],
             "label": "createSetupContract",
             "description": [],
-            "signature": ["() => undefined"],
+            "signature": [
+              "() => undefined"
+            ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

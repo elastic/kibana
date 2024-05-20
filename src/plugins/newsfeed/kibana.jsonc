@@ -6,7 +6,9 @@
     "id": "newsfeed",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["screenshotMode"],
+    "requiredPlugins": [
+      "screenshotMode"
+    ],
     "requiredBundles": []
   }
 }

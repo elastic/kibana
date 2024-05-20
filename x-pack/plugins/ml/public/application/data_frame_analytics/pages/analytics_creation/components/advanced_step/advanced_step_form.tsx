@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { Fragment, useMemo, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiAccordion,
@@ -21,22 +24,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  ANALYSIS_ADVANCED_FIELDS,
   ANALYSIS_CONFIG_TYPE,
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
+  ANALYSIS_ADVANCED_FIELDS,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type { FC } from 'react';
-import React, { Fragment, useMemo, useEffect, useState } from 'react';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { HyperParameters } from './hyper_parameters';
 import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { getModelMemoryLimitErrors } from '../../../analytics_management/hooks/use_create_analytics_form/reducer';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
-import { ContinueButton } from '../continue_button';
 import { fetchExplainData } from '../shared';
-import { HyperParameters } from './hyper_parameters';
+import { ContinueButton } from '../continue_button';
 import { OutlierHyperParameters } from './outlier_hyper_parameters';
 
 const defaultNumTopClassesOption: EuiComboBoxOptionOption = {

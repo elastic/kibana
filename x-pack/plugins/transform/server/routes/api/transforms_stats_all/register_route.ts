@@ -8,8 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
-  type GetTransformStatsQuerySchema,
   getTransformStatsQuerySchema,
+  type GetTransformStatsQuerySchema,
 } from '../../../../common/api_schemas/transforms_stats';
 import { addInternalBasePath } from '../../../../common/constants';
 

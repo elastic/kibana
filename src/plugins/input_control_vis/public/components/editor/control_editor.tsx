@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage, InjectedIntlProps, injectI18n } from '@kbn/i18n-react';
 import React, { PureComponent, ChangeEvent } from 'react';
+import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n-react';
 
 import {
   EuiAccordion,
@@ -20,10 +20,10 @@ import {
 } from '@elastic/eui';
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import { CONTROL_TYPES, ControlParams, ControlParamsOptions, getTitle } from '../../editor_utils';
-import { InputControlVisDependencies } from '../../plugin';
-import { ListControlEditor } from './list_control_editor';
 import { RangeControlEditor } from './range_control_editor';
+import { ListControlEditor } from './list_control_editor';
+import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
+import { InputControlVisDependencies } from '../../plugin';
 
 import './control_editor.scss';
 

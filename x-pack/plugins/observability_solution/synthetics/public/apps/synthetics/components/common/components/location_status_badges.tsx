@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -15,7 +16,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { LocationsStatus } from '../../../hooks';
 import { useMonitorDetailLocator } from '../../../hooks/use_monitor_detail_locator';
 const DEFAULT_DISPLAY_COUNT = 3;

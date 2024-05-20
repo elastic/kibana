@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,11 +19,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
 import { DiagnoseResponse } from '@kbn/reporting-public/reporting_api_client';
-import React, { useState } from 'react';
 
 interface Props {
   apiClient: ReportingAPIClient;

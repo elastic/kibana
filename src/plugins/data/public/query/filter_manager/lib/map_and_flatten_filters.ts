@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Filter, migrateFilter } from '@kbn/es-query';
 import { compact, flatten } from 'lodash';
+import { Filter, migrateFilter } from '@kbn/es-query';
 import { mapFilter } from './map_filter';
 
 export const mapAndFlattenFilters = (filters: Filter[]) => {

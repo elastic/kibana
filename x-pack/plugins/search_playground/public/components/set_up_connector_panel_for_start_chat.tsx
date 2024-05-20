@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { GenerativeAIForSearchPlaygroundConnectorFeatureId } from '@kbn/actions-plugin/common';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState } from 'react';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { GenerativeAIForSearchPlaygroundConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AnalyticsEvents } from '../analytics/constants';
+import { useUsageTracker } from '../hooks/use_usage_tracker';
 import { useKibana } from '../hooks/use_kibana';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
-import { useUsageTracker } from '../hooks/use_usage_tracker';
 import { StartChatPanel } from './start_chat_panel';
 
 export const SetUpConnectorPanelForStartChat: React.FC = () => {

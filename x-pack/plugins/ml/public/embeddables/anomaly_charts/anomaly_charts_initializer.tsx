@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldNumber,
-  EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
-import React, { useState } from 'react';
 import type { AnomalyChartsEmbeddableInput } from '..';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 

@@ -10,8 +10,6 @@ import type {
   PluginStartContract as AlertingPluginPublicStart,
 } from '@kbn/alerting-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   AppMountParameters,
   CoreSetup,
@@ -20,7 +18,6 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public/plugin';
@@ -31,13 +28,13 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { MetricsDataPluginStart } from '@kbn/metrics-data-access-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
-import { MetricsDataPluginStart } from '@kbn/metrics-data-access-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
   ObservabilityAIAssistantPublicSetup,
@@ -65,18 +62,21 @@ import type {
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { from } from 'rxjs';
 import { map } from 'rxjs';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
+import { registerEmbeddables } from './embeddable/register_embeddables';
 import {
-  LazyApmCustomAssetsExtension,
   getApmEnrollmentFlyoutData,
+  LazyApmCustomAssetsExtension,
 } from './components/fleet_integration';
 import { getLazyApmAgentsTabExtension } from './components/fleet_integration/lazy_apm_agents_tab_extension';
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
-import { registerEmbeddables } from './embeddable/register_embeddables';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';

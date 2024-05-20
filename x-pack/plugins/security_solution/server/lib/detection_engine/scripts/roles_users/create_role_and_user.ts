@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
 import yargs from 'yargs';
+import { ToolingLog } from '@kbn/tooling-log';
 import {
   KNOWN_ESS_ROLE_DEFINITIONS,
   KNOWN_SERVERLESS_ROLE_DEFINITIONS,

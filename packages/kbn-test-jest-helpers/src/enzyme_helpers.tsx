@@ -13,8 +13,8 @@
  * intl context around them.
  */
 
-import { I18nProvider, InjectedIntl, __IntlProvider, intlShape } from '@kbn/i18n-react';
-import { ReactWrapper, mount, render, shallow } from 'enzyme';
+import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n-react';
+import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ComponentType, ReactElement, ValidationMap } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 

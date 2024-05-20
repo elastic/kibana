@@ -7,8 +7,8 @@
 
 import { getDeprecationDataView } from './external_links';
 
-import { Start, dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DEPRECATION_LOGS_INDEX_PATTERN } from '../../../../../common/constants';
+import { dataPluginMock, Start } from '@kbn/data-plugin/public/mocks';
 
 describe('External Links', () => {
   let dataService: Start;
@@ -26,14 +26,10 @@ describe('External Links', () => {
 
       expect(dataViewId).toBe('123-456');
       // prettier-ignore
-      expect(dataService.dataViews.createAndSave).toHaveBeenCalledWith(
-        {
-          title: DEPRECATION_LOGS_INDEX_PATTERN,
-          allowNoIndex: true,
-        },
-        false,
-        true
-      );
+      expect(dataService.dataViews.createAndSave).toHaveBeenCalledWith({
+        title: DEPRECATION_LOGS_INDEX_PATTERN,
+        allowNoIndex: true,
+      }, false, true);
     });
 
     it('uses existing data view if it already exists', async () => {

@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { isJSXExpressionContainer, isJSXIdentifier, isObjectExpression } from '@babel/types';
+import { isJSXIdentifier, isObjectExpression, isJSXExpressionContainer } from '@babel/types';
 
-import { createFailError } from '@kbn/dev-cli-errors';
-import { DEFAULT_MESSAGE_KEY, DESCRIPTION_KEY, VALUES_KEY } from '../constants';
 import {
-  checkValuesProperty,
-  extractDescriptionValueFromNode,
+  isPropertyWithKey,
+  formatJSString,
+  formatHTMLString,
   extractMessageIdFromNode,
   extractMessageValueFromNode,
+  extractDescriptionValueFromNode,
   extractValuesKeysFromNode,
-  formatHTMLString,
-  formatJSString,
-  isPropertyWithKey,
+  checkValuesProperty,
 } from '../utils';
+import { DEFAULT_MESSAGE_KEY, VALUES_KEY, DESCRIPTION_KEY } from '../constants';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 /**
  * Extract default messages from ReactJS intl.formatMessage(...) AST

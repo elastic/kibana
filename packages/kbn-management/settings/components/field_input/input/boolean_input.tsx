@@ -13,8 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
-import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import type { InputProps } from '../types';
+import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 /**
  * Props for a {@link BooleanInput} component.

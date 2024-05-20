@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useState, useEffect } from 'react';
 import type { SavedQueryService } from '@kbn/data-plugin/public';
 import { createSavedQueryService } from '@kbn/data-plugin/public';
-import { useEffect, useState } from 'react';
 
 import { useKibana } from '../../lib/kibana';
 

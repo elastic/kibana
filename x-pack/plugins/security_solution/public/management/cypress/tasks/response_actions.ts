@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { inputConsoleCommand, submitCommand } from './response_console';
+import type { UserAuthzAccessLevel } from '../screens';
+import { loadPage, request } from './common';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import {
   ACTION_DETAILS_ROUTE,
   EXECUTE_ROUTE,
@@ -16,13 +20,9 @@ import {
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
+import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
-import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
-import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
-import type { UserAuthzAccessLevel } from '../screens';
-import { loadPage, request } from './common';
-import { inputConsoleCommand, submitCommand } from './response_console';
 
 export const validateAvailableCommands = () => {
   // TODO: TC- use ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS when we go GA with automated process actions

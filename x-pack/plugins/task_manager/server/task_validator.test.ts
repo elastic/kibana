@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { taskManagerMock } from './mocks';
-import { TaskTypeDictionary } from './task_type_dictionary';
-import { TaskValidator } from './task_validator';
 import { mockLogger } from './test_utils';
+import { TaskValidator } from './task_validator';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 const fooTaskDefinition = {
   title: 'Foo',

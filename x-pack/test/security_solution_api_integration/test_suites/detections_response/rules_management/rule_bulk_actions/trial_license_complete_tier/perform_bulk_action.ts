@@ -5,32 +5,25 @@
  * 2.0.
  */
 
-import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import {
-  BulkActionEditTypeEnum,
-  BulkActionTypeEnum,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import expect from 'expect';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
-import expect from 'expect';
 import {
-  createAlertsIndex,
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../../common/utils/security_solution';
-import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
+  BulkActionTypeEnum,
+  BulkActionEditTypeEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
+import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   binaryToString,
-  getCustomQueryRuleParams,
   getSimpleMlRule,
+  getCustomQueryRuleParams,
   getSimpleRule,
   getSimpleRuleOutput,
   getSlackAction,
@@ -39,6 +32,13 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
+import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { Duration } from 'moment';
-import type { IndexPattern } from '../../../types';
 import {
-  GenericIndexPatternColumn,
   adjustTimeScaleLabelSuffix,
+  GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
-import { reducedTimeRangeOptions } from '../reduced_time_range_utils';
 import type { FormBasedLayer } from '../types';
+import type { IndexPattern } from '../../../types';
+import { reducedTimeRangeOptions } from '../reduced_time_range_utils';
 
 export function setReducedTimeRange(
   columnId: string,
@@ -145,10 +145,10 @@ export function ReducedTimeRange({
                   'Additional time range filter can not be used together with date histogram or without a default time field specified on the data view',
               })
             : isLocalValueInvalid
-              ? i18n.translate('xpack.lens.indexPattern.reducedTimeRange.genericInvalidHelp', {
-                  defaultMessage: 'Time range value is not valid.',
-                })
-              : undefined
+            ? i18n.translate('xpack.lens.indexPattern.reducedTimeRange.genericInvalidHelp', {
+                defaultMessage: 'Time range value is not valid.',
+              })
+            : undefined
         }
         isInvalid={isLocalValueInvalid || shouldNotUseReducedTimeRange}
       >

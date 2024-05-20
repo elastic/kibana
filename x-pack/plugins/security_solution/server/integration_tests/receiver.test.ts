@@ -7,18 +7,18 @@
 import Path from 'path';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { bulkInsert, removeFile, setupTestServers } from './lib/helpers';
+import { bulkInsert, setupTestServers, removeFile } from './lib/helpers';
 import { getTelemetryReceiver } from './lib/telemetry_helpers';
 
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import type { Nullable } from '../lib/telemetry/types';
 import { Plugin as SecuritySolutionPlugin } from '../plugin';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { Nullable } from '../lib/telemetry/types';
 
 // not needed, but it avoids some error messages like "Error: Cross origin http://localhost forbidden"
 jest.mock('axios');

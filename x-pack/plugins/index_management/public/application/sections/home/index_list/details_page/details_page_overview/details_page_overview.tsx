@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiTextColor,
+  EuiLink,
+  EuiFlexGrid,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 import {
   CodeBox,
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
-  getConsoleRequest,
   getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
 } from '@kbn/search-api-panels';
-import React, { useState, useMemo } from 'react';
+import { StatusDetails } from './status_details';
 import type { Index } from '../../../../../../../common';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services';
-import { AliasesDetails } from './aliases_details';
+import { languageDefinitions, curlDefinition } from './languages';
 import { DataStreamDetails } from './data_stream_details';
-import { curlDefinition, languageDefinitions } from './languages';
-import { StatusDetails } from './status_details';
 import { StorageDetails } from './storage_details';
+import { AliasesDetails } from './aliases_details';
 
 interface Props {
   indexDetails: Index;

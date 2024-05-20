@@ -6,11 +6,11 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
-import { createTag, createTagAttributes } from '../../../common/test_utils';
 import { Tag } from '../../../common/types';
+import { createTag, createTagAttributes } from '../../../common/test_utils';
 import { tagsCacheMock } from './tags_cache.mock';
-import { FindTagsOptions, TagsClient } from './tags_client';
+import { TagsClient, FindTagsOptions } from './tags_client';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('TagsClient', () => {
   let tagsClient: TagsClient;

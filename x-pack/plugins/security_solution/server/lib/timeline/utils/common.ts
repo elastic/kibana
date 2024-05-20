@@ -1,9 +1,3 @@
-import fs from 'fs';
-import readline from 'readline';
-import type { Readable } from 'stream';
-import { schema } from '@kbn/config-schema';
-import { set } from '@kbn/safer-lodash-set/fp';
-import { createListStream } from '@kbn/utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,6 +5,12 @@ import { createListStream } from '@kbn/utils';
  * 2.0.
  */
 import type * as rt from 'io-ts';
+import { set } from '@kbn/safer-lodash-set/fp';
+import readline from 'readline';
+import fs from 'fs';
+import type { Readable } from 'stream';
+import { createListStream } from '@kbn/utils';
+import { schema } from '@kbn/config-schema';
 
 import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
-import { InventoryItemType, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { findInventoryFields, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';

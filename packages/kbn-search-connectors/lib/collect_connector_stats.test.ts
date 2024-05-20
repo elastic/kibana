@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { fetchConnectors, fetchSyncJobs } from '..';
 import { ConnectorSyncJob, Paginate } from '../types';
+import { fetchConnectors, fetchSyncJobs } from '..';
 import { collectConnectorStats } from './collect_connector_stats';
 import {
   expectedDeletedConnectorStats,

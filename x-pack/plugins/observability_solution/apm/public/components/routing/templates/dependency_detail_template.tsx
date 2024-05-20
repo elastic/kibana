@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { unifiedSearchBarPlaceholder } from '../../../../common/dependencies';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { BetaBadge } from '../../shared/beta_badge';
@@ -54,9 +54,7 @@ export function DependencyDetailTemplate({ children }: Props) {
     [dependencyName, start, end]
   );
 
-  const {
-    data: { metadata } = {},
-  } = dependencyMetadataFetch;
+  const { data: { metadata } = {} } = dependencyMetadataFetch;
 
   const tabs = [
     {

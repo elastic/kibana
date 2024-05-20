@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render, within } from '@testing-library/react';
 
 import { ExceptionsAddToRulesTable } from '.';
-import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { TestProviders } from '../../../../../common/mock';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 jest.mock('../../../../rule_management/logic/use_find_rules');
 

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import styled from 'styled-components';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import styled from 'styled-components';
-import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
+import { EuiTitle, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { HostRisk, UserRisk } from '../../../../entity_analytics/api/types';
 import * as i18n from './translations';
+import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 
 import type {
   BrowserFields,
-  RiskSeverity,
   TimelineEventsDetailsItem,
+  RiskSeverity,
 } from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskSummary } from '../../../../entity_analytics/components/risk_summary';
+import { EnrichmentSummary } from './enrichment_summary';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { RiskScoreInfoTooltip } from '../../../../overview/components/common';
-import { EnrichmentSummary } from './enrichment_summary';
 
 const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;

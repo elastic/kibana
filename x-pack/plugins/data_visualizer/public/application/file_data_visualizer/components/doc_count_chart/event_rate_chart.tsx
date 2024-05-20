@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React from 'react';
 import type { PartialTheme } from '@elastic/charts';
 import {
-  Chart,
   HistogramBarSeries,
+  Chart,
   ScaleType,
   Settings,
   Tooltip,
@@ -16,10 +18,8 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
-import type { FC } from 'react';
-import React from 'react';
-import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { Axes } from './axes';
+import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 
 export interface LineChartPoint {
   time: number | string;

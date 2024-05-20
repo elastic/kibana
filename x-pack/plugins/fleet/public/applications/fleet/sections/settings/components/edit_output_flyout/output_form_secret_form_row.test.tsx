@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
 
 import { SecretFormRow } from './output_form_secret_form_row';
 

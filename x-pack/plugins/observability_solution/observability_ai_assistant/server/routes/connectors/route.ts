@@ -16,9 +16,9 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<FindActionResult[]> => {
     const { request, plugins } = resources;
 
-    const actionsClient = await (await plugins.actions.start()).getActionsClientWithRequest(
-      request
-    );
+    const actionsClient = await (
+      await plugins.actions.start()
+    ).getActionsClientWithRequest(request);
 
     const [availableTypes, connectors] = await Promise.all([
       actionsClient

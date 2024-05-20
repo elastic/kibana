@@ -8,16 +8,16 @@
 
 import { buildProcessorFunction } from '../build_processor_function';
 import {
+  query,
+  pivot,
+  splitByTerms,
   applyFilters,
   dateHistogram,
-  filterRatios,
   metricBuckets,
-  normalizeQuery,
-  pivot,
-  positiveRate,
-  query,
   siblingBuckets,
-  splitByTerms,
+  filterRatios,
+  positiveRate,
+  normalizeQuery,
 } from '../request_processors/table';
 
 import type {

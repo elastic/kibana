@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SUPPORTED_METRICS } from '.';
-import { PANEL_TYPES } from '../../../../common/enums';
 import { Metric, MetricType } from '../../../../common/types';
+import { PANEL_TYPES } from '../../../../common/enums';
+import { SUPPORTED_METRICS } from '.';
 
 const isMetricValid = (
   metricType: MetricType,

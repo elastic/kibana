@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
+import numeral from '@elastic/numeral';
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
@@ -15,8 +17,6 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import numeral from '@elastic/numeral';
-import type { HttpHandler } from '@kbn/core-http-browser';
 import React, { useCallback, useMemo } from 'react';
 
 import type { IToasts } from '@kbn/core-notifications-browser';

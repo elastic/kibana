@@ -6,7 +6,7 @@
  */
 
 import { GlobalSearchProviderResult, GlobalSearchResult } from './types';
-import { IBasePath, convertResultUrl } from './utils';
+import { convertResultUrl, IBasePath } from './utils';
 
 /**
  * Convert a {@link GlobalSearchProviderResult | provider result}

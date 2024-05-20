@@ -50,7 +50,11 @@
             "description": [
               "Define the arguments for prop values in this object.\n\nFor example:\n\n```\npropArguments = {\n  someTextProp: {\n    control: 'text',\n    defaultValue: 'Elastic',\n  },\n};\n```"
             ],
-            "signature": ["{ [name in keyof PropArguments]: ", "InputType", "; }"],
+            "signature": [
+              "{ [name in keyof PropArguments]: ",
+              "InputType",
+              "; }"
+            ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -64,7 +68,11 @@
             "description": [
               "\nDefine the arguments for service values in this object.\n\nFor example:\n\n```\nserviceArguments = {\n  isServiceTrue: {\n    control: 'boolean',\n    defaultValue: true,\n  },\n};\n```"
             ],
-            "signature": ["{ [name in keyof ServiceArguments]: ", "InputType", "; }"],
+            "signature": [
+              "{ [name in keyof ServiceArguments]: ",
+              "InputType",
+              "; }"
+            ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -75,7 +83,9 @@
             "type": "Array",
             "tags": [],
             "label": "dependencies",
-            "description": ["Provide dependency `StorybookMock` objects in this array."],
+            "description": [
+              "Provide dependency `StorybookMock` objects in this array."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-storybook-mock",
@@ -101,7 +111,11 @@
             "description": [
               "\nReturns the list of Storybook arguments pertaining to Props for a given story.\nThis collection will be unique to this component, and will not include any\nprops from dependencies."
             ],
-            "signature": ["() => ", "ArgTypes", "<PropArguments>"],
+            "signature": [
+              "() => ",
+              "ArgTypes",
+              "<PropArguments>"
+            ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -189,7 +203,9 @@
                 "tags": [],
                 "label": "arg",
                 "description": [],
-                "signature": ["keyof PropArguments | keyof ServiceArguments"],
+                "signature": [
+                  "keyof PropArguments | keyof ServiceArguments"
+                ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -335,7 +351,9 @@
         "description": [
           "\nType that expresses the arguments available to a story based on the\nprops and services the component consumes."
         ],
-        "signature": ["{ [P in keyof PropArguments | keyof ServiceArguments]: any; }"],
+        "signature": [
+          "{ [P in keyof PropArguments | keyof ServiceArguments]: any; }"
+        ],
         "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
         "deprecated": false,
         "trackAdoption": false,

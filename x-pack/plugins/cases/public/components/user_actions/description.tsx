@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createCommonUpdateUserActionBuilder } from './common';
-import * as i18n from './translations';
 import type { UserActionBuilder } from './types';
+import * as i18n from './translations';
+import { createCommonUpdateUserActionBuilder } from './common';
 
 const getLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`;
 

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import React from 'react';
 import { waitFor } from '@testing-library/react';
 import moment from 'moment';
-import React from 'react';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import {
-  CursorDirection,
   type MonitorSummariesResult,
-  type MonitorSummary,
-  type Ping,
+  CursorDirection,
   SortOrder,
   makePing,
+  type Ping,
+  type MonitorSummary,
 } from '../../../../../common/runtime_types';
-import { render } from '../../../lib/helper/rtl_helpers';
-import { mockMoment } from '../../../lib/helper/test_helpers';
 import { MonitorListComponent } from './monitor_list';
+import { mockMoment } from '../../../lib/helper/test_helpers';
+import { render } from '../../../lib/helper/rtl_helpers';
 import { NO_DATA_MESSAGE } from './translations';
 
 const testFooPings: Ping[] = [

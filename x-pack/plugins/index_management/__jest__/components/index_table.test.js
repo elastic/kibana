@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
 import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
 import { init as initHttpRequests } from '../client_integration/helpers/http_requests';
 
 import { BASE_PATH } from '../../common/constants';
 import { AppWithoutRouter } from '../../public/application/app';
 import { AppContextProvider } from '../../public/application/app_context';
-import { setUiMetricService } from '../../public/application/services/api';
-import { breadcrumbService } from '../../public/application/services/breadcrumbs';
-import { httpService } from '../../public/application/services/http';
-import { notificationService } from '../../public/application/services/notification';
-import { UiMetricService } from '../../public/application/services/ui_metric';
-import { indexManagementStore } from '../../public/application/store';
 import { loadIndicesSuccess } from '../../public/application/store/actions';
+import { breadcrumbService } from '../../public/application/services/breadcrumbs';
+import { UiMetricService } from '../../public/application/services/ui_metric';
+import { notificationService } from '../../public/application/services/notification';
+import { httpService } from '../../public/application/services/http';
+import { setUiMetricService } from '../../public/application/services/api';
+import { indexManagementStore } from '../../public/application/store';
 import { setExtensionsService } from '../../public/application/store/selectors/extension_service';
 import { ExtensionsService } from '../../public/services';
 import { kibanaVersion } from '../client_integration/helpers';
 
-import { executionContextServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
+import { notificationServiceMock, executionContextServiceMock } from '@kbn/core/public/mocks';
 
 let store = null;
 const indices = [];

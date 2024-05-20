@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useBreadcrumbs } from '../../hooks';
+import { EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { setCertificatesTotalAction } from '../../state/certificates/certificates';
 import { CertificateSearch } from './cert_search';
-import { CertSort, CertificateList } from './certificates_list';
 import { useCertSearch } from './use_cert_search';
+import { CertificateList, CertSort } from './certificates_list';
+import { useBreadcrumbs } from '../../hooks';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';

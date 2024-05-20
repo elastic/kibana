@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { MonitorSummary } from '../../../../../../../common/runtime_types';
-import { PopoverState, toggleIntegrationsPopover } from '../../../../../state/actions';
+import { EuiPopover, EuiButton } from '@elastic/eui';
 import { IntegrationGroup } from './integration_group';
+import { MonitorSummary } from '../../../../../../../common/runtime_types';
+import { toggleIntegrationsPopover, PopoverState } from '../../../../../state/actions';
 
 export interface ActionsPopoverProps {
   summary: MonitorSummary;

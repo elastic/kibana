@@ -10,15 +10,15 @@ import React from 'react';
 import { useActions } from 'kea';
 
 import {
-  EuiButtonEmpty,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DocumentCreationButtons, DocumentCreationLogic } from '..';
+import { DocumentCreationLogic, DocumentCreationButtons } from '..';
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { FLYOUT_ARIA_LABEL_ID } from '../constants';
 

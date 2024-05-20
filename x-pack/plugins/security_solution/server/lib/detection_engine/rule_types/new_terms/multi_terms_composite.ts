@@ -1,5 +1,3 @@
-import type { Logger } from '@kbn/logging';
-import type { Moment } from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,25 +5,27 @@ import type { Moment } from 'moment';
  * 2.0.
  */
 import pRetry from 'p-retry';
+import type { Moment } from 'moment';
+import type { Logger } from '@kbn/logging';
 import type { NewTermsRuleParams } from '../../rule_schema';
 import type { GetFilterArgs } from '../utils/get_filter';
 import { getFilter } from '../utils/get_filter';
 import { singleSearchAfter } from '../utils/single_search_after';
 import {
-  buildCompositeDocFetchAgg,
   buildCompositeNewTermsAgg,
+  buildCompositeDocFetchAgg,
 } from './build_new_terms_aggregation';
 
-import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
-import { getMaxSignalsWarning, getSuppressionMaxSignalsWarning } from '../utils/utils';
 import type {
   CompositeDocFetchAggResult,
   CompositeNewTermsAggResult,
   CreateAlertsHook,
 } from './build_new_terms_aggregation';
+import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import { getMaxSignalsWarning, getSuppressionMaxSignalsWarning } from '../utils/utils';
+import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 
-import type { RuleServices, RunOpts, SearchAfterAndBulkCreateReturnType } from '../types';
+import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '../types';
 
 /**
  * composite aggregation page batch size set to 500 as it shows th best performance(refer https://github.com/elastic/kibana/pull/157413) and

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
-import { ChartType } from '../../../../../common';
-import { ChartMode, SeriesParam } from '../../../../types';
 import { ChartOptions, ChartOptionsParams } from './chart_options';
+import { SeriesParam, ChartMode } from '../../../../types';
 import { LineOptions } from './line_options';
-import { seriesParam, valueAxis } from './mocks';
 import { PointOptions } from './point_options';
+import { valueAxis, seriesParam } from './mocks';
+import { ChartType } from '../../../../../common';
 
 describe('ChartOptions component', () => {
   let setParamByIndex: jest.Mock;

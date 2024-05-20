@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
+import { render } from '@testing-library/react';
 import { PreviewPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
-import { AlertReasonPreview } from './alert_reason_preview';
 import { ALERT_REASON_PREVIEW_BODY_TEST_ID } from './test_ids';
+import { AlertReasonPreview } from './alert_reason_preview';
+import { TestProviders } from '../../../../common/mock';
 
 const panelContextValue = {
   ...mockContextValue,

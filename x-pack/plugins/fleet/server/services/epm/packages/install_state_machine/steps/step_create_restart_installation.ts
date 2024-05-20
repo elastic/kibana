@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { MAX_TIME_COMPLETE_INSTALL } from '../../../../../constants';
 import { ConcurrentInstallOperationError } from '../../../../../errors';
+import { MAX_TIME_COMPLETE_INSTALL } from '../../../../../constants';
 
-import { createInstallation, restartInstallation } from '../../install';
+import { restartInstallation, createInstallation } from '../../install';
 
-import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
+import { withPackageSpan } from '../../utils';
 
 export async function stepCreateRestartInstallation(context: InstallContext) {
   const {

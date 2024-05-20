@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import {
-  ElasticsearchClientMock,
   elasticsearchClientMock,
+  ElasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import type { ApiExecutionContext } from '../lib/apis/types';
-import { RepositoryHelpersMock, apiHelperMocks } from './api_helpers.mocks';
-import { KibanaMigratorMock, createMigratorMock } from './migrator.mock';
+import { apiHelperMocks, RepositoryHelpersMock } from './api_helpers.mocks';
 import { savedObjectsExtensionsMock } from './saved_objects_extensions.mock';
+import { createMigratorMock, KibanaMigratorMock } from './migrator.mock';
 
 export type ApiExecutionContextMock = Pick<ApiExecutionContext, 'allowedTypes' | 'mappings'> & {
   registry: SavedObjectTypeRegistry;

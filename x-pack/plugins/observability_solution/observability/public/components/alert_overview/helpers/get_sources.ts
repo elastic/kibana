@@ -6,11 +6,11 @@
  */
 
 import { ALERT_GROUP_FIELD, ALERT_GROUP_VALUE } from '@kbn/rule-data-utils';
-import { TopAlert } from '../../..';
 import {
   apmSources,
   infraSources,
 } from '../../../../common/custom_threshold_rule/helpers/get_alert_source_links';
+import { TopAlert } from '../../..';
 
 interface AlertFields {
   [key: string]: any;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import { CaseStatuses } from '@kbn/cases-components';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { CaseStatuses } from '@kbn/cases-components';
 import { CaseSeverity, SeverityFilter } from './severity_filter';
 import { StatusFilter } from './status_filter';
 import { CasesWebhookActionConnector, CasesWebhookActionParams } from './types';

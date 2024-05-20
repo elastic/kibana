@@ -7,22 +7,22 @@
 
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ILicenseState } from '../lib';
-import { ActionsRequestHandlerContext } from '../types';
-import { getConnectorRoute } from './connector/get';
 import { getAllConnectorsRoute } from './connector/get_all';
 import { getAllConnectorsIncludingSystemRoute } from './connector/get_all_system';
 import { listTypesRoute } from './connector/list_types';
 import { listTypesWithSystemRoute } from './connector/list_types_system';
+import { ILicenseState } from '../lib';
+import { ActionsRequestHandlerContext } from '../types';
 import { createActionRoute } from './create';
 import { deleteActionRoute } from './delete';
 import { executeActionRoute } from './execute';
-import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
-import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
+import { getConnectorRoute } from './connector/get';
+import { updateActionRoute } from './update';
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { defineLegacyRoutes } from './legacy';
-import { updateActionRoute } from './update';
+import { ActionsConfigurationUtilities } from '../actions_config';
+import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
+import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;

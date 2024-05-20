@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
 import { BASE_PATH } from '../../../common/constants';
-import type { DynamicPagePathValues, Page } from '../page_paths';
+import type { Page, DynamicPagePathValues } from '../page_paths';
 import { pagePathGetters } from '../page_paths';
 
 import { useKibana } from '../lib/kibana';

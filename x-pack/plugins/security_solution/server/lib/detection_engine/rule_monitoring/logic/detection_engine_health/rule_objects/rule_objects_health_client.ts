@@ -6,7 +6,7 @@
  */
 
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type {
   ClusterHealthParameters,
   ClusterHealthSnapshot,
@@ -16,6 +16,7 @@ import type {
   SpaceHealthSnapshot,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { RULE_SAVED_OBJECT_TYPE } from '../../event_log/event_log_constants';
+import { DETECTION_RULES_FILTER } from './filters';
 import {
   getClusterHealthAggregation,
   normalizeClusterHealthAggregationResult,
@@ -25,7 +26,6 @@ import {
   normalizeSpaceHealthAggregationResult,
 } from './aggregations/health_stats_for_space';
 import { fetchRuleById } from './fetch_rule_by_id';
-import { DETECTION_RULES_FILTER } from './filters';
 
 /**
  * Client for calculating health stats based on rule objects (saved objects of type "alert").

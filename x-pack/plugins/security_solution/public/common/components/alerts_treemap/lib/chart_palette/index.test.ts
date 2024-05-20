@@ -6,16 +6,16 @@
  */
 
 import { euiPaletteWarm } from '@elastic/eui';
-import { RISK_SCORE_STEPS, getFillColor, getRiskScorePalette } from '.';
 import {
-  RISK_COLOR_CRITICAL,
-  RISK_COLOR_HIGH,
   RISK_COLOR_LOW,
   RISK_COLOR_MEDIUM,
-  RISK_SCORE_CRITICAL,
-  RISK_SCORE_HIGH,
+  RISK_COLOR_HIGH,
+  RISK_COLOR_CRITICAL,
   RISK_SCORE_MEDIUM,
+  RISK_SCORE_HIGH,
+  RISK_SCORE_CRITICAL,
 } from '../../../../constants';
+import { getFillColor, getRiskScorePalette, RISK_SCORE_STEPS } from '.';
 
 describe('getFillColor', () => {
   describe('when using the Risk Score palette', () => {

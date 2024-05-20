@@ -10,9 +10,9 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
 import { OpsgenieSubActions } from '../../../common';
-import { CloseAlertParamsSchema, CreateAlertParamsSchema, Response } from './schema';
-import * as i18n from './translations';
+import { CreateAlertParamsSchema, CloseAlertParamsSchema, Response } from './schema';
 import { CloseAlertParams, Config, CreateAlertParams, FailureResponseType, Secrets } from './types';
+import * as i18n from './translations';
 
 export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   constructor(params: ServiceParams<Config, Secrets>) {

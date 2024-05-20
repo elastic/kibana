@@ -7,11 +7,11 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { CustomIntegrationRegistry } from '../custom_integration_registry';
 import {
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
 } from '../../common';
-import { CustomIntegrationRegistry } from '../custom_integration_registry';
 
 export function defineRoutes(
   router: IRouter,

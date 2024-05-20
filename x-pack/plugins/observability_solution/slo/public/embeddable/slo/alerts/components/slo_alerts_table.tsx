@@ -1,7 +1,3 @@
-import type { TimeRange } from '@kbn/es-query';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { ALL_VALUE } from '@kbn/slo-schema';
-import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,9 +5,13 @@ import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/ap
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../constants';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { TimeRange } from '@kbn/es-query';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
 import type { SloItem } from '../types';
+import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';

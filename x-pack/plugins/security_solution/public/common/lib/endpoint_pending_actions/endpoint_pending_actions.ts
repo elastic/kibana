@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   PendingActionsRequestQuery,
   PendingActionsResponse,
 } from '../../../../common/endpoint/types';
 import { KibanaServices } from '../kibana';
+import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 
 /**
  * Retrieve a list of pending actions against the given Fleet Agent Ids provided on input

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
-import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
-import type { NoDataPageProps, NoDataPageServices } from '@kbn/shared-ux-page-no-data-types';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import type { ArgumentParams } from '@kbn/shared-ux-storybook-mock';
+import type { NoDataPageProps, NoDataPageServices } from '@kbn/shared-ux-page-no-data-types';
+import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
+import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
 
 type PropArguments = Pick<NoDataPageProps, 'solution' | 'logo' | 'docsLink' | 'pageTitle'>;
 

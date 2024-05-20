@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import WebhookActionConnectorFields from './webhook_connectors';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
-import WebhookActionConnectorFields from './webhook_connectors';
+import { WebhookAuthType, SSLCertType } from '../../../common/webhook/constants';
 
 describe('WebhookActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {

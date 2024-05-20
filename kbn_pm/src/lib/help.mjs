@@ -7,8 +7,8 @@
  */
 
 import { COMMANDS, getCmd } from '../commands/index.mjs';
-import { title } from './colors.mjs';
 import { dedent, indent } from './indent.mjs';
+import { title } from './colors.mjs';
 
 /**
  * @param {string | undefined} cmdName

@@ -12,9 +12,9 @@ import { isNull, isUndefined } from 'lodash';
 
 import { run } from '@kbn/dev-cli-runner';
 
+import { getInstalledPackages } from './npm';
 import { engines } from '../../package.json';
 import { LICENSE_OVERRIDES } from './license_checker';
-import { getInstalledPackages } from './npm';
 
 const allDoubleQuoteRE = /"/g;
 

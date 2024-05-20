@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import type { DragStart, DropResult } from '@hello-pangea/dnd';
-import { DragDropContext } from '@hello-pangea/dnd';
-import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import deepEqual from 'fast-deep-equal';
 import { noop, pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
+import type { DragStart, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
+import deepEqual from 'fast-deep-equal';
+import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import { TimelineType } from '../../../../common/api/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
+import type { BrowserFields } from '../../containers/source';
+import { dragAndDropSelectors } from '../../store';
+import { timelineSelectors } from '../../../timelines/store';
+import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { reArrangeProviders } from '../../../timelines/components/timeline/data_providers/helpers';
-import { timelineSelectors } from '../../../timelines/store';
-import { timelineDefaults } from '../../../timelines/store/defaults';
-import type { BrowserFields } from '../../containers/source';
 import {
   ADDED_TO_TIMELINE_MESSAGE,
   ADDED_TO_TIMELINE_TEMPLATE_MESSAGE,
 } from '../../hooks/translations';
+import { displaySuccessToast, useStateToaster } from '../toasters';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/api/timeline';
+import {
+  addProviderToTimeline,
+  fieldWasDroppedOnTimelineColumns,
+  IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
+  providerWasDroppedOnTimeline,
+  draggableIsField,
+  userIsReArrangingProviders,
+  getIdFromColumnDroppableId,
+  addFieldToColumns,
+} from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { dragAndDropSelectors } from '../../store';
-import type { IdToDataProvider } from '../../store/drag_and_drop/model';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 import { defaultAlertsHeaders } from '../events_viewer/default_alert_headers';
-import { displaySuccessToast, useStateToaster } from '../toasters';
-import {
-  IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
-  addFieldToColumns,
-  addProviderToTimeline,
-  draggableIsField,
-  fieldWasDroppedOnTimelineColumns,
-  getIdFromColumnDroppableId,
-  providerWasDroppedOnTimeline,
-  userIsReArrangingProviders,
-} from './helpers';
 
 // @ts-expect-error
 window['__@hello-pangea/dnd-disable-dev-warnings'] = true;

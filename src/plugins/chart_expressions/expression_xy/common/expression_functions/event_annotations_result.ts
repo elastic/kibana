@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EXTENDED_ANNOTATION_LAYER } from '../constants';
-import { strings } from '../i18n';
 import { EventAnnotationResultFn } from '../types';
+import { strings } from '../i18n';
+import { EXTENDED_ANNOTATION_LAYER } from '../constants';
 
 export function eventAnnotationsResult(): EventAnnotationResultFn {
   return {

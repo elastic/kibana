@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
-import { FIELD_ORIGIN } from '../../../common/constants';
-import { AbstractField } from '../../classes/fields/field';
 import { TooltipSelector } from './tooltip_selector';
+import { AbstractField } from '../../classes/fields/field';
+import { FIELD_ORIGIN } from '../../../common/constants';
 
 class MockField extends AbstractField {
   private _label?: string;

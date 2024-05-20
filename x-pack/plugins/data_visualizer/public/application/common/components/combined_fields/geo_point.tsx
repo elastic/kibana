@@ -6,30 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangeEvent } from 'react';
 import React, { Component, Fragment } from 'react';
 
 import type { EuiSelectOption } from '@elastic/eui';
 import {
-  EuiButton,
-  EuiFieldText,
-  EuiFormErrorText,
   EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
+  EuiFieldText,
   EuiTextAlign,
+  EuiSpacer,
+  EuiButton,
+  EuiSelect,
+  EuiFormErrorText,
 } from '@elastic/eui';
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { CombinedField } from './types';
 import {
   createGeoPointCombinedField,
-  getFieldNames,
-  getNameCollisionMsg,
   isWithinLatRange,
   isWithinLonRange,
+  getFieldNames,
+  getNameCollisionMsg,
 } from './utils';
 
 interface Props {

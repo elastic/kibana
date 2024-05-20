@@ -6,10 +6,10 @@
  */
 
 import {
-  DomFields,
-  MappingsEditorTestBed,
-  getMappingsEditorDataFactory,
   setup as mappingsEditorSetup,
+  MappingsEditorTestBed,
+  DomFields,
+  getMappingsEditorDataFactory,
 } from './mappings_editor.helpers';
 
 export type { TestBed } from '@kbn/test-jest-helpers';

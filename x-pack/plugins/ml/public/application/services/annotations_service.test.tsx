@@ -9,9 +9,9 @@ import mockAnnotations from '../components/annotations/annotations_table/__mocks
 
 import type { Annotation } from '../../../common/types/annotations';
 import {
-  AnnotationUpdatesService,
   annotationsRefresh$,
   annotationsRefreshed,
+  AnnotationUpdatesService,
 } from './annotations_service';
 describe('annotations_service', () => {
   let annotationUpdatesService: AnnotationUpdatesService | null = null;

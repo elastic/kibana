@@ -19,9 +19,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { OverviewPanel } from './overview_panel';
 import './select_client.scss';

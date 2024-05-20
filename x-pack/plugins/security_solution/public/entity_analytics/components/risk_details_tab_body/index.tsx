@@ -9,32 +9,32 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../risk_score/constants';
+import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
 import { hostsModel, hostsSelectors } from '../../../explore/hosts/store';
 import { usersSelectors } from '../../../explore/users/store';
-import { EnableRiskScore } from '../enable_risk_score';
 import { RiskInformationButtonEmpty } from '../risk_information';
-import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../risk_score/constants';
 import * as i18n from './translations';
 
-import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { RiskScoreEntity, buildEntityNameFilter } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { useDashboardHref } from '../../../common/hooks/use_dashboard_href';
-import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
-import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
-import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
-import { useRiskScore } from '../../api/hooks/use_risk_score';
-import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
-import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
-import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
-import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
 import { RiskScoreOverTime } from '../risk_score_over_time';
-import { RiskScoreUpdatePanel } from '../risk_score_update_panel';
 import { TopRiskScoreContributors } from '../top_risk_score_contributors';
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
+import { buildEntityNameFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
+import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
+import { useDashboardHref } from '../../../common/hooks/use_dashboard_href';
+import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
+import { useRiskEngineStatus } from '../../api/hooks/use_risk_engine_status';
+import { RiskScoreUpdatePanel } from '../risk_score_update_panel';
+import { HostRiskScoreQueryId, UserRiskScoreQueryId } from '../../common/utils';
+import { useRiskScore } from '../../api/hooks/use_risk_score';
+import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
+import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeL};

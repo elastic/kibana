@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { AwaitedProperties } from '@kbn/utility-types';
+import { httpServerMock, savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
 
-import { API_VERSIONS } from '../../../common/constants';
-import { createFleetAuthzMock } from '../../../common/mocks';
 import type { PostFleetSetupResponse } from '../../../common/types';
+import { API_VERSIONS } from '../../../common/constants';
 import { RegistryError } from '../../errors';
 import {
   createAppContextStartContractMock,
@@ -19,9 +18,10 @@ import {
 } from '../../mocks';
 import { agentServiceMock } from '../../services/agents/agent_service.mock';
 import { appContextService } from '../../services/app_context';
-import { hasFleetServers } from '../../services/fleet_server';
 import { setupFleet } from '../../services/setup';
 import type { FleetRequestHandlerContext } from '../../types';
+import { hasFleetServers } from '../../services/fleet_server';
+import { createFleetAuthzMock } from '../../../common/mocks';
 
 import { fleetSetupHandler, getFleetStatusHandler } from './handlers';
 

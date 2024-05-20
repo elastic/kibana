@@ -15,24 +15,24 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { HOME_APP_BASE_PATH, PLUGIN_ID } from '../common/constants';
-import { ConfigSchema } from '../config';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
+import { ConfigSchema } from '../config';
 import {
-  AddDataService,
-  AddDataServiceSetup,
   EnvironmentService,
   EnvironmentServiceSetup,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
   TutorialService,
   TutorialServiceSetup,
+  AddDataService,
+  AddDataServiceSetup,
   WelcomeService,
   WelcomeServiceSetup,
 } from './services';

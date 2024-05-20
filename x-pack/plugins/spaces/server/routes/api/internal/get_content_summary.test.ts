@@ -18,6 +18,8 @@ import {
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
 
+import type { SpaceContentTypeSummaryItem } from './get_content_summary';
+import { initGetSpaceContentSummaryApi } from './get_content_summary';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -27,8 +29,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import type { SpaceContentTypeSummaryItem } from './get_content_summary';
-import { initGetSpaceContentSummaryApi } from './get_content_summary';
 
 interface SetupParams {
   importableAndExportableTypesMock: SavedObjectsType[];

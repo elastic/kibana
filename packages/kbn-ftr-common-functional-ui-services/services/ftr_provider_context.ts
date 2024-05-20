@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RetryService } from '@kbn/ftr-common-functional-services';
 import { GenericFtrProviderContext, GenericFtrService } from '@kbn/test';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { services as commonFunctionalUiServices } from './all';
 
 const services = {

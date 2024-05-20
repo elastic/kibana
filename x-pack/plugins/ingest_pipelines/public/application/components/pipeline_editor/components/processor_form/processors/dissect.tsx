@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React, { FunctionComponent } from 'react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent } from 'react';
 import { TextEditor } from '../field_components';
 
 import {
-  FIELD_TYPES,
-  Field,
   FieldConfig,
-  UseField,
+  FIELD_TYPES,
   fieldValidators,
+  UseField,
+  Field,
   useKibana,
 } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { EDITOR_PX_HEIGHT, from, isJSONStringValidator, to } from './shared';
+import { EDITOR_PX_HEIGHT, from, to, isJSONStringValidator } from './shared';
 
 const { emptyField } = fieldValidators;
 

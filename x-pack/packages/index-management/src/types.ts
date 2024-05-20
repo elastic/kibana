@@ -6,8 +6,8 @@
  */
 
 import {
-  HealthStatus,
   IlmExplainLifecycleLifecycleExplain,
+  HealthStatus,
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';

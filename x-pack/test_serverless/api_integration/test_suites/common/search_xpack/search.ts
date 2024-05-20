@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
-import { omit } from 'lodash';
 import { parse as parseCookie } from 'tough-cookie';
-import { RoleCredentials } from '../../../../shared/services';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { omit } from 'lodash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { verifyErrorResponse } from '../search_oss/verify_error';
+import { RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

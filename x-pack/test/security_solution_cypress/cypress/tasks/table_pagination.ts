@@ -7,11 +7,11 @@
 
 import { LOADING_SPINNER } from '../screens/loading';
 import {
+  rowsPerPageSelector,
+  tablePageSelector,
   TABLE_PER_PAGE_POPOVER_BTN,
   TABLE_SEARCH_BAR,
   TABLE_SORT_COLUMN_BTN,
-  rowsPerPageSelector,
-  tablePageSelector,
 } from '../screens/table_pagination';
 
 export const goToTablePage = (pageNumber: number) => {

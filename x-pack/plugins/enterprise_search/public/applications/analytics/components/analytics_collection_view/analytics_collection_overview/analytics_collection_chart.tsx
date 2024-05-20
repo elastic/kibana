@@ -18,8 +18,8 @@ import {
   Position,
   ScaleType,
   Settings,
-  Tooltip,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 
 import { XYChartElementEvent } from '@elastic/charts/dist/specs/settings';
@@ -35,7 +35,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import { WithLensDataInputProps, withLensData } from '../../../hoc/with_lens_data';
+import { withLensData, WithLensDataInputProps } from '../../../hoc/with_lens_data';
 import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
 const DEFAULT_STROKE_WIDTH = 1;

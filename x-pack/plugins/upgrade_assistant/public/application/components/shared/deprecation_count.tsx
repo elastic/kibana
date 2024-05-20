@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
 
 import { LevelInfoTip } from './level_info_tip';
 

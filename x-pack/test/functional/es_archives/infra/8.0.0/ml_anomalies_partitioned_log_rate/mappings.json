@@ -2,7 +2,8 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".ml-anomalies-.write-kibana-logs-ui-default-default-log-entry-rate": {},
+      ".ml-anomalies-.write-kibana-logs-ui-default-default-log-entry-rate": {
+      },
       ".ml-anomalies-kibana-logs-ui-default-default-log-entry-rate": {
         "filter": {
           "term": {
@@ -91,7 +92,9 @@
           "type": "keyword"
         },
         "by_field_value": {
-          "copy_to": ["all_field_values"],
+          "copy_to": [
+            "all_field_values"
+          ],
           "type": "keyword"
         },
         "category_id": {
@@ -106,11 +109,15 @@
               "type": "keyword"
             },
             "by_field_value": {
-              "copy_to": ["all_field_values"],
+              "copy_to": [
+                "all_field_values"
+              ],
               "type": "keyword"
             },
             "correlated_by_field_value": {
-              "copy_to": ["all_field_values"],
+              "copy_to": [
+                "all_field_values"
+              ],
               "type": "keyword"
             },
             "field_name": {
@@ -126,14 +133,18 @@
               "type": "keyword"
             },
             "over_field_value": {
-              "copy_to": ["all_field_values"],
+              "copy_to": [
+                "all_field_values"
+              ],
               "type": "keyword"
             },
             "partition_field_name": {
               "type": "keyword"
             },
             "partition_field_value": {
-              "copy_to": ["all_field_values"],
+              "copy_to": [
+                "all_field_values"
+              ],
               "type": "keyword"
             },
             "probability": {
@@ -235,7 +246,9 @@
           "type": "keyword"
         },
         "influencer_field_value": {
-          "copy_to": ["all_field_values"],
+          "copy_to": [
+            "all_field_values"
+          ],
           "type": "keyword"
         },
         "influencer_score": {
@@ -247,7 +260,9 @@
               "type": "keyword"
             },
             "influencer_field_values": {
-              "copy_to": ["all_field_values"],
+              "copy_to": [
+                "all_field_values"
+              ],
               "type": "keyword"
             }
           },
@@ -278,7 +293,9 @@
           "type": "boolean"
         },
         "job_id": {
-          "copy_to": ["all_field_values"],
+          "copy_to": [
+            "all_field_values"
+          ],
           "type": "keyword"
         },
         "last_data_time": {
@@ -391,14 +408,18 @@
           "type": "keyword"
         },
         "over_field_value": {
-          "copy_to": ["all_field_values"],
+          "copy_to": [
+            "all_field_values"
+          ],
           "type": "keyword"
         },
         "partition_field_name": {
           "type": "keyword"
         },
         "partition_field_value": {
-          "copy_to": ["all_field_values"],
+          "copy_to": [
+            "all_field_values"
+          ],
           "type": "keyword"
         },
         "probability": {

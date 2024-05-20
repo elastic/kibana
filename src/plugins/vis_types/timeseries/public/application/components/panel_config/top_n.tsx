@@ -1,18 +1,3 @@
-import {
-  EuiCode,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  htmlIdGenerator,
-} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -24,17 +9,32 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  htmlIdGenerator,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiFieldText,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiCode,
+} from '@elastic/eui';
 
-import { TimeseriesVisParams } from '../../../types';
-import { ColorPicker } from '../color_picker';
-import { ColorRules } from '../color_rules';
+import { SeriesEditor } from '../series_editor';
 // @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
 import { IndexPattern } from '../index_pattern';
+import { ColorRules } from '../color_rules';
+import { ColorPicker } from '../color_picker';
+import { YesNo } from '../yes_no';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
-import { SeriesEditor } from '../series_editor';
-import { YesNo } from '../yes_no';
-import { PANEL_CONFIG_TABS, PanelConfigProps } from './types';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { TimeseriesVisParams } from '../../../types';
 
 export class TopNPanelConfig extends Component<
   PanelConfigProps,

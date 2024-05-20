@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type TypeOf, schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
 /**
  * WARNING: Do not modify the existing versioned schema(s) below, instead define a new version (ex: 2, 3, 4).

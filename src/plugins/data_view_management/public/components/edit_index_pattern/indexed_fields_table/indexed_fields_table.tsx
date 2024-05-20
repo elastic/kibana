@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { OverlayStart } from '@kbn/core/public';
-import { DataView, DataViewField, RuntimeField } from '@kbn/data-views-plugin/public';
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { StartServices } from '../../../types';
+import { OverlayStart } from '@kbn/core/public';
+import { DataViewField, DataView, RuntimeField } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
+import { StartServices } from '../../../types';
 
 interface IndexedFieldsTableProps {
   fields: DataViewField[];

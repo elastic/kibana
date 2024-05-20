@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { cloneDeep, has, isEmpty, merge } from 'lodash';
+import { isEmpty, cloneDeep, has, merge } from 'lodash';
+import { BaseWatch } from './base_watch';
 import { WATCH_TYPES } from '../../../common/constants';
 import { serializeJsonWatch } from '../../../common/lib/serialization';
-import { BaseWatch } from './base_watch';
 
 export class JsonWatch extends BaseWatch {
   // This constructor should not be used directly.

@@ -6,19 +6,18 @@
  * Side Public License, v 1.
  */
 
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart, SavedObject } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
-import type { MockedKeys } from '@kbn/utility-types-jest';
-import { createIndexPatternsStartMock } from '../data_views/mocks';
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
+import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
+import { createIndexPatternsStartMock } from '../data_views/mocks';
 
+import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { bfetchPluginMock } from '@kbn/bfetch-plugin/server/mocks';
 import { lastValueFrom, of } from 'rxjs';
-import { SearchService, SearchServiceSetupDependencies } from './search_service';
 
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import type {
   IScopedSearchClient,
   IScopedSearchSessionsClient,
@@ -26,8 +25,9 @@ import type {
   ISearchStrategy,
 } from '.';
 import { NoSearchIdInSessionError } from '.';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common';
 
 let mockSessionClient: jest.Mocked<IScopedSearchSessionsClient>;
 jest.mock('./session', () => {

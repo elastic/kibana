@@ -6,11 +6,11 @@
  */
 
 import type { JsonObject } from '@kbn/utility-types';
+import type { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import {
   eventIDSafeVersion,
   timestampSafeVersion,
 } from '../../../../../common/endpoint/models/event';
-import type { SafeResolverEvent } from '../../../../../common/endpoint/types';
 
 type SearchAfterFields = [number, string];
 
@@ -31,7 +31,7 @@ export type SortFields = [
   {
     '@timestamp': string;
   },
-  { [x: string]: { order: string; unmapped_type?: string } },
+  { [x: string]: { order: string; unmapped_type?: string } }
 ];
 
 /**

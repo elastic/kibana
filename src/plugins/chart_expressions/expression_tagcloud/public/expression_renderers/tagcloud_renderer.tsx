@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React, { lazy } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { ClassNames } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   type ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { i18n } from '@kbn/i18n';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 
-import { EXPRESSION_NAME } from '../../common';
-import { TagcloudRendererConfig } from '../../common/types';
 import { ExpressionTagcloudRendererDependencies } from '../plugin';
+import { TagcloudRendererConfig } from '../../common/types';
+import { EXPRESSION_NAME } from '../../common';
 
 export const strings = {
   getDisplayName: () =>

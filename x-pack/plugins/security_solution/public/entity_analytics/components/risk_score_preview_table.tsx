@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { RiskScoreLevel } from './severity/common';
 
-import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
 import { HostDetailsLink, UserDetailsLink } from '../../common/components/links';
+import { RiskScoreEntity } from '../../../common/entity_analytics/risk_engine';
 
 type RiskScoreColumn = EuiBasicTableColumn<EntityRiskScoreRecord> & {
   field: keyof EntityRiskScoreRecord;

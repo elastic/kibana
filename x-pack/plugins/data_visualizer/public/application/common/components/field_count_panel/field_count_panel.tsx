@@ -6,16 +6,16 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, useEuiTheme } from '@elastic/eui';
-import { useEuiBreakpoint } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
+import { useEuiBreakpoint } from '@elastic/eui';
 import {
-  MetricFieldsCount,
   type MetricFieldsCountProps,
-  TotalFieldsCount,
   type TotalFieldsCountProps,
+  MetricFieldsCount,
+  TotalFieldsCount,
   dvFieldCountItemCss,
 } from '../stats_table/components/field_count_stats';
 

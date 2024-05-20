@@ -7,19 +7,19 @@
 
 import type { DeepPartial } from '@kbn/utility-types';
 import { grey } from 'chalk';
-import { EndpointPolicyResponseGenerator } from '../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
+import { layout } from '../../common/screen/layout';
 import { indexEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
+import { EndpointPolicyResponseGenerator } from '../../../../common/endpoint/data_generators/endpoint_policy_response_generator';
 import type { HostInfo, HostPolicyResponse } from '../../../../common/endpoint/types';
-import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
 import {
   fetchEndpointMetadataList,
   sendEndpointMetadataUpdate,
 } from '../../common/endpoint_metadata_services';
+import { TOOL_TITLE } from '../constants';
 import type { DataFormatter } from '../../common/screen';
 import { ChoiceMenuFormatter, ScreenBaseClass } from '../../common/screen';
-import { layout } from '../../common/screen/layout';
-import { TOOL_TITLE } from '../constants';
 import type { EmulatorRunContext } from '../services/emulator_run_context';
+import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
 
 const policyResponseGenerator = new EndpointPolicyResponseGenerator();
 

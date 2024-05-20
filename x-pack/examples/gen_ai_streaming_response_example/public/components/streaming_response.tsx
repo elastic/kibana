@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
 import {
-  EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLoadingSpinner,
+  EuiAccordion,
   EuiPanel,
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  EuiLoadingSpinner,
+  EuiIcon,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { useFetchStream } from '@kbn/ml-response-stream/client';
-import React, { useEffect, useState } from 'react';
 
 export interface StreamingResponseProps {
   http: CoreStart['http'];

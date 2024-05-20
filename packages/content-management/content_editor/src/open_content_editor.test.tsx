@@ -9,10 +9,10 @@ import React from 'react';
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { WithServices, getMockServices } from './__jest__';
-import { ContentEditorLoader } from './components';
-import { useOpenContentEditor } from './open_content_editor';
 import type { Services } from './services';
 import type { Item } from './types';
+import { ContentEditorLoader } from './components';
+import { useOpenContentEditor } from './open_content_editor';
 
 describe('useOpenContentEditor() hook', () => {
   const savedObjectItem: Item = { id: 'id', title: 'Foo', tags: [] };

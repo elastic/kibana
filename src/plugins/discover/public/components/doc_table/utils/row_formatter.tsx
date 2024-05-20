@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import React, { Fragment } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { formatHit } from '@kbn/discover-utils';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   DataTableRecord,
-  FormattedHit,
   ShouldShowFieldInTableHandler,
+  FormattedHit,
 } from '@kbn/discover-utils/types';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import React, { Fragment } from 'react';
+import { formatHit } from '@kbn/discover-utils';
 
 import './row_formatter.scss';
 

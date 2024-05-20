@@ -11,10 +11,10 @@ import {
   rawControlGroupAttributesToSerializable,
   serializableToRawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
-import { SavedObjectMigrationFn } from '@kbn/core/server';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import { Serializable } from '@kbn/utility-types';
+import { SavedObjectMigrationFn } from '@kbn/core/server';
+import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 import {
   convertPanelStateToSavedDashboardPanel,

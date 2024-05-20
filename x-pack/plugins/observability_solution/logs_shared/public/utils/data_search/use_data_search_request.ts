@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '@kbn/search-types';
 import { useCallback } from 'react';
 import { OperatorFunction, ReplaySubject } from 'rxjs';
 import { share, tap } from 'rxjs';
+import type {
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  ISearchOptions,
+} from '@kbn/search-types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { tapUnsubscribe, useObservable } from '../use_observable';
 import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
@@ -37,7 +37,7 @@ export const useDataSearch = <
   RequestParams,
   Request extends IKibanaSearchRequest<RequestParams>,
   RawResponse,
-  Response,
+  Response
 >({
   getRequest,
   parseResponses,

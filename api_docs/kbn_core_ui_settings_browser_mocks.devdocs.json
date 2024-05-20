@@ -41,7 +41,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => any"],
+            "signature": [
+              "() => any"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -133,7 +135,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => any"],
+            "signature": [
+              "() => any"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-mocks/src/ui_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

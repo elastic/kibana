@@ -8,10 +8,10 @@
 
 import '../application/models/legacy_core_editor/legacy_core_editor.test.mocks';
 
-import { MODE, create } from '../application/models';
+import RowParser from './row_parser';
+import { create, MODE } from '../application/models';
 import type { SenseEditor } from '../application/models';
 import type { CoreEditor } from '../types';
-import RowParser from './row_parser';
 
 describe('RowParser', () => {
   let editor: SenseEditor | null;

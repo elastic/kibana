@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import * as conn from '..';
 
 export interface OpenConnectionDetailsParams {

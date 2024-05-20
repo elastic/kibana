@@ -13,11 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { Query } from '../../types';
 
 import {
-  ACTIONS_COLUMN,
-  COUNT_COLUMN_PROPS,
-  TAGS_COUNT_COLUMN,
-  TAGS_LIST_COLUMN,
   TERM_COLUMN_PROPS,
+  TAGS_LIST_COLUMN,
+  TAGS_COUNT_COLUMN,
+  COUNT_COLUMN_PROPS,
+  ACTIONS_COLUMN,
 } from './shared_columns';
 
 interface Props {

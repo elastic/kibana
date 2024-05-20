@@ -7,8 +7,8 @@
 
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { SuggestionRequest, VisualizationSuggestion, TableSuggestion } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
-import { SuggestionRequest, TableSuggestion, VisualizationSuggestion } from '../../types';
 import { legacyMetricSupportedTypes } from './visualization';
 
 /**

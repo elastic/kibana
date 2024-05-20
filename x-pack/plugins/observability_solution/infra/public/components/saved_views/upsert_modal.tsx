@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
+  EuiButton,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiFieldText,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { NonEmptyString } from '@kbn/io-ts-utils';
-import React, { useState } from 'react';
 
 interface Props {
   onClose(): void;

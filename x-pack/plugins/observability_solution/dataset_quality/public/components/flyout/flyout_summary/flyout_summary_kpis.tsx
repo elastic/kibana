@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { _IGNORED } from '../../../../common/es_fields';
 
 import { DataStreamDetails } from '../../../../common/api_types';
+import { useKibanaContextForPlugin } from '../../../utils';
 import { useLinkToLogsExplorer } from '../../../hooks';
 import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
-import { useKibanaContextForPlugin } from '../../../utils';
 import { FlyoutSummaryKpiItem, FlyoutSummaryKpiItemLoading } from './flyout_summary_kpi_item';
 import { getSummaryKpis } from './get_summary_kpis';
 

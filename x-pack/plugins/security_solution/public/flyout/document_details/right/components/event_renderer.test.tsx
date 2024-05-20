@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
-import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { render } from '@testing-library/react';
 import { EventRenderer } from './event_renderer';
+import { RightPanelContext } from '../context';
 import { EVENT_RENDERER_TEST_ID } from './test_ids';
+import { mockContextValue } from '../mocks/mock_context';
+import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
+import { TestProviders } from '../../../../common/mock';
 
 const renderEventRenderer = (contextValue: RightPanelContext) =>
   render(

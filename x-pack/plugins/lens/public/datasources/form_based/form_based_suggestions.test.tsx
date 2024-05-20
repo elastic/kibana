@@ -5,32 +5,32 @@
  * 2.0.
  */
 import type {
-  CountColumn,
+  Layer,
+  TermsColumn,
   FiltersColumn,
   FormulaColumn,
-  Layer,
   StaticValueColumn,
-  TermsColumn,
+  CountColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { isEqual } from 'lodash';
-import { generateId } from '../../id_generator';
 import { DatasourceSuggestion } from '../../types';
-import { documentField } from './document_field';
+import { generateId } from '../../id_generator';
+import type { FormBasedPrivateState } from './types';
 import {
-  IndexPatternSuggestion,
   getDatasourceSuggestionsForField,
-  getDatasourceSuggestionsForVisualizeCharts,
-  getDatasourceSuggestionsForVisualizeField,
   getDatasourceSuggestionsFromCurrentState,
+  getDatasourceSuggestionsForVisualizeField,
+  getDatasourceSuggestionsForVisualizeCharts,
+  IndexPatternSuggestion,
 } from './form_based_suggestions';
+import { documentField } from './document_field';
+import { getFieldByNameFactory } from './pure_helpers';
+import { isEqual } from 'lodash';
 import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
 import {
   MathIndexPatternColumn,
   RangeIndexPatternColumn,
   StaticValueIndexPatternColumn,
 } from './operations/definitions';
-import { getFieldByNameFactory } from './pure_helpers';
-import type { FormBasedPrivateState } from './types';
 
 jest.mock('./loader');
 jest.mock('../../id_generator');

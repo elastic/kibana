@@ -8,6 +8,7 @@
 
 import React, { useMemo, useState } from 'react';
 
+import { AwaitingDashboardAPI, DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -17,7 +18,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { AwaitingDashboardAPI, DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import {
   VisualizeEmbeddable,
   VisualizeInput,

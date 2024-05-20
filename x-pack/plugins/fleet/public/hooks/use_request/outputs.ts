@@ -9,10 +9,10 @@ import type { GetOutputHealthResponse } from '../../../common/types';
 
 import { outputRoutesService } from '../../services';
 import type {
-  GetOutputsResponse,
-  PostLogstashApiKeyResponse,
-  PostOutputRequest,
   PutOutputRequest,
+  GetOutputsResponse,
+  PostOutputRequest,
+  PostLogstashApiKeyResponse,
 } from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';

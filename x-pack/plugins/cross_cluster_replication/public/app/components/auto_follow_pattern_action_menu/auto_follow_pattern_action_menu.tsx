@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState } from 'react';
+import { EuiButton, EuiContextMenu, EuiPopover, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { AutoFollowPatternDeleteProvider } from '../auto_follow_pattern_delete_provider';
 

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CrawlType, CrawlerStatus } from '../../../../api/crawler/types';
+import { CrawlerStatus, CrawlType } from '../../../../api/crawler/types';
 
 export const readableCrawlTypes: { [key in CrawlType]: string } = {
   [CrawlType.Full]: i18n.translate('xpack.enterpriseSearch.crawler.crawlTypeOptions.full', {

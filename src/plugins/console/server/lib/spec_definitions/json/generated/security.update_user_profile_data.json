@@ -7,10 +7,19 @@
       "pretty": "__flag__",
       "if_seq_no": "",
       "if_primary_term": "",
-      "refresh": ["true", "false", "wait_for"]
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ]
     },
-    "methods": ["PUT", "POST"],
-    "patterns": ["_security/profile/{uid}/_data"],
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_security/profile/{uid}/_data"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-update-user-profile-data.html",
     "availability": {
       "stack": true,

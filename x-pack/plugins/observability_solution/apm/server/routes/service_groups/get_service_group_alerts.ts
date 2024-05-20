@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Logger } from '@kbn/core/server';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PRODUCER, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { Logger } from '@kbn/core/server';
+import { ApmPluginRequestHandlerContext } from '../typings';
 import { SavedServiceGroup } from '../../../common/service_groups';
 import { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
-import { ApmPluginRequestHandlerContext } from '../typings';
 
 export async function getServiceGroupAlerts({
   serviceGroups,

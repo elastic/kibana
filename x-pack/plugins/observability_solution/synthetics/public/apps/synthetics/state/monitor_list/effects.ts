@@ -6,30 +6,30 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { call, debounce, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { call, put, takeEvery, select, takeLatest, debounce } from 'redux-saga/effects';
+import { quietFetchOverviewStatusAction } from '../overview_status';
+import { enableDefaultAlertingAction } from '../alert_rules';
 import { ConfigKey, EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
-import { enableDefaultAlertingAction } from '../alert_rules';
 import { MonitorOverviewPageState } from '../overview';
 import { quietFetchOverviewAction } from '../overview/actions';
 import { selectOverviewState } from '../overview/selectors';
-import { quietFetchOverviewStatusAction } from '../overview_status';
 import { fetchEffectFactory, sendErrorToast, sendSuccessToast } from '../utils/fetch_effect';
 import { serializeHttpFetchError } from '../utils/http_error';
 import {
   clearMonitorUpsertStatus,
   enableMonitorAlertAction,
-  fetchMonitorFiltersAction,
   fetchMonitorListAction,
   fetchUpsertFailureAction,
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
   quietFetchMonitorListAction,
+  fetchMonitorFiltersAction,
 } from './actions';
-import { fetchMonitorFilters, fetchMonitorManagementList, fetchUpsertMonitor } from './api';
+import { fetchMonitorManagementList, fetchUpsertMonitor, fetchMonitorFilters } from './api';
 
-import { UpsertMonitorRequest } from './models';
 import { toastTitle } from './toast_title';
+import { UpsertMonitorRequest } from './models';
 
 export function* fetchMonitorListEffect() {
   yield debounce(

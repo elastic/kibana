@@ -6,7 +6,11 @@
     "id": "usageCollectionTestPlugin",
     "server": true,
     "browser": false,
-    "configPath": ["usageCollectionTestPlugin"],
-    "requiredPlugins": ["usageCollection"]
+    "configPath": [
+      "usageCollectionTestPlugin"
+    ],
+    "requiredPlugins": [
+      "usageCollection"
+    ]
   }
 }

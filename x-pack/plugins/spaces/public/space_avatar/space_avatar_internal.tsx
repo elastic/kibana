@@ -10,9 +10,9 @@ import { EuiAvatar, isValidHex } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 
-import { MAX_SPACE_INITIALS } from '../../common';
 import { getSpaceColor, getSpaceImageUrl, getSpaceInitials } from './space_attributes';
 import type { SpaceAvatarProps } from './types';
+import { MAX_SPACE_INITIALS } from '../../common';
 
 export const SpaceAvatarInternal: FC<SpaceAvatarProps> = (props: SpaceAvatarProps) => {
   const { space, size, announceSpaceName, ...rest } = props;

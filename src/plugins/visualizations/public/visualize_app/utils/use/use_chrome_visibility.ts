@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { useState, useEffect } from 'react';
 import { ChromeStart } from '@kbn/core/public';
-import { useEffect, useState } from 'react';
 
 export const useChromeVisibility = (chrome: ChromeStart) => {
   const [isVisible, setIsVisible] = useState<boolean>();

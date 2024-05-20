@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { NumericField } from '../../../../../../../shared_imports';
-import { ROLLOVER_FORM_PATHS } from '../../../../constants';
 import { UseField } from '../../../../form';
+import { ROLLOVER_FORM_PATHS } from '../../../../constants';
 
 export const MaxDocumentCountField: FunctionComponent = () => {
   return (

@@ -12,7 +12,7 @@ import { ConcreteTaskInstance } from '../task';
 import { WithTaskTiming, startTaskTimer } from '../task_events';
 import { TaskPoolRunResult } from '../task_pool';
 import { TaskManagerRunner } from '../task_running';
-import { Result, asErr, asOk, map as mapResult } from './result_type';
+import { Result, map as mapResult, asErr, asOk } from './result_type';
 
 export enum FillPoolResult {
   Failed = 'Failed',

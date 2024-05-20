@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import {
-  type TestElasticsearchUtils,
-  createRootWithCorePlugins,
   createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { ElasticsearchClient } from '@kbn/core/server';
-import type { AuditLogger } from '@kbn/security-plugin/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import { Readable } from 'stream';
 
-import type { File, FileStatus } from '../../common';
+import type { FileStatus, File } from '../../common';
 
 import {
   FileKindsRegistryImpl,
@@ -25,7 +25,7 @@ import {
   setFileKindsRegistry,
 } from '../../common/file_kinds_registry';
 import { BlobStorageService } from '../blob_storage_service';
-import { FileServiceFactory, FileServiceStart } from '../file_service';
+import { FileServiceStart, FileServiceFactory } from '../file_service';
 import type { CreateFileArgs } from '../file_service/file_action_types';
 
 describe('FileService', () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import { createCspRequestHandlerContextMock } from '../../mocks';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard';
+import { createCspRequestHandlerContextMock } from '../../mocks';
 
 describe('compliance dashboard permissions API', () => {
   beforeEach(() => {

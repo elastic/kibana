@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
-import { createFailError } from '@kbn/dev-cli-errors';
-import { SomeDevLog } from '@kbn/some-dev-log';
 import { get } from 'lodash';
+import { SomeDevLog } from '@kbn/some-dev-log';
+import { createFailError } from '@kbn/dev-cli-errors';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 
 function isObject(v: unknown): v is object {
   return Object.prototype.toString.call(v) === '[object Object]';

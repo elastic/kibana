@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
-import { isEqual } from 'lodash';
-import { CanvasElement, RendererHandlers } from '../../types';
+import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
+import { RendererHandlers, CanvasElement } from '../../types';
 import { pluginServices } from '../services';
-import { fetchEmbeddableRenderable, updateEmbeddableExpression } from '../state/actions/embeddable';
 import { clearValue } from '../state/actions/resolved_args';
 
 // This class creates stub handlers to ensure every element and renderer fulfills the contract.

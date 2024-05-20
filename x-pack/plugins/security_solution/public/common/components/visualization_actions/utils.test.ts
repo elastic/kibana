@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { mockRequests } from './__mocks__/utils';
 import {
   getDetailsPageFilter,
   getNetworkDetailsPageFilter,
   getRequestsAndResponses,
   parseVisualizationData,
 } from './utils';
+import { mockRequests } from './__mocks__/utils';
 
 describe('getDetailsPageFilter', () => {
   test('should render host details filter', () => {

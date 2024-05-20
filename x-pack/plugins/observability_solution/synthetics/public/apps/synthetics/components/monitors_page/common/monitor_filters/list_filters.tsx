@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { SyntheticsMonitorFilterChangeHandler } from '../../../../utils/filters/filter_fields';
-import { SearchField } from '../search_field';
 import { FilterGroup } from './filter_group';
+import { SearchField } from '../search_field';
+import { SyntheticsMonitorFilterChangeHandler } from '../../../../utils/filters/filter_fields';
 
 export const ListFilters = function ({
   handleFilterChange,

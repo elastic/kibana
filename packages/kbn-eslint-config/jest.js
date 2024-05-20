@@ -1,11 +1,16 @@
 module.exports = {
   overrides: [
     {
-      files: ['**/*.{test,test.mocks,mock}.{js,mjs,ts,tsx}', '**/__mocks__/**/*.{js,mjs,ts,tsx}'],
-      plugins: ['jest'],
+      files: [
+        '**/*.{test,test.mocks,mock}.{js,mjs,ts,tsx}',
+        '**/__mocks__/**/*.{js,mjs,ts,tsx}',
+      ],
+      plugins: [
+        'jest',
+      ],
 
       env: {
-        jest: true,
+        'jest': true,
       },
 
       rules: {
@@ -13,6 +18,6 @@ module.exports = {
         'jest/no-identical-title': 'error',
         'import/order': 'off',
       },
-    },
-  ],
+    }
+  ]
 };

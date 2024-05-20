@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { BehaviorSubject } from 'rxjs';
-import type { ExperimentalFeatures } from '../common/experimental_features';
-import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
-import { breadcrumbsNav$ } from './common/breadcrumbs';
-import { navLinks$, updateNavLinks } from './common/links/nav_links';
-import { ContractComponentsService } from './contract_components';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { CoreStart } from '@kbn/core/public';
 import type { ContractStartServices, PluginSetup, PluginStart } from './types';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { navLinks$, updateNavLinks } from './common/links/nav_links';
+import { breadcrumbsNav$ } from './common/breadcrumbs';
+import { ContractComponentsService } from './contract_components';
+import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;

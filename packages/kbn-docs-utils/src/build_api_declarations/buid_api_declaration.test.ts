@@ -7,14 +7,14 @@
  */
 
 import Path from 'path';
+import { Project, Node } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
-import { Node, Project } from 'ts-morph';
 
-import { getDeclarationNodesForPluginScope } from '../get_declaration_nodes_for_plugin';
+import { TypeKind, ApiScope, PluginOrPackage } from '../types';
 import { getKibanaPlatformPlugin } from '../integration_tests/kibana_platform_plugin_mock';
-import { isNamedNode } from '../tsmorph_utils';
-import { ApiScope, PluginOrPackage, TypeKind } from '../types';
+import { getDeclarationNodesForPluginScope } from '../get_declaration_nodes_for_plugin';
 import { buildApiDeclarationTopNode } from './build_api_declaration';
+import { isNamedNode } from '../tsmorph_utils';
 
 const log = new ToolingLog({
   level: 'debug',

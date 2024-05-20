@@ -8,10 +8,10 @@
 import React from 'react';
 
 import type { AppMockRenderer } from '../../common/mock';
-import { TestProviders, createAppMockRenderer, readCasesPermissions } from '../../common/mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
+import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
 import type { EditableTitleProps } from './editable_title';
 import { EditableTitle } from './editable_title';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('EditableTitle', () => {
   const mount = useMountAppended();

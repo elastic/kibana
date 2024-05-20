@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import moment from 'moment';
-import {
-  CLUSTER_DETAILS_FETCH_INTERVAL,
-  INDEX_PATTERN_ELASTICSEARCH,
-} from '../../common/constants';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
+import {
+  INDEX_PATTERN_ELASTICSEARCH,
+  CLUSTER_DETAILS_FETCH_INTERVAL,
+} from '../../common/constants';
 
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.

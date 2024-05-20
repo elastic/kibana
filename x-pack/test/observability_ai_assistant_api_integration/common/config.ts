@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { UrlObject, format } from 'url';
 import { Config, FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
+import { format, UrlObject } from 'url';
 import { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import {
-  ObservabilityAIAssistantAPIClient,
   createObservabilityAIAssistantApiClient,
+  ObservabilityAIAssistantAPIClient,
 } from './observability_ai_assistant_api_client';
 
 export interface ObservabilityAIAssistantFtrConfig {

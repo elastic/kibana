@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import fs from 'fs';
 import { join } from 'path';
-import expect from '@kbn/expect';
 import { cloneDeep, isEqual } from 'lodash';
 
 const fixturesDir = join(__dirname, '..', 'fixtures');

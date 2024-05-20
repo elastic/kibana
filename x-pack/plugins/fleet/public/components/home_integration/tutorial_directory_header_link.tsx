@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { memo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { TutorialDirectoryHeaderLinkComponent } from '@kbn/home-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo, useState } from 'react';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 

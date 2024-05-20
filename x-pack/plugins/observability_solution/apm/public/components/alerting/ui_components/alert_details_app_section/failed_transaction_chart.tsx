@@ -6,21 +6,21 @@
  */
 /* Error Rate */
 
-import { Theme } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiTitle } from '@elastic/eui';
-import { RecursivePartial } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { BoolQuery } from '@kbn/es-query';
 import React from 'react';
-import { ApmDocumentType } from '../../../../../common/document_type';
+import { RecursivePartial } from '@elastic/eui';
+import { Theme } from '@elastic/charts';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import * as get_timeseries_color from '../../../shared/charts/helper/get_timeseries_color';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { yLabelFormat } from './helpers';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
 
 type ErrorRate =

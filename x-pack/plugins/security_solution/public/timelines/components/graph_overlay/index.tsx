@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,29 +13,28 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
-import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
-import {
-  useGlobalFullScreen,
-  useTimelineFullScreen,
-} from '../../../common/containers/use_full_screen';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { inputsActions } from '../../../common/store/actions';
-import { InputsModelId } from '../../../common/store/inputs/constants';
+import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import {
   getScopedActions,
   isActiveTimeline,
   isInTableScope,
   isTimelineScope,
 } from '../../../helpers';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { InputsModelId } from '../../../common/store/inputs/constants';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../common/containers/use_full_screen';
+import { isFullScreen } from '../timeline/body/column_headers';
+import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../containers/use_timeline_data_filters';
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
-import { isFullScreen } from '../timeline/body/column_headers';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 

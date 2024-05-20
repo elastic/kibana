@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
-import { get, mapValues } from 'lodash';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { get, mapValues } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { openSans } from '../../../common/lib/fonts';
-import { ArgTypesStrings } from '../../../i18n';
-import { TextStylePicker } from '../../components/text_style_picker';
 import { templateFromReactComponent } from '../../lib/template_from_react_component';
+import { TextStylePicker } from '../../components/text_style_picker';
+import { ArgTypesStrings } from '../../../i18n';
 
 const { Font: strings } = ArgTypesStrings;
 

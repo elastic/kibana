@@ -6,9 +6,9 @@
  */
 import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { FlexItem, MetricItem, StatValue } from './utils';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import type { FieldConfigs } from './types';
-import { FlexItem, MetricItem, StatValue } from './utils';
 
 export interface MetricEmbeddableProps {
   fields: FieldConfigs[];

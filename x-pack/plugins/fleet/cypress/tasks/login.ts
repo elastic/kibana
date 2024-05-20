@@ -10,9 +10,9 @@ import type { UrlObject } from 'url';
 
 import * as yaml from 'js-yaml';
 
-import { request } from './common';
-import { LOGOUT_URL, hostDetailsUrl } from './navigation';
 import type { ROLES } from './privileges';
+import { hostDetailsUrl, LOGOUT_URL } from './navigation';
+import { request } from './common';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate

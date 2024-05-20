@@ -6,9 +6,9 @@
  */
 import type { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
 import {
-  ExternalPageName,
-  SecurityPageName,
   getNavigationPropsFromId,
+  SecurityPageName,
+  ExternalPageName,
 } from '@kbn/security-solution-navigation';
 import { combineLatestWith } from 'rxjs';
 import type { Services } from '../common/services';

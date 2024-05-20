@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_POLL_INTERVAL } from '../../../../../management/common/constants';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../../management/pages/endpoint_hosts/view/host_constants';
 import { getEmptyValue } from '../../../empty_value';
 
-import type { EndpointPendingActions, HostInfo } from '../../../../../../common/endpoint/types';
-import { useGetEndpointDetails } from '../../../../../management/hooks';
 import { useGetEndpointPendingActionsSummary } from '../../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { useTestIdGenerator } from '../../../../../management/hooks/use_test_id_generator';
+import type { EndpointPendingActions, HostInfo } from '../../../../../../common/endpoint/types';
+import { useGetEndpointDetails } from '../../../../../management/hooks';
 import { getAgentStatusText } from '../../agent_status_text';
 import { AgentResponseActionsStatus } from '../agent_response_action_status';
 

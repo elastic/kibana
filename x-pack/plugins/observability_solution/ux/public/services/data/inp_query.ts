@@ -7,10 +7,10 @@
 
 import type { ESSearchResponse } from '@kbn/es-types';
 import { UXMetrics } from '@kbn/observability-shared-plugin/public/types';
-import { INP_FIELD } from '../../../common/elasticsearch_fieldnames';
-import { mergeProjection } from '../../../common/utils/merge_projection';
-import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { DEFAULT_RANKS, getRanksPercentages } from './core_web_vitals_query';
+import { INP_FIELD } from '../../../common/elasticsearch_fieldnames';
+import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import { mergeProjection } from '../../../common/utils/merge_projection';
 import { getRumPageExitTransactionsProjection } from './projections';
 
 export function transformINPResponse<T>(

@@ -1,5 +1,3 @@
-import { AttachmentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
+import { AttachmentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 
 import type { LensProps } from '@kbn/cases-plugin/public/types';
 import { APP_ID } from '../../../../common';

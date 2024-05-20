@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { addOrReplaceCustomField, customFieldSerializer } from './utils';
+import { customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type { CaseUICustomField } from '../../../common/ui';
-import { customFieldsConfigurationMock, customFieldsMock } from '../../containers/mock';
-import { addOrReplaceCustomField, customFieldSerializer } from './utils';
 
 describe('utils ', () => {
   describe('addOrReplaceCustomField ', () => {

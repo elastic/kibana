@@ -6,9 +6,9 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { UptimeEsClient } from '../../../lib';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroups: string[];

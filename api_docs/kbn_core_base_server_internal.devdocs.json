@@ -46,7 +46,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/base/core-base-server-internal/src/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -58,7 +60,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -71,7 +75,9 @@
                 "tags": [],
                 "label": "code",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -84,7 +90,9 @@
                 "tags": [],
                 "label": "processExitCode",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -97,7 +105,9 @@
                 "tags": [],
                 "label": "cause",
                 "description": [],
-                "signature": ["Error | undefined"],
+                "signature": [
+                  "Error | undefined"
+                ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -122,7 +132,9 @@
         "tags": [],
         "label": "uuidRegexp",
         "description": [],
-        "signature": ["RegExp"],
+        "signature": [
+          "RegExp"
+        ],
         "path": "packages/core/base/core-base-server-internal/src/regexp.ts",
         "deprecated": false,
         "trackAdoption": false,

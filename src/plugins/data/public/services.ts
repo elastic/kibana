@@ -7,8 +7,8 @@
  */
 
 import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { DataPublicPluginStart } from './types';
 
 export const [getUiSettings, setUiSettings] =

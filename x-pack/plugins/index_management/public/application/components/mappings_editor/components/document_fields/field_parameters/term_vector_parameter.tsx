@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import { documentationService } from '../../../../../services/documentation';
-import { PARAMETERS_OPTIONS } from '../../../constants';
-import { getFieldConfig } from '../../../lib';
-import { Field, FormDataProvider, UseField } from '../../../shared_imports';
+import { UseField, Field, FormDataProvider } from '../../../shared_imports';
 import { NormalizedField } from '../../../types';
+import { getFieldConfig } from '../../../lib';
+import { PARAMETERS_OPTIONS } from '../../../constants';
 import { EditFieldFormRow } from '../fields/edit_field';
+import { documentationService } from '../../../../../services/documentation';
 
 interface Props {
   field: NormalizedField;

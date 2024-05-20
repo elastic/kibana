@@ -10,7 +10,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { cleanSavedObjectIndices, createStats } from '../lib';
+import { createStats, cleanSavedObjectIndices } from '../lib';
 
 export async function emptyKibanaIndexAction({ client, log }: { client: Client; log: ToolingLog }) {
   const stats = createStats('emptyKibanaIndex', log);

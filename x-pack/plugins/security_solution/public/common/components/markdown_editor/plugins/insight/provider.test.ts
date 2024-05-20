@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CombinedFilter } from '@kbn/es-query';
-import { BooleanRelation, FILTERS, FilterStateStore } from '@kbn/es-query';
+import { FILTERS, BooleanRelation, FilterStateStore } from '@kbn/es-query';
 import { filtersToInsightProviders } from './provider';
 
 const flatValueFilters = [

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),

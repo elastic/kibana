@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
 import React from 'react';
+import { Story } from '@storybook/react';
 import { ObservabilityStatusBoxes, ObservabilityStatusProps } from './observability_status_boxes';
 
 export default {

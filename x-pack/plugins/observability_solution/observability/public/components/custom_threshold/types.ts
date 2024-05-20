@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
@@ -25,14 +26,13 @@ import {
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import * as rt from 'io-ts';
 import {
+  aggType,
+  CustomThresholdSearchSourceFields,
   BaseMetricExpressionParams,
   CustomMetricExpressionParams,
-  CustomThresholdSearchSourceFields,
   MetricExpressionParams,
   ThresholdParams,
-  aggType,
 } from '../../../common/custom_threshold_rule/types';
 import { ObservabilityPublicStart } from '../../plugin';
 

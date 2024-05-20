@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Observable, of } from 'rxjs';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { TaskLifecycleEvent } from './polling_lifecycle';
+import { of, Observable } from 'rxjs';
 
 export const ephemeralTaskLifecycleMock = {
   create(opts: { events$?: Observable<TaskLifecycleEvent>; getQueuedTasks?: () => number }) {

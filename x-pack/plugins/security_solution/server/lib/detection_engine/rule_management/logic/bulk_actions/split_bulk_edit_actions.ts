@@ -7,9 +7,9 @@
 
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type {
+  BulkActionEditPayload,
   BulkActionEditForRuleAttributes,
   BulkActionEditForRuleParams,
-  BulkActionEditPayload,
 } from '../../../../../../common/api/detection_engine/rule_management';
 
 /**

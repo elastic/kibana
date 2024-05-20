@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { type CSSProperties, useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -21,18 +23,30 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { useHistory, useLocation } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { createStructuredSelector } from 'reselect';
+import { useDispatch } from 'react-redux';
 import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type CSSProperties, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
-import { createStructuredSelector } from 'reselect';
-import styled from 'styled-components';
-import { APP_UI_ID } from '../../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { TransformFailedCallout } from './components/transform_failed_callout';
+import type { EndpointIndexUIQueryParams } from '../types';
+import { EndpointListNavLink } from './components/endpoint_list_nav_link';
+import {
+  AgentStatus,
+  EndpointAgentStatus,
+} from '../../../../common/components/agents/agent_status';
+import { EndpointDetailsFlyout } from './details';
+import * as selectors from '../store/selectors';
+import { getEndpointPendingActionsCallback } from '../store/selectors';
+import { useEndpointSelector } from './hooks';
+import { isPolicyOutOfDate } from '../utils';
+import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
+import type { CreateStructuredSelector } from '../../../../common/store';
 import type {
   HostInfo,
   HostInfoInterface,
@@ -40,38 +54,24 @@ import type {
   PolicyDetailsRouteState,
 } from '../../../../../common/endpoint/types';
 import { EndpointSortableField } from '../../../../../common/endpoint/types';
-import { SecurityPageName } from '../../../../app/types';
-import {
-  AgentStatus,
-  EndpointAgentStatus,
-} from '../../../../common/components/agents/agent_status';
-import { FormattedDate } from '../../../../common/components/formatted_date';
-import { useFormatUrl } from '../../../../common/components/link_to';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useAppUrl } from '../../../../common/lib/kibana/hooks';
-import type { CreateStructuredSelector } from '../../../../common/store';
 import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { getEndpointDetailsPath, getEndpointListPath } from '../../../common/routing';
-import { AdministrationListPage } from '../../../components/administration_list_page';
-import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { HostsEmptyState, PolicyEmptyState } from '../../../components/management_empty_state';
-import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
+import { FormattedDate } from '../../../../common/components/formatted_date';
+import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
+import { SecurityPageName } from '../../../../app/types';
+import { getEndpointDetailsPath, getEndpointListPath } from '../../../common/routing';
+import { useFormatUrl } from '../../../../common/components/link_to';
+import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 import type { EndpointAction } from '../store/action';
-import * as selectors from '../store/selectors';
-import { getEndpointPendingActionsCallback } from '../store/selectors';
-import type { EndpointIndexUIQueryParams } from '../types';
-import { isPolicyOutOfDate } from '../utils';
-import { BackToPolicyListButton } from './components/back_to_policy_list_button';
-import { EndpointListNavLink } from './components/endpoint_list_nav_link';
 import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
+import { AdministrationListPage } from '../../../components/administration_list_page';
 import { TableRowActions } from './components/table_row_actions';
-import { TransformFailedCallout } from './components/transform_failed_callout';
-import { EndpointDetailsFlyout } from './details';
-import { useEndpointSelector } from './hooks';
-import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
+import { APP_UI_ID } from '../../../../../common/constants';
+import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { BackToPolicyListButton } from './components/back_to_policy_list_button';
 
 const MAX_PAGINATED_ITEM = 9999;
 

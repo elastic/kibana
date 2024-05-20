@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { ApplicationRequiredCallout } from './application_required_callout';
 
 const appId = 'test';

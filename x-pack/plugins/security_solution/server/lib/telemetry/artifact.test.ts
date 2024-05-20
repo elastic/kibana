@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import { createMockTelemetryReceiver } from './__mocks__';
 import { Artifact } from './artifact';
+import axios from 'axios';
 import type { TelemetryConfiguration } from './types';
 
 jest.mock('axios');

@@ -10,9 +10,9 @@ import { EuiTextProps, EuiToolTipProps } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
 import { SearchSessionStatus } from '../../../../../common';
-import { LocaleWrapper } from '../__mocks__';
 import { UISession } from '../types';
-import { StatusIndicator, getStatusText } from './status';
+import { LocaleWrapper } from '../__mocks__';
+import { getStatusText, StatusIndicator } from './status';
 
 let tz: string;
 let session: UISession;

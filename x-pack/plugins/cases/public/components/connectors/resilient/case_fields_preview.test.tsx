@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
+import { screen } from '@testing-library/react';
 
+import { connector } from '../mock';
+import { useGetIncidentTypes } from './use_get_incident_types';
+import { useGetSeverity } from './use_get_severity';
+import FieldsPreview from './case_fields_preview';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { createQueryWithMarkup } from '../../../common/test_utils';
-import { connector } from '../mock';
-import FieldsPreview from './case_fields_preview';
-import { useGetIncidentTypes } from './use_get_incident_types';
-import { useGetSeverity } from './use_get_severity';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_incident_types');

@@ -1,4 +1,3 @@
-import { RewriteRequestCase } from '@kbn/actions-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +5,13 @@ import { RewriteRequestCase } from '@kbn/actions-plugin/common';
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
+import { RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { BASE_ACTION_API_PATH } from '../../constants';
 import type {
   ActionConnector,
   ActionConnectorProps,
   ActionConnectorWithoutId,
 } from '../../../types';
-import { BASE_ACTION_API_PATH } from '../../constants';
 
 const rewriteBodyRes: RewriteRequestCase<
   ActionConnectorProps<Record<string, unknown>, Record<string, unknown>>

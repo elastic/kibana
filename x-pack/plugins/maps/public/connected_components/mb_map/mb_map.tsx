@@ -5,15 +5,33 @@
  * 2.0.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { Filter } from '@kbn/es-query';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import { maplibregl } from '@kbn/mapbox-gl';
-import type { MapMouseEvent, MapOptions, Map as MapboxMap } from '@kbn/mapbox-gl';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { supported as maplibreglSupported } from '@mapbox/mapbox-gl-supported';
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { supported as maplibreglSupported } from '@mapbox/mapbox-gl-supported';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import { Filter } from '@kbn/es-query';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { maplibregl } from '@kbn/mapbox-gl';
+import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { DrawFilterControl } from './draw_control/draw_filter_control';
+import { ScaleControl } from './scale_control';
+import { TooltipControl } from './tooltip_control';
+import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
+import { getInitialView } from './get_initial_view';
+import {
+  getPreserveDrawingBuffer,
+  getUsageCollection,
+  isScreenshotMode,
+} from '../../kibana_services';
+import { ILayer } from '../../classes/layers/layer';
+import {
+  CustomIcon,
+  Goto,
+  MapCenterAndZoom,
+  MapSettings,
+  Timeslice,
+} from '../../../common/descriptor_types';
 import {
   APP_ID,
   CUSTOM_ICON_SIZE,
@@ -22,37 +40,19 @@ import {
   RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
-import {
-  CustomIcon,
-  Goto,
-  MapCenterAndZoom,
-  MapSettings,
-  Timeslice,
-} from '../../../common/descriptor_types';
-import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
-import { ILayer } from '../../classes/layers/layer';
-import {
-  getPreserveDrawingBuffer,
-  getUsageCollection,
-  isScreenshotMode,
-} from '../../kibana_services';
-import { DrawFilterControl } from './draw_control/draw_filter_control';
-import { getInitialView } from './get_initial_view';
 import { getCanAccessEmsFonts, getGlyphs, getKibanaFontsGlyphUrl } from './glyphs';
-import { ScaleControl } from './scale_control';
 import { syncLayerOrder } from './sort_layers';
-import { TooltipControl } from './tooltip_control';
 
-import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
-import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
-import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
-import { boundsToExtent } from '../../classes/util/maplibre_utils';
-import type { MapExtentState } from '../../reducers/map/types';
-import { DrawFeatureControl } from './draw_control/draw_feature_control';
-import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
 import { removeOrphanedSourcesAndLayers } from './remove_orphaned';
+import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
+import { DrawFeatureControl } from './draw_control/draw_feature_control';
+import type { MapExtentState } from '../../reducers/map/types';
+import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
+import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
+import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
 import { transformRequest } from './transform_request';
+import { boundsToExtent } from '../../classes/util/maplibre_utils';
 
 export interface Props {
   isMapReady: boolean;

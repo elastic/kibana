@@ -1,10 +1,3 @@
-import {
-  AlertingAuthorization,
-  AlertingAuthorizationEntity,
-  AlertingAuthorizationFilterType,
-  ReadOperations,
-  WriteOperations,
-} from '@kbn/alerting-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,6 +5,13 @@ import {
  * 2.0.
  */
 import { PublicMethodsOf } from '@kbn/utility-types';
+import {
+  ReadOperations,
+  WriteOperations,
+  AlertingAuthorization,
+  AlertingAuthorizationEntity,
+  AlertingAuthorizationFilterType,
+} from '@kbn/alerting-plugin/server';
 import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,

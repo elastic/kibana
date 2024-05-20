@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
-  AGENT_VERSION,
   CLOUD_PROVIDER,
   CLOUD_SERVICE_NAME,
   CONTAINER_ID,
-  HOST_OS_PLATFORM,
   KUBERNETES,
-  KUBERNETES_POD_NAME,
-  LABEL_TELEMETRY_AUTO_VERSION,
-  SERVICE_FRAMEWORK_NAME,
   SERVICE_NAME,
+  KUBERNETES_POD_NAME,
+  HOST_OS_PLATFORM,
+  LABEL_TELEMETRY_AUTO_VERSION,
+  AGENT_VERSION,
+  SERVICE_FRAMEWORK_NAME,
 } from '../../../common/es_fields/apm';
-import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
 
 type ServiceMetadataIconsRaw = Pick<TransactionRaw, 'kubernetes' | 'cloud' | 'container' | 'agent'>;
 

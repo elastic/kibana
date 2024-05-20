@@ -1,7 +1,3 @@
-import { IToasts } from '@kbn/core-notifications-browser';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks/dom';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,8 +5,12 @@ import { renderHook } from '@testing-library/react-hooks/dom';
  * 2.0.
  */
 import React from 'react';
-import { useKibana } from '../../common/lib/kibana';
+import { renderHook } from '@testing-library/react-hooks/dom';
 import { useLoadTagsQuery } from './use_load_tags_query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useKibana } from '../../common/lib/kibana';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { waitFor } from '@testing-library/react';
 
 const MOCK_TAGS = ['a', 'b', 'c'];
 

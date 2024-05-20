@@ -8,43 +8,43 @@
 import React, { useCallback, useMemo } from 'react';
 
 import {
+  useEuiTheme,
   EuiAccordion,
+  EuiTitle,
+  EuiSpacer,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
   useEuiFontSize,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import dateMath from '@kbn/datemath';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import dateMath from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
 import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana/kibana_react';
 
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
+import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
+import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
-import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 
 import {
-  LAST_30_DAYS,
-  LENS_VISUALIZATION_HEIGHT,
-  LENS_VISUALIZATION_MIN_WIDTH,
-  SUMMARY_TABLE_MIN_WIDTH,
   buildColumns,
   getEntityData,
   getItems,
   isUserRiskData,
+  LAST_30_DAYS,
+  LENS_VISUALIZATION_HEIGHT,
+  LENS_VISUALIZATION_MIN_WIDTH,
+  SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {

@@ -8,8 +8,8 @@
 
 import type { NamespaceTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 
-import { getSavedObjectType } from '../get_saved_object_type';
 import { SavedObjectType } from '../types';
+import { getSavedObjectType } from '../get_saved_object_type';
 
 export const getSavedObjectTypes = ({
   namespaceType,

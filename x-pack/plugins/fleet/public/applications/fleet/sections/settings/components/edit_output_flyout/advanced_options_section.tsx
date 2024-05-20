@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiAccordion,
-  EuiBetaBadge,
-  EuiFieldNumber,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiHorizontalRule,
-  EuiSelect,
-  EuiSpacer,
   EuiSwitch,
+  EuiAccordion,
+  EuiHorizontalRule,
   EuiText,
+  EuiSpacer,
+  EuiFieldText,
+  EuiFieldNumber,
+  EuiSelect,
+  EuiBetaBadge,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 

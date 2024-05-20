@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { TimelineStatus } from '../../../../../common/api/timeline';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { TestProviders, mockTimelineModel } from '../../../../common/mock';
-import { useCreateTimeline } from '../../../hooks/use_create_timeline';
+import { render, waitFor } from '@testing-library/react';
 import { SaveTimelineButton } from './save_timeline_button';
+import { mockTimelineModel, TestProviders } from '../../../../common/mock';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { TimelineStatus } from '../../../../../common/api/timeline';
+import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../hooks/use_create_timeline');

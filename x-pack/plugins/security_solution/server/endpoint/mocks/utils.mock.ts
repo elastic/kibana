@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidV4 } from 'uuid';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { Trigger } from '.';
 
 export const ROW_CLICK_TRIGGER = 'ROW_CLICK_TRIGGER';

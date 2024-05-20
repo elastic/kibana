@@ -7,7 +7,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { CA1_CERT_PATH, CA2_CERT_PATH, EE_P12_PASSWORD, EE_P12_PATH } from '../../__fixtures__';
+import { CA1_CERT_PATH, CA2_CERT_PATH, EE_P12_PATH, EE_P12_PASSWORD } from '../../__fixtures__';
 import { createKibanaSupertestProvider } from '../../services';
 
 export default async function ({ readConfigFile }) {

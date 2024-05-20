@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { IntegrationLink } from './actions_popover/integration_link';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 describe('IntegrationLink component', () => {
   it('renders without errors', () => {

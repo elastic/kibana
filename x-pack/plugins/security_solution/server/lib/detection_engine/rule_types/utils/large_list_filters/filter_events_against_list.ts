@@ -10,9 +10,9 @@ import { entriesList } from '@kbn/securitysolution-io-ts-list-types';
 
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import { createFieldAndSetTuples } from './create_field_and_set_tuples';
-import { partitionEvents } from './filter_events';
 import type { FilterEventsAgainstListOptions, FilterEventsAgainstListReturn } from './types';
+import { partitionEvents } from './filter_events';
+import { createFieldAndSetTuples } from './create_field_and_set_tuples';
 
 /**
  * Filters events against a large value based list. It does this through these

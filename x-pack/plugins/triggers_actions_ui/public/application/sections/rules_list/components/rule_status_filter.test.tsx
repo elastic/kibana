@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFilterButton, EuiSelectableListItem } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { EuiFilterButton, EuiSelectableListItem } from '@elastic/eui';
 import { RuleStatusFilter } from './rule_status_filter';
 
 const onChangeMock = jest.fn();

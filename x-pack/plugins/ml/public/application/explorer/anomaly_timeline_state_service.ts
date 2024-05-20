@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import type { TimeRangeBounds } from '@kbn/data-plugin/common';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-// FIXME get rid of the static import
-import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
-import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
-import { isEqual, sortBy, uniq } from 'lodash';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subscription, combineLatest, from, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, of, Subscription } from 'rxjs';
 import {
-  debounceTime,
-  distinctUntilChanged,
-  filter,
+  switchMap,
   map,
   skipWhile,
+  distinctUntilChanged,
   startWith,
-  switchMap,
   tap,
+  debounceTime,
+  filter,
 } from 'rxjs';
-import type { AnomalyExplorerSwimLaneUrlState } from '../../../common/types/locator';
-import type { Refresh } from '../routing/use_refresh';
-import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
+import { isEqual, sortBy, uniq } from 'lodash';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 // FIXME get rid of the static import
-import { mlJobService } from '../services/job_service';
-import { StateService } from '../services/state_service';
-import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
-import {
-  ANOMALY_SWIM_LANE_HARD_LIMIT,
-  SWIMLANE_TYPE,
-  VIEW_BY_JOB_LABEL,
-} from './explorer_constants';
+import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
   ExplorerJob,
   OverallSwimlaneData,
   ViewBySwimLaneData,
 } from './explorer_utils';
+import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
+import type { AnomalyExplorerSwimLaneUrlState } from '../../../common/types/locator';
+import {
+  ANOMALY_SWIM_LANE_HARD_LIMIT,
+  SWIMLANE_TYPE,
+  VIEW_BY_JOB_LABEL,
+} from './explorer_constants';
+// FIXME get rid of the static import
+import { mlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
+import type { Refresh } from '../routing/use_refresh';
+import { StateService } from '../services/state_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 
 interface SwimLanePagination {
@@ -282,7 +282,7 @@ export class AnomalyTimelineStateService extends StateService {
           AppStateSelectedCells,
           TimeBucketsInterval,
           TimeRangeBounds,
-          Refresh,
+          Refresh
         ]
       >
     )

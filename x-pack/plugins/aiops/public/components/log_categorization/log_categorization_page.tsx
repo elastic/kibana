@@ -12,46 +12,46 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
-  EuiComboBox,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPageBody,
+  EuiComboBox,
+  EuiFormRow,
   EuiSkeletonText,
-  EuiSpacer,
 } from '@elastic/eui';
 
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { stringHash } from '@kbn/ml-string-hash';
-import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
-import {
-  type LogCategorizationPageUrlState,
-  getDefaultLogCategorizationAppState,
-} from '../../application/url_state/log_pattern_analysis';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useData } from '../../hooks/use_data';
 import { useDataSource } from '../../hooks/use_data_source';
+import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import {
+  getDefaultLogCategorizationAppState,
+  type LogCategorizationPageUrlState,
+} from '../../application/url_state/log_pattern_analysis';
 
-import { PageHeader } from '../page_header';
 import { SearchPanel } from '../search_panel';
+import { PageHeader } from '../page_header';
 
-import type { DocumentStats } from '../../hooks/use_document_count_stats';
+import type { EventRate } from './use_categorize_request';
+import { useCategorizeRequest } from './use_categorize_request';
 import { CategoryTable } from './category_table';
-import { FieldValidationCallout } from './category_validation_callout';
 import { DocumentCountChart } from './document_count_chart';
 import { InformationText } from './information_text';
 import { SamplingMenu } from './sampling_menu';
-import type { EventRate } from './use_categorize_request';
-import { useCategorizeRequest } from './use_categorize_request';
 import { useValidateFieldRequest } from './use_validate_category_field';
+import { FieldValidationCallout } from './category_validation_callout';
+import type { DocumentStats } from '../../hooks/use_document_count_stats';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';

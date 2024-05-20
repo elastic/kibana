@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import pMap from 'p-map';
 import {
   Case,
   CaseSeverity,
   CaseStatuses,
   Configuration,
 } from '@kbn/cases-plugin/common/types/domain';
-import pMap from 'p-map';
+import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   createCase as createCaseAPI,
-  createComment,
-  createConfiguration,
   deleteAllCaseItems,
-  getCase,
-  getConfigurationRequest,
+  createComment,
   updateCase,
+  getCase,
+  createConfiguration,
+  getConfigurationRequest,
 } from '../../../cases_api_integration/common/lib/api';
 import {
   loginUsers,

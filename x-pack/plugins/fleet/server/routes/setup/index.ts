@@ -7,12 +7,12 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
-import { API_VERSIONS } from '../../../common/constants';
 import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetConfigType } from '../../../common/types';
 
-import { fleetSetupHandler, getFleetStatusHandler } from './handlers';
+import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 
 export const registerFleetSetupRoute = (router: FleetAuthzRouter) => {
   router.versioned

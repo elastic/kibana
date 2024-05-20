@@ -13,9 +13,9 @@ import {
   ReportTypes,
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
+import { buildPhraseFilter } from '../utils';
 import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
-import { buildPhraseFilter } from '../utils';
 import { MobileFields } from './mobile_fields';
 
 export function getMobileDeviceDistributionConfig({ dataView }: ConfigProps): SeriesConfig {

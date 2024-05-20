@@ -6,14 +6,14 @@
  */
 
 import { isEmpty } from 'lodash';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import type { SetStateAction } from 'react';
 import type React from 'react';
-import { useTrackHttpRequest } from '../../../../common/lib/apm/use_track_http_request';
 import type { fetchQueryRuleRegistryAlerts } from './api';
 import { fetchQueryAlerts } from './api';
-import type { ALERTS_QUERY_NAMES } from './constants';
 import type { AlertSearchResponse, QueryAlerts } from './types';
+import { useTrackHttpRequest } from '../../../../common/lib/apm/use_track_http_request';
+import type { ALERTS_QUERY_NAMES } from './constants';
 
 type Func = () => Promise<void>;
 
@@ -26,7 +26,7 @@ export interface ReturnQueryAlerts<Hit, Aggs> {
   refetch: Func | null;
 }
 
-type AlertsQueryName = (typeof ALERTS_QUERY_NAMES)[keyof typeof ALERTS_QUERY_NAMES];
+type AlertsQueryName = typeof ALERTS_QUERY_NAMES[keyof typeof ALERTS_QUERY_NAMES];
 
 type FetchMethod = typeof fetchQueryAlerts | typeof fetchQueryRuleRegistryAlerts;
 export interface AlertsQueryParams {

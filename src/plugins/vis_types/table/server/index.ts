@@ -8,8 +8,8 @@
 
 import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
+import { configSchema, TableConfig } from '../config';
 import { VIS_TYPE_TABLE } from '../common';
-import { TableConfig, configSchema } from '../config';
 
 export const config: PluginConfigDescriptor<TableConfig> = {
   exposeToBrowser: {

@@ -1,8 +1,3 @@
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,14 +5,19 @@ import { useLinkProps } from '@kbn/observability-shared-plugin/public';
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { HOST_FIELD } from '../../../../../common/constants';
-import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCallOut, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { TimeRange } from '@kbn/es-query';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { Section } from '../../components/section';
-import { APM_HOST_FILTER_FIELD } from '../../constants';
-import { useServices } from '../../hooks/use_services';
-import { LinkToApmServices } from '../../links';
-import { LinkToApmService } from '../../links/link_to_apm_service';
 import { ServicesSectionTitle } from './section_titles';
+import { useServices } from '../../hooks/use_services';
+import { HOST_FIELD } from '../../../../../common/constants';
+import { LinkToApmServices } from '../../links';
+import { APM_HOST_FILTER_FIELD } from '../../constants';
+import { LinkToApmService } from '../../links/link_to_apm_service';
+import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 export const ServicesContent = ({
   hostName,

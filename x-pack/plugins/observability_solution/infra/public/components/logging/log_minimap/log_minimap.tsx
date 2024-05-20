@@ -166,7 +166,9 @@ const TimeCursor = euiStyled.line`
   pointer-events: none;
   stroke-width: 1px;
   stroke: ${(props) =>
-    props.theme.darkMode ? props.theme.eui.euiColorDarkestShade : props.theme.eui.euiColorDarkShade};
+    props.theme.darkMode
+      ? props.theme.eui.euiColorDarkestShade
+      : props.theme.eui.euiColorDarkShade};
 `;
 
 const MinimapWrapper = euiStyled.svg`

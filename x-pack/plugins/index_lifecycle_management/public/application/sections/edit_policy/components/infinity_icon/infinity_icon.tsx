@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiIconProps } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
+import { EuiIcon, EuiIconProps } from '@elastic/eui';
 import { InfinityIconSvg } from './infinity_icon.svg';
 
 export const InfinityIcon: FunctionComponent<Omit<EuiIconProps, 'type'>> = (props) => (

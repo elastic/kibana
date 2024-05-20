@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiBadge } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

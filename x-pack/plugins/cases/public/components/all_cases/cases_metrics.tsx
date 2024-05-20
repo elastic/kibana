@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -15,11 +16,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import prettyMilliseconds from 'pretty-ms';
-import React, { useMemo } from 'react';
 import { CaseStatuses } from '../../../common/types/domain';
-import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { StatusStats } from '../status/status_stats';
+import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { ATTC_DESCRIPTION, ATTC_STAT } from './translations';
 
 export const CasesMetrics: React.FC = () => {
@@ -32,10 +32,7 @@ export const CasesMetrics: React.FC = () => {
     isLoading: isCasesStatusLoading,
   } = useGetCasesStatus();
 
-  const {
-    data: { mttr } = { mttr: 0 },
-    isLoading: isCasesMetricsLoading,
-  } = useGetCasesMetrics();
+  const { data: { mttr } = { mttr: 0 }, isLoading: isCasesMetricsLoading } = useGetCasesMetrics();
 
   const mttrValue = useMemo(
     () => (mttr != null ? prettyMilliseconds(mttr * 1000, { compact: true, verbose: false }) : '-'),

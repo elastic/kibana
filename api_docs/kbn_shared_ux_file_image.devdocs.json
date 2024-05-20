@@ -23,7 +23,9 @@
         "parentPluginId": "@kbn/shared-ux-file-image",
         "id": "def-common.Image",
         "type": "Function",
-        "tags": ["note"],
+        "tags": [
+          "note"
+        ],
         "label": "Image",
         "description": [
           "\nA wrapper around the <EuiImage/> that can renders blurhash by the file service while the image is loading\n"

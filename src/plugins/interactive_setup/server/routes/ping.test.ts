@@ -13,10 +13,10 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { ERROR_OUTSIDE_PREBOOT_STAGE, ERROR_PING_FAILURE } from '../../common';
-import { interactiveSetupMock } from '../mocks';
 import { routeDefinitionParamsMock } from './index.mock';
 import { definePingRoute } from './ping';
+import { ERROR_OUTSIDE_PREBOOT_STAGE, ERROR_PING_FAILURE } from '../../common';
+import { interactiveSetupMock } from '../mocks';
 
 describe('Configure routes', () => {
   let router: jest.Mocked<IRouter>;

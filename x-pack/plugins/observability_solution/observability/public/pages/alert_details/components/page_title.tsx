@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,26 +15,24 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  AlertStatus,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
-  AlertStatus,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import moment from 'moment';
-import React from 'react';
+import { css } from '@emotion/react';
 import { asDuration } from '../../../../common/utils/formatters';
-import { ExperimentalBadge } from '../../../components/experimental_badge';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { TopAlert } from '../../../typings/alerts';
-import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
+import { ExperimentalBadge } from '../../../components/experimental_badge';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../alert_details';
+import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export interface PageTitleProps {
   alert: TopAlert | null;

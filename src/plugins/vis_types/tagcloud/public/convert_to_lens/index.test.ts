@@ -38,10 +38,10 @@ jest.mock('../services', () => ({
   getDataViewsStart: () => ({ get: () => ({}), getDefault: () => ({}) }),
 }));
 
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Vis } from '@kbn/visualizations-plugin/public';
-import { convertToLens } from '.';
 import type { TagCloudVisParams } from '../types';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { convertToLens } from '.';
 
 test('should convert legacy tag cloud vis into navigate to lens context', async () => {
   const mockVis = {

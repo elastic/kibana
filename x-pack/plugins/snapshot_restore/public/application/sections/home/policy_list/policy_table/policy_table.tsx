@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
+  EuiToolTip,
+  EuiButtonIcon,
   EuiLoadingSpinner,
   EuiText,
-  EuiToolTip,
+  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SlmPolicy } from '../../../../../../common/types';
 import { UseRequestResponse } from '../../../../../shared_imports';
+import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import {
   FormattedDateTime,
-  PolicyDeleteProvider,
   PolicyExecuteProvider,
+  PolicyDeleteProvider,
 } from '../../../../components';
-import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
 
 interface Props {

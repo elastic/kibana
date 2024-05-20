@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React from 'react';
+import { EuiImage, EuiEmptyPrompt, EuiButton, EuiLink, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import illustration from '../assets/illustrations/illustration_product_no_results_magnifying_glass.svg';
-import { FINDINGS_DOCS_URL } from '../common/constants';
+import { css } from '@emotion/react';
 import { EMPTY_STATE_TEST_SUBJ } from './test_subjects';
+import { FINDINGS_DOCS_URL } from '../common/constants';
+import illustration from '../assets/illustrations/illustration_product_no_results_magnifying_glass.svg';
 
 export const EmptyState = ({
   onResetFilters,

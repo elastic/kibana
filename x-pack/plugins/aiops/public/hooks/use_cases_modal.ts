@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import { stringHash } from '@kbn/ml-string-hash';
 import { useCallback } from 'react';
-import type { EmbeddableChangePointChartType } from '../embeddables/change_point_chart/embeddable_change_point_chart_factory';
+import { stringHash } from '@kbn/ml-string-hash';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { ChangePointEmbeddableRuntimeState } from '../embeddables/change_point_chart/types';
+import type { EmbeddableChangePointChartType } from '../embeddables/change_point_chart/embeddable_change_point_chart_factory';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 /**

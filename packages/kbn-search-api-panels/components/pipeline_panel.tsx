@@ -9,14 +9,14 @@
 import React from 'react';
 
 import {
+  EuiThemeProvider,
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
-  EuiPanel,
+  EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiThemeProvider,
-  EuiTitle,
+  EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

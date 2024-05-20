@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiText, EuiLink } from '@elastic/eui';
 
 export const Overview = () => {
   return (

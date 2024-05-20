@@ -55,7 +55,9 @@
             "description": [
               "\nOptional host describing the external destination.\nMay be combined with `protocol`.\n"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -69,7 +71,9 @@
             "description": [
               "\nOptional protocol describing the external destination.\nMay be combined with `host`.\n"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -84,10 +88,18 @@
         "parentPluginId": "@kbn/core-http-common",
         "id": "def-common.ApiVersion",
         "type": "Type",
-        "tags": ["note", "note", "experimental"],
+        "tags": [
+          "note",
+          "note",
+          "experimental"
+        ],
         "label": "ApiVersion",
-        "description": ["\nA Kibana HTTP API version\n"],
-        "signature": ["string"],
+        "description": [
+          "\nA Kibana HTTP API version\n"
+        ],
+        "signature": [
+          "string"
+        ],
         "path": "packages/core/http/core-http-common/src/versioning.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -100,7 +112,9 @@
         "tags": [],
         "label": "ELASTIC_HTTP_VERSION_HEADER",
         "description": [],
-        "signature": ["\"elastic-api-version\""],
+        "signature": [
+          "\"elastic-api-version\""
+        ],
         "path": "packages/core/http/core-http-common/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -113,7 +127,9 @@
         "tags": [],
         "label": "ELASTIC_HTTP_VERSION_QUERY_PARAM",
         "description": [],
-        "signature": ["\"apiVersion\""],
+        "signature": [
+          "\"apiVersion\""
+        ],
         "path": "packages/core/http/core-http-common/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -126,7 +142,9 @@
         "tags": [],
         "label": "ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM",
         "description": [],
-        "signature": ["\"elasticInternalOrigin\""],
+        "signature": [
+          "\"elasticInternalOrigin\""
+        ],
         "path": "packages/core/http/core-http-common/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -139,7 +157,9 @@
         "tags": [],
         "label": "X_ELASTIC_INTERNAL_ORIGIN_REQUEST",
         "description": [],
-        "signature": ["\"x-elastic-internal-origin\""],
+        "signature": [
+          "\"x-elastic-internal-origin\""
+        ],
         "path": "packages/core/http/core-http-common/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

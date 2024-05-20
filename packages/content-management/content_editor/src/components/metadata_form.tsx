@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiTextArea,
-  EuiToolTip,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiTextArea,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 
-import type { SavedObjectsReference, Services } from '../services';
 import { ContentEditorFlyoutWarningsCallOut } from './editor_flyout_warnings';
-import type { Field, MetadataFormState } from './use_metadata_form';
+import type { MetadataFormState, Field } from './use_metadata_form';
+import type { SavedObjectsReference, Services } from '../services';
 
 interface Props {
   form: MetadataFormState & {

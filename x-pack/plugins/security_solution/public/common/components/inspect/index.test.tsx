@@ -8,13 +8,13 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
+import { TestProviders, mockGlobalState, createMockStore } from '../../mock';
 import type { State } from '../../store';
 import type { UpdateQueryParams } from '../../store/inputs/helpers';
 import { upsertQuery } from '../../store/inputs/helpers';
 
-import { cloneDeep } from 'lodash/fp';
 import { InspectButton } from '.';
+import { cloneDeep } from 'lodash/fp';
 import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('./modal', () => ({

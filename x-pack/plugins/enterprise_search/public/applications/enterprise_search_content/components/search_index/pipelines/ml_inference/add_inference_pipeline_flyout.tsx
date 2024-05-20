@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
   EuiButton,
@@ -16,14 +16,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
+  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
+  EuiStepsHorizontal,
+  EuiStepsHorizontalProps,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiStepStatus,
-  EuiStepsHorizontal,
-  EuiStepsHorizontalProps,
   EuiTitle,
 } from '@elastic/eui';
 

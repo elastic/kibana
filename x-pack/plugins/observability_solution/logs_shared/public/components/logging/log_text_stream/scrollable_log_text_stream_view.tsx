@@ -7,26 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import moment from 'moment';
 import React, { Fragment, GetDerivedStateFromProps } from 'react';
-import { LogEntry } from '../../../../common/log_entry';
+import moment from 'moment';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
 import { TextScale } from '../../../../common/log_text_scale';
 import { callWithoutRepeats } from '../../../utils/handlers';
-import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
 import { LogsSharedLoadingPanel } from '../../loading';
+import { getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId, StreamItem } from './item';
 import { LogColumnHeaders } from './column_headers';
-import { StreamItem, getStreamItemBeforeTimeKey, getStreamItemId, parseStreamItemId } from './item';
-import { LogTextStreamJumpToTail } from './jump_to_tail';
 import { LogTextStreamLoadingItemView } from './loading_item_view';
-import { LogDateRow } from './log_date_row';
-import { LogEntryColumnWidths, useColumnWidths } from './log_entry_column';
+import { LogTextStreamJumpToTail } from './jump_to_tail';
 import { LogEntryRow } from './log_entry_row';
 import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
+import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
+import { LogDateRow } from './log_date_row';
+import { LogEntry } from '../../../../common/log_entry';
+import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
 export interface ScrollableLogTextStreamViewProps {
   columnConfigurations: LogColumnRenderConfiguration[];

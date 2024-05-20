@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
+import { EuiPageTemplate } from '@elastic/eui';
 
+import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { NoDataPage } from '@kbn/shared-ux-page-no-data';
 import type { NoDataConfigPageProps } from '@kbn/shared-ux-page-no-data-config-types';
-import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 
 import { NO_DATA_PAGE_MAX_WIDTH } from './constants';
 

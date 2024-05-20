@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
-import { useCallback, useEffect, useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 
 export interface FormInput {
   validate: () => boolean;

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../rule_registry/common/lib/authentication';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsOnlySpacesAll,
-  secOnlyReadSpacesAll,
   superUser,
+  globalRead,
+  secOnlyReadSpacesAll,
+  obsOnlySpacesAll,
+  noKibanaPrivileges,
 } from '../../../rule_registry/common/lib/authentication/users';
 
 import { noKibanaPrivileges as noKibanaPrivilegesRole } from '../../../rule_registry/common/lib/authentication/roles';

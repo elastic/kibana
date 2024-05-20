@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { GuidedOnboardingExampleApp } from './components/app';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';
+import { GuidedOnboardingExampleApp } from './components/app';
 
 export const renderApp = (
   { notifications }: CoreStart,

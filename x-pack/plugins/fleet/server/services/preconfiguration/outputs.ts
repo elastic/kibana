@@ -8,24 +8,24 @@
 import crypto from 'crypto';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { safeDump } from 'js-yaml';
 import { isEqual } from 'lodash';
+import { safeDump } from 'js-yaml';
 
-import { normalizeHostsForAgents } from '../../../common/services';
 import type {
+  PreconfiguredOutput,
+  Output,
+  NewOutput,
+  OutputSecret,
   KafkaOutput,
   NewLogstashOutput,
-  NewOutput,
   NewRemoteElasticsearchOutput,
-  Output,
-  OutputSecret,
-  PreconfiguredOutput,
 } from '../../../common/types';
+import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
-import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID } from '../../constants';
+import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
+import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-import { outputService } from '../output';
 
 import { isDifferent } from './utils';
 

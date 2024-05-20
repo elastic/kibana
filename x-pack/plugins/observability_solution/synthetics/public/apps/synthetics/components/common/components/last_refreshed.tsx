@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+import moment from 'moment';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
-import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { selectRefreshPaused } from '../../../state';

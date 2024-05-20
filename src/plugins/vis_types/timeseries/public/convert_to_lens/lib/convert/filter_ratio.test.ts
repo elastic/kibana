@@ -8,10 +8,10 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { FormulaColumn } from './types';
 import type { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
 import { convertFilterRatioToFormulaColumn } from './filter_ratio';
-import { FormulaColumn } from './types';
 
 describe('convertFilterRatioToFormulaColumn', () => {
   const dataView = stubLogstashDataView;

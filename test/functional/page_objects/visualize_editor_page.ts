@@ -430,9 +430,9 @@ export class VisualizeEditorPageObject extends FtrService {
   }
 
   public async selectXAxisPosition(position: string) {
-    const option = await (await this.testSubjects.find('categoryAxisPosition')).findByCssSelector(
-      `option[value="${position}"]`
-    );
+    const option = await (
+      await this.testSubjects.find('categoryAxisPosition')
+    ).findByCssSelector(`option[value="${position}"]`);
     await option.click();
   }
 

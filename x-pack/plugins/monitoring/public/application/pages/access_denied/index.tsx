@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiPanel } from '@elastic/eui';
+import React, { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useContext, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { EuiPanel, EuiCallOut, EuiButton } from '@elastic/eui';
 import useInterval from 'react-use/lib/useInterval';
+import { Redirect } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ComponentProps } from '../../route_init';
 import { MonitoringStartServices } from '../../../types';
 import { ExternalConfigContext } from '../../contexts/external_config_context';
-import { ComponentProps } from '../../route_init';
 
 export const AccessDeniedPage: React.FC<ComponentProps> = () => {
   const { isCcsEnabled } = useContext(ExternalConfigContext);

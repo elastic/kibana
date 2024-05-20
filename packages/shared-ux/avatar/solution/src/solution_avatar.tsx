@@ -7,8 +7,8 @@
  */
 import './solution_avatar.scss';
 
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
 
 import { DistributiveOmit, EuiAvatar, EuiAvatarProps, IconType } from '@elastic/eui';
 

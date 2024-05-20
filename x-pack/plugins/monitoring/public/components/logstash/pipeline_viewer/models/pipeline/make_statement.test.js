@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IfVertex } from '../graph/if_vertex';
-import { PluginVertex } from '../graph/plugin_vertex';
-import { QueueVertex } from '../graph/queue_vertex';
-import { IfStatement } from './if_statement';
 import { makeStatement } from './make_statement';
+import { PluginVertex } from '../graph/plugin_vertex';
+import { IfVertex } from '../graph/if_vertex';
+import { QueueVertex } from '../graph/queue_vertex';
 import { PluginStatement } from './plugin_statement';
+import { IfStatement } from './if_statement';
 import { Queue } from './queue';
 
 describe('makeStatement', () => {

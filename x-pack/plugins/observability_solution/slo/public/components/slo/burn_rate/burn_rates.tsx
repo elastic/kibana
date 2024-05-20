@@ -9,13 +9,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { useFetchSloBurnRates } from '../../../hooks/use_fetch_slo_burn_rates';
-import { SloTabId } from '../../../pages/slo_details/components/slo_details';
 import { TimeBounds } from '../../../pages/slo_details/types';
-import { ErrorRateChart } from '../error_rate_chart';
 import { TimeRange } from '../error_rate_chart/use_lens_definition';
-import { BurnRate } from './burn_rate';
+import { SloTabId } from '../../../pages/slo_details/components/slo_details';
 import { BurnRateHeader } from './burn_rate_header';
+import { useFetchSloBurnRates } from '../../../hooks/use_fetch_slo_burn_rates';
+import { ErrorRateChart } from '../error_rate_chart';
+import { BurnRate } from './burn_rate';
 
 interface Props {
   slo: SLOWithSummaryResponse;

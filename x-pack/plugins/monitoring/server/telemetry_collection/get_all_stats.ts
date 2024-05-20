@@ -8,18 +8,18 @@
 import { set } from '@kbn/safer-lodash-set';
 import { get, merge } from 'lodash';
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  BEATS_SYSTEM_ID,
-  KIBANA_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
   USAGE_FETCH_INTERVAL,
 } from '../../common/constants';
-import { BeatsStatsByClusterUuid, getBeatsStats } from './get_beats_stats';
-import { ESClusterStats, getElasticsearchStats } from './get_es_stats';
-import { KibanaStats, getKibanaStats } from './get_kibana_stats';
-import { LogstashStatsByClusterUuid, getLogstashStats } from './get_logstash_stats';
+import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
+import { getKibanaStats, KibanaStats } from './get_kibana_stats';
+import { getBeatsStats, BeatsStatsByClusterUuid } from './get_beats_stats';
+import { getLogstashStats, LogstashStatsByClusterUuid } from './get_logstash_stats';
 
 /**
  * Get statistics for all products joined by Elasticsearch cluster.

@@ -14,8 +14,8 @@ import type {
 } from '@kbn/presentation-publishing';
 import {
   apiIsOfType,
-  apiPublishesPanelTitle,
   apiPublishesUnifiedSearch,
+  apiPublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import type { ILayer } from '../classes/layers/layer';
 

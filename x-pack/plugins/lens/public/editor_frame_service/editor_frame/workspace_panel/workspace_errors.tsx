@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import React, { useState } from 'react';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import type { UserMessage } from '../../../types';
 
 interface Props {

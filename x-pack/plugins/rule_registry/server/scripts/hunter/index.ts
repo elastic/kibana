@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import * as hunterRole from './detections_role.json';
 import * as hunterUser from './detections_user.json';
+import * as hunterRole from './detections_role.json';
 export { hunterUser, hunterRole };

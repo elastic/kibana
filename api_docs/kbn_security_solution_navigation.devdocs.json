@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "getNavigationPropsFromId",
-        "description": ["\nReturns the appId, deepLinkId, and path from a given navigation id"],
+        "description": [
+          "\nReturns the appId, deepLinkId, and path from a given navigation id"
+        ],
         "signature": [
           "(id: string) => { appId: string; deepLinkId?: string | undefined; path?: string | undefined; }"
         ],
@@ -40,7 +42,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/navigation.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -327,7 +331,9 @@
         "type": "Function",
         "tags": [],
         "label": "useNavigation",
-        "description": ["\nReturns `navigateTo` and `getAppUrl` navigation hooks"],
+        "description": [
+          "\nReturns `navigateTo` and `getAppUrl` navigation hooks"
+        ],
         "signature": [
           "() => { navigateTo: ",
           {
@@ -469,7 +475,9 @@
             "tags": [],
             "label": "linkIds",
             "description": [],
-            "signature": ["readonly T[] | undefined"],
+            "signature": [
+              "readonly T[] | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -481,7 +489,9 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -514,7 +524,10 @@
             "tags": [],
             "label": "iconType",
             "description": [],
-            "signature": ["IconType", " | undefined"],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -593,7 +606,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -605,7 +620,9 @@
             "tags": [],
             "label": "disabled",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -617,7 +634,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -629,7 +648,10 @@
             "tags": [],
             "label": "landingIcon",
             "description": [],
-            "signature": ["IconType", " | undefined"],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -641,7 +663,9 @@
             "tags": [],
             "label": "landingImage",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -685,7 +709,10 @@
             "tags": [],
             "label": "sideNavIcon",
             "description": [],
-            "signature": ["IconType", " | undefined"],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -697,7 +724,9 @@
             "tags": [],
             "label": "skipUrlState",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -709,7 +738,9 @@
             "tags": [],
             "label": "unauthorized",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -721,7 +752,9 @@
             "tags": [],
             "label": "isFooterLink",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -733,7 +766,9 @@
             "tags": [],
             "label": "isBeta",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -745,7 +780,9 @@
             "tags": [],
             "label": "betaOptions",
             "description": [],
-            "signature": ["{ text: string; } | undefined"],
+            "signature": [
+              "{ text: string; } | undefined"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -810,7 +847,9 @@
             "tags": [],
             "label": "linkIds",
             "description": [],
-            "signature": ["readonly T[]"],
+            "signature": [
+              "readonly T[]"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -875,7 +914,9 @@
             "tags": [],
             "label": "linkIds",
             "description": [],
-            "signature": ["readonly T[]"],
+            "signature": [
+              "readonly T[]"
+            ],
             "path": "x-pack/packages/security-solution/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1045,7 +1086,9 @@
         "tags": [],
         "label": "SECURITY_UI_APP_ID",
         "description": [],
-        "signature": ["\"securitySolutionUI\""],
+        "signature": [
+          "\"securitySolutionUI\""
+        ],
         "path": "x-pack/packages/security-solution/navigation/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

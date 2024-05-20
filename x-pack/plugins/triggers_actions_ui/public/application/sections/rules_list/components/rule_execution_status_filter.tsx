@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiPopover,
   EuiFilterButton,
   EuiFilterSelectItem,
   EuiHealth,
-  EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
-import { RuleExecutionStatusValues, RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { getExecutionStatusHealthColor } from '../../../../common/lib';
+import { RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import { rulesStatusesTranslationsMapping } from '../translations';
+import { getExecutionStatusHealthColor } from '../../../../common/lib';
 
 interface RuleExecutionStatusFilterProps {
   selectedStatuses: string[];

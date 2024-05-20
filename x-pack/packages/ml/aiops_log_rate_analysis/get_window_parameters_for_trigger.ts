@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getWindowParameters } from './get_window_parameters';
 import type { DocumentCountStatsChangePoint } from './types';
+import { getWindowParameters } from './get_window_parameters';
 import type { WindowParameters } from './window_parameters';
 
 /**

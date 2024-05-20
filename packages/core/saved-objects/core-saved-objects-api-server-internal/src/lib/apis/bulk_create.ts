@@ -8,36 +8,36 @@
 
 import type { Payload } from '@hapi/boom';
 import {
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkResponse,
-  SavedObjectsCreateOptions,
-} from '@kbn/core-saved-objects-api-server';
-import {
-  AuthorizeCreateObject,
-  DecoratedError,
+  SavedObjectsErrorHelpers,
   type SavedObject,
   type SavedObjectSanitizedDoc,
-  SavedObjectsErrorHelpers,
+  DecoratedError,
+  AuthorizeCreateObject,
   SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import {
+  SavedObjectsCreateOptions,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
+} from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
-import { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
-import { ApiExecutionContext } from './types';
 import {
   Either,
-  errorContent,
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
+  left,
+  right,
   isLeft,
   isRight,
-  left,
   normalizeNamespace,
-  right,
   setManaged,
+  errorContent,
 } from './utils';
 import { getSavedObjectNamespaces } from './utils';
+import { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
+import { ApiExecutionContext } from './types';
 
 export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;
@@ -141,8 +141,9 @@ export const performBulkCreate = async <T>(
       const namespaces = initialNamespaces ?? [namespaceString];
       return { type, id, overwrite, namespaces };
     });
-  const preflightCheckResponse =
-    await preflightHelper.preflightCheckForCreate(preflightCheckObjects);
+  const preflightCheckResponse = await preflightHelper.preflightCheckForCreate(
+    preflightCheckObjects
+  );
 
   const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
     const { object, preflightCheckIndex: index } = element.value;

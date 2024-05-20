@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
-import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
+import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
 import { VislibPublicConfig } from '../config';
-import { heatmapVisTypeDefinition } from './heatmap';
 import { setAnalytics, setI18n, setUsageCollectionStart } from './services';
+import { heatmapVisTypeDefinition } from './heatmap';
 
+import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
+import { setFormatService, setDataActions, setTheme } from './services';
+import { getVislibVisRenderer } from './vis_renderer';
 import { gaugeVisTypeDefinition } from './gauge';
 import { goalVisTypeDefinition } from './goal';
-import { setDataActions, setFormatService, setTheme } from './services';
-import { getVislibVisRenderer } from './vis_renderer';
-import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 
 /** @internal */
 export interface VisTypeVislibPluginSetupDependencies {

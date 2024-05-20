@@ -1,4 +1,3 @@
-import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
+import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import type { ExceptionListRuleReferencesSchema } from '../../../../../../../common/api/detection_engine/rule_exceptions';
 
 import * as i18n from './translations';

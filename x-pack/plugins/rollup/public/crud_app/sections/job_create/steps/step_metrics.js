@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { get } from 'lodash';
-import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiPopover,
+  EuiButton,
 } from '@elastic/eui';
 
-import { METRICS_CONFIG } from '../../../constants';
 import { documentationLinks } from '../../../services/documentation_links';
 import { FieldList } from '../../components';
 import { FieldChooser, StepError } from './components';
+import { METRICS_CONFIG } from '../../../constants';
 
 const whiteListedMetricByFieldType = {
   numeric: {

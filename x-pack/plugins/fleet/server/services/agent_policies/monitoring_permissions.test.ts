@@ -8,7 +8,7 @@
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { Installation, PackageInfo } from '../../types';
-import { getInstallation, getPackageInfo } from '../epm/packages';
+import { getPackageInfo, getInstallation } from '../epm/packages';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 

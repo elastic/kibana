@@ -9,22 +9,22 @@
 import { History } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { scopedHistoryMock } from './scoped_history.mock';
 import {
-  AppMountParameters,
   ApplicationSetup,
   ApplicationStart,
   PublicAppInfo,
+  AppMountParameters,
 } from '@kbn/core-application-browser';
 import type {
   ApplicationService,
-  InternalApplicationSetup,
   InternalApplicationStart,
+  InternalApplicationSetup,
 } from '@kbn/core-application-browser-internal';
-import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { scopedHistoryMock } from './scoped_history.mock';
 
 type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
 

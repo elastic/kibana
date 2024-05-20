@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import Url from 'url';
 import Hapi from '@hapi/hapi';
 import { kbnTestConfig } from '@kbn/test/kbn_test_config';
+import Url from 'url';
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import type { ConfigSchema } from './config';
 
 const apiToken = Buffer.from(kbnTestConfig.getUrlParts().auth!).toString('base64');

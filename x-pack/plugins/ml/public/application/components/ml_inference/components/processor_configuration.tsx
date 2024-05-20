@@ -16,29 +16,29 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiLink,
-  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiPopover,
 } from '@elastic/eui';
 
-import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isValidJson } from '../../../../../common/util/validation_utils';
-import { useMlKibana } from '../../../contexts/kibana';
+import { CodeEditor } from '@kbn/code-editor';
 import type { ModelItem } from '../../../model_management/models_list';
 import {
-  CANCEL_EDIT_MESSAGE,
-  CLEAR_BUTTON_LABEL,
-  CREATE_FIELD_MAPPING_MESSAGE,
   EDIT_MESSAGE,
+  CANCEL_EDIT_MESSAGE,
+  CREATE_FIELD_MAPPING_MESSAGE,
+  CLEAR_BUTTON_LABEL,
 } from '../constants';
-import type { InferenceModelTypes, MlInferenceState } from '../types';
 import { validateInferenceConfig } from '../validation';
-import { validateFieldMap } from '../validation';
-import { AdditionalAdvancedSettings } from './additional_advanced_settings';
+import { isValidJson } from '../../../../../common/util/validation_utils';
 import { SaveChangesButton } from './save_changes_button';
+import { useMlKibana } from '../../../contexts/kibana';
+import type { MlInferenceState, InferenceModelTypes } from '../types';
+import { AdditionalAdvancedSettings } from './additional_advanced_settings';
+import { validateFieldMap } from '../validation';
 
 function getDefaultFieldMapString() {
   return JSON.stringify(
@@ -336,8 +336,8 @@ export const ProcessorConfiguration: FC<Props> = memo(
                         {editFieldMapping
                           ? CANCEL_EDIT_MESSAGE
                           : fieldMap !== undefined
-                            ? EDIT_MESSAGE
-                            : CREATE_FIELD_MAPPING_MESSAGE}
+                          ? EDIT_MESSAGE
+                          : CREATE_FIELD_MAPPING_MESSAGE}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                     {editFieldMapping ? (

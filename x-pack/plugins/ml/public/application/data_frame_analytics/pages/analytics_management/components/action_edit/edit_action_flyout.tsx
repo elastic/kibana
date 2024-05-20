@@ -36,15 +36,15 @@ import {
   type UpdateDataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 
-import type { MemoryInputValidatorResult } from '../../../../../../../common/util/validators';
-import { memoryInputValidator } from '../../../../../../../common/util/validators';
-import { useMlApiContext, useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
+import type { MemoryInputValidatorResult } from '../../../../../../../common/util/validators';
+import { memoryInputValidator } from '../../../../../../../common/util/validators';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
 
-import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../../components/custom_urls';
 import type { EditAction } from './use_edit_action';
+import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../../components/custom_urls';
 
 let mmLValidator: (value: any) => MemoryInputValidatorResult;
 

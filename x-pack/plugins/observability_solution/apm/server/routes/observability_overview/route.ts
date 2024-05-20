@@ -12,10 +12,10 @@ import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
 import {
-  ObservabilityOverviewResponse,
   getObservabilityOverviewData,
+  ObservabilityOverviewResponse,
 } from './get_observability_overview_data';
-import { HasDataResponse, getHasData } from './has_data';
+import { getHasData, HasDataResponse } from './has_data';
 
 const observabilityOverviewHasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/observability_overview/has_data',

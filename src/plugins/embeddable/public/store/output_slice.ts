@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { EmbeddableOutput } from '../lib';
 
 export const output = createSlice({

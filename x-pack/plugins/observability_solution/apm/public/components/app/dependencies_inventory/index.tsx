@@ -8,12 +8,12 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import {
-  getSearchBarBoolFilter,
   unifiedSearchBarPlaceholder,
+  getSearchBarBoolFilter,
 } from '../../../../common/dependencies';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { DependenciesInventoryTable } from './dependencies_inventory_table';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function DependenciesInventory() {
   const {

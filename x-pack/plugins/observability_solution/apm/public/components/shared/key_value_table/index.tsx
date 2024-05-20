@@ -1,4 +1,3 @@
-import { EuiTable, EuiTableBody, EuiTableProps, EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +6,9 @@ import { EuiTable, EuiTableBody, EuiTableProps, EuiTableRow, EuiTableRowCell } f
  */
 import { castArray } from 'lodash';
 import React, { TableHTMLAttributes } from 'react';
-import { KeyValuePair } from '../../../utils/flatten_object';
+import { EuiTable, EuiTableProps, EuiTableBody, EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 import { FormattedValue } from './formatted_value';
+import { KeyValuePair } from '../../../utils/flatten_object';
 
 export function KeyValueTable({
   keyValuePairs,

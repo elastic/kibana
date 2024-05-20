@@ -17,11 +17,18 @@ import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
-import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
+import { createAppContextStartContractMock } from '../../mocks';
 
 import { newArtifactToElasticsearchProperties, uniqueIdFromArtifact } from './mappings';
 
+import {
+  generateArtifactEsGetSingleHitMock,
+  generateArtifactEsSearchResultHitsMock,
+  generateArtifactMock,
+  generateEsRequestErrorApiResponseMock,
+  setEsClientMethodResponseToError,
+} from './mocks';
 import {
   bulkCreateArtifacts,
   bulkDeleteArtifacts,
@@ -33,13 +40,6 @@ import {
   getArtifact,
   listArtifacts,
 } from './artifacts';
-import {
-  generateArtifactEsGetSingleHitMock,
-  generateArtifactEsSearchResultHitsMock,
-  generateArtifactMock,
-  generateEsRequestErrorApiResponseMock,
-  setEsClientMethodResponseToError,
-} from './mocks';
 
 import type { NewArtifact } from './types';
 import type { FetchAllArtifactsOptions } from './types';

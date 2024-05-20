@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ExperimentalFeatures } from '../../../../../../common';
+import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
-import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
+import type { ExperimentalFeatures } from '../../../../../../common';
 
 const mockExperimentalFeatures = {
   bulkCustomHighlightedFieldsEnabled: true,

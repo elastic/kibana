@@ -11,9 +11,9 @@ import { inspect } from 'util';
 import { ToolingLog } from '@kbn/tooling-log';
 import { tap } from 'rxjs';
 
-import { ALL_THEMES, CompilerMsg, pipeClosure } from './common';
 import { OptimizerConfig } from './optimizer';
 import { OptimizerUpdate$ } from './run_optimizer';
+import { CompilerMsg, pipeClosure, ALL_THEMES } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {

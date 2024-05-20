@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps, useEuiTheme } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, useEuiTheme, EuiComboBoxProps } from '@elastic/eui';
 import React from 'react';
 import { genericComboBoxStyle } from './generic_combo_box.styles';
 

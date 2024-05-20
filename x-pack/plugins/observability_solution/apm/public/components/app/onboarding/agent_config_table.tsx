@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
+import type { ValuesType } from 'utility-types';
+import { get } from 'lodash';
 import {
   EuiBasicTable,
+  EuiText,
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
-  EuiText,
   copyToClipboard,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import React from 'react';
-import type { ValuesType } from 'utility-types';
 function ConfigurationValueColumn({
   columnKey,
   value,

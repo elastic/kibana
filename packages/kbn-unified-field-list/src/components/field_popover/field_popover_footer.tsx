@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiPopoverFooter, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { ErrorBoundary } from '../error_boundary';
-import { FieldCategorizeButtonProps, getFieldCategorizeButton } from '../field_categorize_button';
+import { EuiPopoverFooter, EuiSpacer } from '@elastic/eui';
 import { type FieldVisualizeButtonProps, getFieldVisualizeButton } from '../field_visualize_button';
+import { FieldCategorizeButtonProps, getFieldCategorizeButton } from '../field_categorize_button';
+import { ErrorBoundary } from '../error_boundary';
 
 export type FieldPopoverFooterProps = FieldVisualizeButtonProps | FieldCategorizeButtonProps;
 

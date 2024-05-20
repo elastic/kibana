@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { createEsError } from '@kbn/search-errors';
 import React, { useEffect, useState } from 'react';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { createEsError } from '@kbn/search-errors';
 import type { TileError } from '../../../common/descriptor_types';
-import { RESPONSE_VIEW_ID } from '../../inspector/vector_tile_adapter/components/vector_tile_inspector';
 import { getApplication, getDocLinks, getInspector } from '../../kibana_services';
+import { RESPONSE_VIEW_ID } from '../../inspector/vector_tile_adapter/components/vector_tile_inspector';
 
 interface Props {
   inspectorAdapters: Adapters;

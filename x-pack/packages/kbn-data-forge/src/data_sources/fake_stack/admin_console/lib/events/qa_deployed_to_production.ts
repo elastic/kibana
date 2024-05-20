@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { faker } from '@faker-js/faker';
 import { sample } from 'lodash';
-import { EventFunction } from '../../../../../types';
+import { faker } from '@faker-js/faker';
 import { ADMIN_CONSOLE, ADMIN_CONSOLE_QA_HOSTS, DOMAINS } from '../../../common/constants';
-import { createNginxLog } from '../../../nginx_proxy/lib/events/create_nginx_log';
-import { createUpstreamTimeout } from '../../../nginx_proxy/lib/events/create_upstream_timedout';
 import { getLoggedInUser } from '../login_cache';
+import { EventFunction } from '../../../../../types';
+import { createUpstreamTimeout } from '../../../nginx_proxy/lib/events/create_upstream_timedout';
+import { createNginxLog } from '../../../nginx_proxy/lib/events/create_nginx_log';
 
 interface Endpoint {
   path: string;

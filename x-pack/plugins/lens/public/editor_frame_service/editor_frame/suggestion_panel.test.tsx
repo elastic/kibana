@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import { IconChartDatatable } from '@kbn/chart-icons';
-import { coreMock } from '@kbn/core/public/mocks';
-import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { Visualization, Suggestion } from '../../types';
 import {
-  DatasourceMock,
-  createExpressionRendererMock,
-  createMockDatasource,
-  createMockFramePublicAPI,
   createMockVisualization,
+  createMockDatasource,
+  createExpressionRendererMock,
+  DatasourceMock,
+  createMockFramePublicAPI,
 } from '../../mocks';
-import { mountWithProvider } from '../../mocks';
-import { Suggestion, Visualization } from '../../types';
-import { getSuggestions } from './suggestion_helpers';
+import { act } from 'react-dom/test-utils';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
+import { getSuggestions } from './suggestion_helpers';
+import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
+import { IconChartDatatable } from '@kbn/chart-icons';
+import { mountWithProvider } from '../../mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import {
+  applyChanges,
   LensAppState,
   PreviewState,
-  VisualizationState,
-  applyChanges,
   setState,
   setToggleFullscreen,
+  VisualizationState,
 } from '../../state_management';
 import { setChangesApplied } from '../../state_management/lens_slice';
 

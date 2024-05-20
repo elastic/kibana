@@ -7,9 +7,9 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 
+import { authorizationModeFactory } from './mode';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { authorizationModeFactory } from './mode';
 
 describe(`#useRbacForRequest`, () => {
   let mockLicense: jest.Mocked<SecurityLicense>;

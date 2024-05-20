@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiConfirmModal,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useState } from 'react';
+import {
+  EuiCallOut,
+  EuiComboBox,
+  EuiForm,
+  EuiFormRow,
+  EuiConfirmModal,
+  EuiFieldText,
+  EuiSpacer,
+  EuiText,
+  EuiSwitch,
+  EuiButton,
+  EuiComboBoxOptionOption,
+} from '@elastic/eui';
 
 import { PolicyFromES } from '../../../../../common/types';
-import { useKibana } from '../../../../shared_imports';
 import { addLifecyclePolicyToTemplate, useLoadIndexTemplates } from '../../../services/api';
-import { showApiError } from '../../../services/api_errors';
 import { toasts } from '../../../services/notification';
+import { showApiError } from '../../../services/api_errors';
 import { LearnMoreLink } from '../../edit_policy/components';
+import { useKibana } from '../../../../shared_imports';
 
 interface Props {
   policy: PolicyFromES;

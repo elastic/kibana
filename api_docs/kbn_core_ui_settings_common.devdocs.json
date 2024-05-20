@@ -47,7 +47,9 @@
             "tags": [],
             "label": "rawValue",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -65,7 +67,9 @@
         "type": "Interface",
         "tags": [],
         "label": "DeprecationSettings",
-        "description": ["\nUiSettings deprecation field options."],
+        "description": [
+          "\nUiSettings deprecation field options."
+        ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -76,7 +80,9 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": ["Deprecation message"],
+            "description": [
+              "Deprecation message"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -87,7 +93,9 @@
             "type": "string",
             "tags": [],
             "label": "docLinksKey",
-            "description": ["Key to documentation links"],
+            "description": [
+              "Key to documentation links"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -101,7 +109,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UiSettingsParams",
-        "description": ["\nUiSettings parameters defined by the plugins."],
+        "description": [
+          "\nUiSettings parameters defined by the plugins."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-ui-settings-common",
@@ -122,8 +132,12 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["title in the UI"],
-            "signature": ["string | undefined"],
+            "description": [
+              "title in the UI"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -134,8 +148,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
-            "description": ["default value to fall back to if a user doesn't provide any"],
-            "signature": ["T | undefined"],
+            "description": [
+              "default value to fall back to if a user doesn't provide any"
+            ],
+            "signature": [
+              "T | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -146,8 +164,12 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["description provided to a user in UI"],
-            "signature": ["string | undefined"],
+            "description": [
+              "description provided to a user in UI"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -158,8 +180,12 @@
             "type": "Array",
             "tags": [],
             "label": "category",
-            "description": ["used to group the configured setting in the UI"],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "used to group the configured setting in the UI"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -170,8 +196,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "options",
-            "description": ["array of permitted values for this setting"],
-            "signature": ["string[] | number[] | undefined"],
+            "description": [
+              "array of permitted values for this setting"
+            ],
+            "signature": [
+              "string[] | number[] | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -182,8 +212,12 @@
             "type": "Object",
             "tags": [],
             "label": "optionLabels",
-            "description": ["text labels for 'select' type UI element"],
-            "signature": ["Record<string, string> | undefined"],
+            "description": [
+              "text labels for 'select' type UI element"
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -194,8 +228,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "requiresPageReload",
-            "description": ["a flag indicating whether new value applying requires page reloading"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "a flag indicating whether new value applying requires page reloading"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -206,8 +244,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "readonly",
-            "description": ["a flag indicating that value cannot be changed"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "a flag indicating that value cannot be changed"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -244,7 +286,9 @@
             "description": [
               "\na flag indicating that value might contain user sensitive data.\nused by telemetry to mask the value of the setting when sent."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -255,7 +299,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": ["defines a type of UI element {@link UiSettingsType}"],
+            "description": [
+              "defines a type of UI element {@link UiSettingsType}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-common",
@@ -302,7 +348,9 @@
             "description": [
               "\nindex of the settings within its category (ascending order, smallest will be displayed first).\nUsed for ordering in the UI.\n"
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -334,10 +382,16 @@
             "parentPluginId": "@kbn/core-ui-settings-common",
             "id": "def-common.UiSettingsParams.metric",
             "type": "Object",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "metric",
-            "description": ["\nMetric to track once this property changes"],
-            "signature": ["{ type: string; name: string; } | undefined"],
+            "description": [
+              "\nMetric to track once this property changes"
+            ],
+            "signature": [
+              "{ type: string; name: string; } | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -392,7 +446,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProvidedValues",
-        "description": ["\nDescribes the values explicitly set by user."],
+        "description": [
+          "\nDescribes the values explicitly set by user."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-ui-settings-common",
@@ -414,7 +470,9 @@
             "tags": [],
             "label": "userValue",
             "description": [],
-            "signature": ["T | undefined"],
+            "signature": [
+              "T | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -426,7 +484,9 @@
             "tags": [],
             "label": "isOverridden",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -446,7 +506,9 @@
         "description": [
           "\nThe list of possible values for the dark mode UI setting.\n- false: dark mode is disabled\n- true: dark mode is enabled\n- \"system\": dark mode will follow the user system preference."
         ],
-        "signature": ["boolean | \"system\""],
+        "signature": [
+          "boolean | \"system\""
+        ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -461,7 +523,9 @@
         "description": [
           "\nType for the readonly mode of the readonly settings.\n'strict' indicates that the value cannot be changed through API and is not displayed in the UI\n'ui' indicates that the value is just not displayed in the UI"
         ],
-        "signature": ["\"strict\" | \"ui\""],
+        "signature": [
+          "\"strict\" | \"ui\""
+        ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -474,7 +538,9 @@
         "tags": [],
         "label": "TIMEZONE_OPTIONS",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/timezones.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -486,8 +552,12 @@
         "type": "Type",
         "tags": [],
         "label": "UiSettingsScope",
-        "description": ["\nDenotes the scope of the setting"],
-        "signature": ["\"namespace\" | \"global\""],
+        "description": [
+          "\nDenotes the scope of the setting"
+        ],
+        "signature": [
+          "\"namespace\" | \"global\""
+        ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -499,7 +569,9 @@
         "type": "Type",
         "tags": [],
         "label": "UiSettingsType",
-        "description": ["\nUI element type to represent the settings."],
+        "description": [
+          "\nUI element type to represent the settings."
+        ],
         "signature": [
           "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"select\" | \"json\" | \"array\" | \"markdown\""
         ],

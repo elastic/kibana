@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiFlexGrid, EuiFlexGridProps, EuiFlexItem } from '@elastic/eui';
 import { SampleDataCard } from '@kbn/home-sample-data-card';
-import React from 'react';
 
 import { useList } from './hooks';
 

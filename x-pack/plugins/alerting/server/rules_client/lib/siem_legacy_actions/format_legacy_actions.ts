@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsFindOptionsReference } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import type { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
-import type { RuleExecutorServices } from '../../..';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { Rule, RuleAction } from '../../../types';
+import { RuleAction, Rule } from '../../../types';
+import type { RuleExecutorServices } from '../../..';
 import { injectReferencesIntoActions } from '../../common';
-import { transformFromLegacyActions } from './transform_legacy_actions';
-import { transformToAlertThrottle } from './transform_to_alert_throttle';
 import { transformToNotifyWhen } from './transform_to_notify_when';
+import { transformFromLegacyActions } from './transform_legacy_actions';
 import { LegacyIRuleActionsAttributes, legacyRuleActionsSavedObjectType } from './types';
+import { transformToAlertThrottle } from './transform_to_alert_throttle';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

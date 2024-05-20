@@ -6,8 +6,8 @@
  */
 
 import fs from 'fs';
-import { Page, after } from '@elastic/synthetics';
 import Runner from '@elastic/synthetics/dist/core/runner';
+import { after, Page } from '@elastic/synthetics';
 
 const SYNTHETICS_RUNNER = Symbol.for('SYNTHETICS_RUNNER');
 

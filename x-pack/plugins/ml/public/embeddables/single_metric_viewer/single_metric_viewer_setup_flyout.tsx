@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import React from 'react';
-import type { SingleMetricViewerEmbeddableInput, SingleMetricViewerEmbeddableUserInput } from '..';
-import type { MlApiServices } from '../../application/services/ml_api_service';
+import type { SingleMetricViewerEmbeddableUserInput, SingleMetricViewerEmbeddableInput } from '..';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
+import type { MlApiServices } from '../../application/services/ml_api_service';
 
 export async function resolveEmbeddableSingleMetricViewerUserInput(
   coreStart: CoreStart,

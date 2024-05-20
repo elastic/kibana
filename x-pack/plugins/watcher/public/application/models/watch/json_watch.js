@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 import { ACTION_TYPES, WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from './base_watch';

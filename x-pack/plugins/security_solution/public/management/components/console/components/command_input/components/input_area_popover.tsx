@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFocusTrap, EuiPopover } from '@elastic/eui';
 import type { CSSProperties, ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { EuiFocusTrap, EuiPopover } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
-import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
-import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
 import { CommandInputHistory } from './command_input_history';
+import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
+import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
+import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 
 export interface InputAreaPopoverProps {
   /** Should be the Console's input area */

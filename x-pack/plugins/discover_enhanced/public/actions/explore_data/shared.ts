@@ -6,7 +6,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { EmbeddableApiContext, apiPublishesDataViews } from '@kbn/presentation-publishing';
+import { apiPublishesDataViews, EmbeddableApiContext } from '@kbn/presentation-publishing';
 
 export const getDataViews = (embeddable: EmbeddableApiContext['embeddable']): string[] => {
   if (!apiPublishesDataViews(embeddable)) return [];

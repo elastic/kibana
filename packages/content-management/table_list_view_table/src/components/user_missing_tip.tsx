@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
 
 export const NoUsersTip = () => (

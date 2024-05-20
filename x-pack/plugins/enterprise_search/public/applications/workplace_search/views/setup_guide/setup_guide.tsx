@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiText, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { SETUP_GUIDE_TITLE, SetupGuideLayout } from '../../../shared/setup_guide';
+import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import GettingStarted from './assets/getting_started.png';

@@ -31,7 +31,7 @@
             }
           },
           "type": "file"
-        },
+        },  
         "feed": {
           "name": "AbuseCH malware"
         }
@@ -43,7 +43,10 @@
           "percent": "62.30"
         }
       },
-      "tags": ["threatintel-abusemalware", "forwarded"],
+      "tags": [
+        "threatintel-abusemalware",
+        "forwarded"
+      ],
       "input": {
         "type": "httpjson"
       },

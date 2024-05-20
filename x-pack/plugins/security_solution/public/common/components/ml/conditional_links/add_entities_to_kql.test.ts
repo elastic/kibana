@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addEntitiesToKql, entitiesToKql, entityToKql } from './add_entities_to_kql';
+import { entityToKql, entitiesToKql, addEntitiesToKql } from './add_entities_to_kql';
 
 describe('add_entities_to_kql', () => {
   // Suppress warnings about invalid RISON as this is what we are testing

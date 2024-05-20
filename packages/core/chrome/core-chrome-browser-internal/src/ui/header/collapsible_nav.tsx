@@ -8,33 +8,33 @@
 
 import './collapsible_nav.scss';
 import {
-  EuiButton,
+  EuiThemeProvider,
   EuiCollapsibleNav,
   EuiCollapsibleNavGroup,
-  EuiCollapsibleNavProps,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
-  EuiThemeProvider,
+  EuiCollapsibleNavProps,
+  EuiButton,
 } from '@elastic/eui';
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import type { AppCategory } from '@kbn/core-application-common';
-import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import type { AppCategory } from '@kbn/core-application-common';
+import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
+import type { OnIsLockedUpdate } from './types';
 import {
-  createEuiButtonItem,
   createEuiListItem,
-  createOverviewLink,
   createRecentNavLink,
   isModifiedOrPrevented,
+  createEuiButtonItem,
+  createOverviewLink,
 } from './nav_link';
-import type { OnIsLockedUpdate } from './types';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;

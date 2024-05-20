@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { startCase } from 'lodash';
 import React, { useMemo } from 'react';
-import { getFieldArray } from '../../shared/utils';
+import { EuiFlexItem, EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
+import { startCase } from 'lodash';
 import { useRightPanelContext } from '../context';
 import { getEcsAllowedValueDescription } from '../utils/event_utils';
+import { getFieldArray } from '../../shared/utils';
 import { EVENT_CATEGORY_DESCRIPTION_TEST_ID } from './test_ids';
 
 /**

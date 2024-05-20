@@ -14,8 +14,8 @@ import { Conversation } from '../../..';
 import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 import { SystemPrompt } from './system_prompt';
 
-import { SelectedPromptContexts } from './selected_prompt_contexts';
 import * as i18n from './translations';
+import { SelectedPromptContexts } from './selected_prompt_contexts';
 
 export interface Props {
   conversation: Conversation | undefined;

@@ -10,7 +10,11 @@
         "tags": [],
         "label": "generateCaseViewPath",
         "description": [],
-        "signature": ["(params: ", "CaseViewPathParams", ") => string"],
+        "signature": [
+          "(params: ",
+          "CaseViewPathParams",
+          ") => string"
+        ],
         "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -22,7 +26,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["CaseViewPathParams"],
+            "signature": [
+              "CaseViewPathParams"
+            ],
             "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -88,7 +94,9 @@
                 "tags": [],
                 "label": "basePath",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -132,7 +140,10 @@
         "tags": [],
         "label": "CaseAttachments",
         "description": [],
-        "signature": ["SupportedCaseAttachment", "[]"],
+        "signature": [
+          "SupportedCaseAttachment",
+          "[]"
+        ],
         "path": "x-pack/plugins/cases/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -145,7 +156,10 @@
         "tags": [],
         "label": "CaseAttachmentsWithoutOwner",
         "description": [],
-        "signature": ["CaseAttachmentWithoutOwner", "[]"],
+        "signature": [
+          "CaseAttachmentWithoutOwner",
+          "[]"
+        ],
         "path": "x-pack/plugins/cases/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -158,7 +172,9 @@
         "tags": [],
         "label": "DRAFT_COMMENT_STORAGE_ID",
         "description": [],
-        "signature": ["\"xpack.cases.commentDraft\""],
+        "signature": [
+          "\"xpack.cases.commentDraft\""
+        ],
         "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -382,7 +398,9 @@
         "tags": [],
         "label": "ICasesDeepLinkId",
         "description": [],
-        "signature": ["\"cases\" | \"cases_create\" | \"cases_configure\""],
+        "signature": [
+          "\"cases\" | \"cases_create\" | \"cases_configure\""
+        ],
         "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -801,7 +819,9 @@
           "tags": [],
           "label": "attachmentFramework",
           "description": [],
-          "signature": ["AttachmentFramework"],
+          "signature": [
+            "AttachmentFramework"
+          ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -833,7 +853,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -845,7 +867,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["CasesClientArgs"],
+                "signature": [
+                  "CasesClientArgs"
+                ],
                 "path": "x-pack/plugins/cases/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -860,8 +884,12 @@
             "type": "Object",
             "tags": [],
             "label": "cases",
-            "description": ["\nRetrieves an interface for interacting with cases entities."],
-            "signature": ["CasesSubClient"],
+            "description": [
+              "\nRetrieves an interface for interacting with cases entities."
+            ],
+            "signature": [
+              "CasesSubClient"
+            ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -875,7 +903,9 @@
             "description": [
               "\nRetrieves an interface for interacting with attachments (comments) entities."
             ],
-            "signature": ["AttachmentsSubClient"],
+            "signature": [
+              "AttachmentsSubClient"
+            ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -889,7 +919,9 @@
             "description": [
               "\nRetrieves an interface for interacting with the user actions associated with the plugin entities."
             ],
-            "signature": ["UserActionsSubClient"],
+            "signature": [
+              "UserActionsSubClient"
+            ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -903,7 +935,9 @@
             "description": [
               "\nRetrieves an interface for interacting with the configuration of external connectors for the plugin entities."
             ],
-            "signature": ["ConfigureSubClient"],
+            "signature": [
+              "ConfigureSubClient"
+            ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -917,7 +951,9 @@
             "description": [
               "\nRetrieves an interface for retrieving metrics related to the cases entities."
             ],
-            "signature": ["MetricsSubClient"],
+            "signature": [
+              "MetricsSubClient"
+            ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -949,7 +985,9 @@
           "tags": [],
           "label": "attachmentFramework",
           "description": [],
-          "signature": ["AttachmentFramework"],
+          "signature": [
+            "AttachmentFramework"
+          ],
           "path": "x-pack/plugins/cases/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -964,7 +1002,9 @@
       "type": "Interface",
       "tags": [],
       "label": "CasesServerStart",
-      "description": ["\nCases server exposed contract for interacting with cases entities."],
+      "description": [
+        "\nCases server exposed contract for interacting with cases entities."
+      ],
       "path": "x-pack/plugins/cases/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -1007,7 +1047,9 @@
               "type": "Object",
               "tags": [],
               "label": "request",
-              "description": ["a KibanaRequest"],
+              "description": [
+                "a KibanaRequest"
+              ],
               "signature": [
                 {
                   "pluginId": "@kbn/core-http-server",
@@ -1024,7 +1066,9 @@
               "isRequired": true
             }
           ],
-          "returnComment": ["a {@link CasesClient }"]
+          "returnComment": [
+            "a {@link CasesClient }"
+          ]
         },
         {
           "parentPluginId": "cases",
@@ -1033,7 +1077,10 @@
           "tags": [],
           "label": "getExternalReferenceAttachmentTypeRegistry",
           "description": [],
-          "signature": ["() => ", "ExternalReferenceAttachmentTypeRegistry"],
+          "signature": [
+            "() => ",
+            "ExternalReferenceAttachmentTypeRegistry"
+          ],
           "path": "x-pack/plugins/cases/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1047,7 +1094,10 @@
           "tags": [],
           "label": "getPersistableStateAttachmentTypeRegistry",
           "description": [],
-          "signature": ["() => ", "PersistableStateAttachmentTypeRegistry"],
+          "signature": [
+            "() => ",
+            "PersistableStateAttachmentTypeRegistry"
+          ],
           "path": "x-pack/plugins/cases/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1116,7 +1166,9 @@
             "tags": [],
             "label": "owner",
             "description": [],
-            "signature": ["\"cases\" | \"observability\" | \"securitySolution\""],
+            "signature": [
+              "\"cases\" | \"observability\" | \"securitySolution\""
+            ],
             "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1133,7 +1185,9 @@
         "tags": [],
         "label": "getCaseFindUserActionsUrl",
         "description": [],
-        "signature": ["(id: string) => string"],
+        "signature": [
+          "(id: string) => string"
+        ],
         "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1145,7 +1199,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1162,7 +1218,9 @@
         "tags": [],
         "label": "getCasesFromAlertsUrl",
         "description": [],
-        "signature": ["(alertId: string) => string"],
+        "signature": [
+          "(alertId: string) => string"
+        ],
         "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1174,7 +1232,9 @@
             "tags": [],
             "label": "alertId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1191,7 +1251,11 @@
         "tags": [],
         "label": "throwErrors",
         "description": [],
-        "signature": ["(createError: ErrorFactory) => (errors: ", "Errors", ") => never"],
+        "signature": [
+          "(createError: ErrorFactory) => (errors: ",
+          "Errors",
+          ") => never"
+        ],
         "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1203,7 +1267,9 @@
             "tags": [],
             "label": "createError",
             "description": [],
-            "signature": ["ErrorFactory"],
+            "signature": [
+              "ErrorFactory"
+            ],
             "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1233,7 +1299,9 @@
             "tags": [],
             "label": "all",
             "description": [],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1245,7 +1313,9 @@
             "tags": [],
             "label": "read",
             "description": [],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1257,7 +1327,9 @@
             "tags": [],
             "label": "delete",
             "description": [],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1476,7 +1548,9 @@
             "tags": [],
             "label": "all",
             "description": [],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1488,7 +1562,9 @@
             "tags": [],
             "label": "read",
             "description": [],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1500,7 +1576,9 @@
             "tags": [],
             "label": "delete",
             "description": [],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1512,7 +1590,9 @@
             "tags": [],
             "label": "settings",
             "description": [],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1549,7 +1629,9 @@
             "tags": [],
             "label": "_index",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1561,7 +1643,10 @@
             "tags": [],
             "label": "signal",
             "description": [],
-            "signature": ["SignalEcs", " | undefined"],
+            "signature": [
+              "SignalEcs",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1573,7 +1658,11 @@
             "tags": [],
             "label": "kibana",
             "description": [],
-            "signature": ["{ alert: ", "SignalEcsAAD", "; } | undefined"],
+            "signature": [
+              "{ alert: ",
+              "SignalEcsAAD",
+              "; } | undefined"
+            ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1589,7 +1678,9 @@
         "type": "Enum",
         "tags": [],
         "label": "AttachmentType",
-        "description": ["\nUser comment"],
+        "description": [
+          "\nUser comment"
+        ],
         "path": "x-pack/plugins/cases/common/types/domain/attachment/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1613,7 +1704,9 @@
         "type": "Enum",
         "tags": [],
         "label": "CaseSeverity",
-        "description": ["\nSeverity"],
+        "description": [
+          "\nSeverity"
+        ],
         "path": "x-pack/plugins/cases/common/types/domain/case/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1637,7 +1730,9 @@
         "type": "Enum",
         "tags": [],
         "label": "ExternalReferenceStorageType",
-        "description": ["\nExternal reference"],
+        "description": [
+          "\nExternal reference"
+        ],
         "path": "x-pack/plugins/cases/common/types/domain/attachment/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1651,8 +1746,12 @@
         "type": "string",
         "tags": [],
         "label": "APP_ID",
-        "description": ["\nApplication"],
-        "signature": ["\"cases\""],
+        "description": [
+          "\nApplication"
+        ],
+        "signature": [
+          "\"cases\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/application.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1947,7 +2046,9 @@
         "tags": [],
         "label": "CASE_COMMENT_SAVED_OBJECT",
         "description": [],
-        "signature": ["\"cases-comments\""],
+        "signature": [
+          "\"cases-comments\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2222,7 +2323,9 @@
         "tags": [],
         "label": "CASES_CONNECTORS_CAPABILITY",
         "description": [],
-        "signature": ["\"cases_connectors\""],
+        "signature": [
+          "\"cases_connectors\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2235,7 +2338,9 @@
         "tags": [],
         "label": "CASES_SETTINGS_CAPABILITY",
         "description": [],
-        "signature": ["\"cases_settings\""],
+        "signature": [
+          "\"cases_settings\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2247,8 +2352,12 @@
         "type": "string",
         "tags": [],
         "label": "CASES_URL",
-        "description": ["\nCase routes"],
-        "signature": ["\"/api/cases\""],
+        "description": [
+          "\nCase routes"
+        ],
+        "signature": [
+          "\"/api/cases\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2603,7 +2712,9 @@
         "tags": [],
         "label": "CasesMetricsResponse",
         "description": [],
-        "signature": ["{ mttr?: number | null | undefined; }"],
+        "signature": [
+          "{ mttr?: number | null | undefined; }"
+        ],
         "path": "x-pack/plugins/cases/common/types/api/metrics/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2812,7 +2923,9 @@
         "description": [
           "\nThe type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.\n"
         ],
-        "signature": ["{ refreshCase: () => Promise<void>; } | null"],
+        "signature": [
+          "{ refreshCase: () => Promise<void>; } | null"
+        ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2824,8 +2937,12 @@
         "type": "string",
         "tags": [],
         "label": "CREATE_CASES_CAPABILITY",
-        "description": ["\nCases UI Capabilities"],
-        "signature": ["\"create_cases\""],
+        "description": [
+          "\nCases UI Capabilities"
+        ],
+        "signature": [
+          "\"create_cases\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2838,7 +2955,9 @@
         "tags": [],
         "label": "DELETE_CASES_CAPABILITY",
         "description": [],
-        "signature": ["\"delete_cases\""],
+        "signature": [
+          "\"delete_cases\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2851,7 +2970,9 @@
         "tags": [],
         "label": "FEATURE_ID",
         "description": [],
-        "signature": ["\"generalCases\""],
+        "signature": [
+          "\"generalCases\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/application.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2864,7 +2985,9 @@
         "tags": [],
         "label": "GENERAL_CASES_OWNER",
         "description": [],
-        "signature": ["\"cases\""],
+        "signature": [
+          "\"cases\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/owners.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2876,8 +2999,12 @@
         "type": "string",
         "tags": [],
         "label": "GET_CONNECTORS_CONFIGURE_API_TAG",
-        "description": ["\nThis tag is registered for the connectors (configure) get API"],
-        "signature": ["\"casesGetConnectorsConfigure\""],
+        "description": [
+          "\nThis tag is registered for the connectors (configure) get API"
+        ],
+        "signature": [
+          "\"casesGetConnectorsConfigure\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2913,7 +3040,9 @@
         "tags": [],
         "label": "INTERNAL_BULK_CREATE_ATTACHMENTS_URL",
         "description": [],
-        "signature": ["\"/internal/cases/{case_id}/attachments/_bulk_create\""],
+        "signature": [
+          "\"/internal/cases/{case_id}/attachments/_bulk_create\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2926,7 +3055,9 @@
         "tags": [],
         "label": "INTERNAL_BULK_GET_CASES_URL",
         "description": [],
-        "signature": ["\"/internal/cases/_bulk_get\""],
+        "signature": [
+          "\"/internal/cases/_bulk_get\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2939,7 +3070,9 @@
         "tags": [],
         "label": "LENS_ATTACHMENT_TYPE",
         "description": [],
-        "signature": ["\".lens\""],
+        "signature": [
+          "\".lens\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/visualizations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2952,7 +3085,9 @@
         "tags": [],
         "label": "OBSERVABILITY_OWNER",
         "description": [],
-        "signature": ["\"observability\""],
+        "signature": [
+          "\"observability\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/owners.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2965,7 +3100,9 @@
         "tags": [],
         "label": "PUSH_CASES_CAPABILITY",
         "description": [],
-        "signature": ["\"push_cases\""],
+        "signature": [
+          "\"push_cases\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2978,7 +3115,9 @@
         "tags": [],
         "label": "READ_CASES_CAPABILITY",
         "description": [],
-        "signature": ["\"read_cases\""],
+        "signature": [
+          "\"read_cases\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3030,8 +3169,12 @@
         "type": "string",
         "tags": [],
         "label": "SECURITY_SOLUTION_OWNER",
-        "description": ["\nOwner"],
-        "signature": ["\"securitySolution\""],
+        "description": [
+          "\nOwner"
+        ],
+        "signature": [
+          "\"securitySolution\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/owners.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3059,7 +3202,9 @@
         "tags": [],
         "label": "UPDATE_CASES_CAPABILITY",
         "description": [],
-        "signature": ["\"update_cases\""],
+        "signature": [
+          "\"update_cases\""
+        ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,

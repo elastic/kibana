@@ -6,8 +6,17 @@
     "id": "painlessLab",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "painless_lab"],
-    "requiredPlugins": ["devTools", "licensing", "home"],
-    "requiredBundles": ["kibanaReact"]
+    "configPath": [
+      "xpack",
+      "painless_lab"
+    ],
+    "requiredPlugins": [
+      "devTools",
+      "licensing",
+      "home"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

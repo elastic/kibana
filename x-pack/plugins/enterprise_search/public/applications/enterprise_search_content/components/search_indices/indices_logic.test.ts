@@ -13,9 +13,9 @@ import moment from 'moment';
 
 import {
   ConnectorStatus,
-  IngestionMethod,
-  IngestionStatus,
   SyncStatus,
+  IngestionStatus,
+  IngestionMethod,
 } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 

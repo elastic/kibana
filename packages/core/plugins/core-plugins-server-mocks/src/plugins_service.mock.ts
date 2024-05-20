@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
 import {
+  PluginsService,
   type InternalPluginsServiceSetup,
   type InternalPluginsServiceStart,
-  PluginsService,
 } from '@kbn/core-plugins-server-internal';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
 

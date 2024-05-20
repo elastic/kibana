@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import querystring from 'querystring';
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
+import querystring from 'querystring';
 import {
+  SAVED_OBJECT_TEST_CASES,
   CONFLICT_TEST_CASES,
   OTHER_TEST_CASES,
-  SAVED_OBJECT_TEST_CASES,
 } from '../lib/saved_object_test_cases';
+import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
 import {
-  getRedactedNamespaces,
   getUrlPrefix,
   isUserAuthorizedAtSpace,
+  getRedactedNamespaces,
 } from '../lib/saved_object_test_utils';
-import { ALL_SPACES_ID, SPACES } from '../lib/spaces';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
 
 const {

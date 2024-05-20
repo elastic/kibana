@@ -5,57 +5,57 @@
  * 2.0.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ScopedHistory } from '@kbn/core/public';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import _ from 'lodash';
-import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { MapAttributes } from '../../../../common/content_management';
+import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
 import { MapSettings } from '../../../../common/descriptor_types';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
-import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import {
-  replaceLayerList,
+  getTimeFilters,
+  getMapZoom,
+  getMapCenter,
+  getLayerListRaw,
+  getLayerList,
+  getQuery,
+  getFilters,
+  getMapSettings,
+  getLayerListConfigOnly,
+} from '../../../selectors/map_selectors';
+import {
   setGotoWithCenter,
-  setHiddenLayers,
-  setIsLayerTOCOpen,
   setMapSettings,
+  replaceLayerList,
+  setIsLayerTOCOpen,
   setOpenTOCDetails,
+  setHiddenLayers,
 } from '../../../actions';
-import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
-import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
+import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
+import { getMapAttributeService, SharingSavedObjectProps } from '../../../map_attribute_service';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
-import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import {
   getCoreChrome,
   getIndexPatternService,
-  getSavedObjectsTagging,
-  getServerless,
-  getTimeFilter,
   getToasts,
+  getSavedObjectsTagging,
+  getTimeFilter,
   getUsageCollection,
+  getServerless,
 } from '../../../kibana_services';
-import { whenLicenseInitialized } from '../../../licensed_features';
-import { SharingSavedObjectProps, getMapAttributeService } from '../../../map_attribute_service';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
-import { MapStore, MapStoreState, createMapStore } from '../../../reducers/store';
-import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
-import {
-  getFilters,
-  getLayerList,
-  getLayerListConfigOnly,
-  getLayerListRaw,
-  getMapCenter,
-  getMapSettings,
-  getMapZoom,
-  getQuery,
-  getTimeFilters,
-} from '../../../selectors/map_selectors';
-import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
 import { getBreadcrumbs } from './get_breadcrumbs';
+import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
+import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
+import { whenLicenseInitialized } from '../../../licensed_features';
 import { ParsedMapStateJSON, ParsedUiStateJSON } from './types';
+import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
+import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
+import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons

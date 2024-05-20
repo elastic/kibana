@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { Frequency } from '@kbn/rrule';
 import moment from 'moment-timezone';
+import { Frequency } from '@kbn/rrule';
+import { archiveMaintenanceWindow } from './archive_maintenance_window';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import {
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   MaintenanceWindowClientContext,
+  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import type { MaintenanceWindow } from '../../types';
-import { archiveMaintenanceWindow } from './archive_maintenance_window';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 

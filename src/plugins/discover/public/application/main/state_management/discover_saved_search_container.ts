@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { BehaviorSubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
+import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
-import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
-  UnifiedHistogramVisContext,
   canImportVisContext,
+  UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
-import { cloneDeep } from 'lodash';
+import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
-import { DiscoverServices } from '../../../build_services';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
+import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DiscoverAppState, isEqualFilters } from './discover_app_state_container';
-import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
+import { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from './utils/get_state_defaults';
-import { updateSavedSearch } from './utils/update_saved_search';
+import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
 
 const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
   ...COMPARE_ALL_OPTIONS,

@@ -8,9 +8,9 @@
 import { IRouter, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { FeatureSet } from '../common/types';
 import { CredentialStore } from './lib/reindexing/credential_store';
 import { handleEsError } from './shared_imports';
+import type { FeatureSet } from '../common/types';
 
 export interface RouteDependencies {
   router: IRouter;

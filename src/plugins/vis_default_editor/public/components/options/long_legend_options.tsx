@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { SwitchOption } from './switch';
 
 const MAX_TRUNCATE_LINES = 5;

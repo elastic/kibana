@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockTermsSearchQuery } from '../../../../__mocks__/terms_search_query';
-import { mockVectorSearchQuery } from '../../../../__mocks__/vector_search_query';
 import { TERMS_QUERY_SIZE } from '../elasticsearch_store';
 import { getMsearchQueryBody } from './get_msearch_query_body';
+import { mockTermsSearchQuery } from '../../../../__mocks__/terms_search_query';
+import { mockVectorSearchQuery } from '../../../../__mocks__/vector_search_query';
 
 describe('getMsearchQueryBody', () => {
   it('returns the expected multi-search request body', () => {

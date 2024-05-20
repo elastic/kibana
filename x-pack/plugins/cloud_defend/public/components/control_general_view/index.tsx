@@ -1,14 +1,3 @@
-import {
-  EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -16,24 +5,35 @@ import {
  * 2.0.
  */
 import React, { useMemo, useCallback, useState } from 'react';
-import { Response, Selector, SelectorType } from '../../../common';
+import {
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTitle,
+  EuiButton,
+  EuiSpacer,
+} from '@elastic/eui';
 import { INPUT_CONTROL } from '../../../common/constants';
+import { useStyles } from './styles';
 import {
-  getInputFromPolicy,
-  getSelectorsAndResponsesFromYaml,
-  getYamlFromSelectorsAndResponses,
-} from '../../../common/utils/helpers';
-import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../../common/constants';
-import {
-  getDefaultResponseByType,
   getDefaultSelectorByType,
+  getDefaultResponseByType,
   getTotalsByType,
 } from '../../common/utils';
+import {
+  getInputFromPolicy,
+  getYamlFromSelectorsAndResponses,
+  getSelectorsAndResponsesFromYaml,
+} from '../../../common/utils/helpers';
 import { ViewDeps } from '../../types';
-import { ControlGeneralViewResponse } from '../control_general_view_response';
-import { ControlGeneralViewSelector } from '../control_general_view_selector';
-import { useStyles } from './styles';
+import { SelectorType, Selector, Response } from '../../../common';
 import * as i18n from './translations';
+import { ControlGeneralViewSelector } from '../control_general_view_selector';
+import { ControlGeneralViewResponse } from '../control_general_view_response';
+import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../../common/constants';
 
 interface AddSelectorButtonProps {
   type: 'Selector' | 'Response';

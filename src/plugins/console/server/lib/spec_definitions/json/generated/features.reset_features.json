@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["POST"],
-    "patterns": ["_features/_reset"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_features/_reset"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
     "availability": {
       "stack": true,

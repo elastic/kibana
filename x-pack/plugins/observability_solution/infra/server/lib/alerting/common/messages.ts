@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  TimeUnitChar,
   formatDurationFromTimeUnitChar,
+  TimeUnitChar,
 } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { UNGROUPED_FACTORY_KEY } from './utils';

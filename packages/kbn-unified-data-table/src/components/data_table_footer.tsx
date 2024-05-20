@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useState, FC, PropsWithChildren } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, FC, PropsWithChildren } from 'react';
 import { MAX_LOADED_GRID_ROWS } from '../constants';
 
 export interface UnifiedDataTableFooterProps {
@@ -134,9 +134,9 @@ const UnifiedDataTableFooterContainer: React.FC<UnifiedDataTableFooterContainerP
         justify-content: center;
         flex-shrink: 0;
         background-color: ${euiTheme.colors.lightestShade};
-        padding: ${
-          hasButton ? `0 ${euiTheme.size.base}` : `${euiTheme.size.s} ${euiTheme.size.base}`
-        };
+        padding: ${hasButton
+          ? `0 ${euiTheme.size.base}`
+          : `${euiTheme.size.s} ${euiTheme.size.base}`};
         margin-top: ${euiTheme.size.xs};
         text-align: center;
       `}

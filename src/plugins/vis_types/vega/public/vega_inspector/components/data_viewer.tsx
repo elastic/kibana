@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  CommonProps,
   EuiComboBox,
-  EuiComboBoxProps,
   EuiFlexGroup,
+  EuiComboBoxProps,
   EuiFlexItem,
   EuiSpacer,
+  CommonProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, useEffect } from 'react';
-import { InspectDataSets, VegaAdapter } from '../vega_adapter';
+import { VegaAdapter, InspectDataSets } from '../vega_adapter';
 import { InspectorDataGrid } from './inspector_data_grid';
 
 interface DataViewerProps extends CommonProps {

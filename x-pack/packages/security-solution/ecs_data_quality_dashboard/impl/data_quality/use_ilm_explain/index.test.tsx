@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { UseIlmExplain, useIlmExplain } from '.';
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockIlmExplain } from '../mock/ilm_explain/mock_ilm_explain';
 import { ERROR_LOADING_ILM_EXPLAIN } from '../translations';
+import { useIlmExplain, UseIlmExplain } from '.';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const mockHttpFetch = jest.fn();
 const mockReportDataQualityIndexChecked = jest.fn();

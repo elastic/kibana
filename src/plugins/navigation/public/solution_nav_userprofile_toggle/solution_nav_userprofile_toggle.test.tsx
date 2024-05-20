@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
+import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { coreMock } from '@kbn/core/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { globalSearchPluginMock } from '../../mocks';
 import { registerInternalSearchableTypesRoute } from '../get_searchable_types';
 

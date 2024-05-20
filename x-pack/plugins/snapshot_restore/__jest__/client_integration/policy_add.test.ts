@@ -6,17 +6,17 @@
  */
 
 // import helpers first, this also sets up the mocks
-import { getRandomString, pageHelpers, setupEnvironment } from './helpers';
+import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
 import { act } from 'react-dom/test-utils';
 
 import { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { API_BASE_PATH } from '../../common';
 import * as fixtures from '../../test/fixtures';
+import { API_BASE_PATH } from '../../common';
 
-import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
-import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 import { PolicyFormTestBed } from './helpers/policy_form.helpers';
+import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
+import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
 
 const { setup } = pageHelpers.policyAdd;
 

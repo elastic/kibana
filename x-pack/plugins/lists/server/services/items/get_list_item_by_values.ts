@@ -8,12 +8,12 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import {
   TransformElasticToListItemOptions,
   getQueryFilterFromTypeValue,
   transformElasticToListItem,
 } from '../utils';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 export interface GetListItemByValuesOptions {
   listId: string;

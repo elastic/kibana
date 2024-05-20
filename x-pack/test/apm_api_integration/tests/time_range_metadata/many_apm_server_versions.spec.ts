@@ -1,13 +1,3 @@
-import { Readable } from 'stream';
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import {
-  TRANSACTION_DURATION_HISTOGRAM,
-  TRANSACTION_DURATION_SUMMARY,
-} from '@kbn/apm-plugin/common/es_fields/apm';
-import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,9 +5,19 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
-import { ApmApiClient } from '../../common/config';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import {
+  TRANSACTION_DURATION_HISTOGRAM,
+  TRANSACTION_DURATION_SUMMARY,
+} from '@kbn/apm-plugin/common/es_fields/apm';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { Readable } from 'stream';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { ApmApiClient } from '../../common/config';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

@@ -7,7 +7,7 @@
  */
 
 import { SeriesColorAccessorFn } from '@elastic/charts';
-import { type ColorMapping, type ColorMappingInputData, getColorFactory } from '@kbn/coloring';
+import { getColorFactory, type ColorMapping, type ColorMappingInputData } from '@kbn/coloring';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 
 /**

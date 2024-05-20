@@ -1,19 +1,3 @@
-import {
-  EuiComboBox,
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  htmlIdGenerator,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -22,25 +6,41 @@ import { i18n } from '@kbn/i18n';
  * Side Public License, v 1.
  */
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  htmlIdGenerator,
+  EuiComboBox,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiFieldNumber,
+  EuiTitle,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 
 import type { Writable } from '@kbn/utility-types';
 
-import { ColorPicker } from '../color_picker';
-import { ColorRules } from '../color_rules';
-import { IndexPattern } from '../index_pattern';
-import { createSelectHandler } from '../lib/create_select_handler';
-import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { QueryBarWrapper } from '../query_bar_wrapper';
 // @ts-ignore
 import { SeriesEditor } from '../series_editor';
+import { IndexPattern } from '../index_pattern';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { ColorRules } from '../color_rules';
+import { ColorPicker } from '../color_picker';
+import { QueryBarWrapper } from '../query_bar_wrapper';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { YesNo } from '../yes_no';
 
-import { PANEL_TYPES } from '../../../../common/enums';
 import { limitOfSeries } from '../../../../common/ui_restrictions';
+import { PANEL_TYPES } from '../../../../common/enums';
 import { TimeseriesVisParams } from '../../../types';
-import { PANEL_CONFIG_TABS, PanelConfigProps } from './types';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 
 export class GaugePanelConfig extends Component<
   PanelConfigProps,

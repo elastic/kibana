@@ -10,24 +10,24 @@ import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
-import { getFlattenedBuckets } from '../../../../common/components/alerts_treemap/lib/flatten/get_flattened_buckets';
+import type { AlertsCountAggregation } from './types';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import {
   getMaxRiskSubAggregations,
   getUpToMaxBuckets,
 } from '../../../../common/components/alerts_treemap/lib/helpers';
+import { getFlattenedBuckets } from '../../../../common/components/alerts_treemap/lib/flatten/get_flattened_buckets';
 import type {
   FlattenedBucket,
   RawBucket,
 } from '../../../../common/components/alerts_treemap/types';
-import { useUiSetting$ } from '../../../../common/lib/kibana';
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import {
   getMultiGroupAlertsCountTableColumns,
   getSingleGroupByAlertsCountTableColumns,
 } from './columns';
 import { DEFAULT_STACK_BY_FIELD0_SIZE } from './helpers';
-import type { AlertsCountAggregation } from './types';
 
 interface AlertsCountProps {
   loading: boolean;

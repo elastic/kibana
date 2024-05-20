@@ -10,16 +10,16 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
+import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { defaultHeaders } from '../column_headers/default_headers';
 
 import { columnRenderers } from '.';
-import { TimelineId } from '../../../../../../common/types/timeline';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { getColumnRenderer } from './get_column_renderer';
-import { deleteItemIdx, findItem, getValues } from './helpers';
+import { getValues, findItem, deleteItemIdx } from './helpers';
+import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { TimelineId } from '../../../../../../common/types/timeline';
 
 jest.mock('../../../../../common/lib/kibana');
 

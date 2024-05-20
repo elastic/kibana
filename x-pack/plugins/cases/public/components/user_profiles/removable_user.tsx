@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback } from 'react';
-import { RemovableItem } from '../removable_item/removable_item';
-import { HoverableUserWithAvatar } from './hoverable_user_with_avatar';
 import * as i18n from './translations';
 import type { Assignee } from './types';
+import { HoverableUserWithAvatar } from './hoverable_user_with_avatar';
+import { RemovableItem } from '../removable_item/removable_item';
 
 export interface UserRepresentationProps {
   assignee: Assignee;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   isOldAlert: boolean;

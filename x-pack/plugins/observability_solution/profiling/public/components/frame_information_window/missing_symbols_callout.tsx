@@ -6,14 +6,14 @@
  */
 
 import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FrameType, getLanguageType } from '@kbn/profiling-utils';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { FrameType, getLanguageType } from '@kbn/profiling-utils';
+import { PROFILING_FEEDBACK_LINK } from '../profiling_app_page_template';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { AddDataTabs } from '../../views/add_data_view';
-import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
-import { PROFILING_FEEDBACK_LINK } from '../profiling_app_page_template';
 
 interface Props {
   frameType: FrameType;

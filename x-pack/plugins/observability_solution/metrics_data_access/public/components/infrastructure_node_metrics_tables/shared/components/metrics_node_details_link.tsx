@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
 import { parse } from '@kbn/datemath';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useNodeDetailsRedirect } from '../../../../pages/link_to/use_node_details_redirect';
 

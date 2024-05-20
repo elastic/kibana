@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { FlyoutTitle } from './flyout_title';
 import {
   TITLE_HEADER_ICON_TEST_ID,

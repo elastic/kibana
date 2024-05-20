@@ -9,21 +9,21 @@
 
 import expect from 'expect';
 
-import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import {
   getCreateExceptionListDetectionSchemaMock,
   getCreateExceptionListMinimalSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { getUpdateMinimalExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/update_exception_list_item_schema.mock';
 import { UpdateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import {
   createUserAndRole,
   deleteUserAndRole,
 } from '../../../../../../../common/services/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { EuiDataGridColumn, EuiDataGridColumnActions } from '@elastic/eui';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { render, screen } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import {
   DEFAULT_COLUMN_WIDTH,
   FIELD_COLUMN_NAME,
   FIELD_COLUMN_WIDTH,
   useComparisonColumns,
 } from './use_comparison_columns';
+import { renderHook } from '@testing-library/react-hooks';
+import type { EuiDataGridColumn, EuiDataGridColumnActions } from '@elastic/eui';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 type DataGridColumn = Partial<Omit<EuiDataGridColumn, 'actions'>> &
   Pick<EuiDataGridColumn, 'id' | 'displayAsText'> & {

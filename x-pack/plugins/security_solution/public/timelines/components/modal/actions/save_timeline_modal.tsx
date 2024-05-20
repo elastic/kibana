@@ -7,14 +7,14 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
-  EuiProgress,
   EuiSpacer,
+  EuiProgress,
+  EuiCallOut,
   EuiSwitch,
 } from '@elastic/eui';
 import type { EuiSwitchEvent } from '@elastic/eui';
@@ -22,19 +22,19 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import type { State } from '../../../../common/store';
+import { selectTimelineById } from '../../../store/selectors';
+import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
 import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import { timelineActions } from '../../../store';
+import * as commonI18n from '../../timeline/properties/translations';
+import * as i18n from './translations';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import type { State } from '../../../../common/store';
-import { Field, Form, getUseField, useForm } from '../../../../shared_imports';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
-import { timelineActions } from '../../../store';
-import { selectTimelineById } from '../../../store/selectors';
 import { NOTES_PANEL_WIDTH } from '../../timeline/properties/notes_size';
-import * as commonI18n from '../../timeline/properties/translations';
 import { formSchema } from './schema';
-import * as i18n from './translations';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -154,8 +154,8 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
             ? i18n.SAVE_TIMELINE_TEMPLATE
             : i18n.SAVE_TIMELINE
           : timelineType === TimelineType.template
-            ? i18n.NAME_TIMELINE_TEMPLATE
-            : i18n.SAVE_TIMELINE,
+          ? i18n.NAME_TIMELINE_TEMPLATE
+          : i18n.SAVE_TIMELINE,
       [status, timelineType]
     );
 

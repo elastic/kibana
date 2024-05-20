@@ -8,33 +8,33 @@
 import { euiPaletteForStatus } from '@elastic/eui';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
-  FILTER_RECORDS,
   FieldLabels,
+  FILTER_RECORDS,
   LABEL_FIELDS_FILTER,
   REPORT_METRIC_FIELD,
   ReportTypes,
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
+import { buildPhraseFilter, buildPhrasesFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
-  FID_FIELD,
   INP_FIELD,
   LCP_FIELD,
   PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-  TRANSACTION_URL,
-  URL_FULL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
-  USER_AGENT_OS_VERSION,
   USER_AGENT_VERSION,
+  TRANSACTION_URL,
+  USER_AGENT_OS_VERSION,
+  URL_FULL,
+  SERVICE_ENVIRONMENT,
+  FID_FIELD,
 } from '../constants/elasticsearch_fieldnames';
 import { CLS_LABEL, FID_LABEL, INP_LABEL, LCP_LABEL } from '../constants/labels';
-import { buildPhraseFilter, buildPhrasesFilter } from '../utils';
 
 export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig {
   const statusPallete = euiPaletteForStatus(3);

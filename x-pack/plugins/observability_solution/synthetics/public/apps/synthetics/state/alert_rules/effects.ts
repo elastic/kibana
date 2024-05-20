@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { takeLeading } from 'redux-saga/effects';
-import { fetchEffectFactory } from '../utils/fetch_effect';
+import { i18n } from '@kbn/i18n';
 import {
   enableDefaultAlertingAction,
   enableDefaultAlertingSilentlyAction,
   getDefaultAlertingAction,
   updateDefaultAlertingAction,
 } from './actions';
+import { fetchEffectFactory } from '../utils/fetch_effect';
 import { enableDefaultAlertingAPI, getDefaultAlertingAPI, updateDefaultAlertingAPI } from './api';
 
 export function* getDefaultAlertingEffect() {

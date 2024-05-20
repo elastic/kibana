@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { ActionsClient } from '../../../../actions_client';
+import { ActionsAuthorization } from '../../../../authorization/actions_authorization';
+import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
+import { getOAuthJwtAccessToken } from '../../../../lib/get_oauth_jwt_access_token';
+import { getOAuthClientCredentialsAccessToken } from '../../../../lib/get_oauth_client_credentials_access_token';
 import {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core-saved-objects-api-server-mocks';
-import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { Logger } from '@kbn/logging';
+import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { actionExecutorMock } from '../../../../lib/action_executor.mock';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { Logger } from '@kbn/logging';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { ActionTypeRegistry } from '../../../../action_type_registry';
-import { ActionsClient } from '../../../../actions_client';
-import { ActionsAuthorization } from '../../../../authorization/actions_authorization';
-import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
-import { actionExecutorMock } from '../../../../lib/action_executor.mock';
-import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
-import { getOAuthClientCredentialsAccessToken } from '../../../../lib/get_oauth_client_credentials_access_token';
-import { getOAuthJwtAccessToken } from '../../../../lib/get_oauth_jwt_access_token';
 import { getAllUnsecured } from './get_all';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {

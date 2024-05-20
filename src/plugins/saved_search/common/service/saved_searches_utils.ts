@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import { pick } from 'lodash';
-import type { SavedSearch, SavedSearchAttributes } from '..';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
+import type { SavedSearchAttributes, SavedSearch } from '..';
 import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '..';
 
 export { getSavedSearchUrl, getSavedSearchFullPathUrl } from '..';

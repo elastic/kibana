@@ -7,22 +7,22 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KueryNode } from '@kbn/es-query';
-import { IExecutionLogResult } from '../../../common';
-import { getRule } from '../../application/rule/methods/get/get_rule';
+import { SanitizedRuleWithLegacyId } from '../../types';
 import {
+  ReadOperations,
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
-  ReadOperations,
 } from '../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../../lib/get_execution_log_aggregation';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { SanitizedRuleWithLegacyId } from '../../types';
+import { IExecutionLogResult } from '../../../common';
 import { parseDate } from '../common';
-import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
 import { RulesClientContext } from '../types';
+import { getRule } from '../../application/rule/methods/get/get_rule';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetExecutionLogByIdParams {
   id: string;

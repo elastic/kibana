@@ -11,21 +11,21 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import type { Props } from '.';
-import { StorageTreemap } from '.';
-import { EMPTY_STAT } from '../../helpers';
-import { alertIndexWithAllResults } from '../../mock/pattern_rollup/mock_alerts_pattern_rollup';
-import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
-import { packetbeatNoResults } from '../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
-import { TestProviders } from '../../mock/test_providers/test_providers';
-import { PatternRollup } from '../../types';
 import {
   FlattenedBucket,
   getFlattenedBuckets,
   getLegendItems,
 } from '../body/data_quality_details/storage_details/helpers';
+import { EMPTY_STAT } from '../../helpers';
+import { alertIndexWithAllResults } from '../../mock/pattern_rollup/mock_alerts_pattern_rollup';
+import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
+import { packetbeatNoResults } from '../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
+import { TestProviders } from '../../mock/test_providers/test_providers';
+import type { Props } from '.';
+import { StorageTreemap } from '.';
 import { DEFAULT_MAX_CHART_HEIGHT } from '../tabs/styles';
 import { NO_DATA_LABEL } from './translations';
+import { PatternRollup } from '../../types';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>

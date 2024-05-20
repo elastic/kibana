@@ -7,17 +7,17 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ScopedFilesClient } from '.';
-import { FileKindBrowser } from '../common';
-import * as DefaultImageFileKind from '../common/default_image_file_kind';
-import { FileKindsRegistryImpl } from '../common/file_kinds_registry';
-import { createFilesClient } from './files_client';
 import type {
   FilesClient,
   FilesClientFactory,
   FilesPublicSetupDependencies,
   FilesPublicStartDependencies,
 } from './types';
+import { FileKindsRegistryImpl } from '../common/file_kinds_registry';
+import { createFilesClient } from './files_client';
+import { FileKindBrowser } from '../common';
+import { ScopedFilesClient } from '.';
+import * as DefaultImageFileKind from '../common/default_image_file_kind';
 
 /**
  * Public setup-phase contract

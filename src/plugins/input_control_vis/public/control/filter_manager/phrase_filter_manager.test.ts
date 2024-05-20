@@ -9,7 +9,7 @@
 import { Filter } from '@kbn/es-query';
 import expect from '@kbn/expect';
 
-import { DataViewsContract, FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
+import { FilterManager as QueryFilterManager, DataViewsContract } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { PhraseFilterManager } from './phrase_filter_manager';
 

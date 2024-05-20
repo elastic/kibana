@@ -7,12 +7,12 @@
 
 // copied from x-pack/plugins/fleet/public/applications/fleet/components/header.tsx
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
-import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
-import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import { css } from '@emotion/react';
 import React, { memo, useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
+import { css } from '@emotion/react';
 
 const containerCss = ({ euiTheme }: UseEuiTheme) => ({
   borderBottom: euiTheme.border.thin,

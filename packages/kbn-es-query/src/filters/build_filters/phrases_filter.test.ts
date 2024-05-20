@@ -7,8 +7,8 @@
  */
 
 import { DataViewBase } from '../../es_query';
-import { fields } from '../stubs';
 import { buildPhrasesFilter, getPhrasesFilterField } from './phrases_filter';
+import { fields } from '../stubs';
 
 describe('phrases filter', function () {
   const indexPattern: DataViewBase = {

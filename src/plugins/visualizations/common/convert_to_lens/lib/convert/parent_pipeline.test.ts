@@ -8,13 +8,13 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { FormulaColumn, AggBasedColumn } from './types';
 import { SchemaConfig } from '../../..';
 import {
+  convertToOtherParentPipelineAggColumns,
   ParentPipelineAggColumn,
   convertToCumulativeSumAggColumn,
-  convertToOtherParentPipelineAggColumns,
 } from './parent_pipeline';
-import { AggBasedColumn, FormulaColumn } from './types';
 
 const mockGetMetricFromParentPipelineAgg = jest.fn();
 const mockGetFormulaForPipelineAgg = jest.fn();
@@ -72,7 +72,7 @@ describe('convertToOtherParentPipelineAggColumns', () => {
       string,
       Parameters<typeof convertToOtherParentPipelineAggColumns>,
       () => void,
-      Partial<FormulaColumn> | [Partial<ParentPipelineAggColumn>, Partial<AggBasedColumn>] | null,
+      Partial<FormulaColumn> | [Partial<ParentPipelineAggColumn>, Partial<AggBasedColumn>] | null
     ]
   >([
     [
@@ -279,7 +279,7 @@ describe('convertToCumulativeSumAggColumn', () => {
       string,
       Parameters<typeof convertToCumulativeSumAggColumn>,
       () => void,
-      Partial<FormulaColumn> | [Partial<ParentPipelineAggColumn>, Partial<AggBasedColumn>] | null,
+      Partial<FormulaColumn> | [Partial<ParentPipelineAggColumn>, Partial<AggBasedColumn>] | null
     ]
   >([
     [

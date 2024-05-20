@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import type { FunctionComponent } from 'react';
+import { css } from '@emotion/react';
+import React, { useCallback, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiSpacer,
   EuiText,
   useEuiTheme,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { FunctionComponent } from 'react';
-import React, { useCallback, useState } from 'react';
-import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import * as i18n from './translations';
 import type { CasesUI } from '../../../common/ui/types';
-import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
+import type { CasesColumnSelection } from './types';
+import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import { useRefreshCases } from './use_on_refresh_cases';
+import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { ColumnsPopover } from './columns_popover';
-import * as i18n from './translations';
-import type { CasesColumnSelection } from './types';
-import { useBulkActions } from './use_bulk_actions';
-import { useRefreshCases } from './use_on_refresh_cases';
+import { useCasesLocalStorage } from '../../common/use_cases_local_storage';
 
 interface Props {
   isSelectorView?: boolean;

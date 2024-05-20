@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { useGetEndpointPolicyResponse } from './use_get_endpoint_policy_response';
 import type { HttpSetup } from '@kbn/core/public';
-import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { useHttp } from '../../../common/lib/kibana';
 import { getFakeHttpService, renderQuery } from '../test_utils';
-import { useGetEndpointPolicyResponse } from './use_get_endpoint_policy_response';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
 
 jest.mock('../../../common/lib/kibana');
 

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PainlessLang } from '@kbn/monaco';
-import React, { FunctionComponent } from 'react';
 
-import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCode } from '@elastic/eui';
 import {
+  FieldConfig,
+  UseField,
   FIELD_TYPES,
   Field,
-  FieldConfig,
   ToggleField,
-  UseField,
 } from '../../../../../../../shared_imports';
 
 import { TextEditor } from '../../field_components';
-import { EDITOR_PX_HEIGHT, from, to } from '../shared';
+import { to, from, EDITOR_PX_HEIGHT } from '../shared';
 
 const ignoreFailureConfig: FieldConfig<any> = {
   defaultValue: false,

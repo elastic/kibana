@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React, { useMemo } from 'react';
+import type { FC } from 'react';
+import { css } from '@emotion/react';
 import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiImage,
-  EuiPanel,
   EuiSkeletonText,
+  EuiImage,
+  EuiEmptyPrompt,
+  EuiButton,
   useEuiTheme,
+  EuiPanel,
 } from '@elastic/eui';
 import type { ExpressionColor } from '@elastic/eui/src/components/expression/expression';
 import type { EuiFacetGroupLayout } from '@elastic/eui/src/components/facet/facet_group';
-import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useMemo } from 'react';
-import type { FC } from 'react';
-import illustration from '../assets/images/illustration_product_no_results_magnifying_glass.svg';
-import * as i18n from '../translations';
 import { ListTypeText, ViewerStatus } from '../types';
+import * as i18n from '../translations';
+import illustration from '../assets/images/illustration_product_no_results_magnifying_glass.svg';
 
 interface EmptyViewerStateProps {
   title?: string;

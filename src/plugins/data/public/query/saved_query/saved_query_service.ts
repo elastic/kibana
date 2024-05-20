@@ -7,9 +7,9 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import { SavedQuery } from './types';
 import type { SavedQueryAttributes } from '../../../common';
 import { SAVED_QUERY_BASE_URL } from '../../../common/constants';
-import { SavedQuery } from './types';
 
 const version = '1';
 

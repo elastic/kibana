@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiDragDropContext, EuiDroppable, euiDragDropReorder } from '@elastic/eui';
+import { EuiDragDropContext, euiDragDropReorder, EuiDroppable } from '@elastic/eui';
 
 import { BodyRows } from './body_rows';
 

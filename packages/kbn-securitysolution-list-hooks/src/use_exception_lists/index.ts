@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   ExceptionListSchema,
+  UseExceptionListsProps,
   Pagination,
   Sort,
-  UseExceptionListsProps,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { fetchExceptionLists } from '@kbn/securitysolution-list-api';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { getFilters } from '@kbn/securitysolution-list-utils';
 
@@ -25,7 +25,7 @@ export type ReturnExceptionLists = [
   setPagination: React.Dispatch<React.SetStateAction<Pagination>>,
   fetchLists: Func | null,
   sort: Sort,
-  setSort: React.Dispatch<React.SetStateAction<Sort>>,
+  setSort: React.Dispatch<React.SetStateAction<Sort>>
 ];
 
 const DEFAULT_PAGINATION = {

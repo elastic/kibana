@@ -1,7 +1,3 @@
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import type { ExpressionValueError } from '@kbn/expressions-plugin/public';
-import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +6,12 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
  * Side Public License, v 1.
  */
 import { cloneDeep } from 'lodash';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import type { ExpressionValueError } from '@kbn/expressions-plugin/public';
+import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { createVisAsync } from '../../vis_async';
+import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
 import {
   SerializedVis,
   Vis,
@@ -17,8 +19,6 @@ import {
   VisualizeEmbeddableContract,
   VisualizeInput,
 } from '../..';
-import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
-import { createVisAsync } from '../../vis_async';
 import type { VisInstance, VisualizeServices } from '../types';
 
 function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {

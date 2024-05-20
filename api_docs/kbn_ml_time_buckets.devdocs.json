@@ -24,7 +24,9 @@
         "type": "Class",
         "tags": [],
         "label": "TimeBuckets",
-        "description": ["\nRepresents a configurable utility class for working with time buckets."],
+        "description": [
+          "\nRepresents a configurable utility class for working with time buckets."
+        ],
         "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -35,8 +37,12 @@
             "type": "Function",
             "tags": [],
             "label": "Constructor",
-            "description": ["\nCreates an instance of TimeBuckets."],
-            "signature": ["any"],
+            "description": [
+              "\nCreates an instance of TimeBuckets."
+            ],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -47,7 +53,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "timeBucketsConfig",
-                "description": ["- Configuration for the TimeBuckets instance."],
+                "description": [
+                  "- Configuration for the TimeBuckets instance."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/ml-time-buckets",
@@ -71,8 +79,12 @@
             "type": "Function",
             "tags": [],
             "label": "setBarTarget",
-            "description": ["\nSets the target number of bars for the histogram."],
-            "signature": ["(barTarget: number) => void"],
+            "description": [
+              "\nSets the target number of bars for the histogram."
+            ],
+            "signature": [
+              "(barTarget: number) => void"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -83,8 +95,12 @@
                 "type": "number",
                 "tags": [],
                 "label": "barTarget",
-                "description": ["- The target bar count."],
-                "signature": ["number"],
+                "description": [
+                  "- The target bar count."
+                ],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -99,8 +115,12 @@
             "type": "Function",
             "tags": [],
             "label": "setMaxBars",
-            "description": ["\nSets the maximum number of bars for the histogram."],
-            "signature": ["(maxBars: number) => void"],
+            "description": [
+              "\nSets the maximum number of bars for the histogram."
+            ],
+            "signature": [
+              "(maxBars: number) => void"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -111,8 +131,12 @@
                 "type": "number",
                 "tags": [],
                 "label": "maxBars",
-                "description": ["- The maximum bar count."],
-                "signature": ["number"],
+                "description": [
+                  "- The maximum bar count."
+                ],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -127,8 +151,12 @@
             "type": "Function",
             "tags": [],
             "label": "setInterval",
-            "description": ["\nSets the interval for the time buckets."],
-            "signature": ["(interval: string) => void"],
+            "description": [
+              "\nSets the interval for the time buckets."
+            ],
+            "signature": [
+              "(interval: string) => void"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -139,8 +167,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "interval",
-                "description": ["- The interval expression, e.g., \"1h\" for one hour."],
-                "signature": ["string"],
+                "description": [
+                  "- The interval expression, e.g., \"1h\" for one hour."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -155,7 +187,9 @@
             "type": "Function",
             "tags": [],
             "label": "setBounds",
-            "description": ["\nSets the bounds of the time range for the buckets."],
+            "description": [
+              "\nSets the bounds of the time range for the buckets."
+            ],
             "signature": [
               "(bounds: ",
               {
@@ -177,7 +211,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "bounds",
-                "description": ["- The minimum and maximum time bounds."],
+                "description": [
+                  "- The minimum and maximum time bounds."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/ml-time-buckets",
@@ -201,13 +237,19 @@
             "type": "Function",
             "tags": [],
             "label": "getBounds",
-            "description": ["\nGets the current bounds of the time range."],
-            "signature": ["() => { min: moment.Moment; max: moment.Moment; }"],
+            "description": [
+              "\nGets the current bounds of the time range."
+            ],
+            "signature": [
+              "() => { min: moment.Moment; max: moment.Moment; }"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": ["The current time range bounds."]
+            "returnComment": [
+              "The current time range bounds."
+            ]
           },
           {
             "parentPluginId": "@kbn/ml-time-buckets",
@@ -215,7 +257,9 @@
             "type": "Function",
             "tags": [],
             "label": "getInterval",
-            "description": ["\nRetrieves the configured interval for the buckets."],
+            "description": [
+              "\nRetrieves the configured interval for the buckets."
+            ],
             "signature": [
               "() => ",
               {
@@ -230,7 +274,9 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": ["The current interval settings for the buckets."]
+            "returnComment": [
+              "The current interval settings for the buckets."
+            ]
           },
           {
             "parentPluginId": "@kbn/ml-time-buckets",
@@ -261,15 +307,21 @@
                 "type": "number",
                 "tags": [],
                 "label": "divisorSecs",
-                "description": ["- The divisor in seconds."],
-                "signature": ["number"],
+                "description": [
+                  "- The divisor in seconds."
+                ],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["The nearest interval as a multiple of the divisor."]
+            "returnComment": [
+              "The nearest interval as a multiple of the divisor."
+            ]
           },
           {
             "parentPluginId": "@kbn/ml-time-buckets",
@@ -280,12 +332,16 @@
             "description": [
               "\nRetrieves the date format that should be used for scaled intervals."
             ],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": ["The scaled date format string."]
+            "returnComment": [
+              "The scaled date format string."
+            ]
           }
         ],
         "initialIsOpen": false
@@ -338,7 +394,9 @@
             "type": "Object",
             "tags": [],
             "label": "bounds",
-            "description": ["The current time range bounds."],
+            "description": [
+              "The current time range bounds."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-time-buckets",
@@ -359,7 +417,9 @@
             "type": "Object",
             "tags": [],
             "label": "interval",
-            "description": ["The interval to align the time range bounds with."],
+            "description": [
+              "The interval to align the time range bounds with."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-time-buckets",
@@ -380,15 +440,21 @@
             "type": "CompoundType",
             "tags": [],
             "label": "inclusiveEnd",
-            "description": ["Whether the end of the range should be inclusive."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Whether the end of the range should be inclusive."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": ["The adjusted time range bounds."],
+        "returnComment": [
+          "The adjusted time range bounds."
+        ],
         "initialIsOpen": false
       },
       {
@@ -428,7 +494,9 @@
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
-            "description": ["The UI settings client instance used to retrieve UI settings."],
+            "description": [
+              "The UI settings client instance used to retrieve UI settings."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
@@ -457,7 +525,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TimeBucketsConfig",
-        "description": ["\nConfiguration options for initializing TimeBuckets."],
+        "description": [
+          "\nConfiguration options for initializing TimeBuckets."
+        ],
         "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -468,7 +538,9 @@
             "type": "number",
             "tags": [],
             "label": "'histogram:maxBars'",
-            "description": ["\nThe maximum number of bars to display on the histogram."],
+            "description": [
+              "\nThe maximum number of bars to display on the histogram."
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -479,7 +551,9 @@
             "type": "number",
             "tags": [],
             "label": "'histogram:barTarget'",
-            "description": ["\nThe targeted number of bars for the histogram."],
+            "description": [
+              "\nThe targeted number of bars for the histogram."
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -490,7 +564,9 @@
             "type": "string",
             "tags": [],
             "label": "dateFormat",
-            "description": ["\nThe date format string."],
+            "description": [
+              "\nThe date format string."
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -501,8 +577,12 @@
             "type": "Array",
             "tags": [],
             "label": "'dateFormat:scaled'",
-            "description": ["\nThe scaled date format strings."],
-            "signature": ["string[][]"],
+            "description": [
+              "\nThe scaled date format strings."
+            ],
+            "signature": [
+              "string[][]"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -516,7 +596,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TimeBucketsInterval",
-        "description": ["\nDefines the structure for time intervals used within TimeBuckets."],
+        "description": [
+          "\nDefines the structure for time intervals used within TimeBuckets."
+        ],
         "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -527,8 +609,12 @@
             "type": "Function",
             "tags": [],
             "label": "asMilliseconds",
-            "description": ["\nReturns the interval in milliseconds."],
-            "signature": ["() => number"],
+            "description": [
+              "\nReturns the interval in milliseconds."
+            ],
+            "signature": [
+              "() => number"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -541,8 +627,12 @@
             "type": "Function",
             "tags": [],
             "label": "asSeconds",
-            "description": ["\nReturns the interval in seconds."],
-            "signature": ["() => number"],
+            "description": [
+              "\nReturns the interval in seconds."
+            ],
+            "signature": [
+              "() => number"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -555,7 +645,9 @@
             "type": "string",
             "tags": [],
             "label": "expression",
-            "description": ["\nThe string expression representing the interval."],
+            "description": [
+              "\nThe string expression representing the interval."
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -569,7 +661,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TimeRangeBounds",
-        "description": ["\nRepresents the minimum and maximum time bounds for a time range."],
+        "description": [
+          "\nRepresents the minimum and maximum time bounds for a time range."
+        ],
         "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -580,8 +674,12 @@
             "type": "Object",
             "tags": [],
             "label": "min",
-            "description": ["\nThe minimum bound of the time range (optional)."],
-            "signature": ["moment.Moment | undefined"],
+            "description": [
+              "\nThe minimum bound of the time range (optional)."
+            ],
+            "signature": [
+              "moment.Moment | undefined"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -592,8 +690,12 @@
             "type": "Object",
             "tags": [],
             "label": "max",
-            "description": ["\nThe maximum bound of the time range (optional)."],
-            "signature": ["moment.Moment | undefined"],
+            "description": [
+              "\nThe maximum bound of the time range (optional)."
+            ],
+            "signature": [
+              "moment.Moment | undefined"
+            ],
             "path": "x-pack/packages/ml/time_buckets/time_buckets.d.ts",
             "deprecated": false,
             "trackAdoption": false

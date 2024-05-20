@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { IBasePath, Logger } from '@kbn/core/server';
-import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
+import { publicAlertsClientMock } from '@kbn/alerting-plugin/server/alerts_client/alerts_client.mock';
 import { UMServerLibs } from '../../lib';
+import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
 import { getUptimeESMockClient } from '../../requests/test_helpers';
 
 /**

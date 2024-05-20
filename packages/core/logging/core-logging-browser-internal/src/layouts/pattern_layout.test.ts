@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { LogLevel, LogRecord } from '@kbn/logging';
-import hasAnsi from 'has-ansi';
 import stripAnsi from 'strip-ansi';
+import hasAnsi from 'has-ansi';
+import { LogLevel, LogRecord } from '@kbn/logging';
 import { PatternLayout } from './pattern_layout';
 
 const stripAnsiSnapshotSerializer: jest.SnapshotSerializerPlugin = {

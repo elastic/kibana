@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Rule } from '@kbn/alerting-plugin/common';
 import type { PartialRule } from '@kbn/alerting-plugin/server';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import type { Rule } from '@kbn/alerting-plugin/common';
 import { isEqual, xorWith } from 'lodash';
-import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import {
   type QueryRule,
   type ResponseAction,
@@ -18,21 +17,22 @@ import {
   type RuleResponseAction,
   type RuleUpdateProps,
 } from '../../../../../common/api/detection_engine';
-import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
+import { isQueryRule } from '../../../../../common/detection_engine/utils';
+import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import { type BulkError, createBulkErrorObject } from '../../routes/utils';
 import {
+  hasValidRuleType,
   type RuleAlertType,
   type RuleParams,
   type UnifiedQueryRuleParams,
-  hasValidRuleType,
 } from '../../rule_schema';
-import { internalRuleToAPIResponse } from '../normalization/rule_converters';
+import { type BulkError, createBulkErrorObject } from '../../routes/utils';
 import { transform } from './utils';
+import { internalRuleToAPIResponse } from '../normalization/rule_converters';
 
 export const transformValidate = (rule: PartialRule<RuleParams>): RuleResponse => {
   const transformed = transform(rule);

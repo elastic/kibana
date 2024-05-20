@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClient } from '@kbn/analytics-client';
 import { fromEvent } from 'rxjs';
+import type { AnalyticsClient } from '@kbn/analytics-client';
 
 /** HTML attributes that should be skipped from reporting because they might contain data we do not wish to collect */
 const HTML_ATTRIBUTES_TO_REMOVE = [

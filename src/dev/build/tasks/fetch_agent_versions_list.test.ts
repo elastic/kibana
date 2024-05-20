@@ -11,8 +11,8 @@ import pRetry from 'p-retry';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { Build, Config, write } from '../lib';
 import { FetchAgentVersionsList } from './fetch_agent_versions_list';
+import { Build, Config, write } from '../lib';
 
 jest.mock('node-fetch');
 jest.mock('p-retry');

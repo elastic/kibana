@@ -9,16 +9,16 @@ import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import type {
-  Direction,
-  ResultEdges,
-  ResultsRequestOptions,
-  ResultsStrategyResponse,
-} from '../../common/search_strategy';
-import { OsqueryQueries } from '../../common/search_strategy';
 import type { InspectResponse } from '../common/helpers';
 import { generateTablePaginationOptions, getInspectResponse } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
+import type {
+  ResultEdges,
+  ResultsRequestOptions,
+  ResultsStrategyResponse,
+  Direction,
+} from '../../common/search_strategy';
+import { OsqueryQueries } from '../../common/search_strategy';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 

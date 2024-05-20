@@ -16,9 +16,9 @@ import { FetchTextExpansionModelApiLogic } from '../../../../../api/ml_models/te
 import { StartTextExpansionModelApiLogic } from '../../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
 
 import {
+  getTextExpansionError,
   TextExpansionCalloutLogic,
   TextExpansionCalloutValues,
-  getTextExpansionError,
 } from './text_expansion_callout_logic';
 
 const DEFAULT_VALUES: TextExpansionCalloutValues = {

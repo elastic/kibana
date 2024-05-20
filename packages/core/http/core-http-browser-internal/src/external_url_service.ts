@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Sha256 } from '@kbn/crypto-browser';
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { IExternalUrl } from '@kbn/core-http-browser';
 import type { IExternalUrlPolicy } from '@kbn/core-http-common';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
-import { Sha256 } from '@kbn/crypto-browser';
 
 interface SetupDeps {
   location: Pick<Location, 'href'>;

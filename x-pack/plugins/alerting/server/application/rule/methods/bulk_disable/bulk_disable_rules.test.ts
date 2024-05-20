@@ -1,15 +1,3 @@
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
-import {
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -17,36 +5,48 @@ import { loggerMock } from '@kbn/logging-mocks';
  * 2.0.
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client/rules_client';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
 import {
-  disabledRuleForBulkDisable1,
-  disabledRuleForBulkDisable2,
-  disabledRuleForBulkOpsWithActions1,
-  disabledRuleForBulkOpsWithActions2,
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import { loggerMock } from '@kbn/logging-mocks';
+import { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
+import {
   enabledRule1,
   enabledRule2,
-  enabledRuleForBulkOps1,
-  enabledRuleForBulkOps2,
-  returnedRuleForBulkDisable1,
-  returnedRuleForBulkDisable2,
-  returnedRuleForBulkDisableWithActions1,
-  returnedRuleForBulkDisableWithActions2,
   savedObjectWith409Error,
   savedObjectWith500Error,
+  disabledRuleForBulkDisable1,
+  disabledRuleForBulkDisable2,
+  returnedRuleForBulkDisableWithActions1,
+  returnedRuleForBulkDisableWithActions2,
+  enabledRuleForBulkOps1,
+  enabledRuleForBulkOps2,
+  disabledRuleForBulkOpsWithActions1,
+  disabledRuleForBulkOpsWithActions2,
+  returnedRuleForBulkDisable1,
+  returnedRuleForBulkDisable2,
   siemRuleForBulkOps1,
   siemRuleForBulkOps2,
 } from '../../../../rules_client/tests/test_helpers';
+import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {

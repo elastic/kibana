@@ -9,8 +9,8 @@
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 
-import { ChunkLoadErrorComponent, KibanaErrorBoundaryStorybookMock } from '../../mocks';
 import { Template } from '../../mocks/src/storybook_template';
+import { ChunkLoadErrorComponent, KibanaErrorBoundaryStorybookMock } from '../../mocks';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
 import { KibanaErrorBoundary } from './error_boundary';
 

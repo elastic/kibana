@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SerializableRecord } from '@kbn/utility-types';
 import type {
   SavedObjectMigrationMap,
-  SavedObjectUnsanitizedDoc,
   SavedObjectsType,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { ServerShortUrlClientFactory } from '..';
-import { LocatorDefinition, UrlService } from '../../../common/url_service';
+import { UrlService, LocatorDefinition } from '../../../common/url_service';
 import { LegacyShortUrlLocatorDefinition } from '../../../common/url_service/locators/legacy_short_url_locator';
 import { MemoryShortUrlStorage } from '../short_urls/storage/memory_short_url_storage';
 import { ShortUrlSavedObjectAttributes } from '../short_urls/storage/saved_object_short_url_storage';

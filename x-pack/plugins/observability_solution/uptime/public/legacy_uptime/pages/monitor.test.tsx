@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render } from '../lib/helper/rtl_helpers';
 import { MonitorPage } from './monitor';
+import { render } from '../lib/helper/rtl_helpers';
 
 describe('MonitorPage', () => {
   it('renders', async () => {

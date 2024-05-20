@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,
@@ -14,11 +16,9 @@ import {
   EuiPopover,
   EuiSpacer,
 } from '@elastic/eui';
-import type { Dispatch, SetStateAction } from 'react';
-import React, { useEffect, useState } from 'react';
+import * as i18n from './translations';
 import type { SecurityJob } from '../../types';
 import { toggleSelectedGroup } from './toggle_selected_group';
-import * as i18n from './translations';
 
 interface GroupsFilterPopoverProps {
   securityJobs: SecurityJob[];

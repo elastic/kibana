@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import type { findSharedOriginObjects } from '../utils/find_shared_origin_objects';
 import type * as InternalUtils from '../utils/internal_utils';
-import type { findLegacyUrlAliases } from './find_legacy_url_aliases';
 
 export const mockFindLegacyUrlAliases = jest.fn() as jest.MockedFunction<
   typeof findLegacyUrlAliases
@@ -27,7 +27,7 @@ jest.mock('../utils/find_shared_origin_objects', () => {
 });
 
 export const mockRawDocExistsInNamespace = jest.fn() as jest.MockedFunction<
-  (typeof InternalUtils)['rawDocExistsInNamespace']
+  typeof InternalUtils['rawDocExistsInNamespace']
 >;
 
 jest.mock('../utils/internal_utils', () => {

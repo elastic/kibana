@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { getDestinationLayer, getLayerList, getLineLayer, getSourceLayer, lmc } from './map_config';
 import {
   mockAPMIndexPatternIds,
   mockClientLayer,
   mockClientServerLineLayer,
   mockDestinationLayer,
   mockIndexPatternIds,
-  mockLayerGroup,
   mockLayerList,
   mockLayerListDouble,
   mockLayerListMixed,
+  mockLayerGroup,
   mockLineLayer,
   mockServerLayer,
   mockSourceLayer,
 } from './__mocks__/mock';
-import { getDestinationLayer, getLayerList, getLineLayer, getSourceLayer, lmc } from './map_config';
 
 jest.mock('uuid', () => {
   return {

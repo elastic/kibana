@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Observable, ReplaySubject, from, map } from 'rxjs';
+import { from, map, type Observable, ReplaySubject } from 'rxjs';
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -22,13 +22,13 @@ import { durationToNumber } from '@kbn/reporting-common';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 
-import { InjectedIntl } from '@kbn/i18n-react';
-import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import {
   getSharedComponents,
   reportingCsvShareModalProvider,
   reportingExportModalProvider,
 } from '@kbn/reporting-public/share';
+import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
+import { InjectedIntl } from '@kbn/i18n-react';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { StartServices } from './types';

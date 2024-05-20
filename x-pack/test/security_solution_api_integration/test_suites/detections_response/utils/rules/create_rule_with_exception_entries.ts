@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
+import type { NonEmptyEntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   RuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import type { NonEmptyEntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type SuperTest from 'supertest';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { createRule } from '../../../../../common/utils/security_solution';
 import {
-  createContainerWithEndpointEntries,
   createContainerWithEntries,
+  createContainerWithEndpointEntries,
 } from '../exception_list_and_item';
+import { createRule } from '../../../../../common/utils/security_solution';
 
 /**
  * Convenience testing function where you can pass in just the entries and you will

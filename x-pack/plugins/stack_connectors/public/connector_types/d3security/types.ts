@@ -9,8 +9,8 @@ import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-
 import { SUB_ACTION } from '../../../common/d3security/constants';
 import {
   D3SecurityConfig,
-  D3SecurityRunActionParams,
   D3SecuritySecrets,
+  D3SecurityRunActionParams,
 } from '../../../common/d3security/types';
 
 export interface D3SecurityActionParams {

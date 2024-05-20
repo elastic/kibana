@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
-import React from 'react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
-import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { EntriesArray, EntryMatch } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 
 import { AddExceptionFlyout } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import type { Rule } from '../../../rule_management/logic/types';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as helpers from '../../utils/helpers';
+import type { Rule } from '../../../rule_management/logic/types';
 import * as i18n from './translations';
 
 import { TestProviders } from '../../../../common/mock';
@@ -32,10 +32,10 @@ import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
 } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
+import type { AlertData } from '../../utils/types';
 import { useFindRules } from '../../../rule_management/logic/use_find_rules';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
-import type { AlertData } from '../../utils/types';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');

@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import sinon from 'sinon';
-import { fetchLicenses, getLicenses, handleLicenses } from './get_licenses';
+import { getLicenses, handleLicenses, fetchLicenses } from './get_licenses';
 
 describe('get_licenses', () => {
   const searchMock = sinon.stub();

@@ -6,10 +6,10 @@
  */
 
 import {
+  TRAINED_MODEL_TYPE,
   DEPLOYMENT_STATE,
   SUPPORTED_PYTORCH_TASKS,
   type SupportedPytorchTasksType,
-  TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
 import type { ModelItem } from '../models_list';
 

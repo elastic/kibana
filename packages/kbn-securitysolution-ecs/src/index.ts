@@ -9,13 +9,13 @@
 import { AgentEcs } from './agent';
 import type { AuditdEcs } from './auditd';
 import type { CloudEcs } from './cloud';
+import type { CodeSignature, FileEcs } from './file';
 import type { DestinationEcs } from './destination';
 import type { DllEcs } from './dll';
 import type { DnsEcs } from './dns';
 import type { EndgameEcs } from './endgame';
 import { EventCategory, EventCode } from './event';
 import type { EventEcs } from './event';
-import type { CodeSignature, FileEcs } from './file';
 import type { GeoEcs } from './geo';
 import type { HostEcs, OsEcs } from './host';
 import type { HttpEcs } from './http';

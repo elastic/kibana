@@ -6,38 +6,38 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { TelemetryEventTypes } from './constants';
 import type {
-  OnboardingHubStepFinishedParams,
-  OnboardingHubStepLinkClickedParams,
-  OnboardingHubStepOpenParams,
-  ReportAddRiskInputToTimelineClickedParams,
+  TelemetryClientStart,
   ReportAlertsGroupingChangedParams,
   ReportAlertsGroupingToggledParams,
   ReportAlertsTakeActionParams,
+  ReportEntityDetailsClickedParams,
+  ReportEntityAlertsClickedParams,
+  ReportEntityRiskFilteredParams,
+  ReportMLJobUpdateParams,
+  ReportCellActionClickedParams,
   ReportAnomaliesCountClickedParams,
-  ReportAssetCriticalityCsvImportedParams,
-  ReportAssetCriticalityCsvPreviewGeneratedParams,
-  ReportAssetCriticalityFileSelectedParams,
+  ReportDataQualityIndexCheckedParams,
+  ReportDataQualityCheckAllCompletedParams,
+  ReportBreadcrumbClickedParams,
   ReportAssistantInvokedParams,
   ReportAssistantMessageSentParams,
   ReportAssistantQuickPromptParams,
   ReportAssistantSettingToggledParams,
   ReportAttackDiscoveriesGeneratedParams,
-  ReportBreadcrumbClickedParams,
-  ReportCellActionClickedParams,
-  ReportDataQualityCheckAllCompletedParams,
-  ReportDataQualityIndexCheckedParams,
-  ReportDetailsFlyoutOpenedParams,
-  ReportDetailsFlyoutTabClickedParams,
-  ReportEntityAlertsClickedParams,
-  ReportEntityDetailsClickedParams,
-  ReportEntityRiskFilteredParams,
-  ReportMLJobUpdateParams,
   ReportRiskInputsExpandedFlyoutOpenedParams,
   ReportToggleRiskSummaryClickedParams,
-  TelemetryClientStart,
+  ReportDetailsFlyoutOpenedParams,
+  ReportDetailsFlyoutTabClickedParams,
+  ReportAssetCriticalityCsvPreviewGeneratedParams,
+  ReportAssetCriticalityFileSelectedParams,
+  ReportAssetCriticalityCsvImportedParams,
+  ReportAddRiskInputToTimelineClickedParams,
+  OnboardingHubStepLinkClickedParams,
+  OnboardingHubStepOpenParams,
+  OnboardingHubStepFinishedParams,
 } from './types';
+import { TelemetryEventTypes } from './constants';
 
 /**
  * Client which aggregate all the available telemetry tracking functions

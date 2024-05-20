@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { URL } from 'url';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 /* eslint-disable dot-notation */
 import { TelemetryEventsSender } from './sender';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { URL } from 'url';
 
 describe('TelemetryEventsSender', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

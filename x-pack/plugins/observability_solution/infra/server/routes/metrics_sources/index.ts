@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
+import Boom from '@hapi/boom';
+import { createValidationFunction } from '../../../common/runtime_types';
+import { InfraBackendLibs } from '../../lib/infra_types';
+import { hasData } from '../../lib/sources/has_data';
+import { createSearchClient } from '../../lib/create_search_client';
+import { AnomalyThresholdRangeError, NoSuchRemoteClusterError } from '../../lib/sources/errors';
 import {
-  MetricsSourceStatus,
   metricsSourceConfigurationResponseRT,
+  MetricsSourceStatus,
   partialMetricsSourceConfigurationReqPayloadRT,
 } from '../../../common/metrics_sources';
-import { createValidationFunction } from '../../../common/runtime_types';
-import { createSearchClient } from '../../lib/create_search_client';
-import { InfraBackendLibs } from '../../lib/infra_types';
 import { InfraSource, InfraSourceIndexField } from '../../lib/sources';
-import { AnomalyThresholdRangeError, NoSuchRemoteClusterError } from '../../lib/sources/errors';
-import { hasData } from '../../lib/sources/has_data';
 import { InfraPluginRequestHandlerContext } from '../../types';
 
 const defaultStatus = {

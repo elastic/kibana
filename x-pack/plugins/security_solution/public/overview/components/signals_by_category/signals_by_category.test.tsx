@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { act, render } from '@testing-library/react';
 import React from 'react';
+import { act, render } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { SignalsByCategory } from './signals_by_category';

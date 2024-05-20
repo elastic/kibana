@@ -6,10 +6,10 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { getConversationResponseMock } from '../../__mocks__/response';
 import { DeleteConversationParams, deleteConversation } from './delete_conversation';
 import { getConversation } from './get_conversation';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { getConversationResponseMock } from '../../__mocks__/response';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),

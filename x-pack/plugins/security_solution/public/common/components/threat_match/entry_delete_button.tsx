@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { Entry } from './types';

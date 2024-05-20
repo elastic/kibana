@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SERIES_SEPARATOR } from '../../../../../common/constants';
-import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
-import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { getAggValue } from '../../helpers/get_agg_value';
 import { getDefaultDecoration } from '../../helpers/get_default_decoration';
-import { getLastMetric } from '../../helpers/get_last_metric';
 import { getSplits } from '../../helpers/get_splits';
+import { getLastMetric } from '../../helpers/get_last_metric';
+import { toPercentileNumber } from '../../../../../common/to_percentile_number';
+import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
+import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 export function percentileRank(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {

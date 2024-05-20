@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { API_VERSIONS } from '../../../common/constants';
-import { appRoutesService } from '../../services';
 import type { PostHealthCheckRequest, PostHealthCheckResponse } from '../../types';
+import { appRoutesService } from '../../services';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { sendRequest } from './use_request';
 

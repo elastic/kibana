@@ -9,8 +9,8 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { TelemetryCollectionManagerPlugin } from './plugin';
-import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 import type { BasicStatsPayload, CollectionStrategyConfig, StatsGetterConfig } from './types';
+import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
 function createCollectionStrategy(priority: number): jest.Mocked<CollectionStrategyConfig> {
   return {

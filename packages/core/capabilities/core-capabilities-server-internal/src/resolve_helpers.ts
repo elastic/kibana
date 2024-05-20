@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
 import { merge } from 'lodash';
-import type { SwitcherBucket, SwitcherWithId } from './types';
+import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
+import type { SwitcherWithId, SwitcherBucket } from './types';
 
 /**
  * Returns true if the two globing paths can intersect.

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiText } from '@elastic/eui';
 import React from 'react';
-import { DataSourceStrings } from '../../../i18n';
+import { EuiCallOut, EuiText } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { DataSourceStrings } from '../../../i18n';
 
 const { DemoData: strings } = DataSourceStrings;
 

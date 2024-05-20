@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
-import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
 import {
   InfraWaffleMapGroup,
   InfraWaffleMapGroupOfGroups,
@@ -15,6 +14,7 @@ import {
   InfraWaffleMapNode,
 } from '../../../../lib/lib';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
+import { SnapshotNodePath, SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 
 export function createId(path: SnapshotNodePath[]) {
   return path.map((p) => p.value).join('/');

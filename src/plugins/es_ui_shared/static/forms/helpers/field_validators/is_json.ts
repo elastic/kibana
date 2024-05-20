@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isJSON } from '../../../validators/string';
 import { ValidationFunc } from '../../hook_form_lib';
+import { isJSON } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
 export const isJsonField =

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { sessionStorageMock } from '@kbn/core-http-server-mocks';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
-import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { Route, Routes } from '@kbn/shared-ux-router';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useMemo } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 // eslint-disable-next-line no-restricted-imports
 import { Router } from 'react-router-dom';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { sessionStorageMock } from '@kbn/core-http-server-mocks';
 import type { CspClientPluginStartDeps } from '../types';
 
 interface CspAppDeps {

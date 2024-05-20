@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiConfirmModal,
@@ -14,9 +15,8 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
-import { MaintenanceWindowStatus } from '../../../../common';
 import * as i18n from '../translations';
+import { MaintenanceWindowStatus } from '../../../../common';
 
 interface TableActionsPopoverProps {
   id: string;

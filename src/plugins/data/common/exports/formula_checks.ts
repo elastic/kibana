@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { startsWith } from 'lodash';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { CSV_FORMULA_CHARS } from './constants';
 
 export const cellHasFormulas = (val: string) =>

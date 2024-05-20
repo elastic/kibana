@@ -8,20 +8,20 @@
 import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
-import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
 import { canEditRuleWithActions } from '../../../../common/utils/privileges';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../rule_management/logic';
 import { useBulkExport } from '../../../rule_management/logic/bulk_actions/use_bulk_export';
-import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import {
   goToRuleEditPage,
   useExecuteBulkAction,
 } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
+import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_actions/use_download_exported_rules';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 
 export const useRulesTableActions = ({

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiHighlight } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiHighlight } from '@elastic/eui';
 
 import { PromptContextTemplate } from '../../../..';
 import * as i18n from './translations';

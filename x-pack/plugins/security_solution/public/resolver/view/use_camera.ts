@@ -6,19 +6,19 @@
  */
 
 import type React from 'react';
-import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import type { State } from '../../common/store/types';
+import { useCallback, useState, useEffect, useRef, useLayoutEffect, useContext } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { SideEffectContext } from './side_effect_context';
+import type { Matrix3 } from '../types';
+import * as selectors from '../store/selectors';
 import {
-  userMovedPointer,
-  userSetRasterSize,
   userStartedPanning,
+  userMovedPointer,
   userStoppedPanning,
   userZoomed,
+  userSetRasterSize,
 } from '../store/camera/action';
-import * as selectors from '../store/selectors';
-import type { Matrix3 } from '../types';
-import { SideEffectContext } from './side_effect_context';
+import type { State } from '../../common/store/types';
 
 export function useCamera({ id }: { id: string }): {
   /**

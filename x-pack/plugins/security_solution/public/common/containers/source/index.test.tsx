@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { useKibana } from '../../lib/kibana';
-import { TestProviders, mockGlobalState } from '../../mock';
-import { mocksSource } from './mock';
 import type { IndexFieldSearch } from './use_data_view';
 import { useDataView } from './use_data_view';
+import { mocksSource } from './mock';
+import { mockGlobalState, TestProviders } from '../../mock';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { useKibana } from '../../lib/kibana';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

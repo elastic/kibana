@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 import {
-  EuiButton,
   EuiCode,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiText,
+  EuiSpacer,
+  EuiHorizontalRule,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
 import { WhatIs } from '../../blurbs';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class ExplainCollectionEnabled extends React.Component {
   constructor(props) {
@@ -134,7 +134,11 @@ export class ExplainCollectionEnabled extends React.Component {
     );
 
     // prettier-ignore
-    return <Fragment>{isCollectionEnabledUpdated ? renderSuccess() : renderButton()}</Fragment>;
+    return (
+      <Fragment>
+        {isCollectionEnabledUpdated ? renderSuccess() : renderButton()}
+      </Fragment>
+    );
   }
 }
 

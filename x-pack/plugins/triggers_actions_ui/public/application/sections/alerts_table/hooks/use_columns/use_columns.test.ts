@@ -6,15 +6,15 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
-import { AlertsTableStorage } from '../../alerts_table_state';
+import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
-import { UseColumnsArgs, UseColumnsResp, useColumns } from './use_columns';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { AlertsTableStorage } from '../../alerts_table_state';
+import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('../../../../../common/lib/kibana', () => ({

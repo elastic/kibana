@@ -6,9 +6,9 @@
  */
 
 import { cleanup } from '@kbn/infra-forge';
-import { sloData } from '../../../../api_integration/apis/slos/fixtures/create_slo';
-import { SloEsClient } from '../../../../api_integration/apis/slos/helper/es';
 import { loadTestData } from '../../../../api_integration/apis/slos/helper/load_test_data';
+import { SloEsClient } from '../../../../api_integration/apis/slos/helper/es';
+import { sloData } from '../../../../api_integration/apis/slos/fixtures/create_slo';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type SuperTest from 'supertest';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { mount, render } from 'enzyme';
 import React from 'react';
+import { render, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import { NotFoundPrompt } from './not_found_prompt';

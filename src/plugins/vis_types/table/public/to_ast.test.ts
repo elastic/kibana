@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { AggTypes, TableVisParams } from '../common';
 import { toExpressionAst } from './to_ast';
+import { AggTypes, TableVisParams } from '../common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
 const mockSchemas = {
   metric: [{ accessor: 1, format: { id: 'number' }, params: {}, label: 'Count', aggType: 'count' }],

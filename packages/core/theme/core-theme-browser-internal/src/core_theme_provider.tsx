@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { type FC, type PropsWithChildren } from 'react';
 import { CoreTheme } from '@kbn/core-theme-browser/src/types';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import React, { type FC, type PropsWithChildren } from 'react';
 import { Observable } from 'rxjs';
 
 interface CoreThemeProviderProps {

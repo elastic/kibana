@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { History } from 'history';
+import * as Rx from 'rxjs';
+import { filter } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   createQueryParamObservable,
   getQueryParams,
   removeQueryParam,
 } from '@kbn/kibana-utils-plugin/public';
-import { History } from 'history';
-import * as Rx from 'rxjs';
-import { filter } from 'rxjs';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../../constants';
 
 export interface DiscoverSearchSessionManagerDeps {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiDualRange, EuiRangeTick } from '@elastic/eui';
 import React from 'react';
+import { EuiDualRange, EuiRangeTick } from '@elastic/eui';
 import { TimeSlice } from '../../../common/types';
 
 interface Props {

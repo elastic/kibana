@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
+import { css, keyframes } from '@emotion/css';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconTip,
   EuiSpacer,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
-import { css, keyframes } from '@emotion/css';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React from 'react';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 
 const fadeInAnimation = keyframes`

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import usePrevious from 'react-use/lib/usePrevious';
+import { isEqual } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
-import usePrevious from 'react-use/lib/usePrevious';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -25,10 +25,10 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list';
 import type { DatasourceDataPanelProps } from '../../../types';
-import { FieldItem } from '../../common/field_item';
-import { getColumnsFromCache } from '../fieldlist_cache';
 import type { TextBasedPrivateState } from '../types';
 import { getStateFromAggregateQuery } from '../utils';
+import { FieldItem } from '../../common/field_item';
+import { getColumnsFromCache } from '../fieldlist_cache';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 

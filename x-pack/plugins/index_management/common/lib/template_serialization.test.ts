@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TemplateDeserialized, TemplateSerialized } from '../types';
 import { deserializeTemplate, serializeTemplate } from './template_serialization';
+import { TemplateDeserialized, TemplateSerialized } from '../types';
 
 const defaultSerializedTemplate: TemplateSerialized = {
   template: {},

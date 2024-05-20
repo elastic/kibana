@@ -29,7 +29,9 @@
         "tags": [],
         "label": "AppId",
         "description": [],
-        "signature": ["\"monitoring\" | \"management\" | \"integrations\""],
+        "signature": [
+          "\"monitoring\" | \"management\" | \"integrations\""
+        ],
         "path": "packages/deeplinks/management/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -72,7 +74,9 @@
         "tags": [],
         "label": "MONITORING_APP_ID",
         "description": [],
-        "signature": ["\"monitoring\""],
+        "signature": [
+          "\"monitoring\""
+        ],
         "path": "packages/deeplinks/management/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

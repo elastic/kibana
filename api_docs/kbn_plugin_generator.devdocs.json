@@ -26,7 +26,9 @@
         "tags": [],
         "label": "runCli",
         "description": [],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/kbn-plugin-generator/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,

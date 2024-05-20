@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { groupBy, isEmpty, isNil, map, mapValues, omit, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { groupBy, isEmpty, isNil, map, mapValues, omit, omitBy } from 'lodash';
-import { AggExpressionFunctionArgs, AggExpressionType, BUCKET_TYPES } from '..';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 import { CidrOutput, IpRangeOutput } from '../../expressions';
 
 export const aggIpRangeFnName = 'aggIpRange';

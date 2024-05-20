@@ -20,9 +20,9 @@ const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
   ${({ overlay, overlayBackground, theme }) =>
     overlay &&
     css`
-      background: ${
-        overlayBackground ? rgba(overlayBackground, 0.9) : rgba(theme.eui.euiColorEmptyShade, 0.9)
-      };
+      background: ${overlayBackground
+        ? rgba(overlayBackground, 0.9)
+        : rgba(theme.eui.euiColorEmptyShade, 0.9)};
       bottom: 0;
       left: 0;
       position: absolute;

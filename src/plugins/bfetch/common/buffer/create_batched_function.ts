@@ -7,7 +7,7 @@
  */
 
 import { ItemBufferParams } from './item_buffer';
-import { TimedItemBuffer, TimedItemBufferParams } from './timed_item_buffer';
+import { TimedItemBufferParams, TimedItemBuffer } from './timed_item_buffer';
 
 type Fn = (...args: any) => any;
 

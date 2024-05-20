@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import httpProxy from 'http-proxy';
+import expect from '@kbn/expect';
 
-import {
-  ExternalServiceSimulator,
-  getExternalServiceSimulatorPath,
-} from '@kbn/actions-simulators-plugin/server/plugin';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
-import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/jira/constants';
+import {
+  getExternalServiceSimulatorPath,
+  ExternalServiceSimulator,
+} from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/jira/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

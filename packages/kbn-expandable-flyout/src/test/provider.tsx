@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { Provider as ReduxProvider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import React, { FC, PropsWithChildren } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
 import { ExpandableFlyoutContextProvider } from '../context';
 import { reducer } from '../reducer';
 import { Context } from '../redux';
-import { State, initialState } from '../state';
+import { initialState, State } from '../state';
 
 interface TestProviderProps {
   state?: State;

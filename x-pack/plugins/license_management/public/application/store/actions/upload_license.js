@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { createAction } from 'redux-actions';
+import { addLicense } from './add_license';
 import { putLicense } from '../../lib/es';
 import { addUploadErrorMessage } from './add_error_message';
-import { addLicense } from './add_license';
+import { i18n } from '@kbn/i18n';
 
 export const uploadLicenseStatus = createAction('LICENSE_MANAGEMENT_UPLOAD_LICENSE_STATUS');
 

@@ -10,13 +10,13 @@ import deepmerge from 'deepmerge';
 import { isPlainObject } from 'lodash';
 
 import type {
-  NoDataCardKibanaDependencies,
   NoDataCardServices,
+  NoDataCardKibanaDependencies,
 } from '@kbn/shared-ux-card-no-data-types';
 
 import {
-  getRedirectAppLinksKibanaDependenciesMock,
   getRedirectAppLinksServicesMock,
+  getRedirectAppLinksKibanaDependenciesMock,
 } from '@kbn/shared-ux-link-redirect-app-mocks';
 
 const defaultParams = { canAccessFleet: true };

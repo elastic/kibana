@@ -1,7 +1,8 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
+    "aliases": {
+    },
     "index": "ft_module_metrics_ui",
     "mappings": {
       "_meta": {
@@ -10424,7 +10425,9 @@
                   }
                 },
                 "message": {
-                  "copy_to": ["message"],
+                  "copy_to": [
+                    "message"
+                  ],
                   "norms": false,
                   "type": "text"
                 },

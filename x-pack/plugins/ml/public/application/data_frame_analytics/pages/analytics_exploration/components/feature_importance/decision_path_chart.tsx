@@ -7,8 +7,8 @@
 
 import type {
   AxisStyle,
-  LineAnnotationDatum,
   LineAnnotationStyle,
+  LineAnnotationDatum,
   PartialTheme,
   RecursivePartial,
 } from '@elastic/charts';
@@ -16,24 +16,24 @@ import {
   AnnotationDomainType,
   Axis,
   Chart,
-  LEGACY_LIGHT_THEME,
   LineAnnotation,
   LineSeries,
   Position,
   ScaleType,
   Settings,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
   type FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { euiLightVars as euiVars } from '@kbn/ui-theme';
-import React, { useCallback, useMemo } from 'react';
-import { formatSingleValue } from '../../../../../formatters/format_value';
 import type { DecisionPathPlotData } from './use_classification_path_data';
+import { formatSingleValue } from '../../../../../formatters/format_value';
 const { euiColorFullShade, euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
 

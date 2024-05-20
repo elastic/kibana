@@ -6,10 +6,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import {
+  CodeEditorMode,
   BrowserAdvancedFields,
   BrowserSimpleFields,
-  CodeEditorMode,
   CommonFields,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPAdvancedFields,
   HTTPMethod,
@@ -17,16 +18,15 @@ import {
   ICMPSimpleFields,
   Mode,
   MonitorDefaults,
-  MonitorTypeEnum,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
   ScreenshotOption,
   SourceType,
   TCPAdvancedFields,
   TCPSimpleFields,
+  ThrottlingConfig,
   TLSFields,
   TLSVersion,
-  ThrottlingConfig,
   VerificationMode,
 } from '../runtime_types/monitor_management';
 import { ConfigKey } from './monitor_management';
@@ -110,13 +110,10 @@ export const PROFILE_VALUES: ThrottlingConfig[] = [
   },
 ];
 
-export const PROFILES_MAP = PROFILE_VALUES.reduce(
-  (acc, profile) => {
-    acc[profile.id] = profile;
-    return acc;
-  },
-  {} as { [key: string]: ThrottlingConfig }
-);
+export const PROFILES_MAP = PROFILE_VALUES.reduce((acc, profile) => {
+  acc[profile.id] = profile;
+  return acc;
+}, {} as { [key: string]: ThrottlingConfig });
 
 export const ALLOWED_SCHEDULES_IN_MINUTES = [
   '1',

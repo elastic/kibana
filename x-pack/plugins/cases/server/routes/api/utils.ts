@@ -8,7 +8,7 @@
 import type { Boom } from '@hapi/boom';
 import { boomify, isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import type { CustomHttpResponseOptions, Headers, Logger, ResponseError } from '@kbn/core/server';
+import type { CustomHttpResponseOptions, ResponseError, Headers, Logger } from '@kbn/core/server';
 import type { CaseError, HTTPError } from '../../common/error';
 import { isCaseError, isHTTPError } from '../../common/error';
 

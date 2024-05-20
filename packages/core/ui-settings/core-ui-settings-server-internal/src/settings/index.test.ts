@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { getCoreSettings } from '.';
 import { getAccessibilitySettings } from './accessibility';
-import { getAnnouncementsSettings } from './announcements';
 import { getDateFormatSettings } from './date_formats';
 import { getMiscUiSettings } from './misc';
 import { getNavigationSettings } from './navigation';
 import { getNotificationsSettings } from './notifications';
-import { getStateSettings } from './state';
 import { getThemeSettings } from './theme';
+import { getCoreSettings } from '.';
+import { getStateSettings } from './state';
+import { getAnnouncementsSettings } from './announcements';
 
 describe('getCoreSettings', () => {
   it('should not have setting overlaps', () => {

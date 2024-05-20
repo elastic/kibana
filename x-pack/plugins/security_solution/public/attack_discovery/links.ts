@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ATTACK_DISCOVERY_PATH, SERVER_APP_ID, SecurityPageName } from '../../common/constants';
 import { ATTACK_DISCOVERY } from '../app/translations';
+import { ATTACK_DISCOVERY_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {

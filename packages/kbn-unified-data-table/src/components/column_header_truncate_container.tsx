@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiTextBlockTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React from 'react';
 
 const ColumnHeaderTruncateContainer = ({
   headerRowHeight,

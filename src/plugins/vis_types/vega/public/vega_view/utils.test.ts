@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { normalizeDate, normalizeObject, normalizeString } from './utils';
+import { normalizeString, normalizeObject, normalizeDate } from './utils';
 
 describe('normalizeString', () => {
   test('should return undefined for non string input', async () => {

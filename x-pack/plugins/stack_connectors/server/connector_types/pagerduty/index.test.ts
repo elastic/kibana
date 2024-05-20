@@ -10,20 +10,20 @@ import moment from 'moment';
 jest.mock('./post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Services } from '@kbn/actions-plugin/server/types';
+import { validateConfig, validateSecrets, validateParams } from '@kbn/actions-plugin/server/lib';
+import { postPagerduty } from './post_pagerduty';
 import { Logger } from '@kbn/core/server';
-import { loggerMock } from '@kbn/logging-mocks';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   ActionParamsType,
+  getConnectorType,
   PagerDutyConnectorType,
   PagerDutyConnectorTypeExecutorOptions,
-  getConnectorType,
 } from '.';
-import { postPagerduty } from './post_pagerduty';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { loggerMock } from '@kbn/logging-mocks';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 const services: Services = actionsMock.createServices();

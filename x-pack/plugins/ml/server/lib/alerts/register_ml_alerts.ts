@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
 import type { MlFeatures } from '../../../common/constants/app';
-import type { SharedServices } from '../../shared_services';
-import type { MlServicesProviders } from '../../shared_services/shared_services';
 import { registerAnomalyDetectionAlertType } from './register_anomaly_detection_alert_type';
+import type { SharedServices } from '../../shared_services';
 import { registerJobsMonitoringRuleType } from './register_jobs_monitoring_rule_type';
+import type { MlServicesProviders } from '../../shared_services/shared_services';
 
 export interface RegisterAlertParams {
   alerting: AlertingPlugin['setup'];

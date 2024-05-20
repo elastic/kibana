@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataTableState, TableId } from '@kbn/securitysolution-data-table';
-import { TableEntityType, tableEntity } from '@kbn/securitysolution-data-table';
+import { tableEntity, TableEntityType } from '@kbn/securitysolution-data-table';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LOCAL_STORAGE_TABLE_KEY } from '.';
 import {
   hostRiskLevelColumn,

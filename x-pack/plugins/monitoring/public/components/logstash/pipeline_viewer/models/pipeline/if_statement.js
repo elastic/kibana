@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElseElement } from '../list/else_element';
-import { IfElement } from '../list/if_element';
-import { makeStatement } from './make_statement';
 import { Statement } from './statement';
+import { makeStatement } from './make_statement';
 import { isVertexPipelineStage } from './utils';
+import { IfElement } from '../list/if_element';
+import { ElseElement } from '../list/else_element';
 
 function makeStatementsForOutgoingVertices(outgoingVertices, statements, next, pipelineStage) {
   outgoingVertices.forEach((vertex) => {

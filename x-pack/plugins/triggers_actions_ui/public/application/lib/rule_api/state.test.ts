@@ -6,8 +6,8 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { v4 as uuidv4 } from 'uuid';
 import { loadRuleState } from './state';
+import { v4 as uuidv4 } from 'uuid';
 
 const http = httpServiceMock.createStartContract();
 

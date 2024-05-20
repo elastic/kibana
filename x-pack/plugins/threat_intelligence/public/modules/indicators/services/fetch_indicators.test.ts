@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { BehaviorSubject, throwError } from 'rxjs';
-import { FactoryQueryType } from '../../../../common/constants';
 import { mockedSearchService } from '../../../mocks/test_providers';
+import { BehaviorSubject, throwError } from 'rxjs';
 import { createFetchIndicators } from './fetch_indicators';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { FactoryQueryType } from '../../../../common/constants';
 
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 

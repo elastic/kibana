@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { asPercent } from '../../../../../common/utils/formatters';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
-import { useTheme } from '../../../../hooks/use_theme';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { asPercent } from '../../../../../common/utils/formatters';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useTheme } from '../../../../hooks/use_theme';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);

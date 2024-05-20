@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { History, createBrowserHistory } from 'history';
 import React from 'react';
-import { BehaviorSubject, type Observable, Subject, type Subscription, firstValueFrom } from 'rxjs';
-import { distinctUntilChanged, filter, map, shareReplay, take, takeUntil } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
+import { createBrowserHistory, History } from 'history';
 
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type {
   App,
@@ -22,28 +28,22 @@ import type {
   NavigateToAppOptions,
   NavigateToUrlOptions,
 } from '@kbn/core-application-browser';
-import { AppStatus } from '@kbn/core-application-browser';
-import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
-import type { Capabilities } from '@kbn/core-capabilities-common';
+import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 import { AppRouter } from './ui';
+import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
 
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
-import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import {
   appendAppPath,
-  getAppInfo,
-  getLocationObservable,
   parseAppUrl,
   relativeToAbsolute,
+  getAppInfo,
+  getLocationObservable,
 } from './utils';
+import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
 export interface SetupDeps {
   http: InternalHttpSetup;

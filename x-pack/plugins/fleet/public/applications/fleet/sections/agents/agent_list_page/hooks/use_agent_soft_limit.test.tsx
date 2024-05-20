@@ -6,7 +6,7 @@
  */
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
-import { sendGetAgents, useConfig } from '../../../../hooks';
+import { useConfig, sendGetAgents } from '../../../../hooks';
 
 import { useAgentSoftLimit } from './use_agent_soft_limit';
 

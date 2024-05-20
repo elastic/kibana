@@ -5,19 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiHorizontalRule,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import React, { memo, useCallback, useState, useRef } from 'react';
 import {
   RulesSettingsFlappingProperties,
   RulesSettingsProperties,
@@ -25,14 +13,26 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo, useCallback, useState, useRef } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiHorizontalRule,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGetFlappingSettings } from '../../hooks/use_get_flapping_settings';
+import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
+import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
 import { useGetQueryDelaySettings } from '../../hooks/use_get_query_delay_settings';
 import { useUpdateRuleSettings } from '../../hooks/use_update_rules_settings';
 import { CenterJustifiedSpinner } from '../center_justified_spinner';
-import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
-import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
 
 export const RulesSettingsErrorPrompt = memo(() => {
   return (

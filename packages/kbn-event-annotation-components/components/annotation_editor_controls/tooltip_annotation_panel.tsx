@@ -7,23 +7,23 @@
  */
 
 import { EuiFlexItem, EuiPanel, EuiText, htmlIdGenerator } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
-import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
-import { getFieldIconType } from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useState } from 'react';
+import fastIsEqual from 'fast-deep-equal';
+import { getFieldIconType } from '@kbn/field-utils';
 import { useExistingFieldsReader } from '@kbn/unified-field-list';
 import {
-  DragDropBuckets,
-  DraggableBucketContainer,
   FieldOption,
   FieldOptionValue,
   FieldPicker,
-  FieldsBucketContainer,
   NewBucketButton,
+  DragDropBuckets,
+  DraggableBucketContainer,
+  FieldsBucketContainer,
   isFieldLensCompatible,
 } from '@kbn/visualization-ui-components';
-import fastIsEqual from 'fast-deep-equal';
-import React, { useCallback, useState } from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
+import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 3;
 
@@ -128,7 +128,7 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
           exists: dataView.id ? hasFieldData(dataView.id, field.name) : false,
           compatible: true,
           'data-test-subj': `lnsXY-annotation-tooltip-fieldOption-${field.name}`,
-        }) as FieldOption<FieldOptionValue>
+        } as FieldOption<FieldOptionValue>)
     )
     .sort((a, b) => a.label.localeCompare(b.label));
 

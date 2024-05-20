@@ -1,5 +1,3 @@
-import type { Capabilities } from '@kbn/core-capabilities-common';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +5,12 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
  * 2.0.
  */
 import React from 'react';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import { AppMockRenderer, createAppMockRenderer } from '../../lib/test_utils';
+import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
 import { MaintenanceWindowsPage } from '.';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '../../../common';
-import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
-import { AppMockRenderer, createAppMockRenderer } from '../../lib/test_utils';
 
 jest.mock('../../hooks/use_find_maintenance_windows', () => ({
   useFindMaintenanceWindows: jest.fn(),

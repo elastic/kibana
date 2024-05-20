@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { type ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 
 import { ProductLine, ProductTier } from '../../../common/product';
 

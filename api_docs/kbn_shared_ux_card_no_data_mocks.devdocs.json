@@ -8,7 +8,9 @@
         "type": "Class",
         "tags": [],
         "label": "StorybookMock",
-        "description": ["\nStorybook mocks for the `NoDataCard` component."],
+        "description": [
+          "\nStorybook mocks for the `NoDataCard` component."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-card-no-data-mocks",
@@ -435,7 +437,11 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Partial<", "NoDataCardServices", ">"],
+            "signature": [
+              "Partial<",
+              "NoDataCardServices",
+              ">"
+            ],
             "path": "packages/shared-ux/card/no_data/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -454,7 +460,12 @@
         "description": [
           "\nReturns the Jest-compatible service abstractions for the `NoDataCardProvider`."
         ],
-        "signature": ["(params?: Partial<", "NoDataCardServices", ">) => ", "NoDataCardServices"],
+        "signature": [
+          "(params?: Partial<",
+          "NoDataCardServices",
+          ">) => ",
+          "NoDataCardServices"
+        ],
         "path": "packages/shared-ux/card/no_data/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -466,7 +477,11 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Partial<", "NoDataCardServices", ">"],
+            "signature": [
+              "Partial<",
+              "NoDataCardServices",
+              ">"
+            ],
             "path": "packages/shared-ux/card/no_data/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -486,7 +501,9 @@
         "type": "Type",
         "tags": [],
         "label": "Params",
-        "description": ["\nStorybook parameters provided from the controls addon."],
+        "description": [
+          "\nStorybook parameters provided from the controls addon."
+        ],
         "signature": [
           "{ title: any; category: any; description: any; button: any; canAccessFleet: any; }"
         ],

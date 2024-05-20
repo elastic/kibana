@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createReadStream } from 'fs';
 import oboe from 'oboe';
+import { createReadStream } from 'fs';
 
 export default (jsonSummaryPath) => oboe(createReadStream(jsonSummaryPath));

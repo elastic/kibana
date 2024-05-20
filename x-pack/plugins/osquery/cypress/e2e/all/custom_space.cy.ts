@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ServerlessRoleName } from '../../support/roles';
-import { cleanupPack, cleanupSpace, loadPack, loadSpace } from '../../tasks/api_fixtures';
+import { initializeDataViews } from '../../tasks/login';
+import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
   checkResults,
@@ -14,8 +14,8 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import { initializeDataViews } from '../../tasks/login';
-import { navigateTo } from '../../tasks/navigation';
+import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
 const testSpaces = [
   { name: 'default', tags: ['@ess', '@serverless', '@brokenInServerless'] },

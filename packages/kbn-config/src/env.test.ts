@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Package } from '@kbn/repo-packages';
 import { mockPackage } from './env.test.mocks';
+import type { Package } from '@kbn/repo-packages';
 
 import { Env, RawPackageInfo } from './env';
 import { getEnvOptions } from './internal_mocks';

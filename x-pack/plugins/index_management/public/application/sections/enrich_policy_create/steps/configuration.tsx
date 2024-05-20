@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPopover,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React, { useState } from 'react';
+import { omit, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isEmpty, omit } from 'lodash';
-import React, { useState } from 'react';
 import {
-  FIELD_TYPES,
-  Form,
-  FormSchema,
-  JsonEditorField,
-  SelectField,
-  TextField,
-  UseField,
-  fieldValidators,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiIcon,
+  EuiCode,
+  EuiButton,
+  EuiText,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
+import {
   useForm,
+  Form,
+  fieldValidators,
+  FormSchema,
+  FIELD_TYPES,
+  UseField,
+  TextField,
+  SelectField,
+  JsonEditorField,
 } from '../../../../shared_imports';
 
 import { useAppContext } from '../../../app_context';
-import { documentationService } from '../../../services/documentation';
-import { DraftPolicy, useCreatePolicyContext } from '../create_policy_context';
 import { IndicesSelector } from './fields/indices_selector';
+import { documentationService } from '../../../services/documentation';
+import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
 
 interface Props {
   onNext: () => void;

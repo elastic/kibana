@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/public';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FieldName } from '../field_name';
 
 const field = new DataViewField({

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
-import {
-  DASHBOARD_LOCATORS_IDS,
-  FLEET_ELASTIC_AGENT_PACKAGE,
-} from '../../../../../../../common/constants';
-import { useDashboardLocator, useGetPackageInfoByKeyQuery, useLink } from '../../../../hooks';
+import { useGetPackageInfoByKeyQuery, useLink, useDashboardLocator } from '../../../../hooks';
 import type { Agent, AgentPolicy } from '../../../../types';
+import {
+  FLEET_ELASTIC_AGENT_PACKAGE,
+  DASHBOARD_LOCATORS_IDS,
+} from '../../../../../../../common/constants';
 
 function useAgentDashboardLink(agent: Agent) {
   const { isLoading, data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);

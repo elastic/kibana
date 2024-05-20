@@ -8,13 +8,12 @@
 import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import React, { useMemo, useState } from 'react';
+import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
+import { isPending } from '../../../../hooks/use_fetcher';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { isPending } from '../../../../hooks/use_fetcher';
 import { truncate, unit } from '../../../../utils/style';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
@@ -26,9 +25,10 @@ import {
   TableOptions,
   TableSearchBar,
 } from '../../../shared/managed_table';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { ErrorGroupItem, useErrorGroupListData } from './use_error_group_list_data';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};

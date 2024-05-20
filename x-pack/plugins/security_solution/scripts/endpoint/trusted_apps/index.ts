@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import minimist from 'minimist';
+import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClient } from '@kbn/test';
+import pMap from 'p-map';
 import { basename } from 'path';
-import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -14,13 +17,10 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { KbnClient } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
-import minimist from 'minimist';
-import pMap from 'p-map';
-import { TrustedAppGenerator } from '../../../common/endpoint/data_generators/trusted_app_generator';
+import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type { TrustedApp } from '../../../common/endpoint/types';
+import { TrustedAppGenerator } from '../../../common/endpoint/data_generators/trusted_app_generator';
 
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';

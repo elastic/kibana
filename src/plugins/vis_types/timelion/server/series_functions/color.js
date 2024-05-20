@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import tinygradient from 'tinygradient';
 import alter from '../lib/alter';
 import Chainable from '../lib/classes/chainable';
+import tinygradient from 'tinygradient';
 
 export default new Chainable('color', {
   args: [

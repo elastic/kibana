@@ -6,8 +6,8 @@
  */
 
 import dateMath from '@elastic/datemath';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const parseDateString = ({
   date,

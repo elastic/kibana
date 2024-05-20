@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
-import { EuiButtonEmpty, type EuiDataGridColumnCellAction } from '@elastic/eui';
-import { act, render, waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
 import type { JSXElementConstructor, MutableRefObject } from 'react';
 import React from 'react';
+import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
+import { EuiButtonEmpty, type EuiDataGridColumnCellAction } from '@elastic/eui';
+import { render, waitFor, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { makeAction } from '../mocks/helpers';
 import type { UseDataGridColumnsCellActionsProps } from './use_data_grid_column_cell_actions';
 import { useDataGridColumnsCellActions } from './use_data_grid_column_cell_actions';

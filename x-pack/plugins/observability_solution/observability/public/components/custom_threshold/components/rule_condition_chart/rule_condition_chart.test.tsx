@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import {
-  Aggregators,
   Comparator,
+  Aggregators,
   CustomThresholdSearchSourceFields,
 } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';

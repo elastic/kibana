@@ -1,4 +1,3 @@
-import { EuiFormRow } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +5,13 @@ import { EuiFormRow } from '@elastic/eui';
  * 2.0.
  */
 import React, { memo } from 'react';
-import { Controller, FieldError, useFormContext } from 'react-hook-form';
 import { useSelector } from 'react-redux';
+import { Controller, useFormContext, FieldError } from 'react-hook-form';
+import { EuiFormRow } from '@elastic/eui';
 import { selectServiceLocationsState } from '../../../state';
-import { useIsEditFlow, useKibanaSpace, useValidateField } from '../hooks';
-import { FieldMeta, FormConfig } from '../types';
+import { useKibanaSpace, useIsEditFlow, useValidateField } from '../hooks';
 import { ControlledField } from './controlled_field';
+import { FormConfig, FieldMeta } from '../types';
 
 type Props = FieldMeta<any> & { fieldError?: FieldError };
 

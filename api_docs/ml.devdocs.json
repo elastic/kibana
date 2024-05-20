@@ -40,7 +40,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"ML_APP_LOCATOR\""],
+            "signature": [
+              "\"ML_APP_LOCATOR\""
+            ],
             "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -70,7 +72,9 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": ["MlLocatorParams"],
+                "signature": [
+                  "MlLocatorParams"
+                ],
                 "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -91,7 +95,11 @@
         "tags": [],
         "label": "getMlSharedImports",
         "description": [],
-        "signature": ["() => Promise<typeof ", "x-pack/plugins/ml/public/shared", ">"],
+        "signature": [
+          "() => Promise<typeof ",
+          "x-pack/plugins/ml/public/shared",
+          ">"
+        ],
         "path": "x-pack/plugins/ml/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -106,7 +114,9 @@
         "tags": [],
         "label": "MLJobsAwaitingNodeWarning",
         "description": [],
-        "signature": ["({ jobIds }: React.PropsWithChildren<Props>) => JSX.Element"],
+        "signature": [
+          "({ jobIds }: React.PropsWithChildren<Props>) => JSX.Element"
+        ],
         "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -118,7 +128,9 @@
             "tags": [],
             "label": "{ jobIds }",
             "description": [],
-            "signature": ["React.PropsWithChildren<Props>"],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
             "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -149,7 +161,9 @@
             "tags": [],
             "label": "{ nodeAvailableCallback, size }",
             "description": [],
-            "signature": ["React.PropsWithChildren<Props>"],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
             "path": "x-pack/plugins/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -165,7 +179,9 @@
         "type": "Function",
         "tags": [],
         "label": "useMlHref",
-        "description": ["\nProvides a URL to ML plugin page\nTODO remove basePath parameter"],
+        "description": [
+          "\nProvides a URL to ML plugin page\nTODO remove basePath parameter"
+        ],
         "signature": [
           "(ml: { locator?: ",
           {
@@ -221,7 +237,9 @@
             "tags": [],
             "label": "basePath",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -234,7 +252,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["MlLocatorParams"],
+            "signature": [
+              "MlLocatorParams"
+            ],
             "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -247,7 +267,9 @@
             "tags": [],
             "label": "dependencies",
             "description": [],
-            "signature": ["React.DependencyList | undefined"],
+            "signature": [
+              "React.DependencyList | undefined"
+            ],
             "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -265,7 +287,9 @@
         "type": "Interface",
         "tags": [],
         "label": "AnomalySwimLaneEmbeddableState",
-        "description": ["\nPersisted state for the Anomaly Swim Lane Embeddable."],
+        "description": [
+          "\nPersisted state for the Anomaly Swim Lane Embeddable."
+        ],
         "signature": [
           {
             "pluginId": "ml",
@@ -309,7 +333,10 @@
             "tags": [],
             "label": "datafeeds",
             "description": [],
-            "signature": ["DatafeedResponse", "[]"],
+            "signature": [
+              "DatafeedResponse",
+              "[]"
+            ],
             "path": "x-pack/plugins/ml/common/types/modules.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -321,7 +348,10 @@
             "tags": [],
             "label": "jobs",
             "description": [],
-            "signature": ["JobResponse", "[]"],
+            "signature": [
+              "JobResponse",
+              "[]"
+            ],
             "path": "x-pack/plugins/ml/common/types/modules.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -378,7 +408,10 @@
             "tags": [],
             "label": "jobs",
             "description": [],
-            "signature": ["JobStat", "[]"],
+            "signature": [
+              "JobStat",
+              "[]"
+            ],
             "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -437,7 +470,9 @@
             "tags": [],
             "label": "latestResultsTimestampMs",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -512,7 +547,9 @@
         "type": "Interface",
         "tags": [],
         "label": "MlSummaryJob",
-        "description": ["\nA summary of an anomaly detection job."],
+        "description": [
+          "\nA summary of an anomaly detection job."
+        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -523,7 +560,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nThe identifier for the anomaly detection job."],
+            "description": [
+              "\nThe identifier for the anomaly detection job."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -534,7 +573,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["\nA description of the job."],
+            "description": [
+              "\nA description of the job."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -545,8 +586,12 @@
             "type": "Array",
             "tags": [],
             "label": "groups",
-            "description": ["\nA list of job groups. A job can belong to no groups, one or many."],
-            "signature": ["string[]"],
+            "description": [
+              "\nA list of job groups. A job can belong to no groups, one or many."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -560,7 +605,9 @@
             "description": [
               "\nThe number of input documents that have been processed by the anomaly detection job.\nThis value includes documents with missing fields, since they are nonetheless analyzed."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -574,7 +621,9 @@
             "description": [
               "\nThe status of the mathematical models, which can take the values ok, soft_limit or hard_limit."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -585,8 +634,14 @@
             "type": "CompoundType",
             "tags": [],
             "label": "jobState",
-            "description": ["\nThe status of the job."],
-            "signature": ["MlJobState", " | ", "JobActionState"],
+            "description": [
+              "\nThe status of the job."
+            ],
+            "signature": [
+              "MlJobState",
+              " | ",
+              "JobActionState"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -600,7 +655,9 @@
             "description": [
               "\nAn array of index names used by the datafeed. Wildcards are supported."
             ],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -611,7 +668,9 @@
             "type": "boolean",
             "tags": [],
             "label": "hasDatafeed",
-            "description": ["\nFlag indicating whether a datafeed exists for the job."],
+            "description": [
+              "\nFlag indicating whether a datafeed exists for the job."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -622,7 +681,9 @@
             "type": "string",
             "tags": [],
             "label": "datafeedId",
-            "description": ["\nThe identifier for the datafeed."],
+            "description": [
+              "\nThe identifier for the datafeed."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -633,7 +694,9 @@
             "type": "string",
             "tags": [],
             "label": "datafeedState",
-            "description": ["\nThe status of the datafeed."],
+            "description": [
+              "\nThe status of the datafeed."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -644,8 +707,12 @@
             "type": "number",
             "tags": [],
             "label": "latestTimestampMs",
-            "description": ["\nThe timestamp of the latest chronologically input document."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe timestamp of the latest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -656,8 +723,12 @@
             "type": "number",
             "tags": [],
             "label": "earliestTimestampMs",
-            "description": ["\nThe timestamp of the earliest chronologically input document."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe timestamp of the earliest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -671,7 +742,9 @@
             "description": [
               "\nThe latest of the timestamp of the latest chronologically input document or the latest bucket that was processed."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -685,7 +758,10 @@
             "description": [
               "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /internal/ml/jobs/jobs_summary endpoint."
             ],
-            "signature": ["CombinedJob", " | undefined"],
+            "signature": [
+              "CombinedJob",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -696,8 +772,12 @@
             "type": "string",
             "tags": [],
             "label": "nodeName",
-            "description": ["\nThe name of the node that runs the job."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe name of the node that runs the job."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -708,8 +788,14 @@
             "type": "Object",
             "tags": [],
             "label": "auditMessage",
-            "description": ["\nAudit message for the job."],
-            "signature": ["Partial<", "AuditMessage", "> | undefined"],
+            "description": [
+              "\nAudit message for the job."
+            ],
+            "signature": [
+              "Partial<",
+              "AuditMessage",
+              "> | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -736,7 +822,9 @@
             "description": [
               "\nFor jobs which cannot be viewed in the Single Metric Viewer, a message indicating the reason why\nresults for the job cannot be viewed in the Single Metric Viewer."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -750,7 +838,10 @@
             "description": [
               "\nWhen present, it explains that a task is currently running on the job, which is stopping\nany other actions from being performed on the job."
             ],
-            "signature": ["MlJobBlocked", " | undefined"],
+            "signature": [
+              "MlJobBlocked",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -761,8 +852,12 @@
             "type": "number",
             "tags": [],
             "label": "latestTimestampSortValue",
-            "description": ["\nValue of the latest timestamp for the job used for sorting."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nValue of the latest timestamp for the job used for sorting."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -776,7 +871,9 @@
             "description": [
               "\nThe earlist of the timestamp of the earliest chronologically input document or the earliest bucket that was processed."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -800,8 +897,13 @@
             "type": "Array",
             "tags": [],
             "label": "alertingRules",
-            "description": ["\nList of anomaly detection alerting rules configured for the job."],
-            "signature": ["MlAnomalyDetectionAlertRule", "[] | undefined"],
+            "description": [
+              "\nList of anomaly detection alerting rules configured for the job."
+            ],
+            "signature": [
+              "MlAnomalyDetectionAlertRule",
+              "[] | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -812,8 +914,12 @@
             "type": "Object",
             "tags": [],
             "label": "jobTags",
-            "description": ["\nList of tags that have been added to the job."],
-            "signature": ["{ [x: string]: string; }"],
+            "description": [
+              "\nList of tags that have been added to the job."
+            ],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -840,7 +946,9 @@
             "description": [
               "\nAdvanced configuration option. Contains custom meta data about the job. For example, it can contain custom URL information."
             ],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -858,7 +966,9 @@
         "tags": [],
         "label": "ANOMALY_SWIMLANE_EMBEDDABLE_TYPE",
         "description": [],
-        "signature": ["\"ml_anomaly_swimlane\""],
+        "signature": [
+          "\"ml_anomaly_swimlane\""
+        ],
         "path": "x-pack/plugins/ml/public/embeddables/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -968,7 +1078,9 @@
         "tags": [],
         "label": "CONTROLLED_BY_SWIM_LANE_FILTER",
         "description": [],
-        "signature": ["\"anomaly-swim-lane\""],
+        "signature": [
+          "\"anomaly-swim-lane\""
+        ],
         "path": "x-pack/plugins/ml/public/ui_actions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -981,7 +1093,10 @@
         "tags": [],
         "label": "GetMlSharedImportsReturnType",
         "description": [],
-        "signature": ["typeof ", "x-pack/plugins/ml/public/shared"],
+        "signature": [
+          "typeof ",
+          "x-pack/plugins/ml/public/shared"
+        ],
         "path": "x-pack/plugins/ml/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1646,7 +1761,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1658,7 +1775,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1698,7 +1817,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1710,7 +1831,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1750,7 +1873,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1762,7 +1887,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1783,7 +1910,9 @@
         "type": "Interface",
         "tags": [],
         "label": "MlSummaryJob",
-        "description": ["\nA summary of an anomaly detection job."],
+        "description": [
+          "\nA summary of an anomaly detection job."
+        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1794,7 +1923,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nThe identifier for the anomaly detection job."],
+            "description": [
+              "\nThe identifier for the anomaly detection job."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1805,7 +1936,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["\nA description of the job."],
+            "description": [
+              "\nA description of the job."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1816,8 +1949,12 @@
             "type": "Array",
             "tags": [],
             "label": "groups",
-            "description": ["\nA list of job groups. A job can belong to no groups, one or many."],
-            "signature": ["string[]"],
+            "description": [
+              "\nA list of job groups. A job can belong to no groups, one or many."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1831,7 +1968,9 @@
             "description": [
               "\nThe number of input documents that have been processed by the anomaly detection job.\nThis value includes documents with missing fields, since they are nonetheless analyzed."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1845,7 +1984,9 @@
             "description": [
               "\nThe status of the mathematical models, which can take the values ok, soft_limit or hard_limit."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1856,8 +1997,14 @@
             "type": "CompoundType",
             "tags": [],
             "label": "jobState",
-            "description": ["\nThe status of the job."],
-            "signature": ["MlJobState", " | ", "JobActionState"],
+            "description": [
+              "\nThe status of the job."
+            ],
+            "signature": [
+              "MlJobState",
+              " | ",
+              "JobActionState"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1871,7 +2018,9 @@
             "description": [
               "\nAn array of index names used by the datafeed. Wildcards are supported."
             ],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1882,7 +2031,9 @@
             "type": "boolean",
             "tags": [],
             "label": "hasDatafeed",
-            "description": ["\nFlag indicating whether a datafeed exists for the job."],
+            "description": [
+              "\nFlag indicating whether a datafeed exists for the job."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1893,7 +2044,9 @@
             "type": "string",
             "tags": [],
             "label": "datafeedId",
-            "description": ["\nThe identifier for the datafeed."],
+            "description": [
+              "\nThe identifier for the datafeed."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1904,7 +2057,9 @@
             "type": "string",
             "tags": [],
             "label": "datafeedState",
-            "description": ["\nThe status of the datafeed."],
+            "description": [
+              "\nThe status of the datafeed."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1915,8 +2070,12 @@
             "type": "number",
             "tags": [],
             "label": "latestTimestampMs",
-            "description": ["\nThe timestamp of the latest chronologically input document."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe timestamp of the latest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1927,8 +2086,12 @@
             "type": "number",
             "tags": [],
             "label": "earliestTimestampMs",
-            "description": ["\nThe timestamp of the earliest chronologically input document."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe timestamp of the earliest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1942,7 +2105,9 @@
             "description": [
               "\nThe latest of the timestamp of the latest chronologically input document or the latest bucket that was processed."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1956,7 +2121,10 @@
             "description": [
               "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /internal/ml/jobs/jobs_summary endpoint."
             ],
-            "signature": ["CombinedJob", " | undefined"],
+            "signature": [
+              "CombinedJob",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1967,8 +2135,12 @@
             "type": "string",
             "tags": [],
             "label": "nodeName",
-            "description": ["\nThe name of the node that runs the job."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe name of the node that runs the job."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1979,8 +2151,14 @@
             "type": "Object",
             "tags": [],
             "label": "auditMessage",
-            "description": ["\nAudit message for the job."],
-            "signature": ["Partial<", "AuditMessage", "> | undefined"],
+            "description": [
+              "\nAudit message for the job."
+            ],
+            "signature": [
+              "Partial<",
+              "AuditMessage",
+              "> | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2007,7 +2185,9 @@
             "description": [
               "\nFor jobs which cannot be viewed in the Single Metric Viewer, a message indicating the reason why\nresults for the job cannot be viewed in the Single Metric Viewer."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2021,7 +2201,10 @@
             "description": [
               "\nWhen present, it explains that a task is currently running on the job, which is stopping\nany other actions from being performed on the job."
             ],
-            "signature": ["MlJobBlocked", " | undefined"],
+            "signature": [
+              "MlJobBlocked",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2032,8 +2215,12 @@
             "type": "number",
             "tags": [],
             "label": "latestTimestampSortValue",
-            "description": ["\nValue of the latest timestamp for the job used for sorting."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nValue of the latest timestamp for the job used for sorting."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2047,7 +2234,9 @@
             "description": [
               "\nThe earlist of the timestamp of the earliest chronologically input document or the earliest bucket that was processed."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2071,8 +2260,13 @@
             "type": "Array",
             "tags": [],
             "label": "alertingRules",
-            "description": ["\nList of anomaly detection alerting rules configured for the job."],
-            "signature": ["MlAnomalyDetectionAlertRule", "[] | undefined"],
+            "description": [
+              "\nList of anomaly detection alerting rules configured for the job."
+            ],
+            "signature": [
+              "MlAnomalyDetectionAlertRule",
+              "[] | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2083,8 +2277,12 @@
             "type": "Object",
             "tags": [],
             "label": "jobTags",
-            "description": ["\nList of tags that have been added to the job."],
-            "signature": ["{ [x: string]: string; }"],
+            "description": [
+              "\nList of tags that have been added to the job."
+            ],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2111,7 +2309,9 @@
             "description": [
               "\nAdvanced configuration option. Contains custom meta data about the job. For example, it can contain custom URL information."
             ],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2175,7 +2375,9 @@
         "tags": [],
         "label": "DatafeedStats",
         "description": [],
-        "signature": ["MlDatafeedStats"],
+        "signature": [
+          "MlDatafeedStats"
+        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2188,7 +2390,9 @@
         "tags": [],
         "label": "Job",
         "description": [],
-        "signature": ["MlJob"],
+        "signature": [
+          "MlJob"
+        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2301,7 +2505,11 @@
         "tags": [],
         "label": "SummaryJobState",
         "description": [],
-        "signature": ["MlJobState", " | ", "JobActionState"],
+        "signature": [
+          "MlJobState",
+          " | ",
+          "JobActionState"
+        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2455,7 +2663,9 @@
       "tags": [],
       "label": "MlPluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "x-pack/plugins/ml/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -2472,7 +2682,9 @@
         "type": "Function",
         "tags": [],
         "label": "composeValidators",
-        "description": ["\nComposes multiple validators into a single function"],
+        "description": [
+          "\nComposes multiple validators into a single function"
+        ],
         "signature": [
           "(validators: ((value: any) => { [key: string]: any; } | null)[]) => (value: any) => { [key: string]: any; } | null"
         ],
@@ -2487,7 +2699,9 @@
             "tags": [],
             "label": "validators",
             "description": [],
-            "signature": ["((value: any) => { [key: string]: any; } | null)[]"],
+            "signature": [
+              "((value: any) => { [key: string]: any; } | null)[]"
+            ],
             "path": "x-pack/plugins/ml/common/util/validators.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2504,7 +2718,10 @@
         "tags": [],
         "label": "getDefaultCapabilities",
         "description": [],
-        "signature": ["() => ", "MlCapabilities"],
+        "signature": [
+          "() => ",
+          "MlCapabilities"
+        ],
         "path": "x-pack/plugins/ml/common/types/capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2518,7 +2735,9 @@
         "type": "Function",
         "tags": [],
         "label": "patternValidator",
-        "description": ["\nProvides a validator function for checking against pattern."],
+        "description": [
+          "\nProvides a validator function for checking against pattern."
+        ],
         "signature": [
           "(pattern: RegExp) => (value: string) => { pattern: { matchPattern: string; }; } | null"
         ],
@@ -2533,7 +2752,9 @@
             "tags": [],
             "label": "pattern",
             "description": [],
-            "signature": ["RegExp"],
+            "signature": [
+              "RegExp"
+            ],
             "path": "x-pack/plugins/ml/common/util/validators.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2551,7 +2772,9 @@
         "type": "Interface",
         "tags": [],
         "label": "MlSummaryJob",
-        "description": ["\nA summary of an anomaly detection job."],
+        "description": [
+          "\nA summary of an anomaly detection job."
+        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2562,7 +2785,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nThe identifier for the anomaly detection job."],
+            "description": [
+              "\nThe identifier for the anomaly detection job."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2573,7 +2798,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["\nA description of the job."],
+            "description": [
+              "\nA description of the job."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2584,8 +2811,12 @@
             "type": "Array",
             "tags": [],
             "label": "groups",
-            "description": ["\nA list of job groups. A job can belong to no groups, one or many."],
-            "signature": ["string[]"],
+            "description": [
+              "\nA list of job groups. A job can belong to no groups, one or many."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2599,7 +2830,9 @@
             "description": [
               "\nThe number of input documents that have been processed by the anomaly detection job.\nThis value includes documents with missing fields, since they are nonetheless analyzed."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2613,7 +2846,9 @@
             "description": [
               "\nThe status of the mathematical models, which can take the values ok, soft_limit or hard_limit."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2624,8 +2859,14 @@
             "type": "CompoundType",
             "tags": [],
             "label": "jobState",
-            "description": ["\nThe status of the job."],
-            "signature": ["MlJobState", " | ", "JobActionState"],
+            "description": [
+              "\nThe status of the job."
+            ],
+            "signature": [
+              "MlJobState",
+              " | ",
+              "JobActionState"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2639,7 +2880,9 @@
             "description": [
               "\nAn array of index names used by the datafeed. Wildcards are supported."
             ],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2650,7 +2893,9 @@
             "type": "boolean",
             "tags": [],
             "label": "hasDatafeed",
-            "description": ["\nFlag indicating whether a datafeed exists for the job."],
+            "description": [
+              "\nFlag indicating whether a datafeed exists for the job."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2661,7 +2906,9 @@
             "type": "string",
             "tags": [],
             "label": "datafeedId",
-            "description": ["\nThe identifier for the datafeed."],
+            "description": [
+              "\nThe identifier for the datafeed."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2672,7 +2919,9 @@
             "type": "string",
             "tags": [],
             "label": "datafeedState",
-            "description": ["\nThe status of the datafeed."],
+            "description": [
+              "\nThe status of the datafeed."
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2683,8 +2932,12 @@
             "type": "number",
             "tags": [],
             "label": "latestTimestampMs",
-            "description": ["\nThe timestamp of the latest chronologically input document."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe timestamp of the latest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2695,8 +2948,12 @@
             "type": "number",
             "tags": [],
             "label": "earliestTimestampMs",
-            "description": ["\nThe timestamp of the earliest chronologically input document."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe timestamp of the earliest chronologically input document."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2710,7 +2967,9 @@
             "description": [
               "\nThe latest of the timestamp of the latest chronologically input document or the latest bucket that was processed."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2724,7 +2983,10 @@
             "description": [
               "\nUsed in older implementations of the job config, where the datafeed was placed inside the job for convenience.\nThis will be populated if the job's id has been passed to the /internal/ml/jobs/jobs_summary endpoint."
             ],
-            "signature": ["CombinedJob", " | undefined"],
+            "signature": [
+              "CombinedJob",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2735,8 +2997,12 @@
             "type": "string",
             "tags": [],
             "label": "nodeName",
-            "description": ["\nThe name of the node that runs the job."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe name of the node that runs the job."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2747,8 +3013,14 @@
             "type": "Object",
             "tags": [],
             "label": "auditMessage",
-            "description": ["\nAudit message for the job."],
-            "signature": ["Partial<", "AuditMessage", "> | undefined"],
+            "description": [
+              "\nAudit message for the job."
+            ],
+            "signature": [
+              "Partial<",
+              "AuditMessage",
+              "> | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2775,7 +3047,9 @@
             "description": [
               "\nFor jobs which cannot be viewed in the Single Metric Viewer, a message indicating the reason why\nresults for the job cannot be viewed in the Single Metric Viewer."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2789,7 +3063,10 @@
             "description": [
               "\nWhen present, it explains that a task is currently running on the job, which is stopping\nany other actions from being performed on the job."
             ],
-            "signature": ["MlJobBlocked", " | undefined"],
+            "signature": [
+              "MlJobBlocked",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2800,8 +3077,12 @@
             "type": "number",
             "tags": [],
             "label": "latestTimestampSortValue",
-            "description": ["\nValue of the latest timestamp for the job used for sorting."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nValue of the latest timestamp for the job used for sorting."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2815,7 +3096,9 @@
             "description": [
               "\nThe earlist of the timestamp of the earliest chronologically input document or the earliest bucket that was processed."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2839,8 +3122,13 @@
             "type": "Array",
             "tags": [],
             "label": "alertingRules",
-            "description": ["\nList of anomaly detection alerting rules configured for the job."],
-            "signature": ["MlAnomalyDetectionAlertRule", "[] | undefined"],
+            "description": [
+              "\nList of anomaly detection alerting rules configured for the job."
+            ],
+            "signature": [
+              "MlAnomalyDetectionAlertRule",
+              "[] | undefined"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2851,8 +3139,12 @@
             "type": "Object",
             "tags": [],
             "label": "jobTags",
-            "description": ["\nList of tags that have been added to the job."],
-            "signature": ["{ [x: string]: string; }"],
+            "description": [
+              "\nList of tags that have been added to the job."
+            ],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2879,7 +3171,9 @@
             "description": [
               "\nAdvanced configuration option. Contains custom meta data about the job. For example, it can contain custom URL information."
             ],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2895,7 +3189,9 @@
         "type": "Enum",
         "tags": [],
         "label": "DATAFEED_STATE",
-        "description": ["\nThe status of the datafeed."],
+        "description": [
+          "\nThe status of the datafeed."
+        ],
         "path": "x-pack/plugins/ml/common/constants/states.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2907,7 +3203,9 @@
         "type": "Enum",
         "tags": [],
         "label": "JOB_STATE",
-        "description": ["\nThe status of the anomaly detection job."],
+        "description": [
+          "\nThe status of the anomaly detection job."
+        ],
         "path": "x-pack/plugins/ml/common/constants/states.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2922,7 +3220,9 @@
         "tags": [],
         "label": "Datafeed",
         "description": [],
-        "signature": ["MlDatafeed"],
+        "signature": [
+          "MlDatafeed"
+        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2935,7 +3235,9 @@
         "tags": [],
         "label": "Job",
         "description": [],
-        "signature": ["MlJob"],
+        "signature": [
+          "MlJob"
+        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2948,7 +3250,11 @@
         "tags": [],
         "label": "SummaryJobState",
         "description": [],
-        "signature": ["MlJobState", " | ", "JobActionState"],
+        "signature": [
+          "MlJobState",
+          " | ",
+          "JobActionState"
+        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
         "trackAdoption": false,

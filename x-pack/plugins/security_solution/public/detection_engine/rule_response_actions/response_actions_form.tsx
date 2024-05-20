@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { map, reduce } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import type { ArrayItem, FormHook } from '../../shared_imports';
-import { FORM_ERRORS_TITLE } from '../rule_creation/components/rule_actions_field/translations';
-import { getActionDetails } from './constants';
-import { ResponseActionsHeader } from './response_actions_header';
 import { ResponseActionsWrapper } from './response_actions_wrapper';
+import { FORM_ERRORS_TITLE } from '../rule_creation/components/rule_actions_field/translations';
+import { ResponseActionsHeader } from './response_actions_header';
+import type { ArrayItem, FormHook } from '../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
+import { getActionDetails } from './constants';
 
 interface ResponseActionsFormProps {
   items: ArrayItem[];

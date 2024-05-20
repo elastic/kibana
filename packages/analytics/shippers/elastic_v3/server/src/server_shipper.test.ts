@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClientInitContext, Event } from '@kbn/analytics-client';
 import { loggerMock } from '@kbn/logging-mocks';
 import { firstValueFrom } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
-import { ElasticV3ServerShipper } from './server_shipper';
+import type { AnalyticsClientInitContext, Event } from '@kbn/analytics-client';
 import { fetchMock } from './server_shipper.test.mocks';
+import { ElasticV3ServerShipper } from './server_shipper';
 
 const SECONDS = 1000;
 const MINUTES = 60 * SECONDS;

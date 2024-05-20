@@ -19,12 +19,12 @@ import {
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
+import { upgradePackageInstallVersion } from '../services/setup/upgrade_package_install_version';
 import {
   FLEET_INSTALL_FORMAT_VERSION,
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../constants';
-import { upgradePackageInstallVersion } from '../services/setup/upgrade_package_install_version';
 import type { Installation } from '../types';
 
 import { useDockerRegistry, waitForFleetSetup } from './helpers';

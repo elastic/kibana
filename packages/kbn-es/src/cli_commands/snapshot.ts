@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import getopts from 'getopts';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';

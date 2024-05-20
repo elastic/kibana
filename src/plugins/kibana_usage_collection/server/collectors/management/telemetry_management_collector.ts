@@ -8,9 +8,9 @@
 
 import { IUiSettingsClient } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { UsageStats } from './types';
 import { REDACTED_KEYWORD } from '../../../common/constants';
 import { stackManagementSchema } from './schema';
-import { UsageStats } from './types';
 
 /**
  * These config keys should be redacted from any usage data, they are only used for implementation details of the config saved object.

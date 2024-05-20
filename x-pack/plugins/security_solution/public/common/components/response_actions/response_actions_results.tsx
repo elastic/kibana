@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import type { Ecs } from '@kbn/cases-plugin/common';
-import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
 import React, { useCallback } from 'react';
+import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
+import type { Ecs } from '@kbn/cases-plugin/common';
+import { EuiSpacer } from '@elastic/eui';
+import { EndpointResponseActionResults } from './endpoint_action_results';
 import type {
   LogsEndpointAction,
   LogsEndpointActionWithHosts,
 } from '../../../../common/endpoint/types';
 import { useKibana } from '../../lib/kibana';
-import { EndpointResponseActionResults } from './endpoint_action_results';
 
 interface ResponseActionsResultsProps {
   actions: Array<LogsEndpointActionWithHosts | LogsOsqueryAction>;

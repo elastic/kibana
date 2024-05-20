@@ -6,9 +6,9 @@
  */
 
 import { CASE_TAGS_URL } from '../../../../../common/constants';
-import type { caseApiV1 } from '../../../../../common/types/api';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
+import type { caseApiV1 } from '../../../../../common/types/api';
 
 export const getTagsRoute = createCasesRoute({
   method: 'get',

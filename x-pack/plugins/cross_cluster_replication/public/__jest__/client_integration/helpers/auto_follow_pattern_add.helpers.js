@@ -7,8 +7,8 @@
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { AutoFollowPatternAdd } from '../../../app/sections/auto_follow_pattern_add';
-import { routing } from '../../../app/services/routing';
 import { ccrStore } from '../../../app/store';
+import { routing } from '../../../app/services/routing';
 
 const testBedConfig = {
   store: ccrStore,

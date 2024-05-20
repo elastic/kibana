@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { History, createHashHistory, createMemoryHistory } from 'history';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { createMemoryHistory, History, createHashHistory } from 'history';
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { AppStatus } from '@kbn/core-application-browser';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { AppStatus } from '@kbn/core-application-browser';
 
+import { AppRouter, AppNotFound } from '../src/ui';
 import { MockedMounterMap, MockedMounterTuple } from '../src/test_helpers/test_types';
-import { AppNotFound, AppRouter } from '../src/ui';
-import { createAppMounter, createRenderer, getUnmounter } from './utils';
+import { createRenderer, createAppMounter, getUnmounter } from './utils';
 
 describe('AppRouter', () => {
   let mounters: MockedMounterMap;

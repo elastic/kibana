@@ -7,16 +7,16 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { getFieldsForTerms } from '../../../../common/fields_utils';
 import { Panel } from '../../../../common/types';
+import { getFieldsForTerms } from '../../../../common/fields_utils';
 import {
   Column,
-  DateHistogramSeries,
-  FiltersSeries,
-  TermsSeries,
-  convertToDateHistogramColumn,
   convertToFiltersColumn,
+  convertToDateHistogramColumn,
   convertToTermsColumn,
+  TermsSeries,
+  FiltersSeries,
+  DateHistogramSeries,
 } from '../convert';
 import { getValidColumns } from './columns';
 

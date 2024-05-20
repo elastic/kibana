@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import expect from '@kbn/expect';
+import { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {

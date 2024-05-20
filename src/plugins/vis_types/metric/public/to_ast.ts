@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { inter } from '@kbn/expressions-plugin/common';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { getStopsWithColorsFromRanges } from '@kbn/visualizations-plugin/common/utils';
-import { SchemaConfig, VisToExpressionAst, getVisSchemas } from '@kbn/visualizations-plugin/public';
 import { get } from 'lodash';
+import { getStopsWithColorsFromRanges } from '@kbn/visualizations-plugin/common/utils';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { inter } from '@kbn/expressions-plugin/common';
 
 import { ColorMode } from '@kbn/charts-plugin/public';
 import { VisParams } from './types';

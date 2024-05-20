@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { BehaviorSubject } from 'rxjs';
-import { type UseDateRangeProviderProps, useDatePickerContext } from './use_date_picker';
-import { type RequestState, useLoadingStateContext } from './use_loading_state';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useRequestObservable } from './use_request_observable';
+import { type RequestState, useLoadingStateContext } from './use_loading_state';
+import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('./use_loading_state');
 jest.mock('./use_date_picker');

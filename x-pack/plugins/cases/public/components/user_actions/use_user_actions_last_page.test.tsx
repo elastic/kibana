@@ -7,11 +7,11 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { basicCase } from '../../containers/mock';
+import { useLastPageUserActions } from './use_user_actions_last_page';
+import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import { defaultUseFindCaseUserActions } from '../case_view/mocks';
-import type { UserActivityParams } from '../user_actions_activity_bar/types';
-import { useLastPageUserActions } from './use_user_actions_last_page';
+import { basicCase } from '../../containers/mock';
 
 const userActivityQueryParams: UserActivityParams = {
   type: 'all',

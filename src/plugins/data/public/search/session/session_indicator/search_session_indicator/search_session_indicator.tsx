@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useImperativeHandle } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -19,14 +20,13 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React, { useCallback, useImperativeHandle } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { CheckInEmptyCircle, PartialClock } from './custom_icons';
 import './search_session_indicator.scss';
-import { SearchSessionState } from '../../search_session_state';
 import { SearchSessionName } from './components';
+import { SearchSessionState } from '../../search_session_state';
 
 export interface SearchSessionIndicatorProps {
   state: SearchSessionState;

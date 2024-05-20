@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AggParamEditorProps } from '../agg_param_props';
+import { i18n } from '@kbn/i18n';
 import { SwitchParamEditor } from './switch';
+import { AggParamEditorProps } from '../agg_param_props';
 
 function DropPartialsParamEditor(props: AggParamEditorProps<boolean>) {
   return (

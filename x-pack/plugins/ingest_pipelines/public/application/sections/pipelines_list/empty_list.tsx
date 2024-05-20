@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiButton, EuiContextMenu, EuiLink, EuiPageTemplate, EuiPopover } from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
+import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import React, { FunctionComponent, useState } from 'react';
+import { EuiLink, EuiButton, EuiPopover, EuiContextMenu, EuiPageTemplate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { ScopedHistory } from '@kbn/core/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../shared_imports';
 import { getCreateFromCsvPath, getCreatePath } from '../../services/navigation';
 

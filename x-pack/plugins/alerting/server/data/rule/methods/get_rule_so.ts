@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
-import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RuleAttributes } from '../types';
 

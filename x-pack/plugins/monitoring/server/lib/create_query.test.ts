@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createQuery } from './create_query';
 import { MissingRequiredError } from './error_missing_required';
 import { ElasticsearchMetric } from './metrics';
+import { createQuery } from './create_query';
 
 interface Metric {
   uuidField?: string;

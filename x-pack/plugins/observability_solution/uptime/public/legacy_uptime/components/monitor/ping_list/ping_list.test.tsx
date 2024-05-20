@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
+import { formatDuration, PingList } from './ping_list';
 import { Ping, PingsResponse } from '../../../../../common/runtime_types';
-import { render } from '../../../lib/helper/rtl_helpers';
-import { mockDispatch } from '../../../lib/helper/test_helpers';
 import { ExpandedRowMap } from '../../overview/monitor_list/types';
 import { rowShouldExpand, toggleDetails } from './columns/expand_row';
-import { PingList, formatDuration } from './ping_list';
 import * as pingListHook from './use_pings';
+import { mockDispatch } from '../../../lib/helper/test_helpers';
+import { render } from '../../../lib/helper/rtl_helpers';
 
 mockDispatch();
 

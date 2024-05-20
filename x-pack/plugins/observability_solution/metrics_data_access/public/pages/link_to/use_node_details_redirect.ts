@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import type { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';

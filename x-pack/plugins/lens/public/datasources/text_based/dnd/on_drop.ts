@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DatasourceDimensionDropHandlerProps, isOperation } from '../../../types';
-import { reorderElements } from '../../../utils';
-import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
-import { removeColumn } from '../remove_column';
 import type { TextBasedLayerColumn, TextBasedPrivateState } from '../types';
+import { reorderElements } from '../../../utils';
+import { DatasourceDimensionDropHandlerProps, isOperation } from '../../../types';
+import { removeColumn } from '../remove_column';
+import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 
 export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPrivateState>) => {
   const { dropType, state, source, target } = props;
@@ -57,12 +57,12 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
         c.columnId === target.columnId
           ? newColumn
           : c.columnId === source.columnId
-            ? {
-                columnId: source.columnId,
-                fieldName: targetField?.fieldName ?? '',
-                meta: targetField?.meta,
-              }
-            : c;
+          ? {
+              columnId: source.columnId,
+              fieldName: targetField?.fieldName ?? '',
+              meta: targetField?.meta,
+            }
+          : c;
       columns = layer.columns.map(swapTwoColumns);
       break;
     case 'reorder':

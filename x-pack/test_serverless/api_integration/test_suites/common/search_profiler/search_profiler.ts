@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 const API_BASE_PATH = '/api/searchprofiler';
 

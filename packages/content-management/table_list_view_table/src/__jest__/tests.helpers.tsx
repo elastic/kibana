@@ -1,4 +1,3 @@
-import { ContentEditorProvider } from '@kbn/content-management-content-editor';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,9 +8,10 @@ import { ContentEditorProvider } from '@kbn/content-management-content-editor';
 import React from 'react';
 import type { ComponentType } from 'react';
 import { from } from 'rxjs';
+import { ContentEditorProvider } from '@kbn/content-management-content-editor';
 
 import { TagList } from '../mocks';
-import { Services, TableListViewProvider } from '../services';
+import { TableListViewProvider, Services } from '../services';
 
 export const getMockServices = (overrides?: Partial<Services>) => {
   const services: Services = {

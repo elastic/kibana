@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { FilterQueryContextProvider, useFilterQueryUpdates } from './use_filters_query';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
 import { Timefilter } from '@kbn/data-plugin/public/query';
-import { act, renderHook } from '@testing-library/react-hooks';
 import { useAiopsAppContext } from './use_aiops_app_context';
-import { FilterQueryContextProvider, useFilterQueryUpdates } from './use_filters_query';
 import { useReload } from './use_reload';
 
 const mockCurrentDate = new Date('2024-02-23T00:13:45.000Z');

@@ -11,9 +11,9 @@ import { act } from 'react-dom/test-utils';
 import { getExecuteDetails } from '../../__fixtures__';
 import { API_BASE_PATH } from '../../common/constants';
 import { defaultWatch } from '../../public/application/models/watch';
-import { pageHelpers, setupEnvironment } from './helpers';
-import { WATCH } from './helpers/jest_constants';
+import { setupEnvironment, pageHelpers } from './helpers';
 import type { WatchCreateJsonTestBed } from './helpers/watch_create_json_page.helpers';
+import { WATCH } from './helpers/jest_constants';
 
 const { setup } = pageHelpers.watchCreateJsonPage;
 

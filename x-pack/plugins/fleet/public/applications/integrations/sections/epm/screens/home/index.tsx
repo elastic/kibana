@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useMemo } from 'react';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 
@@ -19,8 +19,8 @@ import { useAuthz, useGetPackagesQuery, useGetSettingsQuery } from '../../../../
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
-import { AvailablePackages } from './available_packages';
 import { InstalledPackages } from './installed_packages';
+import { AvailablePackages } from './available_packages';
 
 export { mapToCard, type IntegrationCardItem } from './card_utils';
 

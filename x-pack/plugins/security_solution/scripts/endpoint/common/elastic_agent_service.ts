@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import assert from 'assert';
 import { verifyDockerInstalled } from '@kbn/es';
+import assert from 'assert';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { useCallback } from 'react';
+import type { SerializableRecord } from '@kbn/utility-types';
 
-import { AggParamType, IAggConfig } from '@kbn/data-plugin/public';
+import { IAggConfig, AggParamType } from '@kbn/data-plugin/public';
 
 type SetValue = (value?: IAggConfig) => void;
 

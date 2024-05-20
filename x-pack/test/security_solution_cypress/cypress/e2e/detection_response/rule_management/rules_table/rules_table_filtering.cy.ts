@@ -8,12 +8,12 @@
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
-  expectNumberOfRulesShownOnPage,
   expectRulesWithExecutionStatus,
   filterByExecutionStatus,
+  expectNumberOfRulesShownOnPage,
 } from '../../../../tasks/rule_filters';
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
 import {
   expectManagementTableRules,
@@ -21,14 +21,14 @@ import {
   unselectTags,
 } from '../../../../tasks/alerts_detection_rules';
 
-import { getNewRule } from '../../../../objects/rule';
-import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
-import {
-  createDocument,
-  createIndex,
-  deleteIndex,
-} from '../../../../tasks/api_calls/elasticsearch';
 import { createRule, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
+import {
+  deleteIndex,
+  createIndex,
+  createDocument,
+} from '../../../../tasks/api_calls/elasticsearch';
+import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
+import { getNewRule } from '../../../../objects/rule';
 
 describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

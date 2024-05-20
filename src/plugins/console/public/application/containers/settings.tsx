@@ -10,8 +10,8 @@ import React from 'react';
 
 import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 
+import { useServicesContext, useEditorActionContext } from '../contexts';
 import { DevToolsSettings, Settings as SettingsService } from '../../services';
-import { useEditorActionContext, useServicesContext } from '../contexts';
 import type { SenseEditor } from '../models';
 
 const getAutocompleteDiff = (

@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
   EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiCallOut,
+  EuiText,
   EuiToolTip,
+  EuiIcon,
+  EuiTextColor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import SemVer from 'semver/classes/semver';
 
 import { useFormIsModified } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { documentationService } from '../../../../../../services/documentation';
+import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
-import { Form, FormDataProvider, FormHook } from '../../../../shared_imports';
-import { Field, MainType, NormalizedField, NormalizedFields, SubType } from '../../../../types';
+import { Field, NormalizedField, NormalizedFields, MainType, SubType } from '../../../../types';
 import { CodeBlock } from '../../../code_block';
 import { getParametersFormForType } from '../field_types';
-import { EditFieldHeaderForm } from './edit_field_header_form';
 import { UpdateFieldFunc } from './use_update_field';
+import { EditFieldHeaderForm } from './edit_field_header_form';
 
 const limitStringLength = (text: string, limit = 18): string => {
   if (text.length <= limit) {

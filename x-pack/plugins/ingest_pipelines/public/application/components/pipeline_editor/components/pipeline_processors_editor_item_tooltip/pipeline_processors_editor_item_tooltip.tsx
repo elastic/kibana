@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiPortal } from '@elastic/eui';
 import React, { FunctionComponent, useEffect, useState } from 'react';
+import { EuiPortal } from '@elastic/eui';
 import { ProcessorInternal } from '../../types';
 
 import './pipeline_processors_editor_item_toolip.scss';

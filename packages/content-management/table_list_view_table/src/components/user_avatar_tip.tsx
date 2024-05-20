@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { UserAvatarTip as UserAvatarTipComponent } from '@kbn/user-profile-components';
 import { useQuery } from '@tanstack/react-query';
-import React from 'react';
 import { useServices } from '../services';
 
 export function UserAvatarTip(props: { uid: string }) {

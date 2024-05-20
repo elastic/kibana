@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import React from 'react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { FormattedError } from './formatted_error';

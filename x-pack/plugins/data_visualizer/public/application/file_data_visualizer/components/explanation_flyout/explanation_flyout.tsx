@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiSubSteps,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlyout,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutHeader,
+  EuiButtonEmpty,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiSpacer,
+  EuiText,
+  EuiSubSteps,
+} from '@elastic/eui';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
 interface Props {
   results: FindFileStructureResponse;

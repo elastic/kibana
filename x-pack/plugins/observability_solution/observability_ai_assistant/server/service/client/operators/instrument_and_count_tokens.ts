@@ -7,15 +7,15 @@
 
 import apm from 'elastic-apm-node';
 import {
-  OperatorFunction,
   catchError,
-  finalize,
   ignoreElements,
-  last,
   merge,
+  OperatorFunction,
   shareReplay,
   tap,
+  last,
   throwError,
+  finalize,
 } from 'rxjs';
 import type { StreamingChatResponseEvent } from '../../../../common/conversation_complete';
 import { extractTokenCount } from './extract_token_count';

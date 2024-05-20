@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { HeaderPage } from '.';
 import type { AppMockRenderer } from '../../common/mock';
-import { TestProviders, createAppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import { HeaderPage } from '.';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../common/navigation/hooks');

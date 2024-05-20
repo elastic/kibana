@@ -8,10 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  calculateFrequency,
   calculateRunningAverage,
-  createMapOfRunningAveragedStats,
+  calculateFrequency,
   createRunningAveragedStat,
+  createMapOfRunningAveragedStats,
 } from './task_run_calcultors';
 
 describe('calculateRunningAverage', () => {

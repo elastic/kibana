@@ -10,16 +10,16 @@ import type { Plugin } from '@kbn/core/public';
 
 import type { CoreSetup } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { ConfigSchema } from '../common/app';
 import { getComponents } from './api';
+import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
+import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
+import { setStartServices } from './kibana_services';
+import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
+import type { ConfigSchema } from '../common/app';
 import type {
   DataVisualizerSetupDependencies,
   DataVisualizerStartDependencies,
 } from './application/common/types/data_visualizer_plugin';
-import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
-import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
-import { setStartServices } from './kibana_services';
-import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 export type DataVisualizerPluginSetup = ReturnType<DataVisualizerPlugin['setup']>;
 export type DataVisualizerPluginStart = ReturnType<DataVisualizerPlugin['start']>;
 

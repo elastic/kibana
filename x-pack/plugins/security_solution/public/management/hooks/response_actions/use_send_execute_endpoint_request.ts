@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useMutation } from '@tanstack/react-query';
-import type { ExecuteActionRequestBody } from '../../../../common/api/endpoint';
+import { KibanaServices } from '../../../common/lib/kibana';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
-import { KibanaServices } from '../../../common/lib/kibana';
+import type { ExecuteActionRequestBody } from '../../../../common/api/endpoint';
 
 export const useSendExecuteEndpoint = (
   options?: UseMutationOptions<ResponseActionApiResponse, IHttpFetchError, ExecuteActionRequestBody>

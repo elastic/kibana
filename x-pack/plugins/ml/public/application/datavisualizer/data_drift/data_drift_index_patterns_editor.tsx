@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import type { ChangeEvent } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
-  EuiComboBox,
-  EuiFieldText,
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFieldText,
   EuiFormRow,
+  EuiFlexGroup,
+  EuiComboBox,
   EuiSteps,
 } from '@elastic/eui';
-import { type DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce, intersectionBy } from 'lodash';
-import type { ChangeEvent } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { combineLatest, map } from 'rxjs';
+import { debounce, intersectionBy } from 'lodash';
+import { type DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
-import { useToastNotificationService } from '../../services/toast_notification_service';
 import { DataViewEditor } from './data_view_editor';
 
 export const matchedIndicesDefault = {

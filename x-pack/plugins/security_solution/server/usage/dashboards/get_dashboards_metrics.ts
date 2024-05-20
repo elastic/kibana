@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import type { TagWithOptionalId } from '@kbn/saved-objects-tagging-plugin/common';
 import { SECURITY_TAG_NAME } from '../../../common/constants';
 

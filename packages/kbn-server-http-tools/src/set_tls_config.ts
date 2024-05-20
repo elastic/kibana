@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { Server as HapiServer } from '@hapi/hapi';
 import type { Server as HttpServer } from 'http';
 import type { Server as TlsServer } from 'https';
-import type { Server as HapiServer } from '@hapi/hapi';
-import { getServerTLSOptions } from './get_server_options';
 import type { ISslConfig } from './types';
+import { getServerTLSOptions } from './get_server_options';
 
 function isServerTLS(server: HttpServer): server is TlsServer {
   return 'setSecureContext' in server;

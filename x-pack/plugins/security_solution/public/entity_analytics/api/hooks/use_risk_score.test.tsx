@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../../common/mock';
 import { useRiskScore } from './use_risk_score';
+import { TestProviders } from '../../../common/mock';
 
-import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
-import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
+import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));

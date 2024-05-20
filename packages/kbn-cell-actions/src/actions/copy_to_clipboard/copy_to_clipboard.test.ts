@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { createCopyToClipboardActionFactory } from './copy_to_clipboard';
+import type { CellActionExecutionContext } from '../../types';
 import type { NotificationsStart } from '@kbn/core/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { CellActionExecutionContext } from '../../types';
-import { createCopyToClipboardActionFactory } from './copy_to_clipboard';
 
 const mockSuccessToast = jest.fn();
 const mockWarningToast = jest.fn();

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiText, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function WeTried() {
   return (

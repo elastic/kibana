@@ -1,12 +1,3 @@
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import {
-  AnomalyDetectorType,
-  getAnomalyDetectorIndex,
-} from '../../../../../common/anomaly_detection/apm_ml_detectors';
-import { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
-import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies';
-import { createRuleTypeMocks } from '../../test_utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,6 +5,15 @@ import { createRuleTypeMocks } from '../../test_utils';
  * 2.0.
  */
 import { registerAnomalyRuleType } from './register_anomaly_rule_type';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies';
+import { createRuleTypeMocks } from '../../test_utils';
+import { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
+import {
+  AnomalyDetectorType,
+  getAnomalyDetectorIndex,
+} from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 describe('Transaction duration anomaly alert', () => {
   afterEach(() => {

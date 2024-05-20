@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import sinon from 'sinon';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskStoreMock } from '../task_store.mock';
 import { TaskManagerMetricsCollector } from './task_metrics_collector';
 

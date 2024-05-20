@@ -6,13 +6,13 @@
  */
 import expect from '@kbn/expect';
 import { cleanup } from '@kbn/infra-forge';
-import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 import type { CreateSLOInput } from '@kbn/slo-schema';
+import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { sloData } from './fixtures/create_slo';
-import { SloEsClient } from './helper/es';
 import { loadTestData } from './helper/load_test_data';
+import { SloEsClient } from './helper/es';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('Create SLOs', function () {

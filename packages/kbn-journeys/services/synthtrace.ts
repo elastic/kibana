@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import Url from 'url';
 import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
   InfraSynthtraceEsClient,
   InfraSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
-import { Logger } from '@kbn/apm-synthtrace/src/lib/utils/create_logger';
 import { ToolingLog } from '@kbn/tooling-log';
+import Url from 'url';
+import { Logger } from '@kbn/apm-synthtrace/src/lib/utils/create_logger';
 import { Auth, Es } from '.';
 import { KibanaUrl } from './kibana_url';
 

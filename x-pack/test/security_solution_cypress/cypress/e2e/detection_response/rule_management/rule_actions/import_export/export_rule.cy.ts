@@ -7,40 +7,40 @@
 
 import path from 'path';
 
-import { getExceptionList } from '../../../../../objects/exception';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
 import {
+  TOASTER_BODY,
   MODAL_CONFIRMATION_BODY,
   MODAL_CONFIRMATION_BTN,
   TOASTER,
-  TOASTER_BODY,
 } from '../../../../../screens/alerts_detection_rules';
 import {
-  expectManagementTableRules,
-  exportRule,
   filterByElasticRules,
-  importRules,
   selectAllRules,
   waitForRuleExecution,
+  exportRule,
+  importRules,
+  expectManagementTableRules,
 } from '../../../../../tasks/alerts_detection_rules';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { bulkExportRules } from '../../../../../tasks/rules_bulk_actions';
 import {
   createExceptionList,
   deleteExceptionList,
 } from '../../../../../tasks/api_calls/exceptions';
+import { getExceptionList } from '../../../../../objects/exception';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { resetRulesTableState } from '../../../../../tasks/common';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';
-import { bulkExportRules } from '../../../../../tasks/rules_bulk_actions';
 
-import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
+import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
-import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 
 const EXPORTED_RULES_FILENAME = 'rules_export.ndjson';
 const exceptionList = getExceptionList();

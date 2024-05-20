@@ -6,6 +6,9 @@
     "id": "stackManagementUsageTest",
     "server": false,
     "browser": true,
-    "configPath": ["xpack", "stackManagementUsageTest"]
+    "configPath": [
+      "xpack",
+      "stackManagementUsageTest"
+    ]
   }
 }

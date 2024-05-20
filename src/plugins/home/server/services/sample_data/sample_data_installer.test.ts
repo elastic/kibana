@@ -7,17 +7,17 @@
  */
 
 import { Readable } from 'stream';
+import { insertDataIntoIndexMock, findSampleObjectsMock } from './sample_data_installer.test.mocks';
 import type { SavedObjectsImportFailure } from '@kbn/core/server';
 import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsServiceMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { SampleDataInstallError } from './errors';
 import type { SampleDatasetSchema } from './lib/sample_dataset_registry_types';
 import { SampleDataInstaller } from './sample_data_installer';
-import { findSampleObjectsMock, insertDataIntoIndexMock } from './sample_data_installer.test.mocks';
+import { SampleDataInstallError } from './errors';
 
 const testDatasets: SampleDatasetSchema[] = [
   {

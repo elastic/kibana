@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { EuiFilePicker } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React from 'react';
-import { ArgumentStrings } from '../../../../../i18n';
+import PropTypes from 'prop-types';
+import { EuiFilePicker } from '@elastic/eui';
 import { Loading } from '../../../../../public/components/loading/loading';
+import { ArgumentStrings } from '../../../../../i18n';
 
 const { ImageUpload: strings } = ArgumentStrings;
 
 export const FileForm = ({ loading, onChange }) =>
   loading ? (
-    <Loading animated={true} text={strings.getImageUploading()} />
+    <Loading animated text={strings.getImageUploading()} />
   ) : (
     <EuiFilePicker
       initialPromptText={strings.getFileUploadPrompt()}
       onChange={onChange}
-      compressed={true}
+      compressed
       display="default"
       className="canvasImageUpload"
       accept="image/*"

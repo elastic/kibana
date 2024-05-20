@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, PropsWithChildren } from 'react';
+import { i18n } from '@kbn/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 
 export const TIME_LABELS = {

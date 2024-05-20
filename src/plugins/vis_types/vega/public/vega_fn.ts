@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { KibanaContext } from '@kbn/data-plugin/public';
-import { Query, TimeRange } from '@kbn/es-query';
+import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   ExecutionContext,
   ExpressionFunctionDefinition,
   Render,
 } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import { VegaParser } from './data_model/vega_parser';
+import { TimeRange, Query } from '@kbn/es-query';
+import { KibanaContext } from '@kbn/data-plugin/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { VegaInspectorAdapters } from './vega_inspector';
+import { VegaParser } from './data_model/vega_parser';
 
 type Input = KibanaContext | { type: 'null' };
 type Output = Promise<Render<RenderValue>>;

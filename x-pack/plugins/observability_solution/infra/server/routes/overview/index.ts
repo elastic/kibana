@@ -1,4 +1,3 @@
-import { TopNodesRequestRT } from '../../../common/http_api/overview_api';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +5,9 @@ import { TopNodesRequestRT } from '../../../common/http_api/overview_api';
  * 2.0.
  */
 import { createValidationFunction } from '../../../common/runtime_types';
-import { createSearchClient } from '../../lib/create_search_client';
+import { TopNodesRequestRT } from '../../../common/http_api/overview_api';
 import { InfraBackendLibs } from '../../lib/infra_types';
+import { createSearchClient } from '../../lib/create_search_client';
 import { queryTopNodes } from './lib/get_top_nodes';
 
 export const initOverviewRoute = (libs: InfraBackendLibs) => {

@@ -7,17 +7,17 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { populateContext } from '../../../../../lib/autocomplete/engine';
-import { AutoCompleteContext, ResultTerm } from '../../../../../lib/autocomplete/types';
 import {
   getEndpointBodyCompleteComponents,
   getGlobalAutocompleteComponents,
   getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
 } from '../../../../../lib/kb';
+import { AutoCompleteContext, ResultTerm } from '../../../../../lib/autocomplete/types';
+import { populateContext } from '../../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';
-import { END_OF_URL_TOKEN, i18nTexts, newLineRegex } from './constants';
 import { parseBody, parseLine, parseUrl } from './tokens_utils';
+import { END_OF_URL_TOKEN, i18nTexts, newLineRegex } from './constants';
 
 /*
  * This function initializes the autocomplete context for the request

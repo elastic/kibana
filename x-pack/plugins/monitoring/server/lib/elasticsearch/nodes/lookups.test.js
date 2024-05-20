@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { nodeTypeClass, nodeTypeLabel } from './lookups';
+import _ from 'lodash';
 
 // TODO: tests were not running and are not up to date
 describe.skip('Node Types Lookups', () => {

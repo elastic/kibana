@@ -7,32 +7,32 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
   htmlIdGenerator,
   useIsWithinBreakpoints,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import type {
   EventAnnotationConfig,
   EventAnnotationGroupConfig,
 } from '@kbn/event-annotation-common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { QueryInputServices } from '@kbn/visualization-ui-components';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { GroupEditorControls, isGroupValid } from './group_editor_controls';
 import { GroupPreview } from './group_preview';
 

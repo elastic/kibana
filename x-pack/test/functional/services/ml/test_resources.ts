@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
-import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { ProvidedType } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlApi } from './api';
+import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
+import { savedSearches, dashboards } from './test_resources_data';
 import { getCommonRequestHeader } from './common_api';
-import { dashboards, savedSearches } from './test_resources_data';
+import { MlApi } from './api';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export enum SavedObjectType {
   CONFIG = 'config',

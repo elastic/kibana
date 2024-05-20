@@ -7,18 +7,18 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type {
   CellValueContext,
-  MultiValueClickContext,
   RangeSelectContext,
   ValueClickContext,
+  MultiValueClickContext,
 } from '@kbn/embeddable-plugin/public';
 import { ExpressionsServiceStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 
 export interface SetupDeps {
   expressions: ExpressionsSetup;

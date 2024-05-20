@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defaultResponseSort, response } from '../helpers';
+import { response, defaultResponseSort } from '../helpers';
 import { handleResponse } from './get_beats';
 
 describe('beats/get_beats', () => {

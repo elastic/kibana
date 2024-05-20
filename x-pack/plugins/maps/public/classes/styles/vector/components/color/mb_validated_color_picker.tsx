@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiColorPicker, EuiFormControlLayoutProps, isValidHex } from '@elastic/eui';
 import React, { Component } from 'react';
+import { isValidHex, EuiColorPicker, EuiFormControlLayoutProps } from '@elastic/eui';
 
 export const RGBA_0000 = 'rgba(0,0,0,0)';
 

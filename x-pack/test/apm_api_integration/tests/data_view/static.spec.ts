@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { getStaticDataViewId } from '@kbn/apm-data-view';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import request from 'superagent';
-import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { SupertestReturnType, ApmApiError } from '../../common/apm_api_supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

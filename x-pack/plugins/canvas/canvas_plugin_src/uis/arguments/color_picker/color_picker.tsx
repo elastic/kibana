@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { FC } from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiColorPicker,
   EuiFlexGroup,
@@ -12,11 +14,9 @@ import {
   EuiSetColorMethod,
   useColorPickerState,
 } from '@elastic/eui';
-import PropTypes from 'prop-types';
-import React, { FC } from 'react';
-import { ArgumentStrings } from '../../../../i18n';
-import { withDebounceArg } from '../../../../public/components/with_debounce_arg';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
+import { withDebounceArg } from '../../../../public/components/with_debounce_arg';
+import { ArgumentStrings } from '../../../../i18n';
 
 const { Color: strings } = ArgumentStrings;
 

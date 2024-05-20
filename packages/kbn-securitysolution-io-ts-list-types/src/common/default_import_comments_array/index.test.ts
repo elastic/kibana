@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { left } from 'fp-ts/lib/Either';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { ImportCommentsArray } from '../import_comment';
 import { DefaultImportCommentsArray } from '.';
 import { getCommentsArrayMock } from '../comment/index.mock';
 import { getCreateCommentsArrayMock } from '../create_comment/index.mock';
-import { ImportCommentsArray } from '../import_comment';
 
 describe('default_import_comments_array', () => {
   test('it should pass validation when supplied an empty array', () => {

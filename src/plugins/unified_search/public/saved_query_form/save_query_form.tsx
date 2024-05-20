@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiFieldText, EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
+import React, { useState, useCallback } from 'react';
+import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import React, { useState, useCallback } from 'react';
+import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 
 interface Props {
   savedQuery?: SavedQuery;

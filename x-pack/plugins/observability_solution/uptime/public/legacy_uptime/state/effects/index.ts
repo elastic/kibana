@@ -6,17 +6,17 @@
  */
 
 import { fork } from 'redux-saga/effects';
-import { fetchAlertsEffect } from '../alerts/alerts';
-import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
-import { fetchIndexStatusEffect } from './index_status';
-import { fetchJourneyStepsEffect } from './journey';
-import { fetchMLJobEffect } from './ml_anomaly';
 import { fetchMonitorDetailsEffect } from './monitor';
-import { fetchMonitorDurationEffect } from './monitor_duration';
 import { fetchMonitorListEffect } from './monitor_list';
 import { fetchMonitorStatusEffect } from './monitor_status';
+import { fetchDynamicSettingsEffect, setDynamicSettingsEffect } from './dynamic_settings';
+import { fetchPingsEffect, fetchPingHistogramEffect } from './ping';
+import { fetchMonitorDurationEffect } from './monitor_duration';
+import { fetchMLJobEffect } from './ml_anomaly';
+import { fetchIndexStatusEffect } from './index_status';
+import { fetchAlertsEffect } from '../alerts/alerts';
+import { fetchJourneyStepsEffect } from './journey';
 import { fetchNetworkEventsEffect } from './network_events';
-import { fetchPingHistogramEffect, fetchPingsEffect } from './ping';
 import {
   fetchScreenshotBlocks,
   generateBlockStatsOnPut,

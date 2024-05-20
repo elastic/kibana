@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
-import url from 'url';
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
+import { resolve } from 'path';
+import url from 'url';
 
-import { getConfigFromFiles } from '@kbn/config';
 import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
+import { getConfigFromFiles } from '@kbn/config';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import React, { useMemo, SetStateAction } from 'react';
+import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../../../utils/kibana_react';
 
 export const useFieldSidebar = ({

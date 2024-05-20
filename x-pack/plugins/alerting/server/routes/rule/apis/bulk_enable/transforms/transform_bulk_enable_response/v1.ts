@@ -8,8 +8,8 @@
 import { BulkEnableRulesResponseV1 } from '../../../../../../../common/routes/rule/apis/bulk_enable';
 import { RuleParamsV1 } from '../../../../../../../common/routes/rule/response';
 import { BulkEnableRulesResult } from '../../../../../../application/rule/methods/bulk_enable/types';
-import { Rule, RuleParams } from '../../../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../../../transforms';
+import { Rule, RuleParams } from '../../../../../../application/rule/types';
 
 export const transformBulkEnableResponse = <Params extends RuleParams = never>(
   response: BulkEnableRulesResult<Params>

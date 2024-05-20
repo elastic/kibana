@@ -1,5 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,9 +6,11 @@ import { i18n } from '@kbn/i18n';
  */
 import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ConfigKey } from '../../../../../../../../common/runtime_types';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../../hooks';
 import { GroupMenu } from './group_menu';
+import { ConfigKey } from '../../../../../../../../common/runtime_types';
 
 import {
   GroupByState,

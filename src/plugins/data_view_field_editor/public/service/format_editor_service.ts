@@ -9,20 +9,20 @@
 import { FieldFormatEditors } from './field_format_editors';
 
 import {
-  FieldFormatEditorFactory,
   bytesFormatEditorFactory,
   colorFormatEditorFactory,
   dateFormatEditorFactory,
   dateNanosFormatEditorFactory,
   durationFormatEditorFactory,
   geoPointFormatEditorFactory,
-  histogramFormatEditorFactory,
   numberFormatEditorFactory,
   percentFormatEditorFactory,
   staticLookupFormatEditorFactory,
   stringFormatEditorFactory,
   truncateFormatEditorFactory,
   urlFormatEditorFactory,
+  histogramFormatEditorFactory,
+  FieldFormatEditorFactory,
 } from '../components';
 
 /**

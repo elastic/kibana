@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonIcon,
+  EuiToolTip,
   EuiHealth,
   EuiHighlight,
-  EuiToolTip,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
-import { QuickPrompt } from '../types';
 import * as i18n from './translations';
+import { QuickPrompt } from '../types';
 
 interface Props {
   isDisabled?: boolean;

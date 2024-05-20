@@ -6,18 +6,18 @@
  */
 
 import type { ChartSizeArray } from '@elastic/charts';
-import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Axis, Chart, HistogramBarSeries, Position, Settings, ScaleType } from '@elastic/charts';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import type { ChartData, UpdateDateRange } from '../../../../common/components/charts/common';
+import type { UpdateDateRange, ChartData } from '../../../../common/components/charts/common';
 import { useThemes } from '../../../../common/components/charts/common';
+import { histogramDateTimeFormatter } from '../../../../common/components/utils';
+import { hasValueToDisplay } from '../../../../common/utils/validators';
 import { DraggableLegend } from '../../../../common/components/charts/draggable_legend';
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { EMPTY_VALUE_LABEL } from '../../../../common/components/charts/translation';
-import { histogramDateTimeFormatter } from '../../../../common/components/utils';
-import { hasValueToDisplay } from '../../../../common/utils/validators';
 
 import type { HistogramData } from './types';
 

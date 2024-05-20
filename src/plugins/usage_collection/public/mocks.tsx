@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationUsageTracker } from '@kbn/analytics';
 import React from 'react';
+import { ApplicationUsageTracker } from '@kbn/analytics';
 import { UsageCollectionSetup } from '.';
 import { ApplicationUsageContext } from './components/track_application_view';
 

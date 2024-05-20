@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { taskStoreMock } from '../task_store.mock';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { removeIfExists } from './remove_if_exists';
+import { taskStoreMock } from '../task_store.mock';
 
 describe('removeIfExists', () => {
   test('removes the task by its ID', async () => {

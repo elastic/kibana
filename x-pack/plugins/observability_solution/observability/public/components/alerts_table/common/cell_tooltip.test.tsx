@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CellTooltip } from './cell_tooltip';
 
 describe('CellTooltip', () => {

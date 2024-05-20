@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { waitFor, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
+import { connector, choices } from '../mock';
+import { useGetChoices } from './use_get_choices';
+import Fields from './servicenow_itsm_case_fields';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { choices, connector } from '../mock';
 import { MockFormWrapperComponent } from '../test_utils';
-import Fields from './servicenow_itsm_case_fields';
-import { useGetChoices } from './use_get_choices';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_choices');

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { LINKS_VERTICAL_LAYOUT, Link } from '../../../common/content_management';
-import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
-import { LinksStrings } from '../links_strings';
+import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor } from '@testing-library/react';
 import LinksEditor from './links_editor';
+import { LinksStrings } from '../links_strings';
+import { Link, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import { fetchDashboard } from '../dashboard_link/dashboard_link_tools';
 
 jest.mock('../dashboard_link/dashboard_link_tools', () => {
   return {

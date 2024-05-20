@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import * as nodeModel from '../../../common/endpoint/models/node';
 import type {
-  EventStats,
   NewResolverTree,
   ResolverNode,
+  EventStats,
   ResolverSchema,
 } from '../../../common/endpoint/types';
+import * as nodeModel from '../../../common/endpoint/models/node';
 
 /**
  * These values are only exported for testing. They should not be used directly. Instead use the functions below.

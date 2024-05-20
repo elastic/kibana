@@ -7,13 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TutorialSchema, TutorialsCategory } from '../../services/tutorials';
-import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+import { TutorialsCategory, TutorialSchema } from '../../services/tutorials';
 import {
+  onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
-  onPremInstructions,
 } from '../instructions/metricbeat_instructions';
+import { TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function statsdMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'statsd';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { TelemetrySavedObject } from '../saved_objects';
 import { getTelemetryOptIn } from './get_telemetry_opt_in';
+import type { TelemetrySavedObject } from '../saved_objects';
 
 describe('getTelemetryOptIn', () => {
   it('returns null when saved object not found', () => {

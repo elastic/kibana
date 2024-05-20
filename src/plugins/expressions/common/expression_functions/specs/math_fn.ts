@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { map, zipObject, isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { evaluate } from '@kbn/tinymath';
-import { isString, map, zipObject } from 'lodash';
 import { isDatatable } from '../../expression_types';
 import { MathArguments, MathInput } from './math';
 
 function pivotObjectArray<
   RowType extends { [key: string]: unknown },
-  ReturnColumns extends keyof RowType & string,
+  ReturnColumns extends keyof RowType & string
 >(rows: RowType[], columns?: ReturnColumns[]) {
   const columnNames = columns || Object.keys(rows[0]);
   if (!columnNames.every(isString)) {

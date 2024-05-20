@@ -6,14 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
+import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
-  ruleExecutionStatusErrorReason as ruleExecutionStatusErrorReasonV1,
+  ruleNotifyWhen as ruleNotifyWhenV1,
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
+  ruleExecutionStatusErrorReason as ruleExecutionStatusErrorReasonV1,
   ruleExecutionStatusWarningReason as ruleExecutionStatusWarningReasonV1,
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
-  ruleNotifyWhen as ruleNotifyWhenV1,
 } from '../../common/constants/v1';
 import { validateNotifyWhenV1 } from '../../validation';
 

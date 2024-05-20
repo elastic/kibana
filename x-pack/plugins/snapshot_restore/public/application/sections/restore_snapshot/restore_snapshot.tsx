@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
+import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
-import { RestoreSettings, SnapshotDetails } from '../../../../common/types';
-import { Error, PageError, SectionError } from '../../../shared_imports';
-import { useServices } from '../../app_context';
-import { PageLoading, RestoreSnapshotForm } from '../../components';
+import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
+import { SectionError, Error, PageError } from '../../../shared_imports';
 import { BASE_PATH } from '../../constants';
-import { useDecodedParams } from '../../lib';
-import { executeRestore, useLoadSnapshot } from '../../services/http';
+import { PageLoading, RestoreSnapshotForm } from '../../components';
+import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
+import { useLoadSnapshot, executeRestore } from '../../services/http';
+import { useDecodedParams } from '../../lib';
 
 interface MatchParams {
   repositoryName: string;

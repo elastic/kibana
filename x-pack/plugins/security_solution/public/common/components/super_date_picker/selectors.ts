@@ -7,8 +7,8 @@
 
 import { isEmpty } from 'lodash';
 import { createSelector } from 'reselect';
-import type { State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
+import type { State } from '../../store';
 import type {
   GlobalQuery,
   InputsRange,

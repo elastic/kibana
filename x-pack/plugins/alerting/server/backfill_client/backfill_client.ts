@@ -31,8 +31,8 @@ import {
 } from '../application/backfill/methods/schedule/types';
 import { Backfill } from '../application/backfill/result/types';
 import {
-  transformAdHocRunToBackfillResult,
   transformBackfillParamToAdHocRun,
+  transformAdHocRunToBackfillResult,
 } from '../application/backfill/transforms';
 import { RuleDomain } from '../application/rule/types';
 import { AdHocRunSO } from '../data/ad_hoc_run/types';
@@ -147,8 +147,9 @@ export class BackfillClient {
     }
 
     // Bulk create the saved object
-    const bulkCreateResponse =
-      await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(adHocSOsToCreate);
+    const bulkCreateResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(
+      adHocSOsToCreate
+    );
 
     const transformedResponse: ScheduleBackfillResults = bulkCreateResponse.saved_objects.map(
       (so: SavedObject<AdHocRunSO>) => {

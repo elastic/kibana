@@ -6,9 +6,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { licenseMock } from '../common/licensing.mock';
 import { featureUsageMock } from './services/feature_usage_service.mock';
-import { LicensingPluginSetup, LicensingPluginStart } from './types';
 
 const createSetupMock = () => {
   const license = licenseMock.createLicense();

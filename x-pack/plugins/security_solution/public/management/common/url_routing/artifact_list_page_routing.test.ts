@@ -8,14 +8,14 @@
 import type { ArtifactListPageUrlParams } from '../../components/artifact_list_page';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../constants';
 import {
+  getArtifactListPageUrlPath,
+  extractArtifactListPageUrlSearchParams,
+} from './artifact_list_page_routing';
+import {
+  getTrustedAppsListPath,
   getBlocklistsListPath,
   getHostIsolationExceptionsListPath,
-  getTrustedAppsListPath,
 } from '../routing';
-import {
-  extractArtifactListPageUrlSearchParams,
-  getArtifactListPageUrlPath,
-} from './artifact_list_page_routing';
 
 describe('routing', () => {
   describe('extractListPaginationParams()', () => {

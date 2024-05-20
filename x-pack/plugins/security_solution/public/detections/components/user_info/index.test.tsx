@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { Capabilities } from '@kbn/core/public';
-import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { ManageUserInfo, useUserInfo } from '.';
+import { renderHook, act } from '@testing-library/react-hooks';
+import { useUserInfo, ManageUserInfo } from '.';
+import type { Capabilities } from '@kbn/core/public';
 
-import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
 import { useKibana } from '../../../common/lib/kibana';
-import { TestProviders } from '../../../common/mock/test_providers';
-import { sourcererSelectors } from '../../../common/store';
 import * as api from '../../containers/detection_engine/alerts/api';
+import { TestProviders } from '../../../common/mock/test_providers';
+import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
+import { sourcererSelectors } from '../../../common/store';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');

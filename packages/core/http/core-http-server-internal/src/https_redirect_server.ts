@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { format as formatUrl } from 'url';
 import { Request, ResponseToolkit, Server } from '@hapi/hapi';
-import type { Logger } from '@kbn/logging';
+import { format as formatUrl } from 'url';
 import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+import type { Logger } from '@kbn/logging';
 
 import { HttpConfig } from './http_config';
 

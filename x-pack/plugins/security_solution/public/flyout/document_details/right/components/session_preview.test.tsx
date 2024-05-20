@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { TestProviders } from '../../../../common/mock';
-import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
-import { RightPanelContext } from '../context';
 import { useProcessData } from '../hooks/use_process_data';
 import { SessionPreview } from './session_preview';
+import { TestProviders } from '../../../../common/mock';
+import React from 'react';
+import { RightPanelContext } from '../context';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID } from './test_ids';
+import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 
 jest.mock('../hooks/use_process_data');
 jest.mock('../../shared/hooks/use_rule_details_link');

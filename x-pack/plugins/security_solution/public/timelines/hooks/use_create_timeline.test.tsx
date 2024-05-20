@@ -1,4 +1,3 @@
-import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,19 +5,20 @@ import { renderHook } from '@testing-library/react-hooks';
  * 2.0.
  */
 import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import { useCreateTimeline } from './use_create_timeline';
+import type { TimeRange } from '../../common/store/inputs/model';
 import { TimelineType } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import { TestProviders, mockGlobalState } from '../../common/mock';
-import { appActions } from '../../common/store/app';
-import { inputsActions } from '../../common/store/inputs';
-import { InputsModelId } from '../../common/store/inputs/constants';
-import type { TimeRange } from '../../common/store/inputs/model';
-import { sourcererActions } from '../../common/store/sourcerer';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineActions } from '../store';
-import { useCreateTimeline } from './use_create_timeline';
+import { inputsActions } from '../../common/store/inputs';
+import { sourcererActions } from '../../common/store/sourcerer';
+import { appActions } from '../../common/store/app';
+import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { TestProviders, mockGlobalState } from '../../common/mock';
 
 jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../common/containers/use_global_time', () => {

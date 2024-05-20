@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { LogRecord } from '@kbn/logging';
-import { last } from 'lodash';
 import moment from 'moment-timezone';
+import { last } from 'lodash';
+import { LogRecord } from '@kbn/logging';
 import { Conversion } from './types';
 
 const dateRegExp = /%date({(?<format>[^}]+)})?({(?<timezone>[^}]+)})?/g;

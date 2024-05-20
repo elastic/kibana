@@ -9,8 +9,7 @@ import { cloneDeep } from 'lodash/fp';
 
 import { mockGlobalState } from '../../mock';
 
-import { InputsModelId } from './constants';
-import type { SetIsInspectedParams, UpdateQueryParams } from './helpers';
+import type { UpdateQueryParams, SetIsInspectedParams } from './helpers';
 import {
   addInputLink,
   deleteOneQuery,
@@ -21,6 +20,7 @@ import {
   upsertQuery,
 } from './helpers';
 import type { InputsModel, TimeRange } from './model';
+import { InputsModelId } from './constants';
 
 let state = mockGlobalState.inputs;
 

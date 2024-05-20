@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { isEmpty } from 'lodash/fp';
 import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
 
+import { InputsModelId } from '../../../common/store/inputs/constants';
+import { sourcererActions } from '../../../common/store/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
 } from '../../../common/store/app/actions';
 import {
-  setRelativeRangeDatePicker as dispatchSetRelativeRangeDatePicker,
   setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker,
+  setRelativeRangeDatePicker as dispatchSetRelativeRangeDatePicker,
 } from '../../../common/store/inputs/actions';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { sourcererActions } from '../../../common/store/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import {
+  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
+  addTimeline as dispatchAddTimeline,
+  addNote as dispatchAddGlobalTimelineNote,
+} from '../../store/actions';
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
-import {
-  addNote as dispatchAddGlobalTimelineNote,
-  addTimeline as dispatchAddTimeline,
-  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
-} from '../../store/actions';
 import type { UpdateTimeline } from './types';
 
 export const useUpdateTimeline = () => {

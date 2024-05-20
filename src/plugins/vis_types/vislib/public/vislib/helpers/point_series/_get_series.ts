@@ -7,10 +7,10 @@
  */
 
 import { partial } from 'lodash';
-import { Table } from '../../types';
-import { Serie, addToSiri } from './_add_to_siri';
 import { getPoint } from './_get_point';
+import { addToSiri, Serie } from './_add_to_siri';
 import { Chart } from './point_series';
+import { Table } from '../../types';
 
 export function getSeries(table: Table, chart: Chart) {
   const aspects = chart.aspects;

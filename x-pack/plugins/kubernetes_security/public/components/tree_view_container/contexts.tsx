@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext } from 'react';
 
-import { UseTreeViewProps, useTreeView } from './hooks';
+import { useTreeView, UseTreeViewProps } from './hooks';
 
 type TreeViewContextType = ReturnType<typeof useTreeView>;
 

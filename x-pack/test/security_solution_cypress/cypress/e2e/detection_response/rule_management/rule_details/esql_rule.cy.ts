@@ -8,16 +8,16 @@
 import { getEsqlRule } from '../../../../objects/rule';
 
 import {
-  DEFINITION_DETAILS,
   ESQL_QUERY_DETAILS,
+  DEFINITION_DETAILS,
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
 } from '../../../../screens/rule_details';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { getDetails } from '../../../../tasks/rule_details';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import {
-  DatatableUtilitiesService,
-  TimeRange,
-  TimeRangeBounds,
-  calculateBounds,
-  parseInterval,
-} from '@kbn/data-plugin/common';
-import { DatatableRow, ExecutionContext, buildResultColumns } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
 import moment, { Moment } from 'moment-timezone';
-import type { TimeScaleArgs, TimeScaleExpressionFunction, TimeScaleUnit } from './types';
+import { i18n } from '@kbn/i18n';
+import { buildResultColumns, DatatableRow, ExecutionContext } from '@kbn/expressions-plugin/common';
+import {
+  calculateBounds,
+  DatatableUtilitiesService,
+  parseInterval,
+  TimeRangeBounds,
+  TimeRange,
+} from '@kbn/data-plugin/common';
+import type { TimeScaleExpressionFunction, TimeScaleUnit, TimeScaleArgs } from './types';
 
 const unitInMs: Record<TimeScaleUnit, number> = {
   s: 1000,

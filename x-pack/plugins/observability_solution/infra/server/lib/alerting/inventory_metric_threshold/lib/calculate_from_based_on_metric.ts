@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import moment from 'moment';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import { isRate } from './is_rate';

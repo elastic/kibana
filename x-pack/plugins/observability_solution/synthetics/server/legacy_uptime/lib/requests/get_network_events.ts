@@ -6,8 +6,8 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { NetworkEvent } from '../../../../common/runtime_types';
 import { UptimeEsClient } from '../../../lib';
+import { NetworkEvent } from '../../../../common/runtime_types';
 
 export interface GetNetworkEventsParams {
   checkGroup: string;

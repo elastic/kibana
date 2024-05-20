@@ -6,8 +6,8 @@
  */
 
 import type {
-  GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
+  GetModelDownloadConfigOptions,
 } from '@kbn/ml-trained-models-utils';
 import { type TrainedModelsApiService } from './ml_api_service/trained_models';
 

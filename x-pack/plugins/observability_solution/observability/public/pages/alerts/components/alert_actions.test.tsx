@@ -1,16 +1,3 @@
-import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { allCasesPermissions, noCasesPermissions } from '@kbn/observability-shared-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { Router } from '@kbn/shared-ux-router';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { AlertsTableQueryContext } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/contexts/alerts_table_context';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { waitFor } from '@testing-library/react';
-import { act } from '@testing-library/react-hooks';
-import { createMemoryHistory } from 'history';
-import { noop } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -18,13 +5,26 @@ import { noop } from 'lodash';
  * 2.0.
  */
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act } from '@testing-library/react-hooks';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { kibanaStartMock } from '../../../utils/kibana_react.mock';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { AlertActions, ObservabilityAlertActionsProps } from './alert_actions';
+import { inventoryThresholdAlertEs } from '../../../rules/fixtures/example_alerts';
+import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import * as pluginContext from '../../../hooks/use_plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../plugin';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { allCasesPermissions, noCasesPermissions } from '@kbn/observability-shared-plugin/public';
+import { noop } from 'lodash';
+import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { waitFor } from '@testing-library/react';
+import { AlertsTableQueryContext } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/contexts/alerts_table_context';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
-import { inventoryThresholdAlertEs } from '../../../rules/fixtures/example_alerts';
-import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import { AlertActions, ObservabilityAlertActionsProps } from './alert_actions';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {

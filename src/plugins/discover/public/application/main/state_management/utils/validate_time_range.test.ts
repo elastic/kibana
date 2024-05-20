@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { validateTimeRange } from './validate_time_range';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 describe('Discover validateTimeRange', () => {
   test('validates given time ranges correctly', async () => {

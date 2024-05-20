@@ -9,9 +9,9 @@
 import { inspect } from 'util';
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
-import { migratePanelsTo730 } from './migrate_to_730_panels';
 import { moveFiltersToQuery } from './move_filters_to_query';
-import { DashboardDoc700To720, DashboardDoc730ToLatest } from './types';
+import { migratePanelsTo730 } from './migrate_to_730_panels';
+import { DashboardDoc730ToLatest, DashboardDoc700To720 } from './types';
 
 function isDoc(
   doc: { [key: string]: unknown } | SavedObjectUnsanitizedDoc

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { BytesPercentageUsage, BytesUsage } from './helpers';
+import { renderWithIntl } from '@kbn/test-jest-helpers';
+import { BytesUsage, BytesPercentageUsage } from './helpers';
 
 describe('Bytes Usage', () => {
   it('should format correctly with used and max bytes', () => {

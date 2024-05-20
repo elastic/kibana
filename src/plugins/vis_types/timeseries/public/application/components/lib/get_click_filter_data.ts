@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { GeometryValue, XYChartSeriesIdentifier } from '@elastic/charts';
+import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { ValueClickContext } from '@kbn/embeddable-plugin/public';
-import { SERIES_SEPARATOR } from '../../../../common/constants';
+import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 import { BUCKET_TYPES } from '../../../../common/enums';
 import { TimeseriesVisParams } from '../../../types';
-import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 import type { TSVBTables } from './types';
+import { SERIES_SEPARATOR } from '../../../../common/constants';
 
 export const getClickFilterData = (
   points: Array<[GeometryValue, XYChartSeriesIdentifier]>,

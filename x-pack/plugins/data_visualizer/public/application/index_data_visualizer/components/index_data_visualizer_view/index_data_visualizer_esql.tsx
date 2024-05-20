@@ -7,47 +7,47 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 import { css } from '@emotion/react';
-import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePageUrlState } from '@kbn/ml-url-state';
 
-import type { AggregateQuery } from '@kbn/es-query';
-import { DatePickerWrapper, FullTimeRangeSelector } from '@kbn/ml-date-picker';
+import { FullTimeRangeSelector, DatePickerWrapper } from '@kbn/ml-date-picker';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import type { AggregateQuery } from '@kbn/es-query';
 
 import {
+  useEuiBreakpoint,
+  useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
-  useEuiBreakpoint,
-  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { DocumentCountContent } from '../../../common/components/document_count_content';
-import { FieldCountPanel } from '../../../common/components/field_count_panel';
-import type { GetAdditionalLinks } from '../../../common/components/results_links';
-import { DataVisualizerTable } from '../../../common/components/stats_table';
-import type { FieldVisConfig } from '../../../common/components/stats_table/types';
+import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
-import { useDataVisualizerKibana } from '../../../kibana_context';
+import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
+import { useDataVisualizerKibana } from '../../../kibana_context';
+import type { GetAdditionalLinks } from '../../../common/components/results_links';
+import { DocumentCountContent } from '../../../common/components/document_count_content';
+import { DataVisualizerTable } from '../../../common/components/stats_table';
+import { FieldCountPanel } from '../../../common/components/field_count_panel';
+import { ESQLDefaultLimitSizeSelect } from '../search_panel/esql/limit_size';
+import {
+  getDefaultESQLDataVisualizerListState,
+  useESQLDataVisualizerData,
+} from '../../hooks/esql/use_data_visualizer_esql_data';
 import type {
   ESQLDataVisualizerGridEmbeddableState,
   ESQLDataVisualizerIndexBasedPageUrlState,
   ESQLDefaultLimitSizeOption,
 } from '../../embeddables/grid_embeddable/types';
-import {
-  getDefaultESQLDataVisualizerListState,
-  useESQLDataVisualizerData,
-} from '../../hooks/esql/use_data_visualizer_esql_data';
 import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
-import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
-import { ESQLDefaultLimitSizeSelect } from '../search_panel/esql/limit_size';
 
 export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;

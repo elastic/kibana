@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getWarningsTitle, getWarningsDescription } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
-import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
 
 describe('getWarningsTitle', () => {
   test('Should show title for single non-successful cluster', () => {

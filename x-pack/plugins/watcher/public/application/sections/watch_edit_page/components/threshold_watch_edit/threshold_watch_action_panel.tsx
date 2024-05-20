@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { useLoadSettings } from '../../../../lib/api';
-import { WatchContext } from '../../watch_context';
-import { WatchActionsAccordion } from './threshold_watch_action_accordion';
 import { WatchActionsDropdown } from './threshold_watch_action_dropdown';
+import { WatchActionsAccordion } from './threshold_watch_action_accordion';
+import { WatchContext } from '../../watch_context';
 
 interface Props {
   actionErrors: {

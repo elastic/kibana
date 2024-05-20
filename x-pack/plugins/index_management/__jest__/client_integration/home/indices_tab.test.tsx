@@ -25,19 +25,19 @@ jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH, INTERNAL_API_BASE_PATH, Index } from '../../../common';
+import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
 import { setupEnvironment } from '../helpers';
+import { IndicesTestBed, setup } from './indices_tab.helpers';
 import {
   createDataStreamBackingIndex,
   createDataStreamPayload,
   createNonDataStreamIndex,
 } from './data_streams_tab.helpers';
-import { IndicesTestBed, setup } from './indices_tab.helpers';
 
 import { createMemoryHistory } from 'history';
 import {
-  IndexManagementBreadcrumb,
   breadcrumbService,
+  IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
 
 describe('<IndexManagementHome />', () => {

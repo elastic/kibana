@@ -6,8 +6,8 @@
  */
 
 import type {
-  ImportExceptionListItemSchema,
   ImportExceptionsListSchema,
+  ImportExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';

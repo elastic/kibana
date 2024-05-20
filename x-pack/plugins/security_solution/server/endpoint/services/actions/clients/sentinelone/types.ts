@@ -13,14 +13,14 @@ import type { SUB_ACTION } from '@kbn/stack-connectors-plugin/common/sentinelone
 type ConnectorActionsExecuteOptions = Parameters<ActionsClient['execute']>[0];
 
 interface SentinelOneConnectorExecuteParams<
-  P extends Record<string, unknown> = Record<string, unknown>,
+  P extends Record<string, unknown> = Record<string, unknown>
 > {
   subAction: SUB_ACTION;
   subActionParams: P;
 }
 
 export type SentinelOneConnectorExecuteOptions<
-  P extends Record<string, unknown> = Record<string, any>,
+  P extends Record<string, unknown> = Record<string, any>
 > = Omit<ConnectorActionsExecuteOptions, 'params'> & {
   params: SentinelOneConnectorExecuteParams<P> & Record<string, unknown>;
 };

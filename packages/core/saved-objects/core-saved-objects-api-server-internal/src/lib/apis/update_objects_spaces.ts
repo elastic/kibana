@@ -11,8 +11,8 @@ import {
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateObjectsSpacesResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { updateObjectsSpaces } from './internals/update_objects_spaces';
 import { ApiExecutionContext } from './types';
+import { updateObjectsSpaces } from './internals/update_objects_spaces';
 
 export interface PerformCreateParams<T = unknown> {
   objects: SavedObjectsUpdateObjectsSpacesObject[];

@@ -7,16 +7,16 @@
  */
 
 import {
-  PluginServiceProvider,
-  PluginServiceProviders,
-  PluginServiceRegistry,
   PluginServices,
+  PluginServiceProviders,
+  PluginServiceProvider,
+  PluginServiceRegistry,
 } from './create';
 import { PresentationUtilServices } from './types';
 
 import { capabilitiesServiceFactory } from './capabilities/capabilities.story';
-import { contentManagementServiceFactory } from './content_management/content_management.stub';
 import { dataViewsServiceFactory } from './data_views/data_views.story';
+import { contentManagementServiceFactory } from './content_management/content_management.stub';
 import { labsServiceFactory } from './labs/labs.story';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions.stub';
 

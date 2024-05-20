@@ -6,36 +6,36 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type {
-  ElasticsearchCapabilities,
   ElasticsearchClient,
+  ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import {
-  type IndexMappingMeta,
-  type IndexTypesMap,
-  type MigrationResult,
-  type SavedObjectsMigrationConfigType,
-  type SavedObjectsTypeMappingDefinitions,
-  getVirtualVersionMap,
-} from '@kbn/core-saved-objects-base-server-internal';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
-import type { Logger } from '@kbn/logging';
-import { pick } from 'lodash';
+import {
+  getVirtualVersionMap,
+  type IndexMappingMeta,
+  type IndexTypesMap,
+  type MigrationResult,
+  type SavedObjectsMigrationConfigType,
+  type SavedObjectsTypeMappingDefinitions,
+} from '@kbn/core-saved-objects-base-server-internal';
 import Semver from 'semver';
-import { buildActiveMappings, createIndexMap } from './core';
-import { migrateRawDocsSafely } from './core/migrate_raw_docs';
+import { pick } from 'lodash';
 import type { DocumentMigrator } from './document_migrator';
+import { buildActiveMappings, createIndexMap } from './core';
 import {
   createWaitGroupMap,
   getIndicesInvolvedInRelocation,
   indexMapToIndexTypesMap,
 } from './kibana_migrator_utils';
 import { runResilientMigrator } from './run_resilient_migrator';
+import { migrateRawDocsSafely } from './core/migrate_raw_docs';
 
 export interface RunV2MigrationOpts {
   /** The current Kibana version */

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
+import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import type {
-  AnalyticsServicePreboot,
   AnalyticsServiceSetup,
   AnalyticsServiceStart,
+  AnalyticsServicePreboot,
 } from '@kbn/core-analytics-server';
-import type { CoreContext } from '@kbn/core-base-server-internal';
-import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
-import { of } from 'rxjs';
 
 export class AnalyticsService {
   private readonly analyticsClient: AnalyticsClient;

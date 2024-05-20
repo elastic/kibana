@@ -1,11 +1,11 @@
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { useDataVisualizerKibana } from '../../kibana_context';
 
 export const getFieldFormatType = (type: string) => {

@@ -9,21 +9,21 @@ import { i18n } from '@kbn/i18n';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { localizedDate } from '../../../../common/formatters/datetime';
-import { useLogPositionStateContext } from '../../../containers/logs/log_position';
-import {
-  LogColumnRenderConfiguration,
-  isFieldColumnRenderConfiguration,
-  isMessageColumnRenderConfiguration,
-  isTimestampColumnRenderConfiguration,
-} from '../../../utils/log_column_render_configuration';
-import LogColumnHeadersWrapper from './column_headers_wrapper';
 import {
   LogEntryColumn,
   LogEntryColumnContent,
   LogEntryColumnWidth,
   LogEntryColumnWidths,
 } from './log_entry_column';
+import { useLogPositionStateContext } from '../../../containers/logs/log_position';
+import { localizedDate } from '../../../../common/formatters/datetime';
+import {
+  LogColumnRenderConfiguration,
+  isTimestampColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  isFieldColumnRenderConfiguration,
+} from '../../../utils/log_column_render_configuration';
+import LogColumnHeadersWrapper from './column_headers_wrapper';
 
 export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnRenderConfiguration[];

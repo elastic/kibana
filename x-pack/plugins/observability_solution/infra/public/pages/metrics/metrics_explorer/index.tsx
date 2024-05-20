@@ -7,22 +7,22 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FeatureFeedbackButton, useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
-import { NoData, NoRemoteCluster } from '../../../components/empty_states';
-import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useSourceContext } from '../../../containers/metrics_source';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
-import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useMetricsExplorerViews } from '../../../hooks/use_metrics_explorer_views';
-import { metricsExplorerTitle } from '../../../translations';
-import { MetricsPageTemplate } from '../page_template';
+import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { NoData, NoRemoteCluster } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
-import { SavedViews } from './components/saved_views';
 import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
+import { useSourceContext } from '../../../containers/metrics_source';
+import { MetricsPageTemplate } from '../page_template';
+import { metricsExplorerTitle } from '../../../translations';
+import { DerivedIndexPattern } from '../../../containers/metrics_source';
+import { SavedViews } from './components/saved_views';
 
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;

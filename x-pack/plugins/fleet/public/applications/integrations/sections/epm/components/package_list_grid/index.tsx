@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import type { FunctionComponent, ReactNode } from 'react';
+import type { ReactNode, FunctionComponent } from 'react';
 import { useMemo } from 'react';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiSpacer,
+  EuiButton,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { searchIdField, useLocalSearch } from '../../../../hooks';
+import { useLocalSearch, searchIdField } from '../../../../hooks';
 
 import type { IntegrationCardItem } from '../../screens/home';
 
 import type {
-  CategoryFacet,
   ExtendedIntegrationCategory,
+  CategoryFacet,
 } from '../../screens/home/category_facets';
 
 import type { IntegrationsURLParameters } from '../../screens/home/hooks/use_available_packages';

@@ -7,9 +7,9 @@
  */
 
 import { join } from 'path';
-import { SavedObject } from '@kbn/core/types';
 import expect from '@kbn/expect';
 import type { Response } from 'supertest';
+import { SavedObject } from '@kbn/core/types';
 import type { PluginFunctionalProviderContext } from '../../services';
 
 function parseNdJson(input: string): Array<SavedObject<any>> {

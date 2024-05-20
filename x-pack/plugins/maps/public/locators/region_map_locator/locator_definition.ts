@@ -6,7 +6,7 @@
  */
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import type { MapsAppRegionMapLocatorDependencies, MapsAppRegionMapLocatorParams } from './types';
+import type { MapsAppRegionMapLocatorParams, MapsAppRegionMapLocatorDependencies } from './types';
 
 export const MAPS_APP_REGION_MAP_LOCATOR = 'MAPS_APP_REGION_MAP_LOCATOR' as const;
 

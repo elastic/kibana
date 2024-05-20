@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 import type {
+  GetResult,
   BulkGetResult,
   CreateResult,
-  DeleteResult,
-  GetResult,
-  SearchQuery,
-  SearchResult,
   UpdateResult,
+  DeleteResult,
+  SearchResult,
+  SearchQuery,
 } from '../../common';
 import type { EventBus } from './event_bus';
 import type { ContentStorage, StorageContext } from './types';

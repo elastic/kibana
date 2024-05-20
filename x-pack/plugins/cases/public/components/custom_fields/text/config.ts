@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
 import { MAX_LENGTH_ERROR, REQUIRED_FIELD } from '../translations';
 

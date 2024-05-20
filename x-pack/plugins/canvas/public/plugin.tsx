@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { BehaviorSubject } from 'rxjs';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { ReportingStart } from '@kbn/reporting-plugin/public';
 import {
-  AppMountParameters,
-  AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
+  AppMountParameters,
+  AppUpdater,
+  DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { ReportingStart } from '@kbn/reporting-plugin/public';
-import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import { BehaviorSubject } from 'rxjs';
-import { CANVAS_APP, SESSIONSTORAGE_LASTPATH } from '../common/lib/constants';
-import { CanvasAppLocatorDefinition } from '../common/locator';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-import { initLoadingIndicator } from './lib/loading_indicator';
+import { CanvasAppLocatorDefinition } from '../common/locator';
+import { SESSIONSTORAGE_LASTPATH, CANVAS_APP } from '../common/lib/constants';
 import { getSessionStorage } from './lib/storage';
-import { CanvasApi, getPluginApi } from './plugin_api';
+import { initLoadingIndicator } from './lib/loading_indicator';
+import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { addCanvasElementTrigger } from './state/triggers/add_canvas_element_trigger';
 

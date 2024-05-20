@@ -11,9 +11,9 @@ import { useValues } from 'kea';
 
 import {
   EuiTable,
-  EuiTableBody,
   EuiTableHeader,
   EuiTableHeaderCell,
+  EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';

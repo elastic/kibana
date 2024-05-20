@@ -7,8 +7,8 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SetupHealthResponse } from '../../../../../../../common/api/detection_engine';
 import { SETUP_HEALTH_URL } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import type { SetupHealthResponse } from '../../../../../../../common/api/detection_engine';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildSiemResponse } from '../../../../routes/utils';
 

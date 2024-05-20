@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
-import { schema } from '@kbn/config-schema';
 import { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { FONTS_API_PATH, INDEX_SETTINGS_API_PATH } from '../common/constants';
-import { initIndexingRoutes } from './data_indexing/indexing_routes';
+import { INDEX_SETTINGS_API_PATH, FONTS_API_PATH } from '../common/constants';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 import { initMVTRoutes } from './mvt/mvt_routes';
+import { initIndexingRoutes } from './data_indexing/indexing_routes';
 import { StartDeps } from './types';
 
 export function initRoutes(coreSetup: CoreSetup<StartDeps>, logger: Logger) {

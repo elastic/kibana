@@ -6,8 +6,8 @@
  */
 
 import { ConfigKey, TLSFields } from '../../../../common/runtime_types';
-import { Formatter } from './common';
 import { arrayFormatter } from './formatting_utils';
+import { Formatter } from './common';
 
 type TLSFormatMap = Record<keyof TLSFields, Formatter>;
 

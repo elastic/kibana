@@ -1,4 +1,3 @@
-import { SavedObject } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +5,15 @@ import { SavedObject } from '@kbn/core/server';
  * 2.0.
  */
 import { omit, pick } from 'lodash';
-import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
+import { SavedObject } from '@kbn/core/server';
+import { SyntheticsMonitor880 } from '../../saved_objects/migrations/monitors/8.8.0';
 import { secretKeys } from '../../../common/constants/monitor_management';
 import {
   ConfigKey,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types/monitor_management';
-import { SyntheticsMonitor880 } from '../../saved_objects/migrations/monitors/8.8.0';
+import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
 export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWithSecretsAttributes {
   const monitorWithoutSecrets = omit(monitor, secretKeys) as SyntheticsMonitorWithSecretsAttributes;

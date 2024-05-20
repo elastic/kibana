@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { Replacements } from '@kbn/elastic-assistant-common';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { Conversation, Prompt, useAssistantContext } from '../../..';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import { Replacements } from '@kbn/elastic-assistant-common';
 import type { ClientMessage } from '../../assistant_context/types';
-import { getMessageFromRawResponse } from '../helpers';
-import { getCombinedMessage } from '../prompt/helpers';
 import { SelectedPromptContext } from '../prompt_context/types';
-import { useConversation } from '../use_conversation';
-import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useSendMessage } from '../use_send_message';
+import { useConversation } from '../use_conversation';
+import { getCombinedMessage } from '../prompt/helpers';
+import { Conversation, Prompt, useAssistantContext } from '../../..';
+import { getMessageFromRawResponse } from '../helpers';
+import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 
 export interface UseChatSendProps {
   allSystemPrompts: Prompt[];

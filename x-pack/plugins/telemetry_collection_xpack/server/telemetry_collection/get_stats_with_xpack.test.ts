@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SavedObjectsClient } from '@kbn/core/server';
 import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
+import { SavedObjectsClient } from '@kbn/core/server';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 const kibana = {
   kibana: {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { MlJobCompatibilityLink } from '../../../../common/components/links_to_docs';
 
 export const ML_JOB_COMPATIBILITY_CALLOUT_TITLE = i18n.translate(

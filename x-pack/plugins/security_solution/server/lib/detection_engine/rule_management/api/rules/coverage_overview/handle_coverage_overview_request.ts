@@ -7,15 +7,15 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   CoverageOverviewRequestBody,
   CoverageOverviewResponse,
 } from '../../../../../../../common/api/detection_engine';
 import {
-  CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
+  CoverageOverviewRuleActivity,
 } from '../../../../../../../common/api/detection_engine';
-import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type { RuleParams } from '../../../../rule_schema';
 import { findRules } from '../../../logic/search/find_rules';
 

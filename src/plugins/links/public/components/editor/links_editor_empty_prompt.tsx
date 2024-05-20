@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiButton, EuiEmptyPrompt, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiText, EuiPanel, EuiSpacer, EuiButton, EuiEmptyPrompt, EuiFormRow } from '@elastic/eui';
 
 import { LinksStrings } from '../links_strings';
 

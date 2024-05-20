@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SecurityPageName } from '../../app/types';
-import { formatNavigationLinks } from './nav_links';
 import type { AppLinkItems } from './types';
+import { formatNavigationLinks } from './nav_links';
+import { SecurityPageName } from '../../app/types';
 
 const mockNavLinks: AppLinkItems = [
   {

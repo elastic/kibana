@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { mapValues } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
 import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
-import { mapValues } from 'lodash';
 import { SavedQueryAttributes } from '../../../common';
 import { extract, getAllMigrations } from '../../../common/query/filters/persistable_state';
 

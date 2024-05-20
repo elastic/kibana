@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { RecoveredActionGroup } from '../../../common';
-import { RuleTypeRegistry } from '../../rule_type_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { ConstructorOptions } from '../rules_client';
+import { RuleTypeRegistry } from '../../rule_type_registry';
+import { RecoveredActionGroup } from '../../../common';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const mockedDateString = '2019-02-12T21:01:22.479Z';
 

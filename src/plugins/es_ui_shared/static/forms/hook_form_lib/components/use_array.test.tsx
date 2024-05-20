@@ -9,12 +9,12 @@
 import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { registerTestBed } from '../shared_imports';
 import { useForm } from '../hooks/use_form';
 import { useFormData } from '../hooks/use_form_data';
-import { registerTestBed } from '../shared_imports';
 import { Form } from './form';
-import { UseArray } from './use_array';
 import { UseField } from './use_field';
+import { UseArray } from './use_array';
 
 describe('<UseArray />', () => {
   beforeAll(() => {

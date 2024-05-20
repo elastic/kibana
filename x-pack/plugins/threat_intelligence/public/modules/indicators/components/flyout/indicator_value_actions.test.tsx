@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { Indicator, generateMockFileIndicator } from '../../../../../common/types/indicator';
-import { TestProvidersComponent } from '../../../../mocks/test_providers';
-import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
+import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';
+import { render } from '@testing-library/react';
 import { IndicatorValueActions } from './indicator_value_actions';
+import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
+import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import {
   COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
   FILTER_IN_BUTTON_TEST_ID,

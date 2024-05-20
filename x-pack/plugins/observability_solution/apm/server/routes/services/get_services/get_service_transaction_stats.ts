@@ -11,23 +11,23 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-  SERVICE_OVERFLOW_COUNT,
   TRANSACTION_TYPE,
+  SERVICE_OVERFLOW_COUNT,
 } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { maybe } from '../../../../common/utils/maybe';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
-import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
+import { maybe } from '../../../../common/utils/maybe';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
 
 interface AggregationParams {

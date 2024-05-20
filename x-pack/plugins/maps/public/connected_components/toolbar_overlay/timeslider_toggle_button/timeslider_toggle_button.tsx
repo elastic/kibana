@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 
 export interface Props {
   isTimesliderOpen: boolean;

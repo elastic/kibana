@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { installXJsonMode } from '@kbn/ace';
 import ace from 'brace';
+import { installXJsonMode } from '@kbn/ace';
 
 export function initializeEditor({
   el,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import type { DeepReadonly } from 'utility-types';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import type { EndpointArtifactPageId, EndpointManagementPageMap } from './page_reference';
 import { getEndpointManagementPageMap } from './page_reference';
 import type { UserAuthzAccessLevel } from './types';

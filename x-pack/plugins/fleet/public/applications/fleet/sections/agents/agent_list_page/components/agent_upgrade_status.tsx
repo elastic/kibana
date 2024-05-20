@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import moment from 'moment';
 
+import type { Agent } from '../../../../types';
+import type { AgentUpgradeDetails } from '../../../../../../../common/types';
 import {
   getNotUpgradeableMessage,
   isAgentUpgradeAvailable,
 } from '../../../../../../../common/services';
-import type { AgentUpgradeDetails } from '../../../../../../../common/types';
-import type { Agent } from '../../../../types';
 
 /**
  * Returns a user-friendly string for the estimated remaining time until the upgrade is scheduled.

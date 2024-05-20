@@ -7,15 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
+import { getMonitorsByLocation } from './get_location_monitors';
+import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import {
   privateLocationsSavedObjectId,
   privateLocationsSavedObjectName,
 } from '../../../../common/saved_objects/private_locations';
 import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
-import { SyntheticsRestApiRouteFactory } from '../../types';
-import { getMonitorsByLocation } from './get_location_monitors';
-import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 
 export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined> = () => ({
   method: 'DELETE',

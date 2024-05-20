@@ -6,33 +6,33 @@
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
-import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { getOr } from 'lodash/fp';
 import React, { useMemo } from 'react';
+import { getOr } from 'lodash/fp';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type {
+  SetEventsDeleted,
+  SetEventsLoading,
   ActionProps,
   ControlColumnProps,
   RowCellRender,
-  SetEventsDeleted,
-  SetEventsLoading,
 } from '../../../../../../common/types';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import type { inputsModel } from '../../../../../common/store';
-import type { OnRowSelected } from '../../events';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
+import type { OnRowSelected } from '../../events';
+import type { inputsModel } from '../../../../../common/store';
 import {
-  EVENTS_TD_CLASS_NAME,
   EventsTd,
+  EVENTS_TD_CLASS_NAME,
   EventsTdContent,
-  EventsTdGroupActions,
   EventsTdGroupData,
+  EventsTdGroupActions,
 } from '../../styles';
 
 import { StatefulCell } from './stateful_cell';

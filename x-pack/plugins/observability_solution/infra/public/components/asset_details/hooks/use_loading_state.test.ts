@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { act, renderHook } from '@testing-library/react-hooks';
+import { useLoadingState } from './use_loading_state';
+import { useDatePickerContext, type UseDateRangeProviderProps } from './use_date_picker';
+import { BehaviorSubject, EMPTY, of, Subject, Subscription, skip } from 'rxjs';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { BehaviorSubject, EMPTY, Subject, Subscription, of, skip } from 'rxjs';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { type UseDateRangeProviderProps, useDatePickerContext } from './use_date_picker';
-import { useLoadingState } from './use_loading_state';
 
 jest.mock('./use_date_picker');
 jest.mock('../../../hooks/use_kibana');

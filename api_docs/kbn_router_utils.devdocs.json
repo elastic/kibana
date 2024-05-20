@@ -28,7 +28,10 @@
         "description": [
           "\n\ngetRouterLinkProps is an util that enable HTML elements, such buttons, to\nbehave as links."
         ],
-        "signature": ["({ href, onClick }: GetRouterLinkPropsDeps) => ", "RouterLinkProps"],
+        "signature": [
+          "({ href, onClick }: GetRouterLinkPropsDeps) => ",
+          "RouterLinkProps"
+        ],
         "path": "packages/kbn-router-utils/src/get_router_link_props/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -40,7 +43,9 @@
             "tags": [],
             "label": "{ href, onClick }",
             "description": [],
-            "signature": ["GetRouterLinkPropsDeps"],
+            "signature": [
+              "GetRouterLinkPropsDeps"
+            ],
             "path": "packages/kbn-router-utils/src/get_router_link_props/index.ts",
             "deprecated": false,
             "trackAdoption": false,

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { identity } from 'lodash';
 import { CoreSetup, Plugin } from '@kbn/core/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { identity } from 'lodash';
 import { dynamicActionEnhancement } from './dynamic_action_enhancement';
-import { ActionFactoryDefinition, ActionFactoryRegistry, SerializedEvent } from './types';
+import { ActionFactoryRegistry, SerializedEvent, ActionFactoryDefinition } from './types';
 
 export interface UiActionsEnhancedServerSetup {
   registerActionFactory: (definition: ActionFactoryDefinition) => void;

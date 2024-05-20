@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
-import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
-import { render, shallow } from 'enzyme';
 import React from 'react';
+import { shallow, render } from 'enzyme';
+import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
+import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 
 import { KibanaPageTemplate } from './page_template';
 

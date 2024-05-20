@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
 
 export const HELLO_LOCATOR = 'HELLO_LOCATOR';
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 import { render, screen } from '@testing-library/react';
-import moment from 'moment';
 import React from 'react';
-import { renderer as Renderer, plugin } from '.';
+import moment from 'moment';
+import { TestProviders } from '../../../../mock';
 import {
-  DEFAULT_APP_TIME_RANGE,
   DEFAULT_FROM,
+  DEFAULT_APP_TIME_RANGE,
   DEFAULT_TO,
 } from '../../../../../../common/constants';
-import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { KibanaServices } from '../../../../lib/kibana';
-import { TestProviders } from '../../../../mock';
 import type { DefaultTimeRangeSetting } from '../../../../utils/default_date_settings';
+import { plugin, renderer as Renderer } from '.';
 import type { InvestigateInTimelineButtonProps } from '../../../event_details/table/investigate_in_timeline_button';
+import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 
 jest.mock('../../../../lib/kibana');
 const mockGetServices = KibanaServices.get as jest.Mock;

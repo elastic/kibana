@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExpressionAstArgument, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { getType } from '@kbn/interpreter';
-import { ColorPalette, identifyPalette, identifyPartialPalette } from '../../../../common/lib';
+import { ExpressionAstArgument, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
+import { identifyPalette, ColorPalette, identifyPartialPalette } from '../../../../common/lib';
 import { ArgumentStrings } from '../../../../i18n';
 
 const { Palette: strings } = ArgumentStrings;

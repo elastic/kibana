@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
-import React from 'react';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
-import { useKibana } from '../../../common/lib/kibana';
+import { ResponseActionFormField } from './osquery_response_action_form_field';
 import type { ArrayItem } from '../../../shared_imports';
 import { UseField } from '../../../shared_imports';
-import { ResponseActionFormField } from './osquery_response_action_form_field';
+import { useKibana } from '../../../common/lib/kibana';
 import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
 
 interface OsqueryResponseActionProps {

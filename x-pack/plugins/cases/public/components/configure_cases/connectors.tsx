@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import {
   EuiDescribedFormGroup,
+  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
 
 import { css } from '@emotion/react';
 
 import { ConnectorsDropdown } from './connectors_dropdown';
 import * as i18n from './translations';
 
+import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
+import { Mapping } from './mapping';
 import type { ActionTypeConnector } from '../../../common/types/domain';
 import { ConnectorTypes } from '../../../common/types/domain';
-import { useApplicationCapabilities } from '../../common/lib/kibana';
-import type { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { DeprecatedCallout } from '../connectors/deprecated_callout';
 import { isDeprecatedConnector } from '../utils';
-import { Mapping } from './mapping';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface Props {
   actionTypes: ActionTypeConnector[];

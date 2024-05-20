@@ -14,7 +14,7 @@ export type OmitDeprecatedState<T extends ActorRefWithDeprecatedState<any, any, 
 
 export type MatchedState<
   TState extends State<any, any, any, any, any>,
-  TStateValue extends StateValue,
+  TStateValue extends StateValue
 > = TState extends State<
   any,
   infer TEvent,
@@ -39,5 +39,5 @@ export type MatchedState<
 
 export type MatchedStateFromActor<
   TActorRef extends ActorRef<any, any>,
-  TStateValue extends StateValue,
+  TStateValue extends StateValue
 > = MatchedState<EmittedFrom<TActorRef>, TStateValue>;

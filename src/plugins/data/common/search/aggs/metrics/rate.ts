@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES } from '../../..';
-import { BaseAggParams } from '../types';
+import { aggRateFnName } from './rate_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { aggRateFnName } from './rate_fn';
+import { KBN_FIELD_TYPES } from '../../..';
+import { BaseAggParams } from '../types';
 
 const rateTitle = i18n.translate('data.search.aggs.metrics.rateTitle', {
   defaultMessage: 'Rate',

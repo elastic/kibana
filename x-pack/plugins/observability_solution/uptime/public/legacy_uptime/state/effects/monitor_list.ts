@@ -6,7 +6,7 @@
  */
 
 import { takeLatest } from 'redux-saga/effects';
-import { getMonitorList, getMonitorListFailure, getMonitorListSuccess } from '../actions';
+import { getMonitorList, getMonitorListSuccess, getMonitorListFailure } from '../actions';
 import { fetchMonitorList } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiTitle,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 import * as React from 'react';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { ActionGroupWithCondition, RuleConditions } from './rule_conditions';
+import { ReactWrapper } from 'enzyme';
+import { RuleConditions, ActionGroupWithCondition } from './rule_conditions';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiTitle,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 
 describe('rule_conditions', () => {
   async function setup(element: React.ReactElement): Promise<ReactWrapper<unknown>> {
@@ -88,25 +88,22 @@ describe('rule_conditions', () => {
       </RuleConditions>
     );
 
-    expect(
-      wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).get(0)
-    ).toMatchInlineSnapshot(`
+    expect(wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).get(0))
+      .toMatchInlineSnapshot(`
       <EuiDescriptionListDescription>
         default
       </EuiDescriptionListDescription>
     `);
 
-    expect(
-      wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).get(1)
-    ).toMatchInlineSnapshot(`
+    expect(wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).get(1))
+      .toMatchInlineSnapshot(`
       <EuiDescriptionListDescription>
         Default
       </EuiDescriptionListDescription>
     `);
 
-    expect(
-      wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).get(2)
-    ).toMatchInlineSnapshot(`
+    expect(wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).get(2))
+      .toMatchInlineSnapshot(`
       <EuiDescriptionListDescription>
         my prop value
       </EuiDescriptionListDescription>
@@ -146,17 +143,15 @@ describe('rule_conditions', () => {
       </RuleConditions>
     );
 
-    expect(
-      wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).get(0)
-    ).toMatchInlineSnapshot(`
+    expect(wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).get(0))
+      .toMatchInlineSnapshot(`
       <EuiDescriptionListDescription>
         default
       </EuiDescriptionListDescription>
     `);
 
-    expect(
-      wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).get(1)
-    ).toMatchInlineSnapshot(`
+    expect(wrapper.find(EuiDescriptionList).find(EuiDescriptionListDescription).get(1))
+      .toMatchInlineSnapshot(`
       <EuiDescriptionListDescription>
         shouldRender
       </EuiDescriptionListDescription>

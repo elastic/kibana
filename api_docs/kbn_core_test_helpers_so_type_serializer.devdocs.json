@@ -155,7 +155,9 @@
             "tags": [],
             "label": "namespaceType",
             "description": [],
-            "signature": ["\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""],
+            "signature": [
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -167,7 +169,9 @@
             "tags": [],
             "label": "convertToAliasScript",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -179,7 +183,9 @@
             "tags": [],
             "label": "convertToMultiNamespaceTypeVersion",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -191,7 +197,9 @@
             "tags": [],
             "label": "migrationVersions",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -203,7 +211,9 @@
             "tags": [],
             "label": "schemaVersions",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -215,7 +225,9 @@
             "tags": [],
             "label": "mappings",
             "description": [],
-            "signature": ["{ [x: string]: unknown; }"],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -238,7 +250,10 @@
             "tags": [],
             "label": "modelVersions",
             "description": [],
-            "signature": ["ModelVersionSummary", "[]"],
+            "signature": [
+              "ModelVersionSummary",
+              "[]"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -250,7 +265,9 @@
             "tags": [],
             "label": "switchToModelVersionAt",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,
             "trackAdoption": false

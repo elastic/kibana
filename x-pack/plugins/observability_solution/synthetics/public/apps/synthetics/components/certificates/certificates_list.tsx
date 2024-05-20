@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Direction, EuiBasicTable } from '@elastic/eui';
-import moment from 'moment';
 import React from 'react';
+import moment from 'moment';
+import { Direction, EuiBasicTable } from '@elastic/eui';
 import { Cert, CertMonitor, CertResult } from '../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../hooks/use_date_format';
-import { CertMonitors } from './cert_monitors';
 import { CertStatus } from './cert_status';
-import { FingerprintCol } from './fingerprint_col';
+import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
+import { FingerprintCol } from './fingerprint_col';
 import { LOADING_CERTIFICATES, NO_CERTS_AVAILABLE } from './translations';
 
 interface Page {

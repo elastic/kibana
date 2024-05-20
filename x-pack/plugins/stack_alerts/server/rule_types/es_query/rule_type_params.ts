@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { RuleTypeState } from '@kbn/alerting-plugin/server';
-import { TypeOf, schema } from '@kbn/config-schema';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  MAX_GROUPS,
+  validateTimeWindowUnits,
   validateAggType,
   validateGroupBy,
-  validateTimeWindowUnits,
+  MAX_GROUPS,
 } from '@kbn/triggers-actions-ui-plugin/server';
+import { RuleTypeState } from '@kbn/alerting-plugin/server';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import {
+  MAX_SELECTABLE_SOURCE_FIELDS,
+  MAX_SELECTABLE_GROUP_BY_TERMS,
+} from '../../../common/constants';
 import {
   ComparatorFnNames,
   ES_QUERY_MAX_HITS_PER_EXECUTION,
   ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
 } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
-import {
-  MAX_SELECTABLE_GROUP_BY_TERMS,
-  MAX_SELECTABLE_SOURCE_FIELDS,
-} from '../../../common/constants';
 import { getComparatorSchemaType } from '../lib/comparator';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 

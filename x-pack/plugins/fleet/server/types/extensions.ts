@@ -11,13 +11,13 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import type { DeepReadonly } from 'utility-types';
 
 import type {
-  AgentPolicy,
+  PostDeletePackagePoliciesResponse,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+  PackagePolicy,
   DeletePackagePoliciesResponse,
   NewAgentPolicy,
-  NewPackagePolicy,
-  PackagePolicy,
-  PostDeletePackagePoliciesResponse,
-  UpdatePackagePolicy,
+  AgentPolicy,
 } from '../../common/types';
 
 export type PostPackagePolicyDeleteCallback = (
@@ -71,23 +71,23 @@ export type PostAgentPolicyUpdateCallback = (
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
 export type ExternalCallbackPostCreate = [
   'packagePolicyPostCreate',
-  PostPackagePolicyPostCreateCallback,
+  PostPackagePolicyPostCreateCallback
 ];
 
 export type ExternalCallbackDelete = ['packagePolicyDelete', PostPackagePolicyDeleteCallback];
 export type ExternalCallbackPostDelete = [
   'packagePolicyPostDelete',
-  PostPackagePolicyPostDeleteCallback,
+  PostPackagePolicyPostDeleteCallback
 ];
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
 
 export type ExternalCallbackAgentPolicyCreate = [
   'agentPolicyCreate',
-  PostAgentPolicyCreateCallback,
+  PostAgentPolicyCreateCallback
 ];
 export type ExternalCallbackAgentPolicyUpdate = [
   'agentPolicyUpdate',
-  PostAgentPolicyUpdateCallback,
+  PostAgentPolicyUpdateCallback
 ];
 
 /**

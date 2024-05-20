@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { AttachmentType, CaseStatuses, Cases } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
+import { Cases, CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
+import { postCaseReq } from '../../../../common/lib/mock';
 import {
   createCase,
   createComment,
   deleteAllCaseItems,
   getSignalsWithES,
 } from '../../../../common/lib/api';
-import { postCaseReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

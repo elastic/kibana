@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { ComponentStory } from '@storybook/react';
-import React, { FC, PropsWithChildren } from 'react';
 import { CustomizablePalette, CustomizablePaletteProps } from '../palette_configuration';
 import { getPaletteRegistry } from './palettes';
 

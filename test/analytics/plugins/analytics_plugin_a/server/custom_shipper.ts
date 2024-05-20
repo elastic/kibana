@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Event, EventContext, IShipper, TelemetryCounter } from '@kbn/core/server';
 import { Subject } from 'rxjs';
+import type { IShipper, Event, EventContext, TelemetryCounter } from '@kbn/core/server';
 
 export interface Action {
   action: string;

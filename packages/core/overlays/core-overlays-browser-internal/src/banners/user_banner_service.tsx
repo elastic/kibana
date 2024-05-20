@@ -11,14 +11,14 @@ import ReactDOM from 'react-dom';
 import { filter } from 'rxjs';
 import { Subscription } from 'rxjs';
 
-import { EuiButton, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { OverlayBannersStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { OverlayBannersStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 interface StartServices {

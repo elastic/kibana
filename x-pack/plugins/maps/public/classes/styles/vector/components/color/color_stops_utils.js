@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiPaletteColorBlind, isValidHex } from '@elastic/eui';
+import { isValidHex, euiPaletteColorBlind } from '@elastic/eui';
 import _ from 'lodash';
 
 const DEFAULT_CUSTOM_PALETTE = euiPaletteColorBlind({ rotations: 3 });

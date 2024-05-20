@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { hasMaxLengthArray } from '../../../validators/array';
+import { ValidationFunc, ValidationError } from '../../hook_form_lib';
 import { hasMaxLengthString } from '../../../validators/string';
-import { ValidationError, ValidationFunc } from '../../hook_form_lib';
+import { hasMaxLengthArray } from '../../../validators/array';
 import { ERROR_CODE } from './types';
 
 export const maxLengthField =

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { TestProviders } from '../../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
-import { UserAssetTableType } from '../../../../explore/users/store/model';
-import { mockEntraUserFields } from './__mocks__';
 import { ManagedUserAccordion } from './managed_user_accordion';
+import { mockEntraUserFields } from './__mocks__';
+import { UserAssetTableType } from '../../../../explore/users/store/model';
 
 describe('ManagedUserAccordion', () => {
   it('it renders children', () => {

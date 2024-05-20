@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { Subscription } from 'rxjs';
 import type {
   KibanaRequest,
   Logger,
@@ -13,8 +13,8 @@ import type {
   SavedObjectsServiceStart,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import type { Subscription } from 'rxjs';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 

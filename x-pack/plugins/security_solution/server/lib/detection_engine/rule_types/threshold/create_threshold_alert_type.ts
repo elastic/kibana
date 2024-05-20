@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { ThresholdRuleParams } from '../../rule_schema';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateIndexPatterns } from '../utils';
 import { thresholdExecutor } from './threshold';
 import type { ThresholdAlertState } from './types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateIndexPatterns } from '../utils';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions

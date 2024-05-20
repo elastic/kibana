@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { map, mergeMap } from 'rxjs';
 import {
   ISearchStrategy,
   PluginStart,
   SearchStrategyDependencies,
   shimHitsTotal,
 } from '@kbn/data-plugin/server';
-import { Logger } from '@kbn/logging';
 import type { ISearchOptions } from '@kbn/search-types';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { map, mergeMap } from 'rxjs';
+import { Logger } from '@kbn/logging';
 import { z } from 'zod';
 import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
 import {
-  EntityType,
   TimelineFactoryQueryTypes,
+  EntityType,
   TimelineStrategyRequestType,
 } from '../../../common/search_strategy/timeline';
 import { timelineFactory } from './factory';
-import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_aggregate';
 import { TimelineFactory } from './factory/types';
+import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_aggregate';
 
 export const timelineSearchStrategyProvider = (
   data: PluginStart,

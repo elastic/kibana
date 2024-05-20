@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { SOURCE_TYPES } from '../../../../common/constants';
-import { JoinDescriptor } from '../../../../common/descriptor_types';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
 import { JoinEditor } from './join_editor';
+import { shallow } from 'enzyme';
+import { JoinDescriptor } from '../../../../common/descriptor_types';
+import { SOURCE_TYPES } from '../../../../common/constants';
 
 class MockLayer {
   getSource() {

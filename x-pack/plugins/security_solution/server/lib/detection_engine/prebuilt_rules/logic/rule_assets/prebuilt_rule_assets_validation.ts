@@ -1,4 +1,3 @@
-import { BadRequestError } from '@kbn/securitysolution-es-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { BadRequestError } from '@kbn/securitysolution-es-utils';
  * 2.0.
  */
 import { stringifyZodError } from '@kbn/zod-helpers';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 export const validatePrebuiltRuleAssets = (rules: PrebuiltRuleAsset[]): PrebuiltRuleAsset[] => {

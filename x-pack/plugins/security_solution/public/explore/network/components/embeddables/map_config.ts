@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SCALING_TYPES, SOURCE_TYPES } from '@kbn/maps-plugin/common';
-import { v4 as uuidv4 } from 'uuid';
-import * as i18n from './translations';
 import type {
   IndexPatternMapping,
   LayerMapping,
   LayerMappingCollection,
   LayerMappingDetails,
 } from './types';
+import * as i18n from './translations';
 const euiVisColorPalette = euiPaletteColorBlind();
 
 // Update field mappings to modify what fields will be returned to map tooltip

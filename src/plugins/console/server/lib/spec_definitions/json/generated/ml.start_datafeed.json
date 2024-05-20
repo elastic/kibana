@@ -7,10 +7,18 @@
       "pretty": "__flag__",
       "end": [],
       "start": [],
-      "timeout": ["20s", "-1", "0"]
+      "timeout": [
+        "20s",
+        "-1",
+        "0"
+      ]
     },
-    "methods": ["POST"],
-    "patterns": ["_ml/datafeeds/{datafeed_id}/_start"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/datafeeds/{datafeed_id}/_start"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-start-datafeed.html",
     "availability": {
       "stack": true,

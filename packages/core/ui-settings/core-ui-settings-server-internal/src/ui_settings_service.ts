@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom, Observable } from 'rxjs';
 import { mapToObject } from '@kbn/std';
-import { Observable, firstValueFrom } from 'rxjs';
 
+import type { Logger } from '@kbn/logging';
+import { stripVersionQualifier } from '@kbn/std';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -18,20 +20,18 @@ import type {
   UiSettingsParams,
   UiSettingsScope,
 } from '@kbn/core-ui-settings-common';
-import type { Logger } from '@kbn/logging';
-import { stripVersionQualifier } from '@kbn/std';
+import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient, UiSettingsClientFactory, UiSettingsGlobalClient } from './clients';
-import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
-import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
-import { registerInternalRoutes, registerRoutes } from './routes';
-import { uiSettingsGlobalType, uiSettingsType } from './saved_objects';
-import { getCoreSettings } from './settings';
 import type {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './types';
-import { UiSettingsConfigType, uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
+import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
+import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
+import { registerRoutes, registerInternalRoutes } from './routes';
+import { getCoreSettings } from './settings';
+import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -41,8 +41,8 @@ export interface SetupDeps {
 type ClientType<T> = T extends 'global'
   ? UiSettingsGlobalClient
   : T extends 'namespace'
-    ? UiSettingsClient
-    : never;
+  ? UiSettingsClient
+  : never;
 
 /** @internal */
 export class UiSettingsService

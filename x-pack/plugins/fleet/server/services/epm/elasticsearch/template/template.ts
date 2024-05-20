@@ -5,38 +5,38 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { isResponseError } from '@kbn/es-errors';
 import pMap from 'p-map';
+import { isResponseError } from '@kbn/es-errors';
 
 import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
 
+import type { Field, Fields } from '../../fields/field';
+import type {
+  RegistryDataStream,
+  IndexTemplateEntry,
+  IndexTemplate,
+  IndexTemplateMappings,
+  RegistryElasticsearch,
+} from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
 import {
-  FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
-  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
   STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
   STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS,
 } from '../../../../constants';
-import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
-import type {
-  IndexTemplate,
-  IndexTemplateEntry,
-  IndexTemplateMappings,
-  RegistryDataStream,
-  RegistryElasticsearch,
-} from '../../../../types';
-import type { Field, Fields } from '../../fields/field';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
 import { isUserSettingsTemplate } from './utils';

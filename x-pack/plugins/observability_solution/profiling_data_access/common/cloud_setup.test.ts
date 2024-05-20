@@ -6,9 +6,9 @@
  */
 
 import {
-  PartialCloudSetupState,
   areCloudResourcesSetup,
   createDefaultCloudSetupState,
+  PartialCloudSetupState,
 } from './cloud_setup';
 import { mergePartialSetupStates } from './setup';
 

@@ -1,4 +1,3 @@
-import { BulkOperationAttributes, BulkOperationResponse } from '../../../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { BulkOperationAttributes, BulkOperationResponse } from '../../../types';
  * 2.0.
  */
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { BulkOperationResponse, BulkOperationAttributes } from '../../../types';
 
 export const bulkDeleteRules = async ({
   filter,

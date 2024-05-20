@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import classNames from 'classnames';
+import React, { FunctionComponent, memo, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -16,16 +18,14 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import classNames from 'classnames';
-import React, { FunctionComponent, memo, useCallback } from 'react';
 
-import { ProcessorsDispatch } from '../../processors_reducer';
-import { ContextValueEditor, ProcessorInternal, ProcessorSelector } from '../../types';
+import { ProcessorInternal, ProcessorSelector, ContextValueEditor } from '../../types';
 import { selectorToDataTestSubject } from '../../utils';
+import { ProcessorsDispatch } from '../../processors_reducer';
 
-import { useTestPipelineContext } from '../../context';
-import { PipelineProcessorsItemStatus } from '../pipeline_processors_editor_item_status';
 import { ProcessorInfo } from '../processors_tree';
+import { PipelineProcessorsItemStatus } from '../pipeline_processors_editor_item_status';
+import { useTestPipelineContext } from '../../context';
 
 import { getProcessorDescriptor } from '../shared';
 

@@ -7,8 +7,8 @@
 
 import type { RunContext } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
-import { startFleetServer } from '../common/fleet_server/fleet_server_services';
 import { createRuntimeServices } from '../common/stack_services';
+import { startFleetServer } from '../common/fleet_server/fleet_server_services';
 
 export const cli = async () => {
   return run(

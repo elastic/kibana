@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { OsqueryIcon } from '../components/osquery_icon';
 import { EMPTY_PROMPT, NOT_AVAILABLE, SHORT_EMPTY_TITLE } from './osquery_action/translations';
 

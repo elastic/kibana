@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { CheckBoxField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   UseField,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { CheckBoxField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ServiceNowSIRFieldsType } from '../../../../common/types/domain';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
-import { choicesToEuiOptions } from './helpers';
-import type { Fields } from './types';
 import { useGetChoices } from './use_get_choices';
+import type { Fields } from './types';
+import { choicesToEuiOptions } from './helpers';
 
-import { DeprecatedCallout } from '../deprecated_callout';
 import * as i18n from './translations';
+import { DeprecatedCallout } from '../deprecated_callout';
 
 const choicesToGet = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {

@@ -6,14 +6,14 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { PLUGIN_ID } from '../../../common';
-import type { DeleteSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/delete_saved_query_route';
-import { deleteSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/delete_saved_query_route';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
+import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { isSavedQueryPrebuilt } from './utils';
+import type { DeleteSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/delete_saved_query_route';
+import { deleteSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/delete_saved_query_route';
 
 export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

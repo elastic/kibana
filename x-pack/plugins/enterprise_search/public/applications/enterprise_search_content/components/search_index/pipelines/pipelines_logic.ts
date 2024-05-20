@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
@@ -32,8 +32,8 @@ import {
 } from '../../../api/connector/update_pipeline_api_logic';
 import {
   CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicActions,
   CachedFetchIndexApiLogicValues,
+  CachedFetchIndexApiLogicActions,
 } from '../../../api/index/cached_fetch_index_api_logic';
 import {
   CreateCustomPipelineApiLogic,
@@ -41,9 +41,9 @@ import {
   CreateCustomPipelineApiLogicResponse,
 } from '../../../api/index/create_custom_pipeline_api_logic';
 import {
-  FetchCustomPipelineApiLogic,
   FetchCustomPipelineApiLogicArgs,
   FetchCustomPipelineApiLogicResponse,
+  FetchCustomPipelineApiLogic,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import {
   AttachMlInferencePipelineApiLogic,

@@ -1,8 +1,3 @@
-import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
-import type {
-  InternalPrebootServicePreboot,
-  PrebootService,
-} from '@kbn/core-preboot-server-internal';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,6 +6,11 @@ import type {
  * Side Public License, v 1.
  */
 import { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  InternalPrebootServicePreboot,
+  PrebootService,
+} from '@kbn/core-preboot-server-internal';
+import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
 
 export type InternalPrebootServicePrebootMock = jest.Mocked<InternalPrebootServicePreboot>;
 export type PrebootServicePrebootMock = jest.Mocked<PrebootServicePreboot>;

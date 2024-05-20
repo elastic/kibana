@@ -7,11 +7,11 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
-import { LARGE_FLOAT } from '../../../../common/formatting';
+import { i18n } from '@kbn/i18n';
 import { ClusterMetric, Metric, MetricOptions } from '../classes';
+import { LARGE_FLOAT } from '../../../../common/formatting';
+import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.logstash.msTimeUnitLabel', {
   defaultMessage: 'ms',

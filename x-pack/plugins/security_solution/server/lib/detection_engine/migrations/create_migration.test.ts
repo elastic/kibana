@@ -6,8 +6,8 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { createMigration } from './create_migration';
 import { createMigrationIndex } from './create_migration_index';
+import { createMigration } from './create_migration';
 
 jest.mock('./create_migration_index');
 

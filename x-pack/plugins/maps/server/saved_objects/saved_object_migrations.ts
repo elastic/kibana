@@ -6,22 +6,22 @@
  */
 
 import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import type { MapAttributes } from '../../common/content_management';
-import { addFieldMetaOptions } from '../../common/migrations/add_field_meta_options';
-import { addTypeToTermJoin } from '../../common/migrations/add_type_to_termjoin';
+import { extractReferences } from '../../common/migrations/references';
 import { emsRasterTileToEmsVectorTile } from '../../common/migrations/ems_raster_tile_to_ems_vector_tile';
+import { topHitsTimeToSort } from '../../common/migrations/top_hits_time_to_sort';
+import { moveApplyGlobalQueryToSources } from '../../common/migrations/move_apply_global_query';
+import { addFieldMetaOptions } from '../../common/migrations/add_field_meta_options';
+import { migrateSymbolStyleDescriptor } from '../../common/migrations/migrate_symbol_style_descriptor';
+import { migrateUseTopHitsToScalingType } from '../../common/migrations/scaling_type';
 import { migrateJoinAggKey } from '../../common/migrations/join_agg_key';
 import { migrateOtherCategoryColor } from '../../common/migrations/migrate_other_category_color';
-import { migrateSymbolStyleDescriptor } from '../../common/migrations/migrate_symbol_style_descriptor';
-import { moveApplyGlobalQueryToSources } from '../../common/migrations/move_apply_global_query';
-import { moveAttribution } from '../../common/migrations/move_attribution';
-import { extractReferences } from '../../common/migrations/references';
 import { removeBoundsFromSavedObject } from '../../common/migrations/remove_bounds';
-import { renameLayerTypes } from '../../common/migrations/rename_layer_types';
-import { migrateUseTopHitsToScalingType } from '../../common/migrations/scaling_type';
 import { setDefaultAutoFitToBounds } from '../../common/migrations/set_default_auto_fit_to_bounds';
+import { addTypeToTermJoin } from '../../common/migrations/add_type_to_termjoin';
+import { moveAttribution } from '../../common/migrations/move_attribution';
 import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
-import { topHitsTimeToSort } from '../../common/migrations/top_hits_time_to_sort';
+import { renameLayerTypes } from '../../common/migrations/rename_layer_types';
+import type { MapAttributes } from '../../common/content_management';
 
 function logMigrationWarning(
   context: SavedObjectMigrationContext,

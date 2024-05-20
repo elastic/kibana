@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 // FIXME: Remove references to `querystring`
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
-import { isEmpty } from 'lodash/fp';
 import { generatePath } from 'react-router-dom';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import type { ArtifactListPageUrlParams } from '../components/artifact_list_page';
@@ -33,7 +33,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
-import { getArtifactListPageUrlPath, isDefaultOrMissing } from './url_routing';
+import { isDefaultOrMissing, getArtifactListPageUrlPath } from './url_routing';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;

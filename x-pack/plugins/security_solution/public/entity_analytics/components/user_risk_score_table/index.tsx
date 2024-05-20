@@ -14,6 +14,16 @@ import { PaginatedTable } from '../../../explore/components/paginated_table';
 
 import { getUserRiskScoreColumns } from './columns';
 
+import * as i18nUsers from '../../../explore/users/pages/translations';
+import * as i18n from './translations';
+import { usersModel, usersSelectors, usersActions } from '../../../explore/users/store';
+import type { UserRiskScoreItem } from '../../../../common/search_strategy/security_solution/users/common';
+import type { SeverityCount } from '../severity/types';
+import { SeverityBadges } from '../severity/severity_badges';
+import { SeverityBar } from '../severity/severity_bar';
+import { SeverityFilterGroup } from '../severity/severity_filter_group';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import type { State } from '../../../common/store';
 import type {
   RiskScoreFields,
   RiskScoreSortField,
@@ -21,17 +31,7 @@ import type {
   UserRiskScore,
 } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
-import type { UserRiskScoreItem } from '../../../../common/search_strategy/security_solution/users/common';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import type { State } from '../../../common/store';
-import * as i18nUsers from '../../../explore/users/pages/translations';
-import { usersActions, usersModel, usersSelectors } from '../../../explore/users/store';
 import { RiskInformationButtonEmpty } from '../risk_information';
-import { SeverityBadges } from '../severity/severity_badges';
-import { SeverityBar } from '../severity/severity_bar';
-import { SeverityFilterGroup } from '../severity/severity_filter_group';
-import type { SeverityCount } from '../severity/types';
-import * as i18n from './translations';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -62,7 +62,7 @@ export type UserRiskScoreColumns = [
   Columns<UserRiskScoreItem[RiskScoreFields.userName]>,
   Columns<UserRiskScoreItem[RiskScoreFields.timestamp]>,
   Columns<UserRiskScoreItem[RiskScoreFields.userRiskScore]>,
-  Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>,
+  Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>
 ];
 
 const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({

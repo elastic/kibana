@@ -12,17 +12,17 @@ import ReactDOM from 'react-dom';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageHeader,
-  EuiPageSection,
   EuiPageTemplate,
+  EuiPageSection,
   EuiSpacer,
+  EuiPageHeader,
 } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ContextMenuExamples } from './context_menu_examples';
-import { HelloWorldExample } from './hello_world_example';
-import { Overview } from './overview';
 import { TriggerContextExample } from './trigger_context_example';
+import { ContextMenuExamples } from './context_menu_examples';
+import { Overview } from './overview';
+import { HelloWorldExample } from './hello_world_example';
 
 interface Props {
   uiActionsStartService: UiActionsStart;

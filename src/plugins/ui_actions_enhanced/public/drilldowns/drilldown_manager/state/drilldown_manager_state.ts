@@ -6,34 +6,34 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { useMemo } from 'react';
+import {
+  PublicDrilldownManagerProps,
+  DrilldownManagerDependencies,
+  DrilldownTemplate,
+} from '../types';
 import {
   ActionFactory,
   BaseActionFactoryContext,
   SerializedAction,
   SerializedEvent,
 } from '../../../dynamic_actions';
-import { DrilldownTableItem } from '../components/drilldown_table';
-import {
-  DrilldownManagerDependencies,
-  DrilldownTemplate,
-  PublicDrilldownManagerProps,
-} from '../types';
 import { DrilldownState } from './drilldown_state';
 import {
+  toastDrilldownCreated,
+  toastDrilldownsCRUDError,
   insufficientLicenseLevel,
   invalidDrilldownType,
-  toastDrilldownCreated,
-  toastDrilldownDeleted,
-  toastDrilldownEdited,
-  toastDrilldownsCRUDError,
-  toastDrilldownsDeleted,
   txtDefaultTitle,
+  toastDrilldownDeleted,
+  toastDrilldownsDeleted,
+  toastDrilldownEdited,
 } from './i18n';
+import { DrilldownTableItem } from '../components/drilldown_table';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
@@ -103,8 +103,8 @@ export class DrilldownManagerState {
       error: !actionFactory
         ? invalidDrilldownType(event.action.factoryId) // this shouldn't happen for the end user, but useful during development
         : !actionFactory.isCompatibleLicense()
-          ? insufficientLicenseLevel
-          : undefined,
+        ? insufficientLicenseLevel
+        : undefined,
       triggers: event.triggers.map((trigger) => this.deps.getTrigger(trigger as string)),
       triggerIncompatible: !this.deps.triggers.find((t) => t === firstTrigger),
     };

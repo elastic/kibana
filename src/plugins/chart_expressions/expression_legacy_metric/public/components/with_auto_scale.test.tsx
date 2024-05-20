@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
 import { computeScale, withAutoScale } from './with_auto_scale';
+import { mount } from 'enzyme';
 
 const mockElement = (clientWidth = 100, clientHeight = 200) => ({
   clientHeight,

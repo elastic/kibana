@@ -11,14 +11,14 @@ import { HttpHandler } from '@kbn/core-http-browser';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { IndexProperties, Props } from '.';
 import { EMPTY_STAT } from '../../helpers';
 import { mockMappingsResponse } from '../../mock/mappings_response/mock_mappings_response';
 import { auditbeatWithAllResults } from '../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { mockUnallowedValuesResponse } from '../../mock/unallowed_values/mock_unallowed_values';
-import { UnallowedValueRequestItem } from '../../types';
 import { LOADING_MAPPINGS, LOADING_UNALLOWED_VALUES } from './translations';
+import { UnallowedValueRequestItem } from '../../types';
+import { IndexProperties, Props } from '.';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>

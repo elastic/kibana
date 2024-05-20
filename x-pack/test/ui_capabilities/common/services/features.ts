@@ -5,20 +5,17 @@
  * 2.0.
  */
 
+import axios, { AxiosInstance } from 'axios';
 import { format as formatUrl } from 'url';
 import util from 'util';
 import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosInstance } from 'axios';
-import { Features } from '../features';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { Features } from '../features';
 
 export class FeaturesService {
   private readonly axios: AxiosInstance;
 
-  constructor(
-    url: string,
-    private readonly log: ToolingLog
-  ) {
+  constructor(url: string, private readonly log: ToolingLog) {
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/features' },
       baseURL: url,

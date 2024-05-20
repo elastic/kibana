@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormHelpText, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
+import { EuiFormRow, EuiComboBox, EuiFormHelpText, EuiComboBoxOptionOption } from '@elastic/eui';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
 import {
-  FieldConfig,
   UseField,
+  FieldConfig,
   ValidationConfig,
   getFieldValidityAndErrorMessage,
 } from '../../shared_imports';
 
-import { MatchedIndicesSet, TimestampOption } from '../../types';
+import { TimestampOption, MatchedIndicesSet } from '../../types';
 import { schema } from '../form_schema';
 
 interface Props {

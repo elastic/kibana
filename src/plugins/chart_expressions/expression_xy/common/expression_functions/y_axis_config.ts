@@ -7,8 +7,8 @@
  */
 
 import { Position } from '@elastic/charts';
-import { AxisModes, YScaleTypes, Y_AXIS_CONFIG } from '../constants';
 import { strings } from '../i18n';
+import { Y_AXIS_CONFIG, AxisModes, YScaleTypes } from '../constants';
 import { YAxisConfigFn } from '../types';
 import { commonAxisConfigArgs } from './common_axis_args';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
-import { sortBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
+import { sortBy } from 'lodash';
+import { EuiFlexItem } from '@elastic/eui';
+import type { CasesConfigurationUI, CaseUICustomField } from '../../../../common/ui';
 import type { CaseUI } from '../../../../common';
-import type { CaseUICustomField, CasesConfigurationUI } from '../../../../common/ui';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { builderMap as customFieldsBuilderMap } from '../../custom_fields/builder';
 

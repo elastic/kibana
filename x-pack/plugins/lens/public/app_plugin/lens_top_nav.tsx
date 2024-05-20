@@ -5,41 +5,41 @@
  * 2.0.
  */
 
+import { cloneDeep, isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { useStore } from 'react-redux';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { cloneDeep, isEqual } from 'lodash';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { useStore } from 'react-redux';
-import { LENS_APP_NAME } from '../../common/constants';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
-import { LensByReferenceInput } from '../embeddable';
+import { LENS_APP_NAME } from '../../common/constants';
+import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import { toggleSettingsMenuOpen } from './settings_menu';
 import {
-  LensAppState,
-  selectIsManaged,
   setState,
-  switchAndCleanDatasource,
-  useLensDispatch,
   useLensSelector,
+  useLensDispatch,
+  LensAppState,
+  switchAndCleanDatasource,
+  selectIsManaged,
 } from '../state_management';
-import { changeIndexPattern } from '../state_management/lens_slice';
-import { getDatasourceLayers } from '../state_management/utils';
 import {
-  getIndexPatternsIds,
   getIndexPatternsObjects,
+  getIndexPatternsIds,
   getResolvedDateRange,
   refreshIndexPatternsList,
 } from '../utils';
-import { toggleSettingsMenuOpen } from './settings_menu';
-import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
-import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import { changeIndexPattern } from '../state_management/lens_slice';
+import { LensByReferenceInput } from '../embeddable';
+import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
+import { getDatasourceLayers } from '../state_management/utils';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -135,12 +135,12 @@ function getLensTopNavConfig(options: {
         defaultMessage: 'Save to library',
       })
     : actions.saveAndReturn.visible
-      ? i18n.translate('xpack.lens.app.saveAs', {
-          defaultMessage: 'Save as',
-        })
-      : i18n.translate('xpack.lens.app.save', {
-          defaultMessage: 'Save',
-        });
+    ? i18n.translate('xpack.lens.app.saveAs', {
+        defaultMessage: 'Save as',
+      })
+    : i18n.translate('xpack.lens.app.save', {
+        defaultMessage: 'Save',
+      });
 
   if (contextOriginatingApp && !actions.cancel.visible) {
     topNavMenu.push({

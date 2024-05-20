@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set/fp';
 import { get } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import type { SignalSource } from '../../../types';
-import type { FieldsType, MergeStrategyFunction } from '../types';
-import { buildFieldsKeyAsArrayMap } from '../utils/build_fields_key_as_array_map';
 import { filterFieldEntries } from '../utils/filter_field_entries';
-import { isArrayOfPrimitives } from '../utils/is_array_of_primitives';
-import { isNestedObject } from '../utils/is_nested_object';
+import type { FieldsType, MergeStrategyFunction } from '../types';
 import { isObjectLikeOrArrayOfObjectLikes } from '../utils/is_objectlike_or_array_of_objectlikes';
-import { isPathValid } from '../utils/is_path_valid';
-import { isPrimitive } from '../utils/is_primitive';
-import { isTypeObject } from '../utils/is_type_object';
+import { isNestedObject } from '../utils/is_nested_object';
 import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
+import { isPrimitive } from '../utils/is_primitive';
+import { isArrayOfPrimitives } from '../utils/is_array_of_primitives';
+import { isTypeObject } from '../utils/is_type_object';
+import { isPathValid } from '../utils/is_path_valid';
+import { buildFieldsKeyAsArrayMap } from '../utils/build_fields_key_as_array_map';
 
 /**
  * Merges all of "doc._source" with its "doc.fields" on a "best effort" basis. See ../README.md for more information

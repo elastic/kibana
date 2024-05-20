@@ -6,7 +6,12 @@
     "id": "charts",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["expressions", "data"],
-    "extraPublicDirs": ["common"]
+    "requiredPlugins": [
+      "expressions",
+      "data"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

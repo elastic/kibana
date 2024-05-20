@@ -19,9 +19,9 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InstallablePackage, RegistryDataStream } from '../../../../types';
 
 import {
-  _filterComponentTemplatesInUse,
-  _getIndexTemplatesToUsedByMap,
   _getLegacyComponentTemplatesForPackage,
+  _getIndexTemplatesToUsedByMap,
+  _filterComponentTemplatesInUse,
 } from './remove_legacy';
 
 const mockLogger: Logger = loggingSystemMock.create().get();
@@ -72,7 +72,7 @@ const createMockTemplate = ({ name, composedOf = [] }: { name: string; composedO
     index_template: {
       composed_of: composedOf,
     },
-  }) as IndicesGetIndexTemplateIndexTemplateItem;
+  } as IndicesGetIndexTemplateIndexTemplateItem);
 
 const makeArrayOf = (arraySize: number, fn = (i: any) => i) => {
   return [...Array(arraySize)].map(fn);

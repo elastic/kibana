@@ -8,9 +8,9 @@
 
 import './last_value_mode_popover.scss';
 
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiSwitch } from '@elastic/eui';
 
 interface LastValueModePopoverProps {
   isIndicatorDisplayed: boolean;

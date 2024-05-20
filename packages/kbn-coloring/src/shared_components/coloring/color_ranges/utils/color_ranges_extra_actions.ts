@@ -7,13 +7,13 @@
  */
 
 import {
-  CustomPaletteParams,
-  DataBounds,
-  PaletteContinuity,
   checkIsMaxContinuity,
   checkIsMinContinuity,
-  getDataMinMax,
+  PaletteContinuity,
+  DataBounds,
   roundValue,
+  getDataMinMax,
+  CustomPaletteParams,
 } from '../../../../palettes';
 
 import type { ColorRange } from '../types';

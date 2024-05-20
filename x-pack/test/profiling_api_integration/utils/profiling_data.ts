@@ -1,5 +1,3 @@
-import fs from 'fs';
-import Path from 'path';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +8,8 @@ import { Client } from '@elastic/elasticsearch';
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
 import { ProfilingStatus } from '@kbn/profiling-utils';
 import { ToolingLog } from '@kbn/tooling-log';
+import fs from 'fs';
+import Path from 'path';
 import { BetterTest } from '../common/bettertest';
 import { deletePackagePolicy, getProfilingPackagePolicyIds } from './fleet';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { generateNodeNoticeText } from './generate_node_notice_text';
 import { generatePackageNoticeText } from './generate_package_notice_text';
+import { generateNodeNoticeText } from './generate_node_notice_text';
 
 /**
  *  When given a list of packages and the directory to the

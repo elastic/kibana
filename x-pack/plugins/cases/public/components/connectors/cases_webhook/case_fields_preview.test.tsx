@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
+import { screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { connector } from '../mock';
 import FieldsPreview from './case_fields_preview';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 
 describe('Webhook fields: Preview', () => {
   let appMockRenderer: AppMockRenderer;

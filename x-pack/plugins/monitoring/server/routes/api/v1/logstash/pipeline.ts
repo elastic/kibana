@@ -6,16 +6,16 @@
  */
 
 import { notFound } from '@hapi/boom';
+import { handleError, PipelineNotFoundError } from '../../../../lib/errors';
 import {
   postLogstashPipelineRequestParamsRT,
   postLogstashPipelineRequestPayloadRT,
 } from '../../../../../common/http_api/logstash/post_logstash_pipeline';
-import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { PipelineNotFoundError, handleError } from '../../../../lib/errors';
-import { getPipeline } from '../../../../lib/logstash/get_pipeline';
 import { getPipelineVersions } from '../../../../lib/logstash/get_pipeline_versions';
+import { getPipeline } from '../../../../lib/logstash/get_pipeline';
 import { getPipelineVertex } from '../../../../lib/logstash/get_pipeline_vertex';
 import { MonitoringCore, PipelineVersion } from '../../../../types';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 
 function getPipelineVersion(versions: PipelineVersion[], pipelineHash: string | null) {
   return pipelineHash

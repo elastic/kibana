@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { LogCategorization } from '@kbn/aiops-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { pick } from 'lodash';
 import type { FC } from 'react';
 import React from 'react';
-import { HelpMenu } from '../components/help_menu';
-import { MlPageHeader } from '../components/page_header';
+import { pick } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { LogCategorization } from '@kbn/aiops-plugin/public';
+import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { useEnabledFeatures } from '../contexts/ml';
-import { useDataSource } from '../contexts/ml/data_source_context';
+import { HelpMenu } from '../components/help_menu';
+import { MlPageHeader } from '../components/page_header';
 
 export const LogCategorizationPage: FC = () => {
   const { services } = useMlKibana();

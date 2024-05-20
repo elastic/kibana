@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -14,14 +15,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import { DataViewFilterHandler } from '../types';
 import { DataViewsFilterParams } from '../../../state_machines/data_views';
 import {
   allDataViewTypesLabel,
   logsDataViewTypeLabel,
   selectDataViewTypeLabel,
 } from '../constants';
-import { DataViewFilterHandler } from '../types';
 
 interface DataViewFilterProps {
   onFilter: DataViewFilterHandler;

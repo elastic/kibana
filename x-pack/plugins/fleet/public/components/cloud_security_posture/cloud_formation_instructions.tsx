@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import type { CloudSecurityIntegration } from '../agent_enrollment_flyout/types';
 
-import { CloudFormationGuide } from './cloud_formation_guide';
 import { useCreateCloudFormationUrl } from './hooks';
+import { CloudFormationGuide } from './cloud_formation_guide';
 
 interface Props {
   enrollmentAPIKey?: string;

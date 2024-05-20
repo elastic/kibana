@@ -10,8 +10,8 @@ import { schema } from '@kbn/config-schema';
 
 import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
-import { fetchIndex } from '../lib/indices/fetch_index';
 import { fetchIndices } from '../lib/indices/fetch_indices';
+import { fetchIndex } from '../lib/indices/fetch_index';
 import { RouteDependencies } from '../plugin';
 
 export const registerIndicesRoutes = ({ router, getSecurity }: RouteDependencies) => {

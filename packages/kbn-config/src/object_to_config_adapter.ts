@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { cloneDeep, get, has } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { getFlattenedObject } from '@kbn/std';
-import { cloneDeep, get, has } from 'lodash';
 
 import { Config, ConfigPath } from '..';
 

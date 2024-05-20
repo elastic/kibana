@@ -58,7 +58,10 @@
             "tags": [],
             "label": "componentTemplates",
             "description": [],
-            "signature": ["ClusterPutComponentTemplateRequest", "[]"],
+            "signature": [
+              "ClusterPutComponentTemplateRequest",
+              "[]"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -70,7 +73,10 @@
             "tags": [],
             "label": "indexTemplates",
             "description": [],
-            "signature": ["IndicesPutIndexTemplateRequest", "[]"],
+            "signature": [
+              "IndicesPutIndexTemplateRequest",
+              "[]"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -93,7 +99,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -105,7 +113,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -250,7 +260,9 @@
                 "tags": [],
                 "label": "{ logger, pluginStop$, tasksTimeoutMs }",
                 "description": [],
-                "signature": ["GetInstallFnParams"],
+                "signature": [
+                  "GetInstallFnParams"
+                ],
                 "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -343,7 +355,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -355,7 +369,9 @@
                 "tags": [],
                 "label": "prefix",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -438,7 +454,9 @@
             "tags": [],
             "label": "installSpace",
             "description": [],
-            "signature": ["(spaceId: string) => Promise<string>"],
+            "signature": [
+              "(spaceId: string) => Promise<string>"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -450,7 +468,9 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -466,7 +486,9 @@
             "tags": [],
             "label": "getInstalledSpaceName",
             "description": [],
-            "signature": ["(spaceId: string) => Promise<string | undefined>"],
+            "signature": [
+              "(spaceId: string) => Promise<string | undefined>"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -478,7 +500,9 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-data-stream-adapter/src/data_stream_spaces_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -521,7 +545,9 @@
             "tags": [],
             "label": "esCall",
             "description": [],
-            "signature": ["() => Promise<T>"],
+            "signature": [
+              "() => Promise<T>"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/retry_transient_es_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -565,7 +591,9 @@
                 "tags": [],
                 "label": "attempt",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-data-stream-adapter/src/retry_transient_es_errors.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -596,7 +624,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -608,7 +638,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -645,7 +677,9 @@
             "tags": [],
             "label": "totalFieldsLimit",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -714,7 +748,9 @@
             "tags": [],
             "label": "doc_values",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -726,7 +762,9 @@
             "tags": [],
             "label": "example",
             "description": [],
-            "signature": ["string | number | boolean | undefined"],
+            "signature": [
+              "string | number | boolean | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -749,7 +787,9 @@
             "tags": [],
             "label": "ignore_above",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -761,7 +801,9 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -816,7 +858,9 @@
             "tags": [],
             "label": "normalize",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -828,7 +872,9 @@
             "tags": [],
             "label": "required",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -840,7 +886,9 @@
             "tags": [],
             "label": "scaling_factor",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -874,7 +922,9 @@
             "tags": [],
             "label": "properties",
             "description": [],
-            "signature": ["Record<string, { type: string; }> | undefined"],
+            "signature": [
+              "Record<string, { type: string; }> | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/field_maps/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -985,7 +1035,10 @@
             "tags": [],
             "label": "pluginStop$",
             "description": [],
-            "signature": ["Subject", "<void>"],
+            "signature": [
+              "Subject",
+              "<void>"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -997,7 +1050,9 @@
             "tags": [],
             "label": "tasksTimeoutMs",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1101,7 +1156,10 @@
             "tags": [],
             "label": "settings",
             "description": [],
-            "signature": ["IndicesIndexSettings", " | undefined"],
+            "signature": [
+              "IndicesIndexSettings",
+              " | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1113,7 +1171,9 @@
             "tags": [],
             "label": "dynamic",
             "description": [],
-            "signature": ["boolean | \"strict\" | undefined"],
+            "signature": [
+              "boolean | \"strict\" | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1150,7 +1210,9 @@
             "tags": [],
             "label": "componentTemplateRefs",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1162,7 +1224,9 @@
             "tags": [],
             "label": "namespace",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1174,7 +1238,10 @@
             "tags": [],
             "label": "template",
             "description": [],
-            "signature": ["IndicesPutIndexTemplateIndexTemplateMapping", " | undefined"],
+            "signature": [
+              "IndicesPutIndexTemplateIndexTemplateMapping",
+              " | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1186,7 +1253,9 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-data-stream-adapter/src/data_stream_adapter.ts",
             "deprecated": false,
             "trackAdoption": false

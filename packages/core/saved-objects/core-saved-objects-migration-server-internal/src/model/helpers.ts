@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { gt, valid } from 'semver';
 import type {
   BulkOperationContainer,
   QueryDslBoolQuery,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import * as Either from 'fp-ts/lib/Either';
-import { gt, valid } from 'semver';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { AliasAction, FetchIndexResponse } from '../actions';
-import type { BaseState, OutdatedDocumentsSearchRead, ReindexSourceToTempRead } from '../state';
 import type { BulkIndexOperationTuple } from './create_batches';
+import type { BaseState, OutdatedDocumentsSearchRead, ReindexSourceToTempRead } from '../state';
 
 /** @internal */
 export const REINDEX_TEMP_SUFFIX = '_reindex_temp';

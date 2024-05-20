@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Position } from '@elastic/charts';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { Position } from '@elastic/charts';
+import { css } from '@emotion/react';
 
 export interface LegendToggleProps {
   onClick: () => void;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReadySignal, createReadySignal } from './ready_signal';
+import { createReadySignal, ReadySignal } from './ready_signal';
 
 describe('ReadySignal', () => {
   let readySignal: ReadySignal<number>;

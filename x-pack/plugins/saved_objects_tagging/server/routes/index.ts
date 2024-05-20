@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { TagsPluginRouter } from '../types';
 import {
-  registerFindAssignableObjectsRoute,
-  registerGetAssignableTypesRoute,
-  registerUpdateTagsAssignmentsRoute,
-} from './assignments';
-import { registerInternalBulkDeleteRoute, registerInternalFindTagsRoute } from './internal';
-import {
-  registerCreateTagRoute,
-  registerDeleteTagRoute,
+  registerUpdateTagRoute,
   registerGetAllTagsRoute,
   registerGetTagRoute,
-  registerUpdateTagRoute,
+  registerDeleteTagRoute,
+  registerCreateTagRoute,
 } from './tags';
+import {
+  registerFindAssignableObjectsRoute,
+  registerUpdateTagsAssignmentsRoute,
+  registerGetAssignableTypesRoute,
+} from './assignments';
+import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
+import { TagsPluginRouter } from '../types';
 
 export const registerRoutes = ({ router }: { router: TagsPluginRouter }) => {
   // tags API

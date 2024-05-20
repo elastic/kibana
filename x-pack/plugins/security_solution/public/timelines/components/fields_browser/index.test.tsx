@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render, act } from '@testing-library/react';
+import type { Store } from 'redux';
+import type { UseFieldBrowserOptionsProps, UseFieldBrowserOptions, FieldEditorActionsRef } from '.';
+import { useFieldBrowserOptions } from '.';
 import type { Start } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
-import { act, render } from '@testing-library/react';
-import React from 'react';
-import type { Store } from 'redux';
-import type { FieldEditorActionsRef, UseFieldBrowserOptions, UseFieldBrowserOptionsProps } from '.';
-import { useFieldBrowserOptions } from '.';
 
-import { EuiInMemoryTable } from '@elastic/eui';
+import { TestProviders } from '../../../common/mock';
+import { useKibana } from '../../../common/lib/kibana';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import { useKibana } from '../../../common/lib/kibana';
-import { TestProviders } from '../../../common/mock';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
+import { EuiInMemoryTable } from '@elastic/eui';
+import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');

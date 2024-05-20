@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { first, get, sortBy } from 'lodash';
+import { getCoreStart } from '../../../../services';
+import { getMetricsField } from '../../lib/get_metrics_field';
+import { createTickFormatter } from '../../lib/tick_formatter';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { TopN } from '../../../visualizations/views/top_n';
+import { getLastValue } from '../../../../../common/last_value_utils';
+import { isBackgroundInverted } from '../../../lib/set_is_reversed';
+import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React, { useState, useCallback } from 'react';
-import { SERIES_SEPARATOR } from '../../../../../common/constants';
+import { sortBy, first, get } from 'lodash';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
-import { getLastValue } from '../../../../../common/last_value_utils';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
-import { getCoreStart } from '../../../../services';
-import { isBackgroundInverted } from '../../../lib/set_is_reversed';
-import { TopN } from '../../../visualizations/views/top_n';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
-import { getMetricsField } from '../../lib/get_metrics_field';
-import { replaceVars } from '../../lib/replace_vars';
-import { createTickFormatter } from '../../lib/tick_formatter';
+import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 function sortByDirection(data, direction, fn) {
   if (direction === 'desc') {

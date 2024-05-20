@@ -6,8 +6,8 @@
  */
 
 import { FIELD_ORIGIN } from '../../../common/constants';
+import { IField, AbstractField } from './field';
 import { IVectorSource } from '../sources/vector_source';
-import { AbstractField, IField } from './field';
 
 export class InlineField<T extends IVectorSource> extends AbstractField implements IField {
   private readonly _label?: string;

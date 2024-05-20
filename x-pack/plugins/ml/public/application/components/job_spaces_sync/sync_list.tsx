@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EuiText,
+  EuiTitle,
   EuiAccordion,
+  EuiTextColor,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
 } from '@elastic/eui';
 
-import type { SyncResult, SyncSavedObjectResponse } from '../../../../common/types/saved_objects';
+import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { useEnabledFeatures } from '../../contexts/ml';
 
 export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ syncItems }) => {

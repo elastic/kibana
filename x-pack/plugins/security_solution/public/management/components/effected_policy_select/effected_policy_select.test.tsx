@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { act, fireEvent } from '@testing-library/react';
-import React from 'react';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type { EffectedPolicySelectProps } from './effected_policy_select';
 import { EffectedPolicySelect } from './effected_policy_select';
+import React from 'react';
 import { forceHTMLElementOffsetWidth } from './test_utils';
+import { fireEvent, act } from '@testing-library/react';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 
 jest.mock('../../../common/components/user_privileges');
 

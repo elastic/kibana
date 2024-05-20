@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
 import React from 'react';
+import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { routes } from '../../routes';
 

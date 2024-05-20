@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
 import type { PossibleSchemaTypes, SchemaMetaOptional } from '@kbn/analytics-client';
 
@@ -34,8 +34,8 @@ export type RecursiveMakeSchemaFrom<U, RequireMeta> = U extends object
         | MakeSchemaFrom<U, RequireMeta> // But still allow being explicit in the definition if they want to.
     : MakeSchemaFrom<U, RequireMeta>
   : RequireMeta extends true
-    ? { type: PossibleSchemaTypes<U>; _meta: { description: string } }
-    : { type: PossibleSchemaTypes<U>; _meta?: { description: string } };
+  ? { type: PossibleSchemaTypes<U>; _meta: { description: string } }
+  : { type: PossibleSchemaTypes<U>; _meta?: { description: string } };
 
 /**
  * The `schema` property in {@link CollectorOptions} must match the output of

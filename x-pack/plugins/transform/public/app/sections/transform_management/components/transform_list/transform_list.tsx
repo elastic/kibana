@@ -7,6 +7,7 @@
 
 import React, { type FC, type MouseEventHandler, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -19,20 +20,19 @@ import {
   EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { TransformId } from '../../../../../../common/types/transform';
 import {
+  isReauthorizeActionDisabled,
   ReauthorizeActionModal,
   ReauthorizeActionName,
-  isReauthorizeActionDisabled,
   useReauthorizeAction,
 } from '../action_reauthorize';
+import type { TransformId } from '../../../../../../common/types/transform';
 
-import { TRANSFORM_LIST_COLUMN, type TransformListRow } from '../../../../common';
+import { type TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useRefreshTransformList, useTransformCapabilities } from '../../../../hooks';
 
-import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
-import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
+import { CreateTransformButton } from '../create_transform_button';
+import { RefreshTransformListButton } from '../refresh_transform_list_button';
 import {
   DeleteActionModal,
   DeleteActionName,
@@ -40,30 +40,30 @@ import {
   useDeleteAction,
 } from '../action_delete';
 import {
+  isResetActionDisabled,
   ResetActionModal,
   ResetActionName,
-  isResetActionDisabled,
   useResetAction,
 } from '../action_reset';
 import {
-  ScheduleNowActionName,
-  isScheduleNowActionDisabled,
-  useScheduleNowAction,
-} from '../action_schedule_now';
-import {
+  isStartActionDisabled,
   StartActionModal,
   StartActionName,
-  isStartActionDisabled,
   useStartAction,
 } from '../action_start';
-import { StopActionName, isStopActionDisabled, useStopAction } from '../action_stop';
-import { StopActionModal } from '../action_stop/stop_action_modal';
-import { CreateTransformButton } from '../create_transform_button';
-import { RefreshTransformListButton } from '../refresh_transform_list_button';
+import {
+  isScheduleNowActionDisabled,
+  ScheduleNowActionName,
+  useScheduleNowAction,
+} from '../action_schedule_now';
+import { isStopActionDisabled, StopActionName, useStopAction } from '../action_stop';
+import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
 import { filterTransforms, transformFilters } from './transform_search_bar_filters';
-import { useColumns } from './use_columns';
 import { useTableSettings } from './use_table_settings';
+import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
+import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
+import { StopActionModal } from '../action_stop/stop_action_modal';
 
 type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 

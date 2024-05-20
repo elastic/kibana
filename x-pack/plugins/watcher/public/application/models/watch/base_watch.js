@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { get, isEqual, map, remove } from 'lodash';
 import { getSearchValue } from '../../lib/get_search_value';
+import { get, isEqual, remove, map } from 'lodash';
 import { Action } from '../action';
-import { WatchErrors } from '../watch_errors';
 import { WatchStatus } from '../watch_status';
-import { checkActionIdCollision } from './lib/check_action_id_collision';
+import { WatchErrors } from '../watch_errors';
 import { createActionId } from './lib/create_action_id';
+import { checkActionIdCollision } from './lib/check_action_id_collision';
+import { i18n } from '@kbn/i18n';
 
 export class BaseWatch {
   /**

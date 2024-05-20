@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { EuiToolTip } from '@elastic/eui';
 
 /**
  * Applies CSS styling to enable text to be truncated with an ellipsis.

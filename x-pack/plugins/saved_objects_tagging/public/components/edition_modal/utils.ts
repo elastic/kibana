@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   TagAttributes,
   TagValidation,
   validateTagColor,
-  validateTagDescription,
   validateTagName,
+  validateTagDescription,
 } from '../../../common';
 
 /**

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
-import { PersistedIndexPatternLayer, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { RotatingNumberState } from '../common/types';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import { getRotatingNumberRenderer, rotatingNumberFunction } from './expression';
-import image from './image.png';
 import { getRotatingNumberVisualization } from './visualization';
+import { RotatingNumberState } from '../common/types';
+import image from './image.png';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;

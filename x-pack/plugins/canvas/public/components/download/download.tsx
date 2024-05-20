@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { parseDataUrl } from '@kbn/presentation-util-plugin/common';
 import { toByteArray } from 'base64-js';
 import fileSaver from 'file-saver';
 import PropTypes from 'prop-types';
 import React, { ReactElement } from 'react';
+import { parseDataUrl } from '@kbn/presentation-util-plugin/common';
 
 interface Props {
   children: ReactElement<any>;

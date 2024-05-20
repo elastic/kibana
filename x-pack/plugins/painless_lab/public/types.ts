@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
-import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
 
 export interface PluginDependencies {
   licensing: LicensingPluginSetup;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { type FC, useCallback, useMemo } from 'react';
+import { omit, pick } from 'lodash';
 import type { EuiDescriptionListProps, EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiBadge,
@@ -20,21 +22,19 @@ import {
   EuiTitle,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isDefined } from '@kbn/ml-is-defined';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { omit, pick } from 'lodash';
-import React, { type FC, useCallback, useMemo } from 'react';
-import type { AllocatedModel, TrainedModelStat } from '../../../common/types/trained_models';
-import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
-import { useEnabledFeatures } from '../contexts/ml';
-import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
 import { InferenceApi } from './inference_api_tab';
 import type { ModelItemFull } from './models_list';
 import { ModelPipelines } from './pipelines';
+import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
+import type { AllocatedModel, TrainedModelStat } from '../../../common/types/trained_models';
+import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
+import { useEnabledFeatures } from '../contexts/ml';
 
 interface ExpandedRowProps {
   item: ModelItemFull;

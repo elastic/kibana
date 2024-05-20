@@ -1,4 +1,3 @@
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,11 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
  * 2.0.
  */
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getCspStatus } from '../../../routes/status/status';
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 
+import type { CspmIndicesStats, IndexStats } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_DEFAULT_NS,
@@ -16,7 +17,6 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '../../../../common/constants';
-import type { CspmIndicesStats, IndexStats } from './types';
 
 const getIndexDocCount = (esClient: ElasticsearchClient, index: string) =>
   esClient.indices.stats({ index });

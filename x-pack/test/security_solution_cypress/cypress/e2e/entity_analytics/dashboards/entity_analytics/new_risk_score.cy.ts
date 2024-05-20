@@ -13,39 +13,39 @@ import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../../urls/navigation';
 
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
-import { getNewRule } from '../../../../objects/rule';
-import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../../screens/common/filter_group';
 import {
   ENABLE_HOST_RISK_SCORE_BUTTON,
   ENABLE_USER_RISK_SCORE_BUTTON,
   HOSTS_DONUT_CHART,
-  HOSTS_TABLE,
-  HOSTS_TABLE_ALERT_CELL,
   HOSTS_TABLE_ROWS,
   HOST_RISK_SCORE_NO_DATA_DETECTED,
   USERS_DONUT_CHART,
   USERS_TABLE,
-  USERS_TABLE_ALERT_CELL,
   USERS_TABLE_ROWS,
   USER_RISK_SCORE_NO_DATA_DETECTED,
+  USERS_TABLE_ALERT_CELL,
+  HOSTS_TABLE_ALERT_CELL,
+  HOSTS_TABLE,
 } from '../../../../screens/entity_analytics';
+import {
+  openRiskTableFilterAndSelectTheCriticalOption,
+  removeCriticalFilterAndCloseRiskTableFilter,
+} from '../../../../tasks/host_risk';
+import {
+  removeLowFilterAndCloseUserRiskTableFilter,
+  openUserRiskTableFilterAndSelectTheLowOption,
+} from '../../../../tasks/user_risk';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { getNewRule } from '../../../../objects/rule';
+import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../../../tasks/risk_scores';
+import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../../../screens/common/filter_group';
+import { kqlSearch } from '../../../../tasks/security_header';
 import { setEndDate, setStartDate } from '../../../../tasks/date_picker';
 import {
   mockRiskEngineEnabled,
   updateDashboardTimeRange,
 } from '../../../../tasks/entity_analytics';
-import {
-  openRiskTableFilterAndSelectTheCriticalOption,
-  removeCriticalFilterAndCloseRiskTableFilter,
-} from '../../../../tasks/host_risk';
-import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../../../tasks/risk_scores';
-import { kqlSearch } from '../../../../tasks/security_header';
-import {
-  openUserRiskTableFilterAndSelectTheLowOption,
-  removeLowFilterAndCloseUserRiskTableFilter,
-} from '../../../../tasks/user_risk';
 
 const TEST_USER_ALERTS = 1;
 const TEST_USER_NAME = 'test';

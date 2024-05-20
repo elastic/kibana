@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import type {
   ExceptionListSchema,
   UseExceptionListsProps,
 } from '@kbn/securitysolution-io-ts-list-types';
 import * as api from '@kbn/securitysolution-list-api';
 import { ReturnExceptionLists, useExceptionLists } from '@kbn/securitysolution-list-hooks';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
 

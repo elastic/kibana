@@ -1,5 +1,3 @@
-import { EnabledActionTypes } from '@kbn/actions-plugin/server/config';
-import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,10 +6,12 @@ import type { ProductFeatureKeys } from '@kbn/security-solution-features';
  */
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import {
-  EmailConnectorTypeId,
   IndexConnectorTypeId,
   SlackWebhookConnectorTypeId,
+  EmailConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
+import { EnabledActionTypes } from '@kbn/actions-plugin/server/config';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 

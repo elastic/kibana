@@ -6,13 +6,13 @@
  */
 import React from 'react';
 import './helpers.scss';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { isLensEmbeddable } from '../utils';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { StartServices } from '../../types';
-import { isLensEmbeddable } from '../utils';
 
 interface Context extends StartServices {
   embeddable: IEmbeddable;

@@ -6,8 +6,8 @@
  */
 
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
 enum OpenAiProviderType {

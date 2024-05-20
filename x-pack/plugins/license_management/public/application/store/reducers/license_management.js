@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { combineReducers } from 'redux';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 
-import moment from 'moment-timezone';
 import { license } from './license';
-import { permissions } from './permissions';
-import { startBasicStatus } from './start_basic_license_status';
-import { trialStatus } from './trial_status';
-import { uploadErrorMessage } from './upload_error_message';
 import { uploadStatus } from './upload_status';
+import { startBasicStatus } from './start_basic_license_status';
+import { uploadErrorMessage } from './upload_error_message';
+import { trialStatus } from './trial_status';
+import { permissions } from './permissions';
+import moment from 'moment-timezone';
 
 export const WARNING_THRESHOLD_IN_DAYS = 25;
 

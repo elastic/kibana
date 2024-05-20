@@ -6,13 +6,13 @@
  */
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import { find } from 'lodash';
 import React, { useMemo } from 'react';
+import { find } from 'lodash';
 import { useWatch } from 'react-hook-form';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
-import { PacksComboBoxField } from '../../live_queries/form/packs_combobox_field';
 import { usePacks } from '../../packs/use_packs';
+import { PacksComboBoxField } from '../../live_queries/form/packs_combobox_field';
 
 interface PackFieldWrapperProps {
   liveQueryDetails?: {

@@ -122,7 +122,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ModelVersionTestBed",
-        "description": ["\nA testbed that can be used for model version integration tests.\n"],
+        "description": [
+          "\nA testbed that can be used for model version integration tests.\n"
+        ],
         "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -136,7 +138,9 @@
             "description": [
               "\nStarts the ES cluster.\nThis should usually be called only once before the suite runs, within a `beforeAll` block."
             ],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -152,7 +156,9 @@
             "description": [
               "\nStops the ES cluster.\nThis should usually be called only after the suite runs, within a `afterAll` block."
             ],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -163,9 +169,14 @@
             "parentPluginId": "@kbn/core-test-helpers-model-versions",
             "id": "def-common.ModelVersionTestBed.prepareTestKit",
             "type": "Function",
-            "tags": ["see", "see"],
+            "tags": [
+              "see",
+              "see"
+            ],
             "label": "prepareTestKit",
-            "description": ["\nPrepare and return the testkit instance.\n"],
+            "description": [
+              "\nPrepare and return the testkit instance.\n"
+            ],
             "signature": [
               "(options: ",
               {
@@ -238,7 +249,9 @@
             "description": [
               "\nAn ES client connecting to the Elasticsearch cluster used by the testkit."
             ],
-            "signature": ["default"],
+            "signature": [
+              "default"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -296,7 +309,9 @@
             "description": [
               "\nCleanup function that will delete the test index.\nShould be called before calling `testbed.prepareTestKit` again."
             ],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -387,7 +402,9 @@
             "description": [
               "\n(optional) raw record of settings to be used to override the default Kibana configuration.\nif provided, will be merged by the default test configuration.\n"
             ],
-            "signature": ["Record<string, any> | undefined"],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -401,7 +418,9 @@
             "description": [
               "\n(optional) allows to override the kibanaVersion that will be passed down to the migrator instances\nDefaults to the version coming from the package.json."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -415,7 +434,9 @@
             "description": [
               "\n(optional) allows to override the kibanaBranch that will be passed down to the migrator instances\nDefaults to the version coming from the package.json."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -429,7 +450,9 @@
             "description": [
               "\n(optional) the index (pattern) to use for all types.\nDefaults to `.kibana_migrator_tests`"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -443,7 +466,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ModelVersionTestMigrator",
-        "description": ["\nTest utility allowing to test model version changes between versions."],
+        "description": [
+          "\nTest utility allowing to test model version changes between versions."
+        ],
         "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -452,7 +477,9 @@
             "parentPluginId": "@kbn/core-test-helpers-model-versions",
             "id": "def-common.ModelVersionTestMigrator.migrate",
             "type": "Function",
-            "tags": ["see"],
+            "tags": [
+              "see"
+            ],
             "label": "migrate",
             "description": [
               "\nMigrate the document from the provided source to destination model version.\n"
@@ -479,7 +506,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["ModelVersionTestMigrateOptions<In>"],
+                "signature": [
+                  "ModelVersionTestMigrateOptions<In>"
+                ],
                 "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/model_version_tester.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -510,7 +539,9 @@
             "type": "Object",
             "tags": [],
             "label": "definition",
-            "description": ["\nThe SO type definition"],
+            "description": [
+              "\nThe SO type definition"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -531,7 +562,9 @@
             "type": "number",
             "tags": [],
             "label": "modelVersionBefore",
-            "description": ["\nThe model version to be used for the 'before' repository."],
+            "description": [
+              "\nThe model version to be used for the 'before' repository."
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -542,7 +575,9 @@
             "type": "number",
             "tags": [],
             "label": "modelVersionAfter",
-            "description": ["\nThe model version to be used for the 'after' repository."],
+            "description": [
+              "\nThe model version to be used for the 'after' repository."
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-model-versions/src/test_bed/types.ts",
             "deprecated": false,
             "trackAdoption": false

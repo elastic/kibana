@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiHealth } from '@elastic/eui';
 import React from 'react';
+import { EuiHealth } from '@elastic/eui';
 
-import type { HostItem } from '../../../../../common/search_strategy';
-import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy';
-import { EndpointAgentStatus } from '../../../../common/components/agents/agent_status';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type { EntityTableRows } from '../../shared/components/entity_table/types';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
+import { EndpointAgentStatus } from '../../../../common/components/agents/agent_status';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import type { HostItem } from '../../../../../common/search_strategy';
+import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 
 export const policyFields: EntityTableRows<ObservedEntityData<HostItem>> = [

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { PainlessAutocompleteField, PainlessContext } from '../types';
+import type { PainlessContext, PainlessAutocompleteField } from '../types';
 
 export interface EditorState {
   context: PainlessContext;

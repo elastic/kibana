@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButtonEmpty,
   EuiDescribedFormGroup,
+  EuiTitle,
+  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiSwitch,
-  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
-import { StepProps } from '..';
 import { SlmPolicyPayload } from '../../../../../../common/types';
+import { StepProps } from '..';
 
-import { useCore } from '../../../../app_context';
 import {
-  IncludeFeatureStatesField,
-  IncludeGlobalStateField,
   IndicesAndDataStreamsField,
+  IncludeGlobalStateField,
+  IncludeFeatureStatesField,
 } from './fields';
+import { useCore } from '../../../../app_context';
 
 export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
   policy,

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import React, { createContext, useContext } from 'react';
+import SemVer from 'semver/classes/semver';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
   ApplicationStart,
+  I18nStart,
+  ThemeServiceStart,
+  FatalErrorsStart,
+  ScopedHistory,
   DocLinksStart,
   ExecutionContextStart,
-  FatalErrorsStart,
   HttpSetup,
-  I18nStart,
   IUiSettingsClient,
-  ScopedHistory,
-  ThemeServiceStart,
 } from '@kbn/core/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import React, { createContext, useContext } from 'react';
-import SemVer from 'semver/classes/semver';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
 import { EuiBreadcrumb } from '@elastic/eui';
 import { ExtensionsService } from '../services';

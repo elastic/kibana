@@ -7,34 +7,34 @@
  */
 
 import {
-  mockCheckConflicts,
-  mockCheckOriginConflicts,
-  mockCheckReferenceOrigins,
   mockCollectSavedObjects,
-  mockCreateSavedObjects,
-  mockExecuteImportHooks,
+  mockCheckReferenceOrigins,
   mockRegenerateIds,
   mockValidateReferences,
+  mockCheckConflicts,
+  mockCheckOriginConflicts,
+  mockCreateSavedObjects,
+  mockExecuteImportHooks,
 } from './import_saved_objects.test.mock';
 
 import { Readable } from 'stream';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   SavedObjectsImportFailure,
   SavedObjectsImportWarning,
 } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
-  ISavedObjectTypeRegistry,
-  SavedObject,
-  SavedObjectsImportHook,
   SavedObjectsType,
+  ISavedObjectTypeRegistry,
+  SavedObjectsImportHook,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
-import { v4 as uuidv4 } from 'uuid';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
-  type ImportSavedObjectsOptions,
   importSavedObjectsFromStream,
+  type ImportSavedObjectsOptions,
 } from './import_saved_objects';
 import type { ImportStateMap } from './lib';
 
@@ -78,7 +78,7 @@ describe('#importSavedObjectsFromStream', () => {
       ({
         // other attributes aren't needed for the purposes of injecting metadata
         management: { icon: `${type}-icon` },
-      }) as any,
+      } as any),
     importHooks = {},
     managed,
   }: {

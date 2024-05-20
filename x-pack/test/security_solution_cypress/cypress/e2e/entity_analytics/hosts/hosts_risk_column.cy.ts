@@ -8,10 +8,10 @@
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
-import { TABLE_CELL } from '../../../screens/alerts_details';
-import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
-import { kqlSearch } from '../../../tasks/security_header';
 import { hostsUrl } from '../../../urls/navigation';
+import { TABLE_CELL } from '../../../screens/alerts_details';
+import { kqlSearch } from '../../../tasks/security_header';
+import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
 describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {

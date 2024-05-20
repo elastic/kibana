@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiComboBox,
   EuiExpression,
+  EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPopover,
+  EuiComboBox,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState } from 'react';
-import { IErrorObject } from '../../types';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType, FieldOption, ValidNormalizedTypes } from '../types';
+import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 import './of.scss';
 

@@ -14,8 +14,8 @@ import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
 
 import {
-  cleanPreconfiguredOutputs,
   createOrUpdatePreconfiguredOutputs,
+  cleanPreconfiguredOutputs,
   getPreconfiguredOutputFromConfig,
   hashSecret,
 } from './outputs';

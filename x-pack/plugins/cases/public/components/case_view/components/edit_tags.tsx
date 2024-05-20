@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
 import {
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { useCallback, useState } from 'react';
+import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import * as i18n from '../../tags/translations';
 import { useGetTags } from '../../../containers/use_get_tags';
+import { Tags } from '../../tags/tags';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { schemaTags } from '../../create/schema';
-import { Tags } from '../../tags/tags';
-import * as i18n from '../../tags/translations';
 
 export const schema: FormSchema = {
   tags: schemaTags,

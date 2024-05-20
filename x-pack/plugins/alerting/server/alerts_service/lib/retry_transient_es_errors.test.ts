@@ -1,4 +1,3 @@
-import { errors as EsErrors } from '@elastic/elasticsearch';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import type { IBasePath, Logger } from '@kbn/core/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileUserInfo } from '@kbn/user-profile-components';
-import pMap from 'p-map';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { getCaseViewPath } from '../../common/utils';
-import { assigneesTemplateRenderer } from './templates/assignees/renderer';
 import type { NotificationService, NotifyAssigneesArgs } from './types';
+import { assigneesTemplateRenderer } from './templates/assignees/renderer';
 
 type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
 

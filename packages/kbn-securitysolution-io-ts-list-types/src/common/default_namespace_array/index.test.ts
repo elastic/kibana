@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { left } from 'fp-ts/lib/Either';
 import { DefaultNamespaceArray, DefaultNamespaceArrayType } from '.';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('default_namespace_array', () => {
   test('it should validate "null" single item as an array with a "single" value', () => {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
-  TableSearchBar,
   getItemsFilteredBySearchQuery,
+  TableSearchBar,
 } from '../table_search_bar/table_search_bar';
 
 type SortDirection = 'asc' | 'desc';

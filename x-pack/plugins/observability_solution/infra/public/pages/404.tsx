@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import React from 'react';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { MetricsPageTemplate } from './metrics/page_template';
 
 interface NotFoundPageProps {

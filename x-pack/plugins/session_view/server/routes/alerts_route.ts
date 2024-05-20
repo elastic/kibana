@@ -5,20 +5,20 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ALERTS_PER_PAGE,
   ALERTS_ROUTE,
-  ALERT_FIELDS,
-  ALERT_ORIGINAL_TIME_PROPERTY,
-  ALERT_UUID_PROPERTY,
+  ALERTS_PER_PAGE,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
+  ALERT_UUID_PROPERTY,
+  ALERT_ORIGINAL_TIME_PROPERTY,
   PREVIEW_ALERTS_INDEX,
+  ALERT_FIELDS,
 } from '../../common/constants';
 
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';

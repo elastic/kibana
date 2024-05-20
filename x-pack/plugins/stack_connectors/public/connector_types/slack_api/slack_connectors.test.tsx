@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import { SlackActionFieldsComponents as SlackActionFields } from './slack_connectors';

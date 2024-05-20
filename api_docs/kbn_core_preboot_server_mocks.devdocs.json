@@ -80,7 +80,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<PrebootServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<PrebootServiceContract>"
+            ],
             "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

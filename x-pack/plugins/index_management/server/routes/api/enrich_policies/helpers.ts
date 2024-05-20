@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { forEach, keys, reduce, size, sortBy } from 'lodash';
-import { flatMap, flow, groupBy, map, pickBy, values as valuesFP } from 'lodash/fp';
+import { forEach, keys, sortBy, reduce, size } from 'lodash';
+import { flatMap, flow, groupBy, values as valuesFP, map, pickBy } from 'lodash/fp';
 
-import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export type FieldCapsList = FieldCapsResponse['fields'];
 

@@ -11,21 +11,21 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
-  buildEntriesMappingFilter,
-  buildThreatMappingFilter,
-  createAndOrClauses,
-  createInnerAndClauses,
   filterThreatMapping,
+  buildThreatMappingFilter,
   splitShouldClauses,
+  createInnerAndClauses,
+  createAndOrClauses,
+  buildEntriesMappingFilter,
 } from './build_threat_mapping_filter';
 import {
-  getFilterThreatMapping,
-  getThreatListItemMock,
-  getThreatListSearchResponseMock,
-  getThreatMappingFilterMock,
-  getThreatMappingFilterShouldMock,
-  getThreatMappingFiltersShouldMock,
   getThreatMappingMock,
+  getThreatListItemMock,
+  getThreatMappingFilterMock,
+  getFilterThreatMapping,
+  getThreatMappingFiltersShouldMock,
+  getThreatMappingFilterShouldMock,
+  getThreatListSearchResponseMock,
 } from './build_threat_mapping_filter.mock';
 import type { BooleanFilter, ThreatListItem } from './types';
 

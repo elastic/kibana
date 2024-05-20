@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
+import expect from 'expect';
 
 import {
-  ALERT_LAST_DETECTED,
-  ALERT_START,
-  ALERT_SUPPRESSION_DOCS_COUNT,
-  ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_TERMS,
+  ALERT_LAST_DETECTED,
   TIMESTAMP,
+  ALERT_START,
 } from '@kbn/rule-data-utils';
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
@@ -27,16 +27,16 @@ import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/ap
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { createRule } from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
-  dataGeneratorFactory,
   getOpenAlerts,
   getPreviewAlerts,
   getThreatMatchRuleForAlertTesting,
-  patchRule,
   previewRule,
+  patchRule,
   setAlertStatus,
+  dataGeneratorFactory,
 } from '../../../../utils';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

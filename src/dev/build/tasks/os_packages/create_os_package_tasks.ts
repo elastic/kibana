@@ -7,9 +7,9 @@
  */
 
 import { Task } from '../../lib';
-import { createOSPackageKibanaYML } from './create_os_package_kibana_yml';
-import { runDockerGenerator } from './docker_generator';
 import { runFpm } from './run_fpm';
+import { runDockerGenerator } from './docker_generator';
+import { createOSPackageKibanaYML } from './create_os_package_kibana_yml';
 
 export const CreatePackageConfig: Task = {
   description: 'Creating OS package kibana.yml',

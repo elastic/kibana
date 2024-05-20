@@ -8,7 +8,6 @@
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { act, fireEvent, render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import { useUiSetting$ } from '../../../lib/kibana';
 import { TestProviders } from '../../../mock';
 import type {
   UseBulkAlertTagsItemsProps,
@@ -16,6 +15,7 @@ import type {
 } from './use_bulk_alert_tags_items';
 import { useBulkAlertTagsItems } from './use_bulk_alert_tags_items';
 import { useSetAlertTags } from './use_set_alert_tags';
+import { useUiSetting$ } from '../../../lib/kibana';
 
 jest.mock('./use_set_alert_tags');
 jest.mock('../../../lib/kibana');

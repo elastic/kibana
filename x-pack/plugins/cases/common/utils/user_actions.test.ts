@@ -8,16 +8,16 @@
 import { omit } from 'lodash';
 import { UserActionTypes } from '../types/domain';
 import {
-  isCategoryUserAction,
-  isCommentUserAction,
   isConnectorUserAction,
-  isCreateCaseUserAction,
-  isDescriptionUserAction,
-  isPushedUserAction,
+  isTitleUserAction,
   isStatusUserAction,
   isTagsUserAction,
-  isTitleUserAction,
+  isCommentUserAction,
+  isDescriptionUserAction,
+  isPushedUserAction,
+  isCreateCaseUserAction,
   isUserActionType,
+  isCategoryUserAction,
 } from './user_actions';
 
 describe('user action utils', () => {

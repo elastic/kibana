@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
-import { BooleanRelation, FILTERS, FilterStateStore } from '@kbn/es-query';
-import type { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
 import { useMemo } from 'react';
+import type { Filter } from '@kbn/es-query';
+import { FILTERS, BooleanRelation, FilterStateStore } from '@kbn/es-query';
+import type { QueryOperator, DataProvider } from '@kbn/timelines-plugin/common';
 import { DataProviderType } from '../../../../../../common/api/timeline';
+import { replaceParamsQuery } from './replace_params_query';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import {
   EXISTS_OPERATOR,
-  IS_ONE_OF_OPERATOR,
   IS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
 } from '../../../../../timelines/components/timeline/data_providers/data_provider';
-import { replaceParamsQuery } from './replace_params_query';
 
 export interface Provider {
   field: string;

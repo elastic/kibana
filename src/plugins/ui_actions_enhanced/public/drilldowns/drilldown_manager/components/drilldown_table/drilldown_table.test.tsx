@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render } from '@testing-library/react';
 import { DrilldownTable, DrilldownTableItem, TEST_SUBJ_DRILLDOWN_ITEM } from './drilldown_table';
 
 const drilldowns: DrilldownTableItem[] = [

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { useMemo } from 'react';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { useKibana } from '../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 

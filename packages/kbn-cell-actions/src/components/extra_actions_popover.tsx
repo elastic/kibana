@@ -13,11 +13,11 @@ import {
   EuiScreenReaderOnly,
   EuiWrappingPopover,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useMemo } from 'react';
-import type { CellAction, CellActionExecutionContext } from '../types';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import { EXTRA_ACTIONS_ARIA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
+import type { CellAction, CellActionExecutionContext } from '../types';
 
 const euiContextMenuItemCSS = css`
   color: ${euiThemeVars.euiColorPrimaryText};

@@ -9,14 +9,14 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 import { VisTypeVislibCoreSetup } from './plugin';
-import { VislibChartType } from './types';
 import { VislibRenderValue, vislibVisName } from './vis_type_vislib_vis_fn';
+import { VislibChartType } from './types';
 
 const VislibWrapper = lazy(() => import('./vis_wrapper'));
 

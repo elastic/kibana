@@ -5,9 +5,15 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "timeout": ["30s", "-1", "0"]
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
-    "methods": ["GET"],
+    "methods": [
+      "GET"
+    ],
     "patterns": [
       "_nodes/usage",
       "_nodes/{node_id}/usage",

@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { markdown } from '../../../canvas_plugin_src/functions/browser/markdown';
-import { FunctionFactory } from '../../../types';
-import { CSS, MARKDOWN } from '../../constants';
 import { FunctionHelp } from '../function_help';
+import { FunctionFactory } from '../../../types';
+import { MARKDOWN, CSS } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof markdown>> = {
   help: i18n.translate('xpack.canvas.functions.markdownHelpText', {

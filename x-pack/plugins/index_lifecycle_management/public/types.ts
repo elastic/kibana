@@ -8,13 +8,13 @@
 import { ApplicationStart } from '@kbn/core/public';
 import { DocLinksStart } from '@kbn/core/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
 
 import { BreadcrumbService } from './application/services/breadcrumbs';
 

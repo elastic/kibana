@@ -1,7 +1,3 @@
-import type { HttpSetup } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +5,10 @@ import { renderHook } from '@testing-library/react-hooks';
  * 2.0.
  */
 import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import type { HttpSetup } from '@kbn/core/public';
+import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ReactQueryClientProvider } from '../../common/containers/query_client/query_client_provider';
 
 export const getFakeListId: () => string = () => 'FAKE_LIST_ID';

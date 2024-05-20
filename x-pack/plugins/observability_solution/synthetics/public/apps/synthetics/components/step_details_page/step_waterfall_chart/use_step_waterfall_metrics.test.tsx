@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import * as searchHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 import { renderHook } from '@testing-library/react-hooks';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import {
   BROWSER_TRACE_NAME,
   BROWSER_TRACE_START,
   BROWSER_TRACE_TYPE,
   useStepWaterfallMetrics,
 } from './use_step_waterfall_metrics';
+import * as searchHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 describe('useStepWaterfallMetrics', () => {
   it('returns result as expected', () => {

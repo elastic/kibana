@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { getFunctionHelp } from '../../../i18n';
 import { Datatable, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 const noop = () => {};
 
 interface Return extends Datatable {
   columns: [
     { id: 'latitude'; name: 'latitude'; meta: { type: 'number' } },
-    { id: 'longitude'; name: 'longitude'; meta: { type: 'number' } },
+    { id: 'longitude'; name: 'longitude'; meta: { type: 'number' } }
   ];
   rows: [{ latitude: number; longitude: number }];
 }

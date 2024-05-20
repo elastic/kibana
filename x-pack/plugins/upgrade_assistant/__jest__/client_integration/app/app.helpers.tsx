@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AsyncTestBedConfig, TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 
 import { HttpSetup } from '@kbn/core/public';
 import { App } from '../../../public/application/app';

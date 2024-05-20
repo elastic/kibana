@@ -6,9 +6,9 @@
  */
 
 import type { SignalsEnrichment } from '../../types';
+import type { BuildThreatEnrichmentOptions } from './types';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
-import type { BuildThreatEnrichmentOptions } from './types';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 

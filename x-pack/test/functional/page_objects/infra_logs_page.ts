@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import querystring from 'querystring';
 import { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
+import querystring from 'querystring';
+import { encode } from '@kbn/rison';
 import type { PositionStateInUrl } from '@kbn/infra-plugin/public/observability_logs/log_stream_position_state/src/url_state_storage_service';
 import { FilterStateInUrl } from '@kbn/infra-plugin/public/observability_logs/log_stream_query_state';
-import { encode } from '@kbn/rison';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface TabsParams {

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 
-import { CiStatsMetric, CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { CiStatsReporter, CiStatsMetric } from '@kbn/ci-stats-reporter';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';

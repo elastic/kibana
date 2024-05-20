@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import moment from 'moment';
+import { badRequest } from '@hapi/boom';
+import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 interface PipelineOptions {
   id: string;

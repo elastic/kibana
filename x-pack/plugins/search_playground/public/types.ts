@@ -12,21 +12,21 @@ import {
   QueryDslQueryContainer,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import { HttpStart } from '@kbn/core-http-browser';
-import { AppMountParameters } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { HttpStart } from '@kbn/core-http-browser';
 import React, { ComponentType } from 'react';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { ChatRequestData } from '../common/types';
 import type { App } from './components/app';
-import { PlaygroundHeaderDocs } from './components/playground_header_docs';
-import type { Toolbar } from './components/toolbar';
 import type { PlaygroundProvider as PlaygroundProviderComponent } from './providers/playground_provider';
+import type { Toolbar } from './components/toolbar';
+import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export * from '../common/types';
 
@@ -83,9 +83,9 @@ export interface ChatForm {
 }
 
 export enum MessageRole {
-  user = 'human',
-  assistant = 'assistant',
-  system = 'system',
+  'user' = 'human',
+  'assistant' = 'assistant',
+  'system' = 'system',
 }
 
 export interface Message {

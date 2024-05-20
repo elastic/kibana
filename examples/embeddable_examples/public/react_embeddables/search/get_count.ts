@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-plugin/common';
+import { lastValueFrom } from 'rxjs';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { lastValueFrom } from 'rxjs';
+import type { DataView } from '@kbn/data-plugin/common';
 
 export async function getCount(
   dataView: DataView,

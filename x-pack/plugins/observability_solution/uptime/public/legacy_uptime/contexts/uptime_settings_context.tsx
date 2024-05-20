@@ -6,8 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, PropsWithChildren } from 'react';
-import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../common/constants';
 import { UptimeAppProps } from '../app/uptime_app';
+import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../common/constants';
 import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { useGetUrlParams } from '../hooks';
 

@@ -7,8 +7,8 @@
  */
 
 import { ExpressionType } from './expression_type';
-import { getType } from './get_type';
 import { ExpressionValue } from './types';
+import { getType } from './get_type';
 
 const identity = <T>(x: T) => x;
 

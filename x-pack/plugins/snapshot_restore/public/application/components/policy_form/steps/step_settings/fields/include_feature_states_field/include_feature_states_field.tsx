@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiCallOut,
-  EuiComboBoxOptionOption,
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiTitle,
+  EuiCallOut,
+  EuiSpacer,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../../../common/constants';
 import { SlmPolicyPayload } from '../../../../../../../../common/types';
-import { useLoadFeatures } from '../../../../../../services/http/policy_requests';
 import { PolicyValidation } from '../../../../../../services/validation';
+import { useLoadFeatures } from '../../../../../../services/http/policy_requests';
 import { FeatureStatesFormField } from '../../../../../feature_states_form_field';
 
 interface Props {

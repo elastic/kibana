@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { SNAPSHOT_STATE } from '../../../../../constants';
 

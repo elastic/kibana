@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { render, screen } from '@testing-library/react';
 import { Username } from './username';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 describe('Username', () => {
   it('renders the name', () => {

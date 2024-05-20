@@ -1,5 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
-import { sumBy } from 'lodash/fp';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,33 +5,35 @@ import { sumBy } from 'lodash/fp';
  * 2.0.
  */
 import React, { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
 import styled from 'styled-components';
-import { isJobStarted } from '../../../../common/machine_learning/helpers';
+import { useDispatch } from 'react-redux';
+import { sumBy } from 'lodash/fp';
+import { SEVERITY_COLOR } from '../../../overview/components/detection_response/utils';
+import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import {
   Direction,
   RiskScoreEntity,
   RiskScoreFields,
   RiskSeverity,
 } from '../../../../common/search_strategy';
-import { SecurityPageName } from '../../../app/types';
-import { FormattedCount } from '../../../common/components/formatted_number';
+import * as i18n from './translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
+import { SecurityPageName } from '../../../app/types';
+import { HostsTableType, HostsType } from '../../../explore/hosts/store/model';
+import { hostsActions } from '../../../explore/hosts/store';
+import { usersActions } from '../../../explore/users/store';
 import { getTabsOnUsersUrl } from '../../../common/components/link_to/redirect_to_users';
-import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
+import { UsersTableType } from '../../../explore/users/store/model';
 import { useAggregatedAnomaliesByJob } from '../../../common/components/ml/anomaly/use_anomalies_search';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
-import { hostsActions } from '../../../explore/hosts/store';
-import { HostsTableType, HostsType } from '../../../explore/hosts/store/model';
-import { usersActions } from '../../../explore/users/store';
-import { UsersTableType } from '../../../explore/users/store/model';
-import { SEVERITY_COLOR } from '../../../overview/components/detection_response/utils';
-import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import { ENTITY_ANALYTICS_ANOMALIES_PANEL } from '../entity_analytics_anomalies';
-import * as i18n from './translations';
+import { isJobStarted } from '../../../../common/machine_learning/helpers';
+import { FormattedCount } from '../../../common/components/formatted_number';
+import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
+import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${SEVERITY_COLOR.critical};

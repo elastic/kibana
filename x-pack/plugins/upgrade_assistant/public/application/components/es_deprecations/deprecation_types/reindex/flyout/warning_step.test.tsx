@@ -11,7 +11,7 @@ import React from 'react';
 import SemVer from 'semver/classes/semver';
 
 import { ReindexWarning } from '../../../../../../../common/types';
-import { WarningsFlyoutStep, idForWarning } from './warnings_step';
+import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 
 const kibanaVersion = new SemVer('8.0.0');
 

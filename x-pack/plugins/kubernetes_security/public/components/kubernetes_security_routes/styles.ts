@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CSSObject } from '@emotion/react';
 import { useMemo } from 'react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {

@@ -9,8 +9,8 @@ import type {
   Direction,
   FlowTarget,
   NetworkDnsFields,
-  NetworkTlsFields,
   NetworkTopTablesFields,
+  NetworkTlsFields,
   NetworkUsersFields,
   SortField,
 } from '../../../../common/search_strategy';

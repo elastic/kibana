@@ -6,20 +6,20 @@
  */
 
 import {
-  type CriteriaWithPagination,
   EuiBasicTable,
   type EuiBasicTableColumn,
   type EuiBasicTableProps,
-  EuiLink,
   type Pagination,
+  type CriteriaWithPagination,
+  EuiLink,
 } from '@elastic/eui';
+import React from 'react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { TimestampTableCell } from '../timestamp_table_cell';
 import type { CloudDefendPolicy } from '../../../common';
 import { useKibana } from '../../common/hooks/use_kibana';
 import * as TEST_SUBJ from '../../pages/policies/test_subjects';
-import { TimestampTableCell } from '../timestamp_table_cell';
 
 interface PoliciesTableProps
   extends Pick<

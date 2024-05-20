@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { Component } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import React, { Component } from 'react';
 import { AGG_TYPE } from '../../../../common/constants';
 import { AggDescriptor, FieldedAggDescriptor } from '../../../../common/descriptor_types';
+import { MaskEditor } from './mask_editor';
+import { getAggDisplayName } from '../../../classes/sources/es_agg_source';
 import {
   getMaskI18nDescription,
   getMaskI18nValue,
 } from '../../../classes/layers/vector_layer/mask';
-import { getAggDisplayName } from '../../../classes/sources/es_agg_source';
-import { MaskEditor } from './mask_editor';
 
 interface Props {
   fields: DataViewField[];

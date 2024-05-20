@@ -9,11 +9,11 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { Field, UseField } from '../../../../shared_imports';
-import { Field as FieldType, NormalizedField } from '../../../../types';
+import { UseField, Field } from '../../../../shared_imports';
 import { AnalyzersParameter, MetaParameter } from '../../field_parameters';
-import { AdvancedParametersSection, EditFieldFormRow } from '../edit_field';
+import { EditFieldFormRow, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {

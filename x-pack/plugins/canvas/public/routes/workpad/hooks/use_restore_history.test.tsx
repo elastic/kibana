@@ -6,8 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { encode } from '../route_state';
 import { useRestoreHistory } from './use_restore_history';
+import { encode } from '../route_state';
 
 const mockDispatch = jest.fn();
 const mockGetLocation = jest.fn();

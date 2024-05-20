@@ -6,18 +6,18 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { MaintenanceWindowStatus } from '../../../../../common';
-import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { maintenanceWindowClientMock } from '../../../../maintenance_window_client.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { maintenanceWindowClientMock } from '../../../../maintenance_window_client.mock';
 import { createMaintenanceWindowRoute } from './create_maintenance_window_route';
+import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
+import { MaintenanceWindowStatus } from '../../../../../common';
 
-import { CreateMaintenanceWindowRequestBody } from '../../../../../common/routes/maintenance_window/apis/create';
 import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import { transformMaintenanceWindowToResponse } from '../../transforms';
+import { CreateMaintenanceWindowRequestBody } from '../../../../../common/routes/maintenance_window/apis/create';
 import { transformCreateBody } from './transforms';
+import { transformMaintenanceWindowToResponse } from '../../transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 

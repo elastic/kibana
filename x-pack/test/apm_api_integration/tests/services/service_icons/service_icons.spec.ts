@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getServerlessTypeFromCloudData } from '@kbn/apm-plugin/common/serverless';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import expect from '@kbn/expect';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { getServerlessTypeFromCloudData } from '@kbn/apm-plugin/common/serverless';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 

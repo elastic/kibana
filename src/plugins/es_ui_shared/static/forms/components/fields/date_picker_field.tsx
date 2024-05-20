@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
-import { Moment } from 'moment';
 import React from 'react';
+import { Moment } from 'moment';
+import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 

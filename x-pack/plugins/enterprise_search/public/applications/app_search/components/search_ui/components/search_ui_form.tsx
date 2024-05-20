@@ -7,23 +7,23 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiButton, EuiComboBox, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiSelect, EuiComboBox, EuiButton } from '@elastic/eui';
 
 import { EngineLogic } from '../../engine';
 import {
-  FILTER_FIELD_HELP_TEXT,
-  FILTER_FIELD_LABEL,
-  GENERATE_PREVIEW_BUTTON_LABEL,
-  SORT_FIELD_HELP_TEXT,
-  SORT_FIELD_LABEL,
-  THUMBNAIL_FIELD_HELP_TEXT,
-  THUMBNAIL_FIELD_LABEL,
-  TITLE_FIELD_HELP_TEXT,
   TITLE_FIELD_LABEL,
-  URL_FIELD_HELP_TEXT,
+  TITLE_FIELD_HELP_TEXT,
+  FILTER_FIELD_LABEL,
+  FILTER_FIELD_HELP_TEXT,
+  SORT_FIELD_LABEL,
+  SORT_FIELD_HELP_TEXT,
   URL_FIELD_LABEL,
+  URL_FIELD_HELP_TEXT,
+  GENERATE_PREVIEW_BUTTON_LABEL,
+  THUMBNAIL_FIELD_LABEL,
+  THUMBNAIL_FIELD_HELP_TEXT,
 } from '../i18n';
 import { SearchUILogic } from '../search_ui_logic';
 import { ActiveField } from '../types';

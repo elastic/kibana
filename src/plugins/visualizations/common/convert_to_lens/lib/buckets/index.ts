@@ -8,14 +8,14 @@
 
 import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { AggBasedColumn, SchemaConfig } from '../../..';
 import { convertToSchemaConfig } from '../../../vis_schemas';
+import { AggBasedColumn, SchemaConfig } from '../../..';
 import {
   CommonBucketConverterArgs,
   convertToDateHistogramColumn,
   convertToFiltersColumn,
-  convertToRangeColumn,
   convertToTermsColumn,
+  convertToRangeColumn,
 } from '../convert';
 import { getFieldNameFromField, getLabel, isSchemaConfig } from '../utils';
 

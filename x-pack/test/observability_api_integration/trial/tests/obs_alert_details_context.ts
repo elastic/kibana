@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LogCategory } from '@kbn/apm-plugin/server/routes/assistant_functions/get_log_categories';
-import { apm, generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
-import expect from '@kbn/expect';
 import moment from 'moment';
-import { ObsFtrProviderContext } from '../../common/ftr_provider_context';
+import { log, apm, generateShortId, timerange } from '@kbn/apm-synthtrace-client';
+import expect from '@kbn/expect';
+import { LogCategory } from '@kbn/apm-plugin/server/routes/assistant_functions/get_log_categories';
 import { SupertestReturnType } from '../../common/obs_api_supertest';
+import { ObsFtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ApiTest({ getService }: ObsFtrProviderContext) {

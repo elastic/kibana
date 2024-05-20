@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import React, { useRef, useState } from 'react';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiPopover,
-  type EuiPopoverProps,
+  EuiButtonIcon,
   EuiPopoverTitle,
   EuiToolTip,
   PopoverAnchorPosition,
+  type EuiPopoverProps,
 } from '@elastic/eui';
-import React, { useRef, useState } from 'react';
 import { useUIFieldActions } from '../../../hooks/use_field_actions';
 
 interface HoverPopoverActionProps {

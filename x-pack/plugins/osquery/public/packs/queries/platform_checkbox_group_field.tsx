@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { EuiCheckboxGroupOption } from '@elastic/eui';
-import { EuiCheckboxGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty, pickBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { EuiCheckboxGroupOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiCheckboxGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { i18n } from '@kbn/i18n';
 import { useController } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import type { FormFieldProps } from '../../form/types';
 import { PlatformIcon } from './platforms/platform_icon';
 
@@ -83,14 +83,11 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
 
   const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
     () =>
-      (options as EuiCheckboxGroupOption[]).reduce(
-        (acc, option) => {
-          acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
+      (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
+        acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
 
-          return acc;
-        },
-        {} as Record<string, boolean>
-      )
+        return acc;
+      }, {} as Record<string, boolean>)
   );
 
   const handleChange = useCallback(
@@ -114,14 +111,11 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
 
   useEffect(() => {
     setCheckboxIdToSelectedMap(() =>
-      (options as EuiCheckboxGroupOption[]).reduce(
-        (acc, option) => {
-          acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
+      (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
+        acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
 
-          return acc;
-        },
-        {} as Record<string, boolean>
-      )
+        return acc;
+      }, {} as Record<string, boolean>)
     );
   }, [value, options]);
 

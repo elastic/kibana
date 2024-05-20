@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { LOADING_TEST_ID, PERCENT_DATA_TEST_ID, PercentWidget } from '.';
 import { ENTRY_LEADER_INTERACTIVE } from '../../../common/constants';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { GlobalFilter } from '../../types';
+import { PercentWidget, LOADING_TEST_ID, PERCENT_DATA_TEST_ID } from '.';
 import { useFetchPercentWidgetData } from './hooks';
 
 const MOCK_DATA: Record<string, number> = {

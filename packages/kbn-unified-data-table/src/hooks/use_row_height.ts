@@ -8,14 +8,14 @@
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useCallback, useMemo } from 'react';
-import { RowHeightMode, RowHeightSettingsProps } from '../components/row_height_settings';
-import { ROWS_HEIGHT_OPTIONS } from '../constants';
+import { isValidRowHeight } from '../utils/validate_row_height';
 import {
   DataGridOptionsRecord,
   getStoredRowHeight,
   updateStoredRowHeight,
 } from '../utils/row_heights';
-import { isValidRowHeight } from '../utils/validate_row_height';
+import { ROWS_HEIGHT_OPTIONS } from '../constants';
+import { RowHeightMode, RowHeightSettingsProps } from '../components/row_height_settings';
 
 interface UseRowHeightProps {
   storage: Storage;

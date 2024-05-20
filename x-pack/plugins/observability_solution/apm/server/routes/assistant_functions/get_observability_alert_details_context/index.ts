@@ -10,22 +10,22 @@ import {
   AlertDetailsContextualInsightsHandlerQuery,
   AlertDetailsContextualInsightsRequestContext,
 } from '@kbn/observability-plugin/server/services';
-import { isEmpty } from 'lodash';
 import moment from 'moment';
+import { isEmpty } from 'lodash';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import { getApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
-import { getAssistantDownstreamDependencies } from '../get_apm_downstream_dependencies';
 import { getApmServiceSummary } from '../get_apm_service_summary';
-import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
-import { getExitSpanChangePoints, getServiceChangePoints } from '../get_changepoints';
+import { getAssistantDownstreamDependencies } from '../get_apm_downstream_dependencies';
 import { getLogCategories } from '../get_log_categories';
-import { getApmErrors } from './get_apm_errors';
-import { getContainerIdFromSignals } from './get_container_id_from_signals';
+import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
+import { getContainerIdFromSignals } from './get_container_id_from_signals';
+import { getExitSpanChangePoints, getServiceChangePoints } from '../get_changepoints';
+import { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
+import { getApmErrors } from './get_apm_errors';
 
 export const getAlertDetailsContextHandler = (
   resourcePlugins: APMRouteHandlerResources['plugins'],

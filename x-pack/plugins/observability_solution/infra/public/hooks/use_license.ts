@@ -6,10 +6,10 @@
  */
 
 import url from 'url';
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import { useCallback } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import { useKibanaContextForPlugin } from './use_kibana';
 
 interface UseLicenseReturnValue {

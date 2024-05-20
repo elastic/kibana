@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../loading';
 import { ArgLabel } from './arg_label';
@@ -56,7 +56,7 @@ export class PendingArgValue extends React.PureComponent {
           expandable={false}
         >
           <div className="canvasArg--pending">
-            <Loading animated={true} text={strings.getLoadingMessage()} />
+            <Loading animated text={strings.getLoadingMessage()} />
           </div>
         </ArgLabel>
       </div>

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { htmlIdGenerator } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { htmlIdGenerator } from '@elastic/eui';
 
+import { parseRange, NumberListRange } from './range';
 import { NumberRowModel } from './number_row';
-import { NumberListRange, parseRange } from './range';
 
 const EMPTY_STRING = '';
 const defaultRange = parseRange('[0,Infinity)');

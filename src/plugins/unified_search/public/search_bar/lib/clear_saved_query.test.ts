@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { clearStateFromSavedQuery } from './clear_saved_query';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 describe('clearStateFromSavedQuery', () => {
   let dataMock: jest.Mocked<DataPublicPluginStart>;

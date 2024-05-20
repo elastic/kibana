@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiCode, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiIcon, EuiToolTip, EuiCode } from '@elastic/eui';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 

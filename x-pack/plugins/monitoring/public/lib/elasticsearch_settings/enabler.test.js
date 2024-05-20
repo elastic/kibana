@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { forbidden } from '@hapi/boom';
 import { Enabler } from '.';
+import { forbidden } from '@hapi/boom';
 
 const updateModelSpy = jest.fn((properties) => properties);
 

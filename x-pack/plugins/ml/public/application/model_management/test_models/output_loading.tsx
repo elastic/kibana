@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { EuiSkeletonTextProps } from '@elastic/eui';
-import { EuiSkeletonText } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
+import type { EuiSkeletonTextProps } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 
 export const OutputLoadingContent: FC<{ text: string }> = ({ text }) => {
   const actualLines = text.split(/\r\n|\r|\n/).length + 1;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import React, { useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useRef, useState } from 'react';
-import { ChatApi, useChatConfig } from '../chat/use_chat_config';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { useChatConfig, ChatApi } from '../chat/use_chat_config';
 export type { ChatApi } from '../chat/use_chat_config';
 
 export interface Props {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { existsSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
-import { mkdir, readFile, unlink, writeFile } from 'fs/promises';
+import { mkdir, writeFile, readFile, unlink } from 'fs/promises';
+import { existsSync } from 'fs';
 
 interface SettingStorageOptions<TSettingsDef extends object = object> {
   /** The default directory where settings will be saved. Defaults to `~/.kibanaSecuritySolutionCliTools` */

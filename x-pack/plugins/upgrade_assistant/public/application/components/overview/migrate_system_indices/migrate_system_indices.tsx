@@ -7,21 +7,21 @@
 
 import React, { FunctionComponent, useEffect } from 'react';
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiText,
+  EuiButton,
+  EuiSpacer,
+  EuiIcon,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCode,
+  EuiLink,
+} from '@elastic/eui';
+import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { DocLinksStart } from '@kbn/core/public';
 import type { SystemIndicesMigrationFeature } from '../../../../../common/types';

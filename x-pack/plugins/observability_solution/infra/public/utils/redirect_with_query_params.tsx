@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
-import { Redirect, RedirectProps, RouteProps } from 'react-router-dom';
+import { Redirect, RouteProps, RedirectProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 interface RedirectWithQueryParamsProps extends Omit<RedirectProps, 'to'> {
   from: string;

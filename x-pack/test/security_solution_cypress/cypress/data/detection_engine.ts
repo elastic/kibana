@@ -17,15 +17,15 @@ import type {
 
 import type {
   IndexPatternArray,
-  InvestigationFields,
   InvestigationGuide,
-  MaxSignals,
+  InvestigationFields,
   RuleDescription,
   RuleFalsePositiveArray,
-  RuleName,
   RuleQuery,
+  RuleName,
   RuleReferenceArray,
   RuleTagArray,
+  MaxSignals,
   SetupGuide,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 

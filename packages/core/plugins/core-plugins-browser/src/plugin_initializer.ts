@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { EnvironmentMode, PackageInfo } from '@kbn/config';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { LoggerFactory } from '@kbn/logging';
+import type { PackageInfo, EnvironmentMode } from '@kbn/config';
 import type { Plugin } from './plugin';
 
 /**
@@ -21,7 +21,7 @@ export type PluginInitializer<
   TSetup,
   TStart,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object,
+  TPluginsStart extends object = object
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**

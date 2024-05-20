@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiTextArea } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { act, fireEvent, render } from '@testing-library/react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { EuiTextArea } from '@elastic/eui';
 
-import { shallow } from 'enzyme';
 import { ExceptionItemComments } from '.';
-import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
-import { useCurrentUser } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
+import { useCurrentUser } from '../../../../common/lib/kibana';
+import { shallow } from 'enzyme';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 jest.mock('../../../../common/lib/kibana');
 

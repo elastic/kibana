@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_COLOR_MAPPING_CONFIG, PaletteOutput } from '@kbn/coloring';
+import { PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { suggestions } from './suggestions';
+import type { DataType, SuggestionRequest } from '../../types';
+import type { PieLayerState, PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -13,9 +16,6 @@ import {
   PieChartTypes,
 } from '../../../common/constants';
 import { layerTypes } from '../../../common/layer_types';
-import type { PieLayerState, PieVisualizationState } from '../../../common/types';
-import type { DataType, SuggestionRequest } from '../../types';
-import { suggestions } from './suggestions';
 
 describe('suggestions', () => {
   describe('pie', () => {

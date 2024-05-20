@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiModal, EuiModalBody, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { EuiModal, EuiModalBody, EuiSpacer } from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { Rule, RuleTypeParams, SnoozeSchedule } from '../../../../types';
 import { snoozeRule } from '../../../lib/rule_api/snooze';
 import { unsnoozeRule } from '../../../lib/rule_api/unsnooze';
 import {
@@ -18,6 +17,7 @@ import {
   UNSNOOZE_SUCCESS_MESSAGE,
 } from './notify_badge';
 import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
+import { Rule, RuleTypeParams, SnoozeSchedule } from '../../../../types';
 
 export interface RuleSnoozeModalProps {
   rule: Rule<RuleTypeParams>;

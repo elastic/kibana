@@ -1,7 +1,3 @@
-import {
-  ALL_DATASETS_LOCATOR_ID,
-  AllDatasetsLocatorParams,
-} from '@kbn/deeplinks-observability/locators';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +5,10 @@ import {
  * 2.0.
  */
 import React, { useEffect } from 'react';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
 import { useHasData } from '../../hooks/use_has_data';
 import { useKibana } from '../../utils/kibana_react';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useQuery } from '@tanstack/react-query';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 
 import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { useKibana } from '../utils/kibana_react';
-import { ActiveAlerts } from './active_alerts';
 import { sloKeys } from './query_key_factory';
+import { ActiveAlerts } from './active_alerts';
 
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 
@@ -101,12 +101,9 @@ export function useFetchActiveAlerts({
           signal,
         });
 
-        const activeAlertsData = response.aggregations.perSloId.buckets.reduce(
-          (acc, bucket) => {
-            return { ...acc, [bucket.key_as_string]: bucket.doc_count ?? 0 };
-          },
-          {} as Record<string, number>
-        );
+        const activeAlertsData = response.aggregations.perSloId.buckets.reduce((acc, bucket) => {
+          return { ...acc, [bucket.key_as_string]: bucket.doc_count ?? 0 };
+        }, {} as Record<string, number>);
         return new ActiveAlerts(activeAlertsData);
       } catch (error) {
         // ignore error

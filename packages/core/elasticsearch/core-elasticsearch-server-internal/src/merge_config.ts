@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { merge } from '@kbn/std';
 import { Writable } from '@kbn/utility-types';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 
 type WritableConfig = Writable<ElasticsearchClientConfig>;
 

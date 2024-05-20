@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { screen, waitFor } from '@testing-library/react';
 import React, { Suspense } from 'react';
+import { screen, waitFor } from '@testing-library/react';
 import { LENS_ATTACHMENT_TYPE } from '../../../common';
 import type { PersistableStateAttachmentViewProps } from '../../client/attachment_framework/types';
 import { AttachmentActionType } from '../../client/attachment_framework/types';

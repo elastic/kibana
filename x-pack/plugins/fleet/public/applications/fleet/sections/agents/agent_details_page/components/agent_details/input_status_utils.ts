@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { PackagePolicy } from '../../../../../types';
 import type {
   FleetServerAgentComponent,
   FleetServerAgentComponentStatus,
   FleetServerAgentComponentUnit,
 } from '../../../../../../../../common/types/models/agent';
-import type { PackagePolicy } from '../../../../../types';
 export class InputStatusFormatter {
   public status?: FleetServerAgentComponentStatus;
   public description?: string;

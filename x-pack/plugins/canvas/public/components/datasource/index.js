@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import { PropTypes } from 'prop-types';
 import React, { useState, useCallback } from 'react';
+import { PropTypes } from 'prop-types';
 import { connect } from 'react-redux';
+import { get } from 'lodash';
 import { datasourceRegistry } from '../../expression_types';
-import { flushContext, setAstAtIndex } from '../../state/actions/elements';
 import { getServerFunctions } from '../../state/selectors/app';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
+import { setAstAtIndex, flushContext } from '../../state/actions/elements';
 import { Datasource as Component } from './datasource';
 
 const DatasourceComponent = (props) => {

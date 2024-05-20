@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import type { StatsBarStat } from './stat';
 import { Stat } from './stat';
 

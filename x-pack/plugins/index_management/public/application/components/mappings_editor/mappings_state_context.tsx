@@ -8,7 +8,7 @@
 import React, { useReducer, createContext, useContext } from 'react';
 
 import { reducer } from './reducer';
-import { Dispatch, State } from './types';
+import { State, Dispatch } from './types';
 
 const StateContext = createContext<State | undefined>(undefined);
 const DispatchContext = createContext<Dispatch | undefined>(undefined);

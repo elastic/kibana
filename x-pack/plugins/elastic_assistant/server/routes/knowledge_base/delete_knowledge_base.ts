@@ -9,15 +9,15 @@ import { IRouter, KibanaRequest } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   DeleteKnowledgeBaseRequestParams,
   DeleteKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen';
-import { KNOWLEDGE_BASE } from '../../../common/constants';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
+import { KNOWLEDGE_BASE } from '../../../common/constants';
+import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
 
 /**

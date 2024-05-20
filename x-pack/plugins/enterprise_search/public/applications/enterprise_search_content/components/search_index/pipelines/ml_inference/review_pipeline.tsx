@@ -14,8 +14,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

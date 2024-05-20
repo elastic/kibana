@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { VisitorBreakdown } from '../visitor_breakdown';
 import { VisitorBreakdownMap } from '../visitor_breakdown_map';
 

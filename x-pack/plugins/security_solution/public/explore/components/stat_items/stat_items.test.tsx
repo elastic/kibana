@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
+import { StatItemsComponent } from './stat_items';
 import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 import { TestProviders } from '../../../common/mock/test_providers';
-import { StatItemsComponent } from './stat_items';
 import { useToggleStatus } from './use_toggle_status';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');

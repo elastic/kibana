@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import {
   FieldFormatEditor,
   FieldFormatEditorFactory,
   IndexPatternFieldEditorSetup,
 } from '@kbn/data-view-field-editor-plugin/public';
-import React from 'react';
 import { ExampleCurrencyFormat } from '../../common';
 
 // 1. Create an editor component

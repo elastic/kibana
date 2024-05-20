@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { APP_POLICIES_PATH } from '../../../../../common/constants';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import { loadPage } from '../../tasks/common';
 import { login } from '../../tasks/login';
+import { visitPolicyDetailsPage } from '../../screens/policy_details';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { APP_POLICIES_PATH } from '../../../../../common/constants';
 
 describe(
   'When displaying the Policy Details in Security Essentials PLI',

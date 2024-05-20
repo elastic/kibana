@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 
 jest.mock('@kbn/saved-objects-plugin/public', () => ({
   SavedObjectSaveModal: () => null,

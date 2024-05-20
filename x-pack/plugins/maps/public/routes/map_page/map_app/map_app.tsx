@@ -5,12 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
+import _ from 'lodash';
+import { finalize, switchMap, tap } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import {
   AppLeaveAction,
   AppMountParameters,
   KibanaExecutionContext,
   ScopedHistory,
 } from '@kbn/core/public';
+import { Adapters } from '@kbn/embeddable-plugin/public';
+import { Subscription } from 'rxjs';
+import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import {
   GlobalQueryStateFromUrl,
@@ -19,32 +27,16 @@ import {
   SavedQuery,
   syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { Adapters } from '@kbn/embeddable-plugin/public';
-import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import {
-  IKbnUrlStateStorage,
   createKbnUrlStateStorage,
   withNotifyOnErrors,
+  IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import _ from 'lodash';
-import React from 'react';
-import { finalize, switchMap, tap } from 'rxjs';
-import { Subscription } from 'rxjs';
 import {
-  APP_ID,
-  MAP_EMBEDDABLE_NAME,
-  getEditPath,
-  getFullPath,
-} from '../../../../common/constants';
-import { MapContainer } from '../../../connected_components/map_container';
-import { getIndexPatternsFromIds } from '../../../index_pattern_util';
-import {
-  getCoreChrome,
   getData,
   getExecutionContextService,
+  getCoreChrome,
   getIndexPatternService,
   getMapsCapabilities,
   getNavigation,
@@ -52,17 +44,25 @@ import {
   getTimeFilter,
   getToasts,
 } from '../../../kibana_services';
+import { AppStateManager, startAppStateSyncing } from '../url_state';
+import { MapContainer } from '../../../connected_components/map_container';
+import { getIndexPatternsFromIds } from '../../../index_pattern_util';
+import { getTopNavConfig } from '../top_nav_config';
 import {
-  SavedMap,
+  getEditPath,
+  getFullPath,
+  APP_ID,
+  MAP_EMBEDDABLE_NAME,
+} from '../../../../common/constants';
+import {
   getInitialQuery,
   getInitialRefreshConfig,
+  SavedMap,
   unsavedChangesTitle,
   unsavedChangesWarning,
 } from '../saved_map';
-import { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
-import { getTopNavConfig } from '../top_nav_config';
-import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
+import { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
 
 export interface Props {
   savedMap: SavedMap;

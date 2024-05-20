@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { always, pretty } from './utils';
 import chalk from 'chalk';
+import { fromNullable } from './either';
 import {
   COVERAGE_INDEX,
   RESEARCH_COVERAGE_INDEX,
   RESEARCH_TOTALS_INDEX,
   TOTALS_INDEX,
 } from './constants';
-import { fromNullable } from './either';
-import { always, pretty } from './utils';
 
 export function errMsg(index, redacted, body, e) {
   const orig = fromNullable(e.body).fold(

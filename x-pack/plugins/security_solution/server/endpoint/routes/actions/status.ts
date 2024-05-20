@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import { ActionStatusRequestSchema } from '../../../../common/api/endpoint';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { getPendingActionsSummary } from '../../services';
 import type { EndpointAppContext } from '../../types';
+import { getPendingActionsSummary } from '../../services';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**

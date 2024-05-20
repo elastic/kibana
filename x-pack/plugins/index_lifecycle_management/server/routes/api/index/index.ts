@@ -6,9 +6,9 @@
  */
 
 import { RouteDependencies } from '../../../types';
-import { registerAddPolicyRoute } from './register_add_policy_route';
-import { registerRemoveRoute } from './register_remove_route';
 import { registerRetryRoute } from './register_retry_route';
+import { registerRemoveRoute } from './register_remove_route';
+import { registerAddPolicyRoute } from './register_add_policy_route';
 
 export function registerIndexRoutes(dependencies: RouteDependencies) {
   registerRetryRoute(dependencies);

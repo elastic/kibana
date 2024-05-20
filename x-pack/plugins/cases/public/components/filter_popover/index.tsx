@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
 import {
   EuiCallOut,
   EuiFilterButton,
@@ -17,7 +18,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useState } from 'react';
 
 interface FilterPopoverProps {
   buttonLabel: string;

@@ -7,13 +7,13 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 
-import { readFileSync } from 'fs';
 import path from 'path';
 import { safeLoad as loadYaml } from 'js-yaml';
+import { readFileSync } from 'fs';
 
-import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
-import type { YamlRoleDefinitions } from '../../../test_serverless/shared/lib';
 import { getFailedSpecVideos } from './support/filter_videos';
+import type { YamlRoleDefinitions } from '../../../test_serverless/shared/lib';
+import { setupUserDataLoader } from '../../../test_serverless/functional/test_suites/security/cypress/support/setup_data_loader_tasks';
 const ROLES_YAML_FILE_PATH = path.join(
   `${__dirname}/support`,
   'project_controller_osquery_roles.yml'

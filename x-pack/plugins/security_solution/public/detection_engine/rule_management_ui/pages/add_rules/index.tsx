@@ -7,24 +7,24 @@
 
 import React from 'react';
 
+import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 
-import { APP_UI_ID } from '../../../../../common';
-import { getDetectionEngineUrl } from '../../../../common/components/link_to';
-import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
-import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
-import { AddPrebuiltRulesHeaderButtons } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_header_buttons';
+import * as i18n from './translations';
 import { AddPrebuiltRulesTable } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table';
 import { AddPrebuiltRulesTableContextProvider } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_table_context';
-import * as i18n from './translations';
+import { AddPrebuiltRulesHeaderButtons } from '../../components/rules_table/add_prebuilt_rules_table/add_prebuilt_rules_header_buttons';
+import { APP_UI_ID } from '../../../../../common';
+import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
+import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
+import { getDetectionEngineUrl } from '../../../../common/components/link_to';
 
 const AddRulesPageComponent: React.FC = () => {
   const { navigateToApp } = useKibana().services.application;

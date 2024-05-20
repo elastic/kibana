@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { API_BASE_PATH, INDEX_TO_ROLLUP_MAPPINGS, ROLLUP_INDEX_NAME } from './constants';
-import { getRandomString, initElasticsearchIndicesHelpers } from './lib';
+import { initElasticsearchIndicesHelpers, getRandomString } from './lib';
+import { API_BASE_PATH, ROLLUP_INDEX_NAME, INDEX_TO_ROLLUP_MAPPINGS } from './constants';
 
 const jobsCreated = [];
 const jobsStarted = [];

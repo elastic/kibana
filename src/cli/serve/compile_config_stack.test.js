@@ -14,7 +14,7 @@ jest.mock('@kbn/repo-info', () => ({
 }));
 jest.mock('@kbn/config');
 
-import { existsSync, statSync, writeFileSync } from 'fs';
+import { statSync, existsSync, writeFileSync } from 'fs';
 import { getConfigFromFiles } from '@kbn/config';
 
 import { compileConfigStack } from './compile_config_stack';

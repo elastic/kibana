@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 
 import { PLUGIN_ID } from '../../common';
-import { isLeftClickEvent, isModifiedEvent, useKibana } from '../common/lib/kibana';
+import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 
 interface NavigationButtonsProps {
   isDisabled?: boolean;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { INTEGRATION_PACKAGE_NAME } from '@kbn/cloud-defend-plugin/common/constants';
 import {
   CNVM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,
@@ -13,6 +12,7 @@ import {
   LATEST_FINDINGS_INDEX_PATTERN,
   LATEST_VULNERABILITIES_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { INTEGRATION_PACKAGE_NAME } from '@kbn/cloud-defend-plugin/common/constants';
 
 const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat';
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';

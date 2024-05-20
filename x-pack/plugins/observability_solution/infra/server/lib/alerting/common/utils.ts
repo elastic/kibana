@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { Alert } from '@kbn/alerts-as-data-utils';
+import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
+import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { LogMeta, Logger } from '@kbn/logging';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import {
   ParsedTechnicalFields,
   parseTechnicalFields,
 } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { isEmpty, isError } from 'lodash';
+import { Alert } from '@kbn/alerts-as-data-utils';
+import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import {
   getInventoryViewInAppUrl,
   getMetricsViewInAppUrl,
@@ -251,7 +251,7 @@ export const flattenAdditionalContext = (
 };
 
 export const getContextForRecoveredAlerts = <
-  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields),
+  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields)
 >(
   alertHitSource: Partial<T> | undefined | null
 ): AdditionalContext => {

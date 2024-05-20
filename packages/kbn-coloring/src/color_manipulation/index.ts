@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isColorDark } from '@elastic/eui';
 import chroma from 'chroma-js';
+import { isColorDark } from '@elastic/eui';
 
 export const enforceColorContrast = (color: string, backgroundColor: string) => {
   const finalColor =

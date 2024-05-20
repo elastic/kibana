@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FC } from 'react';
+import React, { type ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -23,16 +24,15 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { i18n } from '@kbn/i18n';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { debounce } from 'lodash';
-import type { FC } from 'react';
-import React, { type ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { isValidIndexName } from '../../../../../common/util/es_utils';
 import { useMlKibana } from '../../../contexts/kibana';
+import { isValidIndexName } from '../../../../../common/util/es_utils';
+import { createKibanaDataView, checkIndexExists } from '../retry_create_data_view';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
-import { checkIndexExists, createKibanaDataView } from '../retry_create_data_view';
 
 const destIndexEmpty = i18n.translate(
   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destIndexEmpty',

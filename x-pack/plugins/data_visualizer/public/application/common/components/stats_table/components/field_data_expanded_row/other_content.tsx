@@ -7,8 +7,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { ExamplesList } from '../../../examples_list';
 import type { FieldDataRowProps } from '../../types/field_data_row';
+import { ExamplesList } from '../../../examples_list';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 

@@ -1,4 +1,3 @@
-import demo from '../images/demo.png';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import demo from '../images/demo.png';
  */
 import documentation from '../images/documentation.png';
 import forum from '../images/forum.png';
+import demo from '../images/demo.png';
 import labs from '../images/labs.png';
 import * as i18n from './translations';
 

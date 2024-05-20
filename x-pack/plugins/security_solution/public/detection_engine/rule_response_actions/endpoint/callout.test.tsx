@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { render } from '@testing-library/react';
 import React from 'react';
 import { EndpointActionCallout } from './callout';
+import { render } from '@testing-library/react';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib');
 
 const useFormDataMock = useFormData as jest.MockedFunction<typeof useFormData>;

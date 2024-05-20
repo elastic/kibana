@@ -6,19 +6,19 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BUILT_IN_MODEL_TAG, BUILT_IN_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { BUILT_IN_MODEL_TYPE, BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import { listTypeSchema } from './schemas/management_schema';
 
-import type {
-  AnalyticsManagementItems,
-  AnomalyDetectionManagementItems,
-  TrainedModelsManagementItems,
-} from '../../common/types/management';
 import { jobServiceProvider } from '../models/job_service';
 import { checksFactory } from '../saved_objects';
+import type {
+  AnomalyDetectionManagementItems,
+  AnalyticsManagementItems,
+  TrainedModelsManagementItems,
+} from '../../common/types/management';
 import { filterForEnabledFeatureModels } from './trained_models';
 
 /**
@@ -95,13 +95,10 @@ export function managementRoutes({ router, routeGuard, getEnabledFeatures }: Rou
                   jobsSpaces(),
                 ]);
 
-                const dfaStatsMapped = dfaJobsStats.reduce(
-                  (acc, cur) => {
-                    acc[cur.id] = cur;
-                    return acc;
-                  },
-                  {} as Record<string, estypes.MlDataframeAnalytics>
-                );
+                const dfaStatsMapped = dfaJobsStats.reduce((acc, cur) => {
+                  acc[cur.id] = cur;
+                  return acc;
+                }, {} as Record<string, estypes.MlDataframeAnalytics>);
 
                 const dfaJobsWithSpaces: AnalyticsManagementItems[] = dfaJobs.map((j) => {
                   const id = j.id;
@@ -132,13 +129,10 @@ export function managementRoutes({ router, routeGuard, getEnabledFeatures }: Rou
 
                 const filteredModels = filterForEnabledFeatureModels(models, getEnabledFeatures());
 
-                const modelStatsMapped = modelsStats.reduce(
-                  (acc, cur) => {
-                    acc[cur.model_id] = cur;
-                    return acc;
-                  },
-                  {} as Record<string, estypes.MlTrainedModelStats>
-                );
+                const modelStatsMapped = modelsStats.reduce((acc, cur) => {
+                  acc[cur.model_id] = cur;
+                  return acc;
+                }, {} as Record<string, estypes.MlTrainedModelStats>);
 
                 const modelsWithSpaces: TrainedModelsManagementItems[] = filteredModels.map((m) => {
                   const id = m.model_id;

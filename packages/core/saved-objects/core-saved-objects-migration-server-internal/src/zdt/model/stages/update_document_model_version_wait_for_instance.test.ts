@@ -7,12 +7,12 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import type { UpdateDocumentModelVersionsWaitForInstancesState } from '../../state';
 import {
-  type MockedMigratorContext,
   createContextMock,
   createPostDocInitState,
+  type MockedMigratorContext,
 } from '../../test_helpers';
+import type { UpdateDocumentModelVersionsWaitForInstancesState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { updateDocumentModelVersionWaitForInstances } from './update_document_model_version_wait_for_instances';
 

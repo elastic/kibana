@@ -6,7 +6,12 @@
     "id": "savedObjects",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["data", "dataViews"],
-    "requiredBundles": ["kibanaUtils"]
+    "requiredPlugins": [
+      "data",
+      "dataViews"
+    ],
+    "requiredBundles": [
+      "kibanaUtils"
+    ]
   }
 }

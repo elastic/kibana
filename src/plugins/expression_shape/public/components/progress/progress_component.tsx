@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import React, { CSSProperties, RefCallback, useCallback, useEffect, useRef, useState } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import React, { CSSProperties, RefCallback, useCallback, useEffect, useRef, useState } from 'react';
-import { getId } from '../../../common/lib';
 import { NodeDimensions, ProgressRendererConfig } from '../../../common/types';
-import { getDefaultShapeData } from '../reusable';
-import { getShapeContentElement } from '../reusable/shape_factory';
 import { ShapeRef, SvgConfig, SvgTextAttributes } from '../reusable/types';
-import { ProgressDrawerComponent } from './progress_drawer';
+import { getShapeContentElement } from '../reusable/shape_factory';
 import { getTextAttributes, getViewBox } from './utils';
+import { getId } from '../../../common/lib';
+import { getDefaultShapeData } from '../reusable';
+import { ProgressDrawerComponent } from './progress_drawer';
 
 interface ProgressComponentProps extends ProgressRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];

@@ -1,6 +1,3 @@
-import * as Rx from 'rxjs';
-import * as rxOp from 'rxjs';
-import type { UsageCounters } from '../../common/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import type { UsageCounters } from '../../common/types';
  * Side Public License, v 1.
  */
 import { UsageCounter } from './usage_counter';
+import type { UsageCounters } from '../../common/types';
+import * as Rx from 'rxjs';
+import * as rxOp from 'rxjs';
 
 describe('UsageCounter', () => {
   const domainId = 'test-domain-id';

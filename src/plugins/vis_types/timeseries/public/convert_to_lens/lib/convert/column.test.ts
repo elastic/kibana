@@ -12,20 +12,20 @@ import {
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
-import { MaxColumn as BaseMaxColumn } from '@kbn/visualizations-plugin/common';
-import { DATA_FORMATTERS } from '../../../../common/enums';
-import { Metric } from '../../../../common/types';
 import {
-  InputFormat,
-  OutputFormat,
   durationInputOptions,
   durationOutputOptions,
+  InputFormat,
   inputFormats,
+  OutputFormat,
   outputFormats,
 } from '../../../application/components/lib/durations';
+import { MaxColumn as BaseMaxColumn } from '@kbn/visualizations-plugin/common';
+import { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
 import { createColumn, excludeMetaFromColumn, getFormat, isColumnWithMeta } from './column';
 import { MaxColumn } from './types';
+import { DATA_FORMATTERS } from '../../../../common/enums';
 
 describe('getFormat', () => {
   const dataViewWithoutSupportedFormatsFields = createStubDataView({

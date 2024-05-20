@@ -6,10 +6,10 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ObservabilityAlertsProvider } from './alerts';
-import { ObservabilityComponentsProvider } from './components';
-import { ObservabilityOverviewProvider } from './overview';
 import { ObservabilityUsersProvider } from './users';
+import { ObservabilityAlertsProvider } from './alerts';
+import { ObservabilityOverviewProvider } from './overview';
+import { ObservabilityComponentsProvider } from './components';
 
 export function ObservabilityProvider(context: FtrProviderContext) {
   const alerts = ObservabilityAlertsProvider(context);

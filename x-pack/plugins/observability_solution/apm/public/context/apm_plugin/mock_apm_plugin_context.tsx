@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { ReactNode, useMemo } from 'react';
+import { RouterProvider } from '@kbn/typed-react-router-config';
+import { useHistory } from 'react-router-dom';
+import { createMemoryHistory, History } from 'history';
+import { merge, noop } from 'lodash';
 import { coreMock } from '@kbn/core/public/mocks';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { UrlService } from '@kbn/share-plugin/common/url_service';
+import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
 import {
   LogsLocatorParams,
   NodeLogsLocatorParams,
   TraceLogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
-import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
-import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
 import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
-import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { RouterProvider } from '@kbn/typed-react-router-config';
-import { History, createMemoryHistory } from 'history';
-import { merge, noop } from 'lodash';
-import React, { ReactNode, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
-import { ConfigSchema } from '../..';
-import { apmRouter } from '../../components/routing/apm_route_config';
-import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
+import { ConfigSchema } from '../..';
+import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { apmRouter } from '../../components/routing/apm_route_config';
 
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
@@ -96,7 +96,7 @@ const urlService = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
-  shortUrls: () => ({ get: () => {} }) as any,
+  shortUrls: () => ({ get: () => {} } as any),
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
 

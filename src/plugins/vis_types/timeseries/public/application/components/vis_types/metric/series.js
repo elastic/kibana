@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTab,
-  EuiTabs,
-  useEuiTheme,
-} from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { aggRowSplitStyles, tsvbEditorRowStyles } from '../../../styles/common.styles';
-import { AddDeleteButtons } from '../../add_delete_buttons';
-import { Aggs } from '../../aggs/aggs';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiButtonIcon,
+  useEuiTheme,
+} from '@elastic/eui';
 import { ColorPicker } from '../../color_picker';
-import { createTextHandler } from '../../lib/create_text_handler';
+import { AddDeleteButtons } from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
-import { SeriesDragHandler } from '../../series_drag_handler';
+import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 import { Split } from '../../split';
+import { SeriesDragHandler } from '../../series_drag_handler';
+import { createTextHandler } from '../../lib/create_text_handler';
+import { Aggs } from '../../aggs/aggs';
 
 function MetricSeriesUi(props) {
   const {

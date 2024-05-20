@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import url from 'url';
 import expect from '@kbn/expect';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import url from 'url';
 import { keyBy, mapValues } from 'lodash';
 import supertest from 'supertest';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 interface MonitoringStats {

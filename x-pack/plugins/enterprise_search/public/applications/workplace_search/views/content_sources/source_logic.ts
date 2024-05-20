@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_META } from '../../../shared/constants';
 import {
-  clearFlashMessages,
   flashAPIErrors,
   flashSuccessToast,
   setErrorMessage,
+  clearFlashMessages,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
 import { PRIVATE_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
-import { ContentSourceFullData, DocumentSummaryItem, Meta, SourceContentItem } from '../../types';
+import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
 
 export interface SourceActions {
   setContentSource(contentSource: ContentSourceFullData): ContentSourceFullData;
@@ -125,7 +125,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           ...contentSource,
           summary,
         }),
-        resetSourceState: () => ({}) as ContentSourceFullData,
+        resetSourceState: () => ({} as ContentSourceFullData),
       },
     ],
     dataLoading: [

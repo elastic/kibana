@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { getMonitoringUsageCollector } from './get_usage_collector';
+import { fetchClusters } from '../../lib/alerts/fetch_clusters';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { MonitoringConfig } from '../../config';
-import { fetchClusters } from '../../lib/alerts/fetch_clusters';
-import { getMonitoringUsageCollector } from './get_usage_collector';
 
 jest.mock('../../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn().mockImplementation(() => {

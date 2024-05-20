@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ACTION_TYPES, ERROR_CODES } from '../../constants';
 import { BaseAction } from './base_action';
+import { ACTION_TYPES, ERROR_CODES } from '../../constants';
+import { i18n } from '@kbn/i18n';
 
 export class LoggingAction extends BaseAction {
   constructor(props, errors) {

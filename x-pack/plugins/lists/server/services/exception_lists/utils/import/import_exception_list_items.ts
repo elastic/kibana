@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ImportExceptionListItemSchemaDecoded,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
 
-import { bulkCreateImportedItems } from './bulk_create_imported_items';
-import { bulkUpdateImportedItems } from './bulk_update_imported_items';
 import { getAllListItemTypes } from './find_all_exception_list_item_types';
 import { getAllListTypes } from './find_all_exception_list_types';
 import { sortExceptionItemsToUpdateOrCreate } from './sort_exception_items_to_create_update';
+import { bulkCreateImportedItems } from './bulk_create_imported_items';
+import { bulkUpdateImportedItems } from './bulk_update_imported_items';
 import { sortItemsImportsByNamespace } from './sort_import_by_namespace';
 import { sortImportResponses } from './sort_import_responses';
 

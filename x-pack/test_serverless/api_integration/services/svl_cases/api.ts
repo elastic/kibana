@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CASES_URL } from '@kbn/cases-plugin/common';
-import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
-import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
-import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type SuperTest from 'supertest';
+import { CASES_URL } from '@kbn/cases-plugin/common';
+import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import { CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
+import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface User {

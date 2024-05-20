@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
 import moment from 'moment';
+import { omit } from 'lodash';
+import { validateIntegrity, validatePublishedDate, localizeItem } from './convert_items';
 import type { ApiItem, NewsfeedItem } from '../types';
-import { localizeItem, validateIntegrity, validatePublishedDate } from './convert_items';
 
 const createApiItem = (parts: Partial<ApiItem> = {}): ApiItem => ({
   hash: 'hash',

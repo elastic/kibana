@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
-import type { JobExistResult, MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
 import { createAction } from 'redux-actions';
+import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
+import type { MlCapabilitiesResponse, JobExistResult } from '@kbn/ml-plugin/public';
+import { createAsyncAction } from './utils';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,
-  HeartbeatIndicesParam,
   MonitorIdParam,
+  HeartbeatIndicesParam,
 } from './types';
-import { createAsyncAction } from './utils';
 
 export const resetMLState = createAction('RESET_ML_STATE');
 

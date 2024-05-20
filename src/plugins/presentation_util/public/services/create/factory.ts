@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AppUpdater, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
+import { CoreStart, AppUpdater, PluginInitializerContext } from '@kbn/core/public';
 
 /**
  * A factory function for creating a service.

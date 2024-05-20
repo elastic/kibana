@@ -6,40 +6,40 @@
  */
 
 import React from 'react';
+import { formatNumber } from '../../../lib/format_number';
+import {
+  ClusterItemContainer,
+  BytesPercentageUsage,
+  DisabledIfNoDataAndInSetupModeLink,
+} from './helpers';
 import {
   LOGSTASH,
   LOGSTASH_SYSTEM_ID,
   RULE_LOGSTASH_VERSION_MISMATCH,
 } from '../../../../common/constants';
-import { formatNumber } from '../../../lib/format_number';
-import {
-  BytesPercentageUsage,
-  ClusterItemContainer,
-  DisabledIfNoDataAndInSetupModeLink,
-} from './helpers';
 
 import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLink,
-  EuiPanel,
   EuiTitle,
+  EuiPanel,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { SetupModeFeature } from '../../../../common/enums';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 import { SetupModeContext } from '../../setup_mode/setup_mode_context';
-import { SetupModeTooltip } from '../../setup_mode/tooltip';
 
 const NODES_PANEL_RULES = [RULE_LOGSTASH_VERSION_MISMATCH];
 

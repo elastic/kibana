@@ -7,7 +7,7 @@
  */
 
 import type { TimeRange } from '@kbn/es-query';
-import { Embeddable, EmbeddableInput, EmbeddableOutput, IContainer } from '../../..';
+import { EmbeddableOutput, Embeddable, EmbeddableInput, IContainer } from '../../..';
 
 export interface EmbeddableTimeRangeInput extends EmbeddableInput {
   timeRange: TimeRange;

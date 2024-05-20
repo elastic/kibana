@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useUrlState } from '@kbn/ml-url-state';
 import {
   ANALYSIS_CONFIG_TYPE,
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { useUrlState } from '@kbn/ml-url-state';
-import { ClassificationExploration } from './components/classification_exploration';
 import { OutlierExploration } from './components/outlier_exploration';
 import { RegressionExploration } from './components/regression_exploration';
+import { ClassificationExploration } from './components/classification_exploration';
 
 import { HelpMenu } from '../../../components/help_menu';
+import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
-import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
-import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
-import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import type { AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
+import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
+import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 
 export const Page: FC<{
   jobId: string;

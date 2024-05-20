@@ -7,8 +7,17 @@
     "id": "cloudExperiments",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "cloud_integrations", "experiments"],
-    "requiredPlugins": ["cloud", "dataViews"],
-    "optionalPlugins": ["usageCollection"]
+    "configPath": [
+      "xpack",
+      "cloud_integrations",
+      "experiments"
+    ],
+    "requiredPlugins": [
+      "cloud",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ]
   }
 }

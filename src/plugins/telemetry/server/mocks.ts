@@ -7,7 +7,7 @@
  */
 
 import { URL } from 'url';
-import { TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
+import { TelemetryPluginStart, TelemetryPluginSetup } from './plugin';
 
 export type Setup = jest.Mocked<TelemetryPluginSetup>;
 export type Start = jest.Mocked<TelemetryPluginStart>;

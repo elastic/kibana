@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
+import { EuiTitle, EuiPanel, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipSelector } from '../../../components/tooltip_selector';
+import { IEmsFileSource } from './ems_file_source';
 import { IField } from '../../fields/field';
 import { OnSourceChangeArgs } from '../source';
-import { IEmsFileSource } from './ems_file_source';
 
 interface Props {
   layerId: string;

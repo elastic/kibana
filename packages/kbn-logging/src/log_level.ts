@@ -57,10 +57,7 @@ export class LogLevel {
     }
   }
 
-  private constructor(
-    public readonly id: LogLevelId,
-    public readonly value: number
-  ) {}
+  private constructor(public readonly id: LogLevelId, public readonly value: number) {}
 
   /**
    * Indicates whether current log level covers the one that is passed as an argument.

@@ -8,7 +8,7 @@
 import React, { useEffect, createContext, useContext } from 'react';
 import { ApiService } from '../../../../lib/api';
 
-import { SnapshotState, useSnapshotState } from './use_snapshot_state';
+import { useSnapshotState, SnapshotState } from './use_snapshot_state';
 
 export interface MlSnapshotContext {
   snapshotState: SnapshotState;

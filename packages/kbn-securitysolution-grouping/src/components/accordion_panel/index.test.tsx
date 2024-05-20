@@ -7,9 +7,9 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
 import { GroupPanel } from '.';
 import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
+import React from 'react';
 import { groupingBucket } from '../../mocks';
 
 const onToggleGroup = jest.fn();

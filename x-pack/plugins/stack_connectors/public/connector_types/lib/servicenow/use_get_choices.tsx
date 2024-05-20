@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { getChoices } from './api';
-import * as i18n from './translations';
 import { Choice } from './types';
+import * as i18n from './translations';
 
 export interface UseGetChoicesProps {
   http: HttpSetup;

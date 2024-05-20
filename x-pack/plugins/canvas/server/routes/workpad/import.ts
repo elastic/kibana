@@ -8,9 +8,9 @@
 import { RouteInitializerDeps } from '..';
 import { API_ROUTE_WORKPAD_IMPORT } from '../../../common/lib/constants';
 import { ImportedCanvasWorkpad } from '../../../types';
-import { catchErrorHandler } from '../catch_error_handler';
-import { okResponse } from '../ok_response';
 import { ImportedWorkpadSchema } from './workpad_schema';
+import { okResponse } from '../ok_response';
+import { catchErrorHandler } from '../catch_error_handler';
 
 const createRequestBodySchema = ImportedWorkpadSchema;
 

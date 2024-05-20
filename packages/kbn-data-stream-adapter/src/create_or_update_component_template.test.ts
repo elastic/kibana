@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
 
 const randomDelayMultiplier = 0.01;

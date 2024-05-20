@@ -1,6 +1,3 @@
-import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
  * 2.0.
  */
 import React from 'react';
+import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
 import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
 
 interface Props {

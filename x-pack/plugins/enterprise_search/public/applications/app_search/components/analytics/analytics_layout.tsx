@@ -8,14 +8,14 @@
 import React, { useEffect, FC, PropsWithChildren } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import { KibanaLogic } from '../../../shared/kibana';
 import { BreadcrumbTrail } from '../../../shared/kibana_chrome/generate_breadcrumbs';
 import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
-import { LogRetentionCallout, LogRetentionOptions, LogRetentionTooltip } from '../log_retention';
+import { LogRetentionTooltip, LogRetentionCallout, LogRetentionOptions } from '../log_retention';
 
 import { AnalyticsFilters } from './components';
 import { ANALYTICS_TITLE } from './constants';

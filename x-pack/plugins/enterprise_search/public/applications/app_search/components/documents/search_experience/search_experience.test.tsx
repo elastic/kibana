@@ -10,9 +10,9 @@ import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { Facet, SearchProvider } from '@elastic/react-search-ui';
+import { SearchProvider, Facet } from '@elastic/react-search-ui';
 
 jest.mock('../../../../shared/use_local_storage', () => ({
   useLocalStorage: jest.fn(),

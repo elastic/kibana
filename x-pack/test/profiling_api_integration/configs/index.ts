@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import path from 'path';
 import { mapValues } from 'lodash';
-import { CreateTestConfig, createTestConfig } from '../common/config';
+import path from 'path';
+import { createTestConfig, CreateTestConfig } from '../common/config';
 
 const kibanaYamlFilePath = path.join(__dirname, './ftr_kibana.yml');
 

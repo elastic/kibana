@@ -11,9 +11,9 @@ import Os from 'os';
 import Path from 'path';
 import Rl from 'readline';
 
-import { ToolingLog } from '@kbn/tooling-log';
 import Chalk from 'chalk';
 import execa from 'execa';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { quietFail } from './error';
 

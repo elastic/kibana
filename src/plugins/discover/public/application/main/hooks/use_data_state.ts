@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { DataMsg } from '../state_management/discover_data_state_container';
 

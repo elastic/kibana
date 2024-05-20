@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { euiLightVars } from '@kbn/ui-theme';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiBadge,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFormRow,
   EuiSuperSelect,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';

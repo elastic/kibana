@@ -14,17 +14,17 @@ import userEvent from '@testing-library/user-event';
 
 import type { AppMockRenderer } from '../../common/mock';
 
-import { useToasts } from '../../common/lib/kibana';
+import * as api from '../../containers/api';
 import {
   buildCasesPermissions,
   createAppMockRenderer,
   mockedTestProvidersOwner,
 } from '../../common/mock';
-import * as api from '../../containers/api';
 import { AddFile } from './add_file';
+import { useToasts } from '../../common/lib/kibana';
 
-import { basicCaseId, basicFileMock } from '../../containers/mock';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
+import { basicCaseId, basicFileMock } from '../../containers/mock';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_create_attachments');

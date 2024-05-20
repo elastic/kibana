@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
+import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { collectionActions } from '../lib/collection_actions';
 import { MetricSelect } from './metric_select';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 export const newVariable = (opts) => ({ id: uuidv4(), name: '', field: '', ...opts });
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiLink, EuiSpacer, EuiTextArea } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
+import { EuiTextArea, EuiSpacer, EuiLink, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../../../hooks';
 import { LogstashInstructions } from '../logstash_instructions';
 
 import { MultiRowInput } from '../multi_row_input';
 
-import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
-import { SecretFormRow } from './output_form_secret_form_row';
 import type { OutputFormInputsType } from './use_output_form';
+import { SecretFormRow } from './output_form_secret_form_row';
+import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
 
 interface Props {
   inputs: OutputFormInputsType;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import queryString from 'query-string';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useLocation, useHistory } from 'react-router-dom';
 
 export function useInRouterContext() {
   try {
@@ -25,7 +25,7 @@ function useQuery<T extends Record<string, unknown> = {}>() {
 
 export function useUrlState<
   T extends Record<string, unknown> = {},
-  Q extends Record<string, unknown> = {},
+  Q extends Record<string, unknown> = {}
 >({
   queryParamsDeserializer,
   queryParamsSerializer,

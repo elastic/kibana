@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexItem, EuiFlexGroup, EuiPanel, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { BuilderItem } from '../types';
-import { DataTypesSelect } from './columns/data_type_select';
-import { IncompleteBadge } from './columns/incomplete_badge';
 import { SeriesActions } from './columns/series_actions';
 import { SeriesInfo } from './columns/series_info';
-import { SeriesName } from './columns/series_name';
+import { DataTypesSelect } from './columns/data_type_select';
+import { IncompleteBadge } from './columns/incomplete_badge';
 import { ExpandedSeriesRow } from './expanded_series_row';
+import { SeriesName } from './columns/series_name';
 import { ReportMetricOptions } from './report_metric_options';
 
 const StyledAccordion = styled(EuiAccordion)`

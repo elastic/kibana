@@ -17,10 +17,10 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
+import { css } from '@emotion/react';
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
+import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 
 interface Props {
   riskInputs: InputAlert[];

@@ -7,8 +7,8 @@
 
 import { EuiBadge, EuiDescriptionList, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { RulesDetectionRuleCounter } from '../../rules/rules_detection_rule_counter';
 import { CisKubernetesIcons, CspFlyoutMarkdown } from './findings_flyout';

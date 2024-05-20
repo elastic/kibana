@@ -6,17 +6,17 @@
  */
 
 import {
-  type DataViewCreateQuerySchema,
   dataViewCreateQuerySchema,
+  type DataViewCreateQuerySchema,
 } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
 
 import {
-  type TransformIdParamSchema,
   transformIdParamSchema,
+  type TransformIdParamSchema,
 } from '../../../../common/api_schemas/common';
 import {
-  type PutTransformsRequestSchema,
   putTransformsRequestSchema,
+  type PutTransformsRequestSchema,
 } from '../../../../common/api_schemas/transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 

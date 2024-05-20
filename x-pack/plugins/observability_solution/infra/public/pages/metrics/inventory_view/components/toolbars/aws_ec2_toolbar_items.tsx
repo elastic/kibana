@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { awsEC2SnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import React from 'react';
-import { CloudToolbarItems } from './cloud_toolbar_items';
+import { awsEC2SnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
+import { CloudToolbarItems } from './cloud_toolbar_items';
 import { ToolbarProps } from './types';
 
 export const ec2groupByFields = [

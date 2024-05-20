@@ -9,15 +9,10 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { sortBy } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
 
-import { getSizeInBytes } from '../../../helpers';
-import type {
-  DataQualityCheckResult,
-  ErrorSummary,
-  IndexToCheck,
-  OnCheckCompleted,
-  PatternRollup,
-} from '../../../types';
-import { useDataQualityContext } from '../../data_quality_context';
+import { CheckAll } from './check_all';
+import { CheckStatus } from '../check_status';
+import { ERROR, INDEX, PATTERN } from '../errors_viewer/translations';
+import { ERRORS } from '../errors_popover/translations';
 import {
   getDataQualitySummaryMarkdownComment,
   getErrorsMarkdownTable,
@@ -27,11 +22,16 @@ import {
   getSummaryTableMarkdownRow,
 } from '../../index_properties/markdown/helpers';
 import { defaultSort, getSummaryTableItems } from '../../pattern/helpers';
-import { CheckStatus } from '../check_status';
-import { ERRORS } from '../errors_popover/translations';
-import { ERROR, INDEX, PATTERN } from '../errors_viewer/translations';
 import { Actions } from './actions';
-import { CheckAll } from './check_all';
+import type {
+  DataQualityCheckResult,
+  ErrorSummary,
+  IndexToCheck,
+  OnCheckCompleted,
+  PatternRollup,
+} from '../../../types';
+import { getSizeInBytes } from '../../../helpers';
+import { useDataQualityContext } from '../../data_quality_context';
 
 export const getResultsSortedByDocsCount = (
   results: Record<string, DataQualityCheckResult> | undefined

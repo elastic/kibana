@@ -73,7 +73,9 @@
         "type": "Function",
         "tags": [],
         "label": "wrapWithTheme",
-        "description": ["\nA React HOC that wraps a component with the `KibanaThemeProvider`."],
+        "description": [
+          "\nA React HOC that wraps a component with the `KibanaThemeProvider`."
+        ],
         "signature": [
           "(node: React.ReactNode, theme: ",
           {
@@ -95,8 +97,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "node",
-            "description": ["The node to wrap."],
-            "signature": ["React.ReactNode"],
+            "description": [
+              "The node to wrap."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
             "path": "packages/react/kibana_context/theme/with_theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -108,7 +114,9 @@
             "type": "Object",
             "tags": [],
             "label": "theme",
-            "description": ["The `ThemeServiceStart` API."],
+            "description": [
+              "The `ThemeServiceStart` API."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/react-kibana-context-common",
@@ -148,7 +156,9 @@
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
-            "description": ["is dark mode enabled or not"],
+            "description": [
+              "is dark mode enabled or not"
+            ],
             "path": "packages/react/kibana_context/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -162,7 +172,9 @@
         "type": "Interface",
         "tags": [],
         "label": "KibanaThemeProviderProps",
-        "description": ["\nProps for the `KibanaThemeProvider`."],
+        "description": [
+          "\nProps for the `KibanaThemeProvider`."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/react-kibana-context-theme",
@@ -183,7 +195,9 @@
             "type": "Object",
             "tags": [],
             "label": "theme",
-            "description": ["The `ThemeServiceStart` API."],
+            "description": [
+              "The `ThemeServiceStart` API."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/react-kibana-context-common",
@@ -224,7 +238,9 @@
             "tags": [],
             "label": "darkMode",
             "description": [],
-            "signature": ["false"],
+            "signature": [
+              "false"
+            ],
             "path": "packages/react/kibana_context/common/index.ts",
             "deprecated": false,
             "trackAdoption": false

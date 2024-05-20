@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { fail } from 'assert';
 import http, { ClientRequest, OutgoingHttpHeaders } from 'http';
-import { URL } from 'url';
 import * as sinon from 'sinon';
 import { proxyRequest } from './proxy_request';
+import { URL } from 'url';
+import { fail } from 'assert';
 import { toURL } from './utils';
 
 describe(`Console's send request`, () => {

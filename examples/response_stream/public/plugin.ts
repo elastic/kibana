@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { mount } from './mount';

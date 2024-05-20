@@ -1,6 +1,3 @@
-import { EuiPanel } from '@elastic/eui';
-import { FindActionResult } from '@kbn/actions-plugin/server';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,7 +5,10 @@ import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
  * 2.0.
  */
 import React from 'react';
+import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import { FindActionResult } from '@kbn/actions-plugin/server';
 import { ComponentProps } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { ConnectorSelectorBase as Component } from './connector_selector_base';
 
 const meta: ComponentMeta<typeof Component> = {

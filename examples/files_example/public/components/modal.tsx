@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiModal, EuiModalBody, EuiModalHeader, EuiText } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { MyImageMetadata, exampleFileKind } from '../../common';
-import { FileUpload, FilesClient } from '../imports';
+import { EuiModal, EuiModalHeader, EuiModalBody, EuiText } from '@elastic/eui';
+import { exampleFileKind, MyImageMetadata } from '../../common';
+import { FilesClient, FileUpload } from '../imports';
 
 interface Props {
   client: FilesClient<MyImageMetadata>;

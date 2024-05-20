@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { LOCALSTORAGE_KEY, REPORT_INTERVAL_MS } from '../../common/constants';
-import { mockTelemetryService } from '../mocks';
 /* eslint-disable dot-notation */
 import { TelemetrySender } from './telemetry_sender';
+import { mockTelemetryService } from '../mocks';
+import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
 
 class LocalStorageMock implements Partial<Storage> {
   getItem = jest.fn();
@@ -173,8 +173,8 @@ describe('TelemetrySender', () => {
     });
   });
   describe('sendIfDue', () => {
-    let originalFetch: (typeof window)['fetch'];
-    let mockFetch: jest.Mock<(typeof window)['fetch']>;
+    let originalFetch: typeof window['fetch'];
+    let mockFetch: jest.Mock<typeof window['fetch']>;
 
     beforeAll(() => {
       originalFetch = window.fetch;
@@ -236,8 +236,8 @@ describe('TelemetrySender', () => {
   });
 
   describe('sendUsageData', () => {
-    let originalFetch: (typeof window)['fetch'];
-    let mockFetch: jest.Mock<(typeof window)['fetch']>;
+    let originalFetch: typeof window['fetch'];
+    let mockFetch: jest.Mock<typeof window['fetch']>;
     let consoleWarnMock: jest.SpyInstance;
 
     beforeAll(() => {

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React, { useState, useCallback } from 'react';
 import {
   EuiButtonEmpty,
-  EuiDescribedFormGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPanel,
+  EuiDescribedFormGroup,
   EuiSpacer,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import React, { useState, useCallback } from 'react';
 
-import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
-import { CustomFieldsList } from './custom_fields_list';
 import * as i18n from './translations';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
+import { CustomFieldsList } from './custom_fields_list';
+import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 
 export interface Props {
   customFields: CustomFieldsConfiguration;

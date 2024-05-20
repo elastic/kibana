@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { IfStatement } from './if_statement';
 import { PluginVertex } from '../graph/plugin_vertex';
 import { IfElement } from '../list/if_element';
 import { PluginElement } from '../list/plugin_element';
-import { IfStatement } from './if_statement';
 
 describe('IfStatement class', () => {
   let ifVertex;

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { get, map } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFieldSubtypeNested } from '@kbn/data-plugin/common';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { get, map } from 'lodash';
 import { ConfigSchema } from '../../config';
 import { findIndexPatternById, getFieldByName } from '../data_views';
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CONTROL_TYPES, ControlParams } from '../editor_utils';
+import { listControlFactory, ListControl } from './list_control_factory';
+import { ControlParams, CONTROL_TYPES } from '../editor_utils';
 import { getDepsMock, getSearchSourceMock } from '../test_utils';
-import { ListControl, listControlFactory } from './list_control_factory';
 
 describe('listControlFactory', () => {
   const searchSourceMock = getSearchSourceMock();

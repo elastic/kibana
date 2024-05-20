@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
+import { useToasts } from '../common/lib/kibana';
+import { usePostPushToService } from './use_post_push_to_service';
+import { pushedCase } from './mock';
+import * as api from './api';
 import type { CaseConnector } from '../../common/types/domain';
 import { ConnectorTypes } from '../../common/types/domain';
-import { useToasts } from '../common/lib/kibana';
 import { createAppMockRenderer } from '../common/mock';
 import type { AppMockRenderer } from '../common/mock';
-import * as api from './api';
 import { casesQueriesKeys } from './constants';
-import { pushedCase } from './mock';
-import { usePostPushToService } from './use_post_push_to_service';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

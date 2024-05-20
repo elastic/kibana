@@ -5,10 +5,10 @@
  * 2.0.
  */
 import Path from 'path';
-import type { Ecs, KibanaExecutionContext } from '@kbn/core/server';
-import Fs from 'fs/promises';
 import JSON5 from 'json5';
+import Fs from 'fs/promises';
 import { isEqualWith } from 'lodash';
+import type { Ecs, KibanaExecutionContext } from '@kbn/core/server';
 
 export const logFilePath = Path.resolve(__dirname, './kibana.log');
 export const ANY = Symbol('any');

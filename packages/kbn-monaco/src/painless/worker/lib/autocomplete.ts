@@ -9,31 +9,31 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  PainlessAutocompleteField,
-  PainlessCompletionItem,
   PainlessCompletionResult,
+  PainlessCompletionItem,
   PainlessContext,
+  PainlessAutocompleteField,
 } from '../../types';
 
 import {
-  booleanScriptFieldScriptFieldContext,
   commonContext,
+  scoreContext,
+  filterContext,
+  booleanScriptFieldScriptFieldContext,
   dateScriptFieldContext,
   doubleScriptFieldScriptFieldContext,
-  filterContext,
   ipScriptFieldScriptFieldContext,
   longScriptFieldScriptFieldContext,
   processorConditionalContext,
-  scoreContext,
   stringScriptFieldScriptFieldContext,
 } from '../../autocomplete_definitions';
 
 import { lexerRules } from '../../lexer_rules';
 
 import {
-  isAccessingProperty,
-  isConstructorInstance,
   isDeclaringField,
+  isConstructorInstance,
+  isAccessingProperty,
   showStaticSuggestions,
 } from './autocomplete_utils';
 

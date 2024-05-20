@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { count } from '../../../shared/metrics/snapshot/count';
 import { cpu } from './cpu';
 import { diskLatency } from './disk_latency';
 import { diskSpaceUsage } from './disk_space_usage';
+import { count } from '../../../shared/metrics/snapshot/count';
 import { load } from './load';
 import { logRate } from './log_rate';
 import { memory } from './memory';

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { identity, shuffle, sortBy } from 'lodash';
 /* eslint import/no-duplicates: 0 */
 import sinon from 'sinon';
+import { identity, shuffle, sortBy } from 'lodash';
 
 import { getFieldCapabilities } from '.';
 

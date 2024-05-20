@@ -13,9 +13,9 @@ import { appContextService } from '../services';
 
 import {
   FleetError,
+  RegistryError,
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
-  RegistryError,
   defaultFleetErrorHandler,
 } from '.';
 

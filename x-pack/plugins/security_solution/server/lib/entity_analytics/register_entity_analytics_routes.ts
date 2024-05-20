@@ -6,8 +6,8 @@
  */
 
 import { registerAssetCriticalityRoutes } from './asset_criticality/routes';
-import { registerRiskEngineRoutes } from './risk_engine/routes';
 import { registerRiskScoreRoutes } from './risk_score/routes';
+import { registerRiskEngineRoutes } from './risk_engine/routes';
 import type { EntityAnalyticsRoutesDeps } from './types';
 
 export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {

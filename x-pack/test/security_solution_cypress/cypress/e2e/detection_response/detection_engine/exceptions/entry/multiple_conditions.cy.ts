@@ -7,23 +7,23 @@
 
 import { getNewRule } from '../../../../../objects/rule';
 
-import {
-  EXCEPTION_CARD_ITEM_CONDITIONS,
-  EXCEPTION_CARD_ITEM_NAME,
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
-} from '../../../../../screens/exceptions';
 import { createRule } from '../../../../../tasks/api_calls/rules';
+import { login } from '../../../../../tasks/login';
+import {
+  openExceptionFlyoutFromEmptyViewerPrompt,
+  visitRuleDetailsPage,
+} from '../../../../../tasks/rule_details';
 import {
   addExceptionFlyoutItemName,
   addTwoAndedConditions,
   addTwoORedConditions,
   submitNewExceptionItem,
 } from '../../../../../tasks/exceptions';
-import { login } from '../../../../../tasks/login';
 import {
-  openExceptionFlyoutFromEmptyViewerPrompt,
-  visitRuleDetailsPage,
-} from '../../../../../tasks/rule_details';
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_CARD_ITEM_CONDITIONS,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+} from '../../../../../screens/exceptions';
 
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 

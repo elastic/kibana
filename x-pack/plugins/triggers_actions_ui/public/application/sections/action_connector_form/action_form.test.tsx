@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { lazy } from 'react';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiAccordion } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
+import { act } from 'react-dom/test-utils';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { ValidationResult, GenericValidationResult, RuleUiAction } from '../../../types';
+import ActionForm from './action_form';
+import { useKibana } from '../../../common/lib/kibana';
 import {
   RecoveredActionGroup,
-  SanitizedRuleAction,
   isActionGroupDisabledForActionTypeId,
+  SanitizedRuleAction,
 } from '@kbn/alerting-plugin/common';
-import { coreMock } from '@kbn/core/public/mocks';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import React, { lazy } from 'react';
-import { act } from 'react-dom/test-utils';
-import { useKibana } from '../../../common/lib/kibana';
-import { GenericValidationResult, RuleUiAction, ValidationResult } from '../../../types';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import ActionForm from './action_form';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({

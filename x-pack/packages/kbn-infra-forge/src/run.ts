@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import datemath from '@kbn/datemath';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { range } from 'lodash';
 import moment from 'moment';
+import datemath from '@kbn/datemath';
 import type { Moment } from 'moment';
-import * as fakeHosts from './data_sources/fake_hosts';
-import { deleteTemplate, installTemplate } from './lib/manage_template';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
 import { createQueue, getIndexName } from './lib/queue';
+import { deleteTemplate, installTemplate } from './lib/manage_template';
+import * as fakeHosts from './data_sources/fake_hosts';
 
 const generateEventsFns = {
   fake_hosts: fakeHosts.generateEvent,

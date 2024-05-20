@@ -6,12 +6,12 @@
  */
 
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { getBaseBreadcrumb } from '../../lib/breadcrumbs';
-import { usePlatformService } from '../../services';
 import { resetWorkpad } from '../../state/actions/workpad';
 import { HomeApp as Component } from './home_app.component';
+import { usePlatformService } from '../../services';
 
 export const HomeApp = () => {
   const { setBreadcrumbs } = usePlatformService();

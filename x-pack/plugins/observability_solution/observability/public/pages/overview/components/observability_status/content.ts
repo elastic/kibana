@@ -1,4 +1,3 @@
-import { DocLinksStart, HttpSetup } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +5,9 @@ import { DocLinksStart, HttpSetup } from '@kbn/core/public';
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { paths } from '../../../../../common/locators/paths';
+import { HttpSetup, DocLinksStart } from '@kbn/core/public';
 import { ObservabilityFetchDataPlugins } from '../../../../typings/fetch_overview_data';
+import { paths } from '../../../../../common/locators/paths';
 
 export interface ObservabilityStatusContent {
   id: ObservabilityFetchDataPlugins | 'alert';

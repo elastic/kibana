@@ -13,12 +13,12 @@ import type {
   UpdatePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import type { UserAuthzAccessLevel } from './types';
 import { APP_POLICIES_PATH } from '../../../../common/constants';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
 import { loadPage, request } from '../tasks/common';
 import { expectAndCloseSuccessToast } from '../tasks/toasts';
 import { getNoPrivilegesPage } from './common';
-import type { UserAuthzAccessLevel } from './types';
 
 /**
  * Loads the Policy details page - either for the `policyId` provided on input, or if undefined,

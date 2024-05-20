@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { SearchAfterAndBulkCreateReturnType } from '../../types';
-import { getFilter } from '../../utils/get_filter';
-import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
-import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
-import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
-import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
+import { getFilter } from '../../utils/get_filter';
+import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
+import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
 import type { CreateEventSignalOptions } from './types';
+import type { SearchAfterAndBulkCreateReturnType } from '../../types';
+import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
+import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import {
   FAILED_CREATE_QUERY_MAX_CLAUSE,
-  MANY_NESTED_CLAUSES_ERR,
   getSignalValueMap,
+  MANY_NESTED_CLAUSES_ERR,
 } from './utils';
 
 export const createEventSignal = async ({

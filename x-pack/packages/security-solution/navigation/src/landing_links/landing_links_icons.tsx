@@ -1,5 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import { css } from '@emotion/react';
  */
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { NavigationLink } from '../types';
 import { BetaBadge } from './beta_badge';
 import { LandingLink } from './landing_links';

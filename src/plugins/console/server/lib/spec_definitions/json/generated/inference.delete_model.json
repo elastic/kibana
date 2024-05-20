@@ -7,10 +7,20 @@
       "pretty": "__flag__"
     },
     "url_components": {
-      "task_type": ["sparse_embedding", "text_embedding", "rerank", "completion"]
+      "task_type": [
+        "sparse_embedding",
+        "text_embedding",
+        "rerank",
+        "completion"
+      ]
     },
-    "methods": ["DELETE"],
-    "patterns": ["_inference/{inference_id}", "_inference/{task_type}/{inference_id}"],
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_inference/{inference_id}",
+      "_inference/{task_type}/{inference_id}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-inference-api.html",
     "availability": {
       "stack": true,

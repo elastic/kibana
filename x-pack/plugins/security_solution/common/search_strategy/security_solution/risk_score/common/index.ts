@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
 import {
   RiskScoreEntity,
   getRiskScoreLatestIndex,
   getRiskScoreTimeSeriesIndex,
 } from '../../../../entity_analytics/risk_engine';
-import type { ESQuery } from '../../../../typed_json';
 export { RiskQueries } from '../../../../api/search_strategy';
 
 /**

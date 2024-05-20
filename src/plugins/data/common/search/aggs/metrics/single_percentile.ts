@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES } from '../../..';
-import { BaseAggParams } from '../types';
+import { aggSinglePercentileFnName } from './single_percentile_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { aggSinglePercentileFnName } from './single_percentile_fn';
+import { KBN_FIELD_TYPES } from '../../..';
+import { BaseAggParams } from '../types';
 
 const singlePercentileTitle = i18n.translate('data.search.aggs.metrics.singlePercentileTitle', {
   defaultMessage: 'Percentile',

@@ -8,10 +8,10 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { createContext, memo, useContext, useMemo } from 'react';
 
-import type { IsolateHostPanelProps } from '.';
+import { useEventDetails } from '../shared/hooks/use_event_details';
 import { FlyoutError } from '../../shared/components/flyout_error';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { useEventDetails } from '../shared/hooks/use_event_details';
+import type { IsolateHostPanelProps } from '.';
 
 export interface IsolateHostPanelContext {
   /**

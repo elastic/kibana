@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
 import { useHttp } from '../../lib/kibana';
+import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 

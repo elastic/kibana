@@ -41,7 +41,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<EnvironmentServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<EnvironmentServiceContract>"
+            ],
             "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,7 +57,11 @@
             "tags": [],
             "label": "createPrebootContract",
             "description": [],
-            "signature": ["() => jest.Mocked<", "InternalEnvironmentServicePreboot", ">"],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalEnvironmentServicePreboot",
+              ">"
+            ],
             "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -69,7 +75,11 @@
             "tags": [],
             "label": "createSetupContract",
             "description": [],
-            "signature": ["() => jest.Mocked<", "InternalEnvironmentServicePreboot", ">"],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalEnvironmentServicePreboot",
+              ">"
+            ],
             "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

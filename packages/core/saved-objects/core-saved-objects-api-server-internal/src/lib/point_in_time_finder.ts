@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger } from '@kbn/logging';
 import type {
-  ISavedObjectsPointInTimeFinder,
-  SavedObjectsCreatePointInTimeFinderDependencies,
-  SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsFindInternalOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  ISavedObjectsPointInTimeFinder,
   SavedObjectsPointInTimeFinderClient,
+  SavedObjectsFindInternalOptions,
 } from '@kbn/core-saved-objects-api-server';
-import type { Logger } from '@kbn/logging';
 
 /**
  * @internal

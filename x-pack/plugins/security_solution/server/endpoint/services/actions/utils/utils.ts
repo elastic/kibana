@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { EcsError } from '@elastic/ecs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
-import {
-  ENDPOINT_ACTIONS_DS,
-  ENDPOINT_ACTION_RESPONSES_DS,
-  failedFleetActionErrorCode,
-} from '../../../../../common/endpoint/constants';
+import { i18n } from '@kbn/i18n';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  ENDPOINT_ACTION_RESPONSES_DS,
+  ENDPOINT_ACTIONS_DS,
+  failedFleetActionErrorCode,
+} from '../../../../../common/endpoint/constants';
 import type {
   ActionDetails,
   ActivityLogAction,
@@ -130,7 +130,7 @@ type ActionCompletionInfo = Pick<
 >;
 
 export const getActionCompletionInfo = <
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 >(
   /** The normalized action request */
   action: NormalizedActionRequest,
@@ -246,16 +246,16 @@ export const getActionStatus = ({
   const status = isExpired
     ? 'failed'
     : isCompleted
-      ? wasSuccessful
-        ? 'successful'
-        : 'failed'
-      : 'pending';
+    ? wasSuccessful
+      ? 'successful'
+      : 'failed'
+    : 'pending';
 
   return { isExpired, status };
 };
 
 interface NormalizedAgentActionResponse<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > {
   isCompleted: boolean;
   completedAt: undefined | string;
@@ -273,7 +273,7 @@ type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
  * @param actionResponses
  */
 const mapActionResponsesByAgentId = <
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 >(
   actionResponses: Array<
     ActivityLogActionResponse | EndpointActivityLogActionResponse<TOutputContent>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { getComponentTemplateFromFieldMap } from './component_template_from_field_map';
-import { expectedTestMapping, testFieldMap } from './mapping_from_field_map.test';
+import { testFieldMap, expectedTestMapping } from './mapping_from_field_map.test';
 
 describe('getComponentTemplateFromFieldMap', () => {
   it('correctly creates component template from field map', () => {

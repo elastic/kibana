@@ -6,8 +6,8 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FieldMap, MultiField } from '@kbn/alerts-as-data-utils';
 import { set } from '@kbn/safer-lodash-set';
+import type { FieldMap, MultiField } from '@kbn/alerts-as-data-utils';
 
 export function mappingFromFieldMap(
   fieldMap: FieldMap,
@@ -33,15 +33,12 @@ export function mappingFromFieldMap(
       ? {
           ...rest,
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          fields: multi_fields.reduce(
-            (acc, multi_field: MultiField) => {
-              acc[multi_field.name] = {
-                type: multi_field.type,
-              };
-              return acc;
-            },
-            {} as Record<string, unknown>
-          ),
+          fields: multi_fields.reduce((acc, multi_field: MultiField) => {
+            acc[multi_field.name] = {
+              type: multi_field.type,
+            };
+            return acc;
+          }, {} as Record<string, unknown>),
         }
       : rest;
 

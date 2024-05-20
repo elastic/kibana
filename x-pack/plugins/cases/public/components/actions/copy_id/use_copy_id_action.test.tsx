@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
+import { renderHook } from '@testing-library/react-hooks';
 import { useCopyIDAction } from './use_copy_id_action';
 
 import { basicCase } from '../../../containers/mock';

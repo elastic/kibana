@@ -8,9 +8,9 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { agentPolicyService } from './agent_policy';
+import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
 import { unenrollForAgentPolicyId } from './agents';
-import { deleteEnrollmentApiKeyForAgentPolicyId, generateEnrollmentAPIKey } from './api_keys';
+import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 
 const fakeRequest = {

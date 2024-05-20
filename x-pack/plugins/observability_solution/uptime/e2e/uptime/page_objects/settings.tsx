@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Page, expect } from '@elastic/synthetics';
+import { expect, Page } from '@elastic/synthetics';
 import { byTestId } from '../../helpers/utils';
 import { loginPageProvider } from '../../page_objects/login';
 import { utilsPageProvider } from '../../page_objects/utils';

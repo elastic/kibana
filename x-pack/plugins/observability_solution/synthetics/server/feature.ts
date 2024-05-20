@@ -6,17 +6,17 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { PLUGIN } from '../common/constants/plugin';
+import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
-import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
-import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
+import { PLUGIN } from '../common/constants/plugin';
 import { settingsObjectType } from './saved_objects/uptime_settings';
+import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 const UPTIME_RULE_TYPES = [
   'xpack.uptime.alerts.tls',

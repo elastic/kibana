@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
 import { indexPatternRt } from '.';
+import { isRight } from 'fp-ts/lib/Either';
 
 describe('indexPatternRt', () => {
   test('passes on valid index pattern strings', () => {

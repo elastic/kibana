@@ -1,5 +1,3 @@
-import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +5,11 @@ import { fireEvent, render, screen } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { HasDataContextValue } from '../../../../context/has_data_context/has_data_context';
 import * as hasDataHook from '../../../../hooks/use_has_data';
 import { ObservabilityStatusProgress } from './observability_status_progress';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('ObservabilityStatusProgress', () => {
   const onViewDetailsClickFn = jest.fn();

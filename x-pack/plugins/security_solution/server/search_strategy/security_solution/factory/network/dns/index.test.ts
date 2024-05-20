@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import * as buildQuery from './query.dns_network.dsl';
 import { networkDns } from '.';
 import {
-  formattedSearchStrategyResponse,
   mockOptions,
   mockSearchStrategyResponse,
+  formattedSearchStrategyResponse,
 } from './__mocks__';
-import * as buildQuery from './query.dns_network.dsl';
 
 describe('networkDns search strategy', () => {
   const mockBuildDnsQuery = jest.spyOn(buildQuery, 'buildDnsQuery');

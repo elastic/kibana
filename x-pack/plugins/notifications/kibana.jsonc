@@ -6,6 +6,9 @@
     "id": "notifications",
     "server": true,
     "browser": false,
-    "optionalPlugins": ["actions", "licensing"]
+    "optionalPlugins": [
+      "actions",
+      "licensing"
+    ]
   }
 }

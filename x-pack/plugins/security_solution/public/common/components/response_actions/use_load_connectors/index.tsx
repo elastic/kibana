@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { ServerError } from '@kbn/cases-plugin/public/types';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { IToasts } from '@kbn/core-notifications-browser';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { useHttp } from '../../../lib/kibana';
+import type { ServerError } from '@kbn/cases-plugin/public/types';
+import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import * as i18n from '../translations';
+import { useHttp } from '../../../lib/kibana';
 
 export interface Props {
   actionTypeId: string;

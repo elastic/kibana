@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
-import { BehaviorSubject } from 'rxjs';
-import type { Vis, VisParams, VisSavedObject, VisualizeInput } from '../..';
-import type { VisualizeServices } from '../types';
+import type { VisualizeInput, VisSavedObject, Vis, VisParams } from '../..';
 import {
   getVisualizationInstance,
   getVisualizationInstanceFromInput,
 } from './get_visualization_instance';
 import { createVisualizeServicesMock } from './mocks';
+import { BehaviorSubject } from 'rxjs';
+import type { VisualizeServices } from '../types';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 
 const commonSerializedVisMock = {
   type: 'area',

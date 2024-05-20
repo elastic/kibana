@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import {
+  renderCustomToolbar,
   UnifiedDataTable,
   type UnifiedDataTableProps,
-  renderCustomToolbar,
 } from '@kbn/unified-data-table';
-import React from 'react';
 
 /**
  * Customized version of the UnifiedDataTable

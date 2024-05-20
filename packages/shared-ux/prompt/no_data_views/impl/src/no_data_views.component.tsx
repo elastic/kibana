@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
 import React from 'react';
+import { css } from '@emotion/react';
 
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 
-import { NoDataButtonLink } from './actions';
 import { DocumentationLink } from './documentation_link';
+import { NoDataButtonLink } from './actions';
 
 // Using raw value because it is content dependent
 const MAX_WIDTH = 830;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import { IconPosition } from '@kbn/expression-xy-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import React from 'react';
 import { YAxisMode } from '../../types';
 
 import { idPrefix } from '../dimension_editor';

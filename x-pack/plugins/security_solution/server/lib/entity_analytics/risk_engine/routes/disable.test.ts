@@ -6,15 +6,15 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { RISK_ENGINE_DISABLE_URL } from '../../../../../common/constants';
-import {
-  requestContextMock,
-  requestMock,
-  serverMock,
-} from '../../../detection_engine/routes/__mocks__';
-import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
 import { riskEngineDisableRoute } from './disable';
 import { riskEnginePrivilegesMock } from './risk_engine_privileges.mock';
+import { RISK_ENGINE_DISABLE_URL } from '../../../../../common/constants';
+import {
+  serverMock,
+  requestContextMock,
+  requestMock,
+} from '../../../detection_engine/routes/__mocks__';
+import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
 
 describe('risk score disable route', () => {
   let server: ReturnType<typeof serverMock.create>;

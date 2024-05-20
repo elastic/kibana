@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LEGACY_NOTIFICATIONS_ID } from '../../../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetFilter } from './legacy_find_notifications';
+import { LEGACY_NOTIFICATIONS_ID } from '../../../../../../common/constants';
 
 describe('legacyFind_notifications', () => {
   test('it returns a full filter with an AND if sent down', () => {

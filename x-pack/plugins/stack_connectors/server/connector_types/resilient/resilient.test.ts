@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { createAxiosResponse, request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { RESILIENT_CONNECTOR_ID } from './constants';
-import { incidentTypes, resilientFields, severity } from './mocks';
+import { resilientFields, incidentTypes, severity } from './mocks';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { ResilientConnector } from './resilient';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { RESILIENT_CONNECTOR_ID } from './constants';
 import { PushToServiceIncidentSchema } from './schema';
 
 jest.mock('axios');

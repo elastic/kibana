@@ -7,11 +7,11 @@
  */
 
 import { Position } from '@elastic/charts';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { mockPaletteOutput, sampleArgs } from '../../common/__mocks__';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '../../common/constants';
 import { DataLayerConfig, XYProps } from '../../common/types';
+import { mockPaletteOutput, sampleArgs } from '../../common/__mocks__';
 
 const chartSetupContract = chartPluginMock.createSetupContract();
 const chartStartContract = chartPluginMock.createStartContract();

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import React from 'react';
+import numeral from '@elastic/numeral';
+import { EuiText } from '@elastic/eui';
 import {
-  ALERTS_LABEL,
   ALERT_COUNT_FORMAT,
+  ALERTS_LABEL,
   ALL_ALERT_COLOR,
   TOTAL_ALERT_COUNT_DATA_TEST_SUBJ,
 } from './constants';

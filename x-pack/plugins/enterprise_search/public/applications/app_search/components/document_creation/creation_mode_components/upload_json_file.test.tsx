@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton, EuiButtonEmpty, EuiFilePicker } from '@elastic/eui';
+import { EuiFilePicker, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 
 import { rerender } from '../../../../test_helpers';
 
-import { UploadJsonFileFooterContent, UploadJsonFileTabContent } from './upload_json_file';
+import { UploadJsonFileTabContent, UploadJsonFileFooterContent } from './upload_json_file';
 
 describe('UploadJsonFile', () => {
   const mockFile = new File(['mock'], 'mock.json', { type: 'application/json' });

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
 import {
   EuiIcon,
   EuiLink,
@@ -13,15 +14,14 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSelectableOption,
   EuiText,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
-import React, { useState } from 'react';
 import {
   txtAddVariableButtonTitle,
-  txtUrlTemplateVariablesFilterPlaceholderText,
   txtUrlTemplateVariablesHelpLinkText,
+  txtUrlTemplateVariablesFilterPlaceholderText,
 } from './i18n';
 
 export interface Props {

@@ -1,4 +1,3 @@
-import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,20 +5,21 @@ import { render, screen } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect'; // For additional matchers like toHaveTextContent
+import { RuleDefinitionSection } from './rule_definition_section';
 import type {
-  AlertSuppressionMissingFieldsStrategy,
   RuleResponse,
+  AlertSuppressionMissingFieldsStrategy,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
-import * as useUpsellingMessageMock from '../../../../common/hooks/use_upselling';
+import * as useAlertSuppressionMock from '../../logic/use_alert_suppression';
 import * as useGetSavedQueryMock from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import * as useUpsellingMessageMock from '../../../../common/hooks/use_upselling';
 import {
+  ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS,
   ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS,
   ALERT_SUPPRESSION_PER_RULE_EXECUTION,
-  ALERT_SUPPRESSION_SUPPRESS_ON_MISSING_FIELDS,
 } from '../../../rule_creation_ui/components/description_step/translations';
-import * as useAlertSuppressionMock from '../../logic/use_alert_suppression';
-import { RuleDefinitionSection } from './rule_definition_section';
 
 jest.spyOn(useGetSavedQueryMock, 'useGetSavedQuery').mockReturnValue({
   isSavedQueryLoading: false,

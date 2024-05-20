@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, FieldFormatMap } from '@kbn/data-views-plugin/common';
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { isNumber } from 'lodash';
-import { DISPLAY_EMPTY_VALUE, isEmptyValue } from '../../../../common/last_value_utils';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatMap, DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
+import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
 import { getFieldFormats } from '../../../services';
 
 export const createFieldFormatter = (
@@ -32,10 +32,10 @@ export const createFieldFormatter = (
     fieldType === 'date'
       ? { id: 'date' }
       : fieldType === 'string'
-        ? { id: 'string' }
-        : fieldType === 'boolean'
-          ? { id: 'boolean' }
-          : { id: 'number' };
+      ? { id: 'string' }
+      : fieldType === 'boolean'
+      ? { id: 'boolean' }
+      : { id: 'number' };
 
   const fieldFormat = getFieldFormats().deserialize(
     shouldSkipFormatting ? defaultFieldFormat : serializedFieldFormat

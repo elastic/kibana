@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 import { ILayer } from '../../../../../classes/layers/layer';
 
 jest.mock('../../../../../kibana_services', () => {

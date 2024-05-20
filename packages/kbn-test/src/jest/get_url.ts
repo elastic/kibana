@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import url from 'url';
 import _ from 'lodash';
+import url from 'url';
 
 interface UrlParam {
   hash?: string;

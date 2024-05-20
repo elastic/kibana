@@ -5,99 +5,67 @@
  * 2.0.
  */
 
-import {
-  PluginSetupContract as ActionsPluginSetupContract,
-  PluginStartContract as ActionsPluginStartContract,
-} from '@kbn/actions-plugin/server';
-import {
-  CoreSetup,
-  CoreStart,
-  IContextProvider,
-  KibanaRequest,
-  Logger,
-  PluginInitializerContext,
-  SavedObjectsBulkGetObject,
-  ServiceStatus,
-  ServiceStatusLevels,
-  StatusServiceSetup,
-} from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import { pick } from 'lodash';
+import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
-  IEventLogClientService,
-  IEventLogService,
-  IEventLogger,
-} from '@kbn/event-log-plugin/server';
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
-  PluginSetupContract as FeaturesPluginSetup,
-  PluginStartContract as FeaturesPluginStart,
-} from '@kbn/features-plugin/server';
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  IContextProvider,
+  StatusServiceSetup,
+  ServiceStatus,
+  SavedObjectsBulkGetObject,
+  ServiceStatusLevels,
+} from '@kbn/core/server';
 import {
   LICENSE_TYPE,
   LicensingPluginSetup,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { ServerlessPluginSetup } from '@kbn/serverless/server';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from '@kbn/actions-plugin/server';
+import {
+  IEventLogger,
+  IEventLogService,
+  IEventLogClientService,
+} from '@kbn/event-log-plugin/server';
+import {
+  PluginStartContract as FeaturesPluginStart,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '@kbn/features-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
-import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { pick } from 'lodash';
-import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { ServerlessPluginSetup } from '@kbn/serverless/server';
 
-import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
-import {
-  AlertsService,
-  type InitializationPromise,
-  type PublicFrameworkAlertsService,
-  errorResult,
-} from './alerts_service';
-import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
-import { AlertingAuthorization } from './authorization';
-import { BackfillClient } from './backfill_client/backfill_client';
-import { AlertingConfig, AlertingRulesConfig } from './config';
-import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
-import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
-import { initializeAlertingHealth, scheduleAlertingHealthCheck } from './health';
-import { getHealth } from './health/get_health';
-import {
-  initializeApiKeyInvalidator,
-  scheduleApiKeyInvalidatorTask,
-} from './invalidate_pending_api_keys/task';
-import { GetAlertIndicesAlias, createGetAlertIndicesAliasFn } from './lib';
-import { getActionsConfigMap } from './lib/get_actions_config_map';
-import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
-import { SecurityHealth, getSecurityHealth } from './lib/get_security_health';
-import { ILicenseState, LicenseState } from './lib/license_state';
-import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
-import { maintenanceWindowFeature } from './maintenance_window_feature';
-import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
-import { defineRoutes } from './routes';
 import { RuleTypeRegistry } from './rule_type_registry';
+import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
 import { RulesSettingsClientFactory } from './rules_settings_client_factory';
-import { getRulesSettingsFeature } from './rules_settings_feature';
-import {
-  AD_HOC_RUN_SAVED_OBJECT_TYPE,
-  RULE_SAVED_OBJECT_TYPE,
-  getLatestRuleVersion,
-  setupSavedObjects,
-} from './saved_objects';
-import { TaskRunnerFactory } from './task_runner';
-import { ALERTING_FEATURE_ID, AlertingRequestHandlerContext, RuleAlertData } from './types';
+import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
+import { ILicenseState, LicenseState } from './lib/license_state';
+import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData } from './types';
+import { defineRoutes } from './routes';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -109,6 +77,38 @@ import {
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
+import {
+  setupSavedObjects,
+  getLatestRuleVersion,
+  RULE_SAVED_OBJECT_TYPE,
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+} from './saved_objects';
+import {
+  initializeApiKeyInvalidator,
+  scheduleApiKeyInvalidatorTask,
+} from './invalidate_pending_api_keys/task';
+import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
+import { AlertingConfig, AlertingRulesConfig } from './config';
+import { getHealth } from './health/get_health';
+import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { AlertingAuthorization } from './authorization';
+import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
+import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
+import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
+import { getActionsConfigMap } from './lib/get_actions_config_map';
+import {
+  AlertsService,
+  type PublicFrameworkAlertsService,
+  type InitializationPromise,
+  errorResult,
+} from './alerts_service';
+import { getRulesSettingsFeature } from './rules_settings_feature';
+import { maintenanceWindowFeature } from './maintenance_window_feature';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
+import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
+import { BackfillClient } from './backfill_client/backfill_client';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -129,8 +129,10 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 export interface PluginSetupContract {
   registerConnectorAdapter<
     RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
-    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams,
-  >(adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>): void;
+    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+  >(
+    adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
+  ): void;
   registerType<
     Params extends RuleTypeParams = RuleTypeParams,
     ExtractedParams extends RuleTypeParams = RuleTypeParams,
@@ -139,7 +141,7 @@ export interface PluginSetupContract {
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = never,
     RecoveryActionGroupId extends string = never,
-    AlertData extends RuleAlertData = never,
+    AlertData extends RuleAlertData = never
   >(
     ruleType: RuleType<
       Params,
@@ -403,7 +405,7 @@ export class AlertingPlugin {
     return {
       registerConnectorAdapter: <
         RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
-        ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+        ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
       >(
         adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
       ) => {
@@ -417,7 +419,7 @@ export class AlertingPlugin {
         InstanceContext extends AlertInstanceContext = never,
         ActionGroupIds extends string = never,
         RecoveryActionGroupId extends string = never,
-        AlertData extends RuleAlertData = never,
+        AlertData extends RuleAlertData = never
       >(
         ruleType: RuleType<
           Params,

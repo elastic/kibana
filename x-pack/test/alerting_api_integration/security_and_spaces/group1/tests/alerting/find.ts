@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { chunk, omit } from 'lodash';
 import { SuperTest, Test } from 'supertest';
+import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
 import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const findTestUtils = (
   describeType: 'internal' | 'public',

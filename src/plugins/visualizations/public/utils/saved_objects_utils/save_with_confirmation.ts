@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsCreateOptions } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { VisualizationSavedObject, VisualizationSavedObjectAttributes } from '../../../common';
-import { visualizationsClient } from '../../content_management';
-import type { StartServices, VisSavedObject } from '../../types';
-import { confirmModalPromise } from './confirm_modal_promise';
+import { i18n } from '@kbn/i18n';
+import type { SavedObjectsCreateOptions } from '@kbn/core/public';
 import { OVERWRITE_REJECTED } from './constants';
+import { confirmModalPromise } from './confirm_modal_promise';
+import type { StartServices, VisSavedObject } from '../../types';
+import { visualizationsClient } from '../../content_management';
+import { VisualizationSavedObjectAttributes, VisualizationSavedObject } from '../../../common';
 
 /**
  * Attempts to create the current object using the serialized source. If an object already

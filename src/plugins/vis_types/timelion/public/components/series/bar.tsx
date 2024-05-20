@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { BarSeries, BarSeriesStyle, ScaleType } from '@elastic/charts';
 import React from 'react';
+import { BarSeries, ScaleType, BarSeriesStyle } from '@elastic/charts';
 import type { VisSeries } from '../../../common/vis_data';
 
 interface BarSeriesComponentProps {

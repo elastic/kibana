@@ -7,23 +7,23 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useContext } from 'react';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { Route, Routes } from '@kbn/shared-ux-router';
-import React, { useContext } from 'react';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
-import { StateMachinePlayground } from '../../observability_logs/xstate_helpers';
-import { isDevMode } from '../../utils/dev_mode';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
-import { NotFoundPage } from '../404';
 import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
+import { isDevMode } from '../../utils/dev_mode';
+import { StateMachinePlayground } from '../../observability_logs/xstate_helpers';
+import { NotFoundPage } from '../404';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;

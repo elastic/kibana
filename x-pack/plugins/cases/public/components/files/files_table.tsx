@@ -6,16 +6,16 @@
  */
 import React, { useCallback, useState } from 'react';
 
-import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
+import type { Pagination, EuiBasicTableProps } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import { EuiBasicTable, EuiEmptyPrompt, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiSkeletonText, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
 
-import { AddFile } from './add_file';
-import { FilePreview } from './file_preview';
 import * as i18n from './translations';
-import { useFilePreview } from './use_file_preview';
 import { useFilesTableColumns } from './use_files_table_columns';
+import { FilePreview } from './file_preview';
+import { AddFile } from './add_file';
+import { useFilePreview } from './use_file_preview';
 
 const EmptyFilesTable = ({ caseId }: { caseId: string }) => (
   <EuiEmptyPrompt

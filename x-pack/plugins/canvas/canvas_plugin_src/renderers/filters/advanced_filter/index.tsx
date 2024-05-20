@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RendererStrings } from '../../../../i18n';
-import { RendererFactory } from '../../../../types';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StartInitializer } from '../../../plugin';
+import { RendererFactory } from '../../../../types';
 import { AdvancedFilter } from './component';
+import { RendererStrings } from '../../../../i18n';
 
 const { advancedFilter: strings } = RendererStrings;
 

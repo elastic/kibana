@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFormRow } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { CodeEditor } from '@kbn/code-editor';
 
 export function EventInput({ value, onChange }) {
   return (

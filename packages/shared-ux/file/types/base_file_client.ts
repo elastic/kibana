@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FileJSON, FileKindBase } from '.';
 import type { FileShareJSON, FileShareJSONWithToken } from './sharing';
+import type { FileJSON, FileKindBase } from '.';
 
 export interface Pagination {
   page?: number;

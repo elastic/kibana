@@ -12,9 +12,9 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import type { TaskInstanceFields } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-import { type Duration, add, sub } from 'date-fns';
+import type { TaskInstanceFields } from '@kbn/reporting-common/types';
+import { sub, add, type Duration } from 'date-fns';
 
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
@@ -63,9 +63,8 @@ describe('getExportSettings', () => {
   });
 
   test('getExportSettings: returns the expected result', async () => {
-    expect(
-      await getExportSettings(uiSettingsClient, taskInstanceFields, config, '', logger)
-    ).toMatchInlineSnapshot(`
+    expect(await getExportSettings(uiSettingsClient, taskInstanceFields, config, '', logger))
+      .toMatchInlineSnapshot(`
       Object {
         "bom": "",
         "checkForFormulas": true,

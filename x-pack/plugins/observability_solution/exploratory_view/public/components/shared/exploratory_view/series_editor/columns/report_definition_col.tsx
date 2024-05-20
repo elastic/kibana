@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 import React from 'react';
-import { SYNTHETICS_STEP_NAME } from '../../configurations/constants/field_names/synthetics';
-import { isStepLevelMetric } from '../../configurations/synthetics/kpi_over_time_config';
+import { isEmpty } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { ReportDefinitionField } from './report_definition_field';
 import { TextReportDefinitionField } from './text_report_definition_field';
+import { isStepLevelMetric } from '../../configurations/synthetics/kpi_over_time_config';
+import { SYNTHETICS_STEP_NAME } from '../../configurations/constants/field_names/synthetics';
 
 export function ReportDefinitionCol({
   seriesId,

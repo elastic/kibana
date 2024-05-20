@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BulkEditRulesRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/bulk_edit';
 import { BulkEditOperation } from '../../../../../../application/rule/methods/bulk_edit';
+import { BulkEditRulesRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/bulk_edit';
 
 export const transformOperations = ({
   operations,

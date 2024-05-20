@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { constants, accessSync } from 'fs';
 import { join } from 'path';
+import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
 

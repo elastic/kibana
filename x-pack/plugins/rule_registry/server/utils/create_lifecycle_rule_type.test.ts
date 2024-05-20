@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { schema } from '@kbn/config-schema';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import {
   ALERT_DURATION,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
-  ALERT_TIME_RANGE,
   ALERT_UUID,
+  ALERT_TIME_RANGE,
 } from '@kbn/rule-data-utils';
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { castArray, omit } from 'lodash';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 

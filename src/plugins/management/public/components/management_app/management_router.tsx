@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { memo } from 'react';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import {
   AnalyticsServiceStart,
   AppMountParameters,
@@ -14,12 +17,9 @@ import {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import React, { memo } from 'react';
-import { Redirect } from 'react-router-dom';
-import { ManagementSection } from '../../utils';
-import { ManagementLandingPage } from '../landing';
 import { ManagementAppWrapper } from '../management_app_wrapper';
+import { ManagementLandingPage } from '../landing';
+import { ManagementSection } from '../../utils';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];

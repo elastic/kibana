@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   EuiBasicTable,
@@ -15,26 +15,26 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiIconTip,
-  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
 import {
   AggFunctionsMapping,
   AggParamOption,
   IndexPatternAggRestrictions,
-  UI_SETTINGS,
   search,
+  UI_SETTINGS,
 } from '@kbn/data-plugin/public';
+import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { OperationDefinition, ParamEditorProps } from '.';
-import { FormBasedLayer } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
+import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { FormBasedLayer } from '../../types';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';

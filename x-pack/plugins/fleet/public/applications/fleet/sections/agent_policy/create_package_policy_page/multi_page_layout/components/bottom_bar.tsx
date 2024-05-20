@@ -7,12 +7,12 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiBottomBar, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
-import { FLEET_KUBERNETES_PACKAGE } from '../../../../../../../../common';
 import { useLink } from '../../../../../../../hooks';
 import { useGetDiscoverLogsLinkForAgents } from '../hooks';
+import { FLEET_KUBERNETES_PACKAGE } from '../../../../../../../../common';
 
 const CenteredRoundedBottomBar = styled(EuiBottomBar)`
   max-width: 820px;

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiIcon } from '@elastic/eui';
 import classNames from 'classnames';
+import { CSS } from '@dnd-kit/utilities';
+import { useSortable } from '@dnd-kit/sortable';
 import React, { forwardRef, HTMLAttributes } from 'react';
+import { EuiFlexItem, EuiFormLabel, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 
 import { ControlGroupStrings } from '../control_group_strings';
-import { controlGroupSelector } from '../embeddable/control_group_container';
 import { ControlFrame, ControlFrameProps } from './control_frame_component';
+import { controlGroupSelector } from '../embeddable/control_group_container';
 
 interface DragInfo {
   isOver?: boolean;

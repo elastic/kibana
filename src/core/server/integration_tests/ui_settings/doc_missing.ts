@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { chance, getServices } from './lib';
+import { getServices, chance } from './lib';
 
 export const docMissingSuite = (savedObjectsIndex: string) => () => {
   // ensure the kibana index has no documents

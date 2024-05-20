@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
-import type { MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { monaco } from '@kbn/monaco';
+import { i18n } from '@kbn/i18n';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { MapCache } from 'lodash';
 
 export type MonacoMessage = monaco.editor.IMarkerData;
 

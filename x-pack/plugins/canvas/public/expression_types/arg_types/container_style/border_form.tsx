@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { FunctionComponent } from 'react';
+import PropTypes from 'prop-types';
 import {
-  EuiFieldNumber,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
+  EuiFlexItem,
+  EuiFieldNumber,
   EuiSuperSelect,
 } from '@elastic/eui';
-import PropTypes from 'prop-types';
-import React, { FunctionComponent } from 'react';
-import { ArgTypesStrings } from '../../../../i18n';
-import { BorderStyle, isBorderStyle } from '../../../../types';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
+import { BorderStyle, isBorderStyle } from '../../../../types';
+import { ArgTypesStrings } from '../../../../i18n';
 
 export { BorderStyle } from '../../../../types';
 

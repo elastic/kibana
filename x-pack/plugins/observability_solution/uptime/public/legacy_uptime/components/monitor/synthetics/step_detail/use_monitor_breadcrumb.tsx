@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import moment from 'moment';
-import { PLUGIN } from '../../../../../../common/constants/plugin';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { JourneyState } from '../../../../state/reducers/journey';
+import { PLUGIN } from '../../../../../../common/constants/plugin';
 import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
 
 interface ActiveStep {

@@ -7,14 +7,14 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
-import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
+import { getRuleStatesKey } from '../configurations/latest_findings/use_get_benchmark_rules_state_api';
+import { getCspmStatsKey, getKspmStatsKey } from '../../common/api';
+import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';
 import {
   CspBenchmarkRulesBulkActionRequestSchema,
   RuleStateAttributes,
 } from '../../../common/types/latest';
-import { getCspmStatsKey, getKspmStatsKey } from '../../common/api';
-import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';
-import { getRuleStatesKey } from '../configurations/latest_findings/use_get_benchmark_rules_state_api';
+import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
 
 export type RuleStateAttributesWithoutStates = Omit<RuleStateAttributes, 'muted'>;
 export const useChangeCspRuleState = () => {

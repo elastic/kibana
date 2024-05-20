@@ -6,17 +6,17 @@
  */
 
 import type {
-  DataViewsServerPluginStart,
   SearchStrategyDependencies,
+  DataViewsServerPluginStart,
 } from '@kbn/data-plugin/server';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
-import type { IndexFieldsStrategyRequestByIndices } from '@kbn/timelines-plugin/common/search_strategy';
 import { fieldsBeat as beatFields } from '@kbn/timelines-plugin/server/utils/beat_schema/fields.json';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { requestEndpointFieldsSearch } from '.';
-import { METADATA_UNITED_INDEX, eventsIndexPattern } from '../../../common/endpoint/constants';
-import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
-import { EndpointAuthorizationError } from '../../endpoint/errors';
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
+import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
+import { eventsIndexPattern, METADATA_UNITED_INDEX } from '../../../common/endpoint/constants';
+import { EndpointAuthorizationError } from '../../endpoint/errors';
+import type { IndexFieldsStrategyRequestByIndices } from '@kbn/timelines-plugin/common/search_strategy';
 
 describe('Endpoint fields', () => {
   const getFieldsForWildcardMock = jest.fn();

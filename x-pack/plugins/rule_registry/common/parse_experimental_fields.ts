@@ -1,4 +1,3 @@
-import { ExperimentalRuleFieldMap, legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +7,7 @@ import { ExperimentalRuleFieldMap, legacyExperimentalFieldMap } from '@kbn/alert
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { pick } from 'lodash';
+import { legacyExperimentalFieldMap, ExperimentalRuleFieldMap } from '@kbn/alerts-as-data-utils';
 
 import { runtimeTypeFromFieldMap } from './field_map';
 

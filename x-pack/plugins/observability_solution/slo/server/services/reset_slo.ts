@@ -8,13 +8,13 @@
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
+  getSLOSummaryPipelineId,
+  getSLOSummaryTransformId,
+  getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_MODEL_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_TEMP_INDEX_NAME,
-  getSLOSummaryPipelineId,
-  getSLOSummaryTransformId,
-  getSLOTransformId,
 } from '../../common/constants';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { retryTransientEsErrors } from '../utils/retry';

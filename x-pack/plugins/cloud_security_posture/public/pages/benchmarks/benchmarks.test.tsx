@@ -1,6 +1,3 @@
-import type { UseQueryResult } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
-import Chance from 'chance';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,17 +5,20 @@ import Chance from 'chance';
  * 2.0.
  */
 import React from 'react';
-import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
+import Chance from 'chance';
+import { render, screen } from '@testing-library/react';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
 import { Benchmarks } from './benchmarks';
-import { ERROR_STATE_TEST_SUBJECT } from './benchmarks_table';
 import * as TEST_SUBJ from './test_subjects';
 import { useCspBenchmarkIntegrationsV2 } from './use_csp_benchmark_integrations';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
+import { ERROR_STATE_TEST_SUBJECT } from './benchmarks_table';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 
 jest.mock('./use_csp_benchmark_integrations');
 jest.mock('../../common/api/use_setup_status_api');

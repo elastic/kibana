@@ -7,30 +7,30 @@
  */
 
 import {
-  KibanaRequest,
-  Logger,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
+  Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { File, FileJSON, FileMetadata } from '../../common';
-import { FileKindsRegistry } from '../../common/file_kinds_registry';
+import { fileObjectType, fileShareObjectType, hiddenTypes } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
-import { SavedObjectsFileMetadataClient } from '../file_client';
 import { FileClientImpl } from '../file_client/file_client';
 import { InternalFileShareService } from '../file_share_service';
-import { fileObjectType, fileShareObjectType, hiddenTypes } from '../saved_objects';
 import {
-  BulkGetByIdArgs,
   CreateFileArgs,
   FindFileArgs,
   GetByIdArgs,
+  BulkGetByIdArgs,
   UpdateFileArgs,
 } from './file_action_types';
-import { FileServiceStart } from './file_service';
 import { InternalFileService } from './internal_file_service';
+import { FileServiceStart } from './file_service';
+import { FileKindsRegistry } from '../../common/file_kinds_registry';
+import { SavedObjectsFileMetadataClient } from '../file_client';
 
 /**
  * A simple interface for getting an instance of {@link FileServiceStart}

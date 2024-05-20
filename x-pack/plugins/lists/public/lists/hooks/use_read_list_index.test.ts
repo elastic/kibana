@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/public/mocks';
-import * as Api from '@kbn/securitysolution-list-api';
-import { useReadListIndex } from '@kbn/securitysolution-list-hooks';
 import { renderHook } from '@testing-library/react-hooks';
+import { useReadListIndex } from '@kbn/securitysolution-list-hooks';
+import * as Api from '@kbn/securitysolution-list-api';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { getAcknowledgeSchemaResponseMock } from '../../../common/schemas/response/acknowledge_schema.mock';
 import { createQueryWrapperMock } from '../mocks/query_wrapper';

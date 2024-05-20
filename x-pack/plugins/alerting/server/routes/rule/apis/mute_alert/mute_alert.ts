@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { IRouter } from '@kbn/core/server';
-import {
-  MuteAlertRequestParamsV1,
-  muteAlertParamsSchemaV1,
-} from '../../../../../common/routes/rule/apis/mute_alert';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
-import { verifyAccessAndContext } from '../../../lib';
 import { transformRequestParamsToApplicationV1 } from './transforms';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import {
+  muteAlertParamsSchemaV1,
+  MuteAlertRequestParamsV1,
+} from '../../../../../common/routes/rule/apis/mute_alert';
 
 export const muteAlertRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { ISearchGeneric } from '@kbn/search-types';
 import * as rt from 'io-ts';
+import { HttpStart } from '@kbn/core/public';
+import type { ISearchGeneric } from '@kbn/search-types';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { getLogViewResponsePayloadRT, putLogViewRequestPayloadRT } from '../../../common/http_api';
 import { getLogViewUrl } from '../../../common/http_api/log_views';
@@ -17,12 +17,12 @@ import {
   FetchLogViewStatusError,
   LogView,
   LogViewAttributes,
+  logViewAttributesRT,
   LogViewReference,
-  LogViewStatus,
   LogViewsStaticConfig,
+  LogViewStatus,
   PutLogViewError,
   ResolvedLogView,
-  logViewAttributesRT,
   resolveLogView,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
 import { getReportMessageIter } from './report_metadata';
 import { parseTestReport } from './test_report';
+import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
 
 it('reads messages and screenshots from metadata-json properties', async () => {
   const ftrReport = await parseTestReport(FTR_REPORT);

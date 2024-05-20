@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
+import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
 import { ChromeStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
-import { AnyAction, Dispatch, Store, applyMiddleware, combineReducers, createStore } from 'redux';
-import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
-import { AdvancedSettings, GraphSavePolicy, IndexPatternProvider, Workspace } from '../types';
+import { ContentClient } from '@kbn/content-management-plugin/public';
+import {
+  fieldsReducer,
+  FieldsState,
+  syncNodeStyleSaga,
+  syncFieldsSaga,
+  updateSaveButtonSaga,
+} from './fields';
+import { UrlTemplatesState, urlTemplatesReducer, syncTemplatesSaga } from './url_templates';
 import {
   AdvancedSettingsState,
   advancedSettingsReducer,
@@ -18,17 +25,10 @@ import {
 } from './advanced_settings';
 import { DatasourceState, datasourceReducer } from './datasource';
 import { datasourceSaga } from './datasource.sagas';
-import {
-  FieldsState,
-  fieldsReducer,
-  syncFieldsSaga,
-  syncNodeStyleSaga,
-  updateSaveButtonSaga,
-} from './fields';
-import { MetaDataState, metaDataReducer, syncBreadcrumbSaga } from './meta_data';
+import { IndexPatternProvider, Workspace, GraphSavePolicy, AdvancedSettings } from '../types';
 import { loadingSaga, savingSaga } from './persistence';
-import { UrlTemplatesState, syncTemplatesSaga, urlTemplatesReducer } from './url_templates';
-import { WorkspaceState, fillWorkspaceSaga, submitSearchSaga, workspaceReducer } from './workspace';
+import { metaDataReducer, MetaDataState, syncBreadcrumbSaga } from './meta_data';
+import { fillWorkspaceSaga, submitSearchSaga, workspaceReducer, WorkspaceState } from './workspace';
 
 export interface GraphState {
   fields: FieldsState;

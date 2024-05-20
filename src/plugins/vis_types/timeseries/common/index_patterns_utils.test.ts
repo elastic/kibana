@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewsService } from '@kbn/data-views-plugin/public';
 import {
   extractIndexPatternValues,
-  fetchIndexPattern,
-  isDataViewTypeIndexPattern,
   isStringTypeIndexPattern,
+  isDataViewTypeIndexPattern,
+  fetchIndexPattern,
 } from './index_patterns_utils';
 import { Panel } from './types';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/public';
 
 describe('isStringTypeIndexPattern', () => {
   test('should returns true on string-based index', () => {

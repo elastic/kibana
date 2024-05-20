@@ -13,44 +13,31 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiAccordion,
-  EuiCallOut,
   EuiComboBox,
+  EuiLink,
+  EuiSwitch,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiLink,
   EuiSelect,
   EuiSpacer,
-  EuiSwitch,
+  EuiCallOut,
   EuiTextArea,
 } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
-import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
+import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
+import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 import type { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
-import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
-import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import {
-  getPreviewTransformRequestBody,
-  getTransformConfigQuery,
-  isTransformIdValid,
-} from '../../../../common';
-import {
-  integerRangeMinus1To100Validator,
-  isContinuousModeDelay,
-  isRetentionPolicyMaxAge,
-  isTransformWizardFrequency,
-  transformSettingsPageSearchSizeValidator,
-} from '../../../../common/validators';
 import { ToastNotificationText } from '../../../../components';
 import {
   useDocumentationLinks,
@@ -61,8 +48,21 @@ import {
   useGetTransformsPreview,
 } from '../../../../hooks';
 import type { SearchItems } from '../../../../hooks/use_search_items';
-import type { StepDefineExposedState } from '../step_define/common';
+import {
+  getTransformConfigQuery,
+  getPreviewTransformRequestBody,
+  isTransformIdValid,
+} from '../../../../common';
 import type { EsIndexName } from './common';
+import {
+  isContinuousModeDelay,
+  isRetentionPolicyMaxAge,
+  isTransformWizardFrequency,
+  integerRangeMinus1To100Validator,
+  transformSettingsPageSearchSizeValidator,
+} from '../../../../common/validators';
+import type { StepDefineExposedState } from '../step_define/common';
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
 import type { StepDetailsExposedState } from './common';
 import { getDefaultStepDetailsState } from './common';
@@ -368,8 +368,8 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           transformSettingsNumFailureRetries === ''
             ? undefined
             : typeof transformSettingsNumFailureRetries === 'number'
-              ? transformSettingsNumFailureRetries
-              : parseInt(transformSettingsNumFailureRetries, 10),
+            ? transformSettingsNumFailureRetries
+            : parseInt(transformSettingsNumFailureRetries, 10),
         destinationIndex,
         destinationIngestPipeline,
         touched: true,

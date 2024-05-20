@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
+import { i18n } from '@kbn/i18n';
 
 /**
  * To translate label that includes nested `FormattedMessage` instances React Intl

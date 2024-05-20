@@ -6,9 +6,9 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { GetThreatListOptions } from './types';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
-import type { GetThreatListOptions } from './types';
 
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
 const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();

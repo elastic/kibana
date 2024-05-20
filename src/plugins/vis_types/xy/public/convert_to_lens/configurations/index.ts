@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ScaleType as ECScaleType, Position } from '@elastic/charts';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { Position, ScaleType as ECScaleType } from '@elastic/charts';
 import {
-  Column,
   SeriesTypes,
+  Column,
   XYConfiguration,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Vis } from '@kbn/visualizations-plugin/public';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { Layer } from '..';
 import { ChartType } from '../../../common';
 import {

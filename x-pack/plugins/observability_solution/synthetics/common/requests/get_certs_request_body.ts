@@ -7,18 +7,18 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
-import type { CertificatesResults } from '../../server/queries/get_certs';
 import { EXCLUDE_RUN_ONCE_FILTER, FINAL_SUMMARY_FILTER } from '../constants/client_defaults';
+import type { CertificatesResults } from '../../server/queries/get_certs';
 import { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
 import { asMutableArray } from '../utils/as_mutable_array';
 
 enum SortFields {
-  issuer = 'tls.server.x509.issuer.common_name',
-  not_after = 'tls.server.x509.not_after',
-  not_before = 'tls.server.x509.not_before',
-  common_name = 'tls.server.x509.subject.common_name',
+  'issuer' = 'tls.server.x509.issuer.common_name',
+  'not_after' = 'tls.server.x509.not_after',
+  'not_before' = 'tls.server.x509.not_before',
+  'common_name' = 'tls.server.x509.subject.common_name',
 }
 
 export const DEFAULT_SORT = 'not_after';

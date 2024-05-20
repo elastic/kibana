@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { EuiLinkAnchorProps } from '@elastic/eui';
-import { EuiIcon, EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useMemo } from 'react';
-import type { PolicyDetailsRouteState } from '../../../common/endpoint/types';
+import type { EuiLinkAnchorProps } from '@elastic/eui';
+import { EuiLink, EuiText, EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getPolicyDetailPath } from '../common/routing';
 import { useNavigateByRouterEventHandler } from '../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useAppUrl } from '../../common/lib/kibana/hooks';
-import { getPolicyDetailPath } from '../common/routing';
+import type { PolicyDetailsRouteState } from '../../../common/endpoint/types';
 
 /**
  * A policy link (to details) that first checks to see if the policy id exists against

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { SPACES } from '../../common/lib/spaces';
 import { getTestScenarios } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
 import { TestUser } from '../../../saved_object_api_integration/common/lib/types';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { SPACES } from '../../common/lib/spaces';
 import {
-  EXPECTED_RESULTS,
+  getShareableReferencesTestSuiteFactory,
   GetShareableReferencesTestCase,
   GetShareableReferencesTestDefinition,
   TEST_CASE_OBJECTS,
-  getShareableReferencesTestSuiteFactory,
+  EXPECTED_RESULTS,
 } from '../../common/suites/get_shareable_references';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

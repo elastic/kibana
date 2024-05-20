@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiCard, EuiIcon, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import {
-  ANALYSIS_CONFIG_TYPE,
   type DataFrameAnalysisConfigType,
+  ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import type { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';

@@ -6,22 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TinymathAST, TinymathLocation, TinymathVariable } from '@kbn/tinymath';
 import { isObject } from 'lodash';
-import {
-  GenericIndexPatternColumn,
-  GenericOperationDefinition,
-  OperationDefinition,
-  operationDefinitionMap,
-} from '..';
+import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
+import { nonNullable } from '../../../../../utils';
 import type { DateRange } from '../../../../../../common/types';
 import type { IndexPattern } from '../../../../../types';
-import { nonNullable } from '../../../../../utils';
-import { documentField } from '../../../document_field';
+import {
+  OperationDefinition,
+  GenericOperationDefinition,
+  GenericIndexPatternColumn,
+  operationDefinitionMap,
+} from '..';
 import type { FormBasedLayer } from '../../../types';
-import { getColumnOrder } from '../../layer_helpers';
-import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
 import { mathOperation } from './math';
+import { documentField } from '../../../document_field';
+import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
 import {
   filterByVisibleOperation,
   findVariables,
@@ -29,7 +28,8 @@ import {
   groupArgsByType,
   mergeWithGlobalFilters,
 } from './util';
-import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
+import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
+import { getColumnOrder } from '../../layer_helpers';
 
 /** @internal **/
 export function getManagedId(mainId: string, index: number) {

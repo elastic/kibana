@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RestoreSettings, SnapshotDetails } from '../../../../../common/types';
+import { SnapshotDetails, RestoreSettings } from '../../../../../common/types';
 import { RestoreValidation } from '../../../services/validation';
 
 export interface StepProps {

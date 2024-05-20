@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { InfraConfig } from '../../common/plugin_config_types';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import type { InfraConfig } from '../../common/plugin_config_types';
 import { PluginConfigProvider, usePluginConfig } from './plugin_config_context';
 
 describe('usePluginConfig()', () => {

@@ -15,9 +15,9 @@ import {
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
+import React, { Controller, useForm } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Controller, useForm } from 'react-hook-form';
 import { useCreateApiKeyQuery } from '../../hooks/use_create_api_key_query';
 import { useKibana } from '../../hooks/use_kibana';
 

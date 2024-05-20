@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginStartContract as AlertingPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
+import { PluginStartContract as AlertingPluginStartContract } from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
+import { ToolingLog } from '@kbn/tooling-log';
 
+import { isErrorLogged, markErrorLogged } from './errors';
 import { Build } from './build';
 import { Config } from './config';
-import { isErrorLogged, markErrorLogged } from './errors';
 
 interface Options {
   config: Config;

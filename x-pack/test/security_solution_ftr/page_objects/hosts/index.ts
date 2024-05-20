@@ -29,8 +29,9 @@ export class HostsPageObject extends FtrService {
    */
   async hostDetailsEndpointOverviewData(): Promise<Record<string, string>> {
     await this.ensureOnHostDetails();
-    const endpointDescriptionLists: WebElementWrapper[] =
-      await this.testSubjects.findAll('endpoint-overview');
+    const endpointDescriptionLists: WebElementWrapper[] = await this.testSubjects.findAll(
+      'endpoint-overview'
+    );
 
     const data: Record<string, string> = {};
 

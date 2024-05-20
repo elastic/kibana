@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core/public';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { useKibana } from '../../../../common/lib';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { loadExecutionKPIAggregations } from '../../../lib/rule_api/load_execution_kpi_aggregations';
 import { loadGlobalExecutionKPIAggregations } from '../../../lib/rule_api/load_global_execution_kpi_aggregations';
 import { RuleEventLogListKPI } from './rule_event_log_list_kpi';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useKibana } from '../../../../common/lib';
+import { IToasts } from '@kbn/core/public';
 
 const addDangerMock = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => ({

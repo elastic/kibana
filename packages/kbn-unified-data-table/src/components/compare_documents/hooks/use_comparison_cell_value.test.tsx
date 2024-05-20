@@ -15,9 +15,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { ReactNode, useState } from 'react';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import { useComparisonCellValue, UseComparisonCellValueProps } from './use_comparison_cell_value';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
-import * as CalculateDiff from './calculate_diff';
-import { UseComparisonCellValueProps, useComparisonCellValue } from './use_comparison_cell_value';
 import {
   ADDED_SEGMENT_CLASS,
   BASE_CELL_CLASS,
@@ -27,6 +26,7 @@ import {
   REMOVED_SEGMENT_CLASS,
   SEGMENT_CLASS,
 } from './use_comparison_css';
+import * as CalculateDiff from './calculate_diff';
 
 const calculateDiff = jest.spyOn(CalculateDiff, 'calculateDiff');
 

@@ -7,8 +7,8 @@
  */
 
 import {
-  type ModelVersionTestMigrator,
   createModelVersionTestMigrator,
+  type ModelVersionTestMigrator,
 } from '@kbn/core-test-helpers-model-versions';
 import { querySavedObjectType } from './query';
 

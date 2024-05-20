@@ -6,9 +6,9 @@
  */
 
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
+import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 describe('getCasesConnectorType', () => {
   let caseConnectorType: SubActionConnectorType<CasesConnectorConfig, CasesConnectorSecrets>;

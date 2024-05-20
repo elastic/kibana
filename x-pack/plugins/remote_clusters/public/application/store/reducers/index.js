@@ -6,11 +6,11 @@
  */
 
 import { combineReducers } from 'redux';
-import { addCluster } from './add_cluster';
 import { clusters } from './clusters';
 import { detailPanel } from './detail_panel';
-import { editCluster } from './edit_cluster';
+import { addCluster } from './add_cluster';
 import { removeCluster } from './remove_cluster';
+import { editCluster } from './edit_cluster';
 
 export const remoteClusters = combineReducers({
   clusters,

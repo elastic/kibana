@@ -6,7 +6,7 @@
  */
 import React, { type ReactNode } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexItem, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 import { Popover } from '../tabs/common/popover';
 
 export const SectionTitle = ({

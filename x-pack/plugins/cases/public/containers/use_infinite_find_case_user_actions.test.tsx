@@ -7,13 +7,13 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { useInfiniteFindCaseUserActions } from './use_infinite_find_case_user_actions';
 import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
+import { basicCase, findCaseUserActionsResponse } from './mock';
+import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
-import * as api from './api';
-import { basicCase, findCaseUserActionsResponse } from './mock';
-import { useInfiniteFindCaseUserActions } from './use_infinite_find_case_user_actions';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

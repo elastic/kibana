@@ -7,20 +7,20 @@
 
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExperimentalFeatures } from '../../../../../../common';
+import { invariant } from '../../../../../../common/utils/invariant';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
+import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
+import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
-import { isMlRule } from '../../../../../../common/machine_learning/helpers';
-import { invariant } from '../../../../../../common/utils/invariant';
+import type { RuleAlertType } from '../../../rule_schema';
+import { isIndexPatternsBulkEditAction, isInvestigationFieldsBulkEditAction } from './utils';
+import { throwDryRunError } from './dry_run';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import type { RuleAlertType } from '../../../rule_schema';
-import { throwDryRunError } from './dry_run';
-import { isIndexPatternsBulkEditAction, isInvestigationFieldsBulkEditAction } from './utils';
 
 interface BulkActionsValidationArgs {
   rule: RuleAlertType;

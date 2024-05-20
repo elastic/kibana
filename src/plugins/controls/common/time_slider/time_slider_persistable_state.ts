@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
 import {
-  EmbeddablePersistableStateService,
   EmbeddableStateWithType,
+  EmbeddablePersistableStateService,
 } from '@kbn/embeddable-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
 import { TimeSliderControlEmbeddableInput } from './types';
 
 type TimeSliderInputWithType = Partial<TimeSliderControlEmbeddableInput> & { type: string };

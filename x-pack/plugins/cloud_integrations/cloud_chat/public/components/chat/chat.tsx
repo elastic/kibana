@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ChatApi, useChatConfig } from './use_chat_config';
+import { i18n } from '@kbn/i18n';
 import { WhenIdle } from './when_idle';
+import { useChatConfig, ChatApi } from './use_chat_config';
 export type { ChatApi } from './use_chat_config';
 
 export interface Props {

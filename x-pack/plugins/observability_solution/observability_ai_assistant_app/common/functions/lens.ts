@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { FromSchema } from 'json-schema-to-ts';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
-import { FromSchema } from 'json-schema-to-ts';
 
 export enum SeriesType {
   Bar = 'bar',
@@ -118,4 +118,4 @@ export const lensFunctionDefinition = {
   } as const,
 };
 
-export type LensFunctionArguments = FromSchema<(typeof lensFunctionDefinition)['parameters']>;
+export type LensFunctionArguments = FromSchema<typeof lensFunctionDefinition['parameters']>;

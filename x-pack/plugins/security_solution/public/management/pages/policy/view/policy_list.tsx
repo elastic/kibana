@@ -9,42 +9,42 @@ import React, { memo, useCallback, useMemo } from 'react';
 
 import type { CriteriaWithPagination } from '@elastic/eui';
 import {
-  EuiAvatar,
   EuiBasicTable,
-  EuiCallOut,
+  EuiText,
+  EuiHorizontalRule,
+  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIconTip,
-  EuiText,
   EuiToolTip,
+  EuiIconTip,
+  EuiCallOut,
   useEuiTheme,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { useLocation } from 'react-router-dom';
 import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import { useLocation } from 'react-router-dom';
-import { APP_UI_ID } from '../../../../../common/constants';
-import type { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
-import { FormattedDate } from '../../../../common/components/formatted_date';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
-import { getPoliciesPath } from '../../../common/routing';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AdministrationListPage } from '../../../components/administration_list_page';
+import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
-import { PolicyEmptyState } from '../../../components/management_empty_state';
-import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
+import type { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import {
   useEndpointPackagePoliciesStats,
   useGetEndpointSecurityPackage,
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
+import { PolicyEmptyState } from '../../../components/management_empty_state';
+import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { APP_UI_ID } from '../../../../../common/constants';
+import { getPoliciesPath } from '../../../common/routing';
+import { useAppUrl, useToasts } from '../../../../common/lib/kibana';
 import { PolicyEndpointCount } from './components/policy_endpoint_count';
+import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 export const policyListErrorMessage = i18n.translate(
   'xpack.securitySolution.policy.list.errorMessage',

@@ -6,8 +6,8 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import React, { useCallback } from 'react';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 
 export const StateMachinePlayground = () => {
   const { changeLogViewReference, revertToDefaultLogView, update, isLoading, logViewStateService } =

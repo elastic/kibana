@@ -7,14 +7,14 @@
  */
 
 import { Server } from 'http';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { Router } from '@kbn/core-http-router-server-internal';
-import { HttpConfig, HttpServer } from '@kbn/core-http-server-internal';
-import type { Logger } from '@kbn/logging';
+import supertest from 'supertest';
 import moment from 'moment';
 import { of } from 'rxjs';
-import supertest from 'supertest';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { Router } from '@kbn/core-http-router-server-internal';
+import { HttpServer, HttpConfig } from '@kbn/core-http-server-internal';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import type { Logger } from '@kbn/logging';
 
 describe('Http server', () => {
   let server: HttpServer;

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import moment from 'moment';
 import React from 'react';
 import { NewsFeed } from './news_feed';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 const mockNewsFetchResult = {
   error: null,

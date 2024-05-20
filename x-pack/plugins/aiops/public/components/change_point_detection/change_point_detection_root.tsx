@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { pick } from 'lodash';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
+import { pick } from 'lodash';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { EuiSpacer } from '@elastic/eui';
 
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
+import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   DatePickerContextProvider,
   type DatePickerDependencies,
   mlTimefilterRefresh$,
 } from '@kbn/ml-date-picker';
-import { StorageContextProvider } from '@kbn/ml-local-storage';
-import { UrlStateProvider } from '@kbn/ml-url-state';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 
+import { DataSourceContext } from '../../hooks/use_data_source';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { DataSourceContext } from '../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { PageHeader } from '../page_header';
 
-import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
-import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
-import { ReloadContextProvider } from '../../hooks/use_reload';
+import { ChangePointDetectionPage } from './change_point_detection_page';
 import {
   ChangePointDetectionContextProvider,
   ChangePointDetectionControlsContextProvider,
 } from './change_point_detection_context';
-import { ChangePointDetectionPage } from './change_point_detection_page';
+import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
+import { ReloadContextProvider } from '../../hooks/use_reload';
+import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 
 const localStorage = new Storage(window.localStorage);
 

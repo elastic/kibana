@@ -5,12 +5,12 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import { getContainerHostNames } from './get_host_names';
 import { getInfrastructureData } from './get_infrastructure_data';
+import { getContainerHostNames } from './get_host_names';
+import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 const infrastructureRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure_attributes',

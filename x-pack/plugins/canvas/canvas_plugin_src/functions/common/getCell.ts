@@ -6,8 +6,8 @@
  */
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { getFunctionErrors, getFunctionHelp } from '../../../i18n';
 import { Datatable } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   column: string;

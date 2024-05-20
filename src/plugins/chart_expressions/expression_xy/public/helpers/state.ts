@@ -8,8 +8,8 @@
 
 import type {
   CommonXYLayerConfig,
-  DataDecorationConfig,
   ReferenceLineDecorationConfig,
+  DataDecorationConfig,
 } from '../../common';
 import { getDataLayers, isAnnotationsLayer, isDataLayer, isReferenceLine } from './visualization';
 

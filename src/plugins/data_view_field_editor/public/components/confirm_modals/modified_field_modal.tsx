@@ -1,5 +1,3 @@
-import { EuiConfirmModal } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import { i18n } from '@kbn/i18n';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiConfirmModal } from '@elastic/eui';
 
 const i18nTexts = {
   title: i18n.translate('indexPatternFieldEditor.cancelField.confirmationModal.title', {

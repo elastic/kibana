@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
+import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { coreInternalLifecycleMock, coreLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { isPromise } from '@kbn/std';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import type { PluginInitializerContext, SharedGlobalConfig } from '@kbn/core-plugins-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { typeRegistryMock as savedObjectsTypeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
-import { isPromise } from '@kbn/std';
-import { duration } from 'moment';
-import { of } from 'rxjs';
+import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';

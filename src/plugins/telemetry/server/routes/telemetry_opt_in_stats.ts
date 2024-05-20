@@ -8,17 +8,17 @@
 
 import fetch from 'node-fetch';
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import type {
-  StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
+  StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
-import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import { GetOptInStatsRoutePathBasedV2 } from '../../common/routes';
-import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import type { v2 } from '../../common/types';
 import { EncryptedTelemetryPayload, UnencryptedTelemetryPayload } from '../../common/types';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
+import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 
 interface SendTelemetryOptInStatusConfig {
   appendServerlessChannelsSuffix: boolean;

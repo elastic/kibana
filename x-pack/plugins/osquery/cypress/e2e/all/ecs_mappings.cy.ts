@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { getAdvancedButton } from '../../screens/integrations';
-import { ServerlessRoleName } from '../../support/roles';
+import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
   getOsqueryFieldTypes,
@@ -16,8 +17,7 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
-import { initializeDataViews } from '../../tasks/login';
-import { navigateTo } from '../../tasks/navigation';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {

@@ -1,4 +1,3 @@
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +5,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
  * 2.0.
  */
 import moment from 'moment';
-import { useEffect, useRef, useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMonitoringTimeContainerContext } from './use_monitoring_time';
 
 export function useCharts() {

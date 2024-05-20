@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
-import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
-import { useLogViewReference } from '../../../../../../hooks/use_log_view_reference';
-import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
+import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
 import { LogsLinkToStream } from './logs_link_to_stream';
 import { LogsSearchBar } from './logs_search_bar';
+import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
+import { useLogViewReference } from '../../../../../../hooks/use_log_view_reference';
 
 export const LogsTabContent = () => {
   const [filterQuery] = useLogsSearchUrlState();

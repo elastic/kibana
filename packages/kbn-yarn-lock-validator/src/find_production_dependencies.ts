@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson } from '@kbn/repo-info';
 import { SomeDevLog } from '@kbn/some-dev-log';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { YarnLock } from './yarn_lock';
 

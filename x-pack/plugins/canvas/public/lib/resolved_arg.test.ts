@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getError, getState, getValue } from './resolved_arg';
+import { getState, getValue, getError } from './resolved_arg';
 
 describe('resolved arg helper', () => {
   describe('getState', () => {

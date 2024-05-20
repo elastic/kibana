@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getAllMigrations, searchMigrations } from './search_migrations';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;

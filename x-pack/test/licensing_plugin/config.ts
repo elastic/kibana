@@ -6,7 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { pageObjects, services } from './services';
+import { services, pageObjects } from './services';
 
 const license = 'basic';
 

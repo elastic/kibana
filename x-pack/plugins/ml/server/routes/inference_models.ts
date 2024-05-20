@@ -1,4 +1,3 @@
-import type { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,11 +6,12 @@ import type { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticse
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { wrapError } from '../client/error_wrapper';
-import { modelsProvider } from '../models/model_management';
+import type { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { RouteInitialization } from '../types';
 import { createInferenceSchema } from './schemas/inference_schema';
+import { modelsProvider } from '../models/model_management';
+import { wrapError } from '../client/error_wrapper';
+import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 
 export function inferenceModelRoutes(
   { router, routeGuard }: RouteInitialization,

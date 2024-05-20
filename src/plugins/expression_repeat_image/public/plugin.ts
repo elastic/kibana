@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { repeatImageFunction } from '../common/expression_functions';
 import { repeatImageRendererFactory } from './expression_renderers';
 
@@ -24,7 +24,12 @@ export type ExpressionRepeatImagePluginStart = void;
 
 export class ExpressionRepeatImagePlugin
   implements
-    Plugin<ExpressionRepeatImagePluginSetup, ExpressionRepeatImagePluginStart, SetupDeps, StartDeps>
+    Plugin<
+      ExpressionRepeatImagePluginSetup,
+      ExpressionRepeatImagePluginStart,
+      SetupDeps,
+      StartDeps
+    >
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRepeatImagePluginSetup {
     expressions.registerFunction(repeatImageFunction);

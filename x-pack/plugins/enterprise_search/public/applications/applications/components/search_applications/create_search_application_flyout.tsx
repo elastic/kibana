@@ -12,22 +12,22 @@ import { useLocation } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiComboBoxOptionOption,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFieldText,
   EuiFlyout,
+  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiLink,
   EuiSpacer,
   EuiSteps,
   EuiText,
   EuiTitle,
+  EuiComboBoxOptionOption,
+  EuiCallOut,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -42,7 +42,7 @@ import { getErrorsFromHttpResponse } from '../../../shared/flash_messages/handle
 
 import { parseQueryParams } from '../../../shared/query_params';
 
-import { IndicesSelectComboBox, indexToOption } from './components/indices_select_combobox';
+import { indexToOption, IndicesSelectComboBox } from './components/indices_select_combobox';
 import { CreateSearchApplicationLogic } from './create_search_application_logic';
 
 export interface CreateSearchApplicationFlyoutProps {

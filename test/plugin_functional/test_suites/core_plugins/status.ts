@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ServiceStatusLevels } from '@kbn/core/server';
 import expect from '@kbn/expect';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {

@@ -1,7 +1,3 @@
-import { coreMock } from '@kbn/core/public/mocks';
-import { render, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import yaml from 'js-yaml';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,15 +5,19 @@ import yaml from 'js-yaml';
  * 2.0.
  */
 import React from 'react';
-import { ControlGeneralView } from '.';
-import { INPUT_CONTROL } from '../../../common/constants';
-import { getInputFromPolicy } from '../../../common/utils/helpers';
+import yaml from 'js-yaml';
+import { render, waitFor } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
+import userEvent from '@testing-library/user-event';
+import { TestProvider } from '../../test/test_provider';
 import {
+  getCloudDefendNewPolicyMock,
   MOCK_YAML_INVALID_CONFIGURATION,
   MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
-  getCloudDefendNewPolicyMock,
 } from '../../test/mocks';
-import { TestProvider } from '../../test/test_provider';
+import { ControlGeneralView } from '.';
+import { getInputFromPolicy } from '../../../common/utils/helpers';
+import { INPUT_CONTROL } from '../../../common/constants';
 
 describe('<ControlGeneralView />', () => {
   const onChange = jest.fn();

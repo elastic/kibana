@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import FieldIcon from './field_icon';
 import { getFieldIconProps } from './get_field_icon_props';
 

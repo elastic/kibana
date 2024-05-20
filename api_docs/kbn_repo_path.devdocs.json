@@ -36,7 +36,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-repo-path/repo_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -48,7 +50,9 @@
                 "tags": [],
                 "label": "repoRoot",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-repo-path/repo_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -61,7 +65,9 @@
                 "tags": [],
                 "label": "repoRel",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-repo-path/repo_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -76,7 +82,9 @@
             "type": "string",
             "tags": [],
             "label": "abs",
-            "description": ["\nabsolute path to the file\n(lazy and cached getter)"],
+            "description": [
+              "\nabsolute path to the file\n(lazy and cached getter)"
+            ],
             "path": "packages/kbn-repo-path/repo_path.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -87,7 +95,9 @@
             "type": "string",
             "tags": [],
             "label": "ext",
-            "description": ["\nextension to the filename\n(lazy and cached getter)"],
+            "description": [
+              "\nextension to the filename\n(lazy and cached getter)"
+            ],
             "path": "packages/kbn-repo-path/repo_path.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -111,7 +121,9 @@
             "type": "string",
             "tags": [],
             "label": "repoRelDir",
-            "description": ["\nrepoRelDir of the path\n(lazy and cached getter)"],
+            "description": [
+              "\nrepoRelDir of the path\n(lazy and cached getter)"
+            ],
             "path": "packages/kbn-repo-path/repo_path.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -123,7 +135,9 @@
             "tags": [],
             "label": "isTypeScript",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/kbn-repo-path/repo_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -137,7 +151,9 @@
             "tags": [],
             "label": "isTypeScriptAmbient",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/kbn-repo-path/repo_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -151,7 +167,9 @@
             "tags": [],
             "label": "isJavaScript",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/kbn-repo-path/repo_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -165,7 +183,9 @@
             "tags": [],
             "label": "isJsTsCode",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/kbn-repo-path/repo_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -179,7 +199,9 @@
             "tags": [],
             "label": "isFixture",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/kbn-repo-path/repo_path.ts",
             "deprecated": false,
             "trackAdoption": false,

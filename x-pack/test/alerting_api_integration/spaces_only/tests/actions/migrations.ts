@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getUrlPrefix } from '../../../common/lib';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {

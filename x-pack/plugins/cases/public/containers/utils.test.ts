@@ -6,16 +6,16 @@
  */
 
 import {
-  constructAssigneesFilter,
-  constructCustomFieldsFilter,
-  constructReportersFilter,
-  createUpdateSuccessToaster,
   valueToUpdateIsSettings,
   valueToUpdateIsStatus,
+  createUpdateSuccessToaster,
+  constructAssigneesFilter,
+  constructReportersFilter,
+  constructCustomFieldsFilter,
 } from './utils';
 
-import { CustomFieldTypes } from '../../common/types/domain';
 import type { CaseUI } from './types';
+import { CustomFieldTypes } from '../../common/types/domain';
 
 const caseBeforeUpdate = {
   comments: [

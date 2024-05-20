@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { UiCounterMetricType } from '@kbn/analytics';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { Draggable } from '@kbn/dom-drag-drop';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useMemo, useState } from 'react';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { UiCounterMetricType } from '@kbn/analytics';
+import { Draggable } from '@kbn/dom-drag-drop';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
   FieldPopover,
-  FieldPopoverFooter,
-  type FieldPopoverFooterProps,
   FieldPopoverHeader,
   type FieldPopoverHeaderProps,
+  FieldPopoverFooter,
+  type FieldPopoverFooterProps,
 } from '../../components/field_popover';
-import type { SearchMode } from '../../types';
-import type {
-  AddFieldFilterHandler,
-  UnifiedFieldListSidebarContainerStateService,
-} from '../../types';
-import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
 import {
   UnifiedFieldListItemStats,
   type UnifiedFieldListItemStatsProps,
 } from './field_list_item_stats';
+import type {
+  UnifiedFieldListSidebarContainerStateService,
+  AddFieldFilterHandler,
+} from '../../types';
+import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
 
 interface GetCommonFieldItemButtonPropsParams {
   stateService: UnifiedFieldListSidebarContainerStateService;

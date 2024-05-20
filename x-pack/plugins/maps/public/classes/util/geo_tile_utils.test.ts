@@ -6,11 +6,11 @@
  */
 
 import {
-  expandToTileBoundaries,
-  getTileBoundingBox,
   getTileKey,
-  getTilesForExtent,
   parseTileKey,
+  getTileBoundingBox,
+  getTilesForExtent,
+  expandToTileBoundaries,
 } from './geo_tile_utils';
 
 test('Should parse tile key', () => {

@@ -1,4 +1,3 @@
-import { schema } from '@kbn/config-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import { schema } from '@kbn/config-schema';
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
-import type { PreconfiguredOutput } from '../../../common/types';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
+import type { PreconfiguredOutput } from '../../../common/types';
 
 import {
   ElasticSearchSchema,

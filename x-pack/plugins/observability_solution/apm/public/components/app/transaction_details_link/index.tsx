@@ -6,14 +6,14 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { css } from '@emotion/react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { getRedirectToTransactionDetailPageUrl } from '../trace_link/get_redirect_to_transaction_detail_page_url';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 export function TransactionDetailsByNameLink() {
   const {

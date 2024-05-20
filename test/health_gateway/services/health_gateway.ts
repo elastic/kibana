@@ -8,10 +8,10 @@
 
 import { resolve } from 'path';
 import { format } from 'url';
-import { ProcRunner } from '@kbn/dev-proc-runner';
-import { REPO_ROOT } from '@kbn/repo-info';
 import getPort from 'get-port';
 import supertest from 'supertest';
+import { ProcRunner } from '@kbn/dev-proc-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrService } from '../../functional/ftr_provider_context';
 
 interface HealthGatewayOptions {

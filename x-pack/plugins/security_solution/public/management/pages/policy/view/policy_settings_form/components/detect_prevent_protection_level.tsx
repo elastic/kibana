@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React, { memo, useCallback, useMemo } from 'react';
+import { cloneDeep } from 'lodash';
 import type { EuiFlexItemProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiRadio, EuiSpacer } from '@elastic/eui';
+import { EuiRadio, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { cloneDeep } from 'lodash';
-import React, { memo, useCallback, useMemo } from 'react';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import { SettingCardHeader } from './setting_card';
+import type { PolicyFormComponentCommonProps } from '../types';
 import type {
-  Immutable,
   ImmutableArray,
   UIPolicyConfig,
+  Immutable,
 } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
 import { useLicense } from '../../../../../../common/hooks/use_license';
-import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import type { LinuxPolicyProtection, MacPolicyProtection, PolicyProtection } from '../../../types';
-import type { PolicyFormComponentCommonProps } from '../types';
-import { SettingCardHeader } from './setting_card';
 
 const DETECT_LABEL = i18n.translate('xpack.securitySolution.endpoint.policy.details.detect', {
   defaultMessage: 'Detect',

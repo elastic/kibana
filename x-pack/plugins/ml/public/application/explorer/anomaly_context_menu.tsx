@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FC, ReactEventHandler } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
@@ -23,33 +25,31 @@ import {
   formatDate,
   htmlIdGenerator,
 } from '@elastic/eui';
-import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Query, TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
+import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import type { FC, ReactEventHandler } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import { useTableSeverity } from '../components/controls/select_severity';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import type { AnomalyChartsEmbeddableInput } from '../../embeddables';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/anomaly_charts_embeddable';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/anomaly_charts_initializer';
-import { useTableSeverity } from '../components/controls/select_severity';
-import { useMlKibana } from '../contexts/kibana';
+import { useAnomalyExplorerContext } from './anomaly_explorer_context';
+import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
-import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
-import { useAnomalyExplorerContext } from './anomaly_explorer_context';
+import type { AnomalyChartsEmbeddableInput } from '../../embeddables';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
+import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 

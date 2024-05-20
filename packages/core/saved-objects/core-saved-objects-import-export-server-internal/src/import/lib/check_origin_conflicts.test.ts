@@ -8,18 +8,18 @@
 
 import { mockCreateOriginQuery } from './check_reference_origins.test.mock';
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
   SavedObject,
   SavedObjectReference,
 } from '@kbn/core-saved-objects-server';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import type { ImportStateMap } from './types';
 
@@ -53,7 +53,7 @@ const OTHER_TYPE = 'other';
 describe('#checkOriginConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
-  let find: (typeof savedObjectsClient)['find'];
+  let find: typeof savedObjectsClient['find'];
 
   const getResultMock = (...objects: SavedObjectType[]) => ({
     page: 1,

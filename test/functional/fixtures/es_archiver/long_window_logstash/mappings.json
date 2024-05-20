@@ -1,7 +1,8 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
+    "aliases": {
+    },
     "index": "long-window-logstash-0",
     "mappings": {
       "properties": {

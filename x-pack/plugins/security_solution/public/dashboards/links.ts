@@ -5,18 +5,18 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { DASHBOARDS_PATH, SERVER_APP_ID, SecurityPageName } from '../../common/constants';
+import { DASHBOARDS_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
 import { DASHBOARDS } from '../app/translations';
-import { cspDashboardLink, vulnerabilityDashboardLink } from '../cloud_security_posture/links';
-import { IconDashboards } from '../common/icons/dashboards';
 import type { LinkItem } from '../common/links/types';
 import { links as kubernetesLinks } from '../kubernetes/links';
+import { cspDashboardLink, vulnerabilityDashboardLink } from '../cloud_security_posture/links';
 import {
-  detectionResponseLinks,
   ecsDataQualityDashboardLinks,
+  detectionResponseLinks,
   entityAnalyticsLinks,
   overviewLinks,
 } from '../overview/links';
+import { IconDashboards } from '../common/icons/dashboards';
 
 const subLinks: LinkItem[] = [
   overviewLinks,

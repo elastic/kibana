@@ -8,12 +8,12 @@
 import { before, expect, journey, step } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { recordVideo } from '../../helpers/record_video';
-import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import {
   addTestMonitor,
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
+import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey('Overview Search', async ({ page, params }) => {
   recordVideo(page);

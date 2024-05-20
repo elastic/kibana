@@ -6,8 +6,8 @@
  */
 
 import { get } from 'lodash';
-import { ModelStrings } from '../../../i18n';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
+import { ModelStrings } from '../../../i18n';
 
 const { Math: strings } = ModelStrings;
 

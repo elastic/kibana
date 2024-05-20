@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { type GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
-import { ExistenceFetchStatus } from '../../types';
-import { FieldListFilters } from '../field_list_filters';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { ReactWrapper } from 'enzyme';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import FieldListGrouped, { type FieldListGroupedProps } from './field_list_grouped';
+import { FieldListFilters } from '../field_list_filters';
+import { ExistenceFetchStatus } from '../../types';
 import { FieldsAccordion } from './fields_accordion';
 import { NoFieldsCallout } from './no_fields_callout';
+import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grouped_fields';
 
 describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
   let defaultProps: FieldListGroupedProps<DataViewField>;

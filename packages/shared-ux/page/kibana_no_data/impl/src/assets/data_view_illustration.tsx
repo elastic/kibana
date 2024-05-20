@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React from 'react';
 
 export const DataViewIllustration = () => {
   const { euiTheme } = useEuiTheme();

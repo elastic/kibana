@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/Either';
 import * as rt from 'io-ts';
+import { either } from 'fp-ts/Either';
 import { inventoryViewRT } from '../../../inventory_views';
 
 export const INVENTORY_VIEW_URL = '/api/infra/inventory_views';

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useCallback, useMemo } from 'react';
-import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../common/types';
+import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import type { AlertWorkflowStatus } from '../../../common/types';
+import { FILTER_CLOSED, FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
+import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
-import * as i18n from '../translations';
 
 interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
@@ -160,8 +160,8 @@ export const useBulkAlertActionItems = ({
         status === FILTER_OPEN
           ? i18n.BULK_ACTION_OPEN_SELECTED
           : status === FILTER_CLOSED
-            ? i18n.BULK_ACTION_CLOSE_SELECTED
-            : i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED;
+          ? i18n.BULK_ACTION_CLOSE_SELECTED
+          : i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED;
 
       return {
         label,

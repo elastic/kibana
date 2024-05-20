@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { random, sample, sortBy, sum, xor } from 'lodash';
-import { EventFunction } from '../../../../../types';
+import { sample, random, xor, sortBy, sum } from 'lodash';
 import { MESSAGE_PROCESSOR_HOSTS } from '../../../common/constants';
-import { badHosts } from './bad_host';
 import { createBaseEvent } from './create_base_event';
+import { badHosts } from './bad_host';
+import { EventFunction } from '../../../../../types';
 import { createLatencyHistogram } from './create_latency_histogram';
 import { generateBytesProcessed } from './generate_bytes_processed';
 import { generateTimeSpent } from './generate_time_spent';

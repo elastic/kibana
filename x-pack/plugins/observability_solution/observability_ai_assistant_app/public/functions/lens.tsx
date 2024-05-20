@@ -9,13 +9,13 @@ import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types
 import { i18n } from '@kbn/i18n';
 import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddable-utils';
 import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import React, { useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
+import { Assign } from 'utility-types';
 import {
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from '@kbn/observability-ai-assistant-plugin/public/types';
-import React, { useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
-import { Assign } from 'utility-types';
 import type { LensFunctionArguments } from '../../common/functions/lens';
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { licenseMock } from '../common/licensing.mock';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { licenseMock } from '../common/licensing.mock';
 
 describe('createOnPreResponseHandler', () => {
   it('sets license.signature header immediately for non-error responses', async () => {

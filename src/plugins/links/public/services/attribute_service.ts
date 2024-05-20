@@ -9,13 +9,13 @@
 import { Reference } from '@kbn/content-management-utils';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { CONTENT_ID } from '../../common';
+import { SharingSavedObjectProps } from '../../common/types';
 import { LinksAttributes } from '../../common/content_management';
 import { extractReferences, injectReferences } from '../../common/persistable_state';
-import { SharingSavedObjectProps } from '../../common/types';
-import { checkForDuplicateTitle, linksClient } from '../content_management';
 import { LinksByReferenceInput, LinksByValueInput } from '../embeddable/types';
 import { embeddableService } from './kibana_services';
+import { checkForDuplicateTitle, linksClient } from '../content_management';
+import { CONTENT_ID } from '../../common';
 
 export type LinksDocument = LinksAttributes & {
   references?: Reference[];

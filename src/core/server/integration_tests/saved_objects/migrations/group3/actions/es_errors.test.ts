@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { ElasticsearchClient } from '../../../../..';
 import {
-  createIndex,
-  isClusterShardLimitExceeded,
-  isWriteBlockException,
-  setWriteBlock,
-} from '@kbn/core-saved-objects-migration-server-internal';
-import {
-  type TestElasticsearchUtils,
   createRootWithCorePlugins,
   createTestServers,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import type { ElasticsearchClient } from '../../../../..';
+import {
+  isWriteBlockException,
+  isClusterShardLimitExceeded,
+  createIndex,
+  setWriteBlock,
+} from '@kbn/core-saved-objects-migration-server-internal';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
+import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { Field as FieldType, NormalizedField, ParameterName } from '../../../../types';
-import { AdvancedParametersSection, BasicParametersSection } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 import {
-  CoerceShapeParameter,
   IgnoreMalformedParameter,
   IgnoreZValueParameter,
   OrientationParameter,
+  CoerceShapeParameter,
 } from '../../field_parameters';
 
 const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
@@ -33,8 +33,8 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean 
       return field[param] !== undefined
         ? (field[param] as boolean) // If the field has a value set, use it
         : defaultValue !== undefined // If the parameter definition has a "defaultValue" set, use it
-          ? (defaultValue as boolean)
-          : false; // Defaults to "false"
+        ? (defaultValue as boolean)
+        : false; // Defaults to "false"
   }
 };
 

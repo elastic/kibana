@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AlertingAuthorizationEntity, WriteOperations } from '../../authorization';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { RawRule } from '../../types';
-import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { createNewAPIKeySet, updateMeta } from '../lib';
 import { RulesClientContext } from '../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export async function updateApiKey(
   context: RulesClientContext,

@@ -6,16 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { AggregationsCardinalityAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { AggregationsCardinalityAggregate } from '@elastic/elasticsearch/lib/api/types';
 import {
-  CRAWLER_SERVICE_TYPE,
   Connector,
   ConnectorConfigProperties,
   ConnectorStats,
   ConnectorSyncJob,
+  CRAWLER_SERVICE_TYPE,
   DataSourceSpecificStats,
   DocumentsStats,
+  fetchConnectors,
+  fetchSyncJobs,
   SyncJobStats,
   SyncJobStatsByState,
   SyncJobStatsByType,
@@ -23,8 +25,6 @@ import {
   SyncJobType,
   SyncStatus,
   TriggerMethod,
-  fetchConnectors,
-  fetchSyncJobs,
 } from '..';
 
 export const collectConnectorStats = async (

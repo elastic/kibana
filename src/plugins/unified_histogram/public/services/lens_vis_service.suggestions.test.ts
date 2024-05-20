@@ -1,4 +1,3 @@
-import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +6,9 @@ import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__m
  * Side Public License, v 1.
  */
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { getLensVisMock } from '../__mocks__/lens_vis';
+import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { allSuggestionsMock } from '../__mocks__/suggestions';
+import { getLensVisMock } from '../__mocks__/lens_vis';
 import { UnifiedHistogramSuggestionType } from '../types';
 
 describe('LensVisService suggestions', () => {

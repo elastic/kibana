@@ -6,8 +6,8 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { RulesAPIServiceProvider } from './api';
 import { RulesCommonServiceProvider } from './common';
+import { RulesAPIServiceProvider } from './api';
 
 export function RulesServiceProvider(context: FtrProviderContext) {
   return {

@@ -10,10 +10,10 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../helpers';
 import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import {
+  esDeprecationsMockResponse,
+  MOCK_SNAPSHOT_ID,
   MOCK_JOB_ID,
   MOCK_REINDEX_DEPRECATION,
-  MOCK_SNAPSHOT_ID,
-  esDeprecationsMockResponse,
 } from './mocked_responses';
 
 describe('Index settings deprecation flyout', () => {

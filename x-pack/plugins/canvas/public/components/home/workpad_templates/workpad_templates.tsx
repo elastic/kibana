@@ -9,9 +9,9 @@ import React, { useState, useEffect } from 'react';
 
 import { useCreateFromTemplate, useFindTemplates } from '../hooks';
 
+import { WorkpadTemplates as Component } from './workpad_templates.component';
 import { CanvasTemplate } from '../../../../types';
 import { Loading } from '../loading';
-import { WorkpadTemplates as Component } from './workpad_templates.component';
 
 export const WorkpadTemplates = () => {
   const findTemplates = useFindTemplates();

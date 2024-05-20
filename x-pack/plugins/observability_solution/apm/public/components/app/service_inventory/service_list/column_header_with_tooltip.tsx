@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiFlexGroup, EuiPopover, EuiIcon } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 

@@ -7,29 +7,29 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { DeepPartial, Mutable } from 'utility-types';
+import { merge } from 'lodash';
+import type { SearchResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  SentinelOneActivityRecord,
   SentinelOneGetActivitiesResponse,
   SentinelOneGetAgentsResponse,
+  SentinelOneActivityRecord,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import { merge } from 'lodash';
-import type { DeepPartial, Mutable } from 'utility-types';
+import { EndpointActionGenerator } from './endpoint_action_generator';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../..';
 import type {
+  LogsEndpointAction,
+  SentinelOneActivityEsDoc,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
-  LogsEndpointAction,
   SentinelOneActivityDataForType80,
-  SentinelOneActivityEsDoc,
 } from '../types';
-import { EndpointActionGenerator } from './endpoint_action_generator';
 
 export class SentinelOneDataGenerator extends EndpointActionGenerator {
   generate<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {},
+    TMeta extends {} = {}
   >(
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): LogsEndpointAction<TParameters, TOutputContent, TMeta> {

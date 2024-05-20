@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
-  type CompareModelVersionDetails,
-  type CompareModelVersionStatus,
-  type IndexMapping,
+  getVirtualVersionsFromMappings,
   compareVirtualVersions,
   getVirtualVersionMap,
-  getVirtualVersionsFromMappings,
+  type IndexMapping,
+  type CompareModelVersionStatus,
+  type CompareModelVersionDetails,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { getUpdatedRootFields } from '../../core/compare_mappings';
 
 interface CheckVersionCompatibilityOpts {

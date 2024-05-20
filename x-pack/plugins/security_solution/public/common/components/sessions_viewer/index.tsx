@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { useMemo, useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
+import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/public';
+import { useDispatch } from 'react-redux';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
-import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/public';
-import React, { useMemo, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import type { ESBoolQuery } from '../../../../common/typed_json';
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import type { SessionsComponentsProps } from './types';
+import type { ESBoolQuery } from '../../../../common/typed_json';
+import { StatefulEventsViewer } from '../events_viewer';
+import { getSessionsDefaultModel, sessionsHeaders } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useLicense } from '../../hooks/use_license';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { SecurityCellActionsTrigger } from '../cell_actions';
-import { StatefulEventsViewer } from '../events_viewer';
-import { eventsDefaultModel } from '../events_viewer/default_model';
-import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
-import { getSessionsDefaultModel, sessionsHeaders } from './default_headers';
 import * as i18n from './translations';
-import type { SessionsComponentsProps } from './types';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { useLicense } from '../../hooks/use_license';
+import { eventsDefaultModel } from '../events_viewer/default_model';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import { SecurityCellActionsTrigger } from '../cell_actions';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 

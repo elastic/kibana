@@ -8,10 +8,10 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 
-import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { AppContextProvider } from '../../public/application/app_context';
+import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { licenseManagementStore } from '../../public/application/store/store';
+import { AppContextProvider } from '../../public/application/app_context';
 
 const highExpirationMillis = new Date('October 13, 2099 00:00:00Z').getTime();
 

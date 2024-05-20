@@ -9,9 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { LayerDescriptor } from '../../../common/descriptor_types';
+import { AbstractLayer } from './layer';
 import { AbstractSource } from '../sources/source';
 import { IStyle } from '../styles/style';
-import { AbstractLayer } from './layer';
 
 class InvalidSource extends AbstractSource {
   constructor(id?: string) {

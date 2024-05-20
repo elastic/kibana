@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -16,17 +17,16 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { HeaderSection } from '../../../../common/components/header_section';
-import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
-import { SuperDatePicker } from '../../../../common/components/super_date_picker';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SocTrendsDatePickerLock } from './date_picker_lock';
+import { SuperDatePicker } from '../../../../common/components/super_date_picker';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { HeaderSection } from '../../../../common/components/header_section';
+import * as i18n from './translations';
 import type { StatState } from './hooks/use_soc_trends';
 import { useSocTrends } from './hooks/use_soc_trends';
-import * as i18n from './translations';
 
 const SOC_TRENDS_ID = 'socTrends';
 

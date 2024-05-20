@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from 'expect';
 import { omit } from 'lodash';
+import expect from 'expect';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -14,33 +14,33 @@ import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  getActionsWithFrequencies,
+  getActionsWithoutFrequencies,
+  getSomeActionsWithFrequencies,
+  getCustomQueryRuleParams,
+  getSavedQueryRuleParams,
+  getMLRuleParams,
+  getThresholdRuleParams,
+  generateEvent,
+  fetchRule,
+  waitForAlertToComplete,
+} from '../../../utils';
+import {
+  deleteAllRules,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  waitForRulePartialFailure,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,
 } from '../../../../../../common/services/security_solution';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  waitForAlertsToBePresent,
-  waitForRulePartialFailure,
-  waitForRuleSuccess,
-} from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import {
-  fetchRule,
-  generateEvent,
-  getActionsWithFrequencies,
-  getActionsWithoutFrequencies,
-  getCustomQueryRuleParams,
-  getMLRuleParams,
-  getSavedQueryRuleParams,
-  getSomeActionsWithFrequencies,
-  getThresholdRuleParams,
-  waitForAlertToComplete,
-} from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

@@ -6,12 +6,12 @@
  */
 
 import {
-  getEventDetails,
   getHostNameSeparator,
   getHumanReadableLogonType,
   getTargetUserAndTargetDomain,
   getUserDomainField,
   getUserNameField,
+  getEventDetails,
 } from './helpers';
 
 describe('helpers', () => {

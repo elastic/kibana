@@ -5,46 +5,46 @@
  * 2.0.
  */
 
+import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
+import { isEqual } from 'lodash';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import {
+  EuiTitle,
   EuiAccordion,
+  useEuiTheme,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
   euiScrollBarStyles,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import {
   getAggregateQueryMode,
-  getLanguageDisplayName,
   isOfAggregateQueryType,
+  getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { isEqual } from 'lodash';
-import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
-import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
+import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
-import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import {
-  onActiveDataChange,
-  selectFramePublicAPI,
-  useLensDispatch,
   useLensSelector,
+  selectFramePublicAPI,
+  onActiveDataChange,
+  useLensDispatch,
 } from '../../../state_management';
+import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { EXPRESSION_BUILD_ERROR_ID, extractReferencesFromState } from '../../../utils';
-import { useApplicationUserMessages } from '../../get_application_user_messages';
-import { FlyoutWrapper } from './flyout_wrapper';
-import { getSuggestions } from './helpers';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
+import { FlyoutWrapper } from './flyout_wrapper';
+import { getSuggestions } from './helpers';
+import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { useApplicationUserMessages } from '../../get_application_user_messages';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 
 export function LensEditConfigurationFlyout({
   attributes,

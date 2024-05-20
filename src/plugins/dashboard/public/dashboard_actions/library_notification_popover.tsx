@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -16,13 +17,12 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 
-import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 import {
   LegacyUnlinkFromLibraryAction,
   LegacyUnlinkPanelFromLibraryActionApi,
 } from './legacy_unlink_from_library_action';
+import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 import {
   UnlinkFromLibraryAction,
   UnlinkPanelFromLibraryActionApi,

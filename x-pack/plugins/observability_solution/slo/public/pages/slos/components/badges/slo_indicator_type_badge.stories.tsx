@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import {
+  buildCustomKqlIndicator,
   buildApmAvailabilityIndicator,
   buildApmLatencyIndicator,
-  buildCustomKqlIndicator,
 } from '../../../../data/slo/indicator';
-import { buildSlo } from '../../../../data/slo/slo';
 import { SloIndicatorTypeBadge as Component, Props } from './slo_indicator_type_badge';
+import { buildSlo } from '../../../../data/slo/slo';
 
 export default {
   component: Component,

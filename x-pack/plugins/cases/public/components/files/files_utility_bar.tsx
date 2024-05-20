@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
 import { AddFile } from './add_file';
 
 import * as i18n from './translations';

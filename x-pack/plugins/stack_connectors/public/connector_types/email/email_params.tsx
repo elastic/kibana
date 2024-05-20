@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
+  TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useState, useEffect } from 'react';
 import { EmailActionParams } from '../types';
 
 const noop = () => {};

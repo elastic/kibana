@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { readFileSync } from 'fs';
 import { relative, resolve } from 'path';
+import { readFileSync } from 'fs';
 import { promisify } from 'util';
 
 import licenseChecker from 'license-checker';

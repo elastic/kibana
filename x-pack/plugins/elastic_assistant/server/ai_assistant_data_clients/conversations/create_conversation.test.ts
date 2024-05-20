@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { createConversation } from './create_conversation';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { estypes } from '@elastic/elasticsearch';
+import { EsConversationSchema } from './types';
+import { getConversation } from './get_conversation';
 import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import { createConversation } from './create_conversation';
-import { getConversation } from './get_conversation';
-import { EsConversationSchema } from './types';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),

@@ -10,13 +10,13 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
+import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
   GetPingsParams,
   HttpResponseBody,
-  Ping,
   PingsResponse,
+  Ping,
 } from '../../../../common/runtime_types';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
 
 const DEFAULT_PAGE_SIZE = 25;
 

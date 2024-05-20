@@ -22,14 +22,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import {
-  type SetFullTimeRangeApiPath,
   setFullTimeRange,
+  type SetFullTimeRangeApiPath,
 } from '../services/full_time_range_selector_service';
 import type { GetTimeFieldRangeResponse } from '../services/types';
 import { FROZEN_TIER_PREFERENCE, type FrozenTierPreference } from '../storage';

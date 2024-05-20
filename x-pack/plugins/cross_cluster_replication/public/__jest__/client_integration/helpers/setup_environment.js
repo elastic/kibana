@@ -6,9 +6,9 @@
  */
 
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
-import { setHttpClient } from '../../../app/services/api';
 import { init as initDocumentation } from '../../../app/services/documentation_links';
 import { init as initHttpRequests } from './http_requests';
+import { setHttpClient } from '../../../app/services/api';
 
 export const setupEnvironment = () => {
   const httpRequests = initHttpRequests();

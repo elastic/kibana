@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { MSearchIn, MSearchOut } from '../../../common';
 import { rpcSchemas } from '../../../common/schemas';
-import { getMSearchClientFactory } from '../../content_client';
+import type { MSearchIn, MSearchOut } from '../../../common';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
+import { getMSearchClientFactory } from '../../content_client';
 
 export const mSearch: ProcedureDefinition<Context, MSearchIn, MSearchOut> = {
   schemas: rpcSchemas.mSearch,

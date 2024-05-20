@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiTab } from '@elastic/eui';
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { EuiTab } from '@elastic/eui';
 import { FlyoutHeaderTabs } from './flyout_header_tabs';
 
 const tab = 'tab name';

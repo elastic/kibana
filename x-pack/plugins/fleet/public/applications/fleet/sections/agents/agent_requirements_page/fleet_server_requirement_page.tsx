@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useAuthz, useCheckPermissions, useStartServices } from '../../../hooks';
+import { useStartServices, useCheckPermissions, useAuthz } from '../../../hooks';
 
 import {
   FleetServerMissingESPrivileges,

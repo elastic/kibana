@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { setTimeout as setTimeoutP } from 'timers/promises';
+import moment from 'moment';
+import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { AnalyticsNoDataPageKibanaProvider } from '@kbn/shared-ux-page-analytics-no-data';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
-import moment from 'moment';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { setTimeout as setTimeoutP } from 'timers/promises';
-import { Overview } from './overview';
 import { hasESData, hasUserDataView } from './overview.test.mocks';
+import { Overview } from './overview';
 
 jest.mock('@kbn/shared-ux-page-kibana-template', () => {
   const MockedComponent: string = 'MockedKibanaPageTemplate';

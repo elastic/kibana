@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 
+import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { AnonymizationSettings } from '.';
 import type { Props } from '.';
-import { TestProviders } from '../../../mock/test_providers/test_providers';
 
 const props: Props = {
   defaultPageSize: 5,

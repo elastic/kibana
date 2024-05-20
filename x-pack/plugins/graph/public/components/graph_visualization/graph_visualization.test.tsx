@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { Workspace, WorkspaceEdge, WorkspaceNode } from '../../types';
+import { shallow } from 'enzyme';
 import { GraphVisualization } from './graph_visualization';
+import { Workspace, WorkspaceEdge, WorkspaceNode } from '../../types';
 
 describe('graph_visualization', () => {
   const nodes: WorkspaceNode[] = [

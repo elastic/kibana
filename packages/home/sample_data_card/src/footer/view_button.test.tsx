@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithIntl } from '@kbn/test-jest-helpers';
 
-import { getMockServices } from '../mocks';
-import { SampleDataCardProvider } from '../services';
 import { ViewButton } from './view_button';
+import { SampleDataCardProvider } from '../services';
+import { getMockServices } from '../mocks';
 
 const render = (element: React.ReactElement) =>
   renderWithIntl(<SampleDataCardProvider {...getMockServices()}>{element}</SampleDataCardProvider>);

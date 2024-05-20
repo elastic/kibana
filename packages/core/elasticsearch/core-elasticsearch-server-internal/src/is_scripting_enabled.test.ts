@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { isRetryableEsClientErrorMock } from './is_scripting_enabled.test.mocks';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
-import { isRetryableEsClientErrorMock } from './is_scripting_enabled.test.mocks';
 
 describe('isInlineScriptingEnabled', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;

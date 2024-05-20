@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FiltersParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { v4 as uuidv4 } from 'uuid';
+import { FiltersParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { FiltersColumn, FiltersSeries } from './types';
 
 export const convertToFiltersParams = (series: FiltersSeries): FiltersParams => {

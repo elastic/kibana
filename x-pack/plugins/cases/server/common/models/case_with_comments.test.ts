@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import type { AlertAttachmentAttributes } from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import { createCasesClientMockArgs } from '../../client/mocks';
+import { alertComment, comment, mockCaseComments, mockCases, multipleAlert } from '../../mocks';
+import { CaseCommentModel } from './case_with_comments';
 import {
   MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
-import type { AlertAttachmentAttributes } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common/types/domain';
 import {
   commentExternalReference,
   commentFileExternalReference,
   commentPersistableState,
 } from '../../client/cases/mock';
-import { createCasesClientMockArgs } from '../../client/mocks';
-import { alertComment, comment, mockCaseComments, mockCases, multipleAlert } from '../../mocks';
-import { CaseCommentModel } from './case_with_comments';
 
 describe('CaseCommentModel', () => {
   const theCase = mockCases[0];

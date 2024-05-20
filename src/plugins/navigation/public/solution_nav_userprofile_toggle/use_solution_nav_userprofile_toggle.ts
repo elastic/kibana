@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { useUpdateUserProfile } from '@kbn/user-profile-components';
 import { useCallback, useEffect, useState } from 'react';
+import { useUpdateUserProfile } from '@kbn/user-profile-components';
 
 interface Deps {
   defaultOptOutValue: boolean;
@@ -17,9 +17,7 @@ export const useSolutionNavUserProfileToggle = ({ defaultOptOutValue }: Deps) =>
   const [hasOptOut, setHasOptOut] = useState(defaultOptOutValue);
   const { userProfileData, isLoading, update, userProfileEnabled } = useUpdateUserProfile();
 
-  const {
-    userSettings: { solutionNavOptOut = defaultOptOutValue } = {},
-  } = userProfileData ?? {};
+  const { userSettings: { solutionNavOptOut = defaultOptOutValue } = {} } = userProfileData ?? {};
 
   const toggle = useCallback(
     (on: boolean) => {

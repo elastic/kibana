@@ -6,19 +6,19 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest } from '@kbn/core/server';
-import { KueryNode } from '@kbn/es-query';
-import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { Space } from '@kbn/spaces-plugin/server';
-import { JsonObject } from '@kbn/utility-types';
 import { has, isEmpty } from 'lodash';
+import { KibanaRequest } from '@kbn/core/server';
+import { JsonObject } from '@kbn/utility-types';
+import { KueryNode } from '@kbn/es-query';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { Space } from '@kbn/spaces-plugin/server';
 import { RegistryRuleType } from '../rule_type_registry';
 import { ALERTING_FEATURE_ID, RuleTypeRegistry } from '../types';
 import {
-  AlertingAuthorizationFilterOpts,
   asFiltersByRuleTypeAndConsumer,
   asFiltersBySpaceId,
+  AlertingAuthorizationFilterOpts,
 } from './alerting_authorization_kuery';
 
 export enum AlertingAuthorizationEntity {

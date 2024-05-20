@@ -1,4 +1,3 @@
-import { fireEvent, render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +6,9 @@ import { fireEvent, render } from '@testing-library/react';
  * Side Public License, v 1.
  */
 import React from 'react';
-import { ExceptionItemCardComments } from '.';
+import { fireEvent, render } from '@testing-library/react';
 import { mockGetFormattedComments } from '../../mocks/comments.mock';
+import { ExceptionItemCardComments } from '.';
 import * as i18n from '../translations';
 
 const comments = mockGetFormattedComments();

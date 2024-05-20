@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
-import React, { useMemo } from 'react';
 import {
-  ALERT_STATUS_UNKNOWN,
-  RULE_LAST_RUN_OUTCOME_FAILED,
   RULE_LAST_RUN_OUTCOME_SUCCEEDED,
+  RULE_LAST_RUN_OUTCOME_FAILED,
   RULE_LAST_RUN_OUTCOME_WARNING,
+  ALERT_STATUS_UNKNOWN,
 } from '../../../rules_list/translations';
 
 interface EventLogListStatusProps {

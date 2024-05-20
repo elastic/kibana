@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { i18n } from '@kbn/i18n';
+import type { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/common';
 import { APP_ICON } from '../../common';
 

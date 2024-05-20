@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import * as Either from 'fp-ts/lib/Either';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Option from 'fp-ts/lib/Option';
 import { errors as EsErrors, TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { waitForDeleteByQueryTask } from './wait_for_delete_by_query_task';
 import { waitForTask } from './wait_for_task';
 

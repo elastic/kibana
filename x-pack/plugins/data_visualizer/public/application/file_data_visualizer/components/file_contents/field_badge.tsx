@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field';
 import type { FC } from 'react';
 import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { FieldIcon } from '@kbn/react-field';
+import { i18n } from '@kbn/i18n';
 import { getSupportedFieldType } from '../../../common/components/fields_stats_grid/get_field_names';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 

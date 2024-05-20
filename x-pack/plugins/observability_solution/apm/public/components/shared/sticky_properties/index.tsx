@@ -7,8 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { truncate } from '../../../utils/style';
 
 export interface IStickyProperty {

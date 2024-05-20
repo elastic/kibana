@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  createValidateRecurrenceByV1,
-  validateEndDateV1,
   validateStartDateV1,
+  validateEndDateV1,
+  createValidateRecurrenceByV1,
 } from '../../validation';
 
 export const rRuleRequestSchema = schema.object({

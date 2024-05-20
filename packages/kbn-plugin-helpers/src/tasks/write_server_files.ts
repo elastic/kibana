@@ -9,8 +9,8 @@
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import { transformFileStream } from '@kbn/dev-utils';
 import vfs from 'vinyl-fs';
+import { transformFileStream } from '@kbn/dev-utils';
 import { transformFileWithBabel } from './transform_file_with_babel';
 
 import { TaskContext } from '../task_context';

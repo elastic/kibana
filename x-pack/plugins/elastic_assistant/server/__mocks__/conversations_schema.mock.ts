@@ -8,10 +8,10 @@
 import { estypes } from '@elastic/elasticsearch';
 import {
   AppendConversationMessageRequestBody,
+  PerformBulkActionRequestBody,
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
-  PerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 

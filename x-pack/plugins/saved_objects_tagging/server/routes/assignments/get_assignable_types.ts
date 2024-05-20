@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetAssignableTypesResponse } from '../../../common/http_api_types';
 import type { TagsPluginRouter } from '../../types';
+import { GetAssignableTypesResponse } from '../../../common/http_api_types';
 
 export const registerGetAssignableTypesRoute = (router: TagsPluginRouter) => {
   router.get(

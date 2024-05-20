@@ -6,12 +6,12 @@
  */
 
 import { set } from '@kbn/safer-lodash-set/fp';
-import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
+import { mount } from 'enzyme';
 import React, { useEffect } from 'react';
 
 import type { AppToast } from '.';
-import { GlobalToaster, ManageGlobalToaster, displayErrorToast, useStateToaster } from '.';
+import { useStateToaster, ManageGlobalToaster, GlobalToaster, displayErrorToast } from '.';
 
 jest.mock('uuid', () => {
   return {

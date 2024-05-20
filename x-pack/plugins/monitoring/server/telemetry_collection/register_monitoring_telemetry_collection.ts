@@ -6,13 +6,13 @@
  */
 
 import type { IClusterClient } from '@kbn/core/server';
-import type { UsageStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { getAllStats } from './get_all_stats';
+import type { UsageStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { LogstashBaseStats } from './get_logstash_stats';
 import type { BeatsBaseStats } from './get_beats_stats';
+import { getAllStats } from './get_all_stats';
 import { getClusterUuids } from './get_cluster_uuids';
 import { getLicenses } from './get_licenses';
-import type { LogstashBaseStats } from './get_logstash_stats';
 
 interface MonitoringStats extends Omit<UsageStatsPayload, 'cacheDetails'> {
   stack_stats: {

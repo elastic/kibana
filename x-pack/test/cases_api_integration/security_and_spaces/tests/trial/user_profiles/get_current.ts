@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import { CaseStatuses, CreateCaseUserAction, User } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import { CreateCaseUserAction, User, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { setupSuperUserProfile } from '../../../../common/lib/api/user_profiles';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { superUser } from '../../../../common/lib/authentication/users';
 import {
   createCase,
   createComment,
   createConfiguration,
   deleteAllCaseItems,
   getComment,
-  getConfigurationRequest,
   updateCase,
   updateComment,
+  getConfigurationRequest,
   updateConfiguration,
 } from '../../../../common/lib/api';
 import { getCaseUserActions } from '../../../../common/lib/api/user_actions';
-import { setupSuperUserProfile } from '../../../../common/lib/api/user_profiles';
-import { superUser } from '../../../../common/lib/authentication/users';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
@@ -37,8 +37,9 @@ export default function ({ getService }: FtrProviderContext) {
       let superUserInfo: User;
 
       before(async () => {
-        ({ headers, superUserInfo, superUserWithProfile } =
-          await setupSuperUserProfile(getService));
+        ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
+          getService
+        ));
       });
 
       afterEach(async () => {

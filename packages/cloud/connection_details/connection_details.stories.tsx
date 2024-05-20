@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import { ConnectionDetails } from './connection_details';
 import { StoriesProvider } from './stories';
+import { ConnectionDetails } from './connection_details';
 
 export default {
   title: 'Connection Details',

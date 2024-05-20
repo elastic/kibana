@@ -8,17 +8,17 @@
 
 import { resolve } from 'path';
 
-import chalk from 'chalk';
-import dedent from 'dedent';
-import execa from 'execa';
 import * as Rx from 'rxjs';
+import execa from 'execa';
+import chalk from 'chalk';
 import { first, tap } from 'rxjs';
+import dedent from 'dedent';
 
-import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
-import { GithubApi } from './github_api';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { getLine$ } from './helpers';
 import { Pr } from './pr';
+import { GithubApi } from './github_api';
 
 const UPSTREAM_URL = 'git@github.com:elastic/kibana.git';
 

@@ -8,8 +8,8 @@
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { kibanaContextMock } from '../../../../../contexts/kibana/__mocks__/kibana_context';
 import { OutlierExploration } from './outlier_exploration';
+import { kibanaContextMock } from '../../../../../contexts/kibana/__mocks__/kibana_context';
 
 // workaround to make React.memo() work with enzyme
 jest.mock('react', () => {

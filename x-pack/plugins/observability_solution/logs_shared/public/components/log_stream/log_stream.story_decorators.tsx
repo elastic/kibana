@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import type { StoryContext } from '@storybook/react';
+import React from 'react';
+import { defer, of, Subject } from 'rxjs';
+import { delay } from 'rxjs';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ES_SEARCH_STRATEGY,
   FieldSpec,
 } from '@kbn/data-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type {
-  IEsSearchResponse,
-  IKibanaSearchRequest,
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
+  IEsSearchResponse,
 } from '@kbn/search-types';
-import type { StoryContext } from '@storybook/react';
-import React from 'react';
-import { Subject, defer, of } from 'rxjs';
-import { delay } from 'rxjs';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getLogViewResponsePayloadRT } from '../../../common/http_api';
 import { defaultLogViewAttributes } from '../../../common/log_views';
 import {
-  LOG_ENTRIES_SEARCH_STRATEGY,
   LogEntriesSearchResponsePayload,
+  LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../common/search_strategies/log_entries/log_entries';
 import { ENTRIES_EMPTY, generateFakeEntries } from '../../test_utils/entries';
 

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, memo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonGroup,
   EuiFieldNumber,
@@ -13,8 +15,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState, memo, useCallback } from 'react';
 import { LineStyle } from '../types';
 
 interface LineStyleConfig {

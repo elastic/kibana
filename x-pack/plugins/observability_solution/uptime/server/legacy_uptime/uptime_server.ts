@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getRequestValidation } from '@kbn/core-http-server';
 import { Logger } from '@kbn/core/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { getRequestValidation } from '@kbn/core-http-server';
 import { INITIAL_REST_VERSION } from '../../common/constants';
+import { DynamicSettingsSchema } from './routes/dynamic_settings';
 import { UptimeRouter } from '../types';
-import { UptimeCorePluginsSetup, UptimeServerSetup } from './lib/adapters';
 import { uptimeRequests } from './lib/requests';
 import {
   createRouteWithAuth,
@@ -18,12 +18,12 @@ import {
   legacyUptimeRestApiRoutes,
   uptimeRouteWrapper,
 } from './routes';
-import { DynamicSettingsSchema } from './routes/dynamic_settings';
+import { UptimeServerSetup, UptimeCorePluginsSetup } from './lib/adapters';
 
-import { durationAnomalyAlertFactory } from './lib/alerts/duration_anomaly';
 import { statusCheckAlertFactory } from './lib/alerts/status_check';
 import { tlsAlertFactory } from './lib/alerts/tls';
 import { tlsLegacyRuleFactory } from './lib/alerts/tls_legacy';
+import { durationAnomalyAlertFactory } from './lib/alerts/duration_anomaly';
 import { licenseCheck } from './lib/domains';
 
 const libs = {

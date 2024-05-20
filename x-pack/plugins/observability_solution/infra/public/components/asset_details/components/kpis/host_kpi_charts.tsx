@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import React from 'react';
-import { useHostKpiCharts } from '../../hooks/use_host_metrics_charts';
 import { Kpi } from './kpi';
+import { useHostKpiCharts } from '../../hooks/use_host_metrics_charts';
 
 export interface HostKpiChartsProps {
   dataView?: DataView;

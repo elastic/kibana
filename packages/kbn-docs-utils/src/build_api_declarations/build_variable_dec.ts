@@ -7,17 +7,17 @@
  */
 
 import {
+  VariableDeclaration,
   Node,
   PropertyAssignment,
   PropertyDeclaration,
   PropertySignature,
   ShorthandPropertyAssignment,
-  VariableDeclaration,
 } from 'ts-morph';
-import { ApiDeclaration, TypeKind } from '../types';
 import { isInternal } from '../utils';
-import { buildApiDeclaration } from './build_api_declaration';
+import { ApiDeclaration, TypeKind } from '../types';
 import { getArrowFunctionDec } from './build_arrow_fn_dec';
+import { buildApiDeclaration } from './build_api_declaration';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { buildCallSignatureDec } from './build_call_signature_dec';
 import { BuildApiDecOpts } from './types';

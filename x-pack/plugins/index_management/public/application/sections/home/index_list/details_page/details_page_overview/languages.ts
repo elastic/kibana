@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
-import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 
 const INDEX_NAME_PLACEHOLDER = 'index_name';
 
@@ -33,7 +33,11 @@ export const javascriptDefinition: LanguageDefinition = {
     defaultMessage: 'JavaScript',
   }),
   iconType: 'javascript.svg',
-  ingestDataIndex: ({ apiKey, url, indexName }) => `const { Client } = require('@elastic/elasticsearch');
+  ingestDataIndex: ({
+    apiKey,
+    url,
+    indexName,
+  }) => `const { Client } = require('@elastic/elasticsearch');
 const client = new Client({
   node: '${url}',
   auth: {
@@ -156,7 +160,9 @@ export const rubyDefinition: LanguageDefinition = {
 )
 
 documents = [
-  { index: { _index: '${indexName ?? INDEX_NAME_PLACEHOLDER}', data: {name: "foo", "title": "bar"} } },
+  { index: { _index: '${
+    indexName ?? INDEX_NAME_PLACEHOLDER
+  }', data: {name: "foo", "title": "bar"} } },
 ]
 client.bulk(body: documents)
 `,

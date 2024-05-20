@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiPageBody, EuiPageHeader, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
+import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 
 interface PageProps {
   title: string;

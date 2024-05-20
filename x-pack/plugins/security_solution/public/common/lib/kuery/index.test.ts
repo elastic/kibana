@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { buildGlobalQuery, convertToBuildEsQuery } from '.';
 import type { DataProvider } from '../../../../common/types/timeline';
+import { convertToBuildEsQuery, buildGlobalQuery } from '.';
 import { mockIndexPattern } from '../../mock';
 
 describe('convertToBuildEsQuery', () => {

@@ -6,21 +6,21 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useContext } from 'react';
-import { MonitorSummary } from '../../../../../../../common/runtime_types';
-import { UptimeSettingsContext } from '../../../../../contexts';
+import { IntegrationLink } from './integration_link';
 import {
+  getLegacyApmHref,
   getInfraContainerHref,
   getInfraIpHref,
   getInfraKubernetesHref,
-  getLegacyApmHref,
   getLoggingContainerHref,
   getLoggingIpHref,
   getLoggingKubernetesHref,
 } from '../../../../../lib/helper';
-import { IntegrationLink } from './integration_link';
+import { MonitorSummary } from '../../../../../../../common/runtime_types';
+import { UptimeSettingsContext } from '../../../../../contexts';
 
 interface IntegrationGroupProps {
   summary: MonitorSummary;

@@ -6,9 +6,9 @@
  */
 
 import { connect } from 'react-redux';
-import { MapStoreState } from '../../reducers/store';
-import { getMapSettings } from '../../selectors/map_selectors';
 import { RightSideControls } from './right_side_controls';
+import { getMapSettings } from '../../selectors/map_selectors';
+import { MapStoreState } from '../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TelemetryEvent, TelemetryEventTypes } from './types';
+import { TelemetryEventTypes, TelemetryEvent } from './types';
 
 const searchQuerySubmittedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SEARCH_QUERY_SUBMITTED,

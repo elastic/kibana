@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiText,
+  EuiPopoverTitle,
   EuiPopover,
   EuiPopoverFooter,
-  EuiPopoverTitle,
-  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useUrlParams } from '../../../hooks';
 import { selectPingHistogram } from '../../../state/selectors';
+import { useUrlParams } from '../../../hooks';
 
 export const TroubleshootPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

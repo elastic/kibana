@@ -1,5 +1,3 @@
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,15 +5,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { memo, useEffect, useState, useMemo } from 'react';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../common/lib/kibana';
 import type { HostPolicyResponse } from '../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
-import { useKibana } from '../../../common/lib/kibana';
-import { useGetEndpointDetails } from '../../hooks';
 import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpoint_policy_response';
-import { getFailedOrWarningActionCountFromPolicyResponse } from '../../pages/endpoint_hosts/store/utils';
 import { PolicyResponse } from './policy_response';
+import { getFailedOrWarningActionCountFromPolicyResponse } from '../../pages/endpoint_hosts/store/utils';
 import { PolicyResponseActionItem } from './policy_response_action_item';
 import { PolicyResponseActionFormatter } from './policy_response_friendly_names';
+import { useGetEndpointDetails } from '../../hooks';
 
 export interface PolicyResponseWrapperProps {
   endpointId: string;

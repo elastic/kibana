@@ -24,9 +24,13 @@
         "parentPluginId": "@kbn/core-plugins-server",
         "id": "def-common.AsyncPlugin",
         "type": "Interface",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "AsyncPlugin",
-        "description": ["\nA plugin with asynchronous lifecycle methods.\n"],
+        "description": [
+          "\nA plugin with asynchronous lifecycle methods.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-server",
@@ -107,7 +111,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["TPluginsSetup"],
+                "signature": [
+                  "TPluginsSetup"
+                ],
                 "path": "packages/core/plugins/core-plugins-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -166,7 +172,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["TPluginsStart"],
+                "signature": [
+                  "TPluginsStart"
+                ],
                 "path": "packages/core/plugins/core-plugins-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -276,7 +284,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["TPluginsSetup"],
+                "signature": [
+                  "TPluginsSetup"
+                ],
                 "path": "packages/core/plugins/core-plugins-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -335,7 +345,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["TPluginsStart"],
+                "signature": [
+                  "TPluginsStart"
+                ],
                 "path": "packages/core/plugins/core-plugins-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -377,7 +389,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PluginConfigDescriptor",
-        "description": ["\nDescribes a plugin configuration properties.\n"],
+        "description": [
+          "\nDescribes a plugin configuration properties.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-server",
@@ -516,7 +530,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PluginInitializerContext",
-        "description": ["\nContext that's available to plugins during initialization stage.\n"],
+        "description": [
+          "\nContext that's available to plugins during initialization stage.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-server",
@@ -538,7 +554,9 @@
             "tags": [],
             "label": "opaqueId",
             "description": [],
-            "signature": ["symbol"],
+            "signature": [
+              "symbol"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -623,7 +641,9 @@
             "type": "Object",
             "tags": [],
             "label": "config",
-            "description": ["\nAccessors for the plugin's configuration"],
+            "description": [
+              "\nAccessors for the plugin's configuration"
+            ],
             "signature": [
               "{ legacy: { globalConfig$: ",
               "Observable",
@@ -722,7 +742,9 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": ["\nVersion of the plugin."],
+            "description": [
+              "\nVersion of the plugin."
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -746,7 +768,9 @@
             "type": "Enum",
             "tags": [],
             "label": "type",
-            "description": ["\nType of the plugin, defaults to `standard`."],
+            "description": [
+              "\nType of the plugin, defaults to `standard`."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-base-common",
@@ -769,7 +793,9 @@
             "description": [
               "\nRoot {@link ConfigPath | configuration path} used by the plugin, defaults\nto \"id\" in snake_case format.\n"
             ],
-            "signature": ["string | string[]"],
+            "signature": [
+              "string | string[]"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -783,7 +809,9 @@
             "description": [
               "\nAn optional list of the other plugins that **must be** installed and enabled\nfor this plugin to function properly."
             ],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -797,7 +825,9 @@
             "description": [
               "\nList of plugin ids that this plugin's UI code imports modules from that are\nnot in `requiredPlugins`.\n"
             ],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -811,7 +841,9 @@
             "description": [
               "\nAn optional list of the other plugins that if installed and enabled **may be**\nleveraged by this plugin for some additional functionality but otherwise are\nnot required for this plugin to work properly."
             ],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -825,7 +857,9 @@
             "description": [
               "\nAn optional list of plugin dependencies that can be resolved dynamically at runtime\nusing the dynamic contract resolving capabilities from the plugin service."
             ],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -860,12 +894,16 @@
             "parentPluginId": "@kbn/core-plugins-server",
             "id": "def-common.PluginManifest.extraPublicDirs",
             "type": "Array",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "extraPublicDirs",
             "description": [
               "\nSpecifies directory names that can be imported by other ui-plugins built\nusing the same instance of the @kbn/optimizer. A temporary measure we plan\nto replace with better mechanisms for sharing static code between plugins"
             ],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -905,7 +943,9 @@
             "description": [
               "\nOnly used for the automatically generated API documentation. Specifying service\nfolders will cause your plugin API reference to be broken up into sub sections."
             ],
-            "signature": ["readonly string[] | undefined"],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -917,7 +957,9 @@
             "tags": [],
             "label": "owner",
             "description": [],
-            "signature": ["{ readonly name: string; readonly githubTeam?: string | undefined; }"],
+            "signature": [
+              "{ readonly name: string; readonly githubTeam?: string | undefined; }"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -931,7 +973,9 @@
             "description": [
               "\nTODO: make required once all plugins specify this.\nA brief description of what this plugin does and any capabilities it provides."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -945,7 +989,9 @@
             "description": [
               "\nSpecifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when\nconfigured, etc.) Default is false."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1026,7 +1072,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["TPluginsSetup"],
+                "signature": [
+                  "TPluginsSetup"
+                ],
                 "path": "packages/core/plugins/core-plugins-server/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1042,7 +1090,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1136,7 +1186,9 @@
         "type": "Type",
         "tags": [],
         "label": "PluginConfigSchema",
-        "description": ["\nDedicated type for plugin configuration schema.\n"],
+        "description": [
+          "\nDedicated type for plugin configuration schema.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
@@ -1285,8 +1337,12 @@
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
-            "description": ["// We can add more if really needed"],
-            "signature": ["readonly [\"shardTimeout\", \"requestTimeout\", \"pingTimeout\"]"],
+            "description": [
+              "// We can add more if really needed"
+            ],
+            "signature": [
+              "readonly [\"shardTimeout\", \"requestTimeout\", \"pingTimeout\"]"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/shared_global_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1298,7 +1354,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["readonly [\"data\"]"],
+            "signature": [
+              "readonly [\"data\"]"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/shared_global_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1310,7 +1368,9 @@
             "tags": [],
             "label": "savedObjects",
             "description": [],
-            "signature": ["readonly [\"maxImportPayloadBytes\"]"],
+            "signature": [
+              "readonly [\"maxImportPayloadBytes\"]"
+            ],
             "path": "packages/core/plugins/core-plugins-server/src/shared_global_config.ts",
             "deprecated": false,
             "trackAdoption": false

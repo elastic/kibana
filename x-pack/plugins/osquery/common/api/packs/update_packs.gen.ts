@@ -17,12 +17,12 @@ import { z } from 'zod';
  */
 
 import {
+  PackId,
   DescriptionOrUndefined,
   EnabledOrUndefined,
-  ObjectQueries,
-  PackId,
   PolicyIdsOrUndefined,
   Shards,
+  ObjectQueries,
 } from '../model/schema/common_attributes.gen';
 
 export type UpdatePacksRequestParams = z.infer<typeof UpdatePacksRequestParams>;

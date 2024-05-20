@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import type { LicenseService } from '../../../../../../common/license';
+import { render } from '@testing-library/react';
 import { useLicense } from '../../../../hooks/use_license';
 import { useAppUrl } from '../../../../lib/kibana';
 import { CurrentPlan } from './current_plan';
+import type { LicenseService } from '../../../../../../common/license';
 
 jest.mock('../../../../hooks/use_license');
 jest.mock('../../../../lib/kibana');

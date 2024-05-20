@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
 import { get } from 'lodash';
-import { UI_SETTINGS } from '../constants';
 import { getEsQueryConfig } from './get_es_query_config';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { UI_SETTINGS } from '../constants';
 
 const config = {
   get(item: string) {

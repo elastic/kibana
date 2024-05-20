@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import {
-  ACTION_CATEGORIZE_FIELD,
-  CATEGORIZE_FIELD_TRIGGER,
-  type CategorizeFieldContext,
-} from '@kbn/ml-ui-actions';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { getFieldCategorizeButton } from './field_categorize_button';
+import {
+  CATEGORIZE_FIELD_TRIGGER,
+  ACTION_CATEGORIZE_FIELD,
+  type CategorizeFieldContext,
+} from '@kbn/ml-ui-actions';
+import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 
 const ORIGINATING_APP = 'test';
 const mockExecuteAction = jest.fn();

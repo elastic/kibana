@@ -13,18 +13,18 @@ import { of } from 'rxjs';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { CoreStart } from '@kbn/core/public';
+import { merge } from 'lodash';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { merge } from 'lodash';
 import type { LatencyCorrelationsResponse } from '../../../../common/correlations/latency_correlations/types';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
-  MockApmPluginContextWrapper,
   mockApmPluginContextValue,
+  MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { fromQuery } from '../../shared/links/url_helpers';
 
 import { LatencyCorrelations } from './latency_correlations';

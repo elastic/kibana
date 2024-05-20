@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import expect from '@kbn/expect';
 import {
   CASES_URL,
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -16,40 +17,39 @@ import {
   MAX_TAGS_FILTER_LENGTH,
 } from '@kbn/cases-plugin/common/constants';
 import {
-  AttachmentType,
   Case,
   CaseSeverity,
   CaseStatuses,
+  AttachmentType,
 } from '@kbn/cases-plugin/common/types/domain';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
-  createCase,
-  createComment,
+  postCaseReq,
+  postCommentUserReq,
+  findCasesResp,
+  getPostCaseRequest,
+} from '../../../../common/lib/mock';
+import {
   deleteAllCaseItems,
   ensureSavedObjectIsAuthorized,
   findCases,
+  createCase,
   updateCase,
+  createComment,
 } from '../../../../common/lib/api';
 import {
-  globalRead,
-  noKibanaPrivileges,
   obsOnly,
-  obsOnlyRead,
-  obsSec,
-  obsSecRead,
   secOnly,
+  obsOnlyRead,
   secOnlyRead,
+  noKibanaPrivileges,
   superUser,
+  globalRead,
+  obsSecRead,
+  obsSec,
 } from '../../../../common/lib/authentication/users';
-import {
-  findCasesResp,
-  getPostCaseRequest,
-  postCaseReq,
-  postCommentUserReq,
-} from '../../../../common/lib/mock';
 
 interface CaseAttributes {
   cases: {

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { useState, useCallback } from 'react';
 import {
-  EuiButton,
+  EuiText,
+  EuiSpacer,
+  EuiCodeBlock,
   EuiButtonGroup,
   EuiCallOut,
-  EuiCodeBlock,
+  EuiButton,
   EuiCopy,
-  EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useCallback } from 'react';
 
 import {
-  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
 } from '../../common/constants/epm';
 import { type PLATFORM_TYPE } from '../hooks';
-import { PLATFORM_OPTIONS, REDUCED_PLATFORM_OPTIONS, usePlatform } from '../hooks';
+import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
 import type { CloudSecurityIntegration } from './agent_enrollment_flyout/types';

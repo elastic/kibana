@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty, isObject } from 'lodash/fp';
+import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 export type QueryFilterType = estypes.QueryDslQueryContainer[];
 

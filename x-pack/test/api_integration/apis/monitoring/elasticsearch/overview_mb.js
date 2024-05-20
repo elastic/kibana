@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { getLifecycleMethods } from '../data_stream';
 import overviewFixtureGreenPlatinum from './fixtures/overview_green_platinum.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

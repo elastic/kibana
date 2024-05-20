@@ -8,8 +8,8 @@
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import React from 'react';
 import type { CaseUser } from '../../containers/types';
-import { HoverableAvatar } from './hoverable_avatar';
 import { convertToUserInfo } from './user_converter';
+import { HoverableAvatar } from './hoverable_avatar';
 
 const HoverableAvatarResolverComponent: React.FC<{
   user: CaseUser;

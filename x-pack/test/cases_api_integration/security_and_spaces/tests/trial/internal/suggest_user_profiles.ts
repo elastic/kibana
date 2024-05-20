@@ -6,15 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { loginUsers, suggestUserProfiles } from '../../../../common/lib/api';
-import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
-import { Role, User } from '../../../../common/lib/authentication/types';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  noCasesPrivilegesSpace1,
-  obsOnly,
   superUser,
+  obsOnly,
+  noCasesPrivilegesSpace1,
 } from '../../../../common/lib/authentication/users';
+import { Role, User } from '../../../../common/lib/authentication/types';
+import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

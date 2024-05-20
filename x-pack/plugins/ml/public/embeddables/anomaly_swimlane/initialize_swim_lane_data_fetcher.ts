@@ -10,13 +10,13 @@ import type { TimeRange } from '@kbn/es-query';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import {
   BehaviorSubject,
-  EMPTY,
-  type Observable,
   catchError,
   combineLatest,
   debounceTime,
+  EMPTY,
   from,
   map,
+  type Observable,
   of,
   shareReplay,
   skipWhile,

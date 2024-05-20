@@ -17,16 +17,16 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import React from 'react';
+import { useFetchSLOsWithBurnRateRules } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
+import { Dependency } from '../../../common/types';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
 } from '../../../common/constants';
-import { Dependency } from '../../../common/types';
-import { useFetchSLOsWithBurnRateRules } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
-import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { DependencyEditor } from './dependency_editor';
+import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 const ACTION_GROUP_OPTIONS = [
   { value: ALERT_ACTION.id, label: ALERT_ACTION.name },

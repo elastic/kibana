@@ -6,17 +6,17 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ConfigType } from '../../../../..';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import type { ConfigType } from '../../../../..';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { getDraftTimelineSchema } from '../../../../../../common/api/timeline';
 import { TIMELINE_DRAFT_URL } from '../../../../../../common/constants';
+import { buildFrameworkRequest } from '../../../utils/common';
 import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { getDraftTimeline, persistTimeline } from '../../../saved_object/timelines';
-import { buildFrameworkRequest } from '../../../utils/common';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
+import { getDraftTimelineSchema } from '../../../../../../common/api/timeline';
 
 export const getDraftTimelinesRoute = (
   router: SecuritySolutionPluginRouter,

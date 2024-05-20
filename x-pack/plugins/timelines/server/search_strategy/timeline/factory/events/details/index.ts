@@ -11,17 +11,17 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import {
   EventHit,
-  TimelineEventsDetailsItem,
   TimelineEventsDetailsStrategyResponse,
+  TimelineEventsDetailsItem,
 } from '../../../../../../common/search_strategy';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
+import { TimelineFactory } from '../../types';
+import { buildTimelineDetailsQuery } from './query.events_details.dsl';
 import {
   getDataFromFieldsHits,
   getDataSafety,
 } from '../../../../../../common/utils/field_formatters';
-import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildEcsObjects } from '../../helpers/build_ecs_objects';
-import { TimelineFactory } from '../../types';
-import { buildTimelineDetailsQuery } from './query.events_details.dsl';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: (parsedRequest) => {

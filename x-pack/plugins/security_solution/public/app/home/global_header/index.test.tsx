@@ -1,4 +1,3 @@
-import { render, waitFor } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +5,9 @@ import { render, waitFor } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
+import { useVariationMock } from '../../../common/components/utils.mocks';
 import { GlobalHeader } from '.';
 import {
   ADD_DATA_PATH,
@@ -14,15 +15,14 @@ import {
   SecurityPageName,
   THREAT_INTELLIGENCE_PATH,
 } from '../../../../common/constants';
-import { TimelineId } from '../../../../common/types/timeline';
-import { useVariationMock } from '../../../common/components/utils.mocks';
-import { sourcererPaths } from '../../../common/containers/sourcerer';
 import {
-  TestProviders,
   createMockStore,
   mockGlobalState,
   mockIndexPattern,
+  TestProviders,
 } from '../../../common/mock';
+import { TimelineId } from '../../../../common/types/timeline';
+import { sourcererPaths } from '../../../common/containers/sourcerer';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

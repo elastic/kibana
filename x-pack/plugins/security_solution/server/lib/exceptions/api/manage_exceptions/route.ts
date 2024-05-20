@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { v4 as uuidv4 } from 'uuid';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { IKibanaResponse } from '@kbn/core/server';
 
 import { CreateSharedExceptionListRequest } from '../../../../../common/api/detection_engine';
 import { SHARED_EXCEPTION_LIST_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 
 export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

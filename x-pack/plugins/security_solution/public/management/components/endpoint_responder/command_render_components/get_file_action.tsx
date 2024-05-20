@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
-import type { ResponseActionGetFileRequestBody } from '../../../../../common/api/endpoint';
+import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useSendGetFileRequest } from '../../../hooks/response_actions/use_send_get_file_request';
-import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
+import type { ResponseActionGetFileRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from '../types';
+import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
 
 export const GetFileActionResult = memo<
   ActionRequestComponentProps<{

@@ -41,9 +41,8 @@ describe('Status routes', () => {
     it('should return connection status', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      await expect(
-        routeHandler(mockContext, mockRequest, kibanaResponseFactory)
-      ).resolves.toMatchInlineSnapshot(`
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves
+        .toMatchInlineSnapshot(`
               KibanaResponse {
                 "options": Object {
                   "body": Object {

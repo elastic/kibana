@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fromExpression } from '@kbn/interpreter';
-import { decode } from '../../../../common/lib/embeddable_dataurl';
-import { EmbeddableInput } from '../../../../types';
 import { toExpression } from './embeddable';
+import { EmbeddableInput } from '../../../../types';
+import { decode } from '../../../../common/lib/embeddable_dataurl';
+import { fromExpression } from '@kbn/interpreter';
 
 describe('toExpression', () => {
   describe('by-reference embeddable input', () => {

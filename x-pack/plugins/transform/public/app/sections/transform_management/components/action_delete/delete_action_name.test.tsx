@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import type { DeleteActionNameProps } from './delete_action_name';
 import { DeleteActionName } from './delete_action_name';

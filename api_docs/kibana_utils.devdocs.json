@@ -32,7 +32,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -44,7 +46,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/abort_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -93,7 +97,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -105,7 +111,9 @@
                 "tags": [],
                 "label": "character",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -118,7 +126,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -160,7 +170,9 @@
             "tags": [],
             "label": "resolve",
             "description": [],
-            "signature": ["(data: T) => void"],
+            "signature": [
+              "(data: T) => void"
+            ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -173,7 +185,9 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "src/plugins/kibana_utils/common/defer.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -187,7 +201,9 @@
             "tags": [],
             "label": "reject",
             "description": [],
-            "signature": ["(error: any) => void"],
+            "signature": [
+              "(error: any) => void"
+            ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -200,7 +216,9 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/kibana_utils/common/defer.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -214,7 +232,9 @@
             "tags": [],
             "label": "promise",
             "description": [],
-            "signature": ["Promise<T>"],
+            "signature": [
+              "Promise<T>"
+            ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -259,7 +279,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -271,7 +293,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -319,7 +343,9 @@
             "tags": [],
             "label": "PERSISTED_INDEX_KEY",
             "description": [],
-            "signature": ["\"kbn.hashedItemsIndex.v1\""],
+            "signature": [
+              "\"kbn.hashedItemsIndex.v1\""
+            ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -333,7 +359,9 @@
             "description": [
               "\nHashedItemStore uses objects called indexed items to refer to items that have been persisted\nin storage. An indexed item is shaped {hash, touched}. The touched date is when the item\nwas last referenced by the browser history."
             ],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -345,7 +373,9 @@
                 "tags": [],
                 "label": "storage",
                 "description": [],
-                "signature": ["Storage"],
+                "signature": [
+                  "Storage"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -361,7 +391,9 @@
             "tags": [],
             "label": "setItem",
             "description": [],
-            "signature": ["(hash: string, item: string) => boolean"],
+            "signature": [
+              "(hash: string, item: string) => boolean"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -373,7 +405,9 @@
                 "tags": [],
                 "label": "hash",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -386,7 +420,9 @@
                 "tags": [],
                 "label": "item",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -402,7 +438,9 @@
             "tags": [],
             "label": "getItem",
             "description": [],
-            "signature": ["(hash: string) => string | null"],
+            "signature": [
+              "(hash: string) => string | null"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -414,7 +452,9 @@
                 "tags": [],
                 "label": "hash",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -430,7 +470,9 @@
             "tags": [],
             "label": "removeItem",
             "description": [],
-            "signature": ["(hash: string) => string | null"],
+            "signature": [
+              "(hash: string) => string | null"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -442,7 +484,9 @@
                 "tags": [],
                 "label": "hash",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -458,7 +502,9 @@
             "tags": [],
             "label": "clear",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/hashed_item_store/hashed_item_store.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -505,7 +551,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -517,7 +565,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -557,7 +607,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -569,7 +621,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -601,7 +655,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -613,7 +669,9 @@
                 "tags": [],
                 "label": "el",
                 "description": [],
-                "signature": ["HTMLElement | undefined"],
+                "signature": [
+                  "HTMLElement | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -629,7 +687,9 @@
             "tags": [],
             "label": "setEl",
             "description": [],
-            "signature": ["(el?: HTMLElement | undefined) => void"],
+            "signature": [
+              "(el?: HTMLElement | undefined) => void"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -641,7 +701,9 @@
                 "tags": [],
                 "label": "el",
                 "description": [],
-                "signature": ["HTMLElement | undefined"],
+                "signature": [
+                  "HTMLElement | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -657,7 +719,9 @@
             "tags": [],
             "label": "dispatchInProgress",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -671,7 +735,9 @@
             "tags": [],
             "label": "dispatchComplete",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -685,7 +751,9 @@
             "tags": [],
             "label": "dispatchError",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -699,7 +767,9 @@
             "tags": [],
             "label": "setTitle",
             "description": [],
-            "signature": ["(title: string) => void"],
+            "signature": [
+              "(title: string) => void"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -711,7 +781,9 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -741,7 +813,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -753,7 +827,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["HTMLElement"],
+                "signature": [
+                  "HTMLElement"
+                ],
                 "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -769,7 +845,9 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -783,7 +861,9 @@
             "tags": [],
             "label": "setup",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -797,7 +877,9 @@
             "tags": [],
             "label": "disable",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_listener.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -838,7 +920,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -850,7 +934,9 @@
                 "tags": [],
                 "label": "el",
                 "description": [],
-                "signature": ["HTMLElement"],
+                "signature": [
+                  "HTMLElement"
+                ],
                 "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -874,7 +960,9 @@
                     "tags": [],
                     "label": "disabled",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -891,7 +979,9 @@
             "tags": [],
             "label": "enable",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -907,7 +997,9 @@
             "description": [
               "\n Run a function and ignore all resizes that occur\n while it's running."
             ],
-            "signature": ["(block: () => void) => void"],
+            "signature": [
+              "(block: () => void) => void"
+            ],
             "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -919,7 +1011,9 @@
                 "tags": [],
                 "label": "block",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -937,7 +1031,9 @@
             "description": [
               "\nTell the ResizeChecker to shutdown, stop listenings, and never\nemit another resize event.\n\nCleans up it's listeners and timers."
             ],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/resize_checker/resize_checker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -953,7 +1049,9 @@
         "type": "Class",
         "tags": [],
         "label": "SavedFieldNotFound",
-        "description": ["\nA saved field doesn't exist anymore"],
+        "description": [
+          "\nA saved field doesn't exist anymore"
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -982,7 +1080,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -994,7 +1094,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1012,7 +1114,9 @@
         "type": "Class",
         "tags": [],
         "label": "SavedFieldTypeInvalidForAgg",
-        "description": ["\nA saved field type isn't compatible with aggregation"],
+        "description": [
+          "\nA saved field type isn't compatible with aggregation"
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -1041,7 +1145,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1053,7 +1159,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1071,7 +1179,9 @@
         "type": "Class",
         "tags": [],
         "label": "SavedObjectNotFound",
-        "description": ["\nA saved object was not found"],
+        "description": [
+          "\nA saved object was not found"
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -1111,7 +1221,9 @@
             "tags": [],
             "label": "savedObjectId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1123,7 +1235,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1135,7 +1249,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1148,7 +1264,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1161,7 +1279,9 @@
                 "tags": [],
                 "label": "link",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1174,7 +1294,9 @@
                 "tags": [],
                 "label": "customMessage",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1243,7 +1365,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1280,7 +1404,9 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": ["(key: string) => any"],
+            "signature": [
+              "(key: string) => any"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1292,7 +1418,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1308,7 +1436,9 @@
             "tags": [],
             "label": "set",
             "description": [],
-            "signature": ["(key: string, value: any) => false | void"],
+            "signature": [
+              "(key: string, value: any) => false | void"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1320,7 +1450,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1333,7 +1465,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1349,7 +1483,9 @@
             "tags": [],
             "label": "remove",
             "description": [],
-            "signature": ["(key: string) => any"],
+            "signature": [
+              "(key: string) => any"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1361,7 +1497,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1377,7 +1515,9 @@
             "tags": [],
             "label": "clear",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1398,7 +1538,9 @@
         "description": [
           "\nReturns a `Promise` corresponding with when the given `AbortSignal` is aborted. Useful for\nsituations when you might need to `Promise.race` multiple `AbortSignal`s, or an `AbortSignal`\nwith any other expected errors (or completions).\n"
         ],
-        "signature": ["(signal: AbortSignal) => { promise: Promise<never>; cleanup: () => void; }"],
+        "signature": [
+          "(signal: AbortSignal) => { promise: Promise<never>; cleanup: () => void; }"
+        ],
         "path": "src/plugins/kibana_utils/common/abort_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1409,8 +1551,12 @@
             "type": "Object",
             "tags": [],
             "label": "signal",
-            "description": ["The `AbortSignal` to generate the `Promise` from"],
-            "signature": ["AbortSignal"],
+            "description": [
+              "The `AbortSignal` to generate the `Promise` from"
+            ],
+            "signature": [
+              "AbortSignal"
+            ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1442,7 +1588,9 @@
             "tags": [],
             "label": "target",
             "description": [],
-            "signature": ["Record<string, any>"],
+            "signature": [
+              "Record<string, any>"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/utils/diff_object.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1455,7 +1603,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["Record<string, any>"],
+            "signature": [
+              "Record<string, any>"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/utils/diff_object.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1472,7 +1622,9 @@
         "tags": [],
         "label": "calculateObjectHash",
         "description": [],
-        "signature": ["(o: object) => string"],
+        "signature": [
+          "(o: object) => string"
+        ],
         "path": "src/plugins/kibana_utils/common/calculate_object_hash.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1485,7 +1637,9 @@
             "tags": [],
             "label": "o",
             "description": [],
-            "signature": ["object"],
+            "signature": [
+              "object"
+            ],
             "path": "src/plugins/kibana_utils/common/calculate_object_hash.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1530,7 +1684,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1543,7 +1699,9 @@
             "tags": [],
             "label": "isValueRequired",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1559,7 +1717,9 @@
         "type": "Function",
         "tags": [],
         "label": "createHistoryObservable",
-        "description": ["\nConvert history.listen into an observable"],
+        "description": [
+          "\nConvert history.listen into an observable"
+        ],
         "signature": [
           "(history: ",
           "History",
@@ -1581,8 +1741,13 @@
             "type": "Object",
             "tags": [],
             "label": "history",
-            "description": ["- {@link History } instance"],
-            "signature": ["History", "<unknown>"],
+            "description": [
+              "- {@link History } instance"
+            ],
+            "signature": [
+              "History",
+              "<unknown>"
+            ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1599,7 +1764,12 @@
         "tags": [],
         "label": "createKbnUrlControls",
         "description": [],
-        "signature": ["(history?: ", "History", "<unknown>) => ", "IKbnUrlControls"],
+        "signature": [
+          "(history?: ",
+          "History",
+          "<unknown>) => ",
+          "IKbnUrlControls"
+        ],
         "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1611,7 +1781,10 @@
             "tags": [],
             "label": "history",
             "description": [],
-            "signature": ["History", "<unknown>"],
+            "signature": [
+              "History",
+              "<unknown>"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1627,7 +1800,9 @@
         "type": "Function",
         "tags": [],
         "label": "createKbnUrlStateStorage",
-        "description": ["\nCreates {@link IKbnUrlStateStorage} state storage"],
+        "description": [
+          "\nCreates {@link IKbnUrlStateStorage} state storage"
+        ],
         "signature": [
           "({ useHash, useHashQuery, history, onGetError, onSetError, }?: { useHash: boolean; useHashQuery?: boolean | undefined; history?: ",
           "History",
@@ -1673,7 +1848,9 @@
                 "tags": [],
                 "label": "useHashQuery",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1685,7 +1862,10 @@
                 "tags": [],
                 "label": "history",
                 "description": [],
-                "signature": ["History", "<unknown> | undefined"],
+                "signature": [
+                  "History",
+                  "<unknown> | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1697,7 +1877,9 @@
                 "tags": [],
                 "label": "onGetError",
                 "description": [],
-                "signature": ["((error: Error) => void) | undefined"],
+                "signature": [
+                  "((error: Error) => void) | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1709,7 +1891,9 @@
                     "tags": [],
                     "label": "error",
                     "description": [],
-                    "signature": ["Error"],
+                    "signature": [
+                      "Error"
+                    ],
                     "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1725,7 +1909,9 @@
                 "tags": [],
                 "label": "onSetError",
                 "description": [],
-                "signature": ["((error: Error) => void) | undefined"],
+                "signature": [
+                  "((error: Error) => void) | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1737,7 +1923,9 @@
                     "tags": [],
                     "label": "error",
                     "description": [],
-                    "signature": ["Error"],
+                    "signature": [
+                      "Error"
+                    ],
                     "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1749,7 +1937,9 @@
             ]
           }
         ],
-        "returnComment": ["- {@link IKbnUrlStateStorage }"],
+        "returnComment": [
+          "- {@link IKbnUrlStateStorage }"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1892,7 +2082,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "toastNotifications",
-                "description": ["\nToast notifications service to show toasts in error cases."],
+                "description": [
+                  "\nToast notifications service to show toasts in error cases."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -1915,7 +2107,10 @@
                 "description": [
                   "\nHistory object to use to track url changes. If this isn't provided, a local history instance will be created."
                 ],
-                "signature": ["History", "<unknown> | undefined"],
+                "signature": [
+                  "History",
+                  "<unknown> | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1926,8 +2121,14 @@
                 "type": "Function",
                 "tags": [],
                 "label": "getHistory",
-                "description": ["\nLazily retrieve history instance"],
-                "signature": ["(() => ", "History", "<unknown>) | undefined"],
+                "description": [
+                  "\nLazily retrieve history instance"
+                ],
+                "signature": [
+                  "(() => ",
+                  "History",
+                  "<unknown>) | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1943,7 +2144,9 @@
                 "description": [
                   "\nStorage object to use to persist currently active url. If this isn't provided, the browser wide session storage instance will be used."
                 ],
-                "signature": ["Storage | undefined"],
+                "signature": [
+                  "Storage | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1957,7 +2160,9 @@
                 "description": [
                   "\nChecks if pathname belongs to current app. It's used in history listener to define whether it's necessary to set pathname as active url or not.\nThe default implementation compares the app name to the first part of pathname. Consumers can override this function for more complex cases.\n"
                 ],
-                "signature": ["((pathname: string) => boolean) | undefined"],
+                "signature": [
+                  "((pathname: string) => boolean) | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1968,8 +2173,12 @@
                     "type": "string",
                     "tags": [],
                     "label": "pathname",
-                    "description": ["A location's pathname which comes to history listener"],
-                    "signature": ["string"],
+                    "description": [
+                      "A location's pathname which comes to history listener"
+                    ],
+                    "signature": [
+                      "string"
+                    ],
                     "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1987,7 +2196,9 @@
                 "description": [
                   "\nCalled when current subpath is about to be saved to sessionStorage for subsequent use as a nav link.\nUse to mutate app's subpath before it is saved by returning a new subpath."
                 ],
-                "signature": ["((newNavLink: string) => string) | undefined"],
+                "signature": [
+                  "((newNavLink: string) => string) | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1999,7 +2210,9 @@
                     "tags": [],
                     "label": "newNavLink",
                     "description": [],
-                    "signature": ["string"],
+                    "signature": [
+                      "string"
+                    ],
                     "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -2020,7 +2233,9 @@
         "type": "Function",
         "tags": [],
         "label": "createQueryParamObservable",
-        "description": ["\nCreate an observable that emits every time _paramKey_ changes"],
+        "description": [
+          "\nCreate an observable that emits every time _paramKey_ changes"
+        ],
         "signature": [
           "(history: ",
           "History",
@@ -2038,8 +2253,13 @@
             "type": "Object",
             "tags": [],
             "label": "history",
-            "description": ["- {@link History } instance"],
-            "signature": ["History", "<unknown>"],
+            "description": [
+              "- {@link History } instance"
+            ],
+            "signature": [
+              "History",
+              "<unknown>"
+            ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2051,8 +2271,12 @@
             "type": "string",
             "tags": [],
             "label": "paramKey",
-            "description": ["- query param key to observe"],
-            "signature": ["string"],
+            "description": [
+              "- query param key to observe"
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2090,8 +2314,13 @@
             "type": "Object",
             "tags": [],
             "label": "history",
-            "description": ["- {@link History } instance"],
-            "signature": ["History", "<unknown>"],
+            "description": [
+              "- {@link History } instance"
+            ],
+            "signature": [
+              "History",
+              "<unknown>"
+            ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2133,14 +2362,18 @@
             "description": [
               "- Option {@link Storage } to use for storing state. By default window.sessionStorage."
             ],
-            "signature": ["Storage"],
+            "signature": [
+              "Storage"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["- {@link ISessionStorageStateStorage }"],
+        "returnComment": [
+          "- {@link ISessionStorageStateStorage }"
+        ],
         "initialIsOpen": false
       },
       {
@@ -2189,7 +2422,9 @@
             "type": "Function",
             "tags": [],
             "label": "accessor",
-            "description": ["Asynchronous start service accessor provided by platform."],
+            "description": [
+              "Asynchronous start service accessor provided by platform."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
@@ -2217,7 +2452,9 @@
         "type": "Function",
         "tags": [],
         "label": "createStateContainer",
-        "description": ["\nCreates a state container without transitions and without selectors."],
+        "description": [
+          "\nCreates a state container without transitions and without selectors."
+        ],
         "signature": [
           "(defaultState: State) => ",
           {
@@ -2239,8 +2476,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultState",
-            "description": ["- initial state"],
-            "signature": ["State"],
+            "description": [
+              "- initial state"
+            ],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2256,7 +2497,9 @@
         "type": "Function",
         "tags": [],
         "label": "createStateContainer",
-        "description": ["\nCreates a state container with transitions, but without selectors."],
+        "description": [
+          "\nCreates a state container with transitions, but without selectors."
+        ],
         "signature": [
           "(defaultState: State, pureTransitions: PureTransitions) => ",
           {
@@ -2278,8 +2521,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultState",
-            "description": ["- initial state"],
-            "signature": ["State"],
+            "description": [
+              "- initial state"
+            ],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2294,7 +2541,9 @@
             "description": [
               "- state transitions configuration object. Map of {@link PureTransition }."
             ],
-            "signature": ["PureTransitions"],
+            "signature": [
+              "PureTransitions"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2310,7 +2559,9 @@
         "type": "Function",
         "tags": [],
         "label": "createStateContainer",
-        "description": ["\nCreates a state container with transitions and selectors."],
+        "description": [
+          "\nCreates a state container with transitions and selectors."
+        ],
         "signature": [
           "(defaultState: State, pureTransitions: PureTransitions, pureSelectors: PureSelectors, options: ",
           {
@@ -2340,8 +2591,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultState",
-            "description": ["- initial state"],
-            "signature": ["State"],
+            "description": [
+              "- initial state"
+            ],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2356,7 +2611,9 @@
             "description": [
               "- state transitions configuration object. Map of {@link PureTransition }."
             ],
-            "signature": ["PureTransitions"],
+            "signature": [
+              "PureTransitions"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2371,7 +2628,9 @@
             "description": [
               "- state selectors configuration object. Map of {@link PureSelectors }."
             ],
-            "signature": ["PureSelectors"],
+            "signature": [
+              "PureSelectors"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2383,7 +2642,9 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": ["- state container options {@link CreateStateContainerOptions }"],
+            "description": [
+              "- state container options {@link CreateStateContainerOptions }"
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -2479,7 +2740,10 @@
         "description": [
           "\nReplicates what src/legacy/ui/public/chrome/api/nav.ts did\nPersists the url in sessionStorage so it could be restored if navigated back to the app"
         ],
-        "signature": ["(key: string, storage: Storage) => ", "IUrlTracker"],
+        "signature": [
+          "(key: string, storage: Storage) => ",
+          "IUrlTracker"
+        ],
         "path": "src/plugins/kibana_utils/public/state_management/url/url_tracker.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2491,7 +2755,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/url_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2504,7 +2770,9 @@
             "tags": [],
             "label": "storage",
             "description": [],
-            "signature": ["Storage"],
+            "signature": [
+              "Storage"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/url_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2546,7 +2814,9 @@
         "tags": [],
         "label": "dispatchRenderComplete",
         "description": [],
-        "signature": ["(el: HTMLElement) => void"],
+        "signature": [
+          "(el: HTMLElement) => void"
+        ],
         "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2558,7 +2828,9 @@
             "tags": [],
             "label": "el",
             "description": [],
-            "signature": ["HTMLElement"],
+            "signature": [
+              "HTMLElement"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2575,7 +2847,9 @@
         "tags": [],
         "label": "dispatchRenderStart",
         "description": [],
-        "signature": ["(el: HTMLElement) => void"],
+        "signature": [
+          "(el: HTMLElement) => void"
+        ],
         "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2587,7 +2861,9 @@
             "tags": [],
             "label": "el",
             "description": [],
-            "signature": ["HTMLElement"],
+            "signature": [
+              "HTMLElement"
+            ],
             "path": "src/plugins/kibana_utils/public/render_complete/render_complete_dispatcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2604,7 +2880,9 @@
         "tags": [],
         "label": "fieldWildcardFilter",
         "description": [],
-        "signature": ["(globs: string[], metaFields: string[]) => (val: unknown) => boolean"],
+        "signature": [
+          "(globs: string[], metaFields: string[]) => (val: unknown) => boolean"
+        ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2616,7 +2894,9 @@
             "tags": [],
             "label": "globs",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2629,7 +2909,9 @@
             "tags": [],
             "label": "metaFields",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2646,7 +2928,9 @@
         "tags": [],
         "label": "fieldWildcardMatcher",
         "description": [],
-        "signature": ["(globs: string[], metaFields: unknown[]) => (val: unknown) => boolean"],
+        "signature": [
+          "(globs: string[], metaFields: unknown[]) => (val: unknown) => boolean"
+        ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2658,7 +2942,9 @@
             "tags": [],
             "label": "globs",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2671,7 +2957,9 @@
             "tags": [],
             "label": "metaFields",
             "description": [],
-            "signature": ["unknown[]"],
+            "signature": [
+              "unknown[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2688,7 +2976,13 @@
         "tags": [],
         "label": "getQueryParams",
         "description": [],
-        "signature": ["(location: ", "Location", "<unknown>) => ", "ParsedQuery", "<string>"],
+        "signature": [
+          "(location: ",
+          "Location",
+          "<unknown>) => ",
+          "ParsedQuery",
+          "<string>"
+        ],
         "path": "src/plugins/kibana_utils/public/history/get_query_params.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2700,7 +2994,10 @@
             "tags": [],
             "label": "location",
             "description": [],
-            "signature": ["Location", "<unknown>"],
+            "signature": [
+              "Location",
+              "<unknown>"
+            ],
             "path": "src/plugins/kibana_utils/public/history/get_query_params.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2733,7 +3030,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2746,7 +3045,9 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2803,7 +3104,9 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2816,7 +3119,9 @@
             "tags": [],
             "label": "keys",
             "description": [],
-            "signature": ["(keyof State)[] | undefined"],
+            "signature": [
+              "(keyof State)[] | undefined"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2874,7 +3179,9 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": ["{ [x: string]: any; }"],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2886,7 +3193,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["IUrlQueryMapperOptions"],
+            "signature": [
+              "IUrlQueryMapperOptions"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2901,7 +3210,9 @@
         "tags": [],
         "label": "hashUrl",
         "description": [],
-        "signature": ["(url: string) => string"],
+        "signature": [
+          "(url: string) => string"
+        ],
         "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2943,8 +3254,12 @@
             "type": "Object",
             "tags": [],
             "label": "promise",
-            "description": ["Promise to convert to 3-tuple."],
-            "signature": ["Promise<T>"],
+            "description": [
+              "Promise to convert to 3-tuple."
+            ],
+            "signature": [
+              "Promise<T>"
+            ],
             "path": "src/plugins/kibana_utils/common/of.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2961,7 +3276,9 @@
         "tags": [],
         "label": "persistState",
         "description": [],
-        "signature": ["(state: State) => string"],
+        "signature": [
+          "(state: State) => string"
+        ],
         "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2973,7 +3290,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3067,7 +3386,10 @@
                 "tags": [],
                 "label": "history",
                 "description": [],
-                "signature": ["History", "<unknown>"],
+                "signature": [
+                  "History",
+                  "<unknown>"
+                ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3158,7 +3480,9 @@
                 "description": [
                   "\na mapping of url's to redirect to based on the saved object that\ncouldn't be found, or just a string that will be used for all types"
                 ],
-                "signature": ["string | Mapping"],
+                "signature": [
+                  "string | Mapping"
+                ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3169,7 +3493,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "toastNotifications",
-                "description": ["\nToast notifications service to show toasts in error cases."],
+                "description": [
+                  "\nToast notifications service to show toasts in error cases."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -3280,7 +3606,10 @@
             "tags": [],
             "label": "history",
             "description": [],
-            "signature": ["History", "<unknown>"],
+            "signature": [
+              "History",
+              "<unknown>"
+            ],
             "path": "src/plugins/kibana_utils/public/history/remove_query_param.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3293,7 +3622,9 @@
             "tags": [],
             "label": "param",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/public/history/remove_query_param.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3306,7 +3637,9 @@
             "tags": [],
             "label": "replace",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/kibana_utils/public/history/remove_query_param.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3323,7 +3656,9 @@
         "tags": [],
         "label": "retrieveState",
         "description": [],
-        "signature": ["(stateHash: string) => State"],
+        "signature": [
+          "(stateHash: string) => State"
+        ],
         "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3335,7 +3670,9 @@
             "tags": [],
             "label": "stateHash",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/state_hash/state_hash.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3370,7 +3707,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3383,7 +3722,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3396,7 +3737,9 @@
             "tags": [],
             "label": "{ useHash = false, storeInHashQuery = true }",
             "description": [],
-            "signature": ["SetStateToKbnUrlHashOptions"],
+            "signature": [
+              "SetStateToKbnUrlHashOptions"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3409,7 +3752,9 @@
             "tags": [],
             "label": "rawUrl",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3498,7 +3843,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["- {@link ISyncStateRef }"],
+        "returnComment": [
+          "- {@link ISyncStateRef }"
+        ],
         "initialIsOpen": false
       },
       {
@@ -3553,7 +3900,9 @@
             "type": "Array",
             "tags": [],
             "label": "stateSyncConfigs",
-            "description": ["- Array of {@link IStateSyncConfig } to sync"],
+            "description": [
+              "- Array of {@link IStateSyncConfig } to sync"
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -3605,7 +3954,9 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": ["{ [x: string]: any; }"],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3617,7 +3968,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["IUrlQueryMapperOptions"],
+            "signature": [
+              "IUrlQueryMapperOptions"
+            ],
             "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3632,7 +3985,9 @@
         "tags": [],
         "label": "unhashUrl",
         "description": [],
-        "signature": ["(url: string) => string"],
+        "signature": [
+          "(url: string) => string"
+        ],
         "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3698,8 +4053,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": ["- {@link StateContainer } which state to track."],
-            "signature": ["Container"],
+            "description": [
+              "- {@link StateContainer } which state to track."
+            ],
+            "signature": [
+              "Container"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3711,7 +4070,9 @@
             "type": "Function",
             "tags": [],
             "label": "selector",
-            "description": ["- Function used to pick parts of state."],
+            "description": [
+              "- Function used to pick parts of state."
+            ],
             "signature": [
               "(state: ",
               {
@@ -3753,7 +4114,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["- result of a selector(state)"],
+        "returnComment": [
+          "- result of a selector(state)"
+        ],
         "initialIsOpen": false
       },
       {
@@ -3794,15 +4157,21 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": ["- {@link StateContainer } which state to track."],
-            "signature": ["Container"],
+            "description": [
+              "- {@link StateContainer } which state to track."
+            ],
+            "signature": [
+              "Container"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["- latest {@link StateContainer } state"],
+        "returnComment": [
+          "- latest {@link StateContainer } state"
+        ],
         "initialIsOpen": false
       },
       {
@@ -3862,7 +4231,9 @@
         "type": "Interface",
         "tags": [],
         "label": "BaseStateContainer",
-        "description": ["\nBase state container shape without transitions or selectors"],
+        "description": [
+          "\nBase state container shape without transitions or selectors"
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -3883,13 +4254,19 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": ["\nRetrieves current state from the container"],
-            "signature": ["() => State"],
+            "description": [
+              "\nRetrieves current state from the container"
+            ],
+            "signature": [
+              "() => State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": ["current state"]
+            "returnComment": [
+              "current state"
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -3897,8 +4274,12 @@
             "type": "Function",
             "tags": [],
             "label": "set",
-            "description": ["\nSets state into container"],
-            "signature": ["(state: State) => void"],
+            "description": [
+              "\nSets state into container"
+            ],
+            "signature": [
+              "(state: State) => void"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3909,8 +4290,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": ["- new state to set"],
-                "signature": ["State"],
+                "description": [
+                  "- new state to set"
+                ],
+                "signature": [
+                  "State"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3925,8 +4310,13 @@
             "type": "Object",
             "tags": [],
             "label": "state$",
-            "description": ["\n{@link Observable} of state"],
-            "signature": ["Observable", "<State>"],
+            "description": [
+              "\n{@link Observable} of state"
+            ],
+            "signature": [
+              "Observable",
+              "<State>"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3940,7 +4330,9 @@
         "type": "Interface",
         "tags": [],
         "label": "CollectConfigProps",
-        "description": ["\nProps provided to `CollectConfig` component on every re-render."],
+        "description": [
+          "\nProps provided to `CollectConfig` component on every re-render."
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -3961,8 +4353,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "config",
-            "description": ["\nCurrent (latest) config of the item."],
-            "signature": ["Config"],
+            "description": [
+              "\nCurrent (latest) config of the item."
+            ],
+            "signature": [
+              "Config"
+            ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3973,8 +4369,12 @@
             "type": "Function",
             "tags": [],
             "label": "onConfig",
-            "description": ["\nCallback called when user updates the config in UI."],
-            "signature": ["(config: Config) => void"],
+            "description": [
+              "\nCallback called when user updates the config in UI."
+            ],
+            "signature": [
+              "(config: Config) => void"
+            ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3986,7 +4386,9 @@
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "signature": ["Config"],
+                "signature": [
+                  "Config"
+                ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4001,8 +4403,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "context",
-            "description": ["\nContext information about where component is being rendered."],
-            "signature": ["Context"],
+            "description": [
+              "\nContext information about where component is being rendered."
+            ],
+            "signature": [
+              "Context"
+            ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4016,7 +4422,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Configurable",
-        "description": ["\nRepresents something that can be configured by user using UI."],
+        "description": [
+          "\nRepresents something that can be configured by user using UI."
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -4040,7 +4448,9 @@
             "description": [
               "\nCreate default config for this item, used when item is created for the first time."
             ],
-            "signature": ["(context: Context) => Config"],
+            "signature": [
+              "(context: Context) => Config"
+            ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4052,7 +4462,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4067,8 +4479,12 @@
             "type": "Function",
             "tags": [],
             "label": "isConfigValid",
-            "description": ["\nIs this config valid. Used to validate user's input before saving."],
-            "signature": ["(config: Config, context: Context) => boolean"],
+            "description": [
+              "\nIs this config valid. Used to validate user's input before saving."
+            ],
+            "signature": [
+              "(config: Config, context: Context) => boolean"
+            ],
             "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4080,7 +4496,9 @@
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "signature": ["Config"],
+                "signature": [
+                  "Config"
+                ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4093,7 +4511,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4134,7 +4554,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["P & { children?: React.ReactNode; }"],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4146,7 +4568,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4162,7 +4586,9 @@
         "type": "Interface",
         "tags": [],
         "label": "CreateStateContainerOptions",
-        "description": ["\nState container options"],
+        "description": [
+          "\nState container options"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4176,7 +4602,9 @@
             "description": [
               "\nFunction to use when freezing state. Supply identity function.\nIf not provided, default `deepFreeze` is used.\n"
             ],
-            "signature": ["(<T>(state: T) => T) | undefined"],
+            "signature": [
+              "(<T>(state: T) => T) | undefined"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4188,7 +4616,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4251,7 +4681,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4264,7 +4696,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["State"],
+                "signature": [
+                  "State"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4304,7 +4738,9 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": ["<State = unknown>(key: string) => State | null"],
+            "signature": [
+              "<State = unknown>(key: string) => State | null"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4316,7 +4752,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4332,7 +4770,11 @@
             "tags": [],
             "label": "change$",
             "description": [],
-            "signature": ["<State = unknown>(key: string) => ", "Observable", "<State | null>"],
+            "signature": [
+              "<State = unknown>(key: string) => ",
+              "Observable",
+              "<State | null>"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4344,7 +4786,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4359,8 +4803,12 @@
             "type": "Function",
             "tags": [],
             "label": "cancel",
-            "description": ["\nCancels any pending url updates"],
-            "signature": ["() => void"],
+            "description": [
+              "\nCancels any pending url updates"
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4376,7 +4824,9 @@
             "description": [
               "\nLower level wrapper around history library that handles batching multiple URL updates into one history change"
             ],
-            "signature": ["IKbnUrlControls"],
+            "signature": [
+              "IKbnUrlControls"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4422,7 +4872,9 @@
             "tags": [],
             "label": "set",
             "description": [],
-            "signature": ["(state: State | null) => void"],
+            "signature": [
+              "(state: State | null) => void"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4434,7 +4886,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["State | null"],
+                "signature": [
+                  "State | null"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4483,7 +4937,9 @@
             "tags": [],
             "label": "set",
             "description": [],
-            "signature": ["<State>(key: string, state: State) => void"],
+            "signature": [
+              "<State>(key: string, state: State) => void"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4495,7 +4951,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4508,7 +4966,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["State"],
+                "signature": [
+                  "State"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4524,7 +4984,9 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": ["<State = unknown>(key: string) => State | null"],
+            "signature": [
+              "<State = unknown>(key: string) => State | null"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4536,7 +4998,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_session_storage_state_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4567,8 +5031,12 @@
             "type": "Function",
             "tags": [],
             "label": "set",
-            "description": ["\nTake in a state object, should serialise and persist"],
-            "signature": ["<State>(key: string, state: State) => any"],
+            "description": [
+              "\nTake in a state object, should serialise and persist"
+            ],
+            "signature": [
+              "<State>(key: string, state: State) => any"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4580,7 +5048,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4593,7 +5063,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["State"],
+                "signature": [
+                  "State"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4608,8 +5080,12 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": ["\nShould retrieve state from the storage and deserialize it"],
-            "signature": ["<State = unknown>(key: string) => State | null"],
+            "description": [
+              "\nShould retrieve state from the storage and deserialize it"
+            ],
+            "signature": [
+              "<State = unknown>(key: string) => State | null"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4621,7 +5097,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4636,7 +5114,9 @@
             "type": "Function",
             "tags": [],
             "label": "change$",
-            "description": ["\nShould notify when the stored state has changed"],
+            "description": [
+              "\nShould notify when the stored state has changed"
+            ],
             "signature": [
               "(<State = unknown>(key: string) => ",
               "Observable",
@@ -4653,7 +5133,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4671,7 +5153,9 @@
             "description": [
               "\nOptional method to cancel any pending activity\n{@link syncState} will call it during destroy, if it is provided by IStateStorage"
             ],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4687,7 +5171,9 @@
         "type": "Interface",
         "tags": [],
         "label": "IStateSyncConfig",
-        "description": ["\nConfig for setting up state syncing with {@link stateSync}"],
+        "description": [
+          "\nConfig for setting up state syncing with {@link stateSync}"
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -4747,7 +5233,9 @@
             "description": [
               "\nState storage to use,\nState storage is responsible for serialising / deserialising and persisting / retrieving stored state\n\nThere are common strategies already implemented:\nsee {@link IKbnUrlStateStorage}\nwhich replicate what State (AppState, GlobalState) in legacy world did\n"
             ],
-            "signature": ["StateStorage"],
+            "signature": [
+              "StateStorage"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4783,7 +5271,9 @@
             "tags": [],
             "label": "getItem",
             "description": [],
-            "signature": ["(key: string) => T | null"],
+            "signature": [
+              "(key: string) => T | null"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4795,7 +5285,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4811,7 +5303,9 @@
             "tags": [],
             "label": "setItem",
             "description": [],
-            "signature": ["(key: string, value: T) => S"],
+            "signature": [
+              "(key: string, value: T) => S"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4823,7 +5317,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4836,7 +5332,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4852,7 +5350,9 @@
             "tags": [],
             "label": "removeItem",
             "description": [],
-            "signature": ["(key: string) => T | null"],
+            "signature": [
+              "(key: string) => T | null"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4864,7 +5364,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4880,7 +5382,9 @@
             "tags": [],
             "label": "clear",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4918,7 +5422,9 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": ["(key: string) => T | null"],
+            "signature": [
+              "(key: string) => T | null"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4930,7 +5436,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4946,7 +5454,9 @@
             "tags": [],
             "label": "set",
             "description": [],
-            "signature": ["(key: string, value: T) => S"],
+            "signature": [
+              "(key: string, value: T) => S"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4958,7 +5468,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4971,7 +5483,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4987,7 +5501,9 @@
             "tags": [],
             "label": "remove",
             "description": [],
-            "signature": ["(key: string) => T | null"],
+            "signature": [
+              "(key: string) => T | null"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4999,7 +5515,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/public/storage/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5015,7 +5533,9 @@
             "tags": [],
             "label": "clear",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/storage/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5052,8 +5572,12 @@
             "type": "Function",
             "tags": [],
             "label": "stop",
-            "description": ["\nstop state syncing"],
-            "signature": ["() => void"],
+            "description": [
+              "\nstop state syncing"
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5066,8 +5590,12 @@
             "type": "Function",
             "tags": [],
             "label": "start",
-            "description": ["\nstart state syncing"],
-            "signature": ["() => void"],
+            "description": [
+              "\nstart state syncing"
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5127,7 +5655,9 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": ["T | undefined"],
+            "signature": [
+              "T | undefined"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5173,7 +5703,9 @@
             "tags": [],
             "label": "getState",
             "description": [],
-            "signature": ["() => State"],
+            "signature": [
+              "() => State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5204,7 +5736,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["State"],
+                "signature": [
+                  "State"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5216,7 +5750,10 @@
                 "tags": [],
                 "label": "action",
                 "description": [],
-                "signature": ["TransitionDescription", "<string, any[]>"],
+                "signature": [
+                  "TransitionDescription",
+                  "<string, any[]>"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5277,7 +5814,11 @@
             "tags": [],
             "label": "dispatch",
             "description": [],
-            "signature": ["(action: ", "TransitionDescription", "<string, any[]>) => void"],
+            "signature": [
+              "(action: ",
+              "TransitionDescription",
+              "<string, any[]>) => void"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5289,7 +5830,10 @@
                 "tags": [],
                 "label": "action",
                 "description": [],
-                "signature": ["TransitionDescription", "<string, any[]>"],
+                "signature": [
+                  "TransitionDescription",
+                  "<string, any[]>"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5352,7 +5896,9 @@
             "tags": [],
             "label": "subscribe",
             "description": [],
-            "signature": ["(listener: (state: State) => void) => () => void"],
+            "signature": [
+              "(listener: (state: State) => void) => () => void"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5364,7 +5910,9 @@
                 "tags": [],
                 "label": "listener",
                 "description": [],
-                "signature": ["(state: State) => void"],
+                "signature": [
+                  "(state: State) => void"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5467,8 +6015,12 @@
         "type": "Type",
         "tags": [],
         "label": "BaseState",
-        "description": ["\nBase {@link StateContainer} state shape"],
-        "signature": ["object"],
+        "description": [
+          "\nBase {@link StateContainer} state shape"
+        ],
+        "signature": [
+          "object"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5480,8 +6032,12 @@
         "type": "Type",
         "tags": [],
         "label": "Comparator",
-        "description": ["\nUsed to compare state, see {@link useContainerSelector}."],
-        "signature": ["(previous: Result, current: Result) => boolean"],
+        "description": [
+          "\nUsed to compare state, see {@link useContainerSelector}."
+        ],
+        "signature": [
+          "(previous: Result, current: Result) => boolean"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5494,7 +6050,9 @@
             "tags": [],
             "label": "previous",
             "description": [],
-            "signature": ["Result"],
+            "signature": [
+              "Result"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5506,7 +6064,9 @@
             "tags": [],
             "label": "current",
             "description": [],
-            "signature": ["Result"],
+            "signature": [
+              "Result"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5546,7 +6106,9 @@
             "tags": [],
             "label": "mapStateToProp",
             "description": [],
-            "signature": ["(state: State) => Pick<Props, StatePropKeys>"],
+            "signature": [
+              "(state: State) => Pick<Props, StatePropKeys>"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5559,7 +6121,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["State"],
+                "signature": [
+                  "State"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5575,8 +6139,12 @@
         "type": "Type",
         "tags": [],
         "label": "Dispatch",
-        "description": ["\nRedux like dispatch"],
-        "signature": ["(action: T) => void"],
+        "description": [
+          "\nRedux like dispatch"
+        ],
+        "signature": [
+          "(action: T) => void"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5589,7 +6157,9 @@
             "tags": [],
             "label": "action",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5627,7 +6197,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5665,7 +6237,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5680,7 +6254,9 @@
         "tags": [],
         "label": "Get",
         "description": [],
-        "signature": ["() => T"],
+        "signature": [
+          "() => T"
+        ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5694,8 +6270,12 @@
         "type": "Type",
         "tags": [],
         "label": "MapStateToProps",
-        "description": ["\nState container state to component props mapper.\nSee {@link Connect}"],
-        "signature": ["(state: State) => StateProps"],
+        "description": [
+          "\nState container state to component props mapper.\nSee {@link Connect}"
+        ],
+        "signature": [
+          "(state: State) => StateProps"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5708,7 +6288,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5722,7 +6304,9 @@
         "type": "Type",
         "tags": [],
         "label": "Middleware",
-        "description": ["\nRedux like Middleware"],
+        "description": [
+          "\nRedux like Middleware"
+        ],
         "signature": [
           "(store: Pick<",
           {
@@ -5800,7 +6384,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5892,7 +6478,9 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "signature": ["Args"],
+            "signature": [
+              "Args"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5909,7 +6497,11 @@
         "description": [
           "\nGiven some state and an argument, transform the state and return a new version of the state."
         ],
-        "signature": ["(state: State) => ", "Transition", "<State, Args>"],
+        "signature": [
+          "(state: State) => ",
+          "Transition",
+          "<State, Args>"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5922,7 +6514,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5936,7 +6530,9 @@
         "type": "Type",
         "tags": [],
         "label": "Reducer",
-        "description": ["\nRedux like Reducer"],
+        "description": [
+          "\nRedux like Reducer"
+        ],
         "signature": [
           "(state: State, action: ",
           "TransitionDescription",
@@ -5954,7 +6550,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5966,7 +6564,10 @@
             "tags": [],
             "label": "action",
             "description": [],
-            "signature": ["TransitionDescription", "<string, any[]>"],
+            "signature": [
+              "TransitionDescription",
+              "<string, any[]>"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5981,7 +6582,9 @@
         "tags": [],
         "label": "Selector",
         "description": [],
-        "signature": ["(...args: Args) => Result"],
+        "signature": [
+          "(...args: Args) => Result"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5994,7 +6597,9 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "signature": ["Args"],
+            "signature": [
+              "Args"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6009,7 +6614,9 @@
         "tags": [],
         "label": "Set",
         "description": [],
-        "signature": ["(value: T) => void"],
+        "signature": [
+          "(value: T) => void"
+        ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6022,7 +6629,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6062,7 +6671,9 @@
         "tags": [],
         "label": "StartSyncStateFnType",
         "description": [],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6077,7 +6688,9 @@
         "tags": [],
         "label": "StopSyncStateFnType",
         "description": [],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "src/plugins/kibana_utils/public/state_sync/state_sync.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6091,7 +6704,9 @@
         "type": "Type",
         "tags": [],
         "label": "UnboxState",
-        "description": ["\nUtility type for inferring state shape from {@link StateContainer}"],
+        "description": [
+          "\nUtility type for inferring state shape from {@link StateContainer}"
+        ],
         "signature": [
           "Container extends ",
           {
@@ -6168,7 +6783,10 @@
                 "tags": [],
                 "label": "query",
                 "description": [],
-                "signature": ["ParsedQuery", "<string>"],
+                "signature": [
+                  "ParsedQuery",
+                  "<string>"
+                ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6180,7 +6798,9 @@
                 "tags": [],
                 "label": "encodeFunction",
                 "description": [],
-                "signature": ["(val: string, pctEncodeSpaces?: boolean | undefined) => string"],
+                "signature": [
+                  "(val: string, pctEncodeSpaces?: boolean | undefined) => string"
+                ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6204,7 +6824,9 @@
                     "tags": [],
                     "label": "pctEncodeSpaces",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -6231,7 +6853,9 @@
             "tags": [],
             "label": "encodeUriQuery",
             "description": [],
-            "signature": ["(val: string, pctEncodeSpaces?: boolean) => string"],
+            "signature": [
+              "(val: string, pctEncodeSpaces?: boolean) => string"
+            ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6268,7 +6892,9 @@
             "tags": [],
             "label": "addQueryParam",
             "description": [],
-            "signature": ["(params: string, key: string, value?: string | undefined) => string"],
+            "signature": [
+              "(params: string, key: string, value?: string | undefined) => string"
+            ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6303,7 +6929,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6321,7 +6949,9 @@
       "tags": [],
       "label": "KibanaUtilsPublicStart",
       "description": [],
-      "signature": ["undefined"],
+      "signature": [
+        "undefined"
+      ],
       "path": "src/plugins/kibana_utils/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -6361,7 +6991,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6373,7 +7005,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/abort_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6420,7 +7054,9 @@
             "tags": [],
             "label": "errBody",
             "description": [],
-            "signature": ["Record<string, any> | undefined"],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
             "path": "src/plugins/kibana_utils/server/report_server_error.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6432,7 +7068,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/server/report_server_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6444,7 +7082,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/server/report_server_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6457,7 +7097,9 @@
                 "tags": [],
                 "label": "statusCode",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "src/plugins/kibana_utils/server/report_server_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6470,7 +7112,9 @@
                 "tags": [],
                 "label": "errBody",
                 "description": [],
-                "signature": ["Record<string, any> | undefined"],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/server/report_server_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6493,7 +7137,9 @@
         "description": [
           "\nReturns a `Promise` corresponding with when the given `AbortSignal` is aborted. Useful for\nsituations when you might need to `Promise.race` multiple `AbortSignal`s, or an `AbortSignal`\nwith any other expected errors (or completions).\n"
         ],
-        "signature": ["(signal: AbortSignal) => { promise: Promise<never>; cleanup: () => void; }"],
+        "signature": [
+          "(signal: AbortSignal) => { promise: Promise<never>; cleanup: () => void; }"
+        ],
         "path": "src/plugins/kibana_utils/common/abort_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6504,8 +7150,12 @@
             "type": "Object",
             "tags": [],
             "label": "signal",
-            "description": ["The `AbortSignal` to generate the `Promise` from"],
-            "signature": ["AbortSignal"],
+            "description": [
+              "The `AbortSignal` to generate the `Promise` from"
+            ],
+            "signature": [
+              "AbortSignal"
+            ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6552,7 +7202,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6565,7 +7217,9 @@
             "tags": [],
             "label": "isValueRequired",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6582,7 +7236,9 @@
         "tags": [],
         "label": "fieldWildcardFilter",
         "description": [],
-        "signature": ["(globs: string[], metaFields: string[]) => (val: unknown) => boolean"],
+        "signature": [
+          "(globs: string[], metaFields: string[]) => (val: unknown) => boolean"
+        ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6594,7 +7250,9 @@
             "tags": [],
             "label": "globs",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6607,7 +7265,9 @@
             "tags": [],
             "label": "metaFields",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6624,7 +7284,9 @@
         "tags": [],
         "label": "fieldWildcardMatcher",
         "description": [],
-        "signature": ["(globs: string[], metaFields: unknown[]) => (val: unknown) => boolean"],
+        "signature": [
+          "(globs: string[], metaFields: unknown[]) => (val: unknown) => boolean"
+        ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6636,7 +7298,9 @@
             "tags": [],
             "label": "globs",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6649,7 +7313,9 @@
             "tags": [],
             "label": "metaFields",
             "description": [],
-            "signature": ["unknown[]"],
+            "signature": [
+              "unknown[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6665,7 +7331,9 @@
         "type": "Function",
         "tags": [],
         "label": "getKbnServerError",
-        "description": ["\nFormats any error thrown into a standardized `KbnServerError`."],
+        "description": [
+          "\nFormats any error thrown into a standardized `KbnServerError`."
+        ],
         "signature": [
           "(e: Error) => ",
           {
@@ -6686,15 +7354,21 @@
             "type": "Object",
             "tags": [],
             "label": "e",
-            "description": ["`Error` or `ElasticsearchClientError`"],
-            "signature": ["Error"],
+            "description": [
+              "`Error` or `ElasticsearchClientError`"
+            ],
+            "signature": [
+              "Error"
+            ],
             "path": "src/plugins/kibana_utils/server/report_server_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["`KbnServerError`"],
+        "returnComment": [
+          "`KbnServerError`"
+        ],
         "initialIsOpen": false
       },
       {
@@ -6794,7 +7468,9 @@
         "type": "Function",
         "tags": [],
         "label": "reportServerError",
-        "description": ["\n"],
+        "description": [
+          "\n"
+        ],
         "signature": [
           "(res: ",
           {
@@ -6832,7 +7508,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "res",
-            "description": ["Formats a `KbnServerError` into a server error response"],
+            "description": [
+              "Formats a `KbnServerError` into a server error response"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -6883,7 +7561,9 @@
         "tags": [],
         "label": "Get",
         "description": [],
-        "signature": ["() => T"],
+        "signature": [
+          "() => T"
+        ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6898,7 +7578,9 @@
         "tags": [],
         "label": "Set",
         "description": [],
-        "signature": ["(value: T) => void"],
+        "signature": [
+          "(value: T) => void"
+        ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6911,7 +7593,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6958,7 +7642,10 @@
                 "tags": [],
                 "label": "query",
                 "description": [],
-                "signature": ["ParsedQuery", "<string>"],
+                "signature": [
+                  "ParsedQuery",
+                  "<string>"
+                ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6970,7 +7657,9 @@
                 "tags": [],
                 "label": "encodeFunction",
                 "description": [],
-                "signature": ["(val: string, pctEncodeSpaces?: boolean | undefined) => string"],
+                "signature": [
+                  "(val: string, pctEncodeSpaces?: boolean | undefined) => string"
+                ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6994,7 +7683,9 @@
                     "tags": [],
                     "label": "pctEncodeSpaces",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -7021,7 +7712,9 @@
             "tags": [],
             "label": "encodeUriQuery",
             "description": [],
-            "signature": ["(val: string, pctEncodeSpaces?: boolean) => string"],
+            "signature": [
+              "(val: string, pctEncodeSpaces?: boolean) => string"
+            ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7058,7 +7751,9 @@
             "tags": [],
             "label": "addQueryParam",
             "description": [],
-            "signature": ["(params: string, key: string, value?: string | undefined) => string"],
+            "signature": [
+              "(params: string, key: string, value?: string | undefined) => string"
+            ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7093,7 +7788,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7137,7 +7834,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7149,7 +7848,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/abort_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7198,7 +7899,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7210,7 +7913,9 @@
                 "tags": [],
                 "label": "character",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7223,7 +7928,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7265,7 +7972,9 @@
             "tags": [],
             "label": "resolve",
             "description": [],
-            "signature": ["(data: T) => void"],
+            "signature": [
+              "(data: T) => void"
+            ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7278,7 +7987,9 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "src/plugins/kibana_utils/common/defer.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7292,7 +8003,9 @@
             "tags": [],
             "label": "reject",
             "description": [],
-            "signature": ["(error: any) => void"],
+            "signature": [
+              "(error: any) => void"
+            ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7305,7 +8018,9 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/kibana_utils/common/defer.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7319,7 +8034,9 @@
             "tags": [],
             "label": "promise",
             "description": [],
-            "signature": ["Promise<T>"],
+            "signature": [
+              "Promise<T>"
+            ],
             "path": "src/plugins/kibana_utils/common/defer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7364,7 +8081,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7376,7 +8095,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7425,7 +8146,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7437,7 +8160,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7477,7 +8202,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7489,7 +8216,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7507,7 +8236,9 @@
         "type": "Class",
         "tags": [],
         "label": "SavedFieldNotFound",
-        "description": ["\nA saved field doesn't exist anymore"],
+        "description": [
+          "\nA saved field doesn't exist anymore"
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -7536,7 +8267,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7548,7 +8281,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7566,7 +8301,9 @@
         "type": "Class",
         "tags": [],
         "label": "SavedFieldTypeInvalidForAgg",
-        "description": ["\nA saved field type isn't compatible with aggregation"],
+        "description": [
+          "\nA saved field type isn't compatible with aggregation"
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -7595,7 +8332,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7607,7 +8346,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7625,7 +8366,9 @@
         "type": "Class",
         "tags": [],
         "label": "SavedObjectNotFound",
-        "description": ["\nA saved object was not found"],
+        "description": [
+          "\nA saved object was not found"
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -7665,7 +8408,9 @@
             "tags": [],
             "label": "savedObjectId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7677,7 +8422,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7689,7 +8436,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7702,7 +8451,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7715,7 +8466,9 @@
                 "tags": [],
                 "label": "link",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7728,7 +8481,9 @@
                 "tags": [],
                 "label": "customMessage",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7751,7 +8506,9 @@
         "description": [
           "\nReturns a `Promise` corresponding with when the given `AbortSignal` is aborted. Useful for\nsituations when you might need to `Promise.race` multiple `AbortSignal`s, or an `AbortSignal`\nwith any other expected errors (or completions).\n"
         ],
-        "signature": ["(signal: AbortSignal) => { promise: Promise<never>; cleanup: () => void; }"],
+        "signature": [
+          "(signal: AbortSignal) => { promise: Promise<never>; cleanup: () => void; }"
+        ],
         "path": "src/plugins/kibana_utils/common/abort_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7762,8 +8519,12 @@
             "type": "Object",
             "tags": [],
             "label": "signal",
-            "description": ["The `AbortSignal` to generate the `Promise` from"],
-            "signature": ["AbortSignal"],
+            "description": [
+              "The `AbortSignal` to generate the `Promise` from"
+            ],
+            "signature": [
+              "AbortSignal"
+            ],
             "path": "src/plugins/kibana_utils/common/abort_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7780,7 +8541,9 @@
         "tags": [],
         "label": "calculateObjectHash",
         "description": [],
-        "signature": ["(o: object) => string"],
+        "signature": [
+          "(o: object) => string"
+        ],
         "path": "src/plugins/kibana_utils/common/calculate_object_hash.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7793,7 +8556,9 @@
             "tags": [],
             "label": "o",
             "description": [],
-            "signature": ["object"],
+            "signature": [
+              "object"
+            ],
             "path": "src/plugins/kibana_utils/common/calculate_object_hash.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7838,7 +8603,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7851,7 +8618,9 @@
             "tags": [],
             "label": "isValueRequired",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7867,7 +8636,9 @@
         "type": "Function",
         "tags": [],
         "label": "createStateContainer",
-        "description": ["\nCreates a state container without transitions and without selectors."],
+        "description": [
+          "\nCreates a state container without transitions and without selectors."
+        ],
         "signature": [
           "(defaultState: State) => ",
           {
@@ -7889,8 +8660,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultState",
-            "description": ["- initial state"],
-            "signature": ["State"],
+            "description": [
+              "- initial state"
+            ],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7906,7 +8681,9 @@
         "type": "Function",
         "tags": [],
         "label": "createStateContainer",
-        "description": ["\nCreates a state container with transitions, but without selectors."],
+        "description": [
+          "\nCreates a state container with transitions, but without selectors."
+        ],
         "signature": [
           "(defaultState: State, pureTransitions: PureTransitions) => ",
           {
@@ -7928,8 +8705,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultState",
-            "description": ["- initial state"],
-            "signature": ["State"],
+            "description": [
+              "- initial state"
+            ],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7944,7 +8725,9 @@
             "description": [
               "- state transitions configuration object. Map of {@link PureTransition }."
             ],
-            "signature": ["PureTransitions"],
+            "signature": [
+              "PureTransitions"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7960,7 +8743,9 @@
         "type": "Function",
         "tags": [],
         "label": "createStateContainer",
-        "description": ["\nCreates a state container with transitions and selectors."],
+        "description": [
+          "\nCreates a state container with transitions and selectors."
+        ],
         "signature": [
           "(defaultState: State, pureTransitions: PureTransitions, pureSelectors: PureSelectors, options: ",
           {
@@ -7990,8 +8775,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultState",
-            "description": ["- initial state"],
-            "signature": ["State"],
+            "description": [
+              "- initial state"
+            ],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8006,7 +8795,9 @@
             "description": [
               "- state transitions configuration object. Map of {@link PureTransition }."
             ],
-            "signature": ["PureTransitions"],
+            "signature": [
+              "PureTransitions"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8021,7 +8812,9 @@
             "description": [
               "- state selectors configuration object. Map of {@link PureSelectors }."
             ],
-            "signature": ["PureSelectors"],
+            "signature": [
+              "PureSelectors"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8033,7 +8826,9 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": ["- state container options {@link CreateStateContainerOptions }"],
+            "description": [
+              "- state container options {@link CreateStateContainerOptions }"
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -8168,7 +8963,9 @@
             "tags": [],
             "label": "initialValue",
             "description": [],
-            "signature": ["T | Promise<T>"],
+            "signature": [
+              "T | Promise<T>"
+            ],
             "path": "src/plugins/kibana_utils/common/distinct_until_changed_with_initial_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8181,7 +8978,9 @@
             "tags": [],
             "label": "compare",
             "description": [],
-            "signature": ["((x: T, y: T) => boolean) | undefined"],
+            "signature": [
+              "((x: T, y: T) => boolean) | undefined"
+            ],
             "path": "src/plugins/kibana_utils/common/distinct_until_changed_with_initial_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8198,7 +8997,9 @@
         "tags": [],
         "label": "fieldWildcardFilter",
         "description": [],
-        "signature": ["(globs: string[], metaFields: string[]) => (val: unknown) => boolean"],
+        "signature": [
+          "(globs: string[], metaFields: string[]) => (val: unknown) => boolean"
+        ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8210,7 +9011,9 @@
             "tags": [],
             "label": "globs",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8223,7 +9026,9 @@
             "tags": [],
             "label": "metaFields",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8240,7 +9045,9 @@
         "tags": [],
         "label": "fieldWildcardMatcher",
         "description": [],
-        "signature": ["(globs: string[], metaFields: unknown[]) => (val: unknown) => boolean"],
+        "signature": [
+          "(globs: string[], metaFields: unknown[]) => (val: unknown) => boolean"
+        ],
         "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8252,7 +9059,9 @@
             "tags": [],
             "label": "globs",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8265,7 +9074,9 @@
             "tags": [],
             "label": "metaFields",
             "description": [],
-            "signature": ["unknown[]"],
+            "signature": [
+              "unknown[]"
+            ],
             "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8462,7 +9273,9 @@
             "tags": [],
             "label": "loose",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8481,7 +9294,9 @@
         "description": [
           "\nFunction that returns number in milliseconds since some undefined point in\ntime. Use this function for performance measurements."
         ],
-        "signature": ["() => number"],
+        "signature": [
+          "() => number"
+        ],
         "path": "src/plugins/kibana_utils/common/now.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8511,8 +9326,12 @@
             "type": "Object",
             "tags": [],
             "label": "promise",
-            "description": ["Promise to convert to 3-tuple."],
-            "signature": ["Promise<T>"],
+            "description": [
+              "Promise to convert to 3-tuple."
+            ],
+            "signature": [
+              "Promise<T>"
+            ],
             "path": "src/plugins/kibana_utils/common/of.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8547,7 +9366,9 @@
             "tags": [],
             "label": "rawUrl",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/common/state_management/format.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8560,7 +9381,13 @@
             "tags": [],
             "label": "queryReplacer",
             "description": [],
-            "signature": ["(query: ", "ParsedQuery", "<string>) => ", "ParsedQuery", "<string>"],
+            "signature": [
+              "(query: ",
+              "ParsedQuery",
+              "<string>) => ",
+              "ParsedQuery",
+              "<string>"
+            ],
             "path": "src/plugins/kibana_utils/common/state_management/format.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8595,7 +9422,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/common/state_management/set_state_to_kbn_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8608,7 +9437,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_management/set_state_to_kbn_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8621,7 +9452,9 @@
             "tags": [],
             "label": "hashOptions",
             "description": [],
-            "signature": ["SetStateToKbnUrlHashOptions"],
+            "signature": [
+              "SetStateToKbnUrlHashOptions"
+            ],
             "path": "src/plugins/kibana_utils/common/state_management/set_state_to_kbn_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8634,7 +9467,9 @@
             "tags": [],
             "label": "rawUrl",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/kibana_utils/common/state_management/set_state_to_kbn_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8690,8 +9525,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": ["- {@link StateContainer } which state to track."],
-            "signature": ["Container"],
+            "description": [
+              "- {@link StateContainer } which state to track."
+            ],
+            "signature": [
+              "Container"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8703,7 +9542,9 @@
             "type": "Function",
             "tags": [],
             "label": "selector",
-            "description": ["- Function used to pick parts of state."],
+            "description": [
+              "- Function used to pick parts of state."
+            ],
             "signature": [
               "(state: ",
               {
@@ -8745,7 +9586,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["- result of a selector(state)"],
+        "returnComment": [
+          "- result of a selector(state)"
+        ],
         "initialIsOpen": false
       },
       {
@@ -8786,15 +9629,21 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "container",
-            "description": ["- {@link StateContainer } which state to track."],
-            "signature": ["Container"],
+            "description": [
+              "- {@link StateContainer } which state to track."
+            ],
+            "signature": [
+              "Container"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container_react_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["- latest {@link StateContainer } state"],
+        "returnComment": [
+          "- latest {@link StateContainer } state"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -8805,7 +9654,9 @@
         "type": "Interface",
         "tags": [],
         "label": "BaseStateContainer",
-        "description": ["\nBase state container shape without transitions or selectors"],
+        "description": [
+          "\nBase state container shape without transitions or selectors"
+        ],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -8826,13 +9677,19 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": ["\nRetrieves current state from the container"],
-            "signature": ["() => State"],
+            "description": [
+              "\nRetrieves current state from the container"
+            ],
+            "signature": [
+              "() => State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": ["current state"]
+            "returnComment": [
+              "current state"
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -8840,8 +9697,12 @@
             "type": "Function",
             "tags": [],
             "label": "set",
-            "description": ["\nSets state into container"],
-            "signature": ["(state: State) => void"],
+            "description": [
+              "\nSets state into container"
+            ],
+            "signature": [
+              "(state: State) => void"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8852,8 +9713,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": ["- new state to set"],
-                "signature": ["State"],
+                "description": [
+                  "- new state to set"
+                ],
+                "signature": [
+                  "State"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8868,8 +9733,13 @@
             "type": "Object",
             "tags": [],
             "label": "state$",
-            "description": ["\n{@link Observable} of state"],
-            "signature": ["Observable", "<State>"],
+            "description": [
+              "\n{@link Observable} of state"
+            ],
+            "signature": [
+              "Observable",
+              "<State>"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8883,7 +9753,9 @@
         "type": "Interface",
         "tags": [],
         "label": "CreateStateContainerOptions",
-        "description": ["\nState container options"],
+        "description": [
+          "\nState container options"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8897,7 +9769,9 @@
             "description": [
               "\nFunction to use when freezing state. Supply identity function.\nIf not provided, default `deepFreeze` is used.\n"
             ],
-            "signature": ["(<T>(state: T) => T) | undefined"],
+            "signature": [
+              "(<T>(state: T) => T) | undefined"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8909,7 +9783,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/create_state_container.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8971,7 +9847,9 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": ["T | undefined"],
+            "signature": [
+              "T | undefined"
+            ],
             "path": "src/plugins/kibana_utils/common/errors/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8983,7 +9861,9 @@
         "parentPluginId": "kibanaUtils",
         "id": "def-common.PersistableState",
         "type": "Interface",
-        "tags": ["todo"],
+        "tags": [
+          "todo"
+        ],
         "label": "PersistableState",
         "description": [
           "\nPersistable state interface can be implemented by something that persists\n(stores) state, for example, in a saved object. Once implemented that thing\nwill gain ability to \"extract\" and \"inject\" saved object references, which\nare necessary for various saved object tasks, such as export. It will also be\nable to do state migrations across Kibana versions, if the shape of the state\nwould change over time.\n"
@@ -9011,7 +9891,9 @@
             "description": [
               "\nFunction which reports telemetry information. This function is essentially\na \"reducer\" - it receives the existing \"stats\" object and returns an\nupdated version of the \"stats\" object.\n"
             ],
-            "signature": ["(state: P, stats: Record<string, any>) => Record<string, any>"],
+            "signature": [
+              "(state: P, stats: Record<string, any>) => Record<string, any>"
+            ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9022,8 +9904,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": ["The persistable state serializable state object."],
-                "signature": ["P"],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9038,14 +9924,18 @@
                 "description": [
                   "Stats object containing the stats which were already\ncollected. This `stats` object shall not be mutated in-line."
                 ],
-                "signature": ["Record<string, any>"],
+                "signature": [
+                  "Record<string, any>"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["A new stats object augmented with new telemetry information."]
+            "returnComment": [
+              "A new stats object augmented with new telemetry information."
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9077,8 +9967,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": ["The persistable state serializable state object."],
-                "signature": ["P"],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9090,7 +9984,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "references",
-                "description": ["List of saved object references."],
+                "description": [
+                  "List of saved object references."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-common",
@@ -9107,7 +10003,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["Persistable state object with references injected."]
+            "returnComment": [
+              "Persistable state object with references injected."
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9139,8 +10037,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": ["The persistable state serializable state object."],
-                "signature": ["P"],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9188,7 +10090,9 @@
         "parentPluginId": "kibanaUtils",
         "id": "def-common.PersistableStateService",
         "type": "Interface",
-        "tags": ["todo"],
+        "tags": [
+          "todo"
+        ],
         "label": "PersistableStateService",
         "description": [],
         "signature": [
@@ -9214,7 +10118,9 @@
             "description": [
               "\nFunction which reports telemetry information. This function is essentially\na \"reducer\" - it receives the existing \"stats\" object and returns an\nupdated version of the \"stats\" object.\n"
             ],
-            "signature": ["(state: P, collector: Record<string, any>) => Record<string, any>"],
+            "signature": [
+              "(state: P, collector: Record<string, any>) => Record<string, any>"
+            ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9225,8 +10131,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": ["The persistable state serializable state object."],
-                "signature": ["P"],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9239,14 +10149,18 @@
                 "tags": [],
                 "label": "collector",
                 "description": [],
-                "signature": ["Record<string, any>"],
+                "signature": [
+                  "Record<string, any>"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["A new stats object augmented with new telemetry information."]
+            "returnComment": [
+              "A new stats object augmented with new telemetry information."
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9278,8 +10192,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": ["The persistable state serializable state object."],
-                "signature": ["P"],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9291,7 +10209,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "references",
-                "description": ["List of saved object references."],
+                "description": [
+                  "List of saved object references."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-common",
@@ -9308,7 +10228,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["Persistable state object with references injected."]
+            "returnComment": [
+              "Persistable state object with references injected."
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9340,8 +10262,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "state",
-                "description": ["The persistable state serializable state object."],
-                "signature": ["P"],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9382,7 +10308,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "state",
-                "description": ["The persistable state serializable state object."],
+                "description": [
+                  "The persistable state serializable state object."
+                ],
                 "signature": [
                   {
                     "pluginId": "kibanaUtils",
@@ -9399,7 +10327,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["A serializable state object migrated to the latest state."]
+            "returnComment": [
+              "A serializable state object migrated to the latest state."
+            ]
           },
           {
             "parentPluginId": "kibanaUtils",
@@ -9407,7 +10337,9 @@
             "type": "Function",
             "tags": [],
             "label": "getAllMigrations",
-            "description": ["\nreturns all registered migrations"],
+            "description": [
+              "\nreturns all registered migrations"
+            ],
             "signature": [
               "() => ",
               {
@@ -9465,7 +10397,9 @@
             "tags": [],
             "label": "getState",
             "description": [],
-            "signature": ["() => State"],
+            "signature": [
+              "() => State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9496,7 +10430,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["State"],
+                "signature": [
+                  "State"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9508,7 +10444,10 @@
                 "tags": [],
                 "label": "action",
                 "description": [],
-                "signature": ["TransitionDescription", "<string, any[]>"],
+                "signature": [
+                  "TransitionDescription",
+                  "<string, any[]>"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9569,7 +10508,11 @@
             "tags": [],
             "label": "dispatch",
             "description": [],
-            "signature": ["(action: ", "TransitionDescription", "<string, any[]>) => void"],
+            "signature": [
+              "(action: ",
+              "TransitionDescription",
+              "<string, any[]>) => void"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9581,7 +10524,10 @@
                 "tags": [],
                 "label": "action",
                 "description": [],
-                "signature": ["TransitionDescription", "<string, any[]>"],
+                "signature": [
+                  "TransitionDescription",
+                  "<string, any[]>"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9644,7 +10590,9 @@
             "tags": [],
             "label": "subscribe",
             "description": [],
-            "signature": ["(listener: (state: State) => void) => () => void"],
+            "signature": [
+              "(listener: (state: State) => void) => () => void"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9656,7 +10604,9 @@
                 "tags": [],
                 "label": "listener",
                 "description": [],
-                "signature": ["(state: State) => void"],
+                "signature": [
+                  "(state: State) => void"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9791,7 +10741,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["S"],
+            "signature": [
+              "S"
+            ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9808,8 +10760,12 @@
         "type": "Type",
         "tags": [],
         "label": "BaseState",
-        "description": ["\nBase {@link StateContainer} state shape"],
-        "signature": ["object"],
+        "description": [
+          "\nBase {@link StateContainer} state shape"
+        ],
+        "signature": [
+          "object"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9821,8 +10777,12 @@
         "type": "Type",
         "tags": [],
         "label": "Comparator",
-        "description": ["\nUsed to compare state, see {@link useContainerSelector}."],
-        "signature": ["(previous: Result, current: Result) => boolean"],
+        "description": [
+          "\nUsed to compare state, see {@link useContainerSelector}."
+        ],
+        "signature": [
+          "(previous: Result, current: Result) => boolean"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9835,7 +10795,9 @@
             "tags": [],
             "label": "previous",
             "description": [],
-            "signature": ["Result"],
+            "signature": [
+              "Result"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9847,7 +10809,9 @@
             "tags": [],
             "label": "current",
             "description": [],
-            "signature": ["Result"],
+            "signature": [
+              "Result"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9887,7 +10851,9 @@
             "tags": [],
             "label": "mapStateToProp",
             "description": [],
-            "signature": ["(state: State) => Pick<Props, StatePropKeys>"],
+            "signature": [
+              "(state: State) => Pick<Props, StatePropKeys>"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9900,7 +10866,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["State"],
+                "signature": [
+                  "State"
+                ],
                 "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9916,8 +10884,12 @@
         "type": "Type",
         "tags": [],
         "label": "Dispatch",
-        "description": ["\nRedux like dispatch"],
-        "signature": ["(action: T) => void"],
+        "description": [
+          "\nRedux like dispatch"
+        ],
+        "signature": [
+          "(action: T) => void"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9930,7 +10902,9 @@
             "tags": [],
             "label": "action",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9968,7 +10942,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10006,7 +10982,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10021,7 +10999,9 @@
         "tags": [],
         "label": "Get",
         "description": [],
-        "signature": ["() => T"],
+        "signature": [
+          "() => T"
+        ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10059,8 +11039,12 @@
         "type": "Type",
         "tags": [],
         "label": "MapStateToProps",
-        "description": ["\nState container state to component props mapper.\nSee {@link Connect}"],
-        "signature": ["(state: State) => StateProps"],
+        "description": [
+          "\nState container state to component props mapper.\nSee {@link Connect}"
+        ],
+        "signature": [
+          "(state: State) => StateProps"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10073,7 +11057,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10087,7 +11073,9 @@
         "type": "Type",
         "tags": [],
         "label": "Middleware",
-        "description": ["\nRedux like Middleware"],
+        "description": [
+          "\nRedux like Middleware"
+        ],
         "signature": [
           "(store: Pick<",
           {
@@ -10142,7 +11130,9 @@
         "tags": [],
         "label": "MigrateFunction",
         "description": [],
-        "signature": ["(state: FromVersion) => ToVersion"],
+        "signature": [
+          "(state: FromVersion) => ToVersion"
+        ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10155,7 +11145,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["FromVersion"],
+            "signature": [
+              "FromVersion"
+            ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10241,7 +11233,9 @@
         "type": "Type",
         "tags": [],
         "label": "PersistableStateMigrateFn",
-        "description": ["\nmigrate function runs the specified migration"],
+        "description": [
+          "\nmigrate function runs the specified migration"
+        ],
         "signature": [
           "(state: ",
           {
@@ -10329,7 +11323,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10421,7 +11417,9 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "signature": ["Args"],
+            "signature": [
+              "Args"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10438,7 +11436,11 @@
         "description": [
           "\nGiven some state and an argument, transform the state and return a new version of the state."
         ],
-        "signature": ["(state: State) => ", "Transition", "<State, Args>"],
+        "signature": [
+          "(state: State) => ",
+          "Transition",
+          "<State, Args>"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10451,7 +11453,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10465,7 +11469,9 @@
         "type": "Type",
         "tags": [],
         "label": "Reducer",
-        "description": ["\nRedux like Reducer"],
+        "description": [
+          "\nRedux like Reducer"
+        ],
         "signature": [
           "(state: State, action: ",
           "TransitionDescription",
@@ -10483,7 +11489,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["State"],
+            "signature": [
+              "State"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10495,7 +11503,10 @@
             "tags": [],
             "label": "action",
             "description": [],
-            "signature": ["TransitionDescription", "<string, any[]>"],
+            "signature": [
+              "TransitionDescription",
+              "<string, any[]>"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10510,7 +11521,9 @@
         "tags": [],
         "label": "Selector",
         "description": [],
-        "signature": ["(...args: Args) => Result"],
+        "signature": [
+          "(...args: Args) => Result"
+        ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10523,7 +11536,9 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "signature": ["Args"],
+            "signature": [
+              "Args"
+            ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10538,7 +11553,9 @@
         "tags": [],
         "label": "Set",
         "description": [],
-        "signature": ["(value: T) => void"],
+        "signature": [
+          "(value: T) => void"
+        ],
         "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10551,7 +11568,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10565,7 +11584,9 @@
         "type": "Type",
         "tags": [],
         "label": "UnboxState",
-        "description": ["\nUtility type for inferring state shape from {@link StateContainer}"],
+        "description": [
+          "\nUtility type for inferring state shape from {@link StateContainer}"
+        ],
         "signature": [
           "Container extends ",
           {
@@ -10621,7 +11642,10 @@
                 "tags": [],
                 "label": "query",
                 "description": [],
-                "signature": ["ParsedQuery", "<string>"],
+                "signature": [
+                  "ParsedQuery",
+                  "<string>"
+                ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10633,7 +11657,9 @@
                 "tags": [],
                 "label": "encodeFunction",
                 "description": [],
-                "signature": ["(val: string, pctEncodeSpaces?: boolean | undefined) => string"],
+                "signature": [
+                  "(val: string, pctEncodeSpaces?: boolean | undefined) => string"
+                ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10657,7 +11683,9 @@
                     "tags": [],
                     "label": "pctEncodeSpaces",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -10684,7 +11712,9 @@
             "tags": [],
             "label": "encodeUriQuery",
             "description": [],
-            "signature": ["(val: string, pctEncodeSpaces?: boolean) => string"],
+            "signature": [
+              "(val: string, pctEncodeSpaces?: boolean) => string"
+            ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10721,7 +11751,9 @@
             "tags": [],
             "label": "addQueryParam",
             "description": [],
-            "signature": ["(params: string, key: string, value?: string | undefined) => string"],
+            "signature": [
+              "(params: string, key: string, value?: string | undefined) => string"
+            ],
             "path": "src/plugins/kibana_utils/common/url/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10756,7 +11788,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/kibana_utils/common/url/encode_uri_query.ts",
                 "deprecated": false,
                 "trackAdoption": false

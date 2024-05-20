@@ -5,10 +5,20 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiResizeObserver,
+  EuiText,
+} from '@elastic/eui';
+import { throttle } from 'lodash';
 import type {
   BrushEndListener,
-  CustomTooltip,
   ElementClickListener,
+  CustomTooltip,
   HeatmapBrushEvent,
   HeatmapElementEvent,
   HeatmapSpec,
@@ -20,49 +30,39 @@ import type {
 import {
   Chart,
   Heatmap,
-  LEGACY_LIGHT_THEME,
   Position,
   ScaleType,
   Settings,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingChart,
-  EuiResizeObserver,
-  EuiText,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
+  getFormattedSeverityScore,
   ML_ANOMALY_THRESHOLD,
   ML_SEVERITY_COLORS,
-  getFormattedSeverityScore,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
-import { throttle } from 'lodash';
-import moment from 'moment';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
-import { mlEscape } from '../util/string_utils';
-import type { SwimlaneType } from './explorer_constants';
-import { SWIMLANE_TYPE } from './explorer_constants';
+import { SwimLanePagination } from './swimlane_pagination';
 import type {
   AppStateSelectedCells,
   OverallSwimlaneData,
   ViewBySwimLaneData,
 } from './explorer_utils';
-import { SwimLanePagination } from './swimlane_pagination';
+import type { SwimlaneType } from './explorer_constants';
+import { SWIMLANE_TYPE } from './explorer_constants';
+import { mlEscape } from '../util/string_utils';
+import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import './_explorer.scss';
-import { useCurrentThemeVars, useMlKibana } from '../contexts/kibana';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
+import { useCurrentThemeVars, useMlKibana } from '../contexts/kibana';
 
 declare global {
   interface Window {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
 import React from 'react';
-import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
+import moment from 'moment-timezone';
 import { usePackQueryLastResults } from '../packs/use_pack_query_last_results';
+import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import { ViewResultsInLensAction } from './view_results_in_lens';
 
 interface PackViewInActionProps {

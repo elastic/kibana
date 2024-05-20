@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
 import { VisualizeLocatorDefinition } from './locator';
+import { FilterStateStore } from '@kbn/es-query';
 
 describe('visualize locator', () => {
   let definition: VisualizeLocatorDefinition;

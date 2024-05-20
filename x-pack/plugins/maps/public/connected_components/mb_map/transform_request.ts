@@ -11,8 +11,8 @@ import {
 } from '@kbn/core-http-common';
 import {
   FONTS_API_PATH,
-  MVT_GETGRIDTILE_API_PATH,
   MVT_GETTILE_API_PATH,
+  MVT_GETGRIDTILE_API_PATH,
 } from '../../../common/constants';
 
 /**

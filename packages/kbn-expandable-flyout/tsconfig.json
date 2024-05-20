@@ -11,7 +11,15 @@
       "@testing-library/react"
     ]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/i18n", "@kbn/kibana-utils-plugin"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/kibana-utils-plugin"
+  ]
 }

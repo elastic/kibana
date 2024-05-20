@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
+import { getEventLog, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover, getEventLog, getUrlPrefix } from '../../../../common/lib';
-import { UserAtSpaceScenarios, systemActionScenario } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

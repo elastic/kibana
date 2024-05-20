@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
-import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
-import { debounce } from 'lodash';
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { debounce } from 'lodash';
+import { EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
+import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
-import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { ml } from '../../../../../services/ml_api_service';
 import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
+import { ContinueButton } from '../continue_button';
+import { ANALYTICS_STEPS } from '../../page';
+import { ml } from '../../../../../services/ml_api_service';
 import { useCanCreateDataView } from '../../hooks/use_can_create_data_view';
 import { useDataViewTimeFields } from '../../hooks/use_data_view_time_fields';
-import { ANALYTICS_STEPS } from '../../page';
-import { ContinueButton } from '../continue_button';
-import { IndexPermissionsCallout } from '../index_permissions_callout';
 import { AdditionalSection } from './additional_section';
+import { IndexPermissionsCallout } from '../index_permissions_callout';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
 

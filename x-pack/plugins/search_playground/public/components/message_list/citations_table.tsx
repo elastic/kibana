@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { AnalyticsEvents } from '../../analytics/constants';
+import { i18n } from '@kbn/i18n';
+import { EuiBasicTable, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AIMessage as AIMessageType, Doc } from '../../types';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 type CitationsTableProps = Pick<AIMessageType, 'citations'>;
 

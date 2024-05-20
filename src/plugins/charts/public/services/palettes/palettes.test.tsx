@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 import type { PaletteDefinition } from '@kbn/coloring';
 import { createColorPalette as createLegacyColorPalette } from '../..';
-import { colorsServiceMock } from '../legacy_colors/mock';
 import { buildPalettes } from './palettes';
+import { colorsServiceMock } from '../legacy_colors/mock';
+import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
 describe('palettes', () => {
   const palettes: Record<string, PaletteDefinition> = buildPalettes(colorsServiceMock);

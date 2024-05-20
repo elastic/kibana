@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiIcon, EuiSwitch, EuiTableRow } from '@elastic/eui';
+import { EuiTableRow, EuiSwitch, EuiIcon } from '@elastic/eui';
 
 import { SourceIcon } from '../source_icon';
 

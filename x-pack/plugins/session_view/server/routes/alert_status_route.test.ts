@@ -1,4 +1,3 @@
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,11 +7,12 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
-  ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
+  ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
-import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { searchAlertByUuid } from './alert_status_route';
+import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
 import { getAlertsClientMockInstance, resetAlertingAuthMock } from './alerts_client_mock.test';
 
 const getEmptyResponse = async () => {

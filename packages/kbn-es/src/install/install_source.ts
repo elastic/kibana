@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import crypto from 'crypto';
+import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import path from 'path';
+import crypto from 'crypto';
 
-import { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import simpleGit from 'simple-git';
+import { ToolingLog } from '@kbn/tooling-log';
 
-import { BASE_PATH } from '../paths';
-import { archiveForPlatform, buildSnapshot } from '../utils/build_snapshot';
-import { cache } from '../utils/cache';
-import { log as defaultLog } from '../utils/log';
 import { installArchive } from './install_archive';
+import { log as defaultLog } from '../utils/log';
+import { cache } from '../utils/cache';
+import { buildSnapshot, archiveForPlatform } from '../utils/build_snapshot';
+import { BASE_PATH } from '../paths';
 import { InstallSourceOptions } from './types';
 
 /**

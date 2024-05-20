@@ -25,7 +25,7 @@ export {
  * Exporters (CSV)
  */
 
-import { CSV_MIME_TYPE, cellHasFormulas, datatableToCSV, tableHasFormulas } from '../common';
+import { datatableToCSV, CSV_MIME_TYPE, cellHasFormulas, tableHasFormulas } from '../common';
 export const exporters = {
   datatableToCSV,
   CSV_MIME_TYPE,
@@ -38,18 +38,18 @@ export const exporters = {
  */
 
 import {
-  getFieldSubtypeMulti,
-  getFieldSubtypeNested,
+  isNestedField,
   isFilterable,
   isMultiField,
-  isNestedField,
+  getFieldSubtypeNested,
+  getFieldSubtypeMulti,
 } from '../common';
 
 import {
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS,
   ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS,
   validateDataView,
 } from './data_views';
 
@@ -91,30 +91,30 @@ export {
 import {
   // aggs
   CidrMask,
-  InvalidEsCalendarIntervalError,
-  InvalidEsIntervalFormatError,
-  IpAddress,
-  boundsDescendingRaw,
-  calcAutoIntervalLessThan,
-  dateHistogramInterval,
-  getResponseInspectorStats,
   intervalOptions,
   isDateHistogramBucketAggConfig,
   isNumberType,
   isStringType,
   isType,
-  isValidEsInterval,
-  isValidInterval,
   parentPipelineType,
-  parseEsInterval,
-  parseInterval,
   propFilter,
   siblingPipelineType,
+  termsAggFilter,
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  IpAddress,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
+  parseInterval,
+  toAbsoluteDates,
+  boundsDescendingRaw,
+  getResponseInspectorStats,
+  calcAutoIntervalLessThan,
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
-  termsAggFilter,
-  toAbsoluteDates,
 } from '../common';
 
 export { AggGroupLabels, AggGroupNames, METRIC_TYPES, BUCKET_TYPES } from '../common';

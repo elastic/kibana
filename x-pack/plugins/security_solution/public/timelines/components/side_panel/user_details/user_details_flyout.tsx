@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import {
-  ExpandableUserDetails,
-  ExpandableUserDetailsPageLink,
   ExpandableUserDetailsTitle,
+  ExpandableUserDetailsPageLink,
+  ExpandableUserDetails,
 } from './expandable_user';
 import type { UserDetailsProps } from './types';
 

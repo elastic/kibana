@@ -8,16 +8,16 @@
 import React, { FunctionComponent, useCallback, useEffect, useRef } from 'react';
 
 import {
+  useForm,
+  OnFormUpdateArg,
   FormData,
   FormOptions,
-  OnFormUpdateArg,
-  useForm,
   useKibana,
 } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';
 
-import { AddProcessorForm } from './add_processor_form';
 import { EditProcessorForm } from './edit_processor_form';
+import { AddProcessorForm } from './add_processor_form';
 
 export type ProcessorFormOnSubmitArg = Omit<ProcessorInternal, 'id'>;
 

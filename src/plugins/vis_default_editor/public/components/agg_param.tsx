@@ -8,8 +8,8 @@
 
 import React, { useCallback, useEffect } from 'react';
 
+import { AggParamEditorProps, AggParamCommonProps } from './agg_param_props';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
-import { AggParamCommonProps, AggParamEditorProps } from './agg_param_props';
 import { AGG_PARAMS_ACTION_KEYS, AggParamsAction } from './agg_params_state';
 
 interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {

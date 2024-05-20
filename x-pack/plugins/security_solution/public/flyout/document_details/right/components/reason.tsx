@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
-import { AlertReasonPreviewPanel } from '../../preview';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { getField } from '../../shared/utils';
-import { useRightPanelContext } from '../context';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { AlertReasonPreviewPanel } from '../../preview';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
   REASON_TITLE_TEST_ID,
 } from './test_ids';
+import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useRightPanelContext } from '../context';
 
 /**
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.

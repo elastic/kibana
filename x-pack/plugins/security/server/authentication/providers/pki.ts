@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { DetailedPeerCertificate } from 'tls';
 import Boom from '@hapi/boom';
+import type { DetailedPeerCertificate } from 'tls';
 
 import type { KibanaRequest } from '@kbn/core/server';
 
+import { BaseAuthenticationProvider } from './base';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
@@ -17,7 +18,6 @@ import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
 import { Tokens } from '../tokens';
-import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider.
@@ -259,8 +259,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate request via peer certificate chain.');
 
     // We should collect entire certificate chain as an ordered array of certificates encoded as base64 strings.
-    const { peerCertificate, certificateChain, isChainIncomplete } =
-      await this.getCertificateChain(request);
+    const { peerCertificate, certificateChain, isChainIncomplete } = await this.getCertificateChain(
+      request
+    );
 
     if (!request.socket.authorized) {
       this.logger.debug(

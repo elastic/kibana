@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
 import { first, startsWith } from 'lodash';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
-import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
-import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
-import { InfraSourceConfiguration } from '../../../lib/sources';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
+import { InfraSourceConfiguration } from '../../../lib/sources';
+import { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
 import { getPodNodeName } from './get_pod_node_name';
+import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export const getNodeInfo = async (
   framework: KibanaFramework,

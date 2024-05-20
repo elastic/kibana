@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
-  IconChartGaugeArc,
+  GaugeShapes,
+  GaugeTicksPositions,
+  GaugeLabelMajorModes,
+} from '@kbn/expression-gauge-plugin/common';
+import {
   IconChartGaugeCircle,
   IconChartGaugeSemiCircle,
+  IconChartGaugeArc,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
 } from '@kbn/chart-icons';
-import {
-  GaugeLabelMajorModes,
-  GaugeShapes,
-  GaugeTicksPositions,
-} from '@kbn/expression-gauge-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { TableSuggestion, Visualization, VisualizationSuggestion } from '../../types';
-import { GaugeVisualizationState, gaugeTitlesByType } from './constants';
+import { gaugeTitlesByType, GaugeVisualizationState } from './constants';
 
 const isNotNumericMetric = (table: TableSuggestion) =>
   table.columns?.[0]?.operation.dataType !== 'number' ||

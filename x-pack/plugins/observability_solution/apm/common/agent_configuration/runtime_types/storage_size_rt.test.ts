@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getStorageSizeRt } from './storage_size_rt';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { getStorageSizeRt } from './storage_size_rt';
 
 describe('storageSizeRt', () => {
   describe('when no min or max defined', () => {

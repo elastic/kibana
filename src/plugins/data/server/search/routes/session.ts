@@ -11,17 +11,17 @@ import { Logger } from '@kbn/core/server';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { DataPluginRouter } from '../types';
 import {
-  searchSessionSchema,
-  searchSessionStatusSchema,
-  searchSessionsFindSchema,
-  searchSessionsUpdateSchema,
-} from './response_schema';
-import {
   SearchSessionRestResponse,
   SearchSessionStatusRestResponse,
   SearchSessionsFindRestResponse,
   SearchSessionsUpdateRestResponse,
 } from './response_types';
+import {
+  searchSessionSchema,
+  searchSessionStatusSchema,
+  searchSessionsFindSchema,
+  searchSessionsUpdateSchema,
+} from './response_schema';
 
 const STORE_SEARCH_SESSIONS_ROLE_TAG = `access:store_search_session`;
 const access = 'internal';

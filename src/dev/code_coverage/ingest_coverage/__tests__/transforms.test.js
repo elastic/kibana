@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import {
   ciRunUrl,
   coveredFilePath,
   itemizeVcs,
-  last,
   prokPrevious,
   teamAssignment,
+  last,
 } from '../transforms';
+import { ToolingLog } from '@kbn/tooling-log';
 
 describe(`Transform fns`, () => {
   describe(`ciRunUrl`, () => {

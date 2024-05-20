@@ -42,7 +42,9 @@
             "description": [
               "\nReact Context provider required as the topmost component for any i18n-compatible React tree."
             ],
-            "signature": ["({ children }: { children: React.ReactNode; }) => JSX.Element"],
+            "signature": [
+              "({ children }: { children: React.ReactNode; }) => JSX.Element"
+            ],
             "path": "packages/core/i18n/core-i18n-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,

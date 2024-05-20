@@ -1,4 +1,3 @@
-import { ScopedHistory } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { ScopedHistory } from '@kbn/core/public';
  * 2.0.
  */
 import React from 'react';
+import { ScopedHistory } from '@kbn/core/public';
 
 interface IndexTableProps {
   history: ScopedHistory;

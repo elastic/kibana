@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React, { Component, Fragment } from 'react';
+import { PropTypes } from 'prop-types';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { PropTypes } from 'prop-types';
-import React, { Component, Fragment } from 'react';
 
 import { ImportedEvents } from '../imported_events';
-import { filterEvents, parseICSFile, readFile } from './utils';
+import { readFile, parseICSFile, filterEvents } from './utils';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

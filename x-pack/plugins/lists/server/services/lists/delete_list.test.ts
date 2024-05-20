@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
+import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
+import { getList } from './get_list';
 import { deleteList } from './delete_list';
 import { getDeleteListOptionsMock } from './delete_list.mock';
-import { getList } from './get_list';
 
 jest.mock('../utils', () => ({
   waitUntilDocumentIndexed: jest.fn(),

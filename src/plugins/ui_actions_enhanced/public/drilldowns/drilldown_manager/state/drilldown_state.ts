@@ -7,7 +7,7 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
+import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs';
 import {
   ActionFactory,

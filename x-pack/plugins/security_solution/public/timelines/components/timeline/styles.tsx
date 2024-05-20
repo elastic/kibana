@@ -6,9 +6,9 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 
@@ -130,7 +130,8 @@ export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
     ${({ actionsColumnWidth, isEventViewer }) =>
       `${!isEventViewer ? actionsColumnWidth + 4 : actionsColumnWidth}px`};
   min-width: 0;
-  padding-left: ${({ isEventViewer }) => (!isEventViewer ? '4px;' : '0;')}; // match timeline event border
+  padding-left: ${({ isEventViewer }) =>
+    !isEventViewer ? '4px;' : '0;'}; // match timeline event border
 `;
 
 export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
@@ -185,7 +186,10 @@ export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   min-width: 0;
   padding: ${({ theme }) => theme.eui.euiSizeXS};
   text-align: ${({ textAlign }) => textAlign};
-  width: ${({ width }) => (width != null ? `${width}px` : '100%')}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+  width: ${({ width }) =>
+    width != null
+      ? `${width}px`
+      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 
   > button.euiButtonIcon,
   > .euiToolTipAnchor > button.euiButtonIcon {
@@ -225,10 +229,10 @@ export const EventsTrGroup = styled.div.attrs(
       eventType === 'raw'
         ? theme.eui.euiColorLightShade
         : eventType === 'eql' && isEvenEqlSequence
-          ? theme.eui.euiColorPrimary
-          : eventType === 'eql' && !isEvenEqlSequence
-            ? theme.eui.euiColorAccent
-            : theme.eui.euiColorWarning
+        ? theme.eui.euiColorPrimary
+        : eventType === 'eql' && !isEvenEqlSequence
+        ? theme.eui.euiColorAccent
+        : theme.eui.euiColorWarning
     }`
       : ''};
   ${({ isBuildingBlockType }) =>
@@ -350,7 +354,10 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
   min-width: 0;
   padding: ${({ theme }) => theme.eui.euiSizeXS};
   text-align: ${({ textAlign }) => textAlign};
-  width: ${({ width }) => (width != null ? `${width}px` : '100%')}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+  width: ${({ width }) =>
+    width != null
+      ? `${width}px`
+      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 
   button.euiButtonIcon {
     margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};

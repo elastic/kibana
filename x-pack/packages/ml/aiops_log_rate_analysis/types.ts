@@ -6,10 +6,10 @@
  */
 
 import type {
-  FieldValuePair,
-  ItemSet,
   SignificantItem,
   SignificantItemType,
+  FieldValuePair,
+  ItemSet,
 } from '@kbn/ml-agg-utils';
 
 export interface SignificantItemDuplicateGroup {

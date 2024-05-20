@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
-import { fireEvent } from '@testing-library/react';
 import React from 'react';
-import * as monitorDetail from '../../../../hooks/use_monitor_detail';
-import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
-import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import { render } from '../../../../utils/testing/rtl_helpers';
+import { fireEvent } from '@testing-library/react';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
+import * as monitorDetail from '../../../../hooks/use_monitor_detail';
+import * as statusByLocation from '../../../../hooks/use_status_by_location';
+import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 

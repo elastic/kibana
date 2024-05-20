@@ -7,9 +7,9 @@
 
 import { EuiIcon } from '@elastic/eui';
 import { analyzeMarkdown } from '@kbn/elastic-assistant';
-import type { CodeBlockDetails, Conversation } from '@kbn/elastic-assistant';
-import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import type { Conversation, CodeBlockDetails } from '@kbn/elastic-assistant';
 import React from 'react';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { TimelineEventsDetailsItem } from '../../common/search_strategy';
 import type { Rule } from '../detection_engine/rule_management/logic';
 import { SendToTimelineButton } from './send_to_timeline';

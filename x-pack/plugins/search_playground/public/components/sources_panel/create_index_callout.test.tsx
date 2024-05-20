@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
-import { useKibana } from '../../hooks/use_kibana';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { CreateIndexCallout } from './create_index_callout';
+import { useKibana } from '../../hooks/use_kibana';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 // Mocking the useKibana hook
 jest.mock('../../hooks/use_kibana', () => ({

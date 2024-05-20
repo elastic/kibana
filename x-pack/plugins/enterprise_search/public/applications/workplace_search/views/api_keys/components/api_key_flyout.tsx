@@ -7,21 +7,21 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiPortal,
+  EuiFormRow,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
+  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
   EuiForm,
-  EuiFormRow,
-  EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -31,8 +31,8 @@ import { FlashMessages } from '../../../../shared/flash_messages';
 import { ApiKeysLogic } from '../api_keys_logic';
 import {
   API_KEY_FLYOUT_TITLE,
-  API_KEY_FORM_HELP_TEXT,
   API_KEY_FORM_LABEL,
+  API_KEY_FORM_HELP_TEXT,
   API_KEY_NAME_PLACEHOLDER,
 } from '../constants';
 

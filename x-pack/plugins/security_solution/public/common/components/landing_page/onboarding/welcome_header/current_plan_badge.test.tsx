@@ -1,4 +1,3 @@
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +5,9 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import { ProductTier } from '../configs';
+import { render } from '@testing-library/react';
 import { CurrentPlanBadge } from './current_plan_badge';
+import { ProductTier } from '../configs';
 
 describe('CurrentPlanBadge', () => {
   it('renders nothing when productTier is undefined', () => {

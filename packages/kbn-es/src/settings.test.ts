@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SettingsFilter, parseSettings } from './settings';
+import { parseSettings, SettingsFilter } from './settings';
 
 const mockSettings = [
   'abc.def=1',

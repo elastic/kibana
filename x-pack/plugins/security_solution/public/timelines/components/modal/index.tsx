@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import React, { useMemo, useRef } from 'react';
-import type { TimelineId } from '../../../../common/types/timeline';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { inputsSelectors } from '../../../common/store/selectors';
 import { StatefulTimeline } from '../timeline';
+import type { TimelineId } from '../../../../common/types/timeline';
 import { defaultRowRenderers } from '../timeline/body/renderers';
 import { DefaultCellRenderer } from '../timeline/cell_rendering/default_cell_renderer';
 import { CustomEuiPortal } from './custom_portal';
-import { OverflowHiddenGlobalStyles, usePaneStyles } from './index.styles';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { inputsSelectors } from '../../../common/store/selectors';
+import { usePaneStyles, OverflowHiddenGlobalStyles } from './index.styles';
 
 const TIMELINE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.modal.timelinePropertiesAriaLabel',

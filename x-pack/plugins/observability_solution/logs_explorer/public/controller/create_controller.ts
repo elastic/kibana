@@ -8,12 +8,12 @@
 import { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
-import { Subject, distinctUntilChanged, from, map, shareReplay } from 'rxjs';
+import { distinctUntilChanged, from, map, shareReplay, Subject } from 'rxjs';
 import { interpret } from 'xstate';
-import { LogsExplorerCustomizations } from '../customizations/types';
 import { DatasetsService } from '../services/datasets';
 import { createLogsExplorerControllerStateMachine } from '../state_machines/logs_explorer_controller';
 import { LogsExplorerStartDeps } from '../types';
+import { LogsExplorerCustomizations } from '../customizations/types';
 import { createDataServiceProxy } from './custom_data_service';
 import { createUiSettingsServiceProxy } from './custom_ui_settings_service';
 import {

@@ -15,12 +15,12 @@ import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import { PresentationPanelError } from './presentation_panel_error';
-import { getErrorLoadingPanel } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
+import { getErrorLoadingPanel } from './presentation_panel_strings';
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  PropsType extends {} = {},
+  PropsType extends {} = {}
 >(
   props: PresentationPanelProps<ApiType, PropsType> & {
     hidePanelChrome?: boolean;

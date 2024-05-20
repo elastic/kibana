@@ -15,8 +15,8 @@ import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
 
-import { formatId } from './constants';
 import { sample } from './sample';
+import { formatId } from './constants';
 
 export interface TruncateFormatEditorFormatParams {
   fieldLength: number | null;

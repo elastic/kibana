@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IClusterClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { registerUpgradeAssistantUsageCollector } from './usage_collector';
+import { IClusterClient } from '@kbn/core/server';
 
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
@@ -65,8 +65,9 @@ describe('Upgrade Assistant Usage Collector', () => {
 
     it('fetchUpgradeAssistantMetrics should return correct info', async () => {
       registerUpgradeAssistantUsageCollector(dependencies);
-      const upgradeAssistantStats =
-        await makeUsageCollectorStub.mock.calls[0][0].fetch(callClusterStub);
+      const upgradeAssistantStats = await makeUsageCollectorStub.mock.calls[0][0].fetch(
+        callClusterStub
+      );
       expect(upgradeAssistantStats).toEqual({
         features: {
           deprecation_logging: {

@@ -10,37 +10,34 @@ import type { ListResult } from '../../../common/types';
 
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
 
-import { relativeDownloadUrlFromArtifact, uniqueIdFromId } from './mappings';
 import type {
   Artifact,
-  ArtifactEncodedMetadata,
   ArtifactsClientCreateOptions,
+  ArtifactEncodedMetadata,
   ArtifactsClientInterface,
-  FetchAllArtifactsOptions,
-  ListArtifactsProps,
   NewArtifact,
+  ListArtifactsProps,
+  FetchAllArtifactsOptions,
 } from './types';
+import { relativeDownloadUrlFromArtifact, uniqueIdFromId } from './mappings';
 
 import {
-  bulkCreateArtifacts,
-  bulkDeleteArtifacts,
   createArtifact,
   deleteArtifact,
   encodeArtifactContent,
-  fetchAllArtifacts,
   generateArtifactContentHash,
   getArtifact,
   listArtifacts,
+  bulkCreateArtifacts,
+  bulkDeleteArtifacts,
+  fetchAllArtifacts,
 } from './artifacts';
 
 /**
  * Exposes an interface for access artifacts from within the context of a single integration (`packageName`)
  */
 export class FleetArtifactsClient implements ArtifactsClientInterface {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private packageName: string
-  ) {
+  constructor(private esClient: ElasticsearchClient, private packageName: string) {
     if (!packageName) {
       throw new ArtifactsClientError('packageName is required');
     }
@@ -139,10 +136,9 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
    * - when using the `kuery` filtering param, all filters property names should match the
    *   internal attribute names in the index
    */
-  async listArtifacts({
-    kuery,
-    ...options
-  }: ListArtifactsProps = {}): Promise<ListResult<Artifact>> {
+  async listArtifacts({ kuery, ...options }: ListArtifactsProps = {}): Promise<
+    ListResult<Artifact>
+  > {
     return listArtifacts(this.esClient, {
       ...options,
       kuery: this.buildFilter(kuery),

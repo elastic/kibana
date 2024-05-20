@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render, waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-import { mockSecurityJobs } from '../api.mock';
-import type { SecurityJob } from '../types';
+import { render, waitFor } from '@testing-library/react';
 import { JobsTableComponent } from './jobs_table';
+import { mockSecurityJobs } from '../api.mock';
+import { cloneDeep } from 'lodash/fp';
+import type { SecurityJob } from '../types';
 
 jest.mock('../../../lib/kibana');
 

@@ -36,7 +36,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -48,7 +50,9 @@
                 "tags": [],
                 "label": "coreContext",
                 "description": [],
-                "signature": ["CoreContext"],
+                "signature": [
+                  "CoreContext"
+                ],
                 "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -88,7 +92,9 @@
                 "tags": [],
                 "label": "{ pluginPaths, http }",
                 "description": [],
-                "signature": ["PrebootDeps"],
+                "signature": [
+                  "PrebootDeps"
+                ],
                 "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -128,7 +134,9 @@
                 "tags": [],
                 "label": "{ pluginPaths, http }",
                 "description": [],
-                "signature": ["SetupDeps"],
+                "signature": [
+                  "SetupDeps"
+                ],
                 "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -149,7 +157,9 @@
         "tags": [],
         "label": "getKibanaTranslationFiles",
         "description": [],
-        "signature": ["(locale: string, pluginPaths: string[]) => Promise<string[]>"],
+        "signature": [
+          "(locale: string, pluginPaths: string[]) => Promise<string[]>"
+        ],
         "path": "packages/core/i18n/core-i18n-server-internal/src/get_kibana_translation_files.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -161,7 +171,9 @@
             "tags": [],
             "label": "locale",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/i18n/core-i18n-server-internal/src/get_kibana_translation_files.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -174,7 +186,9 @@
             "tags": [],
             "label": "pluginPaths",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/i18n/core-i18n-server-internal/src/get_kibana_translation_files.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -204,7 +218,9 @@
             "tags": [],
             "label": "getTranslationHash",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -224,7 +240,9 @@
         "tags": [],
         "label": "I18nConfigType",
         "description": [],
-        "signature": ["{ readonly locale: string; }"],
+        "signature": [
+          "{ readonly locale: string; }"
+        ],
         "path": "packages/core/i18n/core-i18n-server-internal/src/i18n_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -236,8 +254,12 @@
         "type": "Array",
         "tags": [],
         "label": "supportedLocale",
-        "description": ["\nList of all locales that are officially supported."],
-        "signature": ["string[]"],
+        "description": [
+          "\nList of all locales that are officially supported."
+        ],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/core/i18n/core-i18n-server-internal/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

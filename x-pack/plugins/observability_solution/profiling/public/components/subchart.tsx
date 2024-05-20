@@ -15,8 +15,8 @@ import {
   Position,
   ScaleType,
   Settings,
-  Tooltip,
   timeFormatter,
+  Tooltip,
 } from '@elastic/charts';
 import {
   EuiAccordion,

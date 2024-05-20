@@ -6,8 +6,8 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
+import { EuiFormRow } from '@elastic/eui';
 import {
   CodeEditor,
   FieldHook,

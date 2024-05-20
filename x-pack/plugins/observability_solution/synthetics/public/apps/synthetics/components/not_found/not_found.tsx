@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 const NOT_FOUND_TITLE = i18n.translate('xpack.synthetics.notFoundTitle', {
   defaultMessage: 'Page not found',

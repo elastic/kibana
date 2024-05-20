@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
+import {
+  ActionParamsProps,
+  TextAreaWithMessageVariables,
+  TextFieldWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,19 +19,13 @@ import {
   EuiText,
   RecursivePartial,
 } from '@elastic/eui';
-import {
-  ActionParamsProps,
-  TextAreaWithMessageVariables,
-  TextFieldWithMessageVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useCallback, useState } from 'react';
 import type {
   OpsgenieActionParams,
   OpsgenieCloseAlertParams,
 } from '../../../server/connector_types';
-import { DisplayMoreOptions } from './display_more_options';
 import * as i18n from './translations';
 import { EditActionCallback } from './types';
+import { DisplayMoreOptions } from './display_more_options';
 
 type AdditionalOptionsProps = Pick<
   CloseAlertProps,

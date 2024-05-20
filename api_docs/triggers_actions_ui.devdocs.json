@@ -68,7 +68,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -156,7 +158,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["PluginsSetup"],
+                "signature": [
+                  "PluginsSetup"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -222,7 +226,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["PluginsStart"],
+                "signature": [
+                  "PluginsStart"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -238,7 +244,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -257,7 +265,11 @@
         "tags": [],
         "label": "ActionForm",
         "description": [],
-        "signature": ["(props: ", "ActionAccordionFormProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "ActionAccordionFormProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -270,7 +282,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -304,7 +318,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -346,7 +362,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -416,7 +434,11 @@
         "tags": [],
         "label": "CreateConnectorFlyout",
         "description": [],
-        "signature": ["(props: ", "CreateConnectorFlyoutProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "CreateConnectorFlyoutProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -429,7 +451,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -444,7 +468,11 @@
         "tags": [],
         "label": "EditConnectorFlyout",
         "description": [],
-        "signature": ["(props: ", "EditConnectorFlyoutProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "EditConnectorFlyoutProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -457,7 +485,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -544,7 +574,9 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": ["{ [x: string]: unknown; }"],
+                "signature": [
+                  "{ [x: string]: unknown; }"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -556,7 +588,9 @@
                 "tags": [],
                 "label": "signal",
                 "description": [],
-                "signature": ["AbortSignal | undefined"],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/execute.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -574,7 +608,11 @@
         "tags": [],
         "label": "ForLastExpression",
         "description": [],
-        "signature": ["(props: ", "ForLastExpressionProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "ForLastExpressionProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -587,7 +625,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -602,7 +642,9 @@
         "tags": [],
         "label": "getCategory",
         "description": [],
-        "signature": ["(fieldName: string) => string"],
+        "signature": [
+          "(fieldName: string) => string"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -614,7 +656,9 @@
             "tags": [],
             "label": "fieldName",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -676,7 +720,9 @@
             "tags": [],
             "label": "indexes",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -738,7 +784,9 @@
             "tags": [],
             "label": "pattern",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/common/index_controls/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -774,7 +822,9 @@
         "tags": [],
         "label": "getTimeFieldOptions",
         "description": [],
-        "signature": ["(fields: { type: string; name: string; }[]) => TimeFieldOptions[]"],
+        "signature": [
+          "(fields: { type: string; name: string; }[]) => TimeFieldOptions[]"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -786,7 +836,9 @@
             "tags": [],
             "label": "fields",
             "description": [],
-            "signature": ["{ type: string; name: string; }[]"],
+            "signature": [
+              "{ type: string; name: string; }[]"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -825,7 +877,9 @@
             "tags": [],
             "label": "unitSize",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_options.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -885,7 +939,9 @@
             "tags": [],
             "label": "timeValue",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/get_time_unit_label.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -902,7 +958,11 @@
         "tags": [],
         "label": "GroupByExpression",
         "description": [],
-        "signature": ["(props: ", "GroupByExpressionProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "GroupByExpressionProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -915,7 +975,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -930,7 +992,9 @@
         "tags": [],
         "label": "hasMustacheTokens",
         "description": [],
-        "signature": ["(str: string) => boolean"],
+        "signature": [
+          "(str: string) => boolean"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/has_mustache_tokens.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -942,7 +1006,9 @@
             "tags": [],
             "label": "str",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/has_mustache_tokens.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -973,7 +1039,9 @@
             "tags": [],
             "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  ariaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  dataTestSubj,\n  euiCodeEditorProps = {},\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<Props>"],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/json_editor_with_message_variables.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -990,7 +1058,9 @@
         "tags": [],
         "label": "JsonFieldWrapper",
         "description": [],
-        "signature": ["({ field, ...rest }: Props) => JSX.Element"],
+        "signature": [
+          "({ field, ...rest }: Props) => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/components/json_field_wrapper.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1002,7 +1072,9 @@
             "tags": [],
             "label": "{ field, ...rest }",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/json_field_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1080,7 +1152,9 @@
                 "tags": [],
                 "label": "featureId",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1092,7 +1166,9 @@
                 "tags": [],
                 "label": "includeSystemActions",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/action_connector_api/connector_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1214,7 +1290,9 @@
             "tags": [],
             "label": "{\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n  filterConsumers,\n}",
             "description": [],
-            "signature": ["LoadRuleAggregationsProps"],
+            "signature": [
+              "LoadRuleAggregationsProps"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1303,7 +1381,9 @@
                 "tags": [],
                 "label": "numberOfExecutions",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/rule_summary.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1388,7 +1468,9 @@
         "tags": [],
         "label": "MustacheTextFieldWrapper",
         "description": [],
-        "signature": ["({ field, euiFieldProps, idAria, ...rest }: Props) => JSX.Element"],
+        "signature": [
+          "({ field, euiFieldProps, idAria, ...rest }: Props) => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/components/mustache_text_field_wrapper.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1400,7 +1482,9 @@
             "tags": [],
             "label": "{ field, euiFieldProps, idAria, ...rest }",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/mustache_text_field_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1417,7 +1501,11 @@
         "tags": [],
         "label": "OfExpression",
         "description": [],
-        "signature": ["(props: ", "OfExpressionProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "OfExpressionProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1430,7 +1518,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1445,7 +1535,9 @@
         "tags": [],
         "label": "SectionLoading",
         "description": [],
-        "signature": ["({ children }: React.PropsWithChildren<Props>) => JSX.Element"],
+        "signature": [
+          "({ children }: React.PropsWithChildren<Props>) => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/components/section_loading.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1457,7 +1549,9 @@
             "tags": [],
             "label": "{ children }",
             "description": [],
-            "signature": ["React.PropsWithChildren<Props>"],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/section_loading.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1474,7 +1568,9 @@
         "tags": [],
         "label": "SimpleConnectorForm",
         "description": [],
-        "signature": ["React.NamedExoticComponent<SimpleConnectorFormProps>"],
+        "signature": [
+          "React.NamedExoticComponent<SimpleConnectorFormProps>"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1487,7 +1583,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1516,7 +1614,9 @@
             "tags": [],
             "label": "ComponentToSuspend",
             "description": [],
-            "signature": ["React.ComponentType<T>"],
+            "signature": [
+              "React.ComponentType<T>"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1529,7 +1629,9 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": ["\"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined"],
+            "signature": [
+              "\"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1593,7 +1695,9 @@
         "tags": [],
         "label": "TextAreaWithMessageVariables",
         "description": [],
-        "signature": ["(props: Props) => React.ReactElement<any, any> | null"],
+        "signature": [
+          "(props: Props) => React.ReactElement<any, any> | null"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/components/text_area_with_message_variables.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1605,7 +1709,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/text_area_with_message_variables.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1636,7 +1742,9 @@
             "tags": [],
             "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  index,\n  inputTargetValue,\n  editAction,\n  errors,\n  formRowProps,\n  defaultValue,\n  wrapField = false,\n  showButtonTitle,\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<Props>"],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/text_field_with_message_variables.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1653,7 +1761,11 @@
         "tags": [],
         "label": "ThresholdExpression",
         "description": [],
-        "signature": ["(props: ", "ThresholdExpressionProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "ThresholdExpressionProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1666,7 +1778,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1695,7 +1809,9 @@
             "tags": [],
             "label": "{\n  rule_type_id: ruleTypeId,\n  created_by: createdBy,\n  updated_by: updatedBy,\n  created_at: createdAt,\n  updated_at: updatedAt,\n  api_key_owner: apiKeyOwner,\n  api_key_created_by_user: apiKeyCreatedByUser,\n  notify_when: notifyWhen,\n  mute_all: muteAll,\n  muted_alert_ids: mutedInstanceIds,\n  scheduled_task_id: scheduledTaskId,\n  execution_status: executionStatus,\n  actions: actions,\n  snooze_schedule: snoozeSchedule,\n  is_snoozed_until: isSnoozedUntil,\n  active_snoozes: activeSnoozes,\n  last_run: lastRun,\n  next_run: nextRun,\n  alert_delay: alertDelay,\n  ...rest\n}",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/common_transformations.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1825,7 +1941,10 @@
         "tags": [],
         "label": "useConnectorContext",
         "description": [],
-        "signature": ["() => ", "ConnectorContextValue"],
+        "signature": [
+          "() => ",
+          "ConnectorContextValue"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/context/use_connector_context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1870,7 +1989,9 @@
             "tags": [],
             "label": "{\n  filteredRuleTypes,\n  enabled = true,\n}",
             "description": [],
-            "signature": ["UseLoadRuleTypesQueryProps"],
+            "signature": [
+              "UseLoadRuleTypesQueryProps"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1903,7 +2024,10 @@
             "tags": [],
             "label": "{\n  connectorId,\n  subAction,\n  subActionParams,\n  disabled = false,\n}",
             "description": [],
-            "signature": ["UseSubActionParams", "<P>"],
+            "signature": [
+              "UseSubActionParams",
+              "<P>"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_sub_action.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1961,7 +2085,11 @@
         "tags": [],
         "label": "validateActionFilterQuery",
         "description": [],
-        "signature": ["(actionItem: ", "RuleUiAction", ") => string | null"],
+        "signature": [
+          "(actionItem: ",
+          "RuleUiAction",
+          ") => string | null"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/value_validators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1973,7 +2101,9 @@
             "tags": [],
             "label": "actionItem",
             "description": [],
-            "signature": ["RuleUiAction"],
+            "signature": [
+              "RuleUiAction"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/value_validators.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1990,7 +2120,11 @@
         "tags": [],
         "label": "ValueExpression",
         "description": [],
-        "signature": ["(props: ", "ValueExpressionProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "ValueExpressionProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2003,7 +2137,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2018,7 +2154,11 @@
         "tags": [],
         "label": "WhenExpression",
         "description": [],
-        "signature": ["(props: ", "WhenExpressionProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "WhenExpressionProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/common/expression_items/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2031,7 +2171,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2081,7 +2223,11 @@
             "tags": [],
             "label": "registerPreSubmitValidator",
             "description": [],
-            "signature": ["(validator: ", "ConnectorValidationFunc", ") => void"],
+            "signature": [
+              "(validator: ",
+              "ConnectorValidationFunc",
+              ") => void"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2093,7 +2239,9 @@
                 "tags": [],
                 "label": "validator",
                 "description": [],
-                "signature": ["ConnectorValidationFunc"],
+                "signature": [
+                  "ConnectorValidationFunc"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2133,7 +2281,9 @@
             "tags": [],
             "label": "actionParams",
             "description": [],
-            "signature": ["{ [P in keyof TParams]?: TParams[P] | undefined; }"],
+            "signature": [
+              "{ [P in keyof TParams]?: TParams[P] | undefined; }"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2178,7 +2328,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2212,7 +2364,9 @@
                 "tags": [],
                 "label": "index",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2248,7 +2402,9 @@
             "tags": [],
             "label": "ruleTypeId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2281,7 +2437,9 @@
             "tags": [],
             "label": "defaultMessage",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2293,7 +2451,9 @@
             "tags": [],
             "label": "useDefaultMessage",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2326,7 +2486,9 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2338,7 +2500,9 @@
             "tags": [],
             "label": "isDisabled",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2350,7 +2514,9 @@
             "tags": [],
             "label": "selectedActionGroupId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2362,7 +2528,9 @@
             "tags": [],
             "label": "showEmailSubjectAndMessage",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2395,7 +2563,9 @@
             "tags": [],
             "label": "onBlur",
             "description": [],
-            "signature": ["((field?: string | undefined) => void) | undefined"],
+            "signature": [
+              "((field?: string | undefined) => void) | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2407,7 +2577,9 @@
                 "tags": [],
                 "label": "field",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2423,7 +2595,9 @@
             "tags": [],
             "label": "producerId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2518,7 +2692,9 @@
             "tags": [],
             "label": "supportedFeatureIds",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2576,7 +2752,9 @@
             "tags": [],
             "label": "iconClass",
             "description": [],
-            "signature": ["string | React.ComponentType<{}>"],
+            "signature": [
+              "string | React.ComponentType<{}>"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2599,7 +2777,9 @@
             "tags": [],
             "label": "actionTypeTitle",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2633,7 +2813,9 @@
                 "tags": [],
                 "label": "actionParams",
                 "description": [],
-                "signature": ["ActionParams"],
+                "signature": [
+                  "ActionParams"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2718,7 +2900,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2748,7 +2932,10 @@
             "tags": [],
             "label": "defaultActionParams",
             "description": [],
-            "signature": ["RecursivePartial", "<ActionParams> | undefined"],
+            "signature": [
+              "RecursivePartial",
+              "<ActionParams> | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2760,7 +2947,10 @@
             "tags": [],
             "label": "defaultRecoveredActionParams",
             "description": [],
-            "signature": ["RecursivePartial", "<ActionParams> | undefined"],
+            "signature": [
+              "RecursivePartial",
+              "<ActionParams> | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2772,7 +2962,9 @@
             "tags": [],
             "label": "customConnectorSelectItem",
             "description": [],
-            "signature": ["CustomConnectorSelectionItem | undefined"],
+            "signature": [
+              "CustomConnectorSelectionItem | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2784,7 +2976,9 @@
             "tags": [],
             "label": "isExperimental",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2796,7 +2990,9 @@
             "tags": [],
             "label": "subtype",
             "description": [],
-            "signature": ["{ id: string; name: string; }[] | undefined"],
+            "signature": [
+              "{ id: string; name: string; }[] | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2808,7 +3004,9 @@
             "tags": [],
             "label": "convertParamsBetweenGroups",
             "description": [],
-            "signature": ["((params: ActionParams) => {} | ActionParams) | undefined"],
+            "signature": [
+              "((params: ActionParams) => {} | ActionParams) | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2820,7 +3018,9 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": ["ActionParams"],
+                "signature": [
+                  "ActionParams"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2836,7 +3036,9 @@
             "tags": [],
             "label": "hideInUi",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2848,7 +3050,9 @@
             "tags": [],
             "label": "modalWidth",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2860,7 +3064,9 @@
             "tags": [],
             "label": "isSystemActionType",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2973,7 +3179,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2999,7 +3207,9 @@
             "tags": [],
             "label": "uuid",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3011,7 +3221,9 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": ["\"OK\" | \"Active\""],
+            "signature": [
+              "\"OK\" | \"Active\""
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3034,7 +3246,9 @@
             "tags": [],
             "label": "actionGroupId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3046,7 +3260,9 @@
             "tags": [],
             "label": "activeStartDate",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3069,7 +3285,9 @@
             "tags": [],
             "label": "maintenanceWindowIds",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3128,7 +3346,9 @@
             "tags": [],
             "label": "tags",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3173,7 +3393,9 @@
             "tags": [],
             "label": "throttle",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3218,7 +3440,9 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": ["\"OK\" | \"Active\" | \"Error\""],
+            "signature": [
+              "\"OK\" | \"Active\" | \"Error\""
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3230,7 +3454,9 @@
             "tags": [],
             "label": "lastRun",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3242,7 +3468,9 @@
             "tags": [],
             "label": "errorMessages",
             "description": [],
-            "signature": ["{ date: string; message: string; }[]"],
+            "signature": [
+              "{ date: string; message: string; }[]"
+            ],
             "path": "x-pack/plugins/alerting/common/alert_summary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3354,7 +3582,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": ["string | JSX.Element | undefined"],
+            "signature": [
+              "string | JSX.Element | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3366,7 +3596,9 @@
             "tags": [],
             "label": "dateFormat",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3525,7 +3757,9 @@
             "tags": [],
             "label": "isUrlField",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3537,7 +3771,9 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": ["string | string[] | undefined"],
+            "signature": [
+              "string | string[] | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3563,7 +3799,10 @@
             "tags": [],
             "label": "createFieldButton",
             "description": [],
-            "signature": ["CreateFieldComponent", " | undefined"],
+            "signature": [
+              "CreateFieldComponent",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3575,7 +3814,10 @@
             "tags": [],
             "label": "getFieldTableColumns",
             "description": [],
-            "signature": ["GetFieldTableColumns", " | undefined"],
+            "signature": [
+              "GetFieldTableColumns",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3586,8 +3828,12 @@
             "type": "Array",
             "tags": [],
             "label": "preselectedCategoryIds",
-            "description": ["\nCategories that should be selected initially"],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "\nCategories that should be selected initially"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3612,8 +3858,12 @@
             "type": "Array",
             "tags": [],
             "label": "columnIds",
-            "description": ["The timeline's current column headers"],
-            "signature": ["string[]"],
+            "description": [
+              "The timeline's current column headers"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3624,7 +3874,9 @@
             "type": "Object",
             "tags": [],
             "label": "browserFields",
-            "description": ["A map of categoryId -> metadata about the fields in that category"],
+            "description": [
+              "A map of categoryId -> metadata about the fields in that category"
+            ],
             "signature": [
               "{ [x: string]: Partial<",
               {
@@ -3646,8 +3898,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isEventViewer",
-            "description": ["When true, this Fields Browser is being used as an \"events viewer\""],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "When true, this Fields Browser is being used as an \"events viewer\""
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3658,8 +3914,12 @@
             "type": "Function",
             "tags": [],
             "label": "onResetColumns",
-            "description": ["Callback to reset the default columns"],
-            "signature": ["() => void"],
+            "description": [
+              "Callback to reset the default columns"
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3672,8 +3932,12 @@
             "type": "Function",
             "tags": [],
             "label": "onToggleColumn",
-            "description": ["Callback to toggle a field column"],
-            "signature": ["(columnId: string) => void"],
+            "description": [
+              "Callback to toggle a field column"
+            ],
+            "signature": [
+              "(columnId: string) => void"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3685,7 +3949,9 @@
                 "tags": [],
                 "label": "columnId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3723,8 +3989,12 @@
             "type": "number",
             "tags": [],
             "label": "width",
-            "description": ["The width of the field browser"],
-            "signature": ["number | undefined"],
+            "description": [
+              "The width of the field browser"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3760,7 +4030,9 @@
             "tags": [],
             "label": "errors",
             "description": [],
-            "signature": ["{ [P in Extract<keyof T, string>]: unknown; }"],
+            "signature": [
+              "{ [P in Extract<keyof T, string>]: unknown; }"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3821,7 +4093,9 @@
             "tags": [],
             "label": "isSummaryOption",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3833,7 +4107,9 @@
             "tags": [],
             "label": "isForEachAlertOption",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4008,7 +4284,9 @@
             "tags": [],
             "label": "onEditRule",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4022,7 +4300,9 @@
             "tags": [],
             "label": "hideEditButton",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4034,7 +4314,9 @@
             "tags": [],
             "label": "filteredRuleTypes",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4081,7 +4363,9 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4093,7 +4377,9 @@
             "tags": [],
             "label": "selectDataTestSubj",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4105,7 +4391,9 @@
             "tags": [],
             "label": "buttonDataTestSubj",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rules_list/components/rule_status_filter.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -4305,7 +4593,9 @@
             "tags": [],
             "label": "showIntervalWarning",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4363,7 +4653,9 @@
             "tags": [],
             "label": "authorizedConsumers",
             "description": [],
-            "signature": ["{ [x: string]: { read: boolean; all: boolean; }; }"],
+            "signature": [
+              "{ [x: string]: { read: boolean; all: boolean; }; }"
+            ],
             "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4386,7 +4678,9 @@
             "tags": [],
             "label": "hasFieldsForAAD",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4398,7 +4692,9 @@
             "tags": [],
             "label": "hasAlertsMappings",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4510,7 +4806,9 @@
                 "tags": [],
                 "label": "ruleParams",
                 "description": [],
-                "signature": ["Params"],
+                "signature": [
+                  "Params"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4523,7 +4821,9 @@
                 "tags": [],
                 "label": "isServerless",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4562,7 +4862,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4587,7 +4889,9 @@
             "tags": [],
             "label": "defaultActionMessage",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4599,7 +4903,9 @@
             "tags": [],
             "label": "defaultRecoveryMessage",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4611,7 +4917,9 @@
             "tags": [],
             "label": "defaultSummaryMessage",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4661,7 +4969,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4673,7 +4983,9 @@
             "tags": [],
             "label": "ruleParams",
             "description": [],
-            "signature": ["Params"],
+            "signature": [
+              "Params"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4707,7 +5019,9 @@
             "tags": [],
             "label": "alertNotifyWhen",
             "description": [],
-            "signature": ["\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""],
+            "signature": [
+              "\"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\""
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4733,7 +5047,9 @@
                 "tags": [],
                 "label": "property",
                 "description": [],
-                "signature": ["Key"],
+                "signature": [
+                  "Key"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4746,7 +5062,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["Params[Key] | undefined"],
+                "signature": [
+                  "Params[Key] | undefined"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4778,7 +5096,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["Prop"],
+                "signature": [
+                  "Prop"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4791,7 +5111,10 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["SanitizedRule", "<Params>[Prop] | null"],
+                "signature": [
+                  "SanitizedRule",
+                  "<Params>[Prop] | null"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4807,7 +5130,9 @@
             "tags": [],
             "label": "onChangeMetaData",
             "description": [],
-            "signature": ["(metadata: MetaData) => void"],
+            "signature": [
+              "(metadata: MetaData) => void"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4819,7 +5144,9 @@
                 "tags": [],
                 "label": "metadata",
                 "description": [],
-                "signature": ["MetaData"],
+                "signature": [
+                  "MetaData"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4887,7 +5214,9 @@
             "tags": [],
             "label": "metadata",
             "description": [],
-            "signature": ["MetaData | undefined"],
+            "signature": [
+              "MetaData | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5004,7 +5333,9 @@
             "tags": [],
             "label": "isPasswordField",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5457,7 +5788,9 @@
             "tags": [],
             "label": "element",
             "description": [],
-            "signature": ["HTMLElement"],
+            "signature": [
+              "HTMLElement"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/rules_app.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -5644,7 +5977,9 @@
             "tags": [],
             "label": "errors",
             "description": [],
-            "signature": ["{ [x: string]: any; }"],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5819,7 +6154,9 @@
         "tags": [],
         "label": "ALERT_HISTORY_PREFIX",
         "description": [],
-        "signature": ["\"kibana-alert-history-\""],
+        "signature": [
+          "\"kibana-alert-history-\""
+        ],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5859,7 +6196,9 @@
         "tags": [],
         "label": "AlertHistoryEsIndexConnectorId",
         "description": [],
-        "signature": ["\"preconfigured-alert-history-es-index\""],
+        "signature": [
+          "\"preconfigured-alert-history-es-index\""
+        ],
         "path": "x-pack/plugins/actions/common/alert_history_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6185,7 +6524,9 @@
         "tags": [],
         "label": "RuleStatus",
         "description": [],
-        "signature": ["\"enabled\" | \"disabled\" | \"snoozed\""],
+        "signature": [
+          "\"enabled\" | \"disabled\" | \"snoozed\""
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6221,7 +6562,9 @@
         "tags": [],
         "label": "RuleTypeParams",
         "description": [],
-        "signature": ["{ [x: string]: unknown; }"],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6345,7 +6688,11 @@
         "tags": [],
         "label": "AlertsTableContext",
         "description": [],
-        "signature": ["React.Context<", "AlertsTableContextType", ">"],
+        "signature": [
+          "React.Context<",
+          "AlertsTableContextType",
+          ">"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alerts_table/contexts/alerts_table_context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6391,7 +6738,9 @@
                 "tags": [],
                 "label": "fieldRequired",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6403,7 +6752,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["AGGREGATION_TYPES"],
+                "signature": [
+                  "AGGREGATION_TYPES"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6415,7 +6766,9 @@
                 "tags": [],
                 "label": "validNormalizedTypes",
                 "description": [],
-                "signature": ["never[]"],
+                "signature": [
+                  "never[]"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6451,7 +6804,9 @@
                 "tags": [],
                 "label": "fieldRequired",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6463,7 +6818,9 @@
                 "tags": [],
                 "label": "validNormalizedTypes",
                 "description": [],
-                "signature": ["\"number\"[]"],
+                "signature": [
+                  "\"number\"[]"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6475,7 +6832,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["AGGREGATION_TYPES"],
+                "signature": [
+                  "AGGREGATION_TYPES"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6511,7 +6870,9 @@
                 "tags": [],
                 "label": "fieldRequired",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6523,7 +6884,9 @@
                 "tags": [],
                 "label": "validNormalizedTypes",
                 "description": [],
-                "signature": ["\"number\"[]"],
+                "signature": [
+                  "\"number\"[]"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6535,7 +6898,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["AGGREGATION_TYPES"],
+                "signature": [
+                  "AGGREGATION_TYPES"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6571,7 +6936,9 @@
                 "tags": [],
                 "label": "fieldRequired",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6583,7 +6950,9 @@
                 "tags": [],
                 "label": "validNormalizedTypes",
                 "description": [],
-                "signature": ["(\"date\" | \"number\")[]"],
+                "signature": [
+                  "(\"date\" | \"number\")[]"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6595,7 +6964,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["AGGREGATION_TYPES"],
+                "signature": [
+                  "AGGREGATION_TYPES"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6631,7 +7002,9 @@
                 "tags": [],
                 "label": "fieldRequired",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6643,7 +7016,9 @@
                 "tags": [],
                 "label": "validNormalizedTypes",
                 "description": [],
-                "signature": ["(\"date\" | \"number\")[]"],
+                "signature": [
+                  "(\"date\" | \"number\")[]"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -6655,7 +7030,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["AGGREGATION_TYPES"],
+                "signature": [
+                  "AGGREGATION_TYPES"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7049,7 +7426,9 @@
                 "tags": [],
                 "label": "sizeRequired",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7072,7 +7451,9 @@
                 "tags": [],
                 "label": "validNormalizedTypes",
                 "description": [],
-                "signature": ["never[]"],
+                "signature": [
+                  "never[]"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7108,7 +7489,9 @@
                 "tags": [],
                 "label": "sizeRequired",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7131,7 +7514,9 @@
                 "tags": [],
                 "label": "validNormalizedTypes",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7242,7 +7627,9 @@
           "tags": [],
           "label": "alertsTableConfigurationRegistry",
           "description": [],
-          "signature": ["AlertTableConfigRegistry"],
+          "signature": [
+            "AlertTableConfigRegistry"
+          ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -7315,7 +7702,9 @@
           "tags": [],
           "label": "alertsTableConfigurationRegistry",
           "description": [],
-          "signature": ["AlertTableConfigRegistry"],
+          "signature": [
+            "AlertTableConfigRegistry"
+          ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -7399,7 +7788,11 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["Omit<", "CreateConnectorFlyoutProps", ", \"actionTypeRegistry\">"],
+              "signature": [
+                "Omit<",
+                "CreateConnectorFlyoutProps",
+                ", \"actionTypeRegistry\">"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -7433,7 +7826,11 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["Omit<", "EditConnectorFlyoutProps", ", \"actionTypeRegistry\">"],
+              "signature": [
+                "Omit<",
+                "EditConnectorFlyoutProps",
+                ", \"actionTypeRegistry\">"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -7661,7 +8058,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["P"],
+              "signature": [
+                "P"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -7812,7 +8211,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["AlertsSearchBarProps"],
+              "signature": [
+                "AlertsSearchBarProps"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -7900,7 +8301,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["ComponentOpts"],
+              "signature": [
+                "ComponentOpts"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -7934,7 +8337,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["RuleTagFilterProps"],
+              "signature": [
+                "RuleTagFilterProps"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -8024,7 +8429,10 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["RuleTagBadgeProps", "<T>"],
+              "signature": [
+                "RuleTagBadgeProps",
+                "<T>"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -8113,7 +8521,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["RulesListProps"],
+              "signature": [
+                "RulesListProps"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -8147,7 +8557,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["RulesListNotifyBadgePropsWithApi"],
+              "signature": [
+                "RulesListNotifyBadgePropsWithApi"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -8260,7 +8672,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["RuleStatusPanelProps"],
+              "signature": [
+                "RuleStatusPanelProps"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -8294,7 +8708,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["AlertSummaryWidgetProps"],
+              "signature": [
+                "AlertSummaryWidgetProps"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -8328,7 +8744,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["RuleSnoozeModalProps"],
+              "signature": [
+                "RuleSnoozeModalProps"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -8344,7 +8762,9 @@
           "tags": [],
           "label": "getRulesSettingsLink",
           "description": [],
-          "signature": ["() => React.ReactElement<any, string | React.JSXElementConstructor<any>>"],
+          "signature": [
+            "() => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -8376,7 +8796,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["GlobalRuleEventLogListProps"],
+              "signature": [
+                "GlobalRuleEventLogListProps"
+              ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -8400,7 +8822,9 @@
         "tags": [],
         "label": "validateAggType",
         "description": [],
-        "signature": ["(aggType: string) => string | undefined"],
+        "signature": [
+          "(aggType: string) => string | undefined"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8412,7 +8836,9 @@
             "tags": [],
             "label": "aggType",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8429,7 +8855,9 @@
         "tags": [],
         "label": "validateCoreQueryBody",
         "description": [],
-        "signature": ["(anyParams: unknown) => string | undefined"],
+        "signature": [
+          "(anyParams: unknown) => string | undefined"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8441,7 +8869,9 @@
             "tags": [],
             "label": "anyParams",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8458,7 +8888,9 @@
         "tags": [],
         "label": "validateGroupBy",
         "description": [],
-        "signature": ["(groupBy: string) => string | undefined"],
+        "signature": [
+          "(groupBy: string) => string | undefined"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8470,7 +8902,9 @@
             "tags": [],
             "label": "groupBy",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8487,7 +8921,9 @@
         "tags": [],
         "label": "validateTimeWindowUnits",
         "description": [],
-        "signature": ["(timeWindowUnit: string) => string | undefined"],
+        "signature": [
+          "(timeWindowUnit: string) => string | undefined"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8499,7 +8935,9 @@
             "tags": [],
             "label": "timeWindowUnit",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8535,7 +8973,9 @@
         "tags": [],
         "label": "DEFAULT_GROUPS",
         "description": [],
-        "signature": ["100"],
+        "signature": [
+          "100"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8548,7 +8988,9 @@
         "tags": [],
         "label": "MAX_GROUPS",
         "description": [],
-        "signature": ["1000"],
+        "signature": [
+          "1000"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8600,7 +9042,9 @@
             "type": "Object",
             "tags": [],
             "label": "index",
-            "description": ["// name of the indices to search"],
+            "description": [
+              "// name of the indices to search"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -8621,7 +9065,9 @@
             "type": "Object",
             "tags": [],
             "label": "timeField",
-            "description": ["// field in index used for date/time"],
+            "description": [
+              "// field in index used for date/time"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -8642,7 +9088,9 @@
             "type": "Object",
             "tags": [],
             "label": "aggType",
-            "description": ["// aggregation type"],
+            "description": [
+              "// aggregation type"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -8663,7 +9111,9 @@
             "type": "Object",
             "tags": [],
             "label": "aggField",
-            "description": ["// aggregation field"],
+            "description": [
+              "// aggregation field"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -8684,7 +9134,9 @@
             "type": "Object",
             "tags": [],
             "label": "groupBy",
-            "description": ["// how to group"],
+            "description": [
+              "// how to group"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -8705,7 +9157,9 @@
             "type": "Object",
             "tags": [],
             "label": "termField",
-            "description": ["// field to group on (for groupBy: top)"],
+            "description": [
+              "// field to group on (for groupBy: top)"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -8726,7 +9180,9 @@
             "type": "Object",
             "tags": [],
             "label": "filterKuery",
-            "description": ["// filter field"],
+            "description": [
+              "// filter field"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -8747,7 +9203,9 @@
             "type": "Object",
             "tags": [],
             "label": "termSize",
-            "description": ["// limit on number of groups returned"],
+            "description": [
+              "// limit on number of groups returned"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -8768,7 +9226,9 @@
             "type": "Object",
             "tags": [],
             "label": "timeWindowSize",
-            "description": ["// size of time window for date range aggregations"],
+            "description": [
+              "// size of time window for date range aggregations"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -8789,7 +9249,9 @@
             "type": "Object",
             "tags": [],
             "label": "timeWindowUnit",
-            "description": ["// units of time window for date range aggregations"],
+            "description": [
+              "// units of time window for date range aggregations"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
@@ -8961,7 +9423,9 @@
         "tags": [],
         "label": "getDateStartAfterDateEndErrorMessage",
         "description": [],
-        "signature": ["() => string"],
+        "signature": [
+          "() => string"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8976,7 +9440,9 @@
         "tags": [],
         "label": "getExperimentalAllowedValues",
         "description": [],
-        "signature": ["() => string[]"],
+        "signature": [
+          "() => string[]"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8991,7 +9457,9 @@
         "tags": [],
         "label": "getTooManyIntervalsErrorMessage",
         "description": [],
-        "signature": ["(intervals: number, maxIntervals: number) => string"],
+        "signature": [
+          "(intervals: number, maxIntervals: number) => string"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9003,7 +9471,9 @@
             "tags": [],
             "label": "intervals",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9016,7 +9486,9 @@
             "tags": [],
             "label": "maxIntervals",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9033,7 +9505,9 @@
         "tags": [],
         "label": "isCountAggregation",
         "description": [],
-        "signature": ["(aggType: string) => boolean"],
+        "signature": [
+          "(aggType: string) => boolean"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9045,7 +9519,9 @@
             "tags": [],
             "label": "aggType",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9062,7 +9538,9 @@
         "tags": [],
         "label": "isGroupAggregation",
         "description": [],
-        "signature": ["(termField?: string | string[] | undefined) => boolean"],
+        "signature": [
+          "(termField?: string | string[] | undefined) => boolean"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9074,7 +9552,9 @@
             "tags": [],
             "label": "termField",
             "description": [],
-            "signature": ["string | string[] | undefined"],
+            "signature": [
+              "string | string[] | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9091,7 +9571,9 @@
         "tags": [],
         "label": "isValidExperimentalValue",
         "description": [],
-        "signature": ["(value: string) => boolean"],
+        "signature": [
+          "(value: string) => boolean"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9103,7 +9585,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9141,7 +9625,9 @@
             "tags": [],
             "label": "{\n  isCountAgg,\n  isGroupAgg,\n  esResult,\n  resultLimit,\n  sourceFieldsParams = [],\n  generateSourceFieldsFromHits = false,\n}",
             "description": [],
-            "signature": ["ParseAggregationResultsOpts"],
+            "signature": [
+              "ParseAggregationResultsOpts"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9155,7 +9641,9 @@
         "parentPluginId": "triggersActionsUi",
         "id": "def-common.parseExperimentalConfigValue",
         "type": "Function",
-        "tags": ["throws"],
+        "tags": [
+          "throws"
+        ],
         "label": "parseExperimentalConfigValue",
         "description": [
           "\nParses the string value used in `xpack.trigger_actions_ui.enableExperimental` kibana configuration,\nwhich should be a string of values delimited by a comma (`,`):\nxpack.trigger_actions_ui.enableExperimental: ['ruleStatusFilter', 'ruleTagFilter']\n"
@@ -9181,7 +9669,9 @@
             "tags": [],
             "label": "configValue",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/experimental_features.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9198,7 +9688,9 @@
         "tags": [],
         "label": "parseInterval",
         "description": [],
-        "signature": ["(intervalString: string) => { value: number; unit: string; }"],
+        "signature": [
+          "(intervalString: string) => { value: number; unit: string; }"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/parse_interval.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9210,7 +9702,9 @@
             "tags": [],
             "label": "intervalString",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/parse_interval.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -9265,7 +9759,9 @@
             "tags": [],
             "label": "aggField",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9277,7 +9773,9 @@
             "tags": [],
             "label": "termSize",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9289,7 +9787,9 @@
             "tags": [],
             "label": "termField",
             "description": [],
-            "signature": ["string | string[] | undefined"],
+            "signature": [
+              "string | string[] | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9301,7 +9801,9 @@
             "tags": [],
             "label": "sourceFieldsParams",
             "description": [],
-            "signature": ["{ label: string; searchPath: string; }[] | undefined"],
+            "signature": [
+              "{ label: string; searchPath: string; }[] | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9313,7 +9815,9 @@
             "tags": [],
             "label": "topHitsSize",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9446,7 +9950,9 @@
             "tags": [],
             "label": "dateStart",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9458,7 +9964,9 @@
             "tags": [],
             "label": "dateEnd",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9470,7 +9978,9 @@
             "tags": [],
             "label": "interval",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9529,7 +10039,10 @@
             "tags": [],
             "label": "hits",
             "description": [],
-            "signature": ["SearchHit", "<unknown>[]"],
+            "signature": [
+              "SearchHit",
+              "<unknown>[]"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9541,7 +10054,9 @@
             "tags": [],
             "label": "sourceFields",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9553,7 +10068,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -9709,7 +10226,9 @@
         "tags": [],
         "label": "BASE_TRIGGERS_ACTIONS_UI_API_PATH",
         "description": [],
-        "signature": ["\"/internal/triggers_actions_ui\""],
+        "signature": [
+          "\"/internal/triggers_actions_ui\""
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9734,7 +10253,9 @@
         "tags": [],
         "label": "BUCKET_SELECTOR_PATH_NAME",
         "description": [],
-        "signature": ["\"compareValue\""],
+        "signature": [
+          "\"compareValue\""
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9747,7 +10268,9 @@
         "tags": [],
         "label": "DEFAULT_GROUPS",
         "description": [],
-        "signature": ["100"],
+        "signature": [
+          "100"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9775,7 +10298,9 @@
         "tags": [],
         "label": "MAX_INTERVALS",
         "description": [],
-        "signature": ["1000"],
+        "signature": [
+          "1000"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/date_range_info.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9788,7 +10313,9 @@
         "tags": [],
         "label": "MAX_SOURCE_FIELDS_TO_COPY",
         "description": [],
-        "signature": ["10"],
+        "signature": [
+          "10"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/build_agg.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9801,7 +10328,9 @@
         "tags": [],
         "label": "MetricResult",
         "description": [],
-        "signature": ["[string, number]"],
+        "signature": [
+          "[string, number]"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9814,7 +10343,9 @@
         "tags": [],
         "label": "UngroupedGroupId",
         "description": [],
-        "signature": ["\"all documents\""],
+        "signature": [
+          "\"all documents\""
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/data/lib/parse_aggregation_results.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -9846,7 +10377,9 @@
         "tags": [],
         "label": "INTERVAL_STRING_RE",
         "description": [],
-        "signature": ["RegExp"],
+        "signature": [
+          "RegExp"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/common/parse_interval.ts",
         "deprecated": false,
         "trackAdoption": false,

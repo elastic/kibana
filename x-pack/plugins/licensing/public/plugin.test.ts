@@ -12,10 +12,10 @@ import { mountExpiredBannerMock } from './plugin.test.mocks';
 import { LicenseType } from '../common/types';
 import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
 
-import { HttpInterceptor } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
 import { License } from '../common/license';
 import { licenseMock } from '../common/licensing.mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import { HttpInterceptor } from '@kbn/core/public';
 
 const coreStart = coreMock.createStart();
 describe('licensing plugin', () => {

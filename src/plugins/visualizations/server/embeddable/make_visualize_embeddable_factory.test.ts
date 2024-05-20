@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import semverGte from 'semver/functions/gte';
+import { makeVisualizeEmbeddableFactory } from './make_visualize_embeddable_factory';
+import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { GetMigrationFunctionObjectFn } from '@kbn/kibana-utils-plugin/common';
-import semverGte from 'semver/functions/gte';
-import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
-import { makeVisualizeEmbeddableFactory } from './make_visualize_embeddable_factory';
 
 describe('embeddable migrations', () => {
   test('should have same versions registered as saved object migrations versions (>7.13.0)', () => {

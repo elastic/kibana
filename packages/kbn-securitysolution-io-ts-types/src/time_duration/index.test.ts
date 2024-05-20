@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
 import { TimeDuration } from '.';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('TimeDuration', () => {
   test('it should validate a correctly formed TimeDuration with time unit of seconds', () => {

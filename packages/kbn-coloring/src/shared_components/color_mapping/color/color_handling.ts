@@ -7,16 +7,16 @@
  */
 import chroma from 'chroma-js';
 import { findLast } from 'lodash';
-import { ColorMappingInputData } from '../categorical_color_mapping';
 import { ColorMapping } from '../config';
+import { changeAlpha, combineColors, getValidColor } from './color_math';
+import { getPalette, NeutralPalette } from '../palettes';
+import { ColorMappingInputData } from '../categorical_color_mapping';
+import { ruleMatch } from './rule_matching';
+import { GradientColorMode } from '../config/types';
 import {
   DEFAULT_NEUTRAL_PALETTE_INDEX,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '../config/default_color_mapping';
-import { GradientColorMode } from '../config/types';
-import { NeutralPalette, getPalette } from '../palettes';
-import { changeAlpha, combineColors, getValidColor } from './color_math';
-import { ruleMatch } from './rule_matching';
 
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],

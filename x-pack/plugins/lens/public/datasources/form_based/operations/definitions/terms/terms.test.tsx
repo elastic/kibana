@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { shallow, mount } from 'enzyme';
 import {
   EuiButtonGroup,
   EuiComboBox,
@@ -13,34 +16,31 @@ import {
   EuiSelect,
   EuiSwitch,
 } from '@elastic/eui';
-import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
-import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { mount, shallow } from 'enzyme';
-import { cloneDeep } from 'lodash';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
+import { createMockedIndexPattern } from '../../../mocks';
+import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
 import {
   GenericOperationDefinition,
+  termsOperation,
   LastValueIndexPatternColumn,
   operationDefinitionMap,
-  termsOperation,
 } from '..';
-import { FramePublicAPI } from '../../../../../types';
-import { IndexPattern } from '../../../../../types';
-import { FieldSelect } from '../../../dimension_panel/field_select';
-import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
-import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
-import { createMockedIndexPattern } from '../../../mocks';
 import { FormBasedLayer, FormBasedPrivateState } from '../../../types';
+import { FramePublicAPI } from '../../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
+import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
+import { FieldSelect } from '../../../dimension_panel/field_select';
+import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
+import { IndexPattern } from '../../../../../types';
+import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
-import { ValuesInput } from './values_input';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({

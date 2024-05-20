@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
 import {
-  elasticsearchServiceMock,
   loggingSystemMock,
+  elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
-import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
-import type { RiskEngineConfiguration } from '../types';
-import * as transforms from '../utils/transforms';
+import type { SavedObject } from '@kbn/core/server';
 import { RiskEngineDataClient } from './risk_engine_data_client';
+import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
+import type { RiskEngineConfiguration } from '../types';
 import * as savedObjectConfig from './utils/saved_object_configuration';
+import * as transforms from '../utils/transforms';
+import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
 
 const getSavedObjectConfiguration = (attributes = {}) => ({
   page: 1,

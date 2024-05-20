@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getLegendItemFromFlattenedBucket, getLegendMap } from '.';
 import { firstNonNullValue } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { LegendItem } from '../../../charts/draggable_legend_item';
+import { getLegendMap, getLegendItemFromFlattenedBucket } from '.';
 import type { FlattenedBucket, RawBucket } from '../../types';
 
 export const getFlattenedLegendItems = ({

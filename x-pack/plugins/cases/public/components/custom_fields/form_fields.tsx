@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { EuiSelectOption } from '@elastic/eui';
-import {
-  HiddenField,
-  SelectField,
-  TextField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { memo, useMemo } from 'react';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  TextField,
+  SelectField,
+  HiddenField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { EuiSelectOption } from '@elastic/eui';
 import type { CustomFieldTypes } from '../../../common/types/domain';
 import { builderMap } from './builder';
 

@@ -25,8 +25,12 @@
         "type": "Function",
         "tags": [],
         "label": "NotFoundPrompt",
-        "description": ["\nPredefined `EuiEmptyPrompt` for 404 pages."],
-        "signature": ["({ actions, title, body }: NotFoundProps) => JSX.Element"],
+        "description": [
+          "\nPredefined `EuiEmptyPrompt` for 404 pages."
+        ],
+        "signature": [
+          "({ actions, title, body }: NotFoundProps) => JSX.Element"
+        ],
         "path": "packages/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +42,9 @@
             "tags": [],
             "label": "{ actions, title, body }",
             "description": [],
-            "signature": ["NotFoundProps"],
+            "signature": [
+              "NotFoundProps"
+            ],
             "path": "packages/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
             "deprecated": false,
             "trackAdoption": false,

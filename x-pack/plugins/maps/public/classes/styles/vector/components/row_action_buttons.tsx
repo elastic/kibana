@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon } from '@elastic/eui';
 
 const ADD_BUTTON_TITLE = i18n.translate('xpack.maps.addBtnTitle', {
   defaultMessage: 'Add',

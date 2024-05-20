@@ -6,19 +6,19 @@
  */
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { APMTransactionDurationIndicator } from '@kbn/slo-schema';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { GroupByField } from '../common/group_by_field';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useFetchApmIndex } from '../../../../hooks/use_fetch_apm_indices';
-import { formatAllFilters } from '../../helpers/format_filters';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
-import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
 import { DataPreviewChart } from '../common/data_preview_chart';
-import { GroupByField } from '../common/group_by_field';
 import { QueryBuilder } from '../common/query_builder';
+import { formatAllFilters } from '../../helpers/format_filters';
+import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardinality_filters';
 
 export function ApmLatencyIndicatorTypeForm() {
   const { control, watch, getFieldState, setValue } =

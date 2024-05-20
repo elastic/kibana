@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { APP_UI_ID } from '../../../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 export const useGetLinkTo = (

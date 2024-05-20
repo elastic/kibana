@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { getEndpointRule } from '../../../../../objects/rule';
-import { ALERTS_COUNT } from '../../../../../screens/alerts';
-import {
-  ADD_AND_BTN,
-  EXCEPTION_CARD_ITEM_CONDITIONS,
-  EXCEPTION_CARD_ITEM_NAME,
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
-} from '../../../../../screens/exceptions';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
   expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
@@ -20,7 +13,8 @@ import {
   openAddEndpointExceptionFromFirstAlert,
   waitForAlerts,
 } from '../../../../../tasks/alerts';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { login } from '../../../../../tasks/login';
+import { getEndpointRule } from '../../../../../objects/rule';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
@@ -32,7 +26,13 @@ import {
   submitNewExceptionItem,
   validateExceptionConditionField,
 } from '../../../../../tasks/exceptions';
-import { login } from '../../../../../tasks/login';
+import { ALERTS_COUNT } from '../../../../../screens/alerts';
+import {
+  ADD_AND_BTN,
+  EXCEPTION_CARD_ITEM_CONDITIONS,
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+} from '../../../../../screens/exceptions';
 import {
   goToEndpointExceptionsTab,
   visitRuleDetailsPage,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Datatable } from '@kbn/expressions-plugin/public';
 import { parseSyncOptions } from './active_cursor_utils';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 
 describe('active_cursor_utils', () => {
   describe('parseSyncOptions', () => {

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ILicense } from '@kbn/licensing-plugin/server';
 import * as t from 'io-ts';
+import Boom from '@hapi/boom';
+import { ILicense } from '@kbn/licensing-plugin/server';
 import {
-  Annotation,
   createAnnotationRt,
   deleteAnnotationRt,
+  Annotation,
   getAnnotationByIdRt,
 } from '../../../common/annotations';
-import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { mappings } from './mappings';
+import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
 
 type CreateParams = t.TypeOf<typeof createAnnotationRt>;
 type DeleteParams = t.TypeOf<typeof deleteAnnotationRt>;

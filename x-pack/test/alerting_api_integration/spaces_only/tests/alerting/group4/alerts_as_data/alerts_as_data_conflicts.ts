@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { basename } from 'node:path';
+import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import expect from '@kbn/expect';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { basename } from 'node:path';
+import { v4 as uuidv4 } from 'uuid';
+import { get, omit } from 'lodash';
 import {
   ALERT_ACTION_GROUP,
   ALERT_CASE_IDS,
-  ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_STATUS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
-import { get, omit } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../../common/lib';
 import { Spaces } from '../../../../scenarios';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 type AlertDoc = Alert & { runCount: number };
 

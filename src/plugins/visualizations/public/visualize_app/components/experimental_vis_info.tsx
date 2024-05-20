@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { memo } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
 
 export const InfoComponent = () => {
   const title = (

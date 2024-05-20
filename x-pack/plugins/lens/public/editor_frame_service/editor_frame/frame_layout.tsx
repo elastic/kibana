@@ -7,11 +7,11 @@
 
 import './frame_layout.scss';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
+import React from 'react';
+import { EuiScreenReaderOnly, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import React from 'react';
-import { selectIsFullscreenDatasource, useLensSelector } from '../../state_management';
+import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;

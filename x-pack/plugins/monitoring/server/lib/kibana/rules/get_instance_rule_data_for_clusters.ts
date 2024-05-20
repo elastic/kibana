@@ -1,4 +1,3 @@
-import { Globals } from '../../../static_globals';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { Globals } from '../../../static_globals';
  */
 import { Cluster, LegacyRequest } from '../../../types';
 import { getIndexPatterns, getKibanaDataset } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 import { createQuery } from '../../create_query';
 import { KibanaClusterRuleMetric } from '../../metrics';
 

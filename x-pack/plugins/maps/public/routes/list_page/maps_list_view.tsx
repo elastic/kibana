@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { useCallback, memo, useEffect } from 'react';
+import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list-view';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, memo, useEffect } from 'react';
 
-import { APP_ID, APP_NAME, MAP_PATH, getEditPath } from '../../../common/constants';
 import type { MapAttributes, MapItem } from '../../../common/content_management';
-import { getMapClient } from '../../content_management';
+import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';
 import {
+  getMapsCapabilities,
   getCoreChrome,
   getExecutionContextService,
-  getMapsCapabilities,
   getNavigateToApp,
-  getServerless,
   getUiSettings,
   getUsageCollection,
+  getServerless,
 } from '../../kibana_services';
+import { getMapClient } from '../../content_management';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -141,8 +141,7 @@ function MapsListViewComp({ history }: Props) {
       title={APP_NAME}
       getOnClickTitle={({ id }) =>
         () =>
-          history.push(getEditPath(id))
-        }
+          history.push(getEditPath(id))}
     />
   );
 }

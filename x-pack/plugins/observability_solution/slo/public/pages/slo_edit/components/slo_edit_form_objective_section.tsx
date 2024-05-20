@@ -18,10 +18,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeWindowType } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   BUDGETING_METHOD_OPTIONS,
   CALENDARALIGNED_TIMEWINDOW_OPTIONS,

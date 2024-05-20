@@ -8,11 +8,11 @@
 import * as rt from 'io-ts';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
-  createDatasetsFilters,
   createJobIdFilters,
   createResultTypeFilters,
   createTimeRangeFilters,
   defaultRequestParameters,
+  createDatasetsFilters,
 } from './common';
 
 import { CategoriesSort } from '../../../../common/log_analysis';

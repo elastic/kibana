@@ -6,7 +6,10 @@
     "id": "osquery",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "osquery"],
+    "configPath": [
+      "xpack",
+      "osquery"
+    ],
     "requiredPlugins": [
       "actions",
       "data",
@@ -20,8 +23,23 @@
       "ruleRegistry",
       "security"
     ],
-    "optionalPlugins": ["fleet", "home", "lens", "telemetry", "cases"],
-    "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact", "lens", "cases"],
-    "extraPublicDirs": ["common"]
+    "optionalPlugins": [
+      "fleet",
+      "home",
+      "lens",
+      "telemetry",
+      "cases"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "fleet",
+      "kibanaUtils",
+      "kibanaReact",
+      "lens",
+      "cases"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { AbstractSource } from '../source';
+import { getKibanaTileMap } from '../../../util';
 import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import _ from 'lodash';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { getKibanaTileMap } from '../../../util';
-import { AbstractSource } from '../source';
 import { extractAttributions } from './extract_attributions';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.kbnTMSTitle', {

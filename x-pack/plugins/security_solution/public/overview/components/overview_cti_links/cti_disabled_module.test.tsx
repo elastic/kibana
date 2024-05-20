@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../common/mock';
+import { render, screen } from '@testing-library/react';
 import { CtiDisabledModule } from './cti_disabled_module';
+import { TestProviders } from '../../../common/mock';
 
 describe('CtiDisabledModule', () => {
   it('renders splitPanel with "danger" variant', () => {

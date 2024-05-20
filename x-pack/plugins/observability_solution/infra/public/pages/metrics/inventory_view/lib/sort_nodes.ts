@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first, last, sortBy } from 'lodash';
+import { sortBy, last, first } from 'lodash';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { WaffleSortOption } from '../hooks/use_waffle_options';
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiBreadcrumb } from '@elastic/eui';
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MouseEvent, useEffect } from 'react';
+import { EuiBreadcrumb } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { stringifyUrlParams } from '../lib/helper/url_params/stringify_url_params';
+import { UptimeUrlParams } from '../lib/helper';
 import { useUrlParams } from '.';
 import { PLUGIN } from '../../../common/constants/plugin';
-import { UptimeUrlParams } from '../lib/helper';
-import { stringifyUrlParams } from '../lib/helper/url_params/stringify_url_params';
 
 const EMPTY_QUERY = '?';
 

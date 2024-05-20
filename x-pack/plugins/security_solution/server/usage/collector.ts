@@ -7,13 +7,13 @@
 
 import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 
-import { getDashboardMetrics } from './dashboards/get_dashboards_metrics';
-import { getDetectionsMetrics } from './detections/get_metrics';
-import { getEndpointMetrics } from './endpoint/get_metrics';
-import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
-import { getRiskEngineMetrics } from './risk_engine/get_risk_engine_metrics';
-import { riskEngineMetricsSchema } from './risk_engine/schema';
 import type { CollectorDependencies, DashboardMetrics } from './types';
+import { getDetectionsMetrics } from './detections/get_metrics';
+import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
+import { getEndpointMetrics } from './endpoint/get_metrics';
+import { getDashboardMetrics } from './dashboards/get_dashboards_metrics';
+import { riskEngineMetricsSchema } from './risk_engine/schema';
+import { getRiskEngineMetrics } from './risk_engine/get_risk_engine_metrics';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 

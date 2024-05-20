@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { palette, systemPalette } from '../common';
 
-import { LegacyColorsService, ThemeService } from './services';
-import { ActiveCursor } from './services/active_cursor';
+import { ThemeService, LegacyColorsService } from './services';
 import { PaletteService } from './services/palettes/service';
+import { ActiveCursor } from './services/active_cursor';
 
 interface SetupDependencies {
   expressions: ExpressionsSetup;

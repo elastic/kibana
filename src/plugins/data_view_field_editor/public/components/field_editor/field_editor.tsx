@@ -6,34 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import React, { useEffect, useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import {
   Form,
-  FormHook,
-  RuntimePrimitiveTypes,
-  RuntimeType,
-  TextField,
-  UseField,
   useForm,
   useFormData,
   useFormIsModified,
+  FormHook,
+  UseField,
+  TextField,
+  RuntimeType,
+  RuntimePrimitiveTypes,
 } from '../../shared_imports';
 import { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
 import { useFieldPreviewContext } from '../preview';
 
-import { ChangeType } from '../preview/types';
-import { CompositeEditor } from './composite_editor';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
-import { FieldDetail } from './field_detail';
-import { TypeField } from './form_fields';
 import { schema } from './form_schema';
-import { getFieldPreviewChanges, getNameFieldConfig } from './lib';
+import { getNameFieldConfig, getFieldPreviewChanges } from './lib';
+import { TypeField } from './form_fields';
+import { FieldDetail } from './field_detail';
+import { CompositeEditor } from './composite_editor';
 import { TypeSelection } from './types';
+import { ChangeType } from '../preview/types';
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;

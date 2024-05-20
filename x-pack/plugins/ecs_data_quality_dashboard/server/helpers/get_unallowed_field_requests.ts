@@ -6,8 +6,8 @@
  */
 
 import type {
-  MsearchMultisearchBody,
   MsearchMultisearchHeader,
+  MsearchMultisearchBody,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { AllowedValuesInputs } from '../schemas/get_unallowed_field_values';
 

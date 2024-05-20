@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { AgentConfigurationTable } from './agent_config_table';
+import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import {
   getApmAgentCommands,
-  getApmAgentHighlightLang,
-  getApmAgentLineNumbers,
   getApmAgentVariables,
+  getApmAgentLineNumbers,
+  getApmAgentHighlightLang,
 } from './commands/get_apm_agent_commands';
+import { AgentConfigurationTable } from './agent_config_table';
 
 export function AgentConfigInstructions({
   variantId,

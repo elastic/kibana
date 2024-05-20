@@ -13,13 +13,13 @@ import {
   EuiPanel,
   EuiSearchBar,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import React, { memo, useCallback } from 'react';
+import { css } from '@emotion/css';
+import { CoverageOverviewLegend } from './shared_components/dashboard_legend';
+import * as i18n from './translations';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { RuleActivityFilter } from './rule_activity_filter';
 import { RuleSourceFilter } from './rule_source_filter';
-import { CoverageOverviewLegend } from './shared_components/dashboard_legend';
-import * as i18n from './translations';
 
 const CoverageOverviewFiltersPanelComponent = () => {
   const {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { EndpointError } from '../../../../common/endpoint/errors';
-import type { EndpointAppContext } from '../../types';
 import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
+import type { EndpointAppContext } from '../../types';
 
 export const COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE =
   'endpoint:complete-external-response-actions';

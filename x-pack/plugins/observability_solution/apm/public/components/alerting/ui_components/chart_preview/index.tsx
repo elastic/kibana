@@ -21,17 +21,17 @@ import {
   niceTimeFormatter,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { TimeUnitChar } from '@kbn/observability-plugin/common';
-import moment from 'moment';
 import React, { useMemo } from 'react';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { TimeUnitChar } from '@kbn/observability-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
+import { TimeLabelForData, TIME_LABELS, getDomain } from './chart_preview_helper';
 import { ALERT_PREVIEW_BUCKET_SIZE } from '../../utils/helper';
-import { TIME_LABELS, TimeLabelForData, getDomain } from './chart_preview_helper';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { IConfigService } from '@kbn/config';
-import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
-import {
-  type LoggingConfigWithBrowserType,
-  config as loggingConfigDef,
-} from '@kbn/core-logging-server-internal';
-import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
-import type { DarkModeValue } from '@kbn/core-ui-settings-common';
+import { firstValueFrom } from 'rxjs';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import { firstValueFrom } from 'rxjs';
+import type { IConfigService } from '@kbn/config';
+import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
+import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import {
+  config as loggingConfigDef,
+  type LoggingConfigWithBrowserType,
+} from '@kbn/core-logging-server-internal';
+import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 
 export const getSettingValue = <T>(
   settingName: string,

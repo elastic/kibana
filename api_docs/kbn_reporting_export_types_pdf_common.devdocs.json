@@ -26,7 +26,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TaskPayloadPDF",
-        "description": ["\nStructure of stored job data provided by create_job"],
+        "description": [
+          "\nStructure of stored job data provided by create_job"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/reporting-export-types-pdf-common",
@@ -73,7 +75,9 @@
             "tags": [],
             "label": "forceNow",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -85,7 +89,9 @@
             "tags": [],
             "label": "objects",
             "description": [],
-            "signature": ["{ relativeUrl: string; }[]"],
+            "signature": [
+              "{ relativeUrl: string; }[]"
+            ],
             "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -202,10 +208,15 @@
         "parentPluginId": "@kbn/reporting-export-types-pdf-common",
         "id": "def-common.JobParamsPDFDeprecated",
         "type": "Type",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "JobParamsPDFDeprecated",
         "description": [],
-        "signature": ["BaseParamsPDF & ", "BaseParams"],
+        "signature": [
+          "BaseParamsPDF & ",
+          "BaseParams"
+        ],
         "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
         "deprecated": true,
         "trackAdoption": false,
@@ -240,7 +251,10 @@
         "tags": [],
         "label": "JobParamsPDFV2",
         "description": [],
-        "signature": ["BaseParamsPDFV2 & ", "BaseParams"],
+        "signature": [
+          "BaseParamsPDFV2 & ",
+          "BaseParams"
+        ],
         "path": "packages/kbn-reporting/export_types/pdf_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -253,7 +267,9 @@
         "tags": [],
         "label": "PDF_JOB_TYPE",
         "description": [],
-        "signature": ["\"printable_pdf\""],
+        "signature": [
+          "\"printable_pdf\""
+        ],
         "path": "packages/kbn-reporting/export_types/pdf_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -266,7 +282,9 @@
         "tags": [],
         "label": "PDF_JOB_TYPE_V2",
         "description": [],
-        "signature": ["\"printable_pdf_v2\""],
+        "signature": [
+          "\"printable_pdf_v2\""
+        ],
         "path": "packages/kbn-reporting/export_types/pdf_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -279,7 +297,9 @@
         "tags": [],
         "label": "PDF_REPORT_TYPE",
         "description": [],
-        "signature": ["\"printablePdf\""],
+        "signature": [
+          "\"printablePdf\""
+        ],
         "path": "packages/kbn-reporting/export_types/pdf_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -292,7 +312,9 @@
         "tags": [],
         "label": "PDF_REPORT_TYPE_V2",
         "description": [],
-        "signature": ["\"printablePdfV2\""],
+        "signature": [
+          "\"printablePdfV2\""
+        ],
         "path": "packages/kbn-reporting/export_types/pdf_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -42,7 +42,9 @@
             "tags": [],
             "label": "labelLength",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_char_count.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,7 +57,11 @@
             "tags": [],
             "label": "overridesPanelWidths",
             "description": [],
-            "signature": ["Partial<", "LIMITS", "> | undefined"],
+            "signature": [
+              "Partial<",
+              "LIMITS",
+              "> | undefined"
+            ],
             "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_char_count.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -88,7 +94,9 @@
             "tags": [],
             "label": "entries",
             "description": [],
-            "signature": ["string[] | Record<string, any>[]"],
+            "signature": [
+              "string[] | Record<string, any>[]"
+            ],
             "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -101,7 +109,9 @@
             "tags": [],
             "label": "labelKeys",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -114,7 +124,11 @@
             "tags": [],
             "label": "overridesPanelWidths",
             "description": [],
-            "signature": ["Partial<", "LIMITS", "> | undefined"],
+            "signature": [
+              "Partial<",
+              "LIMITS",
+              "> | undefined"
+            ],
             "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
             "deprecated": false,
             "trackAdoption": false,

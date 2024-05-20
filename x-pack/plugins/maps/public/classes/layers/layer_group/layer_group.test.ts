@@ -7,9 +7,9 @@
 
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
-import type { ISource } from '../../sources/source';
-import { AbstractLayer, ILayer } from '../layer';
 import { LayerGroup } from './layer_group';
+import { AbstractLayer, ILayer } from '../layer';
+import type { ISource } from '../../sources/source';
 
 describe('getMinZoom', () => {
   test('should return MIN_ZOOM when there are no children', async () => {

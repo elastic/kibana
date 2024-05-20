@@ -6,8 +6,8 @@
  */
 
 import rison from '@kbn/rison';
-import { RENDER_AS } from './constants';
 import { getAggsTileRequest, getHitsTileRequest } from './mvt_request_body';
+import { RENDER_AS } from './constants';
 
 describe('getAggsTileRequest', () => {
   test(`Should URL encode path parameters`, () => {

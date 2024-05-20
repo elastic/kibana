@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TypeOf, schema } from '@kbn/config-schema';
-import { IClusterClient, KibanaRequest } from '@kbn/core/server';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { omit } from 'lodash';
 import { Observable } from 'rxjs';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { IClusterClient, KibanaRequest } from '@kbn/core/server';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 import { KueryNode } from '@kbn/es-query';
 import { EsContext } from './es';
+import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
-import { IEventLogClient } from './types';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { InputsModelId } from '../../store/inputs/constants';
 
 export interface GlobalFullScreen {
   globalFullScreen: boolean;

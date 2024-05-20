@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import { getInterval } from '../get_interval';
 import { UI_SETTINGS } from '../../../../common/constants';
 import type { Annotation, Panel } from '../../../../common/types';
+import { buildAnnotationRequest } from './build_request_body';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import type { EsSearchRequest, SearchCapabilities, SearchStrategy } from '../../search_strategies';
-import { getInterval } from '../get_interval';
-import { buildAnnotationRequest } from './build_request_body';
+import type { SearchStrategy, SearchCapabilities, EsSearchRequest } from '../../search_strategies';
 
 export type AnnotationServices = VisTypeTimeseriesRequestServices & {
   capabilities: SearchCapabilities;

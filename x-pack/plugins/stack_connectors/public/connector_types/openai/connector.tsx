@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import {
+  ActionConnectorFieldsProps,
+  SimpleConnectorForm,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { EuiSpacer } from '@elastic/eui';
 import {
   UseField,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  ActionConnectorFieldsProps,
-  SimpleConnectorForm,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useMemo } from 'react';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import DashboardLink from './dashboard_link';
 import { OpenAiProviderType } from '../../../common/openai/constants';
+import * as i18n from './translations';
 import {
   azureAiConfig,
   azureAiSecrets,
@@ -26,8 +28,6 @@ import {
   openAiSecrets,
   providerOptions,
 } from './constants';
-import DashboardLink from './dashboard_link';
-import * as i18n from './translations';
 const { emptyField } = fieldValidators;
 
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {

@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { CREATE_PACKAGE_POLICY_SAVE_BTN } from '../../screens/integrations';
 import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import {
   ADD_PACK_HEADER_BUTTON,
   ADD_QUERY_BUTTON,
+  formFieldInputSelector,
   SAVED_QUERY_DROPDOWN_SELECT,
   TABLE_ROWS,
-  formFieldInputSelector,
 } from '../../screens/packs';
-import { ServerlessRoleName } from '../../support/roles';
 import {
-  cleanupAgentPolicy,
   cleanupPack,
+  cleanupAgentPolicy,
   cleanupSavedQuery,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
+import { CREATE_PACKAGE_POLICY_SAVE_BTN } from '../../screens/integrations';
+import {
+  createOldOsqueryPath,
+  FLEET_AGENT_POLICIES,
+  NAV_SEARCH_INPUT_OSQUERY_RESULTS,
+  navigateTo,
+  OSQUERY,
+} from '../../tasks/navigation';
 import {
   addCustomIntegration,
-  checkDataStreamsInPolicyDetails,
   closeModalIfVisible,
   generateRandomStringName,
   integrationExistsWithinPolicyDetails,
-  interceptAgentPolicyId,
   interceptPackId,
+  interceptAgentPolicyId,
   policyContainsIntegration,
+  checkDataStreamsInPolicyDetails,
 } from '../../tasks/integrations';
-import {
-  FLEET_AGENT_POLICIES,
-  NAV_SEARCH_INPUT_OSQUERY_RESULTS,
-  OSQUERY,
-  createOldOsqueryPath,
-  navigateTo,
-} from '../../tasks/navigation';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;

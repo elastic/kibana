@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Filter, PhrasesFilter } from '@kbn/es-query';
+import type { PhrasesFilter, Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getPhrasesDisplayValue, mapPhrases } from './map_phrases';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('filter manager utilities', () => {
   describe('mapPhrases()', () => {

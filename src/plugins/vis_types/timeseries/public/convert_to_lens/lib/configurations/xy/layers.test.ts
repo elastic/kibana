@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { XYLayerConfig } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
+import type { Panel, Metric } from '../../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
-import type { Metric, Panel } from '../../../../../common/types';
-import { createPanel, createSeries } from '../../__mocks__';
 import {
   Layer,
   PercentileColumnWithExtendedMeta,
   PercentileRanksColumnWithCommonMeta,
 } from '../../convert';
 import { getLayers } from './layers';
+import { createPanel, createSeries } from '../../__mocks__';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 const mockExtractOrGenerateDatasourceInfo = jest.fn();
 
@@ -385,7 +385,7 @@ describe('getLayers', () => {
     [
       string,
       [Record<number, Layer>, Panel, DataViewsPublicPluginStart, boolean],
-      Array<Partial<XYLayerConfig>>,
+      Array<Partial<XYLayerConfig>>
     ]
   >([
     [

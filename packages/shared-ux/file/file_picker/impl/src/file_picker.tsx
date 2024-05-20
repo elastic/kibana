@@ -6,33 +6,33 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiFlexGroup,
-  EuiLoadingSpinner,
-  EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
 import React from 'react';
 import type { FunctionComponent } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import {
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiFlexGroup,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { DoneNotification } from '@kbn/shared-ux-file-upload';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
-import { FilePickerContext, useFilePickerContext } from './context';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
+import { useFilePickerContext, FilePickerContext } from './context';
 
+import { Title } from './components/title';
+import { ErrorContent } from './components/error_content';
+import { EmptyPrompt } from './components/empty_prompt';
+import { FileGrid } from './components/file_grid';
+import { SearchField } from './components/search_field';
+import { ModalFooter } from './components/modal_footer';
 import { ClearFilterButton } from './components/clear_filter_button';
 import { DeletePrompt } from './components/delete_prompt/delete_prompt';
-import { EmptyPrompt } from './components/empty_prompt';
-import { ErrorContent } from './components/error_content';
-import { FileGrid } from './components/file_grid';
-import { ModalFooter } from './components/modal_footer';
-import { SearchField } from './components/search_field';
-import { Title } from './components/title';
 
 export interface Props<Kind extends string = string> {
   /**

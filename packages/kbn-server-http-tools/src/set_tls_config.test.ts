@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Server } from '@hapi/hapi';
-import { setTlsConfig } from './set_tls_config';
 import { getServerTLSOptionsMock } from './set_tls_config.test.mocks';
+import { Server } from '@hapi/hapi';
 import type { ISslConfig } from './types';
+import { setTlsConfig } from './set_tls_config';
 
 describe('setTlsConfig', () => {
   beforeEach(() => {

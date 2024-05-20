@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
 import { PARTITION_LABELS_FUNCTION, PARTITION_LABELS_VALUE } from '../constants';
 import {
   ExpressionValuePartitionLabels,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
 import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
 import { stringHash } from '@kbn/ml-string-hash';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CloudChatConfigType } from '../server/config';
 import { CloudChatPlugin } from './plugin';
 

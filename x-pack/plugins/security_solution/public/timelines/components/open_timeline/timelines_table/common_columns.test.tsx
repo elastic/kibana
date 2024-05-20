@@ -6,24 +6,24 @@
  */
 
 import type { EuiButtonIconProps } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import '../../../../common/mock/formatted_relative';
-import type { TimelinesTableProps } from '.';
-import { TimelinesTable } from '.';
-import { TimelineId } from '../../../../../common/types';
 import { getEmptyValue } from '../../../../common/components/empty_value';
+import type { OpenTimelineResult } from '../types';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import { NotePreviews } from '../note_previews';
-import type { OpenTimelineResult } from '../types';
+import { TimelineId } from '../../../../../common/types';
+import type { TimelinesTableProps } from '.';
+import { TimelinesTable } from '.';
 
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
-import { createReactQueryWrapper } from '../../../../common/mock';
 import * as i18n from '../translations';
 import { getMockTimelinesTableProps } from './mocks';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import { createReactQueryWrapper } from '../../../../common/mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 

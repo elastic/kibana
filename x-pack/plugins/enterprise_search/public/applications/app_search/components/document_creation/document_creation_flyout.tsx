@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiFlyout, EuiPortal } from '@elastic/eui';
+import { EuiPortal, EuiFlyout } from '@elastic/eui';
 
 import { FLYOUT_ARIA_LABEL_ID } from './constants';
 import {
-  ApiCodeExample,
-  ElasticsearchIndex,
-  JsonFlyout,
   ShowCreationModes,
+  ApiCodeExample,
+  JsonFlyout,
+  ElasticsearchIndex,
 } from './creation_mode_components';
 import { Summary } from './creation_response_components';
 import { DocumentCreationStep } from './types';

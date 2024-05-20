@@ -6,11 +6,11 @@
  */
 
 import type {
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Logger,
   Plugin,
-  PluginInitializerContext,
+  Logger,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
@@ -18,29 +18,29 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 
 import type { Subscription } from 'rxjs';
-import { OSQUERY_INTEGRATION_NAME } from '../common';
-import type { ConfigType } from '../common/config';
-import { packSavedObjectType } from '../common/types';
+import { upgradeIntegration } from './utils/upgrade_integration';
 import type { PackSavedObject } from './common/types';
+import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
+import { packSavedObjectType } from '../common/types';
 import { createConfig } from './create_config';
-import { createDataViews } from './create_data_views';
-import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
-import { initializeTransforms } from './create_transforms/create_transforms';
-import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
+import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
+import { defineRoutes } from './routes';
+import { osquerySearchStrategyProvider } from './search_strategy/osquery';
+import { initSavedObjects } from './saved_objects';
 import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
-import { TelemetryReceiver } from './lib/telemetry/receiver';
+import type { ConfigType } from '../common/config';
+import { OSQUERY_INTEGRATION_NAME } from '../common';
+import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
-import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
-import { defineRoutes } from './routes';
-import { initSavedObjects } from './saved_objects';
-import { osquerySearchStrategyProvider } from './search_strategy/osquery';
-import type { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
-import { upgradeIntegration } from './utils/upgrade_integration';
+import { TelemetryReceiver } from './lib/telemetry/receiver';
+import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
+import { initializeTransforms } from './create_transforms/create_transforms';
+import { createDataViews } from './create_data_views';
 
+import { registerFeatures } from './utils/register_features';
 import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
-import { registerFeatures } from './utils/register_features';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -125,10 +125,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     plugins.fleet
       ?.fleetSetupCompleted()
       .then(async () => {
-        const packageInfo =
-          await plugins.fleet?.packageService.asInternalUser.getInstallation(
-            OSQUERY_INTEGRATION_NAME
-          );
+        const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
+          OSQUERY_INTEGRATION_NAME
+        );
         const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
 
         const esClient = core.elasticsearch.client.asInternalUser;

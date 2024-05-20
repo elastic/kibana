@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutProps } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import React, { useMemo } from 'react';
 
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { AlertsFlyoutHeader } from './alerts_flyout_header';
+import { AlertsFlyoutBody } from './alerts_flyout_body';
+import { AlertsFlyoutFooter } from './alerts_flyout_footer';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import type { TopAlert } from '../../typings/alerts';
-import { AlertsFlyoutBody } from './alerts_flyout_body';
-import { AlertsFlyoutFooter } from './alerts_flyout_footer';
-import { AlertsFlyoutHeader } from './alerts_flyout_header';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;

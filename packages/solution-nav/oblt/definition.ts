@@ -1,7 +1,3 @@
-import type {
-  NavigationTreeDefinition,
-  SolutionNavigationDefinition,
-} from '@kbn/core-chrome-browser';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +6,10 @@ import type {
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import type {
+  NavigationTreeDefinition,
+  SolutionNavigationDefinition,
+} from '@kbn/core-chrome-browser';
 import { of } from 'rxjs';
 
 const title = i18n.translate('navigation.obltNav.headerSolutionSwitcher.obltSolutionTitle', {

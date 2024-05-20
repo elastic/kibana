@@ -12,7 +12,7 @@ import React from 'react';
 import '../../mock/react_beautiful_dnd';
 import { TestProviders } from '../../mock';
 
-import { DEFAULT_WIDTH, DraggableLegend, MIN_LEGEND_HEIGHT } from './draggable_legend';
+import { DEFAULT_WIDTH, MIN_LEGEND_HEIGHT, DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
 
 jest.mock('../../lib/kibana');

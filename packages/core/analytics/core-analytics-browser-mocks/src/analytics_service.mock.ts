@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { Subject } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { AnalyticsService } from '@kbn/core-analytics-browser-internal';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Subject } from 'rxjs';
 
 type AnalyticsServiceContract = PublicMethodsOf<AnalyticsService>;
 

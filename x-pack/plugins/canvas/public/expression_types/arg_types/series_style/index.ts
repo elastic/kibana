@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import { compose, lifecycle } from 'react-recompose';
-import { ArgTypesStrings } from '../../../../i18n';
-import { ExpressionAstExpression } from '../../../../types';
+import { lifecycle, compose } from 'react-recompose';
+import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
-import { ExtendedTemplate, Props as ExtendedTemplateProps } from './extended_template';
 import { SimpleTemplate } from './simple_template';
+import { ExtendedTemplate, Props as ExtendedTemplateProps } from './extended_template';
+import { ExpressionAstExpression } from '../../../../types';
+import { ArgTypesStrings } from '../../../../i18n';
 
 const { SeriesStyle: strings } = ArgTypesStrings;
 

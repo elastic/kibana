@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { MapSourceDataEvent, Map as MbMap } from '@kbn/mapbox-gl';
-import { mount } from 'enzyme';
 // eslint-disable-next-line max-classes-per-file
 import React from 'react';
+import { mount } from 'enzyme';
+import type { Map as MbMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
 import type { TileError, TileMetaFeature } from '../../../../common/descriptor_types';
+import { TileStatusTracker } from './tile_status_tracker';
 import { ILayer } from '../../../classes/layers/layer';
 import type { IVectorSource } from '../../../classes/sources/vector_source';
-import { TileStatusTracker } from './tile_status_tracker';
 
 class MockMbMap {
   public listeners: Array<{ type: string; callback: (e: unknown) => void }> = [];

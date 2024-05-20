@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { useBulkDeleteArtifact } from './use_bulk_delete_artifact';
 import type { HttpSetup } from '@kbn/core/public';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { act } from '@testing-library/react-hooks';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import {
-  getFakeHttpService,
-  getFakeListDefinition,
   getFakeListId,
+  getFakeListDefinition,
+  getFakeHttpService,
   renderMutation,
 } from '../test_utils';
-import { useBulkDeleteArtifact } from './use_bulk_delete_artifact';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { act } from '@testing-library/react-hooks';
 
 const apiVersion = '2023-10-31';
 

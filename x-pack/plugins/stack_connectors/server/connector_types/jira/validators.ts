@@ -7,14 +7,14 @@
 
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
-  ExternalServiceValidation,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
+  ExternalServiceValidation,
 } from './types';
 
+import * as i18n from './translations';
 import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
 import { incidentSchemaObjectProperties } from './schema';
-import * as i18n from './translations';
 
 export const validateCommonConfig = (
   configObject: JiraPublicConfigurationType,

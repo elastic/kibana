@@ -22,7 +22,7 @@ jest.mock('../../../../app_logic', () => ({
 }));
 import { AppLogic } from '../../../../app_logic';
 
-import { PRIVATE_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../../../routes';
+import { SOURCES_PATH, PRIVATE_SOURCES_PATH, getSourcesPath } from '../../../../routes';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
 import { staticSourceData } from '../../source_data';
 import { SourcesLogic } from '../../sources_logic';
@@ -31,10 +31,10 @@ import { ExternalConnectorLogic } from './add_external_connector/external_connec
 import {
   AddSourceLogic,
   AddSourceSteps,
-  AddSourceValues,
-  OrganizationsMap,
   SourceConfigData,
   SourceConnectData,
+  OrganizationsMap,
+  AddSourceValues,
 } from './add_source_logic';
 
 describe('AddSourceLogic', () => {

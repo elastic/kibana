@@ -8,10 +8,10 @@
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import { HostStatus } from '../../../../../common/endpoint/types';
+import { getHostMetadata } from './api';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
-import { getHostMetadata } from './api';
+import { HostStatus } from '../../../../../common/endpoint/types';
 
 interface HostIsolationStatusResponse {
   loading: boolean;

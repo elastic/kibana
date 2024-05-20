@@ -1,4 +1,3 @@
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
  * 2.0.
  */
 import Chance from 'chance';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { getCloudProductTier } from './cloud_security_metering';
 import {
@@ -13,10 +13,10 @@ import {
   getSearchQueryByCloudSecuritySolution,
 } from './cloud_security_metering_task';
 
-import type { ProductTier } from '../../common/product';
 import type { ServerlessSecurityConfig } from '../config';
-import { CLOUD_SECURITY_TASK_TYPE, CNVM, CSPM, KSPM } from './constants';
 import type { CloudSecuritySolutions } from './types';
+import type { ProductTier } from '../../common/product';
+import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM } from './constants';
 
 const mockEsClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();

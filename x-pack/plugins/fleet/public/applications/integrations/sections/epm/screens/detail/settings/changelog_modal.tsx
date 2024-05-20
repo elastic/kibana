@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiButton,
   EuiCodeBlock,
   EuiModal,
   EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
+  EuiModalFooter,
   EuiModalHeaderTitle,
+  EuiButton,
   EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 import { useGetFileByPathQuery, useStartServices } from '../../../../../hooks';
 

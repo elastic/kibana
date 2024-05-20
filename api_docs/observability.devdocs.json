@@ -41,7 +41,9 @@
                 "tags": [],
                 "label": "areSuggestionsVisible",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -53,7 +55,9 @@
                 "tags": [],
                 "label": "isFocused",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -65,7 +69,9 @@
                 "tags": [],
                 "label": "selectedIndex",
                 "description": [],
-                "signature": ["null"],
+                "signature": [
+                  "null"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -79,7 +85,9 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": ["() => JSX.Element"],
+            "signature": [
+              "() => JSX.Element"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -93,7 +101,9 @@
             "tags": [],
             "label": "componentDidMount",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -107,7 +117,9 @@
             "tags": [],
             "label": "componentDidUpdate",
             "description": [],
-            "signature": ["(prevProps: AutocompleteFieldProps) => void"],
+            "signature": [
+              "(prevProps: AutocompleteFieldProps) => void"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -119,7 +131,9 @@
                 "tags": [],
                 "label": "prevProps",
                 "description": [],
-                "signature": ["AutocompleteFieldProps"],
+                "signature": [
+                  "AutocompleteFieldProps"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/public/components/rule_kql_filter/autocomplete_field/autocomplete_field.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -140,7 +154,9 @@
         "tags": [],
         "label": "AlertSummary",
         "description": [],
-        "signature": ["({ alertSummaryFields }: AlertSummaryProps) => JSX.Element"],
+        "signature": [
+          "({ alertSummaryFields }: AlertSummaryProps) => JSX.Element"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/components/alert_summary.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -152,7 +168,9 @@
             "tags": [],
             "label": "{ alertSummaryFields }",
             "description": [],
-            "signature": ["AlertSummaryProps"],
+            "signature": [
+              "AlertSummaryProps"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/pages/alert_details/components/alert_summary.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -191,7 +209,9 @@
             "tags": [],
             "label": "{\n  timeRange,\n  kuery,\n  config = {},\n  queries = [],\n  filters = [],\n}",
             "description": [],
-            "signature": ["BuildEsQueryArgs"],
+            "signature": [
+              "BuildEsQueryArgs"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/build_es_query/build_es_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -284,7 +304,9 @@
         "type": "Function",
         "tags": [],
         "label": "convertTo",
-        "description": ["\nConverts a microseconds value into the unit defined."],
+        "description": [
+          "\nConverts a microseconds value into the unit defined."
+        ],
         "signature": [
           "({\n  unit,\n  microseconds,\n  defaultValue = NOT_AVAILABLE_LABEL,\n  extended,\n}: { unit: DurationTimeUnit; microseconds: ",
           "Maybe",
@@ -312,7 +334,10 @@
                 "tags": [],
                 "label": "unit",
                 "description": [],
-                "signature": ["\"microseconds\" | ", "TimeUnit"],
+                "signature": [
+                  "\"microseconds\" | ",
+                  "TimeUnit"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -324,7 +349,9 @@
                 "tags": [],
                 "label": "microseconds",
                 "description": [],
-                "signature": ["number | null | undefined"],
+                "signature": [
+                  "number | null | undefined"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -336,7 +363,9 @@
                 "tags": [],
                 "label": "defaultValue",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -348,7 +377,9 @@
                 "tags": [],
                 "label": "extended",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -439,7 +470,9 @@
             "tags": [],
             "label": "{\n  rangeFrom,\n  rangeTo,\n  refreshPaused,\n  refreshInterval,\n  width = 'restricted',\n  onTimeRangeRefresh,\n}",
             "description": [],
-            "signature": ["DatePickerProps"],
+            "signature": [
+              "DatePickerProps"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/pages/overview/components/date_picker/date_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -481,7 +514,9 @@
                 "tags": [],
                 "label": "children",
                 "description": [],
-                "signature": ["React.ReactElement<any, string | React.JSXElementConstructor<any>>"],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/public/context/date_picker_context/date_picker_context.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -513,7 +548,9 @@
             "tags": [],
             "label": "ruleTypeId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/format_alert_evaluation_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -526,7 +563,9 @@
             "tags": [],
             "label": "evaluationValue",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/format_alert_evaluation_value.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -543,7 +582,9 @@
         "tags": [],
         "label": "fromQuery",
         "description": [],
-        "signature": ["(query: Record<string, any>) => string"],
+        "signature": [
+          "(query: Record<string, any>) => string"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/public/utils/url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -555,7 +596,9 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": ["Record<string, any>"],
+            "signature": [
+              "Record<string, any>"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -622,7 +665,9 @@
             "tags": [],
             "label": "fixedInterval",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/alert_summary_widget/get_alert_summary_time_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -635,7 +680,9 @@
             "tags": [],
             "label": "dateFormat",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/alert_summary_widget/get_alert_summary_time_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -716,7 +763,11 @@
         "tags": [],
         "label": "getCoreVitalsComponent",
         "description": [],
-        "signature": ["(props: ", "CoreVitalProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "CoreVitalProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/public/pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -728,7 +779,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["CoreVitalProps"],
+            "signature": [
+              "CoreVitalProps"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -788,7 +841,9 @@
         "tags": [],
         "label": "KibanaReactStorybookDecorator",
         "description": [],
-        "signature": ["(Story: React.ComponentType<{}>) => JSX.Element"],
+        "signature": [
+          "(Story: React.ComponentType<{}>) => JSX.Element"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/public/utils/kibana_react.storybook_decorator.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -800,7 +855,9 @@
             "tags": [],
             "label": "Story",
             "description": [],
-            "signature": ["React.ComponentType<{}>"],
+            "signature": [
+              "React.ComponentType<{}>"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/kibana_react.storybook_decorator.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -860,7 +917,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -875,7 +934,11 @@
         "tags": [],
         "label": "ObservabilityAlertSearchBar",
         "description": [],
-        "signature": ["(props: ", "ObservabilityAlertSearchBarProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "ObservabilityAlertSearchBarProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/public/components/alert_search_bar/get_alert_search_bar_lazy.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -887,7 +950,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["ObservabilityAlertSearchBarProps"],
+            "signature": [
+              "ObservabilityAlertSearchBarProps"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/components/alert_search_bar/get_alert_search_bar_lazy.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -938,7 +1003,9 @@
             "tags": [],
             "label": "component",
             "description": [],
-            "signature": ["React.ReactNode"],
+            "signature": [
+              "React.ReactNode"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/test_helper.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -999,7 +1066,9 @@
             "tags": [],
             "label": "{\n  derivedIndexPattern,\n  onSubmit,\n  onChange,\n  value,\n  placeholder,\n  curryLoadSuggestions = defaultCurryLoadSuggestions,\n  compressed,\n}",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/components/rule_kql_filter/kuery_bar.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1016,7 +1085,11 @@
         "tags": [],
         "label": "toQuery",
         "description": [],
-        "signature": ["(search: string | undefined) => ", "ParsedQuery", "<string>"],
+        "signature": [
+          "(search: string | undefined) => ",
+          "ParsedQuery",
+          "<string>"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/public/utils/url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1028,7 +1101,9 @@
             "tags": [],
             "label": "search",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/utils/url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1107,7 +1182,9 @@
         "tags": [],
         "label": "useGetFilteredRuleTypes",
         "description": [],
-        "signature": ["() => string[]"],
+        "signature": [
+          "() => string[]"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/public/hooks/use_get_filtered_rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1215,7 +1292,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P & { children?: React.ReactNode; }"],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1227,7 +1306,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1391,7 +1472,9 @@
             "tags": [],
             "label": "indices",
             "description": [],
-            "signature": ["ApmIndicesConfig"],
+            "signature": [
+              "ApmIndicesConfig"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1456,7 +1539,9 @@
             "tags": [],
             "label": "y",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1613,7 +1698,9 @@
             "tags": [],
             "label": "absoluteTime",
             "description": [],
-            "signature": ["{ start: number; end: number; }"],
+            "signature": [
+              "{ start: number; end: number; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1625,7 +1712,9 @@
             "tags": [],
             "label": "relativeTime",
             "description": [],
-            "signature": ["{ start: string; end: string; }"],
+            "signature": [
+              "{ start: string; end: string; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1637,7 +1726,9 @@
             "tags": [],
             "label": "serviceName",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1671,7 +1762,9 @@
             "tags": [],
             "label": "timeZone",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1722,7 +1815,9 @@
             "tags": [],
             "label": "absoluteTime",
             "description": [],
-            "signature": ["{ start: number; end: number; }"],
+            "signature": [
+              "{ start: number; end: number; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1959,7 +2054,9 @@
                 "tags": [],
                 "label": "by",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1972,7 +2069,9 @@
                 "tags": [],
                 "label": "direction",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2034,7 +2133,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2046,7 +2147,9 @@
             "tags": [],
             "label": "platform",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2058,7 +2161,9 @@
             "tags": [],
             "label": "provider",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2070,7 +2175,9 @@
             "tags": [],
             "label": "cpu",
             "description": [],
-            "signature": ["number | null"],
+            "signature": [
+              "number | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2082,7 +2189,9 @@
             "tags": [],
             "label": "iowait",
             "description": [],
-            "signature": ["number | null"],
+            "signature": [
+              "number | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2094,7 +2203,9 @@
             "tags": [],
             "label": "load",
             "description": [],
-            "signature": ["number | null"],
+            "signature": [
+              "number | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2106,7 +2217,9 @@
             "tags": [],
             "label": "uptime",
             "description": [],
-            "signature": ["number | null"],
+            "signature": [
+              "number | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2118,7 +2231,9 @@
             "tags": [],
             "label": "rx",
             "description": [],
-            "signature": ["number | null"],
+            "signature": [
+              "number | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2130,7 +2245,9 @@
             "tags": [],
             "label": "tx",
             "description": [],
-            "signature": ["number | null"],
+            "signature": [
+              "number | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2444,7 +2561,9 @@
             "tags": [],
             "label": "universal_profiling",
             "description": [],
-            "signature": ["UniversalProfilingHasDataResponse"],
+            "signature": [
+              "UniversalProfilingHasDataResponse"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3452,7 +3571,9 @@
             "tags": [],
             "label": "aiops",
             "description": [],
-            "signature": ["AiopsPluginStart"],
+            "signature": [
+              "AiopsPluginStart"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3761,7 +3882,9 @@
             "tags": [],
             "label": "priority",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/rules/create_observability_rule_type_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3804,7 +3927,9 @@
             "tags": [],
             "label": "lastResponse",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/locators/rules.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3816,7 +3941,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Record<string, string | number> | undefined"],
+            "signature": [
+              "Record<string, string | number> | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/locators/rules.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3828,7 +3955,9 @@
             "tags": [],
             "label": "search",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/locators/rules.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3861,7 +3990,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/locators/rules.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3922,7 +4053,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"number\" | \"percent\" | \"bytesPerSecond\""],
+            "signature": [
+              "\"number\" | \"percent\" | \"bytesPerSecond\""
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4066,7 +4199,9 @@
             "tags": [],
             "label": "link",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/alerts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4089,7 +4224,9 @@
             "tags": [],
             "label": "hasBasePath",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/alerts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4282,7 +4419,9 @@
             "tags": [],
             "label": "serviceName",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4294,7 +4433,9 @@
             "tags": [],
             "label": "indices",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4312,7 +4453,9 @@
         "tags": [],
         "label": "alertsLocatorID",
         "description": [],
-        "signature": ["\"ALERTS_LOCATOR\""],
+        "signature": [
+          "\"ALERTS_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4325,7 +4468,9 @@
         "tags": [],
         "label": "apmEnableTableSearchBar",
         "description": [],
-        "signature": ["\"observability:apmEnableTableSearchBar\""],
+        "signature": [
+          "\"observability:apmEnableTableSearchBar\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4338,7 +4483,9 @@
         "tags": [],
         "label": "apmServiceGroupMaxNumberOfServices",
         "description": [],
-        "signature": ["\"observability:apmServiceGroupMaxNumberOfServices\""],
+        "signature": [
+          "\"observability:apmServiceGroupMaxNumberOfServices\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4351,7 +4498,9 @@
         "tags": [],
         "label": "enableAgentExplorerView",
         "description": [],
-        "signature": ["\"observability:apmAgentExplorerView\""],
+        "signature": [
+          "\"observability:apmAgentExplorerView\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4364,7 +4513,9 @@
         "tags": [],
         "label": "enableComparisonByDefault",
         "description": [],
-        "signature": ["\"observability:enableComparisonByDefault\""],
+        "signature": [
+          "\"observability:enableComparisonByDefault\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4377,7 +4528,9 @@
         "tags": [],
         "label": "enableInfrastructureContainerAssetView",
         "description": [],
-        "signature": ["\"observability:enableInfrastructureContainerAssetView\""],
+        "signature": [
+          "\"observability:enableInfrastructureContainerAssetView\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4390,7 +4543,9 @@
         "tags": [],
         "label": "enableInfrastructureHostsView",
         "description": [],
-        "signature": ["\"observability:enableInfrastructureHostsView\""],
+        "signature": [
+          "\"observability:enableInfrastructureHostsView\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4403,7 +4558,9 @@
         "tags": [],
         "label": "enableInspectEsQueries",
         "description": [],
-        "signature": ["\"observability:enableInspectEsQueries\""],
+        "signature": [
+          "\"observability:enableInspectEsQueries\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4416,7 +4573,9 @@
         "tags": [],
         "label": "enableLegacyUptimeApp",
         "description": [],
-        "signature": ["\"observability:enableLegacyUptimeApp\""],
+        "signature": [
+          "\"observability:enableLegacyUptimeApp\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4530,7 +4689,9 @@
         "tags": [],
         "label": "NumberOrNull",
         "description": [],
-        "signature": ["number | null"],
+        "signature": [
+          "number | null"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4543,7 +4704,9 @@
         "tags": [],
         "label": "observabilityAppId",
         "description": [],
-        "signature": ["\"observability-overview\""],
+        "signature": [
+          "\"observability-overview\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4556,7 +4719,9 @@
         "tags": [],
         "label": "observabilityFeatureId",
         "description": [],
-        "signature": ["\"observability\""],
+        "signature": [
+          "\"observability\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4671,7 +4836,9 @@
         "tags": [],
         "label": "ruleDetailsLocatorID",
         "description": [],
-        "signature": ["\"RULE_DETAILS_LOCATOR\""],
+        "signature": [
+          "\"RULE_DETAILS_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4684,7 +4851,9 @@
         "tags": [],
         "label": "rulesLocatorID",
         "description": [],
-        "signature": ["\"RULES_LOCATOR\""],
+        "signature": [
+          "\"RULES_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4697,7 +4866,9 @@
         "tags": [],
         "label": "sloDetailsLocatorID",
         "description": [],
-        "signature": ["\"SLO_DETAILS_LOCATOR\""],
+        "signature": [
+          "\"SLO_DETAILS_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4710,7 +4881,9 @@
         "tags": [],
         "label": "sloEditLocatorID",
         "description": [],
-        "signature": ["\"SLO_EDIT_LOCATOR\""],
+        "signature": [
+          "\"SLO_EDIT_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4723,7 +4896,9 @@
         "tags": [],
         "label": "StringOrNull",
         "description": [],
-        "signature": ["string | null"],
+        "signature": [
+          "string | null"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/public/typings/fetch_overview_data/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4735,7 +4910,9 @@
         "type": "Type",
         "tags": [],
         "label": "Subset",
-        "description": ["\nAllow partial of nested object"],
+        "description": [
+          "\nAllow partial of nested object"
+        ],
         "signature": [
           "{ [attr in keyof K]?: (K[attr] extends object ? ",
           {
@@ -4759,7 +4936,9 @@
         "tags": [],
         "label": "syntheticsThrottlingEnabled",
         "description": [],
-        "signature": ["\"observability:syntheticsThrottlingEnabled\""],
+        "signature": [
+          "\"observability:syntheticsThrottlingEnabled\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4793,7 +4972,9 @@
         "tags": [],
         "label": "uptimeOverviewLocatorID",
         "description": [],
-        "signature": ["\"UPTIME_OVERVIEW_LOCATOR\""],
+        "signature": [
+          "\"UPTIME_OVERVIEW_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4953,7 +5134,10 @@
         "tags": [],
         "label": "WrappedElasticsearchClientError",
         "description": [],
-        "signature": ["WrappedElasticsearchClientError", " extends Error"],
+        "signature": [
+          "WrappedElasticsearchClientError",
+          " extends Error"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/utils/unwrap_es_response.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4965,7 +5149,9 @@
             "tags": [],
             "label": "originalError",
             "description": [],
-            "signature": ["ElasticsearchClientError"],
+            "signature": [
+              "ElasticsearchClientError"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/unwrap_es_response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4977,7 +5163,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/unwrap_es_response.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4989,7 +5177,9 @@
                 "tags": [],
                 "label": "originalError",
                 "description": [],
-                "signature": ["ElasticsearchClientError"],
+                "signature": [
+                  "ElasticsearchClientError"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/unwrap_es_response.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6422,7 +6612,9 @@
                 "tags": [],
                 "label": "indexTemplate",
                 "description": [],
-                "signature": ["IndicesPutIndexTemplateRequest"],
+                "signature": [
+                  "IndicesPutIndexTemplateRequest"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/utils/create_or_update_index_template.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7748,7 +7940,10 @@
                 "tags": [],
                 "label": "esError",
                 "description": [],
-                "signature": ["WrappedElasticsearchClientError", " | null"],
+                "signature": [
+                  "WrappedElasticsearchClientError",
+                  " | null"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/get_inspect_response.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7760,7 +7955,9 @@
                 "tags": [],
                 "label": "esRequestParams",
                 "description": [],
-                "signature": ["{ [x: string]: any; }"],
+                "signature": [
+                  "{ [x: string]: any; }"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/get_inspect_response.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7792,7 +7989,9 @@
                 "tags": [],
                 "label": "esResponse",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/get_inspect_response.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -7853,7 +8052,11 @@
         "tags": [],
         "label": "getParsedFilterQuery",
         "description": [],
-        "signature": ["(filter: string | undefined) => ", "QueryDslQueryContainer", "[]"],
+        "signature": [
+          "(filter: string | undefined) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/server/utils/get_parsed_filtered_query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7865,7 +8068,9 @@
             "tags": [],
             "label": "filter",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/get_parsed_filtered_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7882,7 +8087,11 @@
         "tags": [],
         "label": "kqlQuery",
         "description": [],
-        "signature": ["(kql: string | undefined) => ", "QueryDslQueryContainer", "[]"],
+        "signature": [
+          "(kql: string | undefined) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7894,7 +8103,9 @@
             "tags": [],
             "label": "kql",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7927,7 +8138,9 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7940,7 +8153,9 @@
             "tags": [],
             "label": "end",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7953,7 +8168,9 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7986,7 +8203,9 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -7999,7 +8218,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["string | number | boolean | null | undefined"],
+            "signature": [
+              "string | number | boolean | null | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8012,7 +8233,9 @@
             "tags": [],
             "label": "opts",
             "description": [],
-            "signature": ["TermQueryOpts"],
+            "signature": [
+              "TermQueryOpts"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8045,7 +8268,9 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8058,7 +8283,9 @@
             "tags": [],
             "label": "values",
             "description": [],
-            "signature": ["(string | number | boolean | null | undefined)[]"],
+            "signature": [
+              "(string | number | boolean | null | undefined)[]"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8075,7 +8302,9 @@
         "tags": [],
         "label": "unwrapEsResponse",
         "description": [],
-        "signature": ["(responsePromise: T) => Promise<Awaited<T>[\"body\"]>"],
+        "signature": [
+          "(responsePromise: T) => Promise<Awaited<T>[\"body\"]>"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/utils/unwrap_es_response.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8087,7 +8316,9 @@
             "tags": [],
             "label": "responsePromise",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/unwrap_es_response.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8120,7 +8351,9 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8133,7 +8366,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8146,7 +8381,9 @@
             "tags": [],
             "label": "opts",
             "description": [],
-            "signature": ["{ leadingWildcard: boolean; }"],
+            "signature": [
+              "{ leadingWildcard: boolean; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -8248,7 +8485,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["{ tags: string[]; access?: \"internal\" | \"public\" | undefined; }"],
+            "signature": [
+              "{ tags: string[]; access?: \"internal\" | \"public\" | undefined; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8319,7 +8558,9 @@
             "tags": [],
             "label": "dependencies",
             "description": [],
-            "signature": ["RegisterRoutesDependencies"],
+            "signature": [
+              "RegisterRoutesDependencies"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -8767,7 +9008,9 @@
         "type": "Object",
         "tags": [],
         "label": "uiSettings",
-        "description": ["\nuiSettings definitions for Observability."],
+        "description": [
+          "\nuiSettings definitions for Observability."
+        ],
         "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8790,7 +9033,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8813,7 +9058,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8857,7 +9104,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8882,7 +9131,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8961,7 +9212,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -8984,7 +9237,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9041,7 +9296,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9053,7 +9310,9 @@
                 "tags": [],
                 "label": "sensitive",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9132,7 +9391,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9215,7 +9476,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9227,7 +9490,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"select\""],
+                "signature": [
+                  "\"select\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9317,7 +9582,9 @@
                 "tags": [],
                 "label": "showInLabs",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9342,7 +9609,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9397,7 +9666,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9409,7 +9680,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9421,7 +9694,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"boolean\""],
+                "signature": [
+                  "\"boolean\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9433,7 +9708,9 @@
                 "tags": [],
                 "label": "showInLabs",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9458,7 +9735,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9537,7 +9816,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9592,7 +9873,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9604,7 +9887,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9616,7 +9901,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"boolean\""],
+                "signature": [
+                  "\"boolean\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9628,7 +9915,9 @@
                 "tags": [],
                 "label": "showInLabs",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9653,7 +9942,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9708,7 +9999,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9720,7 +10013,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9732,7 +10027,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"boolean\""],
+                "signature": [
+                  "\"boolean\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9757,7 +10054,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9780,7 +10079,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9837,7 +10138,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9860,7 +10163,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9917,7 +10222,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9940,7 +10247,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -9997,7 +10306,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10020,7 +10331,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10077,7 +10390,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10132,7 +10447,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10144,7 +10461,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10156,7 +10475,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"boolean\""],
+                "signature": [
+                  "\"boolean\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10168,7 +10489,9 @@
                 "tags": [],
                 "label": "showInLabs",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10193,7 +10516,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10248,7 +10573,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10260,7 +10587,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10272,7 +10601,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"boolean\""],
+                "signature": [
+                  "\"boolean\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10297,7 +10628,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10352,7 +10685,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10364,7 +10699,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10376,7 +10713,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"boolean\""],
+                "signature": [
+                  "\"boolean\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10401,7 +10740,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10456,7 +10797,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10468,7 +10811,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10480,7 +10825,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"boolean\""],
+                "signature": [
+                  "\"boolean\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10505,7 +10852,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10560,7 +10909,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10572,7 +10923,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10584,7 +10937,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"boolean\""],
+                "signature": [
+                  "\"boolean\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10609,7 +10964,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10632,7 +10989,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"json\""],
+                "signature": [
+                  "\"json\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10716,7 +11075,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10784,7 +11145,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10807,7 +11170,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10851,7 +11216,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10876,7 +11243,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10899,7 +11268,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10943,7 +11314,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -10968,7 +11341,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11023,7 +11398,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11035,7 +11412,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11047,7 +11426,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"boolean\""],
+                "signature": [
+                  "\"boolean\""
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11059,7 +11440,9 @@
                 "tags": [],
                 "label": "showInLabs",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11084,7 +11467,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11107,7 +11492,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11151,7 +11538,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11176,7 +11565,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11199,7 +11590,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11243,7 +11636,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11268,7 +11663,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11291,7 +11688,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11324,7 +11723,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11349,7 +11750,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11372,7 +11775,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11405,7 +11810,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11430,7 +11837,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11496,7 +11905,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11521,7 +11932,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11587,7 +12000,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11612,7 +12027,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11678,7 +12095,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11703,7 +12122,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11769,7 +12190,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11794,7 +12217,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11849,7 +12274,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11885,7 +12312,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11940,7 +12369,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11976,7 +12407,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12042,7 +12475,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12067,7 +12502,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12090,7 +12527,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12123,7 +12562,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12148,7 +12589,9 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12182,7 +12625,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12215,7 +12660,9 @@
                 "tags": [],
                 "label": "requiresPageReload",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12337,7 +12784,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"ALERTS_LOCATOR\""],
+            "signature": [
+              "\"ALERTS_LOCATOR\""
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/locators/alerts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12400,7 +12849,11 @@
         "tags": [],
         "label": "asAbsoluteDateTime",
         "description": [],
-        "signature": ["(time: number, timeUnit: ", "TimeUnit", ") => string"],
+        "signature": [
+          "(time: number, timeUnit: ",
+          "TimeUnit",
+          ") => string"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/datetime.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12412,7 +12865,9 @@
             "tags": [],
             "label": "time",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/datetime.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12425,7 +12880,9 @@
             "tags": [],
             "label": "timeUnit",
             "description": [],
-            "signature": ["TimeUnit"],
+            "signature": [
+              "TimeUnit"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/datetime.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12441,7 +12898,9 @@
         "type": "Function",
         "tags": [],
         "label": "asDuration",
-        "description": ["\nConverts value and returns it formatted - 00 unit"],
+        "description": [
+          "\nConverts value and returns it formatted - 00 unit"
+        ],
         "signature": [
           "(value: ",
           "Maybe",
@@ -12458,7 +12917,10 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["Maybe", "<number>"],
+            "signature": [
+              "Maybe",
+              "<number>"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12471,7 +12933,9 @@
             "tags": [],
             "label": "{ defaultValue = NOT_AVAILABLE_LABEL, extended }",
             "description": [],
-            "signature": ["FormatterOptions"],
+            "signature": [
+              "FormatterOptions"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12488,7 +12952,11 @@
         "tags": [],
         "label": "asDynamicBytes",
         "description": [],
-        "signature": ["(val: ", "Maybe", "<number>) => string"],
+        "signature": [
+          "(val: ",
+          "Maybe",
+          "<number>) => string"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/size.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12501,7 +12969,9 @@
             "tags": [],
             "label": "val",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/size.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -12516,7 +12986,9 @@
         "tags": [],
         "label": "asInteger",
         "description": [],
-        "signature": ["(value: number | null | undefined) => string"],
+        "signature": [
+          "(value: number | null | undefined) => string"
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/formatters.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12528,7 +13000,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12561,7 +13035,10 @@
             "tags": [],
             "label": "numerator",
             "description": [],
-            "signature": ["Maybe", "<number>"],
+            "signature": [
+              "Maybe",
+              "<number>"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12574,7 +13051,9 @@
             "tags": [],
             "label": "denominator",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12587,7 +13066,9 @@
             "tags": [],
             "label": "fallbackResult",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12626,7 +13107,9 @@
             "tags": [],
             "label": "time",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12707,7 +13190,9 @@
             "tags": [],
             "label": "spaceId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/alerting/alert_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12720,7 +13205,9 @@
             "tags": [],
             "label": "alertUuid",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/alerting/alert_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12767,7 +13254,9 @@
             "tags": [],
             "label": "alertUuid",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/alerting/alert_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12780,7 +13269,9 @@
             "tags": [],
             "label": "spaceId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/alerting/alert_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12793,7 +13284,9 @@
             "tags": [],
             "label": "startedAt",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/alerting/alert_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12836,7 +13329,9 @@
             "tags": [],
             "label": "publicBaseUrl",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/alerting/alert_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -12941,7 +13436,10 @@
                 "tags": [],
                 "label": "esError",
                 "description": [],
-                "signature": ["WrappedElasticsearchClientError", " | null"],
+                "signature": [
+                  "WrappedElasticsearchClientError",
+                  " | null"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/get_inspect_response.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12953,7 +13451,9 @@
                 "tags": [],
                 "label": "esRequestParams",
                 "description": [],
-                "signature": ["{ [x: string]: any; }"],
+                "signature": [
+                  "{ [x: string]: any; }"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/get_inspect_response.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12985,7 +13485,9 @@
                 "tags": [],
                 "label": "esResponse",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability/common/utils/get_inspect_response.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -13145,7 +13647,9 @@
             "tags": [],
             "label": "rangeFrom",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/locators/alerts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13157,7 +13661,9 @@
             "tags": [],
             "label": "rangeTo",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/locators/alerts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13169,7 +13675,9 @@
             "tags": [],
             "label": "kuery",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/locators/alerts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13181,7 +13689,10 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": ["AlertStatus", " | undefined"],
+            "signature": [
+              "AlertStatus",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/locators/alerts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13224,7 +13735,9 @@
         "tags": [],
         "label": "alertsLocatorID",
         "description": [],
-        "signature": ["\"ALERTS_LOCATOR\""],
+        "signature": [
+          "\"ALERTS_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13237,7 +13750,9 @@
         "tags": [],
         "label": "apmAWSLambdaPriceFactor",
         "description": [],
-        "signature": ["\"observability:apmAWSLambdaPriceFactor\""],
+        "signature": [
+          "\"observability:apmAWSLambdaPriceFactor\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13250,7 +13765,9 @@
         "tags": [],
         "label": "apmAWSLambdaRequestCostPerMillion",
         "description": [],
-        "signature": ["\"observability:apmAWSLambdaRequestCostPerMillion\""],
+        "signature": [
+          "\"observability:apmAWSLambdaRequestCostPerMillion\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13263,7 +13780,9 @@
         "tags": [],
         "label": "apmEnableContinuousRollups",
         "description": [],
-        "signature": ["\"observability:apmEnableContinuousRollups\""],
+        "signature": [
+          "\"observability:apmEnableContinuousRollups\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13276,7 +13795,9 @@
         "tags": [],
         "label": "apmEnableProfilingIntegration",
         "description": [],
-        "signature": ["\"observability:apmEnableProfilingIntegration\""],
+        "signature": [
+          "\"observability:apmEnableProfilingIntegration\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13289,7 +13810,9 @@
         "tags": [],
         "label": "apmEnableServiceInventoryTableSearchBar",
         "description": [],
-        "signature": ["\"observability:apmEnableServiceInventoryTableSearchBar\""],
+        "signature": [
+          "\"observability:apmEnableServiceInventoryTableSearchBar\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13302,7 +13825,9 @@
         "tags": [],
         "label": "apmEnableServiceMetrics",
         "description": [],
-        "signature": ["\"observability:apmEnableServiceMetrics\""],
+        "signature": [
+          "\"observability:apmEnableServiceMetrics\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13315,7 +13840,9 @@
         "tags": [],
         "label": "apmEnableTableSearchBar",
         "description": [],
-        "signature": ["\"observability:apmEnableTableSearchBar\""],
+        "signature": [
+          "\"observability:apmEnableTableSearchBar\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13328,7 +13855,9 @@
         "tags": [],
         "label": "apmEnableTransactionProfiling",
         "description": [],
-        "signature": ["\"observability:apmEnableTransactionProfiling\""],
+        "signature": [
+          "\"observability:apmEnableTransactionProfiling\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13341,7 +13870,9 @@
         "tags": [],
         "label": "apmLabsButton",
         "description": [],
-        "signature": ["\"observability:apmLabsButton\""],
+        "signature": [
+          "\"observability:apmLabsButton\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13354,7 +13885,9 @@
         "tags": [],
         "label": "apmProgressiveLoading",
         "description": [],
-        "signature": ["\"observability:apmProgressiveLoading\""],
+        "signature": [
+          "\"observability:apmProgressiveLoading\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13367,7 +13900,9 @@
         "tags": [],
         "label": "apmServiceGroupMaxNumberOfServices",
         "description": [],
-        "signature": ["\"observability:apmServiceGroupMaxNumberOfServices\""],
+        "signature": [
+          "\"observability:apmServiceGroupMaxNumberOfServices\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13380,7 +13915,9 @@
         "tags": [],
         "label": "apmServiceInventoryOptimizedSorting",
         "description": [],
-        "signature": ["\"observability:apmServiceInventoryOptimizedSorting\""],
+        "signature": [
+          "\"observability:apmServiceInventoryOptimizedSorting\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13393,7 +13930,9 @@
         "tags": [],
         "label": "apmTraceExplorerTab",
         "description": [],
-        "signature": ["\"observability:apmTraceExplorerTab\""],
+        "signature": [
+          "\"observability:apmTraceExplorerTab\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13423,7 +13962,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13435,7 +13976,9 @@
             "tags": [],
             "label": "__1",
             "description": [],
-            "signature": ["FormatterOptions"],
+            "signature": [
+              "FormatterOptions"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13467,7 +14010,9 @@
             "tags": [],
             "label": "numerator",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13479,7 +14024,9 @@
             "tags": [],
             "label": "denominator",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/formatters.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13505,7 +14052,9 @@
         "tags": [],
         "label": "casesFeatureId",
         "description": [],
-        "signature": ["\"observabilityCases\""],
+        "signature": [
+          "\"observabilityCases\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13518,7 +14067,9 @@
         "tags": [],
         "label": "defaultApmServiceEnvironment",
         "description": [],
-        "signature": ["\"observability:apmDefaultServiceEnvironment\""],
+        "signature": [
+          "\"observability:apmDefaultServiceEnvironment\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13531,7 +14082,9 @@
         "tags": [],
         "label": "enableAgentExplorerView",
         "description": [],
-        "signature": ["\"observability:apmAgentExplorerView\""],
+        "signature": [
+          "\"observability:apmAgentExplorerView\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13544,7 +14097,9 @@
         "tags": [],
         "label": "enableAwsLambdaMetrics",
         "description": [],
-        "signature": ["\"observability:enableAwsLambdaMetrics\""],
+        "signature": [
+          "\"observability:enableAwsLambdaMetrics\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13557,7 +14112,9 @@
         "tags": [],
         "label": "enableComparisonByDefault",
         "description": [],
-        "signature": ["\"observability:enableComparisonByDefault\""],
+        "signature": [
+          "\"observability:enableComparisonByDefault\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13570,7 +14127,9 @@
         "tags": [],
         "label": "enableCriticalPath",
         "description": [],
-        "signature": ["\"observability:apmEnableCriticalPath\""],
+        "signature": [
+          "\"observability:apmEnableCriticalPath\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13583,7 +14142,9 @@
         "tags": [],
         "label": "enableInfrastructureAssetCustomDashboards",
         "description": [],
-        "signature": ["\"observability:enableInfrastructureAssetCustomDashboards\""],
+        "signature": [
+          "\"observability:enableInfrastructureAssetCustomDashboards\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13596,7 +14157,9 @@
         "tags": [],
         "label": "enableInfrastructureContainerAssetView",
         "description": [],
-        "signature": ["\"observability:enableInfrastructureContainerAssetView\""],
+        "signature": [
+          "\"observability:enableInfrastructureContainerAssetView\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13609,7 +14172,9 @@
         "tags": [],
         "label": "enableInfrastructureHostsView",
         "description": [],
-        "signature": ["\"observability:enableInfrastructureHostsView\""],
+        "signature": [
+          "\"observability:enableInfrastructureHostsView\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13622,7 +14187,9 @@
         "tags": [],
         "label": "enableInfrastructureProfilingIntegration",
         "description": [],
-        "signature": ["\"observability:enableInfrastructureProfilingIntegration\""],
+        "signature": [
+          "\"observability:enableInfrastructureProfilingIntegration\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13635,7 +14202,9 @@
         "tags": [],
         "label": "enableInspectEsQueries",
         "description": [],
-        "signature": ["\"observability:enableInspectEsQueries\""],
+        "signature": [
+          "\"observability:enableInspectEsQueries\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13648,7 +14217,9 @@
         "tags": [],
         "label": "maxSuggestions",
         "description": [],
-        "signature": ["\"observability:maxSuggestions\""],
+        "signature": [
+          "\"observability:maxSuggestions\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13683,7 +14254,9 @@
         "tags": [],
         "label": "observabilityAppId",
         "description": [],
-        "signature": ["\"observability-overview\""],
+        "signature": [
+          "\"observability-overview\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13696,7 +14269,9 @@
         "tags": [],
         "label": "observabilityFeatureId",
         "description": [],
-        "signature": ["\"observability\""],
+        "signature": [
+          "\"observability\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13709,7 +14284,9 @@
         "tags": [],
         "label": "profilingAWSCostDiscountRate",
         "description": [],
-        "signature": ["\"observability:profilingAWSCostDiscountRate\""],
+        "signature": [
+          "\"observability:profilingAWSCostDiscountRate\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13722,7 +14299,9 @@
         "tags": [],
         "label": "profilingAzureCostDiscountRate",
         "description": [],
-        "signature": ["\"observability:profilingAzureCostDiscountRate\""],
+        "signature": [
+          "\"observability:profilingAzureCostDiscountRate\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13735,7 +14314,9 @@
         "tags": [],
         "label": "profilingCo2PerKWH",
         "description": [],
-        "signature": ["\"observability:profilingCo2PerKWH\""],
+        "signature": [
+          "\"observability:profilingCo2PerKWH\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13748,7 +14329,9 @@
         "tags": [],
         "label": "profilingCostPervCPUPerHour",
         "description": [],
-        "signature": ["\"observability:profilingCostPervCPUPerHour\""],
+        "signature": [
+          "\"observability:profilingCostPervCPUPerHour\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13761,7 +14344,9 @@
         "tags": [],
         "label": "profilingDatacenterPUE",
         "description": [],
-        "signature": ["\"observability:profilingDatacenterPUE\""],
+        "signature": [
+          "\"observability:profilingDatacenterPUE\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13774,7 +14359,9 @@
         "tags": [],
         "label": "profilingFetchTopNFunctionsFromStacktraces",
         "description": [],
-        "signature": ["\"observability:profilingFetchTopNFunctionsFromStacktraces\""],
+        "signature": [
+          "\"observability:profilingFetchTopNFunctionsFromStacktraces\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13787,7 +14374,9 @@
         "tags": [],
         "label": "profilingPervCPUWattArm64",
         "description": [],
-        "signature": ["\"observability:profilingPervCPUWattArm64\""],
+        "signature": [
+          "\"observability:profilingPervCPUWattArm64\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13800,7 +14389,9 @@
         "tags": [],
         "label": "profilingPervCPUWattX86",
         "description": [],
-        "signature": ["\"observability:profilingPerVCPUWattX86\""],
+        "signature": [
+          "\"observability:profilingPerVCPUWattX86\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13813,7 +14404,9 @@
         "tags": [],
         "label": "profilingShowErrorFrames",
         "description": [],
-        "signature": ["\"observability:profilingShowErrorFrames\""],
+        "signature": [
+          "\"observability:profilingShowErrorFrames\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13826,7 +14419,9 @@
         "tags": [],
         "label": "ruleDetailsLocatorID",
         "description": [],
-        "signature": ["\"RULE_DETAILS_LOCATOR\""],
+        "signature": [
+          "\"RULE_DETAILS_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13839,7 +14434,9 @@
         "tags": [],
         "label": "rulesLocatorID",
         "description": [],
-        "signature": ["\"RULES_LOCATOR\""],
+        "signature": [
+          "\"RULES_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13852,7 +14449,9 @@
         "tags": [],
         "label": "sloDetailsLocatorID",
         "description": [],
-        "signature": ["\"SLO_DETAILS_LOCATOR\""],
+        "signature": [
+          "\"SLO_DETAILS_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13865,7 +14464,9 @@
         "tags": [],
         "label": "sloEditLocatorID",
         "description": [],
-        "signature": ["\"SLO_EDIT_LOCATOR\""],
+        "signature": [
+          "\"SLO_EDIT_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13878,7 +14479,9 @@
         "tags": [],
         "label": "sloFeatureId",
         "description": [],
-        "signature": ["\"slo\""],
+        "signature": [
+          "\"slo\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13891,7 +14494,9 @@
         "tags": [],
         "label": "sloListLocatorID",
         "description": [],
-        "signature": ["\"SLO_LIST_LOCATOR\""],
+        "signature": [
+          "\"SLO_LIST_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13904,7 +14509,9 @@
         "tags": [],
         "label": "syntheticsEditMonitorLocatorID",
         "description": [],
-        "signature": ["\"SYNTHETICS_EDIT_MONITOR_LOCATOR\""],
+        "signature": [
+          "\"SYNTHETICS_EDIT_MONITOR_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13917,7 +14524,9 @@
         "tags": [],
         "label": "syntheticsMonitorDetailLocatorID",
         "description": [],
-        "signature": ["\"SYNTHETICS_MONITOR_DETAIL_LOCATOR\""],
+        "signature": [
+          "\"SYNTHETICS_MONITOR_DETAIL_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13930,7 +14539,9 @@
         "tags": [],
         "label": "syntheticsSettingsLocatorID",
         "description": [],
-        "signature": ["\"SYNTHETICS_SETTINGS\""],
+        "signature": [
+          "\"SYNTHETICS_SETTINGS\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13943,7 +14554,9 @@
         "tags": [],
         "label": "syntheticsThrottlingEnabled",
         "description": [],
-        "signature": ["\"observability:syntheticsThrottlingEnabled\""],
+        "signature": [
+          "\"observability:syntheticsThrottlingEnabled\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/ui_settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13973,7 +14586,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -13985,7 +14600,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["FormatterOptions | undefined"],
+            "signature": [
+              "FormatterOptions | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -14000,7 +14617,9 @@
         "tags": [],
         "label": "TimeUnitChar",
         "description": [],
-        "signature": ["\"m\" | \"d\" | \"h\" | \"s\""],
+        "signature": [
+          "\"m\" | \"d\" | \"h\" | \"s\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/duration.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -14013,7 +14632,9 @@
         "tags": [],
         "label": "uptimeOverviewLocatorID",
         "description": [],
-        "signature": ["\"UPTIME_OVERVIEW_LOCATOR\""],
+        "signature": [
+          "\"UPTIME_OVERVIEW_LOCATOR\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

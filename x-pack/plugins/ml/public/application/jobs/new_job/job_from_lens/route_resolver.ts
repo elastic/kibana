@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import rison from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import type { Filter } from '@kbn/es-query';
 import type { LensPublicStart, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import rison from '@kbn/rison';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { QuickLensJobCreator } from './quick_create_job';
+import type { MlApiServices } from '../../../services/ml_api_service';
 
 import { getDefaultQuery, getRisonValue } from '../utils/new_job_utils';
 

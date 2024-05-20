@@ -10,18 +10,18 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiButton,
   EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
+  EuiFlexGroup,
   EuiFormRow,
+  EuiFlexItem,
+  EuiFieldText,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiButton,
 } from '@elastic/eui';
 
 import { AppLogic } from '../../app_logic';

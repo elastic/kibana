@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
-import { useLocation } from 'react-router-dom';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
+import { renderHook } from '@testing-library/react-hooks';
 import { useUnifiedTableExpandableFlyout } from './use_unified_timeline_expandable_flyout';
+import { useLocation } from 'react-router-dom';
+import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('@kbn/kibana-react-plugin/public');

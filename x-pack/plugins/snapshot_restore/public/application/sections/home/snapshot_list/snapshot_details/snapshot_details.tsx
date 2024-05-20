@@ -20,22 +20,22 @@ import {
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment, useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
-import { Error, SectionError } from '../../../../../shared_imports';
-import { useServices } from '../../../../app_context';
+import { SectionError, Error } from '../../../../../shared_imports';
 import { SectionLoading, SnapshotDeleteProvider } from '../../../../components';
+import { useServices } from '../../../../app_context';
 import {
-  SNAPSHOT_STATE,
-  UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,
+  UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
+  SNAPSHOT_STATE,
 } from '../../../../constants';
 import { useLoadSnapshot } from '../../../../services/http';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
-import { TabFailures, TabSummary } from './tabs';
+import { TabSummary, TabFailures } from './tabs';
 
 interface Props {
   repositoryName: string;

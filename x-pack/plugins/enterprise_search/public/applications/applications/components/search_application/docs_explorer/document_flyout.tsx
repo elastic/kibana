@@ -26,10 +26,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '../field_icon';
 
 import {
-  ConvertedResultWithType,
-  FieldValue,
   addTypeToResults,
+  ConvertedResultWithType,
   convertResultToFieldsAndIndex,
+  FieldValue,
 } from './convert_results';
 import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 import { useSelectedDocument } from './document_context';

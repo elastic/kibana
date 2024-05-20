@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent } from 'react';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import {
   ComboBoxField,
   FIELD_TYPES,
-  Field,
-  ToggleField,
   UseField,
+  ToggleField,
+  Field,
 } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
-import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { TargetField } from './common_fields/target_field';
-import { FieldsConfig, from, to } from './shared';
+import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { FieldsConfig, to, from } from './shared';
 
 const propertyValues: string[] = [
   'content',

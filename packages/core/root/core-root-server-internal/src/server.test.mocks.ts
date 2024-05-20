@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { pluginServiceMock } from '@kbn/core-plugins-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
+import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
+import { statusServiceMock } from '@kbn/core-status-server-mocks';
+import { loggingServiceMock } from '@kbn/core-logging-server-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
+import { prebootServiceMock } from '@kbn/core-preboot-server-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
-import { loggingServiceMock } from '@kbn/core-logging-server-mocks';
-import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
-import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import { pluginServiceMock } from '@kbn/core-plugins-server-mocks';
-import { prebootServiceMock } from '@kbn/core-preboot-server-mocks';
-import { renderingServiceMock } from '@kbn/core-rendering-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { securityServiceMock } from '@kbn/core-security-server-mocks';
-import { statusServiceMock } from '@kbn/core-status-server-mocks';
-import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
+import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 
 export const mockHttpService = httpServiceMock.create();
 jest.doMock('@kbn/core-http-server-internal', () => ({

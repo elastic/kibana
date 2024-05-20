@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { dataViewMock, esHitsMock } from '../__mocks__';
 import { buildDataTableRecord, buildDataTableRecordList } from './build_data_record';
+import { dataViewMock, esHitsMock } from '../__mocks__';
 
 describe('Data table record utils', () => {
   describe('buildDataTableRecord', () => {

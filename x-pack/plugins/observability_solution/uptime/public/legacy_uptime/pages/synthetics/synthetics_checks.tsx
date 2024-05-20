@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { useMonitorBreadcrumb } from '../../components/monitor/synthetics/step_detail/use_monitor_breadcrumb';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { useInitApp } from '../../hooks/use_init_app';
 import { StepsList } from '../../components/synthetics/check_steps/steps_list';
 import { useCheckSteps } from '../../components/synthetics/check_steps/use_check_steps';
-import { EmptyJourney } from '../../components/synthetics/empty_journey';
-import { useInitApp } from '../../hooks/use_init_app';
 import { ChecksNavigation } from './checks_navigation';
+import { useMonitorBreadcrumb } from '../../components/monitor/synthetics/step_detail/use_monitor_breadcrumb';
+import { EmptyJourney } from '../../components/synthetics/empty_journey';
 
 export const SyntheticsCheckStepsPageHeader = () => {
   const { details } = useCheckSteps();

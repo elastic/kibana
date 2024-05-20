@@ -9,12 +9,12 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getColumns } from '../../../shared/errors_table/get_columns';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 type ErrorGroupMainStatisticsByTransactionName =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name'>;

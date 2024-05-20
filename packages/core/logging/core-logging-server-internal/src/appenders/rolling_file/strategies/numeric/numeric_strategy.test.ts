@@ -7,16 +7,16 @@
  */
 
 import { join } from 'path';
-import type { NumericRollingStrategyConfig } from '@kbn/core-logging-server';
-import { rollingFileAppenderMocks } from '../../mocks';
-import { NumericRollingStrategy } from './numeric_strategy';
 import {
-  getOrderedRolledFilesMock,
   resetAllMock,
+  shouldSkipRolloutMock,
+  getOrderedRolledFilesMock,
   rollCurrentFileMock,
   rollPreviousFilesInOrderMock,
-  shouldSkipRolloutMock,
 } from './numeric_strategy.test.mocks';
+import { rollingFileAppenderMocks } from '../../mocks';
+import type { NumericRollingStrategyConfig } from '@kbn/core-logging-server';
+import { NumericRollingStrategy } from './numeric_strategy';
 
 const logFileFolder = 'log-file-folder';
 const logFileBaseName = 'kibana.log';

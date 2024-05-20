@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
+import { useUpdateCase } from './use_update_case';
+import { basicCase } from './mock';
+import * as api from './api';
+import type { UpdateKey } from './types';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
-import * as api from './api';
 import { casesQueriesKeys } from './constants';
-import { basicCase } from './mock';
-import type { UpdateKey } from './types';
-import { useUpdateCase } from './use_update_case';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

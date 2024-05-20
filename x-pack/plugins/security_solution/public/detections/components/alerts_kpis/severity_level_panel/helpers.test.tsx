@@ -1,4 +1,3 @@
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +7,7 @@ import type { AlertSearchResponse } from '../../../containers/detection_engine/a
 import { parseSeverityData } from './helpers';
 import * as mock from './mock_data';
 import type { AlertsBySeverityAgg } from './types';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 
 describe('parse severity data', () => {
   test('parse alerts with data', () => {

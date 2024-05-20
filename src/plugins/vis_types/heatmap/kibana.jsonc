@@ -16,7 +16,12 @@
       "fieldFormats",
       "dataViews"
     ],
-    "requiredBundles": ["visDefaultEditor", "kibanaUtils"],
-    "extraPublicDirs": ["common"]
+    "requiredBundles": [
+      "visDefaultEditor",
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

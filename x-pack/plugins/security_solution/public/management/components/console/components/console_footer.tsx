@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
 import { EuiPanel, EuiText } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
+import { useWithInputVisibleState } from '../hooks/state_selectors/use_with_input_visible_state';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useWithFooterContent } from '../hooks/state_selectors/use_with_footer_content';
-import { useWithInputVisibleState } from '../hooks/state_selectors/use_with_input_visible_state';
 
 export const ConsoleFooter = memo(() => {
   const footerContent = useWithFooterContent();

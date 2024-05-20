@@ -6,27 +6,27 @@
  */
 
 import './toolbar.scss';
-import type { Position } from '@elastic/charts';
+import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFormRow,
-  EuiHorizontalRule,
-  EuiRange,
   EuiSuperSelect,
+  EuiRange,
+  EuiHorizontalRule,
+  EuiButtonGroup,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import type { Position } from '@elastic/charts';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
-import React, { useCallback, useState } from 'react';
-import { LegendDisplay } from '../../../common/constants';
-import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
-import { LegendSettingsPopover, ToolbarPopover } from '../../shared_components';
-import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import { VisualizationToolbarProps } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
+import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
+import { LegendDisplay } from '../../../common/constants';
+import { VisualizationToolbarProps } from '../../types';
+import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
+import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { getLegendStats } from './render_helpers';
 
 const legendOptions: Array<{

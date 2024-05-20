@@ -1,4 +1,3 @@
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +5,9 @@ import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eu
  * 2.0.
  */
 import React, { ReactNode } from 'react';
-import { DetailPanelDescriptionList } from '../detail_panel_description_list';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { useStyles } from './styles';
+import { DetailPanelDescriptionList } from '../detail_panel_description_list';
 
 interface DetailPanelAccordionDeps {
   id: string;

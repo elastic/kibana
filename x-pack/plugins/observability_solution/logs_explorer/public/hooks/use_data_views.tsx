@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
-import { useInterpret, useSelector } from '@xstate/react';
-import createContainer from 'constate';
 import { useCallback } from 'react';
+import createContainer from 'constate';
+import { useInterpret, useSelector } from '@xstate/react';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
 import { DataViewDescriptor } from '../../common/data_views/models/data_view_descriptor';
 import { SortOrder } from '../../common/latest';
-import { LogsExplorerCustomizations } from '../controller';
 import { DataViewsFilterParams, createDataViewsStateMachine } from '../state_machines/data_views';
+import { LogsExplorerCustomizations } from '../controller';
 
 interface DataViewsContextDeps {
   core: CoreStart;

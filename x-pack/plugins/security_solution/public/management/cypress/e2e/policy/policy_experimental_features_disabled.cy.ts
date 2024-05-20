@@ -9,8 +9,8 @@ import type { PolicyData } from '../../../../../common/endpoint/types';
 import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
 
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { login } from '../../tasks/login';
+import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 
 // We need a way to disable experimental features in the Cypress tests
 describe.skip(

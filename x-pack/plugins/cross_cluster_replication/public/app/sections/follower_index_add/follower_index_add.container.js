@@ -8,8 +8,8 @@
 import { connect } from 'react-redux';
 
 import { SECTIONS } from '../../constants';
-import { clearApiError, saveFollowerIndex } from '../../store/actions';
-import { getApiError, getApiStatus } from '../../store/selectors';
+import { getApiStatus, getApiError } from '../../store/selectors';
+import { saveFollowerIndex, clearApiError } from '../../store/actions';
 import { FollowerIndexAdd as FollowerIndexAddView } from './follower_index_add';
 
 const scope = SECTIONS.FOLLOWER_INDEX;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchLegacySource, ElasticsearchResponse } from '../../../../common/types/es';
-import { Globals } from '../../../static_globals';
-import { LegacyRequest } from '../../../types';
-import { getElasticsearchDataset, getIndexPatterns } from '../../cluster/get_index_patterns';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
+import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
+import { LegacyRequest } from '../../../types';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(response: ElasticsearchResponse) {
   const hits = response.hits?.hits;

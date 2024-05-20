@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
+import { EuiPanel, EuiHorizontalRule } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ResponseSection } from '../components/response_section';
+import { InvestigationSection } from '../components/investigation_section';
 import { AboutSection } from '../components/about_section';
 import { InsightsSection } from '../components/insights_section';
-import { InvestigationSection } from '../components/investigation_section';
-import { ResponseSection } from '../components/response_section';
 import { VisualizationsSection } from '../components/visualizations_section';
 
 /**

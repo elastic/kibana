@@ -8,18 +8,25 @@
 // Definitions for SO attributes. They mirror the types defined under /common/types/models
 import type { agentPolicyStatuses } from '../../common/constants';
 import type {
-  AgentMetadata,
-  AgentUpgradeDetails,
-  KafkaAcknowledgeReliabilityLevel,
-  KafkaConnectionTypeType,
   MonitoringType,
-  OutputPreset,
+  ValueOf,
+  AgentMetadata,
   OutputType,
   ShipperOutput,
-  ValueOf,
+  KafkaAcknowledgeReliabilityLevel,
+  KafkaConnectionTypeType,
+  AgentUpgradeDetails,
+  OutputPreset,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
+import type {
+  PackagePolicy,
+  PackagePolicyInput,
+  PackagePolicyPackage,
+  PackagePolicyConfigRecord,
+} from '../../common/types/models/package_policy';
+import type { PolicySecretReference } from '../../common/types/models/secret';
 import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
 import type {
   KafkaPartitionType,
@@ -27,13 +34,6 @@ import type {
   KafkaTopicWhenType,
   SimpleSOAssetType,
 } from '../../common/types';
-import type {
-  PackagePolicy,
-  PackagePolicyConfigRecord,
-  PackagePolicyInput,
-  PackagePolicyPackage,
-} from '../../common/types/models/package_policy';
-import type { PolicySecretReference } from '../../common/types/models/secret';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 

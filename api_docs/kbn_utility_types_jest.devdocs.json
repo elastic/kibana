@@ -60,7 +60,9 @@
         "tags": [],
         "label": "MockedKeys",
         "description": [],
-        "signature": ["{ [P in keyof T]: jest.Mocked<T[P]>; }"],
+        "signature": [
+          "{ [P in keyof T]: jest.Mocked<T[P]>; }"
+        ],
         "path": "packages/kbn-utility-types-jest/index.ts",
         "deprecated": false,
         "trackAdoption": false,

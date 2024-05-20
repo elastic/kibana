@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ScheduleBackfillResponseBodyV1 } from '../../../../../../../common/routes/backfill/apis/schedule';
+import type { Backfill } from '../../../../../../application/backfill/result/types';
 import type {
   ScheduleBackfillError,
   ScheduleBackfillResult,
   ScheduleBackfillResults,
 } from '../../../../../../application/backfill/methods/schedule/types';
-import type { Backfill } from '../../../../../../application/backfill/result/types';
+import { ScheduleBackfillResponseBodyV1 } from '../../../../../../../common/routes/backfill/apis/schedule';
 import { transformBackfillToBackfillResponseV1 } from '../../../../transforms';
 
 export const transformResponse = (

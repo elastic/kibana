@@ -6,9 +6,9 @@
  */
 
 import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
-import { setupSources } from './setup_sources';
 import { ISource } from './source';
 import { getSourceByType } from './source_registry';
+import { setupSources } from './setup_sources';
 
 setupSources();
 

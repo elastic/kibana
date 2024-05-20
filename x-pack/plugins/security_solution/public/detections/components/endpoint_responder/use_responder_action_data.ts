@@ -1,4 +1,3 @@
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,17 +6,17 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
  */
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
-import type {
-  EndpointCapabilities,
-  ResponseActionAgentType,
-} from '../../../../common/endpoint/service/response_actions/constants';
-import { HostStatus } from '../../../../common/endpoint/types';
-import type { ThirdPartyAgentInfo } from '../../../../common/types';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { Platform } from '../../../management/components/endpoint_responder/components/header_info/platforms';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
-import type { Platform } from '../../../management/components/endpoint_responder/components/header_info/platforms';
+import type { ThirdPartyAgentInfo } from '../../../../common/types';
+import type {
+  ResponseActionAgentType,
+  EndpointCapabilities,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointDetails, useWithShowResponder } from '../../../management/hooks';
-import { getFieldValue } from '../host_isolation/helpers';
+import { HostStatus } from '../../../../common/endpoint/types';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
@@ -25,6 +24,7 @@ import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
   SENTINEL_ONE_AGENT_ID_PROPERTY_MISSING,
 } from './translations';
+import { getFieldValue } from '../host_isolation/helpers';
 
 export interface ResponderContextMenuItemProps {
   endpointId: string;

@@ -12,41 +12,41 @@ import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import { RowRendererId } from '../../../../common/api/timeline';
-import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import type { CustomBulkAction } from '../../../../common/types';
-import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
-import type { QueryTabBodyProps as NetworkQueryTabBodyProps } from '../../../explore/network/pages/navigation/types';
-import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../explore/users/pages/navigation/types';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
-import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
-import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import type { GlobalTimeArgs } from '../../containers/use_global_time';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useLicense } from '../../hooks/use_license';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { RowRendererId } from '../../../../common/api/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
+import * as i18n from './translations';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import {
   alertsHistogramConfig,
   eventsHistogramConfig,
   getSubtitleFunction,
 } from './histogram_configurations';
-import * as i18n from './translations';
+import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import type { GlobalTimeArgs } from '../../containers/use_global_time';
+import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../explore/users/pages/navigation/types';
+import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
+import type { QueryTabBodyProps as NetworkQueryTabBodyProps } from '../../../explore/network/pages/navigation/types';
+import { useLicense } from '../../hooks/use_license';
 
-import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useUiSetting$ } from '../../lib/kibana';
 import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
+import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 
 import {
   useGetInitialUrlParamValue,
   useReplaceUrlParams,
 } from '../../utils/global_query_string/helpers';
-import { SecurityCellActionsTrigger } from '../cell_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import { SecurityCellActionsTrigger } from '../cell_actions';
 
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 

@@ -5,32 +5,12 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
+import { ReactWrapper } from 'enzyme';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ReactWrapper } from 'enzyme';
-import React, { useEffect } from 'react';
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { act } from '@testing-library/react';
-import { getLensInspectorService } from '../../lens_inspector_service';
-import {
-  DatasourceMock,
-  createExpressionRendererMock,
-  createMockDatasource,
-  createMockVisualization,
-  mockStoreDeps,
-  renderWithReduxStore,
-} from '../../mocks';
-import { mockDataPlugin, mountWithProvider } from '../../mocks';
-import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
-import { LensAppState, setState } from '../../state_management';
+import { EditorFrame, EditorFrameProps } from './editor_frame';
 import {
   DatasourceMap,
   DatasourcePublicAPI,
@@ -38,7 +18,27 @@ import {
   Visualization,
   VisualizationMap,
 } from '../../types';
-import { EditorFrame, EditorFrameProps } from './editor_frame';
+import { act } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
+import {
+  createMockVisualization,
+  createMockDatasource,
+  DatasourceMock,
+  createExpressionRendererMock,
+  mockStoreDeps,
+  renderWithReduxStore,
+} from '../../mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { mockDataPlugin, mountWithProvider } from '../../mocks';
+import { LensAppState, setState } from '../../state_management';
+import { getLensInspectorService } from '../../lens_inspector_service';
+import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {

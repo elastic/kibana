@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import {
+  EVENT_KIND,
   ALERT_ACTION_GROUP,
   ALERT_FLAPPING,
   ALERT_INSTANCE_ID,
@@ -16,18 +17,17 @@ import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_REVISION,
-  ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
+  ALERT_RULE_TAGS,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_WORKFLOW_STATUS,
-  EVENT_KIND,
   SPACE_IDS,
   TAGS,
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createEsQueryRule, createIndexConnector } from './helpers/alerting_api_helper';
+import { createIndexConnector, createEsQueryRule } from './helpers/alerting_api_helper';
 import {
   createIndex,
   getDocumentsInIndex,

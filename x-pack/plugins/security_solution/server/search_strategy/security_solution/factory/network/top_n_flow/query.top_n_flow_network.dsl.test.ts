@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expectedCountDsl, expectedDsl, mockCountOptions, mockOptions } from './__mocks__';
 import { buildTopNFlowCountQuery, buildTopNFlowQuery } from './query.top_n_flow_network.dsl';
+import { mockOptions, mockCountOptions, expectedDsl, expectedCountDsl } from './__mocks__';
 
 describe('buildTopNFlowQuery', () => {
   test('build query from options correctly', () => {

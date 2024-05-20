@@ -13,10 +13,9 @@ import type {
 } from '@kbn/data-plugin/public';
 import { EsQueryConfig } from '@kbn/es-query';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { actions, ActorRefFrom, createMachine, SpecialTargets, send } from 'xstate';
 import { DEFAULT_REFRESH_INTERVAL } from '@kbn/logs-shared-plugin/common';
-import { ActorRefFrom, SpecialTargets, actions, createMachine, send } from 'xstate';
 import { OmitDeprecatedState, sendIfDefined } from '../../xstate_helpers';
-import { DEFAULT_REFRESH_TIME_RANGE } from './defaults';
 import { logStreamQueryNotificationEventSelectors } from './notifications';
 import {
   subscribeToFilterSearchBarChanges,
@@ -24,15 +23,6 @@ import {
   updateFiltersInSearchBar,
   updateQueryInSearchBar,
 } from './search_bar_state_service';
-import {
-  initializeFromTimeFilterService,
-  subscribeToTimeFilterServiceChanges,
-  updateTimeContextFromRefreshIntervalUpdate,
-  updateTimeContextFromTimeFilterService,
-  updateTimeContextFromTimeRangeUpdate,
-  updateTimeContextFromUrl,
-  updateTimeInTimeFilterService,
-} from './time_filter_state_service';
 import type {
   LogStreamQueryContext,
   LogStreamQueryContextWithDataViews,
@@ -51,7 +41,17 @@ import {
   safeDefaultParsedQuery,
   updateContextInUrl,
 } from './url_state_storage_service';
+import {
+  initializeFromTimeFilterService,
+  subscribeToTimeFilterServiceChanges,
+  updateTimeContextFromTimeFilterService,
+  updateTimeContextFromTimeRangeUpdate,
+  updateTimeContextFromRefreshIntervalUpdate,
+  updateTimeInTimeFilterService,
+  updateTimeContextFromUrl,
+} from './time_filter_state_service';
 import { showValidationErrorToast, validateQuery } from './validate_query_service';
+import { DEFAULT_REFRESH_TIME_RANGE } from './defaults';
 
 export const createPureLogStreamQueryStateMachine = (
   initialContext: LogStreamQueryContextWithDataViews & LogStreamQueryContextWithTime
@@ -264,7 +264,7 @@ export const createPureLogStreamQueryStateMachine = (
         ),
         storeDefaultParsedQuery: actions.assign(
           (_context, _event) =>
-            ({ parsedQuery: safeDefaultParsedQuery }) as LogStreamQueryContextWithParsedQuery
+            ({ parsedQuery: safeDefaultParsedQuery } as LogStreamQueryContextWithParsedQuery)
         ),
         storeParsedQuery: actions.assign((_context, event) =>
           'parsedQuery' in event
@@ -273,10 +273,10 @@ export const createPureLogStreamQueryStateMachine = (
         ),
         clearValidationError: actions.assign(
           (_context, _event) =>
-            ({ validationError: undefined }) as Omit<
+            ({ validationError: undefined } as Omit<
               LogStreamQueryContextWithValidationError,
               'validationError'
-            >
+            >)
         ),
         updateTimeContextFromTimeFilterService,
         updateTimeContextFromTimeRangeUpdate,

@@ -6,35 +6,35 @@
  */
 
 import React, { FC, useContext } from 'react';
-import { compose, withHandlers, withProps } from 'react-recompose';
 import { connect } from 'react-redux';
+import { compose, withHandlers, withProps } from 'react-recompose';
 import { Dispatch } from 'redux';
-import { PositionedElement, State } from '../../../../types';
+import { State, PositionedElement } from '../../../../types';
+import { getClipboardData } from '../../../lib/clipboard';
 // @ts-expect-error untyped local
 import { flatten } from '../../../lib/aeroelastic/functional';
-import { getClipboardData } from '../../../lib/clipboard';
-import {
-  alignmentDistributionHandlerCreators,
-  basicHandlerCreators,
-  clipboardHandlerCreators,
-  groupHandlerCreators,
-  layerHandlerCreators,
-} from '../../../lib/element_handler_creators';
-import { WorkpadRoutingContext } from '../../../routes/workpad';
-// @ts-expect-error untyped local
-import { elementLayer, insertNodes, removeElements } from '../../../state/actions/elements';
-// @ts-expect-error untyped local
-import { selectToplevelNodes } from '../../../state/actions/transient';
-import {
-  getNodes,
-  getSelectedPage,
-  getSelectedToplevelNodes,
-} from '../../../state/selectors/workpad';
 // @ts-expect-error untyped local
 import { globalStateUpdater } from '../../workpad_page/integration_utils';
 // @ts-expect-error untyped local
 import { crawlTree } from '../../workpad_page/integration_utils';
+// @ts-expect-error untyped local
+import { insertNodes, elementLayer, removeElements } from '../../../state/actions/elements';
+// @ts-expect-error untyped local
+import { selectToplevelNodes } from '../../../state/actions/transient';
+import {
+  getSelectedPage,
+  getNodes,
+  getSelectedToplevelNodes,
+} from '../../../state/selectors/workpad';
+import {
+  layerHandlerCreators,
+  clipboardHandlerCreators,
+  basicHandlerCreators,
+  groupHandlerCreators,
+  alignmentDistributionHandlerCreators,
+} from '../../../lib/element_handler_creators';
 import { EditMenu as Component, Props as ComponentProps } from './edit_menu.component';
+import { WorkpadRoutingContext } from '../../../routes/workpad';
 
 type LayoutState = any;
 

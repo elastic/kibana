@@ -12,8 +12,8 @@ import type { RequestDiagnosticsAdditionalMetrics } from '../../../common/types'
 import { SO_SEARCH_LIMIT } from '../../constants';
 
 import type { GetAgentsOptions } from '.';
-import { createAgentAction } from './actions';
 import { getAgents, getAgentsByKuery } from './crud';
+import { createAgentAction } from './actions';
 import { openPointInTime } from './crud';
 import {
   RequestDiagnosticsActionRunner,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface SaveChangesButtonProps {
   onClick: () => void;

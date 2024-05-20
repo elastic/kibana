@@ -8,26 +8,26 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Metric, Series } from '../../../../common/types';
+import { getSeriesAgg } from './series_agg';
+import { SUPPORTED_METRICS } from '../metrics';
 import {
   Column,
-  convertFilterRatioToFormulaColumn,
-  convertMathToFormulaColumn,
-  convertMetricAggregationColumnWithoutSpecialParams,
-  convertOtherAggsToFormulaColumn,
-  convertParentPipelineAggToColumns,
-  convertStaticValueToFormulaColumn,
-  convertToCounterRateColumn,
-  convertToCumulativeSumColumns,
-  convertToLastValueColumn,
   convertToPercentileColumns,
   convertToPercentileRankColumns,
-  convertToStandartDeviationColumn,
+  convertMathToFormulaColumn,
+  convertParentPipelineAggToColumns,
+  convertToCumulativeSumColumns,
+  convertOtherAggsToFormulaColumn,
+  convertFilterRatioToFormulaColumn,
+  convertToLastValueColumn,
   convertToStaticValueColumn,
+  convertStaticValueToFormulaColumn,
+  convertMetricAggregationColumnWithoutSpecialParams,
+  convertToCounterRateColumn,
+  convertToStandartDeviationColumn,
   convertVarianceToFormulaColumn,
 } from '../convert';
-import { SUPPORTED_METRICS } from '../metrics';
 import { getValidColumns } from './columns';
-import { getSeriesAgg } from './series_agg';
 
 export const getMetricsColumns = (
   series: Series,

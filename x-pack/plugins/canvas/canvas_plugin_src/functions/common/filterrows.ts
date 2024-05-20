@@ -7,8 +7,8 @@
 
 import { Observable, combineLatest, defer } from 'rxjs';
 import { map } from 'rxjs';
-import { getFunctionHelp } from '../../../i18n';
 import { Datatable, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   fn: (datatable: Datatable) => Observable<boolean>;

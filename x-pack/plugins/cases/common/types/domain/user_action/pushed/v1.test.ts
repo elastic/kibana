@@ -7,10 +7,10 @@
 
 import { UserActionTypes } from '../action/v1';
 import {
-  PushedUserActionPayloadRt,
   PushedUserActionPayloadWithoutConnectorIdRt,
-  PushedUserActionRt,
+  PushedUserActionPayloadRt,
   PushedUserActionWithoutConnectorIdRt,
+  PushedUserActionRt,
 } from './v1';
 
 describe('Pushed', () => {

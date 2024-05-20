@@ -7,8 +7,8 @@
  */
 
 import { useCallback } from 'react';
-import { ESRequest } from '../../../types';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
+import { ESRequest } from '../../../types';
 import { restoreRequestFromHistory } from './restore_request_from_history';
 
 export const useRestoreRequestFromHistory = () => {

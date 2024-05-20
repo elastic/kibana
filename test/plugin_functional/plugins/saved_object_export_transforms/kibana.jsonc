@@ -6,6 +6,8 @@
     "id": "savedObjectExportTransforms",
     "server": true,
     "browser": false,
-    "configPath": ["saved_object_export_transforms"]
+    "configPath": [
+      "saved_object_export_transforms"
+    ]
   }
 }

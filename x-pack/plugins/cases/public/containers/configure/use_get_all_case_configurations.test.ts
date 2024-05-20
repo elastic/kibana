@@ -6,10 +6,10 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { useGetAllCaseConfigurations } from './use_get_all_case_configurations';
+import * as api from './api';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import * as api from './api';
-import { useGetAllCaseConfigurations } from './use_get_all_case_configurations';
 
 jest.mock('./api');
 

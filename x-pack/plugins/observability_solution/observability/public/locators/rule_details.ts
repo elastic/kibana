@@ -6,11 +6,10 @@
  */
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { ruleDetailsLocatorID } from '../../common';
 import { RULES_PATH } from '../../common/locators/paths';
-import type { AlertStatus } from '../../common/typings';
 import { ALL_ALERTS } from '../components/alert_search_bar/constants';
 import {
   RULE_DETAILS_ALERTS_TAB,
@@ -18,6 +17,7 @@ import {
   RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY,
 } from '../pages/rule_details/constants';
 import type { TabId } from '../pages/rule_details/rule_details';
+import type { AlertStatus } from '../../common/typings';
 
 export interface RuleDetailsLocatorParams extends SerializableRecord {
   ruleId: string;

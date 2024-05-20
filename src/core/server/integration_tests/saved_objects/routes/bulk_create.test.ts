@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import supertest from 'supertest';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
-  coreUsageDataServiceMock,
   coreUsageStatsClientMock,
+  coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import supertest from 'supertest';
 
 import {
-  type InternalSavedObjectsRequestHandlerContext,
   registerBulkCreateRoute,
+  type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';

@@ -8,8 +8,8 @@
 
 import { getNoDataCardKibanaDependenciesMock } from '@kbn/shared-ux-card-no-data-mocks';
 import type {
-  KibanaPageTemplateKibanaDependencies,
   KibanaPageTemplateServices,
+  KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template-types';
 import { getNoDataConfigPageServicesMock } from '@kbn/shared-ux-page-no-data-config-mocks';
 

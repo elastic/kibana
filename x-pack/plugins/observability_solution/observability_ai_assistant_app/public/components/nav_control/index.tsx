@@ -1,7 +1,3 @@
-import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,14 +5,18 @@ import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assist
  * 2.0.
  */
 import React, { useEffect, useRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { AssistantAvatar, useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
+import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { v4 } from 'uuid';
-import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
-import { useKibana } from '../../hooks/use_kibana';
-import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
+import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
-import { useTheme } from '../../hooks/use_theme';
 import { ChatFlyout } from '../chat/chat_flyout';
+import { useKibana } from '../../hooks/use_kibana';
+import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
+import { useTheme } from '../../hooks/use_theme';
+import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
 
 export function NavControl({}: {}) {
   const service = useObservabilityAIAssistantAppService();

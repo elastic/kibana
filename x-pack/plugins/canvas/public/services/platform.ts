@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { Observable } from 'rxjs';
 import {
+  IUiSettingsClient,
   ChromeBreadcrumb,
+  IBasePath,
   ChromeStart,
   HttpStart,
-  IBasePath,
-  IUiSettingsClient,
 } from '@kbn/core/public';
-import { Observable } from 'rxjs';
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 export interface CanvasPlatformService {
   getBasePath: () => string;

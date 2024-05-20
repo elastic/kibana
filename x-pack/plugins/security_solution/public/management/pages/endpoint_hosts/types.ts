@@ -7,7 +7,6 @@
 
 import type { DataViewBase } from '@kbn/es-query';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
-import { TRANSFORM_STATES } from '../../../../common/constants';
 import type {
   AppLocation,
   EndpointPendingActions,
@@ -19,6 +18,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../common/types';
 import type { AsyncResourceState } from '../../state';
+import { TRANSFORM_STATES } from '../../../../common/constants';
 
 export interface EndpointState {
   /** list of host **/
@@ -114,7 +114,7 @@ export interface EndpointIndexUIQueryParams {
 }
 
 const transformStates = Object.values(TRANSFORM_STATES);
-export type TransformState = (typeof transformStates)[number];
+export type TransformState = typeof transformStates[number];
 
 export interface TransformStats {
   id: string;

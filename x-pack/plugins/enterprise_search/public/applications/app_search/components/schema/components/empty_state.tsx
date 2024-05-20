@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SchemaAddFieldModal } from '../../../../shared/schema';

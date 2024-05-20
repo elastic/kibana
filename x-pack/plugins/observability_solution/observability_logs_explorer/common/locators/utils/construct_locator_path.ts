@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   DatasetLocatorParams,
   FilterControls,
@@ -14,10 +13,11 @@ import {
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import {
   AvailableControlPanels,
+  availableControlsPanels,
   DataSourceSelectionPlain,
   SMART_FALLBACK_FIELDS,
-  availableControlsPanels,
 } from '@kbn/logs-explorer-plugin/common';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
   logsExplorerUrlSchemaV2,

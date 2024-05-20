@@ -6,15 +6,15 @@
  */
 import React from 'react';
 
-import useThrottle from 'react-use/lib/useThrottle';
 import styled from 'styled-components';
+import useThrottle from 'react-use/lib/useThrottle';
 
 import { EuiPanel } from '@elastic/eui';
-import { CodeEditor as MonacoCodeEditor } from '@kbn/code-editor';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { CodeEditor as MonacoCodeEditor } from '@kbn/code-editor';
 
-import { useDimensions } from '../../../hooks';
 import { MonacoEditorLangId } from '../types';
+import { useDimensions } from '../../../hooks';
 
 const CodeEditorContainer = styled(EuiPanel)`
   padding: 0;

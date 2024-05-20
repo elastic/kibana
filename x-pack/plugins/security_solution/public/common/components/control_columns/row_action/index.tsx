@@ -6,30 +6,30 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import { useKibana } from '../../../lib/kibana';
+import { timelineActions } from '../../../../timelines/store';
 import {
   ENABLE_EXPANDABLE_FLYOUT_SETTING,
   SecurityPageName,
 } from '../../../../../common/constants';
-import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
-  ControlColumnProps,
-  ExpandedDetailType,
   SetEventsDeleted,
   SetEventsLoading,
+  ControlColumnProps,
+  ExpandedDetailType,
 } from '../../../../../common/types';
-import { TimelineId } from '../../../../../common/types';
-import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
-import { timelineActions } from '../../../../timelines/store';
+import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
-import { useKibana } from '../../../lib/kibana';
-import { useRouteSpy } from '../../../utils/route/use_route_spy';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];

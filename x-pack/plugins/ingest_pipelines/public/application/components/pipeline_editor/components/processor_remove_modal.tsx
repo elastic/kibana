@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiConfirmModal } from '@elastic/eui';
 import { ProcessorInternal, ProcessorSelector } from '../types';
 
 interface Props {

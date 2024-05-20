@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { Writable } from 'stream';
 import apm from 'elastic-apm-node';
 import {
-  Observable,
   finalize,
   fromEventPattern,
   lastValueFrom,
   map,
   mergeMap,
+  Observable,
   of,
   takeUntil,
   tap,
 } from 'rxjs';
+import { Writable } from 'stream';
 
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
@@ -38,10 +38,10 @@ import {
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
 import {
-  ExportType,
-  REPORTING_TRANSACTION_TYPE,
   decryptJobHeaders,
+  ExportType,
   getFullRedirectAppUrl,
+  REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-server';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {

@@ -9,8 +9,8 @@ import React, { Suspense, useEffect, useState } from 'react';
 
 import { EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import type { LensPluginStartDependencies } from '../../plugin';
 import type { SaveModalContainerProps } from '../save_modal_container';
+import type { LensPluginStartDependencies } from '../../plugin';
 import type { LensAppServices } from '../types';
 
 const SaveModal = React.lazy(() => import('../save_modal_container'));

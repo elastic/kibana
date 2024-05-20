@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
-import { ActionTypeModel, Rule } from '../../../types';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { getRuleReducer } from './rule_reducer';
+import { ActionTypeModel, Rule } from '../../../types';
+import { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const actionType = {

@@ -18,23 +18,23 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TimelineType } from '../../../../../common/api/timeline';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { useKibana } from '../../../../common/lib/kibana';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
-import { getField } from '../../../../helpers';
-import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
-import { defaultHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
-import { defaultUdtHeaders } from '../../../../timelines/components/timeline/unified_components/default_headers';
-import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
+import { useKibana } from '../../../../common/lib/kibana';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { timelineActions } from '../../../../timelines/store';
 import { sendAlertToTimelineAction } from '../actions';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
+import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
+import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../types';
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
+import { getField } from '../../../../helpers';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { defaultUdtHeaders } from '../../../../timelines/components/timeline/unified_components/default_headers';
+import { defaultHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;

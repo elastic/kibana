@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { REMOVE_CLUSTERS_FINISH, REMOVE_CLUSTERS_START } from '../action_types';
+import { REMOVE_CLUSTERS_START, REMOVE_CLUSTERS_FINISH } from '../action_types';
 
 const initialState = {
   isRemoving: false,

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PassThrough, Stream } from 'stream';
 import { promisify } from 'util';
-import { constants, deflate } from 'zlib';
-import { AnalyticsServiceStart, Logger } from '@kbn/core/server';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { Observable } from 'rxjs';
 import { catchError, concatMap, finalize } from 'rxjs';
+import { AnalyticsServiceStart, Logger } from '@kbn/core/server';
+import { Stream, PassThrough } from 'stream';
+import { constants, deflate } from 'zlib';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 
 const delimiter = '\n';
 const pDeflate = promisify(deflate);

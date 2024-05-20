@@ -7,8 +7,8 @@
 
 import {
   type ResponseActionAgentType,
-  type ResponseActionType,
   type ResponseActionsApiCommandNames,
+  type ResponseActionType,
 } from './constants';
 
 type SupportMap = Record<

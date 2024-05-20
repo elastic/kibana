@@ -12,8 +12,8 @@ import {
 
 import { getCreateExceptionListItemOptionsMock } from '../exception_list_client.mock';
 
-import { DataValidationError } from './errors';
 import { validateData } from './validate_data';
+import { DataValidationError } from './errors';
 
 import { transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema } from '.';
 

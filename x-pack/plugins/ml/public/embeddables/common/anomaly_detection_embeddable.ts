@@ -16,8 +16,8 @@ import {
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, firstValueFrom, forkJoin, from, map, switchMap } from 'rxjs';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { type AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { AnomalySwimLaneEmbeddableApi } from '../anomaly_swimlane/types';
 
 export type CommonInput = { jobIds: string[] } & EmbeddableInput;
@@ -65,7 +65,7 @@ export const buildDataViewPublishingApi = (
 
 export abstract class AnomalyDetectionEmbeddable<
   Input extends CommonInput,
-  Output extends CommonOutput,
+  Output extends CommonOutput
 > extends Embeddable<Input, Output> {
   // Need to defer embeddable load in order to resolve data views
   deferEmbeddableLoad = true;

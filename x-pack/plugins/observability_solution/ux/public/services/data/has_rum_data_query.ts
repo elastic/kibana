@@ -8,9 +8,9 @@
 import type { ESSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { rangeQuery } from './range_query';

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiButton,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
+  EuiSpacer,
   EuiFlyout,
   EuiPopover,
-  EuiSpacer,
-  EuiText,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
-import React from 'react';
 import { useUiActions } from '../../context';
-import { SAMPLE_APP1_CLICK_TRIGGER, SampleApp1ClickContext, SampleMlJob } from '../../triggers';
+import { SAMPLE_APP1_CLICK_TRIGGER, SampleMlJob, SampleApp1ClickContext } from '../../triggers';
 
 export const job: SampleMlJob = {
   job_id: '123',

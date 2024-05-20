@@ -10,8 +10,8 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { kibanaFieldFormat } from '../../../utils';
 import type { MetricDistributionChartData } from './metric_distribution_chart';
+import { kibanaFieldFormat } from '../../../utils';
 
 interface Props {
   chartPoint: MetricDistributionChartData | undefined;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { RulesClientContext } from '../..';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
   legacyGetDailyNotificationResult,
@@ -17,8 +17,8 @@ import {
 
 import { retrieveMigratedLegacyActions } from './retrieve_migrated_legacy_actions';
 
-import { deleteRule } from '../../../application/rule/methods/delete/delete_rule';
 import { findRules } from '../../../application/rule/methods/find/find_rules';
+import { deleteRule } from '../../../application/rule/methods/delete/delete_rule';
 
 jest.mock('../../../application/rule/methods/find/find_rules', () => {
   return {

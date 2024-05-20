@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isNumber, isObject } from 'lodash';
+import { isObject, isNumber } from 'lodash';
 import { flattenData } from './flatten_data';
 
 /*

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import moment from 'moment';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export type CommonlyUsed =

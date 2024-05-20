@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiPopover, EuiBadge, EuiPopoverTitle, EuiFlexGroup } from '@elastic/eui';
 
 const tagTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.rules_list.rules_tag_badge.tagTitle',
@@ -35,8 +35,8 @@ export interface RuleTagBadgeCommonProps {
 export type RuleTagBadgeProps<T extends RuleTagBadgeOptions = 'default'> = T extends 'default'
   ? RuleTagBadgeBasicOptions & RuleTagBadgeCommonProps
   : T extends 'tagsOutPopover'
-    ? RuleTagBadgeCommonProps
-    : never;
+  ? RuleTagBadgeCommonProps
+  : never;
 
 const containerStyle = {
   width: '300px',

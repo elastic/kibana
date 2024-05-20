@@ -13,20 +13,20 @@ import { EuiFlexGroup, EuiIcon, EuiSideNavItemType, EuiText } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 
 import {
-  AI_SEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   APPLICATIONS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 import {
-  PLAYGROUND_PATH,
   SEARCH_APPLICATIONS_PATH,
   SearchApplicationViewTabs,
+  PLAYGROUND_PATH,
 } from '../../applications/routes';
 import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
 import {

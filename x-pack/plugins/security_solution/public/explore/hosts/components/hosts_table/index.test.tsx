@@ -8,13 +8,13 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { render } from '@testing-library/react';
-import { HostsTable } from '.';
 import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
+import { HostsTable } from '.';
 import { mockData } from './mock';
+import { render } from '@testing-library/react';
 
 jest.mock('../../../../common/lib/kibana');
 

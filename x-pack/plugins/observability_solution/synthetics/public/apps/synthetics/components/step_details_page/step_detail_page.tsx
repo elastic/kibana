@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { getNetworkEvents } from '../../state/network_events/actions';
-import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
-import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
 import { ErrorCallOut } from './error_callout';
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
-import { NetworkTimingsBreakdown } from './network_timings_breakdown';
+import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
+import { NetworkTimingsDonut } from './step_timing_breakdown/network_timings_donut';
+import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { getNetworkEvents } from '../../state/network_events/actions';
+import { ObjectWeightList } from './step_objects/object_weight_list';
 import { StepMetrics } from './step_metrics/step_metrics';
 import { ObjectCountList } from './step_objects/object_count_list';
-import { ObjectWeightList } from './step_objects/object_weight_list';
+import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
 import { StepImage } from './step_screenshot/step_image';
 import { BreakdownLegend } from './step_timing_breakdown/breakdown_legend';
-import { NetworkTimingsDonut } from './step_timing_breakdown/network_timings_donut';
-import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
+import { NetworkTimingsBreakdown } from './network_timings_breakdown';
 
 export const StepDetailPage = () => {
   const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();

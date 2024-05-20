@@ -8,8 +8,8 @@
 
 import type { URL } from 'url';
 import type { Request, RouteOptionsPayload } from '@hapi/hapi';
-import type { Headers } from './headers';
 import type { KibanaRouteOptions } from './request';
+import type { Headers } from './headers';
 
 /**
  * Represents a fake raw request.

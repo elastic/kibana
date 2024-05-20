@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FindFileStructureResponse, HasImportPermission } from '../../common/types';
-import type { IImporter, ImportFactoryOptions } from '../importer';
-import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
 import { lazyLoadModules } from '../lazy_load_bundle';
+import type { IImporter, ImportFactoryOptions } from '../importer';
+import type { HasImportPermission, FindFileStructureResponse } from '../../common/types';
+import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
 import { GeoUploadWizardAsyncWrapper } from './geo_upload_wizard_async_wrapper';
 import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
 

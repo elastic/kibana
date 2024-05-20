@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getDashboard } from './api';
 import * as i18n from './translations';

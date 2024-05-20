@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
-import { useDataVisualizerKibana } from '../../../../../kibana_context';
-import { TopValues } from '../../../top_values';
+import type { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { ChoroplethMap } from './choropleth_map';
+import { TopValues } from '../../../top_values';
+import { useDataVisualizerKibana } from '../../../../../kibana_context';
 import { DocumentStatsTable } from './document_stats';
-import { ErrorMessageContent } from './error_message';
 import { ExpandedRowContent } from './expanded_row_content';
+import { ChoroplethMap } from './choropleth_map';
+import { ErrorMessageContent } from './error_message';
 
 export const KeywordContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
   const [suggestion, setSuggestion] = useState<EMSTermJoinConfig | null>(null);

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import { camelCase, isEmpty } from 'lodash/fp';
+import { EuiButtonIcon, EuiFormRow, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { isEmpty, camelCase } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isEqual } from 'lodash';
-import type { MitreTactic } from '../../../../detections/mitre/types';
+import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as Rulei18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { FieldHook } from '../../../../shared_imports';
-import { MyAddItemButton } from '../add_item_form';
 import { threatDefault } from '../step_about_rule/default_value';
-import { MitreAttackTechniqueFields } from './technique_fields';
+import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
+import { MitreAttackTechniqueFields } from './technique_fields';
+import type { MitreTactic } from '../../../../detections/mitre/types';
 
 const lazyMitreConfiguration = () => {
   /**

@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { assertIdFormats } from './assert_id_formats';
-import {
-  hashedCategoriesCountJob,
-  hashedRateJob,
-  legacyCategoriesCountJob,
-  legacyRateJob,
-} from './ml_job_configs';
-import { MlJobHelper, createMlJobHelper } from './ml_job_helper';
+import { createMlJobHelper, MlJobHelper } from './ml_job_helper';
 import { createRequestTracker } from './request_tracker';
+import {
+  hashedRateJob,
+  hashedCategoriesCountJob,
+  legacyRateJob,
+  legacyCategoriesCountJob,
+} from './ml_job_configs';
 
 const anomalyDetectorsPattern =
   /anomaly_detectors\/.*-log-entry-(rate|categories-count)\/results\/overall_buckets/;

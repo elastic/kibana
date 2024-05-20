@@ -14,8 +14,8 @@ import { EnterpriseSearchApplicationDetails } from '../../../../../common/types/
 import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 
 import {
-  SearchApplicationIndicesFlyoutLogic,
   SearchApplicationIndicesFlyoutValues,
+  SearchApplicationIndicesFlyoutLogic,
 } from './search_application_indices_flyout_logic';
 
 const DEFAULT_VALUES: SearchApplicationIndicesFlyoutValues = {

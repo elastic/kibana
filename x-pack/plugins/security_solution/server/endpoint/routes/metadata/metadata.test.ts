@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  ClusterClientMock,
-  ScopedClusterClientMock,
-} from '@kbn/core-elasticsearch-client-server-mocks';
-import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type {
   KibanaResponseFactory,
   RequestHandler,
@@ -23,15 +17,29 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import type { HostInfo, MetadataListResponse } from '../../../../common/endpoint/types';
+import { HostStatus } from '../../../../common/endpoint/types';
+import { registerEndpointRoutes } from '.';
+import {
+  createMockEndpointAppContext,
+  createMockEndpointAppContextServiceSetupContract,
+  createMockEndpointAppContextServiceStartContract,
+  createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
+} from '../../mocks';
+import type { EndpointAppContextServiceStartContract } from '../../endpoint_app_context_services';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { Agent } from '@kbn/fleet-plugin/common/types/models';
+import {
+  legacyMetadataSearchResponseMock,
+  unitedMetadataSearchResponseMock,
+} from './support/test_support';
 import type {
   AgentClient,
   AgentPolicyServiceInterface,
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
-import { registerEndpointRoutes } from '.';
-import { TRANSFORM_STATES } from '../../../../common/constants';
 import {
   ENDPOINT_DEFAULT_SORT_DIRECTION,
   ENDPOINT_DEFAULT_SORT_FIELD,
@@ -40,26 +48,18 @@ import {
   METADATA_TRANSFORMS_STATUS_ROUTE,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
-import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import type { HostInfo, MetadataListResponse } from '../../../../common/endpoint/types';
-import { HostStatus } from '../../../../common/endpoint/types';
-import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
-import type { EndpointAppContextServiceStartContract } from '../../endpoint_app_context_services';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import {
-  createMockEndpointAppContext,
-  createMockEndpointAppContextServiceSetupContract,
-  createMockEndpointAppContextServiceStartContract,
-  createRouteHandlerContext,
-  getRegisteredVersionedRouteMock,
-} from '../../mocks';
+import { TRANSFORM_STATES } from '../../../../common/constants';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import type {
+  ClusterClientMock,
+  ScopedClusterClientMock,
+} from '@kbn/core-elasticsearch-client-server-mocks';
 import { EndpointHostNotFoundError } from '../../services/metadata';
-import {
-  legacyMetadataSearchResponseMock,
-  unitedMetadataSearchResponseMock,
-} from './support/test_support';
+import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
+import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import type { VersionedRouteConfig } from '@kbn/core-http-server';
+import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
 
 describe('test endpoint routes', () => {
   let routerMock: SecuritySolutionPluginRouterMock;

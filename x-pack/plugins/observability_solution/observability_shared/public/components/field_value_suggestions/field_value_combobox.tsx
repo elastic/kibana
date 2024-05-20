@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+import { union, isEmpty } from 'lodash';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormControlLayout,
+  EuiComboBoxOptionOption,
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty, union } from 'lodash';
-import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FieldValueSelectionProps } from './types';
 const formatOptions = (values?: string[], allowAllValuesSelection?: boolean) => {

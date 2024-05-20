@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -15,31 +18,28 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLoadingSpinner,
   EuiProgress,
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
+  EuiIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
-import {
-  TRANSFORM_STATE,
-  mapEsHealthStatus2TransformHealthStatus,
-} from '../../../../../../common/constants';
+import { useTransformCapabilities } from '../../../../hooks';
+import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import type { TransformId } from '../../../../../../common/types/transform';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
-import { needsReauthorization } from '../../../../common/reauthorization_utils';
-import { useTransformCapabilities } from '../../../../hooks';
+import {
+  mapEsHealthStatus2TransformHealthStatus,
+  TRANSFORM_STATE,
+} from '../../../../../../common/constants';
 
 import type { TransformListRow } from '../../../../common';
-import { TRANSFORM_LIST_COLUMN, getTransformProgress } from '../../../../common';
-import { isManagedTransform } from '../../../../common/managed_transforms_utils';
+import { getTransformProgress, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
@@ -96,7 +96,7 @@ export const useColumns = (
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
-    EuiTableActionsColumnType<TransformListRow>,
+    EuiTableActionsColumnType<TransformListRow>
   ] = [
     {
       name: (

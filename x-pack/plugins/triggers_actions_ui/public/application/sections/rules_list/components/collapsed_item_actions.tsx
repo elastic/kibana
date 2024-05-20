@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiPopover,
-} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { asyncScheduler } from 'rxjs';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { asyncScheduler } from 'rxjs';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiPanel,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
-import { isRuleSnoozed } from '../../../lib';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { isRuleSnoozed } from '../../../lib';
 import './collapsed_item_actions.scss';
-import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
+import { futureTimeToInterval, SnoozePanel } from './rule_snooze';
 import {
   SNOOZE_FAILED_MESSAGE,
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
 } from './notify_badge';
-import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
+import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
 export type ComponentOpts = {
   item: RuleTableItem;

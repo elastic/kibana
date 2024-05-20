@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { fieldAndValueValid, getIndicatorFieldAndValue } from './field_value';
 import {
   generateMockFileIndicator,
   generateMockUrlIndicator,
 } from '../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../constants/common';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from './field_value';
 
 describe('field_value', () => {
   describe('getIndicatorFieldAndValue()', () => {

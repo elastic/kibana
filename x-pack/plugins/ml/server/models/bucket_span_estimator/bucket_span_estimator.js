@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { cloneDeep, each, get, remove, sortBy } from 'lodash';
+import { cloneDeep, each, remove, sortBy, get } from 'lodash';
 
 import { mlLog } from '../../lib/log';
 
 import { INTERVALS } from './intervals';
-import { PolledDataChecker } from './polled_data_checker';
 import { SingleSeriesChecker } from './single_series_checker';
+import { PolledDataChecker } from './polled_data_checker';
 
 export function estimateBucketSpanFactory(client) {
   const { asCurrentUser, asInternalUser } = client;

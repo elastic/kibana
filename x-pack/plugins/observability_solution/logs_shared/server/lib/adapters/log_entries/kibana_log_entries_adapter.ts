@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { JsonArray } from '@kbn/utility-types';
 import { timeMilliseconds } from 'd3-time';
 import { fold, map } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
+import { JsonArray } from '@kbn/utility-types';
 import { compact } from 'lodash';
-import { TIEBREAKER_FIELD, TIMESTAMP_FIELD } from '../../../../common/constants';
-import { ResolvedLogView } from '../../../../common/log_views';
 import type { LogsSharedPluginRequestHandlerContext } from '../../../types';
 import {
-  LOG_ENTRIES_PAGE_SIZE,
   LogEntriesAdapter,
   LogEntriesParams,
   LogEntryDocument,
   LogEntryQuery,
   LogSummaryBucket,
+  LOG_ENTRIES_PAGE_SIZE,
 } from '../../domains/log_entries_domain';
 import { SortedSearchHit } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
+import { ResolvedLogView } from '../../../../common/log_views';
+import { TIMESTAMP_FIELD, TIEBREAKER_FIELD } from '../../../../common/constants';
 
 const TIMESTAMP_FORMAT = 'epoch_millis';
 
@@ -48,13 +48,10 @@ export class LogsSharedKibanaLogEntriesAdapter implements LogEntriesAdapter {
       ? {
           highlight: {
             boundary_scanner: 'word' as const,
-            fields: fields.reduce(
-              (highlightFieldConfigs, fieldName) => {
-                highlightFieldConfigs[fieldName] = {};
-                return highlightFieldConfigs;
-              },
-              {} as Record<string, unknown>
-            ),
+            fields: fields.reduce((highlightFieldConfigs, fieldName) => {
+              highlightFieldConfigs[fieldName] = {};
+              return highlightFieldConfigs;
+            }, {} as Record<string, unknown>),
             fragment_size: 1,
             number_of_fragments: 100,
             post_tags: [''],

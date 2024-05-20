@@ -8,9 +8,9 @@
 
 import './filter_button_group.scss';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import classNames from 'classnames';
 import React, { FC, ReactNode } from 'react';
+import classNames from 'classnames';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 interface Props {
   items: ReactNode[];

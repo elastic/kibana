@@ -10,7 +10,11 @@
         "tags": [],
         "label": "AnnotationEditorControls",
         "description": [],
-        "signature": ["(props: ", "Props", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "Props",
+          ") => JSX.Element"
+        ],
         "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -22,7 +26,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "packages/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -68,7 +74,9 @@
             "tags": [],
             "label": "newId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -81,7 +89,9 @@
             "tags": [],
             "label": "timestamp",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-event-annotation-common/util.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -374,7 +384,9 @@
                 "tags": [],
                 "label": "savedObjectId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -390,7 +402,9 @@
             "tags": [],
             "label": "groupExistsWithTitle",
             "description": [],
-            "signature": ["(title: string) => Promise<boolean>"],
+            "signature": [
+              "(title: string) => Promise<boolean>"
+            ],
             "path": "packages/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -402,7 +416,9 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -440,7 +456,9 @@
                 "tags": [],
                 "label": "searchTerm",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -453,7 +471,9 @@
                 "tags": [],
                 "label": "pageSize",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -466,7 +486,9 @@
                 "tags": [],
                 "label": "tagsToInclude",
                 "description": [],
-                "signature": ["string[] | undefined"],
+                "signature": [
+                  "string[] | undefined"
+                ],
                 "path": "packages/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -479,7 +501,9 @@
                 "tags": [],
                 "label": "tagsToExclude",
                 "description": [],
-                "signature": ["string[] | undefined"],
+                "signature": [
+                  "string[] | undefined"
+                ],
                 "path": "packages/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -495,7 +519,9 @@
             "tags": [],
             "label": "deleteAnnotationGroups",
             "description": [],
-            "signature": ["(ids: string[]) => Promise<void>"],
+            "signature": [
+              "(ids: string[]) => Promise<void>"
+            ],
             "path": "packages/kbn-event-annotation-components/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -507,7 +533,9 @@
                 "tags": [],
                 "label": "ids",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -612,7 +640,9 @@
                 "tags": [],
                 "label": "savedObjectId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-event-annotation-components/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -803,7 +833,9 @@
                     "tags": [],
                     "label": "fixedPageSize",
                     "description": [],
-                    "signature": ["number | undefined"],
+                    "signature": [
+                      "number | undefined"
+                    ],
                     "path": "packages/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -923,7 +955,9 @@
                     "tags": [],
                     "label": "onCreateNew",
                     "description": [],
-                    "signature": ["() => void"],
+                    "signature": [
+                      "() => void"
+                    ],
                     "path": "packages/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -995,7 +1029,9 @@
         "tags": [],
         "label": "defaultAnnotationRangeColor",
         "description": [],
-        "signature": ["\"#F04E981A\""],
+        "signature": [
+          "\"#F04E981A\""
+        ],
         "path": "packages/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1008,7 +1044,9 @@
         "tags": [],
         "label": "EVENT_ANNOTATION_APP_NAME",
         "description": [],
-        "signature": ["\"event-annotations\""],
+        "signature": [
+          "\"event-annotations\""
+        ],
         "path": "packages/kbn-event-annotation-components/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

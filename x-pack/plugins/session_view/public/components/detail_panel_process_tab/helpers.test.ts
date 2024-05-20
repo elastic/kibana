@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DASH } from '../../constants';
-import { formatProcessArgs, getProcessExecutableCopyText } from './helpers';
+import { getProcessExecutableCopyText, formatProcessArgs } from './helpers';
 
 describe('detail panel process tab helpers tests', () => {
   it('getProcessExecutableCopyText works with empty array', () => {

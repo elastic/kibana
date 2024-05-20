@@ -1,7 +1,3 @@
-import { getElasticsearchQueryOrThrow } from '@kbn/observability-plugin/public';
-import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
-import { debounce } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,7 +5,11 @@ import { debounce } from 'lodash';
  * 2.0.
  */
 import { useCallback, useEffect, useState } from 'react';
+import { debounce } from 'lodash';
+import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
+import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
+import { getElasticsearchQueryOrThrow } from '@kbn/observability-plugin/public';
 import { useKibana } from '../utils/kibana_react';
 
 export interface UseFetchGroupByCardinalityResponse {

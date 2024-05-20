@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { fireEvent } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import React from 'react';
-import { render } from '../../../utils/testing';
-import { startPlugins } from '../../../utils/testing/__mocks__/synthetics_plugin_start_mock';
 import { SyntheticsDatePicker } from './synthetics_date_picker';
+import { startPlugins } from '../../../utils/testing/__mocks__/synthetics_plugin_start_mock';
+import { createMemoryHistory } from 'history';
+import { render } from '../../../utils/testing';
+import { fireEvent } from '@testing-library/react';
 
 describe('SyntheticsDatePicker component', () => {
   jest.setTimeout(10_000);

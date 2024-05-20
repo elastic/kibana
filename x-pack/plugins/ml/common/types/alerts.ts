@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { ML_ANOMALY_RESULT_TYPE, type MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
+import type { RuleTypeParams, Rule } from '@kbn/alerting-plugin/common';
+import { type MlAnomalyResultType, ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';

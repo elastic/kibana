@@ -1,5 +1,3 @@
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,18 +6,20 @@ import type { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import type { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
+import { addFilter, isEmptyFilterValue } from './add_filter';
 import { FILTER_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
-import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
-import type { DefaultActionsSupportedValue } from '../types';
 import {
   filterOutNullableValues,
   isTypeSupportedByDefaultActions,
   isValueSupportedByDefaultActions,
   valueToArray,
 } from '../utils';
-import { addFilter, isEmptyFilterValue } from './add_filter';
+import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
+import type { DefaultActionsSupportedValue } from '../types';
 
 const ICON = 'plusInCircle';
 const FILTER_IN = i18n.translate('cellActions.actions.filterIn', {

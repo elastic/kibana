@@ -44,7 +44,9 @@
             "description": [
               "- An object where keys are bucket timestamps as strings\n  and values are numeric values associated with each bucket."
             ],
-            "signature": ["Record<string, number>"],
+            "signature": [
+              "Record<string, number>"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_extended_change_point.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -59,14 +61,18 @@
             "description": [
               "- The timestamp of the change point as a number. This timestamp must\n  be one of the keys in the `buckets` object."
             ],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_extended_change_point.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["An object containing two properties: `startTs` and `endTs`."],
+        "returnComment": [
+          "An object containing two properties: `startTs` and `endTs`."
+        ],
         "initialIsOpen": false
       },
       {
@@ -114,7 +120,9 @@
             "type": "Array",
             "tags": [],
             "label": "logRateHistogram",
-            "description": ["The log rate histogram."],
+            "description": [
+              "The log rate histogram."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/aiops-log-rate-analysis",
@@ -136,7 +144,9 @@
             "type": "Object",
             "tags": [],
             "label": "windowParameters",
-            "description": ["The window parameters with baseline and deviation time range."],
+            "description": [
+              "The window parameters with baseline and deviation time range."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/aiops-log-rate-analysis",
@@ -152,7 +162,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["The log rate analysis type."],
+        "returnComment": [
+          "The log rate analysis type."
+        ],
         "initialIsOpen": false
       },
       {
@@ -177,8 +189,12 @@
             "type": "number",
             "tags": [],
             "label": "timeRangeEarliest",
-            "description": ["The earliest timestamp in the time range."],
-            "signature": ["number"],
+            "description": [
+              "The earliest timestamp in the time range."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -190,8 +206,12 @@
             "type": "number",
             "tags": [],
             "label": "timeRangeLatest",
-            "description": ["The latest timestamp in the time range."],
-            "signature": ["number"],
+            "description": [
+              "The latest timestamp in the time range."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -203,8 +223,12 @@
             "type": "number",
             "tags": [],
             "label": "interval",
-            "description": ["The interval between timestamps in milliseconds."],
-            "signature": ["number"],
+            "description": [
+              "The interval between timestamps in milliseconds."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_timestamps.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -279,14 +303,18 @@
             "description": [
               "time range definition that always corresponds to histogram bucket timestamps"
             ],
-            "signature": ["number[]"],
+            "signature": [
+              "number[]"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_snapped_window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["WindowParameters"],
+        "returnComment": [
+          "WindowParameters"
+        ],
         "initialIsOpen": false
       },
       {
@@ -318,8 +346,12 @@
             "type": "number",
             "tags": [],
             "label": "clickTime",
-            "description": ["timestamp of the clicked log rate deviation."],
-            "signature": ["number"],
+            "description": [
+              "timestamp of the clicked log rate deviation."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -331,8 +363,12 @@
             "type": "number",
             "tags": [],
             "label": "minTime",
-            "description": ["minimum timestamp of the time window to be analysed"],
-            "signature": ["number"],
+            "description": [
+              "minimum timestamp of the time window to be analysed"
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -344,8 +380,12 @@
             "type": "number",
             "tags": [],
             "label": "maxTime",
-            "description": ["maximum timestamp of the time window to be analysed"],
-            "signature": ["number"],
+            "description": [
+              "maximum timestamp of the time window to be analysed"
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -360,7 +400,9 @@
             "description": [
               "optional timestamp to treat clicktime and clickTimeUpper\nas a time range instead of point in time"
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -372,15 +414,21 @@
             "type": "number",
             "tags": [],
             "label": "windowGapOverride",
-            "description": ["optional override for the baseline/deviation gap"],
-            "signature": ["number | undefined"],
+            "description": [
+              "optional override for the baseline/deviation gap"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": ["WindowParameters"],
+        "returnComment": [
+          "WindowParameters"
+        ],
         "initialIsOpen": false
       },
       {
@@ -455,7 +503,9 @@
             "description": [
               "Interval in milliseconds for extending the window or\nadjusting the start range."
             ],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -467,8 +517,12 @@
             "type": "number",
             "tags": [],
             "label": "timeRangeEarliest",
-            "description": ["Earliest timestamp in milliseconds in the time range."],
-            "signature": ["number"],
+            "description": [
+              "Earliest timestamp in milliseconds in the time range."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -480,8 +534,12 @@
             "type": "number",
             "tags": [],
             "label": "timeRangeLatest",
-            "description": ["Latest timestamp in milliseconds in the time range."],
-            "signature": ["number"],
+            "description": [
+              "Latest timestamp in milliseconds in the time range."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/get_window_parameters_for_trigger.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -512,7 +570,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": ["Window parameters"],
+        "returnComment": [
+          "Window parameters"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -536,7 +596,9 @@
             "type": "number",
             "tags": [],
             "label": "key",
-            "description": ["Key is the timestamp of the change point."],
+            "description": [
+              "Key is the timestamp of the change point."
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -547,7 +609,9 @@
             "type": "number",
             "tags": [],
             "label": "startTs",
-            "description": ["The start timestamp of the change point period."],
+            "description": [
+              "The start timestamp of the change point period."
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -558,7 +622,9 @@
             "type": "number",
             "tags": [],
             "label": "endTs",
-            "description": ["The end timestamp of the change point period."],
+            "description": [
+              "The end timestamp of the change point period."
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -569,7 +635,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["The type of change point."],
+            "description": [
+              "The type of change point."
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -583,7 +651,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LogRateHistogramItem",
-        "description": ["\nLog rate histogram item"],
+        "description": [
+          "\nLog rate histogram item"
+        ],
         "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -594,8 +664,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "time",
-            "description": ["\nTime of bucket"],
-            "signature": ["string | number"],
+            "description": [
+              "\nTime of bucket"
+            ],
+            "signature": [
+              "string | number"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -606,7 +680,9 @@
             "type": "number",
             "tags": [],
             "label": "value",
-            "description": ["\nNumber of doc count for that time bucket"],
+            "description": [
+              "\nNumber of doc count for that time bucket"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_histogram_item.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -618,7 +694,11 @@
         "parentPluginId": "@kbn/aiops-log-rate-analysis",
         "id": "def-common.WindowParameters",
         "type": "Interface",
-        "tags": ["export", "interface", "typedef"],
+        "tags": [
+          "export",
+          "interface",
+          "typedef"
+        ],
         "label": "WindowParameters",
         "description": [
           "\nTime range definition for baseline and deviation to be used by log rate analysis.\n"
@@ -633,7 +713,9 @@
             "type": "number",
             "tags": [],
             "label": "baselineMin",
-            "description": ["Baseline minimum value"],
+            "description": [
+              "Baseline minimum value"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -644,7 +726,9 @@
             "type": "number",
             "tags": [],
             "label": "baselineMax",
-            "description": ["Baseline maximum value"],
+            "description": [
+              "Baseline maximum value"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -655,7 +739,9 @@
             "type": "number",
             "tags": [],
             "label": "deviationMin",
-            "description": ["Deviation minimum value"],
+            "description": [
+              "Deviation minimum value"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -666,7 +752,9 @@
             "type": "number",
             "tags": [],
             "label": "deviationMax",
-            "description": ["Deviation maximum value"],
+            "description": [
+              "Deviation maximum value"
+            ],
             "path": "x-pack/packages/ml/aiops_log_rate_analysis/window_parameters.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -683,8 +771,12 @@
         "type": "string",
         "tags": [],
         "label": "LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR",
-        "description": ["Highlighting color for charts"],
-        "signature": ["\"orange\""],
+        "description": [
+          "Highlighting color for charts"
+        ],
+        "signature": [
+          "\"orange\""
+        ],
         "path": "x-pack/packages/ml/aiops_log_rate_analysis/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -696,8 +788,12 @@
         "type": "Type",
         "tags": [],
         "label": "LogRateAnalysisType",
-        "description": ["\nUnion type of log rate analysis types."],
-        "signature": ["\"spike\" | \"dip\""],
+        "description": [
+          "\nUnion type of log rate analysis types."
+        ],
+        "signature": [
+          "\"spike\" | \"dip\""
+        ],
         "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_analysis_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -714,7 +810,9 @@
         "description": [
           "\nThe type of log rate analysis (spike or dip) will affect how parameters are\npassed to the analysis API endpoint."
         ],
-        "signature": ["{ readonly SPIKE: \"spike\"; readonly DIP: \"dip\"; }"],
+        "signature": [
+          "{ readonly SPIKE: \"spike\"; readonly DIP: \"dip\"; }"
+        ],
         "path": "x-pack/packages/ml/aiops_log_rate_analysis/log_rate_analysis_type.ts",
         "deprecated": false,
         "trackAdoption": false,

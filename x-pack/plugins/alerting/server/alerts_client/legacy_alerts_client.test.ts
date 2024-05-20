@@ -1,4 +1,3 @@
-import { schema } from '@kbn/config-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +5,18 @@ import { schema } from '@kbn/config-schema';
  * 2.0.
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
-import { Alert } from '../alert/alert';
-import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
-import { getAlertsForNotification, processAlerts } from '../lib';
-import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, RecoveredActionGroup } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
+import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
+import { Alert } from '../alert/alert';
+import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
+import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
+import { getAlertsForNotification, processAlerts } from '../lib';
+import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
+import { logAlerts } from '../task_runner/log_alerts';
+import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { schema } from '@kbn/config-schema';
 
 const scheduleActions = jest.fn();
 const replaceState = jest.fn(() => ({ scheduleActions }));
@@ -80,7 +80,7 @@ jest.mock('../lib/get_alerts_for_notification', () => {
 
 jest.mock('../task_runner/log_alerts', () => ({ logAlerts: jest.fn() }));
 
-let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
+let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
 import { defaultsDeep } from 'lodash';
+import ace from 'brace';
 import 'brace/mode/json';
 
 import { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';

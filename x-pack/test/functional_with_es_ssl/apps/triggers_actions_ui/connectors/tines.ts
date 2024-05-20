@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import {
-  ExternalServiceSimulator,
-  getExternalServiceSimulatorPath,
-} from '@kbn/actions-simulators-plugin/server/plugin';
+import expect from '@kbn/expect';
 import {
   tinesAgentWebhook,
   tinesStory1,
 } from '@kbn/actions-simulators-plugin/server/tines_simulation';
-import expect from '@kbn/expect';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { generateUniqueKey } from '../../../lib/get_test_data';
 import { ObjectRemover } from '../../../lib/object_remover';
+import { generateUniqueKey } from '../../../lib/get_test_data';
 import { getConnectorByName } from './utils';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

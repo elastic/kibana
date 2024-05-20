@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { Owner } from '@kbn/cases-plugin/common/constants/types';
 import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
-import { roles as api_int_roles } from '../../../../../api_integration/apis/cases/common/roles';
-import {
-  users as api_int_users,
-  casesOnlyReadDeleteUser,
-  obsCasesOnlyReadDeleteUser,
-  secAllCasesOnlyReadDeleteUser,
-} from '../../../../../api_integration/apis/cases/common/users';
+import { Owner } from '@kbn/cases-plugin/common/constants/types';
+import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   bulkCreateAttachments,
-  bulkDeleteFileAttachments,
   createCase,
   createFile,
   deleteAllCaseItems,
   deleteAllFiles,
+  bulkDeleteFileAttachments,
 } from '../../../../common/lib/api';
-import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 import { superUser } from '../../../../common/lib/authentication/users';
-import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
+import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
+import {
+  casesOnlyReadDeleteUser,
+  obsCasesOnlyReadDeleteUser,
+  secAllCasesOnlyReadDeleteUser,
+  users as api_int_users,
+} from '../../../../../api_integration/apis/cases/common/users';
+import { roles as api_int_roles } from '../../../../../api_integration/apis/cases/common/roles';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -11,9 +11,9 @@ import type { AgentPolicy, PackagePolicy } from '../types';
 
 import { agentPolicyService, packagePolicyService } from '.';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
-import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 import { bulkInstallPackages } from './epm/packages';
 import { incrementPackageName } from './package_policies';
+import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;

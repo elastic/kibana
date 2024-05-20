@@ -7,8 +7,8 @@
 
 import { EuiButton } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const InlineLogViewCallout = ({
   revertToDefaultLogView,

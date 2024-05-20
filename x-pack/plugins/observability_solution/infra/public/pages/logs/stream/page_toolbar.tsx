@@ -7,12 +7,12 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 import {
   useLogHighlightsStateContext,
   useLogPositionStateContext,
   useLogViewContext,
 } from '@kbn/logs-shared-plugin/public';
-import React, { useMemo } from 'react';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';

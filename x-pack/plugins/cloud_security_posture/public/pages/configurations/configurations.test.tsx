@@ -1,9 +1,3 @@
-import type { DataView } from '@kbn/data-plugin/common';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
-import type { UseQueryResult } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
-import Chance from 'chance';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,21 +5,27 @@ import Chance from 'chance';
  * 2.0.
  */
 import React from 'react';
+import Chance from 'chance';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { of } from 'rxjs';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
-import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { Configurations } from './configurations';
+import { TestProvider } from '../../test/test_provider';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
+import * as TEST_SUBJECTS from './test_subjects';
+import type { DataView } from '@kbn/data-plugin/common';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
-import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
-import { PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
-import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
-import { TestProvider } from '../../test/test_provider';
+import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
+import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
+import { render } from '@testing-library/react';
 import { expectIdsInDoc } from '../../test/utils';
-import { Configurations } from './configurations';
-import * as TEST_SUBJECTS from './test_subjects';
+import { PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');

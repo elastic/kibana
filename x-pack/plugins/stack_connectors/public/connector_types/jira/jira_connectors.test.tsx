@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import JiraConnectorFields from './jira_connectors';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { ConnectorFormTestProvider } from '../lib/test_utils';
-import JiraConnectorFields from './jira_connectors';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 

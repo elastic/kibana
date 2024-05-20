@@ -6,8 +6,8 @@
  */
 
 import {
-  ALL_CASES_CREATE_NEW_CASE_BTN,
   ALL_CASES_NAME,
+  ALL_CASES_CREATE_NEW_CASE_BTN,
   EDIT_EXTERNAL_CONNECTION,
 } from '../screens/all_cases';
 

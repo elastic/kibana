@@ -1,13 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import deepmerge from 'deepmerge';
+import { get } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
-  ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_TAGS,
   ALERT_START,
   ALERT_STATUS,
@@ -20,28 +27,21 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import deepmerge from 'deepmerge';
-import { get } from 'lodash';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
-import { nanosToMicros } from './nanos_to_micros';
 import { stripFrameworkFields } from './strip_framework_fields';
+import { nanosToMicros } from './nanos_to_micros';
 
 interface BuildNewAlertOpts<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string,
+  RecoveryActionGroupId extends string
 > {
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
@@ -61,7 +61,7 @@ export const buildNewAlert = <
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string,
+  RecoveryActionGroupId extends string
 >({
   legacyAlert,
   rule,

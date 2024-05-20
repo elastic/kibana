@@ -6,11 +6,11 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { TimelineType } from '../../../../common/api/timeline';
+import { i18n } from '@kbn/i18n';
 import { TimelineId } from '../../../../common/types';
 import { useCreateTimeline } from '../../hooks/use_create_timeline';
+import { TimelineType } from '../../../../common/api/timeline';
 
 const NEW_TIMELINE = i18n.translate('xpack.securitySolution.timelines.newTimelineButtonLabel', {
   defaultMessage: 'Create new Timeline',

@@ -8,11 +8,11 @@ import { GET_INDEX_MAPPINGS } from '../../common/constants';
 
 import { fetchMappings } from '../lib';
 
-import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
-import { serverMock } from '../__mocks__/server';
 import { getIndexMappingsRoute } from './get_index_mappings';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('../lib', () => ({
   fetchMappings: jest.fn(),

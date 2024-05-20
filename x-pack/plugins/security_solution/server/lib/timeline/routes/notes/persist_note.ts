@@ -10,15 +10,15 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { NOTE_URL } from '../../../../../common/constants';
 
-import type { ConfigType } from '../../../..';
 import type { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
+import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
+import { buildFrameworkRequest } from '../../utils/common';
 import { persistNoteSchema } from '../../../../../common/api/timeline';
 import { persistNote } from '../../saved_object/notes';
-import { buildFrameworkRequest } from '../../utils/common';
 
 export const persistNoteRoute = (
   router: SecuritySolutionPluginRouter,

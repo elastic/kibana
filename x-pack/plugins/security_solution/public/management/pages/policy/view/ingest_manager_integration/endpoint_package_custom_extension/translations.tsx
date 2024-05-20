@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 export const TRUSTED_APPS_LABELS = {
   artifactsSummaryApiError: (error: string) =>

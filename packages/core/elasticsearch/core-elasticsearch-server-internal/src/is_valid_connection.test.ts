@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import { Subject } from 'rxjs';
+import { errors } from '@elastic/elasticsearch';
 import { isValidConnection } from './is_valid_connection';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 

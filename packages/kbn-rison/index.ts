@@ -8,7 +8,7 @@
 
 export * from './kbn_rison';
 
-import { decode, decodeArray, encode, encodeArray, encodeUnknown } from './kbn_rison';
+import { encode, encodeUnknown, decode, encodeArray, decodeArray } from './kbn_rison';
 // maintain compatibility with 'rison-node' and include a default export
 // eslint-disable-next-line import/no-default-export
 export default {

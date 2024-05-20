@@ -6,9 +6,9 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { PhaseWithTiming } from '../../../common/types';
 import { setupEnvironment } from '../../helpers';
-import { TimingTestBed, setupTimingTestBed } from './timing.helpers';
+import { setupTimingTestBed, TimingTestBed } from './timing.helpers';
+import { PhaseWithTiming } from '../../../common/types';
 
 describe('<EditPolicy /> timing', () => {
   let testBed: TimingTestBed;

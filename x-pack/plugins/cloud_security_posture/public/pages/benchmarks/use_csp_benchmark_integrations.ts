@@ -8,9 +8,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
 import type { BenchmarksQueryParams } from '../../../common/types/benchmarks/v1';
-import type { GetBenchmarkResponse as GetBenchmarkResponseV1 } from '../../../common/types/benchmarks/v1';
-import type { GetBenchmarkResponse } from '../../../common/types/latest';
 import { useKibana } from '../../common/hooks/use_kibana';
+import type { GetBenchmarkResponse } from '../../../common/types/latest';
+import type { GetBenchmarkResponse as GetBenchmarkResponseV1 } from '../../../common/types/benchmarks/v1';
 
 const BENCHMARK_INTEGRATION_QUERY_KEY_V1 = 'csp_benchmark_integrations_v1';
 

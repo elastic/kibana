@@ -12,17 +12,17 @@ import {
   PhaseWithDownsample,
   PhaseWithTiming,
 } from '../../../../../common/types';
-import { FormSchema, fieldValidators } from '../../../../shared_imports';
+import { fieldValidators, FormSchema } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
 import { CLOUD_DEFAULT_REPO, ROLLOVER_FORM_PATHS } from '../constants';
 import { i18nTexts } from '../i18n_texts';
 import {
-  downsampleIntervalMultipleOfPreviousOne,
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
   integerValidator,
   minAgeGreaterThanPreviousPhase,
   rolloverThresholdsValidator,
+  downsampleIntervalMultipleOfPreviousOne,
 } from './validations';
 
 const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);

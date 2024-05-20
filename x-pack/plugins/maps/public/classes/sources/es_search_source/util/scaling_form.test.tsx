@@ -13,11 +13,11 @@ jest.mock('./load_index_settings', () => ({
   },
 }));
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
-import { SCALING_TYPES } from '../../../../../common/constants';
 import { ScalingForm } from './scaling_form';
+import { SCALING_TYPES } from '../../../../../common/constants';
 
 const defaultProps = {
   filterByMapBounds: true,

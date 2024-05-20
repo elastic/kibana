@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { MAX_LENGTH_PER_TAG } from '../../../common/constants';
-import type { AppMockRenderer } from '../../common/mock';
-import { TestProviders, createAppMockRenderer } from '../../common/mock';
-import { useGetTags } from '../../containers/use_get_tags';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Tags } from './tags';
 import type { FormProps } from './schema';
 import { schema } from './schema';
-import { Tags } from './tags';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import { useGetTags } from '../../containers/use_get_tags';
+import { MAX_LENGTH_PER_TAG } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');

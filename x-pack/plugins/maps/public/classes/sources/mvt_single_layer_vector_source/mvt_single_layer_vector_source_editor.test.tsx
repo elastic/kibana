@@ -7,8 +7,8 @@
 
 jest.mock('../../../kibana_services', () => ({}));
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
 import { MVTSingleLayerVectorSourceEditor } from './mvt_single_layer_vector_source_editor';
 

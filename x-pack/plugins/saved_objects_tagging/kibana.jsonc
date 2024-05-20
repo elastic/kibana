@@ -6,9 +6,19 @@
     "id": "savedObjectsTagging",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "saved_object_tagging"],
-    "requiredPlugins": ["features", "management", "savedObjectsTaggingOss"],
-    "optionalPlugins": ["usageCollection", "security"],
+    "configPath": [
+      "xpack",
+      "saved_object_tagging"
+    ],
+    "requiredPlugins": [
+      "features",
+      "management",
+      "savedObjectsTaggingOss"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "security"
+    ],
     "requiredBundles": []
   }
 }

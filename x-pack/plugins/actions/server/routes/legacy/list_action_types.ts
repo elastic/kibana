@@ -7,10 +7,10 @@
 
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { BASE_ACTION_API_PATH } from '../../../common';
 import { ILicenseState, verifyApiAccess } from '../../lib';
-import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { BASE_ACTION_API_PATH } from '../../../common';
 import { ActionsRequestHandlerContext } from '../../types';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 /**
  * Return all available action types

@@ -1,6 +1,8 @@
 {
   "attributes": {
-    "columns": ["_source"],
+    "columns": [
+      "_source"
+    ],
     "description": "A Saved Search Description",
     "hits": 0,
     "kibanaSavedObjectMeta": {
@@ -9,7 +11,7 @@
     "sort": [],
     "title": "A Saved Search",
     "version": 1,
-    "timeRange": {
+    "timeRange" : {
       "from": "2006-09-21T00:00:00Z",
       "to": "2015-09-22T00:00:00Z"
     }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
 export type APMEventESSearchRequestParams = ESSearchRequest & {
   body: { size: number; track_total_hits: boolean | number };

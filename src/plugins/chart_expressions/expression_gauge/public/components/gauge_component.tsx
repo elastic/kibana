@@ -1,17 +1,3 @@
-import { Bullet, BulletProps, Chart, Settings } from '@elastic/charts';
-import { useEuiTheme } from '@elastic/eui';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
-import type { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import type { PaletteOutput } from '@kbn/coloring';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  findAccessor,
-  getFormatByAccessor,
-  isVisDimension,
-} from '@kbn/visualizations-plugin/common/utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -20,20 +6,34 @@ import {
  * Side Public License, v 1.
  */
 import React, { FC, useCallback } from 'react';
+import { Chart, Bullet, BulletProps, Settings } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { PaletteOutput } from '@kbn/coloring';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import {
-  GaugeColorModes,
+  findAccessor,
+  getFormatByAccessor,
+  isVisDimension,
+} from '@kbn/visualizations-plugin/common/utils';
+import { i18n } from '@kbn/i18n';
+import {
+  GaugeRenderProps,
   GaugeLabelMajorMode,
   GaugeLabelMajorModes,
-  GaugeRenderProps,
+  GaugeColorModes,
   GaugeTicksPositions,
 } from '../../common';
 import {
-  computeMinMax,
   getAccessorsFromArgs,
   getMaxValue,
   getMinValue,
-  getSubtypeByGaugeType,
   getValueFromAccessor,
+  getSubtypeByGaugeType,
+  computeMinMax,
 } from './utils';
 import { getGaugeIconByType } from './utils/icons';
 import './index.scss';

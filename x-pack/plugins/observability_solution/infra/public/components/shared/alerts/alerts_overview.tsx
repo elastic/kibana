@@ -1,9 +1,3 @@
-import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
-import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
-import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,13 +5,19 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
+import type { TimeRange } from '@kbn/es-query';
+import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { AlertsCount } from '../../../hooks/use_alerts_count';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { HostsStateUpdater } from '../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import { createAlertsEsQuery } from '../../../utils/filters/create_alerts_es_query';
-import { useAssetDetailsUrlState } from '../../asset_details/hooks/use_asset_details_url_state';
-import AlertsStatusFilter from './alerts_status_filter';
 import { ALERT_STATUS_ALL, infraAlertFeatureIds } from './constants';
+import { HostsStateUpdater } from '../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
+import AlertsStatusFilter from './alerts_status_filter';
+import { useAssetDetailsUrlState } from '../../asset_details/hooks/use_asset_details_url_state';
 
 interface AlertsOverviewProps {
   assetId: string;

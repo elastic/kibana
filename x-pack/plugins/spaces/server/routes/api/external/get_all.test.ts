@@ -8,7 +8,6 @@
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
-import { getRequestValidation } from '@kbn/core-http-server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
@@ -16,7 +15,9 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { getRequestValidation } from '@kbn/core-http-server';
 
+import { initGetAllSpacesApi } from './get_all';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -27,7 +28,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initGetAllSpacesApi } from './get_all';
 
 describe('GET /spaces/space', () => {
   const spacesSavedObjects = createSpaces();

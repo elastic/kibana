@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fsp from 'fs/promises';
+import Path from 'path';
 
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { prettyPrintAndSortKeys } from '@kbn/utils';

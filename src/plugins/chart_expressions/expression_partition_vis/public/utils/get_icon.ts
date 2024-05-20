@@ -7,11 +7,11 @@
  */
 
 import {
-  IconChartDonut,
+  IconChartWaffle,
   IconChartMosaic,
   IconChartPie,
+  IconChartDonut,
   IconChartTreemap,
-  IconChartWaffle,
 } from '@kbn/chart-icons';
 import { ChartTypes } from '../../common/types';
 
@@ -22,4 +22,4 @@ export const getIcon = (chart: ChartTypes) =>
     [ChartTypes.TREEMAP]: IconChartTreemap,
     [ChartTypes.MOSAIC]: IconChartMosaic,
     [ChartTypes.WAFFLE]: IconChartWaffle,
-  })[chart];
+  }[chart]);

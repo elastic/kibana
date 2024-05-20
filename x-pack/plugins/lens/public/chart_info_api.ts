@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { Filter, Query } from '@kbn/es-query';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
-import type { LensSavedObjectAttributes } from '.';
+import { getActiveDatasourceIdFromDoc } from './utils';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type { OperationDescriptor } from './types';
-import { getActiveDatasourceIdFromDoc } from './utils';
+import type { LensSavedObjectAttributes } from '.';
 
 export type ChartInfoApi = Promise<{
   getChartInfo: (vis: LensSavedObjectAttributes) => Promise<ChartInfo | undefined>;

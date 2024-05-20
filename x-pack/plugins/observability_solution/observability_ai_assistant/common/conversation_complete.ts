@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type Message, TokenCount as TokenCountType } from './types';
+import { TokenCount as TokenCountType, type Message } from './types';
 
 export enum StreamingChatResponseEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
@@ -20,7 +20,7 @@ export enum StreamingChatResponseEventType {
 
 type StreamingChatResponseEventBase<
   TEventType extends StreamingChatResponseEventType,
-  TData extends {},
+  TData extends {}
 > = {
   type: TEventType;
 } & TData;

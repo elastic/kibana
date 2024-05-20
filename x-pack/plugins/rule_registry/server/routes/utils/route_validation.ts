@@ -11,10 +11,10 @@
  * 2.0.
  */
 
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   RouteValidationError,

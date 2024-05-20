@@ -7,11 +7,11 @@
 
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import {
-  DragDropOperation,
   FramePublicAPI,
-  Visualization,
-  VisualizationDimensionGroupConfig,
   isOperation,
+  Visualization,
+  DragDropOperation,
+  VisualizationDimensionGroupConfig,
 } from '../../../../types';
 
 export interface OnVisDropProps<T> {

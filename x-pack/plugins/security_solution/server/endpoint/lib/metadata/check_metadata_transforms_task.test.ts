@@ -7,28 +7,28 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { CoreSetup } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
-import type { EsAssetReference, Installation } from '@kbn/fleet-plugin/common';
-import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
-import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { RunResult } from '@kbn/task-manager-plugin/server/task';
-import { TRANSFORM_STATES } from '../../../../common/constants';
-import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
-import { createMockEndpointAppContext } from '../../mocks';
 import {
-  BASE_NEXT_ATTEMPT_DELAY,
   CheckMetadataTransformsTask,
   TYPE,
   VERSION,
+  BASE_NEXT_ATTEMPT_DELAY,
 } from './check_metadata_transforms_task';
+import { createMockEndpointAppContext } from '../../mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { TRANSFORM_STATES } from '../../../../common/constants';
+import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
+import type { RunResult } from '@kbn/task-manager-plugin/server/task';
+import type { EsAssetReference, Installation } from '@kbn/fleet-plugin/common';
+import { ElasticsearchAssetType } from '@kbn/fleet-plugin/common';
 
+import type { EndpointAppContext } from '../../types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import type { PackageClient } from '@kbn/fleet-plugin/server';
-import type { EndpointAppContext } from '../../types';
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -124,7 +124,7 @@ describe('check metadata transforms task', () => {
             },
           ],
         },
-      }) as unknown as TransportResult<TransformGetTransformStatsResponse>;
+      } as unknown as TransportResult<TransformGetTransformStatsResponse>);
 
     describe('transforms restart', () => {
       it('should stop task if transform stats response fails', async () => {

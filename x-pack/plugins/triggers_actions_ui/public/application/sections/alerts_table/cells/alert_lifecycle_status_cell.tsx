@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { ALERT_FLAPPING, ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { AlertStatus, ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
 import React, { memo } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { AlertLifecycleStatusBadge } from '../../../components/alert_lifecycle_status_badge';
-import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
 import { CellComponentProps } from '../types';
 import { DefaultCell } from './default_cell';
+import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
 
 const mutedBadgeStyle = css`
   padding-inline: ${euiThemeVars.euiSizeXS};

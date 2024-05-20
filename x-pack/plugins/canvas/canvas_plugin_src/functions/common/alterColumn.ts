@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { omit } from 'lodash';
-import { getFunctionErrors, getFunctionHelp } from '../../../i18n';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { DatatableColumn, DatatableColumnType, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   column: string;

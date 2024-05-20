@@ -6,40 +6,40 @@
  * Side Public License, v 1.
  */
 
-import { Position } from '@elastic/charts';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiPanel,
+  EuiTitle,
+  EuiSpacer,
+  EuiRange,
   EuiFormRow,
   EuiIconTip,
-  EuiPanel,
-  EuiRange,
-  EuiSpacer,
-  EuiTitle,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonGroup,
 } from '@elastic/eui';
-import type { PaletteRegistry } from '@kbn/coloring';
-import {
-  LabelPositions,
-  LegendDisplay,
-  PartitionVisParams,
-  ValueFormats,
-} from '@kbn/expression-partition-vis-plugin/common';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   BasicOptions,
-  LegendSizeSettings,
-  LongLegendOptions,
-  PalettePicker,
-  SelectOption,
   SwitchOption,
+  SelectOption,
+  PalettePicker,
+  LongLegendOptions,
+  LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
 import { LegendSize, VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import React, { useState, useEffect, useCallback } from 'react';
+import {
+  PartitionVisParams,
+  LabelPositions,
+  ValueFormats,
+  LegendDisplay,
+} from '@kbn/expression-partition-vis-plugin/common';
+import { TruncateLabelsOption } from './truncate_labels';
 import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
 import { PieTypeProps } from '../../types';
-import { TruncateLabelsOption } from './truncate_labels';
 
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { uniqBy } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { uniqBy } from 'lodash';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { MAX_SELECTABLE_SOURCE_FIELDS, validSourceFields } from '../../../common/constants';
 import { SourceField } from '../es_query/types';
 

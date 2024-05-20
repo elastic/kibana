@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import React from 'react';
+import { BottomBarActions, useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import {
   aiAssistantLogsIndexPattern,
   aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { BottomBarActions, useEditableSettings } from '@kbn/observability-shared-plugin/public';
+import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { EuiSpacer } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../../hooks/use_app_context';
 
 const settingsKeys = [

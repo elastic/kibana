@@ -21,14 +21,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
-import { i18n } from '@kbn/i18n';
-import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { isPending, useFetcher } from '../../../../../hooks/use_fetcher';
+import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 
 const LazyFieldRow = React.lazy(async () => ({
   default: (await import('@kbn/management-settings-components-field-row')).FieldRow,

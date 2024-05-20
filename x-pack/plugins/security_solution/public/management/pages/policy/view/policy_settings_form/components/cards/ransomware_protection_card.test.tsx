@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
-import React from 'react';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
+import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import React from 'react';
 import { ProtectionModes } from '../../../../../../../../common/endpoint/types';
+import { set } from 'lodash';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
-import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
-import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { RansomwareProtectionCardProps } from './ransomware_protection_card';
 import {
   LOCKED_CARD_RAMSOMWARE_TITLE,

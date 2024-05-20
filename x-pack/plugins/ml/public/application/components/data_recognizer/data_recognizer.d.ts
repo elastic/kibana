@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { type SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { FC } from 'react';
 
 declare const DataRecognizer: FC<{
   indexPattern: DataView;

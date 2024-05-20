@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { uniq, mapValues } from 'lodash';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import { euiLightVars } from '@kbn/ui-theme';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import type { Datatable } from '@kbn/expressions-plugin/common';
-import { euiLightVars } from '@kbn/ui-theme';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
-import { mapValues, uniq } from 'lodash';
-import { FormatFactory } from '../../../common/types';
 import type { FramePublicAPI } from '../../types';
+import { getColumnToLabelMap } from './state_helpers';
+import { FormatFactory } from '../../../common/types';
+import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import {
   getReferenceLineAccessorColorConfig,
   getSingleColorConfig,
 } from './reference_line_helpers';
-import { getColumnToLabelMap } from './state_helpers';
 import { XYDataLayerConfig, XYLayerConfig } from './types';
-import { isAnnotationsLayer, isDataLayer, isReferenceLayer } from './visualization_helpers';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { IndexManagementBreadcrumb, breadcrumbService } from '../../services/breadcrumbs';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 
+import { CreatePolicyWizard } from './create_policy_wizard';
+import { CreatePolicyContextProvider } from './create_policy_context';
 import {
   EnrichPoliciesAuthProvider,
   EnrichPoliciesWithPrivileges,
 } from '../../components/enrich_policies';
-import { CreatePolicyContextProvider } from './create_policy_context';
-import { CreatePolicyWizard } from './create_policy_wizard';
 
 const CreateView: React.FunctionComponent<RouteComponentProps> = () => {
   useEffect(() => {

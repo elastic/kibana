@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink, EuiSpacer, EuiComboBox, EuiFormRow, EuiCallOut } from '@elastic/eui';
 
 import { documentationService } from '../../../../../services/documentation';
-import { FormDataProvider, FormRow, ToggleField, UseField } from '../../../shared_imports';
+import { UseField, FormDataProvider, FormRow, ToggleField } from '../../../shared_imports';
 import { ComboBoxOption } from '../../../types';
 
 export const SourceFieldSection = () => {

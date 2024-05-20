@@ -6,25 +6,25 @@
  */
 
 import { Route } from '@kbn/shared-ux-router';
-import { act, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, act, waitFor } from '@testing-library/react';
 
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
-import { FLEET_ROUTING_PATHS, PLUGIN_ID, pagePathGetters } from '../../../../constants';
+import { FLEET_ROUTING_PATHS, pagePathGetters, PLUGIN_ID } from '../../../../constants';
 import type { CreatePackagePolicyRouteState } from '../../../../types';
 
 import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import {
-  sendCreateAgentPolicy,
   sendCreatePackagePolicy,
+  sendCreateAgentPolicy,
   sendGetAgentStatus,
   sendGetOneAgentPolicy,
-  useGetAgentPolicies,
-  useGetPackageInfoByKeyQuery,
   useIntraAppState,
   useStartServices,
+  useGetAgentPolicies,
+  useGetPackageInfoByKeyQuery,
 } from '../../../../hooks';
 
 jest.mock('../../../../hooks', () => {

@@ -9,10 +9,10 @@
 import d3 from 'd3';
 import _ from 'lodash';
 
-import { getFormatService } from '../../services';
-import { labels } from '../components/labels/labels';
 import { injectZeros } from '../components/zero_injection/inject_zeros';
 import { orderXValues } from '../components/zero_injection/ordered_x_keys';
+import { labels } from '../components/labels/labels';
+import { getFormatService } from '../../services';
 
 // X axis and split series values in a data table can sometimes be objects,
 // e.g. when working with date ranges. d3 casts all ordinal values to strings

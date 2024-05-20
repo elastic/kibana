@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useInterpret, useSelector } from '@xstate/react';
-import createContainer from 'constate';
 import { useCallback } from 'react';
+import createContainer from 'constate';
+import { useInterpret, useSelector } from '@xstate/react';
 import { FindDatasetsRequestQuery, SortOrder } from '../../common/latest';
 import { IDatasetsClient } from '../services/datasets';
 import { createDatasetsStateMachine } from '../state_machines/datasets';

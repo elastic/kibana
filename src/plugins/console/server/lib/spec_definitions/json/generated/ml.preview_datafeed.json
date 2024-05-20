@@ -8,8 +8,14 @@
       "start": [],
       "end": []
     },
-    "methods": ["GET", "POST"],
-    "patterns": ["_ml/datafeeds/{datafeed_id}/_preview", "_ml/datafeeds/_preview"],
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/datafeeds/{datafeed_id}/_preview",
+      "_ml/datafeeds/_preview"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-preview-datafeed.html",
     "availability": {
       "stack": true,

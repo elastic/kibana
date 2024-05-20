@@ -6,8 +6,8 @@
  */
 
 import type { AbsoluteTimeRange } from '../store/inputs/model';
-import { getTimeRangeSettings } from './default_date_settings';
 import { getFutureTimeRange, getPreviousTimeRange } from './get_time_range';
+import { getTimeRangeSettings } from './default_date_settings';
 
 const getTimeRangeSettingsMock = getTimeRangeSettings as jest.Mock;
 

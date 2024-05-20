@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Global, css } from '@emotion/react';
 import React from 'react';
+import { Global, css } from '@emotion/react';
 
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '../../common/lib/kibana';

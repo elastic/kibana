@@ -6,11 +6,11 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  KibanaUsageStats,
-  combineStats,
-  ensureTimeSpan,
   getUsageStats,
+  combineStats,
   rollUpTotals,
+  ensureTimeSpan,
+  KibanaUsageStats,
 } from './get_kibana_stats';
 
 describe('Get Kibana Stats', () => {

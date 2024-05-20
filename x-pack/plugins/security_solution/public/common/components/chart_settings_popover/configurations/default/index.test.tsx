@@ -8,9 +8,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 
-import { useChartSettingsPopoverConfiguration } from '.';
 import { TestProviders } from '../../../../mock';
 import * as i18n from './translations';
+import { useChartSettingsPopoverConfiguration } from '.';
 
 const mockHandleClick = jest.fn();
 

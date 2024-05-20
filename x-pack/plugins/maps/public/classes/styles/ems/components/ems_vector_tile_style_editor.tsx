@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiColorPicker, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiColorPicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {

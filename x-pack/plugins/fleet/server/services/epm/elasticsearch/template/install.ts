@@ -5,57 +5,57 @@
  * 2.0.
  */
 
+import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { concat, merge, omit, uniqBy } from 'lodash';
 
 import type {
-  ClusterPutComponentTemplateRequest,
   IndicesCreateRequest,
+  ClusterPutComponentTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { ElasticsearchAssetType } from '../../../../types';
 import {
   getPipelineNameForDatastream,
   getRegistryDataStreamAssetBaseName,
 } from '../../../../../common/services';
-import type { PackageInstallContext } from '../../../../../common/types';
+import type {
+  RegistryDataStream,
+  IndexTemplateEntry,
+  RegistryElasticsearch,
+  IndexTemplate,
+  IndexTemplateMappings,
+  TemplateMapEntry,
+  TemplateMap,
+  EsAssetReference,
+  ExperimentalDataStreamFeature,
+} from '../../../../types';
+import type { Fields } from '../../fields/field';
+import { loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
   PACKAGE_TEMPLATE_SUFFIX,
-  STACK_COMPONENT_TEMPLATES,
   USER_SETTINGS_TEMPLATE_SUFFIX,
+  STACK_COMPONENT_TEMPLATES,
 } from '../../../../constants';
-import { ElasticsearchAssetType } from '../../../../types';
-import type {
-  EsAssetReference,
-  ExperimentalDataStreamFeature,
-  IndexTemplate,
-  IndexTemplateEntry,
-  IndexTemplateMappings,
-  RegistryDataStream,
-  RegistryElasticsearch,
-  TemplateMap,
-  TemplateMapEntry,
-} from '../../../../types';
-import { appContextService } from '../../../app_context';
+import { getESAssetMetadata } from '../meta';
+import { retryTransientEsErrors } from '../retry';
 import {
   applyDocOnlyValueToMapping,
   forEachMappings,
 } from '../../../experimental_datastream_features_helper';
-import { getAssetFromAssetsMap, getPathParts } from '../../archive';
-import type { Fields } from '../../fields/field';
-import { loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
-import { getESAssetMetadata } from '../meta';
-import { retryTransientEsErrors } from '../retry';
+import { appContextService } from '../../../app_context';
+import type { PackageInstallContext } from '../../../../../common/types';
 
-import { buildDefaultSettings } from './default_settings';
 import {
   generateMappings,
-  generateTemplateIndexPattern,
   generateTemplateName,
+  generateTemplateIndexPattern,
   getTemplate,
   getTemplatePriority,
 } from './template';
+import { buildDefaultSettings } from './default_settings';
 import { isUserSettingsTemplate } from './utils';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);

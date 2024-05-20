@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useState, useContext } from 'react';
-import { isValidJson } from '../../../../../../../../common/util/validation_utils';
-import { getNewJobDefaults } from '../../../../../../services/ml_server_info';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlyout,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiSpacer,
+} from '@elastic/eui';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
-import type { CategorizationJobCreator } from '../../../../common/job_creator';
+import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
+import type { CategorizationJobCreator } from '../../../../common/job_creator';
+import { getNewJobDefaults } from '../../../../../../services/ml_server_info';
 
 const EDITOR_HEIGHT = '800px';
 

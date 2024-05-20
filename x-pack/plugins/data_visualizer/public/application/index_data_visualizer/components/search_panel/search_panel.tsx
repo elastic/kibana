@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  useEuiBreakpoint,
-  useIsWithinMaxBreakpoint,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
-import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { FC } from 'react';
 import React from 'react';
-import type { OverallStats } from '../../types/overall_stats';
+import { css } from '@emotion/react';
+import {
+  useEuiBreakpoint,
+  useIsWithinMaxBreakpoint,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
+} from '@elastic/eui';
+import type { Query, Filter } from '@kbn/es-query';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { SearchPanelContent } from './search_bar';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
-import { SearchPanelContent } from './search_bar';
+import type { OverallStats } from '../../types/overall_stats';
 
 interface Props {
   dataView: DataView;

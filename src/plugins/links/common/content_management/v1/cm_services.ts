@@ -7,14 +7,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  createOptionsSchemas,
-  createResultSchema,
-  objectTypeToGetResultSchema,
-  savedObjectSchema,
-  updateOptionsSchema,
-} from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import {
+  savedObjectSchema,
+  createResultSchema,
+  updateOptionsSchema,
+  createOptionsSchemas,
+  objectTypeToGetResultSchema,
+} from '@kbn/content-management-utils';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '.';
 import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from './constants';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { promisify } from 'util';
 import getOsSync from 'getos';
+import { promisify } from 'util';
 
 const getOs = promisify(getOsSync);
 

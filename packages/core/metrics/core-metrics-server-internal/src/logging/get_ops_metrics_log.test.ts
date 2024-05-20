@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
 import type { OpsMetrics } from '@kbn/core-metrics-server';
 import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
+import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
 
 export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
   totalActiveSockets: 25,

@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { TextField, UseField } from '../../../shared_imports';
+import { UseField, TextField } from '../../../shared_imports';
 
 export const CustomLabelField = () => {
   return <UseField path="customLabel" component={TextField} />;

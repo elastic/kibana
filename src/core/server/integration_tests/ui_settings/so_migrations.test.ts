@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectTestHarness, createTestHarness } from '../../../test_helpers/so_migrations';
+import { createTestHarness, SavedObjectTestHarness } from '../../../test_helpers/so_migrations';
 
 /**
  * These tests are a little unnecessary because these migrations are incredibly simple, however

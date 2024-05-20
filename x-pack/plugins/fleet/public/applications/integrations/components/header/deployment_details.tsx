@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiHeaderLink, EuiPopover } from '@elastic/eui';
-import {
-  DeploymentDetails as DeploymentDetailsComponent,
-  DeploymentDetailsKibanaProvider,
-} from '@kbn/cloud/deployment_details';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiPopover, EuiHeaderLink } from '@elastic/eui';
+import {
+  DeploymentDetailsKibanaProvider,
+  DeploymentDetails as DeploymentDetailsComponent,
+} from '@kbn/cloud/deployment_details';
 
 import { useStartServices } from '../../hooks';
 

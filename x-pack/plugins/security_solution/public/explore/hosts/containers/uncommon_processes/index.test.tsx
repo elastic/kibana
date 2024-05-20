@@ -6,10 +6,10 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useUncommonProcesses } from '.';
-import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { TestProviders } from '../../../../common/mock';
+import { useUncommonProcesses } from '.';
 import { HostsType } from '../../store/model';
+import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 
 jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),

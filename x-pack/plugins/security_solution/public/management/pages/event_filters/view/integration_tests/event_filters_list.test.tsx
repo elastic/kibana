@@ -9,14 +9,14 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { EVENT_FILTERS_PATH } from '../../../../../../common/constants';
-import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { parseQueryFilterToKQL } from '../../../../common/utils';
+import { EventFiltersList } from '../event_filters_list';
 import { exceptionsListAllHttpMocks } from '../../../../mocks/exceptions_list_http_mocks';
 import { SEARCHABLE_FIELDS } from '../../constants';
-import { EventFiltersList } from '../event_filters_list';
+import { parseQueryFilterToKQL } from '../../../../common/utils';
+import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 jest.mock('../../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;

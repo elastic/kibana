@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getSecureRelForTarget } from '@elastic/eui';
 import classNames from 'classnames';
-import { memoize } from 'lodash';
-import MarkdownIt from 'markdown-it';
 import React, { useEffect } from 'react';
+import MarkdownIt from 'markdown-it';
+import { memoize } from 'lodash';
+import { getSecureRelForTarget } from '@elastic/eui';
 
 import './index.scss';
 /**

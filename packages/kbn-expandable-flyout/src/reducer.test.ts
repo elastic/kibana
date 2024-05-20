@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { FlyoutPanelProps } from './types';
+import { reducer } from './reducer';
+import { initialState, State } from './state';
 import {
   closeLeftPanelAction,
   closePanelsAction,
@@ -17,9 +20,6 @@ import {
   openRightPanelAction,
   previousPreviewPanelAction,
 } from './actions';
-import { reducer } from './reducer';
-import { State, initialState } from './state';
-import { FlyoutPanelProps } from './types';
 
 const id1 = 'id1';
 const id2 = 'id2';

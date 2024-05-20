@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
+import { LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
 import { getListClientMock } from './list_client.mock';
 

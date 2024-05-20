@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { MlNodeCount } from '../../../common/types/ml_server_info';
 import { ml } from '../services/ml_api_service';
+import type { MlNodeCount } from '../../../common/types/ml_server_info';
 
 let mlNodeCount: number = 0;
 let lazyMlNodeCount: number = 0;

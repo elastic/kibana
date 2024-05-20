@@ -3,7 +3,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/common/utils/detection_rules.test.ts",
     "fileName": "detection_rules.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('Detection rules utils')",
       "  it('should convert tags to KQL format with AND operator')",
@@ -269,7 +271,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/common/utils/helpers.test.ts",
     "fileName": "helpers.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('test helper methods')",
       "  it('get default integration type from inputs with multiple enabled types')",
@@ -663,7 +667,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/common/utils/subscription.test.ts",
     "fileName": "subscription.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('isSubscriptionAllowed')",
       "  it('should allow any cloud subscription')",
@@ -761,7 +767,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/application/csp_router.test.tsx",
     "fileName": "csp_router.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('CspRouter')",
       "  describe('happy path')",
@@ -1054,7 +1062,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/common/hooks/use_benchmark_dynamic_values.test.ts",
     "fileName": "use_benchmark_dynamic_values.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('useBenchmarkDynamicValues')",
       "  it('should return the correct dynamic benchmark values for each provided benchmark ID')",
@@ -1131,7 +1141,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts",
     "fileName": "use_navigate_findings.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('useNavigateFindings')",
       "  it('creates a URL to findings page with correct path, filter and dataViewId')",
@@ -1250,7 +1262,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/common/hooks/use_url_query.test.ts",
     "fileName": "use_url_query.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('useUrlQuery')",
       "  it('uses default query when no query is provided')",
@@ -1327,8 +1341,13 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/common/navigation/security_solution_links.test.ts",
     "fileName": "security_solution_links.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
-    "lines": ["describe('getSecuritySolutionLink')", "  it('gets the correct link properties')"],
+    "tags": [
+      "UT"
+    ],
+    "lines": [
+      "describe('getSecuritySolutionLink')",
+      "  it('gets the correct link properties')"
+    ],
     "testSuits": [
       {
         "id": "getsecuritysolutionlink",
@@ -1380,7 +1399,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/common/utils/get_abbreviated_number.test.ts",
     "fileName": "get_abbreviated_number.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('getAbbreviatedNumber')",
       "  it('should return the same value if it is less than 1000')",
@@ -1478,7 +1499,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/common/utils/get_limit_properties.test.ts",
     "fileName": "get_limit_properties.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('getLimitProperties')",
       "  it('less items than limit')",
@@ -1576,7 +1599,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/common/utils/get_vulnerabiltity_colors.test.ts",
     "fileName": "get_vulnerabiltity_colors.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('getCvsScoreColor')",
       "  it('returns correct color for low severity score')",
@@ -1844,7 +1869,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/components/accounts_evaluated_widget.test.tsx",
     "fileName": "accounts_evaluated_widget.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('AccountsEvaluatedWidget')",
       "  it('renders the component with benchmark data correctly')",
@@ -1942,7 +1969,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/components/chart_panel.test.tsx",
     "fileName": "chart_panel.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<ChartPanel />')",
       "  it('renders loading state')",
@@ -2040,7 +2069,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/components/cloud_posture_page.test.tsx",
     "fileName": "cloud_posture_page.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<CloudPosturePage />')",
       "  it('renders with license url locator')",
@@ -2348,7 +2379,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/components/cloud_security_data_table/cloud_security_data_table.test.tsx",
     "fileName": "cloud_security_data_table.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('CloudSecurityDataTable')",
       "  it('renders loading state')",
@@ -2446,7 +2479,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/components/cloud_security_data_table/fields_selector/fields_selector_table.test.tsx",
     "fileName": "fields_selector_table.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('FieldsSelectorTable')",
       "  it('renders the table with data correctly')",
@@ -2758,7 +2793,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/components/cloud_security_grouping/utils/first_non_null_value.test.ts",
     "fileName": "first_non_null_value.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('firstNonNullValue')",
       "  it('returns the value itself for non-null single value')",
@@ -2919,7 +2956,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/components/detection_rule_counter.test.tsx",
     "fileName": "detection_rule_counter.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('DetectionRuleCounter')",
       "  it('should render loading skeleton when both rules and alerts are loading')",
@@ -3038,7 +3077,10 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/components/fleet_extensions/policy_template_form.test.tsx",
     "fileName": "policy_template_form.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT", "HAS SKIP"],
+    "tags": [
+      "UT",
+      "HAS SKIP"
+    ],
     "lines": [
       "describe('<CspPolicyTemplateForm />')",
       "  it('updates package policy namespace to default when it changes')",
@@ -4620,7 +4662,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/components/fleet_extensions/setup_technology_selector/use_setup_technology.test.ts",
     "fileName": "use_setup_technology.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('useSetupTechnology')",
       "  describe('create page flow')",
@@ -4932,7 +4976,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/components/fleet_extensions/utils.test.ts",
     "fileName": "utils.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('getPosturePolicy')",
       "    it(`updates package policy with hidden vars for ${name}`)",
@@ -5653,7 +5699,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks_table.test.tsx",
     "fileName": "benchmarks_table.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<BenchmarksTable />')",
       "  it('renders cis integration name')",
@@ -5793,7 +5841,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks.test.tsx",
     "fileName": "benchmarks.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<Benchmarks />')",
       "  it('renders the page header')",
@@ -5912,7 +5962,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_charts/risks_table.test.ts",
     "fileName": "risks_table.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('getTopRisks')",
       "  it('returns sorted by posture score')",
@@ -5989,7 +6041,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/compliance_dashboard.test.tsx",
     "fileName": "compliance_dashboard.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<ComplianceDashboard />')",
       "  it('shows package not installed page instead of tabs')",
@@ -6509,7 +6563,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/benchmarks_section.test.tsx",
     "fileName": "benchmarks_section.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<BenchmarksSection />')",
       "  describe('Sorting')",
@@ -6609,7 +6665,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/compliance_dashboard/dashboard_sections/summary_section.test.tsx",
     "fileName": "summary_section.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<CloudSummarySection />')",
       "  it('renders all counter cards')",
@@ -6707,7 +6765,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/configurations/configurations.test.tsx",
     "fileName": "configurations.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<Findings />')",
       "  it('no findings state: not-deployed - shows NotDeployed instead of findings')",
@@ -6847,7 +6907,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/configurations/findings_flyout/findings_flyout.test.tsx",
     "fileName": "findings_flyout.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<FindingsFlyout/>')",
       "  describe('Overview Tab')",
@@ -7077,8 +7139,13 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/configurations/utils/get_filters.test.ts",
     "fileName": "get_filters.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
-    "lines": ["describe('Get Filters')", "  it('negate an existing filter')"],
+    "tags": [
+      "UT"
+    ],
+    "lines": [
+      "describe('Get Filters')",
+      "  it('negate an existing filter')"
+    ],
     "testSuits": [
       {
         "id": "get-filters",
@@ -7130,8 +7197,13 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/rules/rules_container.test.tsx",
     "fileName": "rules_container.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
-    "lines": ["describe('<RulesContainer />')", "  it('displays rules with their initial state')"],
+    "tags": [
+      "UT"
+    ],
+    "lines": [
+      "describe('<RulesContainer />')",
+      "  it('displays rules with their initial state')"
+    ],
     "testSuits": [
       {
         "id": "<rulescontainer-/>",
@@ -7183,7 +7255,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/rules/rules.test.tsx",
     "fileName": "rules.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<Rules />')",
       "  it('calls Benchmark API')",
@@ -7260,7 +7334,10 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_flyout.test.tsx",
     "fileName": "vulnerability_finding_flyout.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT", "HAS SKIP"],
+    "tags": [
+      "UT",
+      "HAS SKIP"
+    ],
     "lines": [
       "describe('<VulnerabilityFindingFlyout/>')",
       "  describe('Header Info')",
@@ -7513,7 +7590,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilties.test.tsx",
     "fileName": "vulnerabilties.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<Vulnerabilities />')",
       "  it('No vulnerabilities  state: not-deployed - shows NotDeployed instead of vulnerabilities ')",
@@ -7653,7 +7732,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/public/pages/vulnerability_dashboard/vulnerability_dashboard.test.tsx",
     "fileName": "vulnerability_dashboard.test.tsx",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('<VulnerabilityDashboard />')",
       "  it('renders vuln_mgmt integrations installation prompt if vuln_mgmt integration is not installed')",
@@ -7814,7 +7895,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/create_indices/create_indices.test.ts",
     "fileName": "create_indices.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('createBenchmarkScoreIndex')",
       "  it('should delete old index template from prev verions first')",
@@ -7954,7 +8037,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/create_transforms/create_transforms.test.ts",
     "fileName": "create_transforms.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('createTransformIfNotExist')",
       "  it('expect not to create if already exists')",
@@ -8159,8 +8244,12 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/fleet_integration/fleet_integration.test.ts",
     "fileName": "fleet_integration.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
-    "lines": ["describe('is Csp package installed tests')"],
+    "tags": [
+      "UT"
+    ],
+    "lines": [
+      "describe('is Csp package installed tests')"
+    ],
     "testSuits": [
       {
         "id": "is-csp-package-installed-tests",
@@ -8190,7 +8279,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/lib/mapping_field_util.test.ts",
     "fileName": "mapping_field_util.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('Benchmark Field Key Functions')",
       "  it('toBenchmarkDocFieldKey should keep the same benchmark id and version key for benchmark document')",
@@ -8330,7 +8421,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/plugin.test.ts",
     "fileName": "plugin.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('Cloud Security Posture Plugin')",
       "  describe('start()')",
@@ -8493,7 +8586,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/find/find.test.ts",
     "fileName": "find.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('getSortedCspBenchmarkRules')",
       "  it('sorts by metadata.benchmark.rule_number, invalid semantic version still should still get sorted and empty values should be sorted last')",
@@ -8633,7 +8728,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts",
     "fileName": "benchmarks.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('benchmarks API')",
       "  it('validate the API route path')",
@@ -9096,7 +9193,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.test.ts",
     "fileName": "compliance_dashboard.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('compliance dashboard permissions API')",
       "  it('should accept to a user with fleet.all privilege')",
@@ -9173,7 +9272,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_benchmarks.test.ts",
     "fileName": "get_benchmarks.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('getBenchmarksFromAggs')",
       "  it('should return value matching ComplianceDashboardDataV2[\"benchmarks\"]')"
@@ -9229,7 +9330,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_clusters.test.ts",
     "fileName": "get_clusters.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('getClustersFromAggs')",
       "  it('should return value matching ComplianceDashboardData[\"clusters\"]')"
@@ -9285,7 +9388,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_grouped_findings_evaluation.test.ts",
     "fileName": "get_grouped_findings_evaluation.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('getPostureStatsFromAggs')",
       "  it('should return value matching ComplianceDashboardData[\"resourcesTypes\"]')"
@@ -9341,7 +9446,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_stats.test.ts",
     "fileName": "get_stats.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('roundScore')",
       "  it('should return decimal values with one fraction digit')",
@@ -9548,7 +9655,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/routes/compliance_dashboard/get_trends.test.ts",
     "fileName": "get_trends.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('getTrendsFromQueryResult')",
       "  it('should return value matching Trends type definition, in descending order, and with postureScore')"
@@ -9604,7 +9713,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/routes/status/status.test.ts",
     "fileName": "status.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('calculateIntegrationStatus for cspm')",
       "  it('Verify status when CSP package is not installed')",
@@ -10040,7 +10151,9 @@
     "filePath": "x-pack/plugins/cloud_security_posture/server/tasks/task_state.test.ts",
     "fileName": "task_state.test.ts",
     "directory": "x-pack/plugins/cloud_security_posture",
-    "tags": ["UT"],
+    "tags": [
+      "UT"
+    ],
     "lines": [
       "describe('finding stats task state')",
       "  describe('v1')",
@@ -10161,7 +10274,11 @@
     "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v1.ts",
     "fileName": "v1.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
-    "tags": ["FTR", "SERVERLESS", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/benchmark')",
       "    it(`Should return non-empty array filled with Rules if user has CSP integrations`)",
@@ -10280,7 +10397,11 @@
     "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/benchmark/v2.ts",
     "fileName": "v2.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
-    "tags": ["FTR", "SERVERLESS", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/benchmark')",
       "    it(`Should return all benchmarks if user has CSP integrations`)"
@@ -10336,7 +10457,11 @@
     "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts",
     "fileName": "find_csp_benchmark_rule.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
-    "tags": ["FTR", "SERVERLESS", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET internal/cloud_security_posture/rules/_find')",
       "    it(`Should return 500 error code when not provide package policy id or benchmark id`)",
@@ -10518,8 +10643,14 @@
     "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/index.ts",
     "fileName": "index.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
-    "tags": ["FTR", "SERVERLESS", "API INTEGRATION"],
-    "lines": ["  describe('cloud_security_posture')"],
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('cloud_security_posture')"
+    ],
     "testSuits": [
       {
         "id": "cloud_security_posture",
@@ -10549,7 +10680,12 @@
     "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts",
     "fileName": "status_indexed.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
-    "tags": ["FTR", "SERVERLESS", "API INTEGRATION", "HAS SKIP"],
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION",
+      "HAS SKIP"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
       "    describe.skip('STATUS = INDEXED TEST')",
@@ -10670,7 +10806,11 @@
     "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexing.ts",
     "fileName": "status_indexing.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
-    "tags": ["FTR", "SERVERLESS", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
       "    describe('STATUS = INDEXING TEST')",
@@ -10791,7 +10931,11 @@
     "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_not_deployed_not_installed.ts",
     "fileName": "status_not_deployed_not_installed.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
-    "tags": ["FTR", "SERVERLESS", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
       "    describe('STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST')",
@@ -10912,7 +11056,11 @@
     "filePath": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/telemetry.ts",
     "fileName": "telemetry.ts",
     "directory": "x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture",
-    "tags": ["FTR", "SERVERLESS", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "SERVERLESS",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('Verify cloud_security_posture telemetry payloads')",
       "    it('includes only KSPM findings')",
@@ -11052,7 +11200,10 @@
     "filePath": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/compliance_dashboard.ts",
     "fileName": "compliance_dashboard.ts",
     "directory": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture",
-    "tags": ["FTR", "SERVERLESS"],
+    "tags": [
+      "FTR",
+      "SERVERLESS"
+    ],
     "lines": [
       "  describe('Cloud Posture Dashboard Page')",
       "    describe('Kubernetes Dashboard')",
@@ -11131,8 +11282,13 @@
     "filePath": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/index.ts",
     "fileName": "index.ts",
     "directory": "x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture",
-    "tags": ["FTR", "SERVERLESS"],
-    "lines": ["  describe('cloud_security_posture')"],
+    "tags": [
+      "FTR",
+      "SERVERLESS"
+    ],
+    "lines": [
+      "  describe('cloud_security_posture')"
+    ],
     "testSuits": [
       {
         "id": "cloud_security_posture",
@@ -11162,7 +11318,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/benchmark/v1.ts",
     "fileName": "v1.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/benchmark')",
       "    it(`Should return non-empty array filled with Rules if user has CSP integrations`)",
@@ -11281,7 +11440,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/benchmark/v2.ts",
     "fileName": "v2.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/benchmark')",
       "    it(`Should return all benchmarks if user has CSP integrations`)"
@@ -11337,7 +11499,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/find_csp_benchmark_rule.ts",
     "fileName": "find_csp_benchmark_rule.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET internal/cloud_security_posture/rules/_find')",
       "    it(`Should return 500 error code when not provide package policy id or benchmark id`)",
@@ -11519,8 +11684,13 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/index.ts",
     "fileName": "index.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
-    "lines": ["  describe('cloud_security_posture')"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
+    "lines": [
+      "  describe('cloud_security_posture')"
+    ],
     "testSuits": [
       {
         "id": "cloud_security_posture",
@@ -11550,7 +11720,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/rules/v1.ts",
     "fileName": "v1.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET internal/cloud_security_posture/rules/_find')",
       "    it(`Should return 500 error code when not provide package policy id or benchmark id`)",
@@ -11732,7 +11905,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/rules/v2.ts",
     "fileName": "v2.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET internal/cloud_security_posture/rules/_find')",
       "    it(`Should return 500 error code when not provide benchmark id`)",
@@ -11872,7 +12048,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_index_timeout.ts",
     "fileName": "status_index_timeout.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
       "    describe('STATUS = INDEX_TIMEOUT TEST')",
@@ -11993,7 +12172,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_indexed.ts",
     "fileName": "status_indexed.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
       "    describe('STATUS = INDEXED TEST')",
@@ -12114,7 +12296,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_indexing.ts",
     "fileName": "status_indexing.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
       "    describe('STATUS = INDEXING TEST')",
@@ -12235,7 +12420,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_not_deployed_not_installed.ts",
     "fileName": "status_not_deployed_not_installed.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
       "    describe('STATUS = NOT-DEPLOYED and STATUS = NOT-INSTALLED TEST')",
@@ -12356,7 +12544,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_unprivileged.ts",
     "fileName": "status_unprivileged.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
       "    describe('STATUS = UNPRIVILEGED TEST')",
@@ -12521,7 +12712,10 @@
     "filePath": "x-pack/test/api_integration/apis/cloud_security_posture/status/status_waiting_for_results.ts",
     "fileName": "status_waiting_for_results.ts",
     "directory": "x-pack/test/api_integration/apis/cloud_security_posture",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
       "    describe('STATUS = WAITING_FOR_RESULT TEST')",
@@ -12642,7 +12836,11 @@
     "filePath": "x-pack/test/cloud_security_posture_api/routes/benchmarks.ts",
     "fileName": "benchmarks.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
-    "tags": ["FTR", "API INTEGRATION", "HAS SKIP"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION",
+      "HAS SKIP"
+    ],
     "lines": [
       "  describe.skip('GET /internal/cloud_security_posture/benchmarks')",
       "    describe('Get Benchmark API')",
@@ -12742,7 +12940,10 @@
     "filePath": "x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_bulk_update.ts",
     "fileName": "csp_benchmark_rules_bulk_update.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('Verify update csp rules states API')",
       "    it('mute benchmark rules successfully')",
@@ -12924,7 +13125,10 @@
     "filePath": "x-pack/test/cloud_security_posture_api/routes/csp_benchmark_rules_get_states.ts",
     "fileName": "csp_benchmark_rules_get_states.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('Tests get rules states API')",
       "    it('get rules states successfully')",
@@ -13001,7 +13205,10 @@
     "filePath": "x-pack/test/cloud_security_posture_api/routes/stats.ts",
     "fileName": "stats.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/stats')",
       "    describe('CSPM Compliance Dashboard Stats API')",
@@ -13252,7 +13459,10 @@
     "filePath": "x-pack/test/cloud_security_posture_api/routes/vulnerabilities_dashboard.ts",
     "fileName": "vulnerabilities_dashboard.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('Vulnerability Dashboard API')",
       "    it('responds with a 200 status code and matching data mock')",
@@ -13329,7 +13539,10 @@
     "filePath": "x-pack/test/cloud_security_posture_api/telemetry/telemetry.ts",
     "fileName": "telemetry.ts",
     "directory": "x-pack/test/cloud_security_posture_api",
-    "tags": ["FTR", "API INTEGRATION"],
+    "tags": [
+      "FTR",
+      "API INTEGRATION"
+    ],
     "lines": [
       "  describe('Verify cloud_security_posture telemetry payloads')",
       "    it('includes only KSPM findings')",
@@ -13469,7 +13682,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts",
     "fileName": "cis_integration_cnvm.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Test adding Cloud Security Posture Integrations CNVM')",
       "    describe('CNVM AWS')",
@@ -13590,7 +13805,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts",
     "fileName": "cis_integration_aws.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Test adding Cloud Security Posture Integrations CSPM AWS')",
       "    describe('CIS_AWS Organization Cloud Formation')",
@@ -14128,7 +14345,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts",
     "fileName": "cis_integration_azure.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Test adding Cloud Security Posture Integrations CSPM AZURE')",
       "    describe('Azure Organization ARM Template')",
@@ -14515,7 +14734,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts",
     "fileName": "cis_integration_gcp.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Test adding Cloud Security Posture Integrations CSPM GCP')",
       "    describe('CIS_GCP Organization')",
@@ -14999,7 +15220,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts",
     "fileName": "cis_integration_eks.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Test adding Cloud Security Posture Integrations KSPM EKS')",
       "    describe('KSPM EKS Assume Role')",
@@ -15210,7 +15433,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_k8s.ts",
     "fileName": "cis_integration_k8s.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Test adding Cloud Security Posture Integrations KSPM K8S')",
       "    describe('KSPM K8S')",
@@ -15289,7 +15514,10 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts",
     "fileName": "compliance_dashboard.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR", "HAS TODO"],
+    "tags": [
+      "FTR",
+      "HAS TODO"
+    ],
     "lines": [
       "  describe('Cloud Posture Dashboard Page')",
       "    describe('Kubernetes Dashboard')",
@@ -15412,7 +15640,10 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts",
     "fileName": "findings_alerts.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR", "HAS SKIP"],
+    "tags": [
+      "FTR",
+      "HAS SKIP"
+    ],
     "lines": [
       "  describe('Findings Page - Alerts')",
       "    describe.skip('Create detection rule')",
@@ -15621,7 +15852,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/findings_grouping.ts",
     "fileName": "findings_grouping.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Findings Page - Grouping')",
       "    describe('Default Grouping')",
@@ -15937,7 +16170,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/findings_old_data.ts",
     "fileName": "findings_old_data.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Old Data')",
       "    describe('Findings page with old data')",
@@ -16037,7 +16272,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/findings_onboarding.ts",
     "fileName": "findings_onboarding.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Findings Page onboarding')",
       "    it('clicking on the `No integrations installed` prompt action button - `install CNVM`: navigates to the CNVM integration installation page')",
@@ -16135,7 +16372,10 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/findings.ts",
     "fileName": "findings.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR", "HAS SKIP"],
+    "tags": [
+      "FTR",
+      "HAS SKIP"
+    ],
     "lines": [
       "  describe('Findings Page - DataTable')",
       "    describe.skip('SearchBar')",
@@ -16518,8 +16758,12 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/index.ts",
     "fileName": "index.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
-    "lines": ["  describe('Cloud Security Posture')"],
+    "tags": [
+      "FTR"
+    ],
+    "lines": [
+      "  describe('Cloud Security Posture')"
+    ],
     "testSuits": [
       {
         "id": "cloud-security-posture",
@@ -16549,7 +16793,10 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/rules.ts",
     "fileName": "rules.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR", "HAS SKIP"],
+    "tags": [
+      "FTR",
+      "HAS SKIP"
+    ],
     "lines": [
       "  describe.skip('Cloud Posture Rules Page')",
       "    describe('Rules Page - Rules Counters')",
@@ -17161,7 +17408,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/vulnerabilities_grouping.ts",
     "fileName": "vulnerabilities_grouping.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Vulnerabilities Page - Grouping')",
       "    describe('Default Grouping')",
@@ -17412,7 +17661,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/vulnerabilities.ts",
     "fileName": "vulnerabilities.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Vulnerabilities Page - DataTable')",
       "    describe('SearchBar')",
@@ -17663,7 +17914,9 @@
     "filePath": "x-pack/test/cloud_security_posture_functional/pages/vulnerability_dashboard.ts",
     "fileName": "vulnerability_dashboard.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
-    "tags": ["FTR"],
+    "tags": [
+      "FTR"
+    ],
     "lines": [
       "  describe('Vulnerability Dashboard Page')",
       "    describe('Vulnerability Dashboard')",

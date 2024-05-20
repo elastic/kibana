@@ -5,41 +5,41 @@
  * 2.0.
  */
 
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
+import { closeErrorToast } from '../../../../tasks/alerts_detection_rules';
+import {
+  createListsIndex,
+  waitForValueListsModalToBeLoaded,
+  openValueListsModal,
+  importValueList,
+  waitForListsIndex,
+  deleteValueLists,
+  KNOWN_VALUE_LIST_FILES,
+  openValueListItemsModal,
+  searchValueListItemsModal,
+  getValueListItemsTableRow,
+  checkTotalItems,
+  deleteListItem,
+  clearSearchValueListItemsModal,
+  sortValueListItemsTableByValue,
+  updateListItem,
+  addListItem,
+  selectValueListsItemsFile,
+  uploadValueListsItemsFile,
+  mockFetchListItemsError,
+  mockCreateListItemError,
+  mockUpdateListItemError,
+  mockDeleteListItemError,
+} from '../../../../tasks/lists';
 import {
   VALUE_LIST_ITEMS_MODAL_INFO,
   VALUE_LIST_ITEMS_MODAL_TABLE,
   VALUE_LIST_ITEMS_MODAL_TITLE,
 } from '../../../../screens/lists';
-import { closeErrorToast } from '../../../../tasks/alerts_detection_rules';
-import { getDefaultUsername } from '../../../../tasks/common/users';
-import {
-  KNOWN_VALUE_LIST_FILES,
-  addListItem,
-  checkTotalItems,
-  clearSearchValueListItemsModal,
-  createListsIndex,
-  deleteListItem,
-  deleteValueLists,
-  getValueListItemsTableRow,
-  importValueList,
-  mockCreateListItemError,
-  mockDeleteListItemError,
-  mockFetchListItemsError,
-  mockUpdateListItemError,
-  openValueListItemsModal,
-  openValueListsModal,
-  searchValueListItemsModal,
-  selectValueListsItemsFile,
-  sortValueListItemsTableByValue,
-  updateListItem,
-  uploadValueListsItemsFile,
-  waitForListsIndex,
-  waitForValueListsModalToBeLoaded,
-} from '../../../../tasks/lists';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
+import { getDefaultUsername } from '../../../../tasks/common/users';
 
 describe(
   'Value list items',

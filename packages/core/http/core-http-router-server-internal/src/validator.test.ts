@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Type, schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { RouteValidationError } from '@kbn/core-http-server';
 import { RouteValidator } from './validator';
 

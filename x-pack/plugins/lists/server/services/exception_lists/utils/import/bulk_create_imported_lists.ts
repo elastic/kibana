@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { has } from 'lodash/fp';
+import { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
 import { ImportResponse } from '../../import_exception_list_and_items';

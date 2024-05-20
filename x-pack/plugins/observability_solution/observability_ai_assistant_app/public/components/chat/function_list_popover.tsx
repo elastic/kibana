@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
 import {
   EuiBetaBadge,
   EuiButtonIcon,
@@ -19,9 +20,8 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import type { FunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/public';
-import React, { useEffect, useState } from 'react';
+import type { FunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 
 interface FunctionListOption {

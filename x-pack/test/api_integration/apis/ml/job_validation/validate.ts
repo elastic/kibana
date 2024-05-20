@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import {
-  basicInvalidJobMessages,
   basicValidJobMessages,
+  basicInvalidJobMessages,
   nonBasicIssuesMessages,
 } from '@kbn/ml-plugin/common/constants/messages.test.mock';
-import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
-import { USER } from '../../../../functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

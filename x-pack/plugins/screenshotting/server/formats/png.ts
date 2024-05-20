@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { CaptureResult, CaptureOptions } from '../screenshots';
 import type { LayoutParams } from '../../common';
-import type { CaptureOptions, CaptureResult } from '../screenshots';
 
 /**
  * The layout parameters that are accepted by PNG screenshots

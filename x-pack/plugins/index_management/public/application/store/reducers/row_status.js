@@ -7,6 +7,16 @@
 
 import { handleActions } from 'redux-actions';
 import {
+  clearCacheIndicesStart,
+  clearRowStatus,
+  closeIndicesStart,
+  openIndicesStart,
+  flushIndicesStart,
+  forcemergeIndicesStart,
+  reloadIndicesSuccess,
+  refreshIndicesStart,
+} from '../actions';
+import {
   INDEX_CLEARING_CACHE,
   INDEX_CLOSED,
   INDEX_CLOSING,
@@ -16,16 +26,6 @@ import {
   INDEX_OPENING,
   INDEX_REFRESHING,
 } from '../../../../common/constants';
-import {
-  clearCacheIndicesStart,
-  clearRowStatus,
-  closeIndicesStart,
-  flushIndicesStart,
-  forcemergeIndicesStart,
-  openIndicesStart,
-  refreshIndicesStart,
-  reloadIndicesSuccess,
-} from '../actions';
 
 export const rowStatus = handleActions(
   {

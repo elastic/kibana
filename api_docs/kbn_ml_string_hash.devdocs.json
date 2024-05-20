@@ -25,8 +25,12 @@
         "type": "Function",
         "tags": [],
         "label": "stringHash",
-        "description": ["\nCreates a deterministic number based hash out of a string."],
-        "signature": ["(str: string) => number"],
+        "description": [
+          "\nCreates a deterministic number based hash out of a string."
+        ],
+        "signature": [
+          "(str: string) => number"
+        ],
         "path": "x-pack/packages/ml/string_hash/src/string_hash.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +42,9 @@
             "tags": [],
             "label": "str",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/string_hash/src/string_hash.ts",
             "deprecated": false,
             "trackAdoption": false,

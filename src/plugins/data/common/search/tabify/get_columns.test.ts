@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { AggConfigs } from '../aggs';
-import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { tabifyGetColumns } from './get_columns';
 import type { TabbedAggColumn } from './types';
+import { AggConfigs } from '../aggs';
+import { mockAggTypesRegistry } from '../aggs/test_helpers';
 
 describe('get columns', () => {
   const typesRegistry = mockAggTypesRegistry();

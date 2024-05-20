@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { withTimeout, isPromise } from '@kbn/std';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import type {
-  GetDeprecationsContext,
   RegisterDeprecationsConfig,
+  GetDeprecationsContext,
 } from '@kbn/core-deprecations-server';
-import { isPromise, withTimeout } from '@kbn/std';
 
 const MsInSec = 1000;
 

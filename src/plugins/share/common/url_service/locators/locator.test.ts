@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { decompressFromBase64 } from 'lz-string';
-import { LocatorGetUrlParams } from '.';
-import { KibanaLocation } from '../../../public';
-import { Locator, LocatorDependencies } from './locator';
 import { LocatorDefinition } from './types';
+import { Locator, LocatorDependencies } from './locator';
+import { KibanaLocation } from '../../../public';
+import { LocatorGetUrlParams } from '.';
+import { decompressFromBase64 } from 'lz-string';
 
 const setup = () => {
   const baseUrl = 'http://localhost:5601';

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ChromeBreadcrumb, CoreStart, ScopedHistory } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { parse } from 'query-string';
 import React, { useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
+import { parse } from 'query-string';
+import { i18n } from '@kbn/i18n';
+import { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { SavedObjectEdition } from './object_view';
 import './saved_objects_edition_page.scss';
 

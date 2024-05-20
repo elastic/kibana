@@ -8,7 +8,7 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { RiskEngineSettingsResponse } from '../../../../../common/api/entity_analytics/risk_engine';
-import { APP_ID, RISK_ENGINE_SETTINGS_URL } from '../../../../../common/constants';
+import { RISK_ENGINE_SETTINGS_URL, APP_ID } from '../../../../../common/constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';

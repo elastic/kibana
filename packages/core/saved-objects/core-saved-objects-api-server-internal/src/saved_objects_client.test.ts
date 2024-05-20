@@ -7,27 +7,27 @@
  */
 
 import type {
-  SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
-  SavedObjectsBulkDeleteObject,
-  SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResolveObject,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCreateOptions,
+  SavedObjectsDeleteOptions,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsUpdateOptions,
+  SavedObjectsBaseOptions,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
-  SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsDeleteOptions,
   SavedObjectsFindOptions,
-  SavedObjectsOpenPointInTimeOptions,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
-  SavedObjectsUpdateOptions,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteObject,
 } from '@kbn/core-saved-objects-api-server';
-import { repositoryMock, savedObjectsPointInTimeFinderMock } from './mocks';
 import { SavedObjectsClient } from './saved_objects_client';
+import { repositoryMock, savedObjectsPointInTimeFinderMock } from './mocks';
 
 describe('SavedObjectsClient', () => {
   let mockRepository: ReturnType<typeof repositoryMock.create>;

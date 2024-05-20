@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -13,21 +16,18 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiRange,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
   EuiToolTip,
+  EuiSwitch,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
+import { AdvancedRangeEditor } from './advanced_editor';
+import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
 import { useDebounceWithOptions } from '../../../../../shared_components';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
-import { AdvancedRangeEditor } from './advanced_editor';
-import { MIN_HISTOGRAM_BARS, MODES, TYPING_DEBOUNCE_TIME } from './constants';
-import { MODES_TYPES, RangeColumnParams, UpdateParamsFnType } from './ranges';
 
 const GranularityHelpPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

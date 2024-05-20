@@ -11,8 +11,8 @@ import { API_VERSIONS } from '../../../../../../../common/constants';
 
 import type { UseRequestConfig } from '../../../../hooks';
 import { useRequest } from '../../../../hooks';
-import { agentRouteService } from '../../../../services';
 import type { GetAgentStatusResponse } from '../../../../types';
+import { agentRouteService } from '../../../../services';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 

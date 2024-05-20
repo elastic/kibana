@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import handlebars, { compileFnName } from '@kbn/handlebars';
 import { isNumber } from 'lodash';
-import { DISPLAY_EMPTY_VALUE, isEmptyValue } from '../../../../common/last_value_utils';
+import handlebars, { compileFnName } from '@kbn/handlebars';
+import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
+import { inputFormats, outputFormats, isDuration } from './durations';
 import { getFieldFormats } from '../../../services';
-import { inputFormats, isDuration, outputFormats } from './durations';
 
 export const createTickFormatter = (format = '0,0.[00]', template, getConfig = null) => {
   const fieldFormats = getFieldFormats();

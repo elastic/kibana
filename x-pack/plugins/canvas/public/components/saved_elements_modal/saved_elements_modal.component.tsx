@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFieldSearch,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiSpacer,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, {
   Fragment,
   ChangeEvent,
@@ -25,6 +13,18 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
+import {
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiEmptyPrompt,
+  EuiFieldSearch,
+  EuiSpacer,
+  EuiButton,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { sortBy } from 'lodash';
 import { CustomElement } from '../../../types';

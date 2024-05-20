@@ -8,25 +8,25 @@
 import { CASES_URL } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
+import { getPostCaseRequest, postCommentUserReq } from '../../../common/lib/mock';
 import {
-  createCase,
-  createComment,
   deleteAllCaseItems,
-  deleteAllComments,
+  createCase,
   deleteCases,
-  deleteComment,
-  findCases,
+  createComment,
   getCase,
-  getSpaceUrlPrefix,
   superUserSpace1Auth,
+  findCases,
+  deleteComment,
+  getSpaceUrlPrefix,
   updateComment,
+  deleteAllComments,
 } from '../../../common/lib/api';
 import {
+  superUser,
   secOnlyDelete,
   secOnlyNoDelete,
-  superUser,
 } from '../../../common/lib/authentication/users';
-import { getPostCaseRequest, postCommentUserReq } from '../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

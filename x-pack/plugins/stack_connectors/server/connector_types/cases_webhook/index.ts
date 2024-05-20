@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import { api } from './api';
-import {
-  ExecutorParamsSchema,
-  ExternalIncidentServiceConfigurationSchema,
-  ExternalIncidentServiceSecretConfigurationSchema,
-} from './schema';
-import { createExternalService } from './service';
-import * as i18n from './translations';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import {
   CasesWebhookActionParamsType,
   CasesWebhookExecutorResultData,
@@ -27,7 +19,15 @@ import {
   ExecutorParams,
   ExecutorSubActionPushParams,
 } from './types';
+import { createExternalService } from './service';
+import {
+  ExecutorParamsSchema,
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
+} from './schema';
+import { api } from './api';
 import { validate } from './validators';
+import * as i18n from './translations';
 
 const supportedSubActions: string[] = ['pushToService'];
 export type ActionParamsType = CasesWebhookActionParamsType;

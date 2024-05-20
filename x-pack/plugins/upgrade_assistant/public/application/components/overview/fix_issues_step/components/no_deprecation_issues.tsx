@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 const i18nTexts = {
   noPartialDeprecationIssuesText: i18n.translate(

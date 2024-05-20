@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiSuperSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSuperSelect } from '@elastic/eui';
 
 import { OperationType } from '@kbn/lens-plugin/public';
 import { useSeriesStorage } from '../../hooks/use_series_storage';

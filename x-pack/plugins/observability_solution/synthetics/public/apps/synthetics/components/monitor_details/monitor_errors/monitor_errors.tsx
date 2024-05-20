@@ -13,13 +13,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
-import { useMonitorErrors } from '../hooks/use_monitor_errors';
-import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
+import { i18n } from '@kbn/i18n';
 import { useMonitorDetailsPage } from '../use_monitor_details_page';
+import { useMonitorErrors } from '../hooks/use_monitor_errors';
+import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { ErrorsTabContent } from './errors_tab_content';
+import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 
 export const MonitorErrors = () => {
   const { errorStates, upStates, loading, data } = useMonitorErrors();

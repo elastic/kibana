@@ -23,11 +23,11 @@ import {
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../../common/descriptor_types';
-import { IVectorSource } from '../../sources/vector_source';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
+import { IVectorSource } from '../../sources/vector_source';
 import { mockVectorLayer } from '../__fixtures__/mock_vector_layer';
+import { AbstractVectorLayer, isVectorLayer, hasVectorLayerMethod } from './vector_layer';
 import type { ILayer } from '../layer';
-import { AbstractVectorLayer, hasVectorLayerMethod, isVectorLayer } from './vector_layer';
 
 class MockSource {
   cloneDescriptor() {

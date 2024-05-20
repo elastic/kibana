@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { omitBy, isUndefined } from 'lodash';
 import dateMath from '@kbn/datemath';
-import { isUndefined, omitBy } from 'lodash';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 
@@ -15,9 +15,9 @@ import type {
   GetRuleExecutionResultsResponse,
 } from '../../../../common/api/detection_engine/rule_monitoring';
 import {
-  SETUP_HEALTH_URL,
   getRuleExecutionEventsUrl,
   getRuleExecutionResultsUrl,
+  SETUP_HEALTH_URL,
 } from '../../../../common/api/detection_engine/rule_monitoring';
 
 import type {

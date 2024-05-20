@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { FilterStateStore } from '@kbn/es-query';
-import { isLeftClickEvent, isModifiedEvent, useKibana } from '../lib/kibana';
+import { useKibana, isModifiedEvent, isLeftClickEvent } from '../lib/kibana';
 
 interface UseDiscoverLink {
   filters: Array<{ key: string; value: string | number }>;

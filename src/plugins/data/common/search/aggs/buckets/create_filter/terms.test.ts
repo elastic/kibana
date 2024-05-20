@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ExistsFilter, Filter } from '@kbn/es-query';
+import { createFilterTerms } from './terms';
 import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
-import { IBucketAggConfig } from '../bucket_agg_type';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { createFilterTerms } from './terms';
+import { IBucketAggConfig } from '../bucket_agg_type';
+import { Filter, ExistsFilter } from '@kbn/es-query';
 
 describe('AggConfig Filters', () => {
   describe('terms', () => {

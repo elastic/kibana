@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverErrorLink } from './discover_error_link';

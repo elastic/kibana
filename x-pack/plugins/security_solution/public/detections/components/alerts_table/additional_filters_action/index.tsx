@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiNotificationBadge } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { UtilityBarAction } from '../../../../common/components/utility_bar';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 const ColoredSpan = styled.div`

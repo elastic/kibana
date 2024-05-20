@@ -8,14 +8,14 @@
 import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
-import { getMoment } from '../../../common/lib/get_moment';
 import {
-  ClientWatchStatusModel,
-  ServerWatchStatusModel,
   WatchStatusModelEs,
+  ServerWatchStatusModel,
+  ClientWatchStatusModel,
 } from '../../../common/types';
-import { buildClientActionStatusModel, buildServerActionStatusModel } from '../action_status_model';
-import { deriveComment, deriveLastExecution, deriveState } from './watch_status_model_utils';
+import { getMoment } from '../../../common/lib/get_moment';
+import { buildServerActionStatusModel, buildClientActionStatusModel } from '../action_status_model';
+import { deriveState, deriveComment, deriveLastExecution } from './watch_status_model_utils';
 
 export const buildServerWatchStatusModel = (
   watchStatusModelEs: WatchStatusModelEs

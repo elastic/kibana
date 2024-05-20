@@ -7,21 +7,21 @@
 
 import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import React, { useState, useCallback } from 'react';
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import {
+  SnapshotMetricInput,
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,
-  SnapshotMetricInput,
 } from '../../../../../../../common/http_api/snapshot_api';
-import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
-import { DropdownButton } from '../../dropdown_button';
 import { CustomMetricForm } from './custom_metric_form';
 import { MetricsContextMenu } from './metrics_context_menu';
-import { MetricsEditMode } from './metrics_edit_mode';
 import { ModeSwitcher } from './mode_switcher';
+import { MetricsEditMode } from './metrics_edit_mode';
 import { CustomMetricMode } from './types';
+import { DropdownButton } from '../../dropdown_button';
+import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
 
 interface Props {
   options: Array<{ text: string; value: string }>;

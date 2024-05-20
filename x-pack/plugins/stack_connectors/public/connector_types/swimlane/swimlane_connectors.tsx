@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import {
-  EuiButton,
   EuiForm,
-  EuiFormRow,
   EuiSpacer,
-  EuiStepStatus,
   EuiStepsHorizontal,
+  EuiButton,
+  EuiFormRow,
+  EuiStepStatus,
 } from '@elastic/eui';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { SwimlaneConnection, SwimlaneFields } from './steps';
-import * as i18n from './translations';
 import { SwimlaneFieldMappingConfig } from './types';
+import { SwimlaneConnection, SwimlaneFields } from './steps';
 import { useGetApplication } from './use_get_application';
+import * as i18n from './translations';
 
 const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -88,8 +88,8 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         status: (currentStep === 1
           ? 'selected'
           : currentStep === 2
-            ? 'complete'
-            : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
         onClick: () => updateCurrentStep(1),
       },
       {
@@ -99,8 +99,8 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         status: (!isValid
           ? 'danger'
           : currentStep === 2
-            ? 'selected'
-            : 'incomplete') as EuiStepStatus,
+          ? 'selected'
+          : 'incomplete') as EuiStepStatus,
       },
     ],
     [

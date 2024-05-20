@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
+import React, { ReactElement, FC, PropsWithChildren } from 'react';
+import { render, RenderOptions } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RenderOptions, render } from '@testing-library/react';
-import React, { ReactElement, FC, PropsWithChildren } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import { searchConnectorsMock } from '@kbn/search-connectors-plugin/public/plugin.mock';
-import { userProfileMock } from '@kbn/security-plugin/common/model/user_profile.mock';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { userProfileMock } from '@kbn/security-plugin/common/model/user_profile.mock';
+import { searchConnectorsMock } from '@kbn/search-connectors-plugin/public/plugin.mock';
 
 export const core = coreMock.createStart();
 export const services = {

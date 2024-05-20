@@ -6,9 +6,9 @@
  */
 
 import { get } from 'lodash';
-import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
-import { LARGE_FLOAT } from '../../../../common/formatting';
 import { Metric, MetricOptions } from './metric';
+import { LARGE_FLOAT } from '../../../../common/formatting';
+import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 type QuotaMetricOptions = Pick<
   MetricOptions,

@@ -7,10 +7,10 @@
 
 import './mocks';
 import { setup as homeSetup } from './home.helpers';
-import { setup as policyAddSetup } from './policy_add.helpers';
-import { setup as policyEditSetup } from './policy_edit.helpers';
 import { setup as repositoryAddSetup } from './repository_add.helpers';
 import { setup as repositoryEditSetup } from './repository_edit.helpers';
+import { setup as policyAddSetup } from './policy_add.helpers';
+import { setup as policyEditSetup } from './policy_edit.helpers';
 import { setup as restoreSnapshotSetup } from './restore_snapshot.helpers';
 import { setup as snapshotListSetup } from './snapshot_list.helpers';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import React, { memo } from 'react';
 import type { Platform } from './platforms';
 import { PlatformIcon } from './platforms';
 

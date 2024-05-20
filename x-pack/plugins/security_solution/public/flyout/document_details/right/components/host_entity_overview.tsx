@@ -5,54 +5,54 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
-  EuiSkeletonText,
-  useEuiFontSize,
+  EuiIcon,
   useEuiTheme,
+  useEuiFontSize,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { i18n } from '@kbn/i18n';
 import { getOr } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
-import { RiskScoreEntity, buildHostNamesFilter } from '../../../../../common/search_strategy';
+import { i18n } from '@kbn/i18n';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../../common/utility_types';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
-import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
+import { buildHostNamesFilter, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
+import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
-import { RiskScoreDocTooltip } from '../../../../overview/components/common';
-import {
-  FAMILY,
-  HOST_RISK_LEVEL,
-  LAST_SEEN,
-} from '../../../../overview/components/host_overview/translations';
-import { LeftPanelInsightsTab } from '../../left';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { getField } from '../../shared/utils';
-import { useRightPanelContext } from '../context';
 import { CellActions } from './cell_actions';
 import {
+  FAMILY,
+  LAST_SEEN,
+  HOST_RISK_LEVEL,
+} from '../../../../overview/components/host_overview/translations';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import {
+  ENTITIES_HOST_OVERVIEW_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_TEST_ID,
 } from './test_ids';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
+import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 
 const HOST_ICON = 'storage';
 

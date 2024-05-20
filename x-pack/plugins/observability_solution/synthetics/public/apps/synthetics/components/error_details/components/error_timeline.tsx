@@ -1,5 +1,3 @@
-import { EuiSkeletonText } from '@elastic/eui';
-import moment from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import moment from 'moment';
  * 2.0.
  */
 import React from 'react';
+import { EuiSkeletonText } from '@elastic/eui';
+import moment from 'moment';
 import { Ping } from '../../../../../../common/runtime_types';
 import { MonitorFailedTests } from '../../monitor_details/monitor_errors/failed_tests';
 

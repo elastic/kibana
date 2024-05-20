@@ -6,14 +6,10 @@
  */
 
 import {
-  AggregationsStringTermsBucketKeys,
-  AggregationsTermsAggregateBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  CoreStart,
   Logger,
-  SavedObjectsClientContract,
+  CoreStart,
   SavedObjectsFindResponse,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -22,15 +18,19 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
+import {
+  AggregationsStringTermsBucketKeys,
+  AggregationsTermsAggregateBase,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InvalidateAPIKeyResult } from '../rules_client';
 import { AlertingConfig } from '../config';
-import { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { timePeriodBeforeDate } from '../lib/get_cadence';
 import { AlertingPluginsStart } from '../plugin';
-import { InvalidateAPIKeyResult } from '../rules_client';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { InvalidatePendingApiKey } from '../types';
-import { type LatestTaskStateSchema, emptyState, stateSchemaByVersion } from './task_state';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { AdHocRunSO } from '../data/ad_hoc_run/types';
 
 const TASK_TYPE = 'alerts_invalidate_api_keys';
 const PAGE_SIZE = 100;
@@ -43,8 +43,9 @@ const invalidateAPIKeys = async (
   if (!securityPluginStart) {
     return { apiKeysEnabled: false };
   }
-  const invalidateAPIKeyResult =
-    await securityPluginStart.authc.apiKeys.invalidateAsInternalUser(params);
+  const invalidateAPIKeyResult = await securityPluginStart.authc.apiKeys.invalidateAsInternalUser(
+    params
+  );
   // Null when Elasticsearch security is disabled
   if (!invalidateAPIKeyResult) {
     return { apiKeysEnabled: false };

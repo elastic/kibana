@@ -1,5 +1,3 @@
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,11 +7,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
  */
 import React, { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ContextApp } from './context_app';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { ContextApp } from './context_app';
 import type { ContextHistoryLocationState } from './services/locator';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface ContextUrlParams {
   dataViewId: string;

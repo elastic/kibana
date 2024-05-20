@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { exhaustMap, type Observable, Subject, type Subscription, takeUntil, timer } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import moment from 'moment';
 import type {
   ElasticsearchClient,
   Logger,
@@ -13,15 +16,12 @@ import type {
   ServiceStatusLevel,
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
-import moment from 'moment';
-import { type Observable, Subject, type Subscription, exhaustMap, takeUntil, timer } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
-import { KIBANA_SETTINGS_TYPE, KIBANA_STATS_TYPE_MONITORING } from '../../common/constants';
+import { KIBANA_STATS_TYPE_MONITORING, KIBANA_SETTINGS_TYPE } from '../../common/constants';
 
+import { sendBulkPayload } from './lib';
+import { getKibanaSettings } from './collectors';
 import type { MonitoringConfig } from '../config';
 import type { IBulkUploader } from '../types';
-import { getKibanaSettings } from './collectors';
-import { sendBulkPayload } from './lib';
 
 export interface BulkUploaderOptions {
   log: Logger;

@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import {
-  getContextMenuItemsFromActions,
   useUiTracker,
+  getContextMenuItemsFromActions,
 } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -18,13 +18,13 @@ import { LogColumn, LogEntry } from '../../../../common/log_entry';
 import { TextScale } from '../../../../common/log_text_scale';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import {
-  LogColumnRenderConfiguration,
   isFieldColumnRenderConfiguration,
   isMessageColumnRenderConfiguration,
   isTimestampColumnRenderConfiguration,
+  LogColumnRenderConfiguration,
 } from '../../../utils/log_column_render_configuration';
 import { isTimestampColumn } from '../../../utils/log_entry';
-import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
+import { iconColumnId, LogEntryColumn, LogEntryColumnWidths } from './log_entry_column';
 import { LogEntryContextMenu } from './log_entry_context_menu';
 import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';

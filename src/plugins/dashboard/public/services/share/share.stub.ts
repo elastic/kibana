@@ -1,4 +1,3 @@
-import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
  * Side Public License, v 1.
  */
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardShareService } from './types';
 
 type ShareServiceFactory = PluginServiceFactory<DashboardShareService>;

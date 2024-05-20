@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { migrationMocks } from '@kbn/core/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { v4 as uuidv4 } from 'uuid';
-import { RawAction } from '../types';
 import { getActionsMigrations } from './actions_migrations';
+import { RawAction } from '../types';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { migrationMocks } from '@kbn/core/server/mocks';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();

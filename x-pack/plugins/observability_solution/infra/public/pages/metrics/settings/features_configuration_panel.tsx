@@ -8,19 +8,19 @@
 import { EuiTitle } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiForm } from '@elastic/eui';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import React from 'react';
 import {
-  enableInfrastructureContainerAssetView,
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
+  enableInfrastructureContainerAssetView,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import React from 'react';
-import { usePluginConfig } from '../../../containers/plugin_config_context';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { usePluginConfig } from '../../../containers/plugin_config_context';
 
 const LazyFieldRow = React.lazy(async () => ({
   default: (await import('@kbn/management-settings-components-field-row')).FieldRow,

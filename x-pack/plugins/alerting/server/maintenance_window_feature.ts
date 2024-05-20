@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  MAINTENANCE_WINDOW_API_PRIVILEGES,
   MAINTENANCE_WINDOW_FEATURE_ID,
+  MAINTENANCE_WINDOW_API_PRIVILEGES,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../common';
 

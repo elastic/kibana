@@ -7,9 +7,9 @@
 
 import { cloneDeep } from 'lodash';
 
-import { emptyEsResult } from '../../../__mocks__/empty_signal_source_hit';
-import type { SignalSourceHit } from '../../../types';
 import { mergeAllFieldsWithSource } from './merge_all_fields_with_source';
+import type { SignalSourceHit } from '../../../types';
+import { emptyEsResult } from '../../../__mocks__/empty_signal_source_hit';
 
 /**
  * See ../README.md for the nomenclature of any notes within tests below

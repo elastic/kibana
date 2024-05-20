@@ -1,5 +1,3 @@
-import type { KibanaRequest } from '@kbn/core/server';
-import { ElasticsearchClient } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { ElasticsearchClient } from '@kbn/core/server';
  * 2.0.
  */
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { KibanaRequest } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { unwrapEsResponse } from '@kbn/observability-plugin/common/utils/unwrap_es_response';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 

@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import type { IDocumentMigrator } from '@kbn/core-saved-objects-base-server-internal';
-import type {
-  ISavedObjectsSerializer,
-  SavedObjectSanitizedDoc,
-  SavedObjectUnsanitizedDoc,
-  SavedObjectsRawDoc,
-} from '@kbn/core-saved-objects-server';
-import * as Either from 'fp-ts/lib/Either';
 /*
  * This file provides logic for migrating raw documents.
  */
 import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Either from 'fp-ts/lib/Either';
+import type {
+  SavedObjectSanitizedDoc,
+  SavedObjectsRawDoc,
+  SavedObjectUnsanitizedDoc,
+  ISavedObjectsSerializer,
+} from '@kbn/core-saved-objects-server';
+import type { IDocumentMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import { TransformSavedObjectDocumentError } from '.';
 
 type MigrateAndConvertFn = IDocumentMigrator['migrateAndConvert'];

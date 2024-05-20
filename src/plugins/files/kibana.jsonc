@@ -7,8 +7,15 @@
     "id": "files",
     "server": true,
     "browser": true,
-    "optionalPlugins": ["security", "usageCollection"],
-    "requiredBundles": ["kibanaUtils"],
-    "extraPublicDirs": ["common"]
+    "optionalPlugins": [
+      "security",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

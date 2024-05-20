@@ -7,8 +7,8 @@
  */
 
 import type { NodeRoles } from '@kbn/core-node-server';
-import type { MigratorContext } from '../context';
 import type { InitState, State } from './types';
+import type { MigratorContext } from '../context';
 
 /**
  * Create the initial state to be used for the ZDT migrator.

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { cleanup, renderHook } from '@testing-library/react-hooks';
+import { renderHook, cleanup } from '@testing-library/react-hooks';
 
 import { useIntegrations } from './use_integrations';
 
+import { fleetIntegrationsApi } from '../../../../detection_engine/fleet_integrations/api';
 import { useToasts } from '../../../../common/lib/kibana';
 import { createReactQueryWrapper } from '../../../../common/mock';
-import { fleetIntegrationsApi } from '../../../../detection_engine/fleet_integrations/api';
 
 jest.mock('../../../../detection_engine/fleet_integrations/api');
 jest.mock('../../../../common/lib/kibana');

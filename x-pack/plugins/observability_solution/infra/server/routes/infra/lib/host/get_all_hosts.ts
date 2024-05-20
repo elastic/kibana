@@ -9,10 +9,10 @@ import type {
   GetInfraMetricsRequestBodyPayload,
   InfraAssetMetadataType,
 } from '../../../../../common/http_api/infra';
-import { BasicMetricValueRT } from '../../../../lib/metrics/types';
 import { BUCKET_KEY, MAX_SIZE, METADATA_AGGREGATION_NAME } from '../constants';
-import { createFilters, getInventoryModelAggregations } from '../helpers/query';
 import type { GetHostsArgs } from '../types';
+import { createFilters, getInventoryModelAggregations } from '../helpers/query';
+import { BasicMetricValueRT } from '../../../../lib/metrics/types';
 
 export const getAllHosts = async (
   { infraMetricsClient, params }: GetHostsArgs,

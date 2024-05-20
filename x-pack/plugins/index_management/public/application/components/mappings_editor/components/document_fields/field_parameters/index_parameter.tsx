@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { documentationService } from '../../../../../services/documentation';
+import { EditFieldFormRow } from '../fields/edit_field';
 import { PARAMETERS_OPTIONS } from '../../../constants';
 import { getFieldConfig } from '../../../lib';
-import { Field, FieldConfig, UseField } from '../../../shared_imports';
 import { SuperSelectOption } from '../../../types';
-import { EditFieldFormRow } from '../fields/edit_field';
+import { UseField, Field, FieldConfig } from '../../../shared_imports';
 
 interface Props {
   hasIndexOptions?: boolean;

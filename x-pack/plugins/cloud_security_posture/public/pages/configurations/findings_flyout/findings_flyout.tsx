@@ -1,25 +1,3 @@
-import {
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiIcon,
-  EuiMarkdownFormat,
-  EuiPagination,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTextColor,
-  EuiTitle,
-  EuiToolTip,
-  PropsOf,
-} from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { assertNever } from '@kbn/std';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -27,22 +5,44 @@ import { assertNever } from '@kbn/std';
  * 2.0.
  */
 import React, { useState } from 'react';
+import {
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTextColor,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  PropsOf,
+  EuiCodeBlock,
+  EuiMarkdownFormat,
+  EuiIcon,
+  EuiPagination,
+  EuiFlyoutFooter,
+  EuiToolTip,
+} from '@elastic/eui';
+import { assertNever } from '@kbn/std';
+import { i18n } from '@kbn/i18n';
+import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
-import type { BenchmarkId } from '../../../../common/types_old';
-import { BenchmarkName } from '../../../../common/types_old';
-import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
-import { useKibana } from '../../../common/hooks/use_kibana';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
-import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
+import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { TakeAction } from '../../../components/take_action';
-import { FINDINGS_FLYOUT } from '../test_subjects';
-import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
+import { TableTab } from './table_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import { TableTab } from './table_tab';
+import type { BenchmarkId } from '../../../../common/types_old';
+import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
+import { BenchmarkName } from '../../../../common/types_old';
+import { FINDINGS_FLYOUT } from '../test_subjects';
+import { useKibana } from '../../../common/hooks/use_kibana';
+import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 
 const tabs = [
   {
@@ -75,7 +75,7 @@ const PAGINATION_LABEL = i18n.translate('xpack.csp.findings.findingsFlyout.pagin
   defaultMessage: 'Finding navigation',
 });
 
-type FindingsTab = (typeof tabs)[number];
+type FindingsTab = typeof tabs[number];
 
 interface FindingFlyoutProps {
   onClose(): void;

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { uniq } from 'lodash';
+import type { AstWithMeta, AstArgumentWithMeta } from '@kbn/interpreter';
+import { isAstWithMeta } from '@kbn/interpreter';
+import { parse } from '@kbn/interpreter';
 import {
   ExpressionFunction,
   ExpressionFunctionParameter,
   getByAlias,
 } from '@kbn/expressions-plugin/common';
-import type { AstArgumentWithMeta, AstWithMeta } from '@kbn/interpreter';
-import { isAstWithMeta } from '@kbn/interpreter';
-import { parse } from '@kbn/interpreter';
-import { uniq } from 'lodash';
 
 const MARKER = 'EXPRESSIONS_SUGGESTION_MARKER';
 

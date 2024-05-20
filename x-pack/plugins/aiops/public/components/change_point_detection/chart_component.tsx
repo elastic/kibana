@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useRef } from 'react';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useCommonChartProps } from './use_common_chart_props';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import type { ChangePointAnnotation, FieldConfig } from './change_point_detection_context';
-import { useCommonChartProps } from './use_common_chart_props';
 
 export interface ChartComponentProps {
   fieldConfig: FieldConfig;

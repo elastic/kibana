@@ -6,11 +6,11 @@
  */
 
 import { useEffect, useMemo, useRef } from 'react';
-import { SECURITY_TAG_DESCRIPTION, SECURITY_TAG_NAME } from '../../../common/constants';
-import { getRandomColor } from '../../../common/utils/get_ramdom_color';
+import { useKibana } from '../../common/lib/kibana';
 import { createTag, getTagsByName } from '../../common/containers/tags/api';
 import { REQUEST_NAMES, useFetch } from '../../common/hooks/use_fetch';
-import { useKibana } from '../../common/lib/kibana';
+import { SECURITY_TAG_DESCRIPTION, SECURITY_TAG_NAME } from '../../../common/constants';
+import { getRandomColor } from '../../../common/utils/get_ramdom_color';
 
 export const useFetchSecurityTags = () => {
   const { http, savedObjectsTagging } = useKibana().services;

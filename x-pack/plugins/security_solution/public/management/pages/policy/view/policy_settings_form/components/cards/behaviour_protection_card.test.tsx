@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
-import React from 'react';
-import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { ProtectionModes } from '../../../../../../../../common/endpoint/types';
-import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
-import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
-import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
+import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import React from 'react';
+import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
+import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
+import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
+import { set } from 'lodash';
+import { ProtectionModes } from '../../../../../../../../common/endpoint/types';
 import type { BehaviourProtectionCardProps } from './protection_seetings_card/behaviour_protection_card';
 import {
   BehaviourProtectionCard,

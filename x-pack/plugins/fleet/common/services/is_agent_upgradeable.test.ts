@@ -8,12 +8,12 @@
 import type { Agent, AgentUpgradeDetails } from '../types/models/agent';
 
 import {
-  getNotUpgradeableMessage,
   getRecentUpgradeInfoForAgent,
-  isAgentUpgradeAvailable,
   isAgentUpgradeable,
-  isAgentUpgradeableToVersion,
   isAgentUpgrading,
+  getNotUpgradeableMessage,
+  isAgentUpgradeAvailable,
+  isAgentUpgradeableToVersion,
 } from './is_agent_upgradeable';
 
 const getAgent = ({

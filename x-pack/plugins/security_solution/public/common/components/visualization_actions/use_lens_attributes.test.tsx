@@ -13,15 +13,15 @@ import {
   fieldNameExistsFilter,
   getDetailsPageFilter,
   getIndexFilters,
-  getNetworkDetailsPageFilter,
   sourceOrDestinationIpExistsFilter,
+  getNetworkDetailsPageFilter,
 } from './utils';
 
-import { SecurityPageName } from '../../../app/types';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { SecurityPageName } from '../../../app/types';
 
 jest.mock('../../containers/sourcerer');
 jest.mock('../../utils/route/use_route_spy', () => ({

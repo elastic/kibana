@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ApplicationStart } from '@kbn/core-application-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { ApplicationStart } from '@kbn/core-application-browser';
 import { GuideCardSolutions } from './guide_cards';
 
 const filterButtonCss = css`

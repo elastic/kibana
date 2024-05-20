@@ -11,7 +11,6 @@ import { bubbleChart } from './bubble_chart';
 import { debug } from './debug';
 import { dropdownFilter } from './dropdown_filter';
 import { filterDebug } from './filter_debug';
-import { heatmap } from './heatmap';
 import { horizontalBarChart } from './horizontal_bar_chart';
 import { horizontalProgressBar } from './horizontal_progress_bar';
 import { horizontalProgressPill } from './horizontal_progress_pill';
@@ -19,8 +18,6 @@ import { image } from './image';
 import { lineChart } from './line_chart';
 import { markdown } from './markdown';
 import { metricElementInitializer } from './metric';
-import { metricVis } from './metric_vis';
-import { legacyMetricVis } from './metric_vis_legacy';
 import { pie } from './pie';
 import { plot } from './plot';
 import { progressGauge } from './progress_gauge';
@@ -30,14 +27,17 @@ import { repeatImage } from './repeat_image';
 import { revealImage } from './reveal_image';
 import { shape } from './shape';
 import { table } from './table';
-import { tagCloud } from './tag_cloud';
 import { timeFilter } from './time_filter';
 import { verticalBarChart } from './vert_bar_chart';
 import { verticalProgressBar } from './vertical_progress_bar';
 import { verticalProgressPill } from './vertical_progress_pill';
+import { tagCloud } from './tag_cloud';
+import { legacyMetricVis } from './metric_vis_legacy';
+import { metricVis } from './metric_vis';
+import { heatmap } from './heatmap';
 
-import { ElementFactory } from '../../types';
 import { SetupInitializer } from '../plugin';
+import { ElementFactory } from '../../types';
 import { pieVis } from './pie_vis';
 
 const elementSpecs = [

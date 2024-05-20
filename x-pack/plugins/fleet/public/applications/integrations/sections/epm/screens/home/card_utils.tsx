@@ -12,9 +12,9 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
-import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n-react';
+import { EuiBadge, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import semverLt from 'semver/functions/lt';
 
 import type {
@@ -22,8 +22,8 @@ import type {
   CustomIntegrationIcon,
 } from '@kbn/custom-integrations-plugin/common';
 
-import { getPackageReleaseLabel } from '../../../../../../../common/services';
 import { hasDeferredInstallations } from '../../../../../../services/has_deferred_installations';
+import { getPackageReleaseLabel } from '../../../../../../../common/services';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import type {

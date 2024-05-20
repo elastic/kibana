@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { render, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { I18nProvider } from '@kbn/i18n-react';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
@@ -25,9 +25,9 @@ import type { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggNameConflictToastMessages } from './common';
 import { StepDefineForm } from './step_define_form';
 
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { getMlSharedImports } from '../../../../../shared_imports';
 import { MlSharedContext } from '../../../../__mocks__/shared_context';
+import { getMlSharedImports } from '../../../../../shared_imports';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');

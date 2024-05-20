@@ -7,13 +7,13 @@
 
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { DRAW_MODE } from '../../common/constants';
 import { MapStoreState } from '../reducers/store';
-import { FLYOUT_STATE } from '../reducers/ui';
 import { getFlyoutDisplay, getOpenTOCDetails } from '../selectors/ui_selectors';
-import { setSelectedLayer } from './layer_actions';
-import { UPDATE_EDIT_STATE } from './map_action_constants';
+import { FLYOUT_STATE } from '../reducers/ui';
 import { setQuery, trackMapSettings } from './map_actions';
+import { setSelectedLayer } from './layer_actions';
+import { DRAW_MODE } from '../../common/constants';
+import { UPDATE_EDIT_STATE } from './map_action_constants';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';

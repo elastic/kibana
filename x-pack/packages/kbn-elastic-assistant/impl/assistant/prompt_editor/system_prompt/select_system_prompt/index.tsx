@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -14,19 +15,18 @@ import {
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { Conversation } from '../../../../..';
-import { useAssistantContext } from '../../../../assistant_context';
-import { TEST_IDS } from '../../../constants';
-import { PROMPT_CONTEXT_SELECTOR_PREFIX } from '../../../quick_prompts/prompt_context_selector/translations';
-import { SYSTEM_PROMPTS_TAB } from '../../../settings/assistant_settings';
-import type { Prompt } from '../../../types';
-import { useConversation } from '../../../use_conversation';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
+import type { Prompt } from '../../../types';
+import { useAssistantContext } from '../../../../assistant_context';
+import { useConversation } from '../../../use_conversation';
+import { SYSTEM_PROMPTS_TAB } from '../../../settings/assistant_settings';
+import { TEST_IDS } from '../../../constants';
+import { PROMPT_CONTEXT_SELECTOR_PREFIX } from '../../../quick_prompts/prompt_context_selector/translations';
 
 export interface Props {
   allSystemPrompts: Prompt[];

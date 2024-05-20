@@ -158,7 +158,9 @@
                 "tags": [],
                 "label": "mockContext",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -186,7 +188,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<ContextServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<ContextServiceContract>"
+            ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -200,7 +204,11 @@
             "tags": [],
             "label": "createPrebootContract",
             "description": [],
-            "signature": ["(mockContext?: {}) => jest.Mocked<", "InternalContextSetup", ">"],
+            "signature": [
+              "(mockContext?: {}) => jest.Mocked<",
+              "InternalContextSetup",
+              ">"
+            ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -213,7 +221,9 @@
                 "tags": [],
                 "label": "mockContext",
                 "description": [],
-                "signature": ["{}"],
+                "signature": [
+                  "{}"
+                ],
                 "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -227,7 +237,11 @@
             "tags": [],
             "label": "createSetupContract",
             "description": [],
-            "signature": ["(mockContext?: {}) => jest.Mocked<", "InternalContextSetup", ">"],
+            "signature": [
+              "(mockContext?: {}) => jest.Mocked<",
+              "InternalContextSetup",
+              ">"
+            ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -240,7 +254,9 @@
                 "tags": [],
                 "label": "mockContext",
                 "description": [],
-                "signature": ["{}"],
+                "signature": [
+                  "{}"
+                ],
                 "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

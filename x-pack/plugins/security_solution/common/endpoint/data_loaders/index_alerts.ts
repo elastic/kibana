@@ -6,9 +6,9 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { usageTracker } from './usage_tracker';
 import type { EndpointDocGenerator, Event, TreeOptions } from '../generate_data';
 import { firstNonNullValue } from '../models/ecs_safety_helpers';
-import { usageTracker } from './usage_tracker';
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

@@ -12,26 +12,26 @@ import React, { useCallback, Fragment, useMemo, useState, useContext } from 'rea
 import styled from 'styled-components';
 
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import { getSourcererScopeId } from '../../../helpers';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../common/components/cell_actions';
 import type {
   AutonomousSystem,
   FlowTarget,
   FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../common/components/cell_actions';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { DefaultDraggable } from '../../../common/components/draggables';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import * as i18n from '../../../explore/network/components/details/translations';
-import { getSourcererScopeId } from '../../../helpers';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { TimelineContext } from '../timeline';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`

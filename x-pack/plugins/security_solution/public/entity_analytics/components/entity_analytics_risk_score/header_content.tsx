@@ -1,4 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +5,15 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { SecurityPageName } from '../../../../common/constants';
-import type { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
-import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
-import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
-import { RiskInformationButtonEmpty } from '../risk_information';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { RiskSeverity, RiskScoreEntity } from '../../../../common/search_strategy';
 import { SeverityFilterGroup } from '../severity/severity_filter_group';
 import type { SeverityCount } from '../severity/types';
+import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
+import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
+import type { SecurityPageName } from '../../../../common/constants';
 import * as i18n from './translations';
+import { RiskInformationButtonEmpty } from '../risk_information';
 
 const RiskScoreHeaderContentComponent = ({
   entityLinkProps,

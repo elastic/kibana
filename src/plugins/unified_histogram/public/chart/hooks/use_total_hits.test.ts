@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { DataViewType, SearchSourceSearchOptions } from '@kbn/data-plugin/common';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { Filter } from '@kbn/es-query';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
-import { useEffect as mockUseEffect } from 'react';
-import { Subject, of, throwError } from 'rxjs';
-import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../../types';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { useTotalHits } from './use_total_hits';
+import { useEffect as mockUseEffect } from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { of, Subject, throwError } from 'rxjs';
+import { waitFor } from '@testing-library/react';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { DataViewType, SearchSourceSearchOptions } from '@kbn/data-plugin/common';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 
 jest.mock('react-use/lib/useDebounce', () => {
   return jest.fn((...args) => {

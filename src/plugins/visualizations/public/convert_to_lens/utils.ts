@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/public';
 import {
   AggBasedColumn,
   CollapseFunction,
+  isCollapseFunction,
   SchemaConfig,
   SupportedAggregation,
-  isCollapseFunction,
 } from '../../common';
-import { BucketColumn } from '../../common/convert_to_lens/lib';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { isSiblingPipeline } from '../../common/convert_to_lens/lib/utils';
+import { BucketColumn } from '../../common/convert_to_lens/lib';
 import { Schemas } from '../vis_schemas';
 
 export const isReferenced = (columnId: string, references: string[]) =>

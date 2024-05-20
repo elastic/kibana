@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
 import {
   EuiCheckbox,
   EuiFlexGroup,
@@ -13,16 +14,15 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import React, { useCallback } from 'react';
-import { ProtectionModes } from '../../../../../../../../../../common/endpoint/types';
 import { useKibana } from '../../../../../../../../../common/lib/kibana';
 import { useTestIdGenerator } from '../../../../../../../../hooks/use_test_id_generator';
+import { SettingCardHeader } from '../../../setting_card';
 import type { PolicyProtection } from '../../../../../../types';
 import type { PolicyFormComponentCommonProps } from '../../../../types';
-import { SettingCardHeader } from '../../../setting_card';
+import { ProtectionModes } from '../../../../../../../../../../common/endpoint/types';
 
 interface ReputationServiceProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;

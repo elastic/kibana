@@ -7,7 +7,7 @@
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
-import type { Installation, PackagePolicy } from '../../../common';
+import type { PackagePolicy, Installation } from '../../../common';
 
 import { migrateEndpointPackagePolicyToV7140 } from './security_solution';
 

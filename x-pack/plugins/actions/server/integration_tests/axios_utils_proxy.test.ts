@@ -8,26 +8,26 @@
 import * as proxy from 'proxy';
 
 import { readFileSync as fsReadFileSync } from 'fs';
+import { resolve as pathResolve, join as pathJoin } from 'path';
 import http from 'http';
 import https from 'https';
-import { join as pathJoin, resolve as pathResolve } from 'path';
 import axios from 'axios';
-import getPort from 'get-port';
 import { duration as momentDuration } from 'moment';
+import getPort from 'get-port';
 
+import { request } from '../lib/axios_utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
-import {
-  DEFAULT_MICROSOFT_EXCHANGE_URL,
-  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
-  DEFAULT_MICROSOFT_GRAPH_API_URL,
-} from '../../common';
-import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { ActionsConfig } from '../config';
-import { request } from '../lib/axios_utils';
+import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
+import {
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+} from '../../common';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

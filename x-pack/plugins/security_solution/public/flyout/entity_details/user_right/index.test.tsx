@@ -7,9 +7,9 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import { TestProviders } from '../../../common/mock';
 import type { UserPanelProps } from '.';
 import { UserPanel } from '.';
-import { TestProviders } from '../../../common/mock';
 
 import {
   mockManagedUserData,

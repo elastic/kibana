@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { assertNever } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Observable, Subscription } from 'rxjs';
+import { assertNever } from '@kbn/std';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { PLUGIN } from '../constants/plugin';
 import { ActionType } from '../types';
 import { ActionTypeDisabledError } from './errors';

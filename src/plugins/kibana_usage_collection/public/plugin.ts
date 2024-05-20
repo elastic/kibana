@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
 import { registerEbtCounters } from './ebt_counters';
 
 interface KibanaUsageCollectionPluginsDepsSetup {

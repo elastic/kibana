@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import { boomify, isBoom } from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
+import { isCustomError, handleCustomError } from './custom_errors';
+import { isAuthError, handleAuthError } from './auth_errors';
 import { ErrorTypes, LegacyRequest } from '../../types';
-import { handleAuthError, isAuthError } from './auth_errors';
-import { handleCustomError, isCustomError } from './custom_errors';
 import { handleESClientError, isESClientError } from './esclient_errors';
 
 export const getStatusCode = (err: ErrorTypes) => {
   return isBoom(err)
     ? err.output.statusCode
     : err instanceof errors.ResponseError
-      ? err.statusCode
-      : undefined;
+    ? err.statusCode
+    : undefined;
 };
 
 export function handleError(err: ErrorTypes, req?: LegacyRequest) {

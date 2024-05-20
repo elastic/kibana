@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 
 function createCoreContext({ production = false }: { production?: boolean } = {}): CoreContext & {
   logger: MockedLogger;

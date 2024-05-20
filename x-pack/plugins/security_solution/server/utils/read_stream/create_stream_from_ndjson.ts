@@ -6,8 +6,8 @@
  */
 
 import { Transform } from 'stream';
-import { createFilterStream, createMapStream } from '@kbn/utils';
 import { has, isString } from 'lodash/fp';
+import { createMapStream, createFilterStream } from '@kbn/utils';
 
 import type { RuleToImport } from '../../../common/api/detection_engine/rule_management';
 

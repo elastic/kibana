@@ -11,8 +11,8 @@ import { logAnalysisResultsV1 } from '../../../../common/http_api';
 import { createValidationFunction } from '../../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../../lib/infra_types';
 import { getLogEntryAnomaliesDatasets } from '../../../lib/log_analysis';
-import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
+import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBackendLibs) => {
   if (!framework.config.featureFlags.logsUIEnabled) {

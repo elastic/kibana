@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { asyncMap } from '@kbn/std';
-import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { getIndexPatternService } from './kibana_services';
+import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 import { getIsGoldPlus } from './licensed_features';
 
 export function getIsTimeseries(dataView: DataView): boolean {

@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { Filter } from '@kbn/es-query';
-import { ReactWrapper } from 'enzyme';
 import {
-  CONTROL_GROUP_TYPE,
   ControlGroupContainer,
   ControlGroupContainerFactory,
   ControlGroupRenderer,
+  CONTROL_GROUP_TYPE,
 } from '..';
 import { pluginServices } from '../../services/plugin_services';
+import { ReactWrapper } from 'enzyme';
+import { Filter } from '@kbn/es-query';
 
 describe('control group renderer', () => {
   let mockControlGroupFactory: ControlGroupContainerFactory;

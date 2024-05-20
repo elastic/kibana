@@ -6,13 +6,13 @@
  */
 
 import { includes } from 'lodash';
-import { ML_SUPPORTED_LICENSES } from '../../../common/constants';
-import { ElasticsearchResponse } from '../../../common/types/es';
-import { Globals } from '../../static_globals';
-import { Cluster, LegacyRequest } from '../../types';
-import { getElasticsearchDataset, getIndexPatterns } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
+import { ML_SUPPORTED_LICENSES } from '../../../common/constants';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest, Cluster } from '../../types';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 /*
  * Get a listing of jobs along with some metric data to use for the listing

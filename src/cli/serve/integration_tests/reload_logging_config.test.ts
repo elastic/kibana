@@ -8,14 +8,14 @@
 
 import Child from 'child_process';
 import Fs from 'fs';
-import Os from 'os';
 import Path from 'path';
+import Os from 'os';
 import Del from 'del';
 
-import { getConfigFromFiles } from '@kbn/config';
-import { safeDump } from 'js-yaml';
 import * as Rx from 'rxjs';
-import { filter, map, take } from 'rxjs';
+import { map, filter, take } from 'rxjs';
+import { safeDump } from 'js-yaml';
+import { getConfigFromFiles } from '@kbn/config';
 
 const configFileLogConsole = follow(
   '__fixtures__/reload_logging_config/kibana_log_console.test.yml'

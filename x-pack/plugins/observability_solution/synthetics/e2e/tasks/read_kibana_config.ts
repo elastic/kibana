@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import fs from 'fs';
 import path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
+import fs from 'fs';
 import yaml from 'js-yaml';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 export type KibanaConfig = ReturnType<typeof readKibanaConfig>;
 

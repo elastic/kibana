@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FieldsType } from '../types';
-import { isEqlBug77152 } from './is_eql_bug_77152';
-import { isIgnored } from './is_ignored';
-import { isInvalidKey } from './is_invalid_key';
 import { isMultiField } from './is_multifield';
+import { isInvalidKey } from './is_invalid_key';
 import { isTypeObject } from './is_type_object';
+import type { FieldsType } from '../types';
+import { isIgnored } from './is_ignored';
+import { isEqlBug77152 } from './is_eql_bug_77152';
 
 /**
  * Filters field entries by removing invalid field entries such as any invalid characters

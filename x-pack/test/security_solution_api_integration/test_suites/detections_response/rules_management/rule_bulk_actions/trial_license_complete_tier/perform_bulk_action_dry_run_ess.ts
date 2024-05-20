@@ -1,4 +1,3 @@
-import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +5,18 @@ import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/comm
  * 2.0.
  */
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugin/common/constants';
+import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
-import {
-  BulkActionEditTypeEnum,
-  BulkActionTypeEnum,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import expect from 'expect';
 import {
-  createAlertsIndex,
+  BulkActionTypeEnum,
+  BulkActionEditTypeEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import {
   createRule,
-  deleteAllAlerts,
+  createAlertsIndex,
   deleteAllRules,
+  deleteAllAlerts,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

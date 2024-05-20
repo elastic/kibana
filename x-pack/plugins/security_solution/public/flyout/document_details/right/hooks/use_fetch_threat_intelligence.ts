@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { groupBy } from 'lodash';
 import { useMemo } from 'react';
-import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import { groupBy } from 'lodash';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { CtiEnrichment } from '../../../../../common/search_strategy';
+import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
@@ -17,7 +17,7 @@ import {
   timelineDataToEnrichment,
 } from '../../../../common/components/event_details/cti_details/helpers';
 import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 
 export interface UseThreatIntelligenceParams {
   /**

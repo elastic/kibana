@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { closeAllToasts } from '../../tasks/toasts';
+import type { ReturnTypeFromChainable } from '../../types';
+import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
 import { APP_CASES_PATH } from '../../../../../common/constants';
 import {
   closeResponder,
@@ -12,14 +15,11 @@ import {
   openResponderActionLogFlyout,
   setResponderActionLogDateRange,
 } from '../../screens/responder';
-import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
+import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
+import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
-import { indexNewCase } from '../../tasks/index_new_case';
-import { login } from '../../tasks/login';
-import { closeAllToasts } from '../../tasks/toasts';
-import type { ReturnTypeFromChainable } from '../../types';
 
 describe(
   'When accessing Endpoint Response Console',

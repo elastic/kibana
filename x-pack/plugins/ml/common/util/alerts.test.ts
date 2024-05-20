@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
 import {
   getLookbackInterval,
   getResultJobsHealthRuleConfig,
   resolveLookbackInterval,
 } from './alerts';
+import type { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
 
 describe('resolveLookbackInterval', () => {
   test('resolves interval for bucket spans bigger than 1m', () => {

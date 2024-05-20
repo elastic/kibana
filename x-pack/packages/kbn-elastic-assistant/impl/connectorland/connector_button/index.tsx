@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
 import { OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
-import { useAssistantContext } from '../../assistant_context';
 import * as i18n from '../translations';
+import { useAssistantContext } from '../../assistant_context';
 
 export interface ConnectorButtonProps {
   setIsConnectorModalVisible?: React.Dispatch<React.SetStateAction<boolean>>;

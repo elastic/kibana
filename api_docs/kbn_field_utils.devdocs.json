@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "comboBoxFieldOptionMatcher",
-        "description": ["\nAdapts fieldNameWildcardMatcher to combobox props."],
+        "description": [
+          "\nAdapts fieldNameWildcardMatcher to combobox props."
+        ],
         "signature": [
           "({ option: { name, label }, searchValue, }: { option: { name?: string | undefined; label: string; }; searchValue: string; }) => boolean"
         ],
@@ -51,7 +53,9 @@
                 "tags": [],
                 "label": "option",
                 "description": [],
-                "signature": ["{ name?: string | undefined; label: string; }"],
+                "signature": [
+                  "{ name?: string | undefined; label: string; }"
+                ],
                 "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -278,7 +282,9 @@
                 "tags": [],
                 "label": "displayName",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -292,7 +298,9 @@
             "tags": [],
             "label": "fieldSearchHighlight",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -330,7 +338,9 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-field-utils/src/components/field_icon/get_field_icon_props.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -346,7 +356,9 @@
         "type": "Function",
         "tags": [],
         "label": "getFieldIconType",
-        "description": ["\nReturns an icon type for a field"],
+        "description": [
+          "\nReturns an icon type for a field"
+        ],
         "signature": [
           "(field: T, getCustomFieldType: ",
           "GetCustomFieldType",
@@ -363,7 +375,9 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-field-utils/src/utils/get_field_icon_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -376,7 +390,10 @@
             "tags": [],
             "label": "getCustomFieldType",
             "description": [],
-            "signature": ["GetCustomFieldType", "<T> | undefined"],
+            "signature": [
+              "GetCustomFieldType",
+              "<T> | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/utils/get_field_icon_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -392,8 +409,12 @@
         "type": "Function",
         "tags": [],
         "label": "getFieldSearchMatchingHighlight",
-        "description": ["\nGet `highlight` string to be used together with `EuiHighlight`"],
-        "signature": ["(displayName: string, fieldSearchHighlight: string | undefined) => string"],
+        "description": [
+          "\nGet `highlight` string to be used together with `EuiHighlight`"
+        ],
+        "signature": [
+          "(displayName: string, fieldSearchHighlight: string | undefined) => string"
+        ],
         "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -405,7 +426,9 @@
             "tags": [],
             "label": "displayName",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -418,7 +441,9 @@
             "tags": [],
             "label": "fieldSearchHighlight",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/utils/field_name_wildcard_matcher.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -437,7 +462,9 @@
         "description": [
           "\nReturns a field type. Time series metric type will override the original field type."
         ],
-        "signature": ["(field: T) => string"],
+        "signature": [
+          "(field: T) => string"
+        ],
         "path": "packages/kbn-field-utils/src/utils/get_field_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -449,7 +476,9 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-field-utils/src/utils/get_field_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -465,8 +494,12 @@
         "type": "Function",
         "tags": [],
         "label": "getFieldTypeDescription",
-        "description": ["\nReturns a user-friendly description of a field type"],
-        "signature": ["(type: string | undefined) => string"],
+        "description": [
+          "\nReturns a user-friendly description of a field type"
+        ],
+        "signature": [
+          "(type: string | undefined) => string"
+        ],
         "path": "packages/kbn-field-utils/src/utils/get_field_type_description.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -478,7 +511,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/utils/get_field_type_description.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -494,8 +529,12 @@
         "type": "Function",
         "tags": [],
         "label": "getFieldTypeName",
-        "description": ["\nReturns a user-friendly name of a field type"],
-        "signature": ["(type: string | undefined) => string"],
+        "description": [
+          "\nReturns a user-friendly name of a field type"
+        ],
+        "signature": [
+          "(type: string | undefined) => string"
+        ],
         "path": "packages/kbn-field-utils/src/utils/get_field_type_name.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -507,7 +546,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/utils/get_field_type_name.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -573,7 +614,9 @@
         "tags": [],
         "label": "isKnownFieldType",
         "description": [],
-        "signature": ["(type?: string | undefined) => type is string"],
+        "signature": [
+          "(type?: string | undefined) => type is string"
+        ],
         "path": "packages/kbn-field-utils/src/utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -585,7 +628,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/utils/field_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -626,7 +671,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -638,7 +685,9 @@
             "tags": [],
             "label": "displayName",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -650,7 +699,9 @@
             "tags": [],
             "label": "customDescription",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -662,7 +713,9 @@
             "tags": [],
             "label": "count",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -674,7 +727,10 @@
             "tags": [],
             "label": "timeSeriesMetric",
             "description": [],
-            "signature": ["MappingTimeSeriesMetricType", " | undefined"],
+            "signature": [
+              "MappingTimeSeriesMetricType",
+              " | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -686,7 +742,9 @@
             "tags": [],
             "label": "esTypes",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -698,7 +756,9 @@
             "tags": [],
             "label": "scripted",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -710,7 +770,9 @@
             "tags": [],
             "label": "isNull",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -722,7 +784,9 @@
             "tags": [],
             "label": "conflictDescriptions",
             "description": [],
-            "signature": ["Record<string, string[]> | undefined"],
+            "signature": [
+              "Record<string, string[]> | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -748,7 +812,9 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": ["{ name: string; customDescription?: string | undefined; }"],
+            "signature": [
+              "{ name: string; customDescription?: string | undefined; }"
+            ],
             "path": "packages/kbn-field-utils/src/components/field_description/field_description.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -760,7 +826,9 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": ["\"subdued\" | undefined"],
+            "signature": [
+              "\"subdued\" | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/components/field_description/field_description.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -772,7 +840,9 @@
             "tags": [],
             "label": "truncate",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-field-utils/src/components/field_description/field_description.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -788,7 +858,9 @@
         "type": "Enum",
         "tags": [],
         "label": "KNOWN_FIELD_TYPES",
-        "description": ["\nField types for which name and description are defined"],
+        "description": [
+          "\nField types for which name and description are defined"
+        ],
         "path": "packages/kbn-field-utils/src/utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -832,7 +904,9 @@
         "tags": [],
         "label": "FieldTypeKnown",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-field-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -845,7 +919,9 @@
         "tags": [],
         "label": "KNOWN_FIELD_TYPE_LIST",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/kbn-field-utils/src/utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -857,7 +933,9 @@
         "type": "string",
         "tags": [],
         "label": "UNKNOWN_FIELD_TYPE_MESSAGE",
-        "description": ["\nA user-friendly name of an unknown field type"],
+        "description": [
+          "\nA user-friendly name of an unknown field type"
+        ],
         "path": "packages/kbn-field-utils/src/utils/get_field_type_name.ts",
         "deprecated": false,
         "trackAdoption": false,

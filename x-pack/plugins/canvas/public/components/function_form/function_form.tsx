@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { ExpressionContext } from '../../../types';
-import { ExpressionType, RenderArgData } from '../../expression_types/types';
 import { FunctionFormComponent as Component } from './function_form_component';
-import { FunctionFormContextError } from './function_form_context_error';
-import { FunctionFormContextPending } from './function_form_context_pending';
 import { FunctionUnknown } from './function_unknown';
+import { FunctionFormContextPending } from './function_form_context_pending';
+import { FunctionFormContextError } from './function_form_context_error';
+import { ExpressionContext } from '../../../types';
+import { RenderArgData, ExpressionType } from '../../expression_types/types';
 
 type FunctionFormProps = RenderArgData;
 

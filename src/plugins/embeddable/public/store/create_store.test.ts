@@ -7,17 +7,17 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { PayloadAction, createAction, createReducer, createSlice } from '@reduxjs/toolkit';
+import { createAction, createReducer, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Store } from 'redux';
 import {
+  defaultEmbeddableFactoryProvider,
   Container,
   ContainerInput,
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  defaultEmbeddableFactoryProvider,
 } from '../lib';
-import { State, createStore } from './create_store';
+import { createStore, State } from './create_store';
 import { input } from './input_slice';
 import { output } from './output_slice';
 

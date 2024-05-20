@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Datatable, ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '@kbn/expressions-plugin/public';
 import { InputControlVisParams } from './types';
 
 interface Arguments {

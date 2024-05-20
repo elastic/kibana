@@ -1,5 +1,8 @@
 {
-  "groups": ["k8s", "metrics"],
+  "groups": [
+    "k8s",
+    "metrics"
+  ],
   "description": "Metrics: Kubernetes - Identify unusual spikes in memory usage across Kubernetes pods.",
   "analysis_config": {
     "bucket_span": "15m",
@@ -11,7 +14,9 @@
         "partition_field_name": "kubernetes.namespace",
         "custom_rules": [
           {
-            "actions": ["skip_result"],
+            "actions": [
+              "skip_result"
+            ],
             "conditions": [
               {
                 "applies_to": "actual",
@@ -23,7 +28,11 @@
         ]
       }
     ],
-    "influencers": ["kubernetes.namespace", "kubernetes.node.name", "kubernetes.pod.uid"]
+    "influencers": [
+      "kubernetes.namespace",
+      "kubernetes.node.name",
+      "kubernetes.pod.uid"
+    ]
   },
   "data_description": {
     "time_field": "@timestamp"

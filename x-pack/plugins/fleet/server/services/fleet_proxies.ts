@@ -6,9 +6,9 @@
  */
 
 import type {
-  ElasticsearchClient,
-  SavedObject,
   SavedObjectsClientContract,
+  SavedObject,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import { omit } from 'lodash';
 import pMap from 'p-map';
@@ -26,9 +26,9 @@ import type {
 
 import { appContextService } from './app_context';
 
-import { downloadSourceService } from './download_source';
 import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
 import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
 function savedObjectToFleetProxy(so: SavedObject<FleetProxySOAttributes>): FleetProxy {
   const { proxy_headers: proxyHeaders, ...rest } = so.attributes;

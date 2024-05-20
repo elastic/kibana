@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import numeral from '@elastic/numeral';
-import { first, get } from 'lodash';
 import React from 'react';
+import { first, get } from 'lodash';
+import numeral from '@elastic/numeral';
 import { getColor } from './get_color';
 import { TimeseriesVisualization } from './timeseries_visualization';
 

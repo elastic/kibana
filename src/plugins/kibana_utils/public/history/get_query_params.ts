@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { parse, ParsedQuery } from 'query-string';
 import { Location } from 'history';
-import { ParsedQuery, parse } from 'query-string';
 
 export function getQueryParams(location: Location): ParsedQuery {
   const search = (location.search || '').replace(/^\?/, '');

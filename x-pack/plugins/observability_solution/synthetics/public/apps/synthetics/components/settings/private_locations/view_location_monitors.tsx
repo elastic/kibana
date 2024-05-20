@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiPopover, EuiSpacer } from '@elastic/eui';
+import React, { useMemo, useState, FC, PropsWithChildren } from 'react';
+import { EuiPopover, EuiButtonEmpty, EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState, FC, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
 
 export const ViewLocationMonitors = ({

@@ -1,11 +1,3 @@
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClientProviderProps } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
-import { MemoryHistory, createMemoryHistory } from 'history';
-import React from 'react';
-import * as constants from '../common/navigation/constants';
-import type { CspPage, CspPageNavigationItem } from '../common/navigation/types';
-import { CspSecuritySolutionContext } from '../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,6 +5,14 @@ import { CspSecuritySolutionContext } from '../types';
  * 2.0.
  */
 import CspRouter from './csp_router';
+import React from 'react';
+import { render } from '@testing-library/react';
+import { Router } from '@kbn/shared-ux-router';
+import type { CspPage, CspPageNavigationItem } from '../common/navigation/types';
+import { CspSecuritySolutionContext } from '../types';
+import { createMemoryHistory, MemoryHistory } from 'history';
+import * as constants from '../common/navigation/constants';
+import { QueryClientProviderProps } from '@tanstack/react-query';
 
 jest.mock('../pages', () => ({
   Findings: () => <div data-test-subj="Findings">Findings</div>,

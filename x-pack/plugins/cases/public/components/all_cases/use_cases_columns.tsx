@@ -5,43 +5,43 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import type {
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiBadgeGroup,
+  EuiBadge,
   EuiButton,
-  EuiHealth,
-  EuiIcon,
   EuiLink,
+  EuiIcon,
+  EuiHealth,
   EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import React, { useCallback, useMemo } from 'react';
 
 import type { ActionConnector } from '../../../common/types/domain';
 import { CaseSeverity } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
-import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
+import type { CasesColumnSelection } from './types';
 import { getEmptyCellValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
-import { severities } from '../severity/config';
-import { TruncatedText } from '../truncated_text';
-import { getConnectorIcon } from '../utils';
-import { AssigneesColumn } from './assignees_column';
 import * as i18n from './translations';
-import type { CasesColumnSelection } from './types';
 import { useActions } from './use_actions';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
+import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
+import { TruncatedText } from '../truncated_text';
+import { getConnectorIcon } from '../utils';
+import { severities } from '../severity/config';
+import { AssigneesColumn } from './assignees_column';
+import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>

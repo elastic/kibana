@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { useIsWithinBreakpoints } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { AppMountParameters } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
+import React, { ReactNode, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { useIsWithinBreakpoints } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
-import React, { ReactNode, useState } from 'react';
-import ReactDOM from 'react-dom';
-import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
 const ResizableSection = ({
   direction,

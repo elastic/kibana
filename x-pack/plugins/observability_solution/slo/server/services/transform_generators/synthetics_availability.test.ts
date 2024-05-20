@@ -6,10 +6,10 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { SLODefinition } from '../../domain/models';
 import { createSLO, createSyntheticsAvailabilityIndicator } from '../fixtures/slo';
 import { SyntheticsAvailabilityTransformGenerator } from './synthetics_availability';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 
 const generator = new SyntheticsAvailabilityTransformGenerator();
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APP_ID } from '../constants';
 import { ProductFeatureSecurityKey, SecuritySubFeatureId } from '../product_features_keys';
+import { APP_ID } from '../constants';
 import type { DefaultSecurityProductFeaturesConfig } from './types';
 
 /**

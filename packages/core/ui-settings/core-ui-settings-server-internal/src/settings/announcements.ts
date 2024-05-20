@@ -7,8 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 
 export const getAnnouncementsSettings = (): Record<string, UiSettingsParams> => {
   return {

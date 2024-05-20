@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense, ReactNode } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Props } from './file_upload';
 
 export type { DoneNotification } from './upload_state';

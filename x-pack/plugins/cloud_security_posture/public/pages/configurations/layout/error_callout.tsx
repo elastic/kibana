@@ -6,16 +6,16 @@
  */
 
 import {
-  EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiCallOut,
   EuiSpacer,
+  EuiButton,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
 export const ErrorCallout = ({ error }: { error: Error }) => {

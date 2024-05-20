@@ -8,18 +8,18 @@
 
 import 'source-map-support/register';
 
-import { failedStatsToErrorMessage, isFailureStats } from '@kbn/optimizer-webpack-helpers';
-import * as Rx from 'rxjs';
-import { map, mapTo, mergeMap, takeUntil } from 'rxjs';
 import webpack, { Stats } from 'webpack';
+import * as Rx from 'rxjs';
+import { mergeMap, map, mapTo, takeUntil } from 'rxjs';
+import { isFailureStats, failedStatsToErrorMessage } from '@kbn/optimizer-webpack-helpers';
 
 import {
-  Bundle,
-  BundleRemotes,
-  CompilerMsg,
   CompilerMsgs,
-  WorkerConfig,
+  CompilerMsg,
   maybeMap,
+  Bundle,
+  WorkerConfig,
+  BundleRemotes,
 } from '../common';
 import { getWebpackConfig } from './webpack.config';
 

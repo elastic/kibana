@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { Assign } from '@kbn/utility-types';
 import React from 'react';
-import { ArgumentStrings } from '../../../../i18n';
+import { Assign } from '@kbn/utility-types';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { NumberFormatArgInput, Props as ComponentProps } from './number_format';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
+import { ArgumentStrings } from '../../../../i18n';
 import { SetupInitializer } from '../../../plugin';
-import { Props as ComponentProps, NumberFormatArgInput } from './number_format';
 
 const { NumberFormat: strings } = ArgumentStrings;
 
 const getNumberFormatArgInput =
   (defaultNumberFormats: ComponentProps['numberFormats']) =>
-  (props: Assign<ComponentProps, { numberFormats?: ComponentProps['numberFormats'] }>) => (
-    <NumberFormatArgInput numberFormats={defaultNumberFormats} {...props} />
-  );
+  (props: Assign<ComponentProps, { numberFormats?: ComponentProps['numberFormats'] }>) =>
+    <NumberFormatArgInput numberFormats={defaultNumberFormats} {...props} />;
 
 export const numberFormatInitializer: SetupInitializer<ArgumentFactory<ComponentProps>> = (
   core,

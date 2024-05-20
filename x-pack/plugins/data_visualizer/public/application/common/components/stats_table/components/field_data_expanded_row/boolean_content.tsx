@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Axis, BarSeries, Chart, LEGACY_LIGHT_THEME, ScaleType, Settings } from '@elastic/charts';
-import { EuiSpacer } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { Axis, BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
+import { i18n } from '@kbn/i18n';
 import { TopValues } from '../../../top_values';
-import { useDataVizChartTheme } from '../../hooks';
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { getTFPercentage } from '../../utils';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+import { getTFPercentage } from '../../utils';
+import { useDataVizChartTheme } from '../../hooks';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 import { ExpandedRowPanel } from './expanded_row_panel';

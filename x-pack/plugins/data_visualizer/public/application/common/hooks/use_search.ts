@@ -8,8 +8,8 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
-import { FilterStateStore } from '@kbn/es-query';
 import { useEffect } from 'react';
+import { FilterStateStore } from '@kbn/es-query';
 import type { BasicAppState } from '../../data_drift/types';
 import { getEsQueryFromSavedSearch } from '../../index_data_visualizer/utils/saved_search_utils';
 import { useDataVisualizerKibana } from '../../kibana_context';

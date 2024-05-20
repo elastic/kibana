@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/core/server';
-import { EsConversationSchema } from './conversations/types';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { estypes } from '@elastic/elasticsearch';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { findDocuments } from './find';
+import { EsConversationSchema } from './conversations/types';
 
 export const getSearchConversationMock = (): estypes.SearchResponse<EsConversationSchema> => ({
   _scroll_id: '123',

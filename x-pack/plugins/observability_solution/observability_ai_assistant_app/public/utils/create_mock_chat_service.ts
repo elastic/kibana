@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import {
   MessageRole,
   ObservabilityAIAssistantChatService,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
 

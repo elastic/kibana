@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { memo, useCallback, useState } from 'react';
 
 import * as i18n from './translations';

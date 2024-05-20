@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import { AlertAttachment } from '@kbn/cases-plugin/common/types/domain';
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getComment } from '../../../../common/lib/api';
 

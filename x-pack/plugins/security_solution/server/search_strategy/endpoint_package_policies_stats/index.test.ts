@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
-import moment from 'moment';
-import { requestEndpointPackagePoliciesStatsSearch } from '.';
-import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContextService } from '../../endpoint/mocks';
+import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { requestEndpointPackagePoliciesStatsSearch } from '.';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import moment from 'moment';
 
 const mockPackagePolicyResponse = (inputs: string[]) => ({
   items: inputs.map((input) => ({

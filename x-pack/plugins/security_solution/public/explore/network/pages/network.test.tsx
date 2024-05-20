@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
-import { Router } from '@kbn/shared-ux-router';
-import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { waitFor } from '@testing-library/react';
+import type { Filter } from '@kbn/es-query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { TestProviders, createMockStore } from '../../../common/mock';
 import { inputsActions } from '../../../common/store/inputs';
 
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { NetworkRoutes } from './navigation';
 import { Network } from './network';
+import { NetworkRoutes } from './navigation';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 

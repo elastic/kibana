@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { FC } from 'react';
 import { DomainRange } from '@elastic/charts';
 import { CurrentTime } from '@kbn/charts-plugin/public';
-import React, { FC } from 'react';
 
 interface XYCurrentTime {
   enabled: boolean;

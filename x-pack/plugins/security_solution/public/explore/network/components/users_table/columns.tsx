@@ -9,15 +9,15 @@ import type { FlowTargetSourceDest, NetworkUsersItem } from '../../../../../comm
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import type { Columns } from '../../../components/paginated_table';
 
-import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import * as i18n from './translations';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 
 export type UsersColumns = [
   Columns<NetworkUsersItem['name']>,
   Columns<NetworkUsersItem['id']>,
   Columns<NetworkUsersItem['groupName']>,
   Columns<NetworkUsersItem['groupId']>,
-  Columns<NetworkUsersItem['count']>,
+  Columns<NetworkUsersItem['count']>
 ];
 
 export const getUsersColumns = (

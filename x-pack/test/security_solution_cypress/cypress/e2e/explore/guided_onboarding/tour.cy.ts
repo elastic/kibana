@@ -6,29 +6,29 @@
  */
 import { AlertsCasesTourSteps } from '@kbn/security-solution-plugin/public/common/components/guided_onboarding_tour/tour_config';
 
-import { getNewRule } from '../../../objects/rule';
+import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
+import { navigateFromHeaderTo } from '../../../tasks/security_header';
 import { ALERTS, TIMELINES } from '../../../screens/security_header';
 import { closeAlertFlyout, expandFirstAlert } from '../../../tasks/alerts';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
-import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
-import { createRule } from '../../../tasks/api_calls/rules';
-import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import {
-  addToCase,
   assertTourStepExist,
   assertTourStepNotExist,
   closeCreateCaseFlyout,
   completeTourWithActions,
   completeTourWithNextButton,
+  addToCase,
   finishTour,
   goToStep,
   startTour,
 } from '../../../tasks/guided_onboarding';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { getNewRule } from '../../../objects/rule';
+import { ALERTS_URL, DASHBOARDS_URL } from '../../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { navigateFromHeaderTo } from '../../../tasks/security_header';
-import { ALERTS_URL, DASHBOARDS_URL } from '../../../urls/navigation';
+import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
   beforeEach(() => {

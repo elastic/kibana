@@ -7,17 +7,17 @@
 
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { ApmDocumentType } from '../../../common/document_type';
-import { SERVICE_NAME, TRANSACTION_DURATION } from '../../../common/es_fields/apm';
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { RollupInterval } from '../../../common/rollup';
-import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { SERVICE_NAME, TRANSACTION_DURATION } from '../../../common/es_fields/apm';
+import { getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../typings/timeseries';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 interface MobileDetailedStatistics {
   fieldName: string;

@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { keys } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import React from 'react';
 
-import { Operator } from '../../../common/operators_utils';
+import { collectionActions } from './lib/collection_actions';
 import {
   ColorRules,
-  ColorRulesOperator,
   ColorRulesProps,
   colorRulesOperatorsList,
+  ColorRulesOperator,
 } from './color_rules';
-import { collectionActions } from './lib/collection_actions';
+import { Operator } from '../../../common/operators_utils';
 
 describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js', () => {
   const emptyRule: ColorRulesOperator = colorRulesOperatorsList.filter(

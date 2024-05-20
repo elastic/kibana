@@ -6,13 +6,13 @@
  */
 
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -21,13 +21,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
-import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
-import { PackQueriesStatusTable } from '../../../packs/pack_queries_status_table';
-import { AgentPoliciesPopover } from '../../../packs/packs_table';
 import { usePack } from '../../../packs/use_pack';
+import { PackQueriesStatusTable } from '../../../packs/pack_queries_status_table';
+import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
+import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
+import { AgentPoliciesPopover } from '../../../packs/packs_table';
 
 const dividerCss = ({ euiTheme }: UseEuiTheme) => ({
   width: 0,

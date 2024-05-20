@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
-import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import {
   getComplexRule,
   getComplexRuleOutput,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
-  removeServerGeneratedProperties,
   updateUsername,
+  removeServerGeneratedProperties,
 } from '../../../utils';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

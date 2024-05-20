@@ -8,13 +8,13 @@
 import { setTimeout } from 'timers/promises';
 
 import type {
-  ISavedObjectsImporter,
-  Logger,
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
-  SavedObjectsImportFailure,
+  ISavedObjectsImporter,
   SavedObjectsImportSuccess,
+  SavedObjectsImportFailure,
+  Logger,
 } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
@@ -22,25 +22,25 @@ import { partition } from 'lodash';
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
-import type { PackageInstallContext } from '../../../../../common/types';
-import { KibanaSOReferenceError } from '../../../../errors';
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
 import type {
-  AssetParts,
-  AssetReference,
   AssetType,
+  AssetReference,
+  AssetParts,
   Installation,
   PackageSpecTags,
 } from '../../../../types';
-import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { savedObjectTypes } from '../../packages';
-import { saveKibanaAssetsRefs } from '../../packages/install';
-import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
+import type { PackageInstallContext } from '../../../../../common/types';
 import {
-  getIndexPatternSavedObjects,
   indexPatternTypes,
+  getIndexPatternSavedObjects,
   makeManagedIndexPatternsGlobal,
 } from '../index_pattern/install';
+import { saveKibanaAssetsRefs } from '../../packages/install';
+import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
+import { KibanaSOReferenceError } from '../../../../errors';
 
 import { withPackageSpan } from '../../packages/utils';
 

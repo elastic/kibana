@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 import type { ReactNode } from 'react';
+import { EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
 
 interface InputProps {
   label: ReactNode;

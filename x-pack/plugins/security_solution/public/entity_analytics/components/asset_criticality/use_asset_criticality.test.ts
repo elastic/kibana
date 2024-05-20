@@ -7,7 +7,7 @@
 
 import { renderMutation, renderQuery } from '../../../management/hooks/test_utils';
 import type { Entity } from './use_asset_criticality';
-import { useAssetCriticalityData, useAssetCriticalityPrivileges } from './use_asset_criticality';
+import { useAssetCriticalityPrivileges, useAssetCriticalityData } from './use_asset_criticality';
 
 const mockFetchAssetCriticalityPrivileges = jest.fn().mockResolvedValue({});
 const mockFetchAssetCriticality = jest.fn().mockResolvedValue({});

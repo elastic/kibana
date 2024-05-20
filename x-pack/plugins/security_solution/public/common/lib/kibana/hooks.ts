@@ -7,24 +7,24 @@
 
 import moment from 'moment-timezone';
 
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { Capabilities } from '@kbn/core/public';
+import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { Capabilities } from '@kbn/core/public';
 import {
-  type GetAppUrl,
-  type NavigateTo,
   useGetAppUrl,
   useNavigateTo,
   useNavigation,
+  type GetAppUrl,
+  type NavigateTo,
 } from '@kbn/security-solution-navigation';
-import { camelCase, isArray, isObject } from 'lodash';
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
-import type { StartServices } from '../../../types';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
-import { useKibana, useUiSetting } from './kibana_react';
+import type { StartServices } from '../../../types';
+import { useUiSetting, useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 

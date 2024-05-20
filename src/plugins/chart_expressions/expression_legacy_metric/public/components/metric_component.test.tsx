@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { LabelPosition } from '../../common/constants';
+import { shallow, mount } from 'enzyme';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import MetricVisComponent, { MetricVisComponentProps } from './metric_component';
+import { LabelPosition } from '../../common/constants';
 
 jest.mock('../services', () => ({
   getFormatService: () => {

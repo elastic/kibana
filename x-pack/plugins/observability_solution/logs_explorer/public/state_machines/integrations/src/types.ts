@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { DoneInvokeEvent } from 'xstate';
-import { Integration } from '../../../../common/datasets';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { FindIntegrationsValue, SearchAfter, SortOrder } from '../../../../common/latest';
+import { SortOrder, SearchAfter, FindIntegrationsValue } from '../../../../common/latest';
+import { Integration } from '../../../../common/datasets';
 
 export interface IntegrationsSearchParams {
   nameQuery?: string;

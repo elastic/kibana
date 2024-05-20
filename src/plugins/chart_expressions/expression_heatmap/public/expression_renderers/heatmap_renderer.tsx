@@ -1,10 +1,3 @@
-import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  ChartSizeEvent,
-  extractContainerType,
-  extractVisualizationType,
-} from '@kbn/chart-expressions-common';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,20 +6,27 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expre
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { getTimeZone } from '@kbn/visualization-utils';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { getTimeZone } from '@kbn/visualization-utils';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  BrushEvent,
-  EXPRESSION_HEATMAP_NAME,
-  FilterEvent,
-  HeatmapExpressionProps,
-} from '../../common';
+  ChartSizeEvent,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
 import { MultiFilterEvent } from '../../common/types';
 import { ExpressionHeatmapPluginStart } from '../plugin';
+import {
+  EXPRESSION_HEATMAP_NAME,
+  HeatmapExpressionProps,
+  FilterEvent,
+  BrushEvent,
+} from '../../common';
 import {
   getDatatableUtilities,
   getFormatService,

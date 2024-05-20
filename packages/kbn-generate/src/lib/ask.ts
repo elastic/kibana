@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import Readline from 'readline';
-import Util from 'util';
 import Chalk from 'chalk';
+import Readline from 'readline';
 import * as Rx from 'rxjs';
+import Util from 'util';
 
 import * as Ansi from './ansi';
 

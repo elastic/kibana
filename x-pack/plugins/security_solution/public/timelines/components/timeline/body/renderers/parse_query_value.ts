@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNumber, isObject } from 'lodash/fp';
+import { isObject, isNumber } from 'lodash/fp';
 
 export const parseQueryValue = (
   value: string | number | object | undefined | null

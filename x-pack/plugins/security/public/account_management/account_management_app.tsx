@@ -10,8 +10,8 @@ import React, { FC, PropsWithChildren } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type {
-  AppMountParameters,
   ApplicationSetup,
+  AppMountParameters,
   CoreStart,
   StartServicesAccessor,
 } from '@kbn/core/public';

@@ -6,20 +6,20 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
 import { flatten, reverse, uniqBy } from 'lodash/fp';
+import { useQuery } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
+import type { InspectResponse } from '../common/helpers';
+import { getInspectResponse, generateTablePaginationOptions } from '../common/helpers';
+import { useKibana } from '../common/lib/kibana';
 import type {
+  ResultEdges,
   ActionResultsRequestOptions,
   ActionResultsStrategyResponse,
   Direction,
-  ResultEdges,
 } from '../../common/search_strategy';
 import { OsqueryQueries } from '../../common/search_strategy';
-import type { InspectResponse } from '../common/helpers';
-import { generateTablePaginationOptions, getInspectResponse } from '../common/helpers';
-import { useKibana } from '../common/lib/kibana';
 import { queryClient } from '../query_client';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -97,7 +97,7 @@ export const useActionResults = ({
         ? cachedData?.edges
         : agentIds?.map(
             (agentId) =>
-              ({ fields: { agent_id: [agentId] } }) as unknown as estypes.SearchHit<object>
+              ({ fields: { agent_id: [agentId] } } as unknown as estypes.SearchHit<object>)
           ) ?? [];
 
       return {

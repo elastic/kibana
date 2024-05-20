@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiForm,
   EuiTitle,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiForm,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
-import type { FleetProxy } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
-import { TextAreaInput, TextInput } from '../form';
+import type { FleetProxy } from '../../../../types';
+import { TextInput, TextAreaInput } from '../form';
 
 import { useFleetProxyForm } from './use_fleet_proxy_form';
 

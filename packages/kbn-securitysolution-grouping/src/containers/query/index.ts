@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { GroupingAggregation, ParsedGroupingAggregation } from '../..';
 import { getEmptyValue } from './helpers';
-import type { GroupingQuery, GroupingQueryArgs } from './types';
+import { GroupingAggregation, ParsedGroupingAggregation } from '../..';
+import type { GroupingQueryArgs, GroupingQuery } from './types';
 /** The maximum number of groups to render */
 export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
 

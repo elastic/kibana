@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks, EuiToolTip } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
-import { RECORDS_FIELD, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
+import React from 'react';
+import { EuiHeaderLinks, EuiHeaderLink, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
-import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
+import { RECORDS_FIELD, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { UxInspectorHeaderLink } from './inpector_link';
+import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 
 const ANALYZE_DATA = i18n.translate('xpack.ux.analyzeDataButtonLabel', {
   defaultMessage: 'Explore data',

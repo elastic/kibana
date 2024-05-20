@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { OsqueryParser } from './parser';
 import { plugin } from './plugin';
+import { OsqueryParser } from './parser';
 import { OsqueryRenderer } from './renderer';
 
 export { plugin, OsqueryParser as parser, OsqueryRenderer as renderer };

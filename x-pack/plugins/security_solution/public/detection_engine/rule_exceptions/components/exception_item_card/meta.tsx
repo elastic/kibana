@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React, { memo, useMemo, useState } from 'react';
 import type { EuiContextMenuPanelProps } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
-  EuiText,
   EuiToolTip,
+  EuiText,
+  EuiButtonEmpty,
+  EuiPopover,
 } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import React, { memo, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import type { ExceptionListRuleReferencesSchema } from '../../../../../common/api/detection_engine/rule_exceptions';
-import { FormattedDate } from '../../../../common/components/formatted_date';
-import { LinkToListDetails, LinkToRuleDetails } from '../../../../exceptions/components';
+import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
+import { FormattedDate } from '../../../../common/components/formatted_date';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/api/detection_engine/rule_exceptions';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   border-right: 1px solid #d3dae6;

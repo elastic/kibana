@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { renderHook } from '@testing-library/react-hooks';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
-import { renderHook } from '@testing-library/react-hooks';
 
 import { useLogSummary } from './log_summary';
 
-import { datemathToEpochMillis } from '../../../utils/datemath';
 import { fetchLogSummary } from './api/fetch_log_summary';
+import { datemathToEpochMillis } from '../../../utils/datemath';
 
 const LOG_VIEW_REFERENCE = { type: 'log-view-reference' as const, logViewId: 'LOG_VIEW_ID' };
 const CHANGED_LOG_VIEW_REFERENCE = {

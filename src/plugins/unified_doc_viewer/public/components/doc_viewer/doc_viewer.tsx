@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DocViewer } from '@kbn/unified-doc-viewer';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { DocViewer } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 export function UnifiedDocViewer({ docViewsRegistry, ...props }: DocViewRenderProps) {

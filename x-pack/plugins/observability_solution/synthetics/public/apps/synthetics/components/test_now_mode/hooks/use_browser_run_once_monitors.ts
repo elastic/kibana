@@ -1,16 +1,16 @@
-import { createEsParams, useEsSearch, useFetcher } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { createEsParams, useEsSearch, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useTickTick } from './use_tick_tick';
+import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { fetchBrowserJourney } from '../../../state';
-import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
-import { useTickTick } from './use_tick_tick';
 
 export interface CheckGroupResult {
   checkGroupId: string;

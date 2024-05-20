@@ -7,32 +7,31 @@
 
 import { getNewRule, getSavedQueryRule } from '../../../../objects/rule';
 
-import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import {
   DEFINE_CONTINUE_BUTTON,
   LOAD_QUERY_DYNAMICALLY_CHECKBOX,
   QUERY_BAR,
 } from '../../../../screens/create_new_rule';
+import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import {
-  CUSTOM_QUERY_DETAILS,
-  DEFINE_RULE_PANEL_PROGRESS,
   RULE_NAME_HEADER,
+  SAVED_QUERY_NAME_DETAILS,
   SAVED_QUERY_DETAILS,
   SAVED_QUERY_FILTERS_DETAILS,
-  SAVED_QUERY_NAME_DETAILS,
+  DEFINE_RULE_PANEL_PROGRESS,
+  CUSTOM_QUERY_DETAILS,
 } from '../../../../screens/rule_details';
 
 import { editFirstRule, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { createRule } from '../../../../tasks/api_calls/rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../../tasks/api_calls/saved_queries';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
-  checkLoadQueryDynamically,
   createAndEnableRule,
   fillAboutRuleAndContinue,
   fillScheduleRuleAndContinue,
-  getCustomQueryInput,
   selectAndLoadSavedQuery,
+  getCustomQueryInput,
+  checkLoadQueryDynamically,
   uncheckLoadQueryDynamically,
 } from '../../../../tasks/create_new_rule';
 import { saveEditedRule, visitEditRulePage } from '../../../../tasks/edit_rule';
@@ -43,9 +42,10 @@ import {
   getDetails,
   visitRuleDetailsPage,
 } from '../../../../tasks/rule_details';
-import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
+import { createRule } from '../../../../tasks/api_calls/rules';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';

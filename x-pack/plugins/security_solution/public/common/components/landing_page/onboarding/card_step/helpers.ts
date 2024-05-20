@@ -6,8 +6,8 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import { ENABLED_FIELD } from '../../../../../../common/detection_engine/rule_management/rule_fields';
 import { fetchRuleManagementFilters } from '../apis';
+import { ENABLED_FIELD } from '../../../../../../common/detection_engine/rule_management/rule_fields';
 
 export const autoCheckPrebuildRuleStepCompleted = async ({
   abortSignal,

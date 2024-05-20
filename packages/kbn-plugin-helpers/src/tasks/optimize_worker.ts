@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BundleRemotes, WorkerConfig, parseBundles } from '@kbn/optimizer/src/common';
-import { getWebpackConfig } from '@kbn/optimizer/src/worker/webpack.config';
 import webpack from 'webpack';
+import { parseBundles, BundleRemotes, WorkerConfig } from '@kbn/optimizer/src/common';
+import { getWebpackConfig } from '@kbn/optimizer/src/worker/webpack.config';
 
 const send = process.send;
 if (!send) {

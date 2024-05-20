@@ -23,8 +23,8 @@ import { conversationComponentTemplate } from './conversation_component_template
 import { kbComponentTemplate } from './kb_component_template';
 import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
 import type {
-  ObservabilityAIAssistantResourceNames,
   RegistrationCallback,
+  ObservabilityAIAssistantResourceNames,
   RespondFunctionResources,
 } from './types';
 import { splitKbText } from './util/split_kb_text';

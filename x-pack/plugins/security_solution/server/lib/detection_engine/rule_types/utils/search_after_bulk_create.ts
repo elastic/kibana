@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { getMaxSignalsWarning, addToSearchAfterReturn } from './utils';
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from '../types';
 import { createEnrichEventsFunction } from './enrichments';
 import type { SearchAfterAndBulkCreateFactoryParams } from './search_after_bulk_create_factory';
 import { searchAfterAndBulkCreateFactory } from './search_after_bulk_create_factory';
-import { addToSearchAfterReturn, getMaxSignalsWarning } from './utils';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async (

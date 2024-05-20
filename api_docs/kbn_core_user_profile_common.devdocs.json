@@ -49,7 +49,9 @@
             "type": "string",
             "tags": [],
             "label": "uid",
-            "description": ["\nUnique ID for of the user profile."],
+            "description": [
+              "\nUnique ID for of the user profile."
+            ],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -60,7 +62,9 @@
             "type": "boolean",
             "tags": [],
             "label": "enabled",
-            "description": ["\nIndicates whether user profile is enabled or not."],
+            "description": [
+              "\nIndicates whether user profile is enabled or not."
+            ],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -71,7 +75,9 @@
             "type": "Object",
             "tags": [],
             "label": "user",
-            "description": ["\nInformation about the user that owns profile."],
+            "description": [
+              "\nInformation about the user that owns profile."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-common",
@@ -91,8 +97,12 @@
             "type": "Object",
             "tags": [],
             "label": "data",
-            "description": ["\nUser specific data associated with the profile."],
-            "signature": ["{ [P in keyof D]?: D[P] | undefined; }"],
+            "description": [
+              "\nUser specific data associated with the profile."
+            ],
+            "signature": [
+              "{ [P in keyof D]?: D[P] | undefined; }"
+            ],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -106,7 +116,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileUserInfo",
-        "description": ["\nBasic user information returned in user profile."],
+        "description": [
+          "\nBasic user information returned in user profile."
+        ],
         "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -117,7 +129,9 @@
             "type": "string",
             "tags": [],
             "label": "username",
-            "description": ["\nUsername of the user."],
+            "description": [
+              "\nUsername of the user."
+            ],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -128,8 +142,12 @@
             "type": "string",
             "tags": [],
             "label": "email",
-            "description": ["\nOptional email of the user."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional email of the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -140,8 +158,12 @@
             "type": "string",
             "tags": [],
             "label": "full_name",
-            "description": ["\nOptional full name of the user."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional full name of the user."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -185,8 +207,12 @@
             "type": "Object",
             "tags": [],
             "label": "roles",
-            "description": ["\nList of the user roles."],
-            "signature": ["readonly string[]"],
+            "description": [
+              "\nList of the user roles."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -213,7 +239,9 @@
             "description": [
               "\nOptional name of the security domain that Elasticsearch security realm that was\nused to authenticate user resides in (if any)."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -258,7 +286,9 @@
             "type": "Object",
             "tags": [],
             "label": "user",
-            "description": ["\nInformation about the user that owns profile."],
+            "description": [
+              "\nInformation about the user that owns profile."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-common",
@@ -281,7 +311,9 @@
             "description": [
               "\nUser specific _searchable_ labels associated with the profile. Note that labels are considered\nsecurity related field since it's going to be used to store user's space ID."
             ],
-            "signature": ["L"],
+            "signature": [
+              "L"
+            ],
             "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -298,8 +330,12 @@
         "type": "Type",
         "tags": [],
         "label": "UserProfileData",
-        "description": ["\nPlaceholder for data stored in user profile."],
-        "signature": ["{ [x: string]: unknown; }"],
+        "description": [
+          "\nPlaceholder for data stored in user profile."
+        ],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -311,8 +347,12 @@
         "type": "Type",
         "tags": [],
         "label": "UserProfileLabels",
-        "description": ["\nType of the user profile labels structure (currently"],
-        "signature": ["{ [x: string]: string; }"],
+        "description": [
+          "\nType of the user profile labels structure (currently"
+        ],
+        "signature": [
+          "{ [x: string]: string; }"
+        ],
         "path": "packages/core/user-profile/core-user-profile-common/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,

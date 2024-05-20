@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { render, waitFor, screen } from '@testing-library/react';
+import { MlEntitySelector } from './ml_entity_selector';
 import { useMlApiContext } from '../../contexts/kibana';
 import type { MlApiServices } from '../../services/ml_api_service';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { MlEntitySelector } from './ml_entity_selector';
 
 jest.mock('../../contexts/kibana');
 jest.mock('../../services/toast_notification_service');

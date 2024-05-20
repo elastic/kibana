@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { FC } from 'react';
 import React from 'react';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { DocumentDetailsIsolateHostPanelKey } from '../shared/constants/panel_keys';
 import { PanelContent } from './content';
 import { PanelHeader } from './header';

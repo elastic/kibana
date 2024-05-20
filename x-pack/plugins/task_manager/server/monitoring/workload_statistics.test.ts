@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { bufferCount, first, take } from 'rxjs';
-import { ConcreteTaskInstance } from '../task';
+import { first, take, bufferCount } from 'rxjs';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
-  ScheduleDensityHistogram,
   TaskTypeAggregation,
   WorkloadAggregationResponse,
+  ScheduleDensityHistogram,
   createWorkloadAggregator,
-  estimateRecurringTaskScheduling,
   padBuckets,
+  estimateRecurringTaskScheduling,
 } from './workload_statistics';
+import { ConcreteTaskInstance } from '../task';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { times } from 'lodash';
-import { Subject, of } from 'rxjs';
 import { taskStoreMock } from '../task_store.mock';
+import { of, Subject } from 'rxjs';
 import { sleep } from '../test_utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 type ResponseWithAggs = Omit<estypes.SearchResponse<ConcreteTaskInstance>, 'aggregations'> & {
   aggregations: WorkloadAggregationResponse;

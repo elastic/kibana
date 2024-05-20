@@ -8,9 +8,9 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 
-import { reduxDecorator } from '../../../../storybook';
 // @ts-expect-error
 import { getDefaultPage } from '../../../state/defaults';
+import { reduxDecorator } from '../../../../storybook';
 import { Toolbar } from '../toolbar';
 
 const pages = [...new Array(10)].map(() => getDefaultPage());

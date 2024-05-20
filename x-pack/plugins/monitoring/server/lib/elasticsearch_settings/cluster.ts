@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
-import { ClusterSettingsReasonResponse, LegacyRequest } from '../../types';
+import { ClusterGetSettingsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { findReason } from './find_reason';
+import { ClusterSettingsReasonResponse, LegacyRequest } from '../../types';
 
 export function handleResponse(
   response: ClusterGetSettingsResponse,

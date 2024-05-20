@@ -8,12 +8,12 @@
 
 import { getReferencesFilterMock } from './query_params.tests.mocks';
 
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import * as esKuery from '@kbn/es-query';
 import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
-import * as esKuery from '@kbn/es-query';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { getQueryParams } from './query_params';
 
 type KueryNode = any;

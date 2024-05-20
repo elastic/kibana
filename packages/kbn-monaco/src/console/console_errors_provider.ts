@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '../monaco_imports';
 import { ConsoleWorkerProxyService } from './console_worker_proxy';
 import { CONSOLE_LANG_ID } from './constants';
+import { monaco } from '../monaco_imports';
 
 /*
  * This setup function runs when the Console language is registered into the Monaco editor.

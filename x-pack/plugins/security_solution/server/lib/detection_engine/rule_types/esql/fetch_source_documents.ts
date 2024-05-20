@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 interface FetchSourceDocumentsArgs {
   isRuleAggregating: boolean;

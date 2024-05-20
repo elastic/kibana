@@ -13,10 +13,10 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  RoleMappingsHeading,
   RoleMappingsTable,
-  UsersEmptyPrompt,
+  RoleMappingsHeading,
   UsersHeading,
+  UsersEmptyPrompt,
 } from '../../../shared/role_mapping';
 import {
   wsRoleMapping,

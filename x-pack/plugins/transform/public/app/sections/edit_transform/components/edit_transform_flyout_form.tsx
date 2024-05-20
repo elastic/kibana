@@ -11,10 +11,10 @@ import { EuiAccordion, EuiForm, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { EditTransformFlyoutFormTextArea } from './edit_transform_flyout_form_text_area';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
+import { EditTransformFlyoutFormTextArea } from './edit_transform_flyout_form_text_area';
 import { EditTransformRetentionPolicy } from './edit_transform_retention_policy';
+import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
 
 export const EditTransformFlyoutForm: FC = () => (
   <EuiForm>

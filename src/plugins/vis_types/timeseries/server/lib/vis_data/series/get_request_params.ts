@@ -13,7 +13,7 @@ import type {
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import type { EsSearchRequest, SearchCapabilities } from '../../search_strategies';
+import type { SearchCapabilities, EsSearchRequest } from '../../search_strategies';
 
 export async function getSeriesRequestParams(
   req: VisTypeTimeseriesVisDataRequest,

@@ -9,19 +9,19 @@ import React from 'react';
 
 import type { EuiTableActionsColumnType } from '@elastic/eui';
 
-import type { TransformListRow } from '../../../../common';
 import { ReauthorizeActionModal, useReauthorizeAction } from '../action_reauthorize';
+import type { TransformListRow } from '../../../../common';
 
-import { EditTransformFlyout } from '../../../edit_transform';
 import { useCloneAction } from '../action_clone';
-import { useCreateAlertRuleAction } from '../action_create_alert';
-import { DeleteActionModal, useDeleteAction } from '../action_delete';
+import { useDeleteAction, DeleteActionModal } from '../action_delete';
 import { useDiscoverAction } from '../action_discover';
+import { EditTransformFlyout } from '../../../edit_transform';
 import { useEditAction } from '../action_edit';
-import { ResetActionModal, useResetAction } from '../action_reset';
+import { useResetAction, ResetActionModal } from '../action_reset';
 import { useScheduleNowAction } from '../action_schedule_now';
-import { StartActionModal, useStartAction } from '../action_start';
+import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction } from '../action_stop';
+import { useCreateAlertRuleAction } from '../action_create_alert';
 import { StopActionModal } from '../action_stop/stop_action_modal';
 
 export const useActions = ({

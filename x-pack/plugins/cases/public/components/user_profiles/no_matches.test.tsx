@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { NoMatches } from './no_matches';
+import { render, screen } from '@testing-library/react';
 
 describe('NoMatches', () => {
   it('renders the no matches messages', () => {

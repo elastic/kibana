@@ -11,9 +11,9 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
+  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -29,8 +29,8 @@ import { Loading } from '../../../shared/loading';
 import { SourceIcon } from '../../components/shared/source_icon';
 
 import {
-  DOCUMENT_PERMISSIONS_LINK,
   EXTERNAL_IDENTITIES_LINK,
+  DOCUMENT_PERMISSIONS_LINK,
   UNDERSTAND_BUTTON,
 } from './constants';
 import { SourcesLogic } from './sources_logic';

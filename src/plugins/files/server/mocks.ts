@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as stream from 'stream';
 import { KibanaRequest } from '@kbn/core/server';
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import * as stream from 'stream';
 import { clone } from 'lodash';
-import { FileClient, FileServiceFactory, FileServiceStart, FilesSetup } from '.';
 import { File, FileJSON } from '../common';
+import { FileClient, FileServiceFactory, FileServiceStart, FilesSetup } from '.';
 
 export const createFileServiceMock = (): DeeplyMockedKeys<FileServiceStart> => ({
   create: jest.fn(),

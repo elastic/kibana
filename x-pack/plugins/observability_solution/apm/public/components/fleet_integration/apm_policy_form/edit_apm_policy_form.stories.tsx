@@ -1,6 +1,3 @@
-import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { Meta, Story } from '@storybook/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import { Meta, Story } from '@storybook/react';
  * 2.0.
  */
 import React, { useState } from 'react';
+import { Meta, Story } from '@storybook/react';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { EditAPMPolicyForm } from './edit_apm_policy_form';
 import { NewPackagePolicy, PackagePolicy } from './typings';
 

@@ -8,7 +8,7 @@
 import React from 'react';
 import type { FunctionComponent } from 'react';
 
-import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 

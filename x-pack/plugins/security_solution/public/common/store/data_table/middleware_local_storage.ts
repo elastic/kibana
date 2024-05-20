@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
+import { get } from 'lodash/fp';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { dataTableActions, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { addTableInStorage } from '../../../timelines/containers/local_storage';
 import { updateTotalCount } from '../../../timelines/store/actions';
+import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
 import type { State } from '../types';
 

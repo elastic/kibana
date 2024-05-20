@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
+import { isEqual } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 
-import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
-import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 
-import {
-  type LogRateAnalysisPageUrlState,
-  appStateToWindowParameters,
-  getDefaultLogRateAnalysisAppState,
-  windowParametersToAppState,
-} from '../../application/url_state/log_rate_analysis';
+import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useData } from '../../hooks/use_data';
-import { useDataSource } from '../../hooks/use_data_source';
 import { useSearch } from '../../hooks/use_search';
+import {
+  getDefaultLogRateAnalysisAppState,
+  appStateToWindowParameters,
+  windowParametersToAppState,
+  type LogRateAnalysisPageUrlState,
+} from '../../application/url_state/log_rate_analysis';
 
-import { PageHeader } from '../page_header';
 import { SearchPanel } from '../search_panel';
+import { PageHeader } from '../page_header';
 
 import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_analysis_content';
 interface Props {

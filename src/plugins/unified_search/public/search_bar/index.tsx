@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AggregateQuery, Query } from '@kbn/es-query';
 import React from 'react';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchBarProps } from './search_bar';
 
 const Fallback = () => <div />;

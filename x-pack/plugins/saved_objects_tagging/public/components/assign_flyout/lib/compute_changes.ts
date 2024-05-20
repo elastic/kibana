@@ -6,7 +6,7 @@
  */
 
 import { AssignableObject } from '../../../../common/assignments';
-import { AssignmentOverrideMap, AssignmentStatusMap } from '../types';
+import { AssignmentStatusMap, AssignmentOverrideMap } from '../types';
 import { getAssignmentAction, getKey } from '../utils';
 
 /**

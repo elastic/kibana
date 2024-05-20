@@ -9,47 +9,47 @@ import { EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
 import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { generateFilters } from '@kbn/data-plugin/public';
-import type { DropType } from '@kbn/dom-drag-drop';
-import { DropOverlayWrapper, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
-import type { EuiTheme } from '@kbn/react-kibana-context-styled';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataLoadingState } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DropType } from '@kbn/dom-drag-drop';
+import styled from 'styled-components';
+import { Droppable, DropOverlayWrapper, useDragDropContext } from '@kbn/dom-drag-drop';
 import type {
   UnifiedFieldListSidebarContainerApi,
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
 import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
-import styled from 'styled-components';
-import type { TimelineItem } from '../../../../../common/search_strategy';
+import type { EuiTheme } from '@kbn/react-kibana-context-styled';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { withDataView } from '../../../../common/components/with_data_view';
+import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
+import type { TimelineItem } from '../../../../../common/search_strategy';
+import { useKibana } from '../../../../common/lib/kibana';
+import { defaultHeaders } from '../body/column_headers/default_headers';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
   RowRenderer,
   SortColumnTimeline,
-  TimelineTabs,
   ToggleDetailPanel,
+  TimelineTabs,
 } from '../../../../../common/types/timeline';
-import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import { withDataView } from '../../../../common/components/with_data_view';
-import { useKibana } from '../../../../common/lib/kibana';
 import type { inputsModel } from '../../../../common/store';
+import { getColumnHeader } from '../body/column_headers/helpers';
+import { StyledPageContentWrapper, StyledMainEuiPanel, StyledSplitFlexItem } from './styles';
+import { DRAG_DROP_FIELD } from './data_table/translations';
+import { TimelineResizableLayout } from './resizable_layout';
+import TimelineDataTable from './data_table';
 import { timelineActions } from '../../../store';
 import type { TimelineModel } from '../../../store/model';
-import { defaultHeaders } from '../body/column_headers/default_headers';
-import { getColumnHeader } from '../body/column_headers/helpers';
-import TimelineDataTable from './data_table';
-import { DRAG_DROP_FIELD } from './data_table/translations';
-import { defaultUdtHeaders } from './default_headers';
 import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
-import { TimelineResizableLayout } from './resizable_layout';
-import { StyledMainEuiPanel, StyledPageContentWrapper, StyledSplitFlexItem } from './styles';
+import { defaultUdtHeaders } from './default_headers';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,

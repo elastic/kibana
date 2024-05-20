@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { useEffect, useRef, useState } from 'react';
+import { Issue } from './types';
 import { getIssue } from './api';
 import * as i18n from './translations';
-import { Issue } from './types';
 
 interface Props {
   http: HttpSetup;

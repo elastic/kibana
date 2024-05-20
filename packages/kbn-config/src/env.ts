@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { join, resolve } from 'path';
+import { resolve, join } from 'path';
+import loadJsonFile from 'load-json-file';
 import { getPluginSearchPaths } from '@kbn/repo-packages';
 import type { Package } from '@kbn/repo-packages';
-import loadJsonFile from 'load-json-file';
-import { EnvironmentMode, PackageInfo } from './types';
+import { PackageInfo, EnvironmentMode } from './types';
 
 /** @internal */
 export interface EnvOptions {
@@ -96,11 +96,7 @@ export class Env {
   /**
    * @internal
    */
-  constructor(
-    public readonly homeDir: string,
-    pkg: RawPackageInfo,
-    options: EnvOptions
-  ) {
+  constructor(public readonly homeDir: string, pkg: RawPackageInfo, options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');

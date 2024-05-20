@@ -15,13 +15,13 @@ import { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 import { LEGEND_TYPES } from '../vega_chart/common';
 
 import {
-  COLOR_BLUR,
-  COLOR_RANGE_NOMINAL,
-  COLOR_RANGE_OUTLIER,
-  SINGLE_POINT_CLICK,
-  USER_SELECTION,
   getColorSpec,
   getScatterplotMatrixVegaLiteSpec,
+  COLOR_RANGE_NOMINAL,
+  COLOR_RANGE_OUTLIER,
+  COLOR_BLUR,
+  USER_SELECTION,
+  SINGLE_POINT_CLICK,
 } from './scatterplot_matrix_vega_lite_spec';
 
 describe('getColorSpec()', () => {

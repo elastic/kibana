@@ -9,10 +9,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Moment } from 'moment';
 
 import type { MlCustomSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { JobActionState } from '../../constants/job_actions';
-import type { MlAnomalyDetectionAlertRule } from '../alerts';
 import type { CombinedJob, CombinedJobWithStats } from './combined_job';
+import type { MlAnomalyDetectionAlertRule } from '../alerts';
 import type { MlJobBlocked } from './job';
+import type { JobActionState } from '../../constants/job_actions';
 export type { Datafeed } from './datafeed';
 export type { DatafeedStats } from './datafeed_stats';
 

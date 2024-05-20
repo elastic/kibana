@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
 
 import {
   EuiButton,
@@ -18,13 +18,13 @@ import {
   EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
-  EuiText,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { PROXY_MODE } from '../../../../../common/constants';
 import { UIM_SHOW_DETAILS_CLICK } from '../../../constants';
-import { METRIC_TYPE, getRouter, trackUiMetric } from '../../../services';
+import { PROXY_MODE } from '../../../../../common/constants';
+import { trackUiMetric, METRIC_TYPE, getRouter } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider, SecurityModel } from '../components';
 
 const getFilteredClusters = (clusters, queryText) => {

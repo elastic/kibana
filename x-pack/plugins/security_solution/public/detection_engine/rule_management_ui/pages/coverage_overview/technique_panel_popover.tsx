@@ -7,7 +7,6 @@
 
 import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,19 +15,20 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiSpacer,
   EuiText,
+  EuiSpacer,
+  EuiAccordion,
 } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useUserData } from '../../../../detections/components/user_info';
-import { getNumOfCoveredSubtechniques } from '../../../rule_management/model/coverage_overview/mitre_subtechnique';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
-import { RuleLink } from '../../components/rules_table/use_columns';
-import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { CoverageOverviewRuleListHeader } from './shared_components/popover_list_header';
 import { CoverageOverviewMitreTechniquePanel } from './technique_panel';
 import * as i18n from './translations';
+import { RuleLink } from '../../components/rules_table/use_columns';
+import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
+import { getNumOfCoveredSubtechniques } from '../../../rule_management/model/coverage_overview/mitre_subtechnique';
 
 export interface CoverageOverviewMitreTechniquePanelPopoverProps {
   technique: CoverageOverviewMitreTechnique;

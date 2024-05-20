@@ -6,6 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { COMMIT_INFO_CTX, exec } from './shared';
+import {
+  toGitCommitExtract,
+  getCurrentQARelease,
+  getSelectedCommitHash,
+  getCommitByHash,
+  makeCommitInfoHtml,
+  getRecentCommits,
+} from './info_sections/commit_info';
 import {
   getArtifactBuild,
   getOnMergePRBuild,
@@ -13,20 +22,11 @@ import {
   makeBuildkiteBuildInfoHtml,
 } from './info_sections/build_info';
 import {
-  getCommitByHash,
-  getCurrentQARelease,
-  getRecentCommits,
-  getSelectedCommitHash,
-  makeCommitInfoHtml,
-  toGitCommitExtract,
-} from './info_sections/commit_info';
-import {
   compareSOSnapshots,
   makeSOComparisonBlockHtml,
   makeSOComparisonErrorHtml,
 } from './info_sections/so_snapshot_comparison';
 import { makeUsefulLinksHtml } from './info_sections/useful_links';
-import { COMMIT_INFO_CTX, exec } from './shared';
 
 async function main() {
   const previousSha = await getCurrentQARelease();

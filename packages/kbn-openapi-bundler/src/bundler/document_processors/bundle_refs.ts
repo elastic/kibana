@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
 import deepEqual from 'fast-deep-equal';
-import { hasProp } from '../../utils/has_prop';
-import { insertRefByPointer } from '../../utils/insert_by_json_pointer';
-import { isChildContext } from '../is_child_context';
+import chalk from 'chalk';
 import {
   Document,
-  DocumentNode,
-  DocumentNodeProcessor,
-  RefNode,
   ResolvedRef,
   TraverseDocumentContext,
+  RefNode,
+  DocumentNode,
   TraverseRootDocumentContext,
+  DocumentNodeProcessor,
 } from '../types';
+import { hasProp } from '../../utils/has_prop';
+import { isChildContext } from '../is_child_context';
+import { insertRefByPointer } from '../../utils/insert_by_json_pointer';
 import { inlineRef } from './utils/inline_ref';
 
 /**

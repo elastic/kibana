@@ -17,17 +17,17 @@ import { i18n } from '@kbn/i18n';
 import { ApplicationStart, CoreTheme, NotificationsStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
-import type { GuideConfig, GuideId, StepConfig } from '@kbn/guided-onboarding';
+import type { GuideId, GuideConfig, StepConfig } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingApi } from '../types';
 
 import type { PluginState } from '../../common';
 
-import { GuideButton } from './guide_button';
-import { getGuidePanelStyles } from './guide_panel.styles';
 import { QuitGuideModal } from './quit_guide_modal';
+import { getGuidePanelStyles } from './guide_panel.styles';
+import { GuideButton } from './guide_button';
 
-import { getStepLocationPath } from './get_step_location';
 import { GuidePanelFlyout } from './guide_panel_flyout';
+import { getStepLocationPath } from './get_step_location';
 
 interface GuidePanelProps {
   api: GuidedOnboardingApi;

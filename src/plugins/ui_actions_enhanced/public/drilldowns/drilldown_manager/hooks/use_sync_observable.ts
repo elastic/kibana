@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { useMemo, useRef } from 'react';
+import { useRef, useMemo } from 'react';
+import { Observable, Subscription } from 'rxjs';
 import useIsomorphicLayoutEffect from 'react-use/lib/useIsomorphicLayoutEffect';
 import useUpdate from 'react-use/lib/useUpdate';
-import { Observable, Subscription } from 'rxjs';
 
 export const useSyncObservable = <T>(observable: Observable<T>): T => {
   const firstRef = useRef<boolean>(true);

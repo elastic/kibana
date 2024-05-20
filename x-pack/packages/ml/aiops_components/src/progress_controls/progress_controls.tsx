@@ -8,6 +8,7 @@
 import React, { type FC, type PropsWithChildren } from 'react';
 
 import {
+  useEuiTheme,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +16,6 @@ import {
   EuiIconTip,
   EuiProgress,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

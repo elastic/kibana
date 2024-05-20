@@ -7,7 +7,7 @@
 
 import { none } from 'fp-ts/lib/Option';
 import { FillPoolResult } from '../lib/fill_pool';
-import { asErr, asOk } from '../lib/result_type';
+import { asOk, asErr } from '../lib/result_type';
 import { PollingError, PollingErrorType } from '../polling';
 import { asTaskPollingCycleEvent } from '../task_events';
 import { TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiImage,
-  EuiPanel,
-  EuiSkeletonText,
-  useEuiTheme,
-} from '@elastic/eui';
 import React, { useMemo } from 'react';
+import {
+  EuiSkeletonText,
+  EuiImage,
+  EuiEmptyPrompt,
+  EuiButton,
+  useEuiTheme,
+  EuiPanel,
+} from '@elastic/eui';
 
-import illustration from '../../../../common/images/illustration_product_no_results_magnifying_glass.svg';
-import type { ViewerState } from './reducer';
 import * as i18n from './translations';
+import type { ViewerState } from './reducer';
+import illustration from '../../../../common/images/illustration_product_no_results_magnifying_glass.svg';
 
 interface ExeptionItemsViewerEmptyPromptsComponentProps {
   isReadOnly: boolean;

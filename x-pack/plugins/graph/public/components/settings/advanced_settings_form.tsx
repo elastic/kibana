@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFieldNumber, EuiFormRow, EuiSwitch, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
+import { EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSwitch, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { AdvancedSettings } from '../../types';
 import { SettingsStateProps } from './settings';
 

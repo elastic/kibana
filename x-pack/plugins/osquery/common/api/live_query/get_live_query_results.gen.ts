@@ -17,12 +17,12 @@ import { z } from 'zod';
  */
 
 import {
-  Id,
   KueryOrUndefined,
   PageOrUndefined,
   PageSizeOrUndefined,
   SortOrUndefined,
   SortOrderOrUndefined,
+  Id,
 } from '../model/schema/common_attributes.gen';
 
 export type GetLiveQueryResultsRequestQuery = z.infer<typeof GetLiveQueryResultsRequestQuery>;

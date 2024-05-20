@@ -7,10 +7,10 @@
 
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { findRulesSo } from '../../../../data/rule';
+import { AlertingAuthorizationEntity } from '../../../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { buildKueryNodeFilter } from '../../../../rules_client/common';
-import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { aggregateOptionsSchema } from './schemas';

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut } from '@elastic/eui';
 import { SurrDocType } from '../../services/context';
 
 export function ActionBarWarning({ docCount, type }: { docCount: number; type: SurrDocType }) {

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import React, { memo, useCallback, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import type { Dispatch } from 'redux';
 import { EuiFlyoutBody, EuiForm } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { memo, useCallback, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import type { Dispatch } from 'redux';
+import { isEndpointHostIsolated } from '../../../../../../common/utils/validators';
 import type { HostMetadata } from '../../../../../../../common/endpoint/types';
 import type { EndpointIsolatedFormProps } from '../../../../../../common/components/endpoint/host_isolation';
 import {
@@ -19,16 +20,15 @@ import {
   EndpointIsolateSuccess,
   EndpointUnisolateForm,
 } from '../../../../../../common/components/endpoint/host_isolation';
-import type { AppAction } from '../../../../../../common/store/actions';
-import { isEndpointHostIsolated } from '../../../../../../common/utils/validators';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
+import { useEndpointSelector } from '../../hooks';
 import {
   getIsIsolationRequestPending,
   getIsolationRequestError,
   getWasIsolationRequestSuccessful,
   uiQueryParams,
 } from '../../../store/selectors';
-import { useEndpointSelector } from '../../hooks';
+import type { AppAction } from '../../../../../../common/store/actions';
 
 /**
  * Component handles both isolate and un-isolate for a given endpoint

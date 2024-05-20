@@ -7,20 +7,20 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
-import { API_VERSIONS } from '../../../common/constants';
 import { ENROLLMENT_API_KEY_ROUTES } from '../../constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import {
-  DeleteEnrollmentAPIKeyRequestSchema,
   GetEnrollmentAPIKeysRequestSchema,
   GetOneEnrollmentAPIKeyRequestSchema,
+  DeleteEnrollmentAPIKeyRequestSchema,
   PostEnrollmentAPIKeyRequestSchema,
 } from '../../types';
 
 import {
-  deleteEnrollmentApiKeyHandler,
   getEnrollmentApiKeysHandler,
   getOneEnrollmentApiKeyHandler,
+  deleteEnrollmentApiKeyHandler,
   postEnrollmentApiKeyHandler,
 } from './handler';
 

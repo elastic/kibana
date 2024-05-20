@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
 import { curry } from 'lodash';
+import { TypeOf } from '@kbn/config-schema';
 
-import {
-  AlertingConnectorFeatureId,
-  CasesConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import {
-  ServiceNowSIRConnectorTypeId,
-  serviceNowSIRTable,
-  snExternalServiceConfig,
-} from '../lib/servicenow/config';
-import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
+import { validate } from '../lib/servicenow/validators';
 import {
   ExecutorParamsSchemaSIR,
   ExternalIncidentServiceConfigurationSchema,
@@ -32,22 +27,27 @@ import {
 import * as i18n from '../lib/servicenow/translations';
 import {
   ExecutorParams,
+  ExecutorSubActionPushParams,
+  ServiceFactory,
+  ExternalServiceAPI,
+  ServiceNowPublicConfigurationBaseType,
+  ExternalService,
   ExecutorSubActionCommonFieldsParams,
   ExecutorSubActionGetChoicesParams,
-  ExecutorSubActionPushParams,
-  ExternalService,
-  ExternalServiceAPI,
   PushToServiceResponse,
-  ServiceFactory,
   ServiceNowExecutorResultData,
-  ServiceNowPublicConfigurationBaseType,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
 } from '../lib/servicenow/types';
-import { throwIfSubActionIsNotSupported } from '../lib/servicenow/utils';
-import { validate } from '../lib/servicenow/validators';
-import { api as apiSIR } from './api';
+import {
+  ServiceNowSIRConnectorTypeId,
+  serviceNowSIRTable,
+  snExternalServiceConfig,
+} from '../lib/servicenow/config';
 import { createExternalService } from './service';
+import { api as apiSIR } from './api';
+import { throwIfSubActionIsNotSupported } from '../lib/servicenow/utils';
+import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
 
 export { ServiceNowSIRConnectorTypeId, serviceNowSIRTable };
 
@@ -55,12 +55,12 @@ export type ActionParamsType = TypeOf<typeof ExecutorParamsSchemaSIR>;
 
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParams,
+  T extends Record<string, unknown> = ExecutorParams
 > = ConnectorType<C, ServiceNowSecretConfigurationType, T, PushToServiceResponse | {}>;
 
 export type ServiceNowConnectorTypeExecutorOptions<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParams,
+  T extends Record<string, unknown> = ExecutorParams
 > = ConnectorTypeExecutorOptions<C, ServiceNowSecretConfigurationType, T>;
 
 // connector type definition

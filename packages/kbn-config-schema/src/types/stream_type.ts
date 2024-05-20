@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Stream } from 'stream';
 import typeDetect from 'type-detect';
+import { Stream } from 'stream';
 import { internals } from '../internals';
 import { Type, TypeOptions } from './type';
 

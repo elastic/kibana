@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { takeUntil } from 'rxjs';
-import { getAssignFlyoutOpener } from '../../components/assign_flyout';
-import { ITagAssignmentService, ITagsCache } from '../../services';
+import { i18n } from '@kbn/i18n';
+import { ITagsCache, ITagAssignmentService } from '../../services';
 import { StartServices } from '../../types';
 import { TagBulkAction } from '../types';
+import { getAssignFlyoutOpener } from '../../components/assign_flyout';
 
 interface GetBulkAssignActionOptions extends StartServices {
   tagCache: ITagsCache;

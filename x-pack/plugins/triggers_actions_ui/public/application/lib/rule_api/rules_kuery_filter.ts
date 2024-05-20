@@ -6,8 +6,8 @@
  */
 
 import { AsApiContract } from '@kbn/actions-plugin/common';
-import { Rule } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { Rule } from '../../../types';
 import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
 import { LoadRulesProps, rewriteRulesResponseRes } from './rules_helpers';
 

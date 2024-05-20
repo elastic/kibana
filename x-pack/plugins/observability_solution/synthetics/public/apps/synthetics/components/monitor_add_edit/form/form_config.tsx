@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ConfigKey, FormMonitorType, FieldMeta } from '../types';
 import { AlertConfigKey } from '../constants';
-import { ConfigKey, FieldMeta, FormMonitorType } from '../types';
 import { FIELD } from './field_config';
 
 const DEFAULT_DATA_OPTIONS = (readOnly: boolean) => ({

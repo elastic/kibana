@@ -6,15 +6,15 @@
  */
 import { EuiButtonEmpty, EuiConfirmModal, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   DashboardItemWithTitle,
   InfraCustomDashboardAssetType,
 } from '../../../../../../common/custom_dashboards';
-import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
 import { useDeleteCustomDashboard } from '../../../hooks/use_custom_dashboards';
 import { useFetchCustomDashboards } from '../../../hooks/use_fetch_custom_dashboards';
+import { useAssetDetailsUrlState } from '../../../hooks/use_asset_details_url_state';
 import { useSavedObjectUserPermissions } from '../../../hooks/use_saved_objects_permissions';
 
 export function UnlinkDashboard({

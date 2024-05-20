@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RequestMock, RouterMock, routeDependencies } from '../../test/helpers';
-import { ResolveIndexResponseFromES } from '../../types';
 import { addBasePath } from '../helpers';
 import { registerPolicyRoutes } from './policy';
+import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
+import { ResolveIndexResponseFromES } from '../../types';
 
 describe('[Snapshot and Restore API Routes] Policy', () => {
   const mockEsPolicy = {

@@ -5,53 +5,53 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import supertestLib from 'supertest';
 import url from 'url';
 import expect from '@kbn/expect';
 import {
   ALERT_REASON,
   ALERT_RULE_UUID,
-  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   EVENT_KIND,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
-import supertestLib from 'supertest';
-import { v4 as uuidv4 } from 'uuid';
 
 import { get } from 'lodash';
 
 import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_TIME,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_EVENT_CATEGORY,
+  ALERT_GROUP_ID,
+} from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   DETECTION_ENGINE_RULES_URL,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
 import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_GROUP_ID,
-  ALERT_ORIGINAL_EVENT,
-  ALERT_ORIGINAL_EVENT_CATEGORY,
-  ALERT_ORIGINAL_TIME,
-} from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
-import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import {
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-  routeWithNamespace,
-  waitForRuleFailure,
-} from '../../../../../../../common/utils/security_solution';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import {
-  dataGeneratorFactory,
-  getAlerts,
   getEqlRuleForAlertTesting,
+  getAlerts,
   getPreviewAlerts,
   previewRule,
+  dataGeneratorFactory,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRuleFailure,
+  routeWithNamespace,
+} from '../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { getMetricsRequest, getMetricsWithRetry } from './utils';
 
 /**

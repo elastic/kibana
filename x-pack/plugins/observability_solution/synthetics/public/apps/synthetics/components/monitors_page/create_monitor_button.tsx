@@ -1,5 +1,3 @@
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +5,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { useContext } from 'react';
-import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton } from '@elastic/eui';
 import { useCanEditSynthetics } from '../../../../hooks/use_capabilities';
-import { useEnablement } from '../../hooks';
 import { NoPermissionsTooltip } from '../common/components/permissions';
+import { useEnablement } from '../../hooks';
+import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
 
 import { SyntheticsSettingsContext } from '../../contexts/synthetics_settings_context';
 

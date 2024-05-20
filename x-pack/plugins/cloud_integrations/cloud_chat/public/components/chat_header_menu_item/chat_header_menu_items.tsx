@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButtonEmpty,
-  EuiIcon,
-  EuiText,
-  EuiTourStep,
   useEuiTheme,
   useIsWithinMinBreakpoint,
+  EuiTourStep,
+  EuiText,
+  EuiIcon,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { Chat, ChatApi } from '../chat';
 import chatIconDark from './chat_icon_dark.svg';
 import chatIconLight from './chat_icon_light.svg';
+import { Chat, ChatApi } from '../chat';
 
 export function ChatHeaderMenuItem() {
   const [showChatButton, setChatButtonShow] = React.useState(false);

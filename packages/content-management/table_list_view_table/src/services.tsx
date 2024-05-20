@@ -20,10 +20,10 @@ import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
+import type { UserProfile } from '@kbn/user-profile-components';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
-import type { UserProfile } from '@kbn/user-profile-components';
 import { createBatcher } from './utils/batcher';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
@@ -172,110 +172,111 @@ export interface TableListViewKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const TableListViewKibanaProvider: FC<PropsWithChildren<TableListViewKibanaDependencies>> =
-  ({ children, ...services }) => {
-    const { core, savedObjectsTagging, FormattedRelative } = services;
-    const { application, http, notifications, ...startServices } = core;
+export const TableListViewKibanaProvider: FC<
+  PropsWithChildren<TableListViewKibanaDependencies>
+> = ({ children, ...services }) => {
+  const { core, savedObjectsTagging, FormattedRelative } = services;
+  const { application, http, notifications, ...startServices } = core;
 
-    const searchQueryParser = useMemo(() => {
-      if (savedObjectsTagging) {
-        return async (searchQuery: string) => {
-          const res = await savedObjectsTagging.ui.parseSearchQuery(searchQuery, { useName: true });
-          return {
-            searchQuery: res.searchTerm,
-            references: res.tagReferences,
-            referencesToExclude: res.tagReferencesToExclude,
-          };
+  const searchQueryParser = useMemo(() => {
+    if (savedObjectsTagging) {
+      return async (searchQuery: string) => {
+        const res = await savedObjectsTagging.ui.parseSearchQuery(searchQuery, { useName: true });
+        return {
+          searchQuery: res.searchTerm,
+          references: res.tagReferences,
+          referencesToExclude: res.tagReferencesToExclude,
         };
-      }
-    }, [savedObjectsTagging]);
-
-    const TagList = useMemo(() => {
-      const Comp: Services['TagList'] = ({ references, onClick, tagRender }) => {
-        if (!savedObjectsTagging?.ui.components.TagList) {
-          return null;
-        }
-        const PluginTagList = savedObjectsTagging.ui.components.TagList;
-        return <PluginTagList object={{ references }} onClick={onClick} tagRender={tagRender} />;
       };
+    }
+  }, [savedObjectsTagging]);
 
-      return Comp;
-    }, [savedObjectsTagging?.ui.components.TagList]);
+  const TagList = useMemo(() => {
+    const Comp: Services['TagList'] = ({ references, onClick, tagRender }) => {
+      if (!savedObjectsTagging?.ui.components.TagList) {
+        return null;
+      }
+      const PluginTagList = savedObjectsTagging.ui.components.TagList;
+      return <PluginTagList object={{ references }} onClick={onClick} tagRender={tagRender} />;
+    };
 
-    const getTagIdsFromReferences = useCallback(
-      (references: SavedObjectsReference[]) => {
-        if (!savedObjectsTagging?.ui.getTagIdsFromReferences) {
-          return [];
-        }
+    return Comp;
+  }, [savedObjectsTagging?.ui.components.TagList]);
 
-        return savedObjectsTagging.ui.getTagIdsFromReferences(references);
-      },
-      [savedObjectsTagging?.ui]
-    );
-
-    const getTagList = useCallback(() => {
-      if (!savedObjectsTagging?.ui.getTagList) {
+  const getTagIdsFromReferences = useCallback(
+    (references: SavedObjectsReference[]) => {
+      if (!savedObjectsTagging?.ui.getTagIdsFromReferences) {
         return [];
       }
 
-      return savedObjectsTagging.ui.getTagList();
-    }, [savedObjectsTagging?.ui]);
+      return savedObjectsTagging.ui.getTagIdsFromReferences(references);
+    },
+    [savedObjectsTagging?.ui]
+  );
 
-    const itemHasTags = useCallback(
-      (references: SavedObjectsReference[]) => {
-        return getTagIdsFromReferences(references).length > 0;
-      },
-      [getTagIdsFromReferences]
-    );
+  const getTagList = useCallback(() => {
+    if (!savedObjectsTagging?.ui.getTagList) {
+      return [];
+    }
 
-    const bulkGetUserProfiles = useCallback<(userProfileIds: string[]) => Promise<UserProfile[]>>(
-      async (uids: string[]) => {
-        if (uids.length === 0) return [];
+    return savedObjectsTagging.ui.getTagList();
+  }, [savedObjectsTagging?.ui]);
 
-        return core.userProfile.bulkGet({ uids: new Set(uids), dataPath: 'avatar' });
-      },
-      [core.userProfile]
-    );
+  const itemHasTags = useCallback(
+    (references: SavedObjectsReference[]) => {
+      return getTagIdsFromReferences(references).length > 0;
+    },
+    [getTagIdsFromReferences]
+  );
 
-    const getUserProfile = useMemo(() => {
-      return createBatcher({
-        fetcher: bulkGetUserProfiles,
-        resolver: (users, id) => users.find((u) => u.uid === id)!,
-      }).fetch;
-    }, [bulkGetUserProfiles]);
+  const bulkGetUserProfiles = useCallback<(userProfileIds: string[]) => Promise<UserProfile[]>>(
+    async (uids: string[]) => {
+      if (uids.length === 0) return [];
 
-    return (
-      <RedirectAppLinksKibanaProvider coreStart={core}>
-        <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
-          <TableListViewProvider
-            canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
-            getListingLimitSettingsUrl={() =>
-              application.getUrlForApp('management', {
-                path: `/kibana/settings?query=savedObjects:listingLimit`,
-              })
-            }
-            notifyError={(title, text) => {
-              notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
-            }}
-            searchQueryParser={searchQueryParser}
-            DateFormatterComp={(props) => <FormattedRelative {...props} />}
-            currentAppId$={application.currentAppId$}
-            navigateToUrl={application.navigateToUrl}
-            isTaggingEnabled={() => Boolean(savedObjectsTagging)}
-            getTagList={getTagList}
-            TagList={TagList}
-            itemHasTags={itemHasTags}
-            getTagIdsFromReferences={getTagIdsFromReferences}
-            getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
-            bulkGetUserProfiles={bulkGetUserProfiles}
-            getUserProfile={getUserProfile}
-          >
-            {children}
-          </TableListViewProvider>
-        </ContentEditorKibanaProvider>
-      </RedirectAppLinksKibanaProvider>
-    );
-  };
+      return core.userProfile.bulkGet({ uids: new Set(uids), dataPath: 'avatar' });
+    },
+    [core.userProfile]
+  );
+
+  const getUserProfile = useMemo(() => {
+    return createBatcher({
+      fetcher: bulkGetUserProfiles,
+      resolver: (users, id) => users.find((u) => u.uid === id)!,
+    }).fetch;
+  }, [bulkGetUserProfiles]);
+
+  return (
+    <RedirectAppLinksKibanaProvider coreStart={core}>
+      <ContentEditorKibanaProvider core={core} savedObjectsTagging={savedObjectsTagging}>
+        <TableListViewProvider
+          canEditAdvancedSettings={Boolean(application.capabilities.advancedSettings?.save)}
+          getListingLimitSettingsUrl={() =>
+            application.getUrlForApp('management', {
+              path: `/kibana/settings?query=savedObjects:listingLimit`,
+            })
+          }
+          notifyError={(title, text) => {
+            notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
+          }}
+          searchQueryParser={searchQueryParser}
+          DateFormatterComp={(props) => <FormattedRelative {...props} />}
+          currentAppId$={application.currentAppId$}
+          navigateToUrl={application.navigateToUrl}
+          isTaggingEnabled={() => Boolean(savedObjectsTagging)}
+          getTagList={getTagList}
+          TagList={TagList}
+          itemHasTags={itemHasTags}
+          getTagIdsFromReferences={getTagIdsFromReferences}
+          getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
+          bulkGetUserProfiles={bulkGetUserProfiles}
+          getUserProfile={getUserProfile}
+        >
+          {children}
+        </TableListViewProvider>
+      </ContentEditorKibanaProvider>
+    </RedirectAppLinksKibanaProvider>
+  );
+};
 
 /**
  * React hook for accessing pre-wired services.

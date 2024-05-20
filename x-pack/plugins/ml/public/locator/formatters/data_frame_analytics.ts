@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 /**
  * Creates URL to the DataFrameAnalytics page
  */
 import { isEmpty } from 'lodash';
-import { ML_PAGES } from '../../../common/constants/locator';
-import type { AppPageState, ListingPageUrlState } from '../../../common/types/common';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { formatGenericMlUrl } from './common';
 import type {
   DataFrameAnalyticsExplorationQueryState,
   DataFrameAnalyticsExplorationUrlState,
   DataFrameAnalyticsUrlState,
   ExplorationPageUrlState,
-  MlCommonGlobalState,
   MlGenericUrlState,
+  MlCommonGlobalState,
 } from '../../../common/types/locator';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
-import { formatGenericMlUrl } from './common';
+import type { AppPageState, ListingPageUrlState } from '../../../common/types/common';
 
 export function formatDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,

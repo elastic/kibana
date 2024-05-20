@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React, { ReactElement } from 'react';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
-import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
-import { useDiscoverCustomization } from '../../../../customizations';
-import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
+import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
+import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
+import { useDiscoverCustomization } from '../../../../customizations';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),

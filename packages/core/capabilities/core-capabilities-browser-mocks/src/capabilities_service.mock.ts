@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type {
-  CapabilitiesService,
-  CapabilitiesStart,
-} from '@kbn/core-capabilities-browser-internal';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  CapabilitiesStart,
+  CapabilitiesService,
+} from '@kbn/core-capabilities-browser-internal';
 
 const createStartContractMock = (): jest.Mocked<CapabilitiesStart> => ({
   capabilities: {

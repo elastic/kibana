@@ -7,8 +7,8 @@
  */
 import './solution_nav_avatar.scss';
 
-import classNames from 'classnames';
 import React, { FunctionComponent } from 'react';
+import classNames from 'classnames';
 
 import { DistributiveOmit, EuiAvatar, EuiAvatarProps } from '@elastic/eui';
 

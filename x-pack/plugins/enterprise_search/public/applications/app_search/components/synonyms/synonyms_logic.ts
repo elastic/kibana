@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Meta } from '../../../../../common/types';
 import {
@@ -18,11 +18,11 @@ import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import { EngineLogic } from '../engine';
 
 import {
-  CREATE_SUCCESS,
-  DELETE_SUCCESS,
   SYNONYMS_PAGE_META,
-  SYNONYM_IMPACT_MESSAGE,
+  CREATE_SUCCESS,
   UPDATE_SUCCESS,
+  DELETE_SUCCESS,
+  SYNONYM_IMPACT_MESSAGE,
 } from './constants';
 import { SynonymSet, SynonymsApiResponse } from './types';
 

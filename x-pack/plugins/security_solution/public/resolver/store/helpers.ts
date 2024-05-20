@@ -7,10 +7,10 @@
 
 import type { Draft } from 'immer';
 import produce from 'immer';
-import type { AnyAction, Reducer } from 'redux';
+import type { Reducer, AnyAction } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
 import type { ReducerBuilder } from 'typescript-fsa-reducers';
-import type { AnalyzerById, ResolverState } from '../types';
+import type { ResolverState, AnalyzerById } from '../types';
 import { scaleToZoom } from './camera/scale_to_zoom';
 import { analyzerReducer } from './reducer';
 

@@ -1,6 +1,3 @@
-import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import { i18n } from '@kbn/i18n';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 
 export const BETA_LABEL = i18n.translate('sharedUXPackages.chrome.sideNavigation.betaBadge.label', {
   defaultMessage: 'Beta',

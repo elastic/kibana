@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { fetchActionResponses } from './utils/fetch_action_responses';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { ActionListApiResponse } from '../../../../common/endpoint/types';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { fetchActionResponses } from './utils/fetch_action_responses';
 
 import { getActions } from '../../utils/action_list_helpers';
 
-import type { EndpointMetadataService } from '../metadata';
-import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 import {
   categorizeResponseResults,
   createActionDetailsRecord,
@@ -27,6 +25,8 @@ import {
   getAgentHostNamesWithIds,
   mapToNormalizedActionRequest,
 } from './utils';
+import type { EndpointMetadataService } from '../metadata';
+import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 interface OptionalFilterParams {
   agentTypes?: ResponseActionAgentType[];

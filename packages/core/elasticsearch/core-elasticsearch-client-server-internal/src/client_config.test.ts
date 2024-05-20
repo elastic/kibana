@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { duration } from 'moment';
+import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { parseClientOptions } from './client_config';
 import { getDefaultHeaders } from './headers';
 

@@ -8,8 +8,8 @@
 
 import { Type, ValidationError } from '@kbn/config-schema';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { Version } from '@kbn/object-versioning';
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
+import type { Version } from '@kbn/object-versioning';
 
 import type { ContentRegistry, StorageContext } from '../core';
 import type { GetTransformsFactoryFn } from '../types';

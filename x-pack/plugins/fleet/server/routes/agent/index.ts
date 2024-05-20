@@ -8,68 +8,68 @@
 import type { FleetAuthz } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 
-import { type FleetAuthzRouter, getRouteRequiredAuthz } from '../../services/security';
+import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
 
-import type { FleetConfigType } from '../..';
 import { AGENT_API_ROUTES } from '../../constants';
-import * as AgentService from '../../services/agents';
 import {
-  DeleteAgentRequestSchema,
-  GetActionStatusRequestSchema,
-  GetAgentDataRequestSchema,
-  GetAgentStatusRequestSchema,
-  GetAgentUploadFileRequestSchema,
   GetAgentsRequestSchema,
-  GetOneAgentRequestSchema,
   GetTagsRequestSchema,
-  ListAgentUploadsRequestSchema,
-  PostAgentReassignRequestSchema,
-  PostAgentUnenrollRequestSchema,
-  PostAgentUpgradeRequestSchema,
-  PostBulkAgentReassignRequestSchema,
-  PostBulkAgentUnenrollRequestSchema,
-  PostBulkAgentUpgradeRequestSchema,
-  PostBulkRequestDiagnosticsActionRequestSchema,
-  PostCancelActionRequestSchema,
-  PostNewAgentActionRequestSchema,
-  PostRequestDiagnosticsActionRequestSchema,
-  PostRetrieveAgentsByActionsRequestSchema,
-  PutAgentReassignRequestSchemaDeprecated,
+  GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
+  DeleteAgentRequestSchema,
+  PostAgentUnenrollRequestSchema,
+  PostBulkAgentUnenrollRequestSchema,
+  GetAgentStatusRequestSchema,
+  GetAgentDataRequestSchema,
+  PostNewAgentActionRequestSchema,
+  PutAgentReassignRequestSchemaDeprecated,
+  PostAgentReassignRequestSchema,
+  PostBulkAgentReassignRequestSchema,
+  PostAgentUpgradeRequestSchema,
+  PostBulkAgentUpgradeRequestSchema,
+  PostCancelActionRequestSchema,
+  GetActionStatusRequestSchema,
+  PostRequestDiagnosticsActionRequestSchema,
+  PostBulkRequestDiagnosticsActionRequestSchema,
+  ListAgentUploadsRequestSchema,
+  GetAgentUploadFileRequestSchema,
+  PostRetrieveAgentsByActionsRequestSchema,
 } from '../../types';
+import * as AgentService from '../../services/agents';
+import type { FleetConfigType } from '../..';
 
 import { PostBulkUpdateAgentTagsRequestSchema } from '../../types/rest_spec/agent';
 
 import { calculateRouteAuthz } from '../../services/security/security';
 
 import {
-  postCancelActionHandlerBuilder,
-  postNewAgentActionHandlerBuilder,
-} from './actions_handlers';
-import {
-  bulkUpdateAgentTagsHandler,
-  deleteAgentHandler,
-  getActionStatusHandler,
-  getAgentDataHandler,
-  getAgentHandler,
-  getAgentStatusForAgentPolicyHandler,
-  getAgentTagsHandler,
-  getAgentUploadFileHandler,
-  getAgentUploadsHandler,
   getAgentsHandler,
-  getAvailableVersionsHandler,
-  postAgentsReassignHandler,
-  postBulkAgentReassignHandler,
-  postRetrieveAgentsByActionsHandler,
-  putAgentsReassignHandlerDeprecated,
+  getAgentTagsHandler,
+  getAgentHandler,
   updateAgentHandler,
+  deleteAgentHandler,
+  getAgentStatusForAgentPolicyHandler,
+  putAgentsReassignHandlerDeprecated,
+  postBulkAgentReassignHandler,
+  getAgentDataHandler,
+  bulkUpdateAgentTagsHandler,
+  getAvailableVersionsHandler,
+  getActionStatusHandler,
+  getAgentUploadsHandler,
+  getAgentUploadFileHandler,
+  postAgentsReassignHandler,
+  postRetrieveAgentsByActionsHandler,
 } from './handlers';
+import {
+  postNewAgentActionHandlerBuilder,
+  postCancelActionHandlerBuilder,
+} from './actions_handlers';
+import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
+import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 import {
   bulkRequestDiagnosticsHandler,
   requestDiagnosticsHandler,
 } from './request_diagnostics_handler';
-import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
-import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Get one

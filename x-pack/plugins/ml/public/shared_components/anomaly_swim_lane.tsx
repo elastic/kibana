@@ -13,8 +13,8 @@ import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type {
   AnomalySwimLaneEmbeddableApi,
-  AnomalySwimLaneEmbeddableState,
   AnomalySwimlaneEmbeddableCustomInput,
+  AnomalySwimLaneEmbeddableState,
 } from '../embeddables';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 

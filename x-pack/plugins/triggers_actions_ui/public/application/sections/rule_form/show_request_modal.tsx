@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React from 'react';
+import { pick } from 'lodash';
 import {
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiModal,
-  EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiCodeBlock,
   EuiText,
   EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { pick } from 'lodash';
-import React from 'react';
+import * as i18n from '../translations';
 import { RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { rewriteBodyRequest as rewriteCreateBodyRequest } from '../../lib/rule_api/create';
 import {
-  UPDATE_FIELDS,
   rewriteBodyRequest as rewriteUpdateBodyRequest,
+  UPDATE_FIELDS,
 } from '../../lib/rule_api/update';
-import * as i18n from '../translations';
 
 const stringify = (rule: RuleUpdates, edit: boolean): string => {
   try {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { has, merge } from 'lodash/fp';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EventHit } from '../../../../../common/search_strategy';
-import { buildObjectRecursive } from './build_object_recursive';
 import { ECS_METADATA_FIELDS, TIMELINE_EVENTS_FIELDS } from './constants';
-import { getNestedParentPath } from './get_nested_parent_path';
 import { getTimestamp } from './get_timestamp';
+import { buildObjectRecursive } from './build_object_recursive';
+import { getNestedParentPath } from './get_nested_parent_path';
 
 export const buildEcsObjects = (hit: EventHit): Ecs => {
   const ecsFields = [...TIMELINE_EVENTS_FIELDS];

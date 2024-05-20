@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { termQuery } from '@kbn/observability-plugin/server';
-import * as t from 'io-ts';
-import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
-import {
-  LatencyDistributionChartType,
-  latencyDistributionChartTypeRt,
-} from '../../../common/latency_distribution_chart_types';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getOverallLatencyDistribution } from './get_overall_latency_distribution';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import { getOverallLatencyDistribution } from './get_overall_latency_distribution';
+import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
+import {
+  latencyDistributionChartTypeRt,
+  LatencyDistributionChartType,
+} from '../../../common/latency_distribution_chart_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { OverallLatencyDistributionResponse } from './types';
 
 const latencyOverallTransactionDistributionRoute = createApmServerRoute({

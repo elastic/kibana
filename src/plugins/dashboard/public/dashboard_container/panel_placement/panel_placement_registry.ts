@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { panelPlacementStrings } from '../_dashboard_container_strings';
 import { GetPanelPlacementSettings } from './types';
+import { panelPlacementStrings } from '../_dashboard_container_strings';
 
 const registry = new Map<string, GetPanelPlacementSettings<object>>();
 

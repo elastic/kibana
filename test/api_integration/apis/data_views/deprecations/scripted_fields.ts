@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DeprecationsGetResponse } from '@kbn/core/server';
 import expect from '@kbn/expect';
+import type { DeprecationsGetResponse } from '@kbn/core/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

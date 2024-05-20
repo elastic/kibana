@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
 import { format } from 'url';
-import { Client, HttpConnection } from '@elastic/elasticsearch';
+import del from 'del';
+import { v4 as uuidv4 } from 'uuid';
+import globby from 'globby';
+import createArchiver from 'archiver';
+import Fs from 'fs';
+import { pipeline } from 'stream/promises';
 import { Cluster } from '@kbn/es';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense } from '@kbn/es';
 import type { ServerlessOptions } from '@kbn/es/src/utils';
-import { REPO_ROOT } from '@kbn/repo-info';
-import type { ToolingLog } from '@kbn/tooling-log';
-import createArchiver from 'archiver';
-import del from 'del';
-import globby from 'globby';
-import { pipeline } from 'stream/promises';
-import { v4 as uuidv4 } from 'uuid';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
@@ -159,7 +159,7 @@ export interface CreateTestEsClusterOptions {
 }
 
 export function createTestEsCluster<
-  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions,
+  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
 >(options: Options): EsTestCluster<Options> {
   const {
     port = esTestConfig.getPort(),

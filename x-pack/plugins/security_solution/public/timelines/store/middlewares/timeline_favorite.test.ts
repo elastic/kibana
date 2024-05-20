@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { TimelineId } from '../../../../common/types/timeline';
 import { createMockStore, kibanaMock } from '../../../common/mock';
-import { persistFavorite } from '../../containers/api';
 import { selectTimelineById } from '../selectors';
+import { persistFavorite } from '../../containers/api';
+import { TimelineId } from '../../../../common/types/timeline';
 import { refreshTimelines } from './helpers';
 
 import {
-  endTimelineSaving,
-  showCallOutUnauthorizedMsg,
   startTimelineSaving,
+  endTimelineSaving,
   updateIsFavorite,
+  showCallOutUnauthorizedMsg,
   updateTimeline,
 } from '../actions';
 

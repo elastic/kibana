@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import type { ReactElement, VFC } from 'react';
+import type { VFC, ReactElement } from 'react';
 import React from 'react';
+import { EuiToolTip } from '@elastic/eui';
 
 export interface CellTooltipWrapperProps {
   /**

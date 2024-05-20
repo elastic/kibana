@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { render } from '../../utils/testing/rtl_helpers';
-import * as locationHooks from './hooks/use_selected_location';
-import * as selectedMonitorHooks from './hooks/use_selected_monitor';
 import { MonitorPendingWrapper } from './monitor_pending_wrapper';
+import * as selectedMonitorHooks from './hooks/use_selected_monitor';
+import * as locationHooks from './hooks/use_selected_location';
 
 describe('MonitorPendingWrapper', () => {
   const TestComponent = () => {

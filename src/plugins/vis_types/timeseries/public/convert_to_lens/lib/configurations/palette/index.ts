@@ -1,4 +1,3 @@
-import { ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
  * Side Public License, v 1.
  */
 import color from 'color';
+import { ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { uniqBy } from 'lodash';
 import { Panel, Series } from '../../../../../common/types';
 

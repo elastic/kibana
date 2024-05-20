@@ -5,27 +5,20 @@
  * 2.0.
  */
 
+import type { Case, Attachments, Attachment } from '../../../common/types/domain';
 import type {
   AlertResponse,
   AttachmentsFindResponse,
   BulkGetAttachmentsResponse,
 } from '../../../common/types/api';
-import type { Attachment, Attachments, Case } from '../../../common/types/domain';
 import type { CasesClient } from '../client';
 
 import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
 import { addComment } from './add';
-import { bulkCreate } from './bulk_create';
-import { bulkDeleteFileAttachments } from './bulk_delete';
-import { bulkGet } from './bulk_get';
-import { deleteAll, deleteComment } from './delete';
-import { find, get, getAll, getAllAlertsAttachToCase } from './get';
 import type {
-  AddArgs,
   BulkCreateArgs,
-  BulkDeleteFileArgs,
-  BulkGetArgs,
+  AddArgs,
   DeleteAllArgs,
   DeleteArgs,
   FindCommentsArgs,
@@ -33,8 +26,15 @@ import type {
   GetAllArgs,
   GetArgs,
   UpdateArgs,
+  BulkGetArgs,
+  BulkDeleteFileArgs,
 } from './types';
+import { bulkCreate } from './bulk_create';
+import { deleteAll, deleteComment } from './delete';
+import { find, get, getAll, getAllAlertsAttachToCase } from './get';
+import { bulkGet } from './bulk_get';
 import { update } from './update';
+import { bulkDeleteFileAttachments } from './bulk_delete';
 
 /**
  * API for interacting with the attachments to a case.

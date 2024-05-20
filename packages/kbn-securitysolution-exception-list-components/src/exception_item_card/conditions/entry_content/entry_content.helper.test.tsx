@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { OPERATOR_TYPE_LABELS_EXCLUDED, OPERATOR_TYPE_LABELS_INCLUDED } from '../conditions.config';
+import { getEntryOperator, getValue, getValueExpression } from './entry_content.helper';
 import { render } from '@testing-library/react';
 import {
   includedExistsTypeEntry,
@@ -16,8 +18,6 @@ import {
   MockedShowValueListModal,
   mockShowValueListModal,
 } from '../../../mocks/value_list_modal.mock';
-import { OPERATOR_TYPE_LABELS_EXCLUDED, OPERATOR_TYPE_LABELS_INCLUDED } from '../conditions.config';
-import { getEntryOperator, getValue, getValueExpression } from './entry_content.helper';
 
 describe('entry_content.helper', () => {
   describe('getEntryOperator', () => {

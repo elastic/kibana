@@ -8,30 +8,30 @@
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Client } from '@elastic/elasticsearch';
-import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
-import {
-  createBootstrapIndex,
-  setIndexTemplate,
-  setPolicy,
-  setTemplate,
-} from '@kbn/securitysolution-es-utils';
-import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import type {
-  ExceptionList,
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-  ListItemSchema,
-  ListSchema,
-  NamespaceType,
   Type,
+  ListSchema,
+  ListItemSchema,
+  ExceptionListSchema,
+  ExceptionListItemSchema,
+  ExceptionList,
+  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_URL,
   LIST_INDEX,
   LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
+import {
+  setPolicy,
+  setTemplate,
+  setIndexTemplate,
+  createBootstrapIndex,
+} from '@kbn/securitysolution-es-utils';
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
+import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
 import { countDownTest } from '../../../common/utils/security_solution';
 

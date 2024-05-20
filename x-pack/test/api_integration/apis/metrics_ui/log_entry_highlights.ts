@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
+import { fold } from 'fp-ts/lib/Either';
 
 import { createPlainError, throwErrors } from '@kbn/infra-plugin/common/runtime_types';
 

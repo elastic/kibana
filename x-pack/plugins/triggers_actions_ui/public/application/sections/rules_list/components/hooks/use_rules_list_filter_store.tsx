@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { isEmpty } from 'lodash';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { isEmpty } from 'lodash';
 import { RuleStatus } from '../../../../../common';
 import { RulesListFilters, RulesListProps, UpdateFiltersProps } from '../../../../../types';
 

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Draggable } from './draggable';
 import { Droppable } from './droppable';
 import {
-  EXACT,
-  dataTransfer,
   generateDragDropValue,
   renderWithDragDropContext,
+  dataTransfer,
+  EXACT,
 } from './test_utils';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
@@ -97,7 +97,7 @@ describe('Draggable', () => {
 
   test('removes selection on mouse down before dragging', async () => {
     const removeAllRanges = jest.fn();
-    global.getSelection = jest.fn(() => ({ removeAllRanges }) as unknown as Selection);
+    global.getSelection = jest.fn(() => ({ removeAllRanges } as unknown as Selection));
     const { draggable } = renderDraggable();
     fireEvent.mouseDown(draggable);
     expect(global.getSelection).toBeCalled();

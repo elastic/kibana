@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
+import { StyleProperties, VectorStyleEditor } from './vector_style_editor';
+import { getDefaultStaticProperties } from '../vector_style_defaults';
+import { IVectorLayer } from '../../../layers/vector_layer';
+import { IVectorSource } from '../../../sources/vector_source';
+import { CustomIcon } from '../../../../../common/descriptor_types';
 import {
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import { CustomIcon } from '../../../../../common/descriptor_types';
 import { AbstractField, IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../layers/vector_layer';
-import { IVectorSource } from '../../../sources/vector_source';
 import { VectorStyle } from '../vector_style';
-import { getDefaultStaticProperties } from '../vector_style_defaults';
-import { StyleProperties, VectorStyleEditor } from './vector_style_editor';
 
 jest.mock('../../../../kibana_services', () => {
   return {

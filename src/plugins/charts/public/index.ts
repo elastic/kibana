@@ -10,9 +10,9 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 import {
-  MultiValueClickContext,
   RangeSelectContext,
   ValueClickContext,
+  MultiValueClickContext,
 } from '@kbn/embeddable-plugin/public';
 import { ChartsPlugin } from './plugin';
 

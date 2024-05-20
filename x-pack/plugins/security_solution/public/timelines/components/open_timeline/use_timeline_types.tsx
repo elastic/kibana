@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 
 import { noop } from 'lodash/fp';
 import type { TimelineTypeLiteralWithNull } from '../../../../common/api/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { getTimelineTabsUrl, useFormatUrl } from '../../../common/components/link_to';
-import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import type { TimelineTab } from './types';
 import { TimelineTabsStyle } from './types';
+import { useKibana } from '../../../common/lib/kibana';
 export interface UseTimelineTypesArgs {
   defaultTimelineCount?: number | null;
   templateTimelineCount?: number | null;

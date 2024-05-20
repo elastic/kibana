@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
 
 export function TimeRangeCallout() {
   return (

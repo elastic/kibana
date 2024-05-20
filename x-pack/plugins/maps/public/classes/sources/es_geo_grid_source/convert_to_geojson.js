@@ -7,12 +7,12 @@
 
 import _ from 'lodash';
 import {
-  GEOCENTROID_AGG_NAME,
-  GEOTILE_GRID_AGG_NAME,
   RENDER_AS,
+  GEOTILE_GRID_AGG_NAME,
+  GEOCENTROID_AGG_NAME,
 } from '../../../../common/constants';
-import { clamp, extractPropertiesFromBucket } from '../../../../common/elasticsearch_util';
 import { getTileBoundingBox } from '../../util/geo_tile_utils';
+import { clamp, extractPropertiesFromBucket } from '../../../../common/elasticsearch_util';
 
 const GRID_BUCKET_KEYS_TO_IGNORE = ['key', GEOCENTROID_AGG_NAME];
 

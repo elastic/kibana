@@ -7,8 +7,8 @@
  */
 
 import {
-  configServiceMock as configMock,
   createTestEnv,
+  configServiceMock as configMock,
   rawConfigServiceMock as rawMock,
 } from '@kbn/config-mocks';
 

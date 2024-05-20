@@ -6,7 +6,7 @@
  */
 
 import { partition } from 'lodash';
-import { Node, calculateNodeType } from '../nodes';
+import { calculateNodeType, Node } from '../nodes';
 
 /*
  * Reducer function for a set of nodes to key the array by nodeId, summarize

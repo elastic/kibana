@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import {
+  usageCollectorsStatsCollector,
+  CollectorsStatsCollectorParams,
+} from './usage_collector_stats_collector';
+import { UsageCollector } from '../usage_collector';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createCollectorFetchContextMock } from '../../mocks';
-import { UsageCollector } from '../usage_collector';
-import {
-  CollectorsStatsCollectorParams,
-  usageCollectorsStatsCollector,
-} from './usage_collector_stats_collector';
 
 describe('usageCollectorsStatsCollector', () => {
   const logger = loggingSystemMock.createLogger();

@@ -8,11 +8,11 @@
 import { request, visit } from '../tasks/common';
 
 import {
+  getSpecificSelectorId,
   SETTINGS_CONFIRM_MODAL_BTN,
   SETTINGS_OUTPUTS,
   SETTINGS_OUTPUTS_KAFKA,
   SETTINGS_SAVE_BTN,
-  getSpecificSelectorId,
 } from './fleet';
 
 export const selectESOutput = () => {

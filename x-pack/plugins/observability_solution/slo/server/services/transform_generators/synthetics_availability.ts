@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { estypes } from '@elastic/elasticsearch';
 import {
   ALL_VALUE,
-  SyntheticsAvailabilityIndicator,
-  occurrencesBudgetingMethodSchema,
   syntheticsAvailabilityIndicatorSchema,
+  occurrencesBudgetingMethodSchema,
+  SyntheticsAvailabilityIndicator,
 } from '@kbn/slo-schema';
-import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
+import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
+  getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-  SYNTHETICS_DEFAULT_GROUPINGS,
   SYNTHETICS_INDEX_PATTERN,
-  getSLOTransformId,
+  SYNTHETICS_DEFAULT_GROUPINGS,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
+import { SLODefinition } from '../../domain/models';
 export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLODefinition, spaceId: string): TransformPutTransformRequest {
     if (!syntheticsAvailabilityIndicatorSchema.is(slo.indicator)) {

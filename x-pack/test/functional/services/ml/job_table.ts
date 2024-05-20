@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 
 import {
-  TIME_RANGE_TYPE,
   TimeRangeType,
+  TIME_RANGE_TYPE,
   URL_TYPE,
 } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
-import React, { useCallback, useMemo, useState } from 'react';
 import { templateActionVariable } from '../lib';
 
 interface Props {

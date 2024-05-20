@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 import { EVENT_OUTCOME } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../../common/latency_distribution_chart_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
-import { getTransactionDistributionChartData } from '../../correlations/get_transaction_distribution_chart_data';
-import { useFetchParams } from '../../correlations/use_fetch_params';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isErrorMessage } from '../../correlations/utils/is_error_message';
+import { useFetchParams } from '../../correlations/use_fetch_params';
+import { getTransactionDistributionChartData } from '../../correlations/get_transaction_distribution_chart_data';
+import { useTheme } from '../../../../hooks/use_theme';
 
 export const useTransactionDistributionChartData = () => {
   const params = useFetchParams();

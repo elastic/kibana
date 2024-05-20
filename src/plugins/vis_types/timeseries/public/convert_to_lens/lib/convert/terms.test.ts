@@ -54,9 +54,7 @@ describe('convertToTermsParams', () => {
     [
       string,
       Parameters<typeof convertToTermsParams>,
-      Partial<
-        Omit<TermsParams, 'orderAgg'> & { orderAgg: Partial<TermsParams['orderAgg']> }
-      > | null,
+      Partial<Omit<TermsParams, 'orderAgg'> & { orderAgg: Partial<TermsParams['orderAgg']> }> | null
     ]
   >([
     [
@@ -217,7 +215,7 @@ describe('converToTermsColumn', () => {
             orderAgg: Partial<TermsColumn['params']['orderAgg']>;
           };
         }
-      > | null,
+      > | null
     ]
   >([
     ['null if base field is not valid', [[''], series, columns, dataView, false], null],

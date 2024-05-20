@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { fromEvent, merge, Observable } from 'rxjs';
+import { take, share, mapTo, delay, tap } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
-import { Observable, fromEvent, merge } from 'rxjs';
-import { delay, mapTo, share, take, tap } from 'rxjs';
 
 interface IChild {
   kill(signal: string): Promise<unknown>;

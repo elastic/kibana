@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Serializable } from '../serializable';
 import { ApmFields } from './apm_fields';
+import { Serializable } from '../serializable';
 
 export class Event extends Serializable<ApmFields> {
   constructor(fields: ApmFields) {

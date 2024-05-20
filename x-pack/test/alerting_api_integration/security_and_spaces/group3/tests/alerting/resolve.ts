@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
 import { SuperuserAtSpace1 } from '../../../scenarios';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

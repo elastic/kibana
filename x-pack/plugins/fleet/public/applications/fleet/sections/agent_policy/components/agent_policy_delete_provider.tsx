@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
+import React, { Fragment, useRef, useState } from 'react';
+import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useRef, useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
 
 import { SO_SEARCH_LIMIT } from '../../../../../constants';
 
 import {
-  sendGetAgents,
-  useConfig,
-  useDeleteAgentPolicyMutation,
-  useLink,
   useStartServices,
+  useConfig,
+  useLink,
+  useDeleteAgentPolicyMutation,
+  sendGetAgents,
 } from '../../../hooks';
 
 interface Props {

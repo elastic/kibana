@@ -7,11 +7,11 @@
 
 import { act } from 'react-dom/test-utils';
 
+import { setupEnvironment, pageHelpers, TestBed, getRandomString } from './helpers';
 import { RepositoryForm } from '../../public/application/components/repository_form';
-import { TestBed, getRandomString, pageHelpers, setupEnvironment } from './helpers';
-import { REPOSITORY_EDIT, REPOSITORY_NAME } from './helpers/constant';
-import { RepositoryAddTestSubjects } from './helpers/repository_add.helpers';
 import { RepositoryEditTestSubjects } from './helpers/repository_edit.helpers';
+import { RepositoryAddTestSubjects } from './helpers/repository_add.helpers';
+import { REPOSITORY_EDIT, REPOSITORY_NAME } from './helpers/constant';
 
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;

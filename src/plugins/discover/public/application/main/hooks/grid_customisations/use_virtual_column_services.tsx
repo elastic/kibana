@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import createContainer from 'constate';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export interface UseVirtualColumnServices {
   services: {

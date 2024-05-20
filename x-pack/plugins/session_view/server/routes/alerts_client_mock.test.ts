@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
-import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_TYPE_ID,
-  ALERT_WORKFLOW_STATUS,
-  SPACE_IDS,
-} from '@kbn/rule-data-utils';
 import {
   AlertsClient,
   ConstructorOptions,
 } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
-import { ruleDataServiceMock } from '@kbn/rule-registry-plugin/server/rule_data_plugin_service/rule_data_plugin_service.mock';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
+import { ruleDataServiceMock } from '@kbn/rule-registry-plugin/server/rule_data_plugin_service/rule_data_plugin_service.mock';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_TYPE_ID,
+  SPACE_IDS,
+  ALERT_WORKFLOW_STATUS,
+} from '@kbn/rule-data-utils';
 import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
 
 export const alertingAuthMock = alertingAuthorizationMock.create();

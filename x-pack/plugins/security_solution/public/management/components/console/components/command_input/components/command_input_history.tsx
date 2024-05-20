@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { EuiSelectable, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
-import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
-import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_input_history';
-import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import type { InputHistoryItem } from '../../console_state/types';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { UserCommandInput } from '../../user_command_input';
+import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
+import { useWithInputHistory } from '../../../hooks/state_selectors/use_with_input_history';
+import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 import { CommandInputClearHistory } from './command_input_clear_history';
 
 export const NO_HISTORY_EMPTY_MESSAGE = i18n.translate(

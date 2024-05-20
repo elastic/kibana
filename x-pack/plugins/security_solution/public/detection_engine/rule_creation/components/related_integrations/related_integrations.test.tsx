@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
+  screen,
+  render,
   act,
   fireEvent,
-  render,
-  screen,
   waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
-import React from 'react';
 import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
-import { createReactQueryWrapper } from '../../../../common/mock';
 import { FIELD_TYPES, Form, useForm } from '../../../../shared_imports';
+import { createReactQueryWrapper } from '../../../../common/mock';
 import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__';
 import { RelatedIntegrations } from './related_integrations';
 

@@ -10,7 +10,9 @@
         "tags": [],
         "label": "doTheFooFnThing",
         "description": [],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/foo/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -29,7 +31,9 @@
         "tags": [],
         "label": "FooType",
         "description": [],
-        "signature": ["() => \"foo\""],
+        "signature": [
+          "() => \"foo\""
+        ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/foo/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -61,7 +65,9 @@
         "tags": [],
         "label": "commonFoo",
         "description": [],
-        "signature": ["\"COMMON VAR!\""],
+        "signature": [
+          "\"COMMON VAR!\""
+        ],
         "path": "packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/common/foo/index.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -7,15 +7,15 @@
 
 import { Logger } from '@kbn/core/server';
 
+import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
+import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
+import { loadESQL } from './esql_loader';
 import {
   mockEsqlDocsFromDirectoryLoader,
   mockEsqlLanguageDocsFromDirectoryLoader,
   mockExampleQueryDocsFromDirectoryLoader,
 } from '../../../__mocks__/docs_from_directory_loader';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
-import { loadESQL } from './esql_loader';
 
 let mockLoad = jest.fn();
 

@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import { bufferCount, skip, take } from 'rxjs';
 import sinon from 'sinon';
-import { TaskManagerConfig } from '../config';
-import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
+import { Subject } from 'rxjs';
+import { take, bufferCount, skip } from 'rxjs';
 import {
   isTaskManagerMetricEvent,
   isTaskManagerStatEvent,
   isTaskPollingCycleEvent,
   isTaskRunEvent,
 } from '../task_events';
+import { TaskLifecycleEvent } from '../polling_lifecycle';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import { TaskManagerConfig } from '../config';
 import { createAggregator } from './create_aggregator';
-import { metricsAggregatorMock } from './metrics_aggregator.mock';
 import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
-import * as TaskClaimMetricsAggregatorModule from './task_claim_metrics_aggregator';
 import { taskClaimFailureEvent, taskClaimSuccessEvent } from './task_claim_metrics_aggregator.test';
-import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
-import { getTaskManagerMetricEvent } from './task_overdue_metrics_aggregator.test';
-import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 import {
-  getTaskManagerStatEvent,
   getTaskRunFailedEvent,
   getTaskRunSuccessEvent,
+  getTaskManagerStatEvent,
 } from './task_run_metrics_aggregator.test';
+import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
+import * as TaskClaimMetricsAggregatorModule from './task_claim_metrics_aggregator';
+import { metricsAggregatorMock } from './metrics_aggregator.mock';
+import { getTaskManagerMetricEvent } from './task_overdue_metrics_aggregator.test';
+import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 
 const mockMetricsAggregator = metricsAggregatorMock.create();
 const config: TaskManagerConfig = {

@@ -9,36 +9,36 @@ import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard, getDefaultTab } from '.';
-import {
-  BaseCspSetupStatus,
-  ComplianceDashboardDataV2,
-  CspStatusCode,
-} from '../../../common/types_old';
-import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useCspmStatsApi, useKspmStatsApi } from '../../common/api/use_stats_api';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { cloudPosturePages } from '../../common/navigation/constants';
+import { useKspmStatsApi, useCspmStatsApi } from '../../common/api/use_stats_api';
+import {
+  CLOUD_DASHBOARD_CONTAINER,
+  DASHBOARD_CONTAINER,
+  KUBERNETES_DASHBOARD_CONTAINER,
+  KUBERNETES_DASHBOARD_TAB,
+  CLOUD_DASHBOARD_TAB,
+  CLOUD_POSTURE_DASHBOARD_PAGE_HEADER,
+} from './test_subjects';
+import { mockDashboardData } from './mock';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
+import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
+import { expectIdsInDoc } from '../../test/utils';
 import {
   CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
   KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
   PACKAGE_NOT_INSTALLED_TEST_SUBJECT,
 } from '../../components/cloud_posture_page';
-import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
-import { createReactQueryResponse } from '../../test/fixtures/react_query';
-import { TestProvider } from '../../test/test_provider';
-import { expectIdsInDoc } from '../../test/utils';
-import { mockDashboardData } from './mock';
 import {
-  CLOUD_DASHBOARD_CONTAINER,
-  CLOUD_DASHBOARD_TAB,
-  CLOUD_POSTURE_DASHBOARD_PAGE_HEADER,
-  DASHBOARD_CONTAINER,
-  KUBERNETES_DASHBOARD_CONTAINER,
-  KUBERNETES_DASHBOARD_TAB,
-} from './test_subjects';
+  BaseCspSetupStatus,
+  ComplianceDashboardDataV2,
+  CspStatusCode,
+} from '../../../common/types_old';
+import { cloudPosturePages } from '../../common/navigation/constants';
+import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_stats_api');

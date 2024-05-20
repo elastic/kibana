@@ -6,33 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import type { App, PublicAppInfo } from '@kbn/core-application-browser';
-import { getAppInfo } from '@kbn/core-application-browser-internal';
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { coreContextMock } from '@kbn/core-base-browser-mocks';
-import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
-import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { findTestSubject } from '@kbn/test-jest-helpers';
-import { mount, shallow } from 'enzyme';
+import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
+import type { App, PublicAppInfo } from '@kbn/core-application-browser';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { getAppInfo } from '@kbn/core-application-browser-internal';
+import { findTestSubject } from '@kbn/test-jest-helpers';
 import { ChromeService } from './chrome_service';
-import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
 
 class FakeApp implements App {
   public title: string;
   public mount = () => () => {};
 
-  constructor(
-    public id: string,
-    public chromeless?: boolean
-  ) {
+  constructor(public id: string, public chromeless?: boolean) {
     this.title = `${this.id} App`;
   }
 }

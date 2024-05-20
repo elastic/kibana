@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import type { TimelineModel } from '../../../..';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { i18n } from '@kbn/i18n';
+import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
-import { sourcererActions } from '../../../../common/store/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import type { TimelineModel } from '../../../..';
 import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
+import { sourcererActions } from '../../../../common/store/sourcerer';
 import { useQueryTimelineById } from '../../../../timelines/components/open_timeline/helpers';
+import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
 import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';
 export const RULE_FROM_EQL_URL_PARAM = 'createRuleFromEql';

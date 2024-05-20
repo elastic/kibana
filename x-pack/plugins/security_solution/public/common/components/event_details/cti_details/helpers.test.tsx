@@ -10,8 +10,8 @@ import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
-  getEnrichmentIdentifiers,
   parseExistingEnrichments,
+  getEnrichmentIdentifiers,
 } from './helpers';
 
 describe('parseExistingEnrichments', () => {

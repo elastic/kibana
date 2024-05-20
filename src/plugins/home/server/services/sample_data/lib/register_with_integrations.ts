@@ -7,8 +7,8 @@
  */
 
 import { CoreSetup } from '@kbn/core/server';
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { i18n } from '@kbn/i18n';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { HOME_APP_BASE_PATH } from '../../../../common/constants';
 import { GLOBE_ICON_PATH } from '../data_sets/logs';
 

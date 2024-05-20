@@ -1,6 +1,3 @@
-import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
-import { formatDuration, parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,14 +5,17 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import { isObject } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import { formatDuration, parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import {
-  ActionTypeRegistryContract,
-  IErrorObject,
-  Rule,
   RuleTypeModel,
-  RuleUiAction,
-  TriggersActionsUiConfig,
+  Rule,
+  IErrorObject,
   ValidationResult,
+  ActionTypeRegistryContract,
+  TriggersActionsUiConfig,
+  RuleUiAction,
 } from '../../../types';
 import { InitialRule } from './rule_reducer';
 
@@ -160,8 +160,9 @@ export async function getRuleActionErrors(
   return await Promise.all(
     actions.map(
       async (ruleAction: RuleUiAction) =>
-        (await actionTypeRegistry.get(ruleAction.actionTypeId)?.validateParams(ruleAction.params))
-          .errors
+        (
+          await actionTypeRegistry.get(ruleAction.actionTypeId)?.validateParams(ruleAction.params)
+        ).errors
     )
   );
 }

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiPopover,
-  EuiPopoverFooter,
-  EuiPopoverTitle,
+  EuiFilterButton,
   EuiSelectable,
+  EuiFilterGroup,
+  EuiPopoverTitle,
+  EuiButtonEmpty,
+  EuiPopoverFooter,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React, { useCallback, useMemo, useState } from 'react';
 import type { CoverageOverviewRuleSource } from '../../../../../common/api/detection_engine';
 import {
   coverageOverviewFilterWidth,
   ruleSourceFilterDefaultOptions,
   ruleSourceFilterLabelMap,
 } from './constants';
-import { extractSelected, populateSelected } from './helpers';
 import * as i18n from './translations';
+import { populateSelected, extractSelected } from './helpers';
 
 export interface RuleSourceFilterComponentProps {
   selected: CoverageOverviewRuleSource[];

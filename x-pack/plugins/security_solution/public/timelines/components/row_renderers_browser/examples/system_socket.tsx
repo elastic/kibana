@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { demoEndgameIpv4ConnectionAcceptEvent } from '../../../../common/demo_data/endgame_ecs/ipv4';
-import { createSocketRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
 import { ACCEPTED_A_CONNECTION_VIA } from '../../timeline/body/renderers/system/translations';
+import { createSocketRowRenderer } from '../../timeline/body/renderers/system/generic_row_renderer';
+import { demoEndgameIpv4ConnectionAcceptEvent } from '../../../../common/demo_data/endgame_ecs/ipv4';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
 const SystemSocketExampleComponent: React.FC = () => {

@@ -1,5 +1,3 @@
-import type { CoreContext } from '@kbn/core-base-server-internal';
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,7 +6,9 @@ import type { CustomBranding } from '@kbn/core-custom-branding-common';
  * Side Public License, v 1.
  */
 import type { CustomBrandingFetchFn, CustomBrandingStart } from '@kbn/core-custom-branding-server';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 /**
  * @internal

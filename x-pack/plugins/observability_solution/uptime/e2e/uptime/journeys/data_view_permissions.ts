@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { before, expect, journey, step } from '@elastic/synthetics';
+import { journey, step, expect, before } from '@elastic/synthetics';
 import { callKibana } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/helpers/call_kibana';
+import { byTestId, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../../helpers/utils';
 import { recordVideo } from '../../helpers/record_video';
-import { TIMEOUT_60_SEC, byTestId, waitForLoadingToFinish } from '../../helpers/utils';
 import { loginPageProvider } from '../../page_objects/login';
 
 journey('DataViewPermissions', async ({ page, params }) => {

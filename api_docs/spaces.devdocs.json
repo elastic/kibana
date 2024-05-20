@@ -20,7 +20,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -155,7 +157,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -193,7 +197,9 @@
                 "tags": [],
                 "label": "{ forceRefresh = false }",
                 "description": [],
-                "signature": ["{ forceRefresh?: boolean | undefined; }"],
+                "signature": [
+                  "{ forceRefresh?: boolean | undefined; }"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -416,7 +422,9 @@
                 "tags": [],
                 "label": "objects",
                 "description": [],
-                "signature": ["SavedObjectTarget[]"],
+                "signature": [
+                  "SavedObjectTarget[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -429,7 +437,9 @@
                 "tags": [],
                 "label": "spaces",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -442,7 +452,9 @@
                 "tags": [],
                 "label": "includeReferences",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -455,7 +467,9 @@
                 "tags": [],
                 "label": "createNewCopies",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -468,7 +482,9 @@
                 "tags": [],
                 "label": "overwrite",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -506,7 +522,9 @@
                 "tags": [],
                 "label": "objects",
                 "description": [],
-                "signature": ["SavedObjectTarget[]"],
+                "signature": [
+                  "SavedObjectTarget[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -519,7 +537,9 @@
                 "tags": [],
                 "label": "retries",
                 "description": [],
-                "signature": ["unknown"],
+                "signature": [
+                  "unknown"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -532,7 +552,9 @@
                 "tags": [],
                 "label": "includeReferences",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -545,7 +567,9 @@
                 "tags": [],
                 "label": "createNewCopies",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -561,7 +585,9 @@
             "tags": [],
             "label": "getShareSavedObjectPermissions",
             "description": [],
-            "signature": ["(type: string) => Promise<{ shareToAllSpaces: boolean; }>"],
+            "signature": [
+              "(type: string) => Promise<{ shareToAllSpaces: boolean; }>"
+            ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -573,7 +599,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -611,7 +639,9 @@
                 "tags": [],
                 "label": "objects",
                 "description": [],
-                "signature": ["SavedObjectTarget[]"],
+                "signature": [
+                  "SavedObjectTarget[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -641,7 +671,9 @@
                 "tags": [],
                 "label": "objects",
                 "description": [],
-                "signature": ["SavedObjectTarget[]"],
+                "signature": [
+                  "SavedObjectTarget[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -654,7 +686,9 @@
                 "tags": [],
                 "label": "spacesToAdd",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -667,7 +701,9 @@
                 "tags": [],
                 "label": "spacesToRemove",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -683,7 +719,9 @@
             "tags": [],
             "label": "redirectToSpaceSelector",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -725,7 +763,9 @@
             "type": "Object",
             "tags": [],
             "label": "space",
-            "description": ["the space."],
+            "description": [
+              "the space."
+            ],
             "signature": [
               "Partial<",
               {
@@ -752,7 +792,9 @@
         "type": "Function",
         "tags": [],
         "label": "getSpaceImageUrl",
-        "description": ["\nDetermines the avatar image for the provided space.\n"],
+        "description": [
+          "\nDetermines the avatar image for the provided space.\n"
+        ],
         "signature": [
           "(space: Partial<",
           {
@@ -774,7 +816,9 @@
             "type": "Object",
             "tags": [],
             "label": "space",
-            "description": ["the space."],
+            "description": [
+              "the space."
+            ],
             "signature": [
               "Partial<",
               {
@@ -825,7 +869,9 @@
             "type": "Object",
             "tags": [],
             "label": "space",
-            "description": ["the space."],
+            "description": [
+              "the space."
+            ],
             "signature": [
               "Partial<",
               {
@@ -889,7 +935,9 @@
         "type": "Interface",
         "tags": [],
         "label": "CopyToSpaceFlyoutProps",
-        "description": ["\nProperties for the CopyToSpaceFlyout."],
+        "description": [
+          "\nProperties for the CopyToSpaceFlyout."
+        ],
         "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -900,7 +948,9 @@
             "type": "Object",
             "tags": [],
             "label": "savedObjectTarget",
-            "description": ["\nThe object to render the flyout for."],
+            "description": [
+              "\nThe object to render the flyout for."
+            ],
             "signature": [
               {
                 "pluginId": "spaces",
@@ -920,8 +970,12 @@
             "type": "Function",
             "tags": [],
             "label": "onClose",
-            "description": ["\nOptional callback when the flyout is closed."],
-            "signature": ["(() => void) | undefined"],
+            "description": [
+              "\nOptional callback when the flyout is closed."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -937,7 +991,9 @@
         "type": "Interface",
         "tags": [],
         "label": "CopyToSpaceSavedObjectTarget",
-        "description": ["\nDescribes the target saved object during a copy operation."],
+        "description": [
+          "\nDescribes the target saved object during a copy operation."
+        ],
         "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -948,7 +1004,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["\nThe object's type."],
+            "description": [
+              "\nThe object's type."
+            ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -959,7 +1017,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nThe object's ID."],
+            "description": [
+              "\nThe object's ID."
+            ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -970,8 +1030,12 @@
             "type": "Array",
             "tags": [],
             "label": "namespaces",
-            "description": ["\nThe namespaces that the object currently exists in."],
-            "signature": ["string[]"],
+            "description": [
+              "\nThe namespaces that the object currently exists in."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -985,7 +1049,9 @@
             "description": [
               "\nThe EUI icon that is rendered in the flyout's subtitle.\n\nDefault is 'apps'."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -999,7 +1065,9 @@
             "description": [
               "\nThe string that is rendered in the flyout's subtitle.\n\nDefault is `${type} [id=${id}]`."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1013,7 +1081,9 @@
         "type": "Interface",
         "tags": [],
         "label": "EmbeddableLegacyUrlConflictProps",
-        "description": ["\nProperties for the EmbeddableLegacyUrlConflict component."],
+        "description": [
+          "\nProperties for the EmbeddableLegacyUrlConflict component."
+        ],
         "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1024,7 +1094,9 @@
             "type": "string",
             "tags": [],
             "label": "targetType",
-            "description": ["\nThe target type of the legacy URL alias."],
+            "description": [
+              "\nThe target type of the legacy URL alias."
+            ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1035,7 +1107,9 @@
             "type": "string",
             "tags": [],
             "label": "sourceId",
-            "description": ["\nThe source ID of the legacy URL alias."],
+            "description": [
+              "\nThe source ID of the legacy URL alias."
+            ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1049,7 +1123,9 @@
         "type": "Interface",
         "tags": [],
         "label": "GetSpaceResult",
-        "description": ["\nResponse format when querying for spaces."],
+        "description": [
+          "\nResponse format when querying for spaces."
+        ],
         "signature": [
           {
             "pluginId": "spaces",
@@ -1104,7 +1180,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LegacyUrlConflictProps",
-        "description": ["\nProperties for the LegacyUrlConflict component."],
+        "description": [
+          "\nProperties for the LegacyUrlConflict component."
+        ],
         "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1118,7 +1196,9 @@
             "description": [
               "\nThe string that is used to describe the object in the callout, e.g., _There is a legacy URL for this page that points to a different\n**object**_.\n\nDefault value is 'object'."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1129,7 +1209,9 @@
             "type": "string",
             "tags": [],
             "label": "currentObjectId",
-            "description": ["\nThe ID of the object that is currently shown on the page."],
+            "description": [
+              "\nThe ID of the object that is currently shown on the page."
+            ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1140,7 +1222,9 @@
             "type": "string",
             "tags": [],
             "label": "otherObjectId",
-            "description": ["\nThe ID of the other object that the legacy URL alias points to."],
+            "description": [
+              "\nThe ID of the other object that the legacy URL alias points to."
+            ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1167,7 +1251,9 @@
         "type": "Interface",
         "tags": [],
         "label": "RedirectLegacyUrlParams",
-        "description": ["\nParameters for the redirectLegacyUrl function."],
+        "description": [
+          "\nParameters for the redirectLegacyUrl function."
+        ],
         "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1194,7 +1280,9 @@
             "description": [
               "\nThe reason the resolved alias was created.\n\nThis is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias was created\nbecause of saved object conversion, then we will display a toast telling the user that the object has a new URL."
             ],
-            "signature": ["\"savedObjectConversion\" | \"savedObjectImport\" | undefined"],
+            "signature": [
+              "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1208,7 +1296,9 @@
             "description": [
               "\nThe string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new location_.\nDefault value is 'object'."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/legacy_urls/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1222,7 +1312,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ShareToSpaceFlyoutProps",
-        "description": ["\nProperties for the ShareToSpaceFlyout."],
+        "description": [
+          "\nProperties for the ShareToSpaceFlyout."
+        ],
         "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1233,7 +1325,9 @@
             "type": "Object",
             "tags": [],
             "label": "savedObjectTarget",
-            "description": ["\nThe object to render the flyout for."],
+            "description": [
+              "\nThe object to render the flyout for."
+            ],
             "signature": [
               {
                 "pluginId": "spaces",
@@ -1256,7 +1350,9 @@
             "description": [
               "\nThe EUI icon that is rendered in the flyout's title.\n\nDefault is 'share'."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1270,7 +1366,9 @@
             "description": [
               "\nThe string that is rendered in the flyout's title.\n\nDefault is 'Edit spaces for object'."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1284,7 +1382,9 @@
             "description": [
               "\nWhen enabled, if the object is not yet shared to multiple spaces, a callout will be displayed that suggests the user might want to\ncreate a copy instead.\n\nDefault value is false."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1298,7 +1398,9 @@
             "description": [
               "\nWhen enabled, if no other spaces exist _and_ the user has the appropriate privileges, a sentence will be displayed that suggests the\nuser might want to create a space.\n\nDefault value is false."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1312,7 +1414,9 @@
             "description": [
               "\nWhen set to 'within-space' (default), the flyout behaves like it is running on a page within the active space, and it will prevent the\nuser from removing the object from the active space.\n\nConversely, when set to 'outside-space', the flyout behaves like it is running on a page outside of any space, so it will allow the\nuser to remove the object from the active space."
             ],
-            "signature": ["\"within-space\" | \"outside-space\" | undefined"],
+            "signature": [
+              "\"within-space\" | \"outside-space\" | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1340,7 +1444,9 @@
                 "tags": [],
                 "label": "objects",
                 "description": [],
-                "signature": ["{ type: string; id: string; }[]"],
+                "signature": [
+                  "{ type: string; id: string; }[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1353,7 +1459,9 @@
                 "tags": [],
                 "label": "spacesToAdd",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1366,7 +1474,9 @@
                 "tags": [],
                 "label": "spacesToRemove",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1398,7 +1508,9 @@
                 "tags": [],
                 "label": "updatedObjects",
                 "description": [],
-                "signature": ["{ type: string; id: string; }[]"],
+                "signature": [
+                  "{ type: string; id: string; }[]"
+                ],
                 "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1413,8 +1525,12 @@
             "type": "Function",
             "tags": [],
             "label": "onClose",
-            "description": ["\nOptional callback when the flyout is closed."],
-            "signature": ["(() => void) | undefined"],
+            "description": [
+              "\nOptional callback when the flyout is closed."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1430,7 +1546,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ShareToSpaceSavedObjectTarget",
-        "description": ["\nDescribes the target saved object during a share operation."],
+        "description": [
+          "\nDescribes the target saved object during a share operation."
+        ],
         "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1441,7 +1559,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["\nThe object's type."],
+            "description": [
+              "\nThe object's type."
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1452,7 +1572,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nThe object's ID."],
+            "description": [
+              "\nThe object's ID."
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1463,8 +1585,12 @@
             "type": "Array",
             "tags": [],
             "label": "namespaces",
-            "description": ["\nThe namespaces that the object currently exists in."],
-            "signature": ["string[]"],
+            "description": [
+              "\nThe namespaces that the object currently exists in."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1478,7 +1604,9 @@
             "description": [
               "\nThe EUI icon that is rendered in the flyout's subtitle.\n\nDefault is 'empty'."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1492,7 +1620,9 @@
             "description": [
               "\nThe string that is rendered in the flyout's subtitle.\n\nDefault is `${type} [id=${id}]`."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1506,7 +1636,9 @@
             "description": [
               "\nThe string that is used to describe the object in several places, e.g., _Make **object** available in selected spaces only_.\n\nDefault value is 'object'."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/share_saved_objects_to_space/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1520,7 +1652,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Space",
-        "description": ["\nA Space."],
+        "description": [
+          "\nA Space."
+        ],
         "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1544,7 +1678,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["\nDisplay name for this space."],
+            "description": [
+              "\nDisplay name for this space."
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1555,8 +1691,12 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["\nOptional description for this space."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional description for this space."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1570,7 +1710,9 @@
             "description": [
               "\nOptional color (hex code) for this space.\nIf neither `color` nor `imageUrl` is specified, then a color will be automatically generated."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1584,7 +1726,9 @@
             "description": [
               "\nOptional display initials for this space's avatar. Supports a maximum of 2 characters.\nIf initials are not provided, then they will be derived from the space name automatically.\n\nInitials are not displayed if an `imageUrl` has been specified."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1598,7 +1742,9 @@
             "description": [
               "\nOptional base-64 encoded data image url to show as this space's avatar.\nThis setting takes precedence over any configured `color` or `initials`."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1609,8 +1755,12 @@
             "type": "Array",
             "tags": [],
             "label": "disabledFeatures",
-            "description": ["\nThe set of feature ids that should be hidden within this space."],
-            "signature": ["string[]"],
+            "description": [
+              "\nThe set of feature ids that should be hidden within this space."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1619,12 +1769,16 @@
             "parentPluginId": "spaces",
             "id": "def-public.Space._reserved",
             "type": "CompoundType",
-            "tags": ["private"],
+            "tags": [
+              "private"
+            ],
             "label": "_reserved",
             "description": [
               "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1638,7 +1792,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SpaceAvatarProps",
-        "description": ["\nProperties for the SpaceAvatar component."],
+        "description": [
+          "\nProperties for the SpaceAvatar component."
+        ],
         "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1649,7 +1805,9 @@
             "type": "Object",
             "tags": [],
             "label": "space",
-            "description": ["The space to represent with an avatar."],
+            "description": [
+              "The space to represent with an avatar."
+            ],
             "signature": [
               "{ id?: string | undefined; name?: string | undefined; description?: string | undefined; color?: string | undefined; initials?: string | undefined; imageUrl?: string | undefined; disabledFeatures?: string[] | undefined; _reserved?: boolean | undefined; }"
             ],
@@ -1663,8 +1821,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "size",
-            "description": ["The size of the avatar."],
-            "signature": ["\"m\" | \"s\" | \"l\" | \"xl\" | undefined"],
+            "description": [
+              "The size of the avatar."
+            ],
+            "signature": [
+              "\"m\" | \"s\" | \"l\" | \"xl\" | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1675,8 +1837,12 @@
             "type": "string",
             "tags": [],
             "label": "className",
-            "description": ["Optional CSS class(es) to apply."],
-            "signature": ["string | undefined"],
+            "description": [
+              "Optional CSS class(es) to apply."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1690,7 +1856,9 @@
             "description": [
               "\nWhen enabled, allows EUI to provide an aria-label for this component, which is announced on screen readers.\n\nDefault value is true."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1704,7 +1872,9 @@
             "description": [
               "\nWhether or not to render the avatar in a disabled state.\n\nDefault value is false."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1715,7 +1885,9 @@
             "type": "Function",
             "tags": [],
             "label": "onClick",
-            "description": ["\nCallback to be invoked when the avatar is clicked."],
+            "description": [
+              "\nCallback to be invoked when the avatar is clicked."
+            ],
             "signature": [
               "((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void) | undefined"
             ],
@@ -1730,7 +1902,9 @@
                 "tags": [],
                 "label": "event",
                 "description": [],
-                "signature": ["React.MouseEvent<HTMLDivElement, MouseEvent>"],
+                "signature": [
+                  "React.MouseEvent<HTMLDivElement, MouseEvent>"
+                ],
                 "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1745,8 +1919,12 @@
             "type": "Function",
             "tags": [],
             "label": "onKeyPress",
-            "description": ["\nCallback to be invoked when the avatar is clicked via keyboard."],
-            "signature": ["((event: React.KeyboardEvent<HTMLDivElement>) => void) | undefined"],
+            "description": [
+              "\nCallback to be invoked when the avatar is clicked via keyboard."
+            ],
+            "signature": [
+              "((event: React.KeyboardEvent<HTMLDivElement>) => void) | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1758,7 +1936,9 @@
                 "tags": [],
                 "label": "event",
                 "description": [],
-                "signature": ["React.KeyboardEvent<HTMLDivElement>"],
+                "signature": [
+                  "React.KeyboardEvent<HTMLDivElement>"
+                ],
                 "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1773,8 +1953,12 @@
             "type": "Object",
             "tags": [],
             "label": "style",
-            "description": ["\nStyle props for the avatar."],
-            "signature": ["React.CSSProperties | undefined"],
+            "description": [
+              "\nStyle props for the avatar."
+            ],
+            "signature": [
+              "React.CSSProperties | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1788,7 +1972,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SpaceListProps",
-        "description": ["\nProperties for the SpaceList component."],
+        "description": [
+          "\nProperties for the SpaceList component."
+        ],
         "path": "x-pack/plugins/spaces/public/space_list/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1802,7 +1988,9 @@
             "description": [
               "\nThe namespaces of a saved object to render into a corresponding list of spaces."
             ],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1816,7 +2004,9 @@
             "description": [
               "\nOptional limit to the number of spaces that can be displayed in the list. If the number of spaces exceeds this limit, they will be\nhidden behind a \"show more\" button. Set to 0 to disable.\n\nDefault value is 5."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1830,7 +2020,9 @@
             "description": [
               "\nWhen set to 'within-space' (default), the space list behaves like it is running on a page within the active space, and it will omit the\nactive space (e.g., it displays a list of all the _other_ spaces that an object is shared to).\n\nConversely, when set to 'outside-space', the space list behaves like it is running on a page outside of any space, so it will not omit\nthe active space."
             ],
-            "signature": ["\"within-space\" | \"outside-space\" | undefined"],
+            "signature": [
+              "\"within-space\" | \"outside-space\" | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1844,7 +2036,9 @@
             "description": [
               "\nClick handler for spaces list, specifically excluding expand and contract buttons."
             ],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1857,8 +2051,12 @@
             "type": "string",
             "tags": [],
             "label": "cursorStyle",
-            "description": ["\nStyle for the cursor when mousing over space avatars."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nStyle for the cursor when mousing over space avatars."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/space_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2031,7 +2229,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2070,7 +2270,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2109,7 +2311,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2148,7 +2352,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2187,7 +2393,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2226,7 +2434,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2239,7 +2449,9 @@
             "type": "Function",
             "tags": [],
             "label": "getSpaceAvatar",
-            "description": ["\nDisplays an avatar for the given space."],
+            "description": [
+              "\nDisplays an avatar for the given space."
+            ],
             "signature": [
               "(props: ",
               {
@@ -2263,7 +2475,9 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2279,7 +2493,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SpacesContextProps",
-        "description": ["\nProperties for the SpacesContext."],
+        "description": [
+          "\nProperties for the SpacesContext."
+        ],
         "path": "x-pack/plugins/spaces/public/spaces_context/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2293,7 +2509,9 @@
             "description": [
               "\nIf a feature is specified, all Spaces components will treat it appropriately if the feature is disabled in a given Space."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/spaces_context/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2358,7 +2576,9 @@
             "type": "string",
             "tags": [],
             "label": "activeSpaceId",
-            "description": ["The ID of the active space."],
+            "description": [
+              "The ID of the active space."
+            ],
             "path": "x-pack/plugins/spaces/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2403,8 +2623,12 @@
             "type": "boolean",
             "tags": [],
             "label": "isActiveSpace",
-            "description": ["True if this space is the active space."],
-            "signature": ["true | undefined"],
+            "description": [
+              "True if this space is the active space."
+            ],
+            "signature": [
+              "true | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2418,7 +2642,9 @@
             "description": [
               "True if the current feature (specified in the `SpacesContext`) is disabled in this space."
             ],
-            "signature": ["true | undefined"],
+            "signature": [
+              "true | undefined"
+            ],
             "path": "x-pack/plugins/spaces/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2429,7 +2655,9 @@
             "type": "Function",
             "tags": [],
             "label": "isAuthorizedForPurpose",
-            "description": ["Returns true if the user is authorized for the given purpose."],
+            "description": [
+              "Returns true if the user is authorized for the given purpose."
+            ],
             "signature": [
               "(purpose: ",
               {
@@ -2542,7 +2770,9 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": ["Services"],
+            "signature": [
+              "Services"
+            ],
             "path": "x-pack/plugins/spaces/public/spaces_context/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2576,7 +2806,9 @@
         "type": "Type",
         "tags": [],
         "label": "LazyComponentFn",
-        "description": ["\nFunction that returns a promise for a lazy-loadable component."],
+        "description": [
+          "\nFunction that returns a promise for a lazy-loadable component."
+        ],
         "signature": [
           "(props: T) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
         ],
@@ -2592,7 +2824,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/plugins/spaces/public/ui_api/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2608,8 +2842,12 @@
       "type": "Type",
       "tags": [],
       "label": "SpacesPluginSetup",
-      "description": ["\nSetup contract for the Spaces plugin."],
-      "signature": ["{ hasOnlyDefaultSpace: boolean; }"],
+      "description": [
+        "\nSetup contract for the Spaces plugin."
+      ],
+      "signature": [
+        "{ hasOnlyDefaultSpace: boolean; }"
+      ],
       "path": "x-pack/plugins/spaces/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
@@ -2622,7 +2860,9 @@
       "type": "Interface",
       "tags": [],
       "label": "SpacesApi",
-      "description": ["\nClient-side Spaces API."],
+      "description": [
+        "\nClient-side Spaces API."
+      ],
       "path": "x-pack/plugins/spaces/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -2661,7 +2901,9 @@
           "type": "Function",
           "tags": [],
           "label": "getActiveSpace",
-          "description": ["\nRetrieve the currently active space."],
+          "description": [
+            "\nRetrieve the currently active space."
+          ],
           "signature": [
             "() => Promise<",
             {
@@ -2731,7 +2973,9 @@
         "description": [
           "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path\nthat includes a URL identifier with the space id.\n"
         ],
-        "signature": ["(basePath: string, spaceId: string, requestedPath: string) => string"],
+        "signature": [
+          "(basePath: string, spaceId: string, requestedPath: string) => string"
+        ],
         "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2742,8 +2986,12 @@
             "type": "string",
             "tags": [],
             "label": "basePath",
-            "description": ["the server's base path."],
-            "signature": ["string"],
+            "description": [
+              "the server's base path."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2755,8 +3003,12 @@
             "type": "string",
             "tags": [],
             "label": "spaceId",
-            "description": ["the space id."],
-            "signature": ["string"],
+            "description": [
+              "the space id."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2768,8 +3020,12 @@
             "type": "string",
             "tags": [],
             "label": "requestedPath",
-            "description": ["the requested path (e.g. `/app/dashboard`)."],
-            "signature": ["string"],
+            "description": [
+              "the requested path (e.g. `/app/dashboard`)."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2789,7 +3045,9 @@
         "type": "Interface",
         "tags": [],
         "label": "GetAllSpacesOptions",
-        "description": ["\nControls how spaces are retrieved."],
+        "description": [
+          "\nControls how spaces are retrieved."
+        ],
         "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2798,7 +3056,9 @@
             "parentPluginId": "spaces",
             "id": "def-server.GetAllSpacesOptions.purpose",
             "type": "CompoundType",
-            "tags": ["see"],
+            "tags": [
+              "see"
+            ],
             "label": "purpose",
             "description": [
               "\nAn optional purpose describing how the set of spaces will be used.\nThe default purpose (`any`) will retrieve all spaces the user is authorized to see,\nwhereas a more specific purpose will retrieve all spaces the user is authorized to perform a specific action within.\n"
@@ -2821,12 +3081,16 @@
             "parentPluginId": "spaces",
             "id": "def-server.GetAllSpacesOptions.includeAuthorizedPurposes",
             "type": "CompoundType",
-            "tags": ["see"],
+            "tags": [
+              "see"
+            ],
             "label": "includeAuthorizedPurposes",
             "description": [
               "\nSet to true to return a set of flags indicating which purposes the user is authorized for.\n"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2840,7 +3104,9 @@
         "type": "Interface",
         "tags": [],
         "label": "GetSpaceResult",
-        "description": ["\nResponse format when querying for spaces."],
+        "description": [
+          "\nResponse format when querying for spaces."
+        ],
         "signature": [
           {
             "pluginId": "spaces",
@@ -2895,7 +3161,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ISpacesClient",
-        "description": ["\nClient interface for interacting with spaces."],
+        "description": [
+          "\nClient interface for interacting with spaces."
+        ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2906,7 +3174,9 @@
             "type": "Function",
             "tags": [],
             "label": "getAll",
-            "description": ["\nRetrieve all available spaces."],
+            "description": [
+              "\nRetrieve all available spaces."
+            ],
             "signature": [
               "(options?: ",
               {
@@ -2936,7 +3206,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["controls which spaces are retrieved."],
+                "description": [
+                  "controls which spaces are retrieved."
+                ],
                 "signature": [
                   {
                     "pluginId": "spaces",
@@ -2961,7 +3233,9 @@
             "type": "Function",
             "tags": [],
             "label": "get",
-            "description": ["\nRetrieve a space by its id."],
+            "description": [
+              "\nRetrieve a space by its id."
+            ],
             "signature": [
               "(id: string) => Promise<",
               {
@@ -2983,8 +3257,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["the space id."],
-                "signature": ["string"],
+                "description": [
+                  "the space id."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2999,7 +3277,9 @@
             "type": "Function",
             "tags": [],
             "label": "create",
-            "description": ["\nCreates a space."],
+            "description": [
+              "\nCreates a space."
+            ],
             "signature": [
               "(space: ",
               {
@@ -3029,7 +3309,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "space",
-                "description": ["the space to create."],
+                "description": [
+                  "the space to create."
+                ],
                 "signature": [
                   {
                     "pluginId": "spaces",
@@ -3053,7 +3335,9 @@
             "type": "Function",
             "tags": [],
             "label": "update",
-            "description": ["\nUpdates a space."],
+            "description": [
+              "\nUpdates a space."
+            ],
             "signature": [
               "(id: string, space: ",
               {
@@ -3083,8 +3367,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["the id of the space to update."],
-                "signature": ["string"],
+                "description": [
+                  "the id of the space to update."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3096,7 +3384,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "space",
-                "description": ["the updated space."],
+                "description": [
+                  "the updated space."
+                ],
                 "signature": [
                   {
                     "pluginId": "spaces",
@@ -3144,8 +3434,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["the id of the space to search."],
-                "signature": ["string"],
+                "description": [
+                  "the id of the space to search."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3160,8 +3454,12 @@
             "type": "Function",
             "tags": [],
             "label": "delete",
-            "description": ["\nDeletes a space, and all saved objects belonging to that space."],
-            "signature": ["(id: string) => Promise<void>"],
+            "description": [
+              "\nDeletes a space, and all saved objects belonging to that space."
+            ],
+            "signature": [
+              "(id: string) => Promise<void>"
+            ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3172,8 +3470,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["the id of the space to delete."],
-                "signature": ["string"],
+                "description": [
+                  "the id of the space to delete."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3188,7 +3490,9 @@
             "type": "Function",
             "tags": [],
             "label": "disableLegacyUrlAliases",
-            "description": ["\nDisables the specified legacy URL aliases."],
+            "description": [
+              "\nDisables the specified legacy URL aliases."
+            ],
             "signature": [
               "(aliases: ",
               {
@@ -3210,7 +3514,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "aliases",
-                "description": ["the aliases to disable."],
+                "description": [
+                  "the aliases to disable."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-common",
@@ -3238,7 +3544,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Space",
-        "description": ["\nA Space."],
+        "description": [
+          "\nA Space."
+        ],
         "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3262,7 +3570,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["\nDisplay name for this space."],
+            "description": [
+              "\nDisplay name for this space."
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3273,8 +3583,12 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["\nOptional description for this space."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional description for this space."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3288,7 +3602,9 @@
             "description": [
               "\nOptional color (hex code) for this space.\nIf neither `color` nor `imageUrl` is specified, then a color will be automatically generated."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3302,7 +3618,9 @@
             "description": [
               "\nOptional display initials for this space's avatar. Supports a maximum of 2 characters.\nIf initials are not provided, then they will be derived from the space name automatically.\n\nInitials are not displayed if an `imageUrl` has been specified."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3316,7 +3634,9 @@
             "description": [
               "\nOptional base-64 encoded data image url to show as this space's avatar.\nThis setting takes precedence over any configured `color` or `initials`."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3327,8 +3647,12 @@
             "type": "Array",
             "tags": [],
             "label": "disabledFeatures",
-            "description": ["\nThe set of feature ids that should be hidden within this space."],
-            "signature": ["string[]"],
+            "description": [
+              "\nThe set of feature ids that should be hidden within this space."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3337,12 +3661,16 @@
             "parentPluginId": "spaces",
             "id": "def-server.Space._reserved",
             "type": "CompoundType",
-            "tags": ["private"],
+            "tags": [
+              "private"
+            ],
             "label": "_reserved",
             "description": [
               "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3356,7 +3684,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SpacesServiceSetup",
-        "description": ["\nThe Spaces service setup contract."],
+        "description": [
+          "\nThe Spaces service setup contract."
+        ],
         "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3367,7 +3697,9 @@
             "type": "Function",
             "tags": [],
             "label": "getSpaceId",
-            "description": ["\nRetrieves the space id associated with the provided request."],
+            "description": [
+              "\nRetrieves the space id associated with the provided request."
+            ],
             "signature": [
               "(request: ",
               {
@@ -3389,7 +3721,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": ["the request."],
+                "description": [
+                  "the request."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -3417,7 +3751,9 @@
             "description": [
               "\nConverts the provided space id into the corresponding Saved Objects `namespace` id."
             ],
-            "signature": ["(spaceId: string) => string | undefined"],
+            "signature": [
+              "(spaceId: string) => string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3428,8 +3764,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "spaceId",
-                "description": ["the space id to convert."],
-                "signature": ["string"],
+                "description": [
+                  "the space id to convert."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3444,8 +3784,12 @@
             "type": "Function",
             "tags": [],
             "label": "namespaceToSpaceId",
-            "description": ["\nConverts the provided namespace into the corresponding space id."],
-            "signature": ["(namespace: string | undefined) => string"],
+            "description": [
+              "\nConverts the provided namespace into the corresponding space id."
+            ],
+            "signature": [
+              "(namespace: string | undefined) => string"
+            ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3456,8 +3800,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": ["the namespace to convert."],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the namespace to convert."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3475,7 +3823,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SpacesServiceStart",
-        "description": ["\nThe Spaces service start contract."],
+        "description": [
+          "\nThe Spaces service start contract."
+        ],
         "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3486,7 +3836,9 @@
             "type": "Function",
             "tags": [],
             "label": "createSpacesClient",
-            "description": ["\nCreates a scoped instance of the SpacesClient."],
+            "description": [
+              "\nCreates a scoped instance of the SpacesClient."
+            ],
             "signature": [
               "(request: ",
               {
@@ -3515,7 +3867,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": ["the request."],
+                "description": [
+                  "the request."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -3540,7 +3894,9 @@
             "type": "Function",
             "tags": [],
             "label": "getSpaceId",
-            "description": ["\nRetrieves the space id associated with the provided request."],
+            "description": [
+              "\nRetrieves the space id associated with the provided request."
+            ],
             "signature": [
               "(request: ",
               {
@@ -3562,7 +3918,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": ["the request."],
+                "description": [
+                  "the request."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -3611,7 +3969,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": ["the request."],
+                "description": [
+                  "the request."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -3636,7 +3996,9 @@
             "type": "Function",
             "tags": [],
             "label": "getActiveSpace",
-            "description": ["\nRetrieves the Space associated with the provided request."],
+            "description": [
+              "\nRetrieves the Space associated with the provided request."
+            ],
             "signature": [
               "(request: ",
               {
@@ -3666,7 +4028,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": ["the request."],
+                "description": [
+                  "the request."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -3694,7 +4058,9 @@
             "description": [
               "\nConverts the provided space id into the corresponding Saved Objects `namespace` id."
             ],
-            "signature": ["(spaceId: string) => string | undefined"],
+            "signature": [
+              "(spaceId: string) => string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3705,8 +4071,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "spaceId",
-                "description": ["the space id to convert."],
-                "signature": ["string"],
+                "description": [
+                  "the space id to convert."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3721,8 +4091,12 @@
             "type": "Function",
             "tags": [],
             "label": "namespaceToSpaceId",
-            "description": ["\nConverts the provided namespace into the corresponding space id."],
-            "signature": ["(namespace: string | undefined) => string"],
+            "description": [
+              "\nConverts the provided namespace into the corresponding space id."
+            ],
+            "signature": [
+              "(namespace: string | undefined) => string"
+            ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3733,8 +4107,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": ["the namespace to convert."],
-                "signature": ["string | undefined"],
+                "description": [
+                  "the namespace to convert."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3770,9 +4148,13 @@
         "parentPluginId": "spaces",
         "id": "def-server.SpacesClientRepositoryFactory",
         "type": "Type",
-        "tags": ["private"],
+        "tags": [
+          "private"
+        ],
         "label": "SpacesClientRepositoryFactory",
-        "description": ["\nFor consumption by the security plugin only."],
+        "description": [
+          "\nFor consumption by the security plugin only."
+        ],
         "signature": [
           "(request: ",
           {
@@ -3852,9 +4234,13 @@
         "parentPluginId": "spaces",
         "id": "def-server.SpacesClientWrapper",
         "type": "Type",
-        "tags": ["private"],
+        "tags": [
+          "private"
+        ],
         "label": "SpacesClientWrapper",
-        "description": ["\nFor consumption by the security plugin only."],
+        "description": [
+          "\nFor consumption by the security plugin only."
+        ],
         "signature": [
           "(request: ",
           {
@@ -3938,7 +4324,9 @@
       "type": "Interface",
       "tags": [],
       "label": "SpacesPluginSetup",
-      "description": ["\nSetup contract for the Spaces plugin."],
+      "description": [
+        "\nSetup contract for the Spaces plugin."
+      ],
       "path": "x-pack/plugins/spaces/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -3949,7 +4337,9 @@
           "type": "Object",
           "tags": [],
           "label": "spacesService",
-          "description": ["\nService for interacting with spaces."],
+          "description": [
+            "\nService for interacting with spaces."
+          ],
           "signature": [
             {
               "pluginId": "spaces",
@@ -3967,7 +4357,9 @@
           "parentPluginId": "spaces",
           "id": "def-server.SpacesPluginSetup.spacesClient",
           "type": "Object",
-          "tags": ["private"],
+          "tags": [
+            "private"
+          ],
           "label": "spacesClient",
           "description": [
             "\nRegistries exposed for the security plugin to transparently provide authorization and audit logging."
@@ -4004,7 +4396,10 @@
           "description": [
             "\nDetermines whether Kibana supports multiple spaces or only the default space.\n\nWhen `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden."
           ],
-          "signature": ["Observable", "<boolean>"],
+          "signature": [
+            "Observable",
+            "<boolean>"
+          ],
           "path": "x-pack/plugins/spaces/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -4019,7 +4414,9 @@
       "type": "Interface",
       "tags": [],
       "label": "SpacesPluginStart",
-      "description": ["\nStart contract for the Spaces plugin."],
+      "description": [
+        "\nStart contract for the Spaces plugin."
+      ],
       "path": "x-pack/plugins/spaces/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -4030,7 +4427,9 @@
           "type": "Object",
           "tags": [],
           "label": "spacesService",
-          "description": ["Service for interacting with spaces."],
+          "description": [
+            "Service for interacting with spaces."
+          ],
           "signature": [
             {
               "pluginId": "spaces",
@@ -4053,7 +4452,10 @@
           "description": [
             "\nDetermines whether Kibana supports multiple spaces or only the default space.\n\nWhen `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden."
           ],
-          "signature": ["Observable", "<boolean>"],
+          "signature": [
+            "Observable",
+            "<boolean>"
+          ],
           "path": "x-pack/plugins/spaces/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -4075,7 +4477,9 @@
         "description": [
           "\nGiven a server base path, space id, and requested resource, this will construct a space-aware path\nthat includes a URL identifier with the space id.\n"
         ],
-        "signature": ["(basePath: string, spaceId: string, requestedPath: string) => string"],
+        "signature": [
+          "(basePath: string, spaceId: string, requestedPath: string) => string"
+        ],
         "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4086,8 +4490,12 @@
             "type": "string",
             "tags": [],
             "label": "basePath",
-            "description": ["the server's base path."],
-            "signature": ["string"],
+            "description": [
+              "the server's base path."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4099,8 +4507,12 @@
             "type": "string",
             "tags": [],
             "label": "spaceId",
-            "description": ["the space id."],
-            "signature": ["string"],
+            "description": [
+              "the space id."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4112,8 +4524,12 @@
             "type": "string",
             "tags": [],
             "label": "requestedPath",
-            "description": ["the requested path (e.g. `/app/dashboard`)."],
-            "signature": ["string"],
+            "description": [
+              "the requested path (e.g. `/app/dashboard`)."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4129,9 +4545,13 @@
         "parentPluginId": "spaces",
         "id": "def-common.getSpaceIdFromPath",
         "type": "Function",
-        "tags": ["private"],
+        "tags": [
+          "private"
+        ],
         "label": "getSpaceIdFromPath",
-        "description": ["\nExtracts the space id from the given path.\n"],
+        "description": [
+          "\nExtracts the space id from the given path.\n"
+        ],
         "signature": [
           "(requestBasePath: string | null | undefined, serverBasePath: string | null | undefined) => { spaceId: string; pathHasExplicitSpaceIdentifier: boolean; }"
         ],
@@ -4145,8 +4565,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "requestBasePath",
-            "description": ["The base path of the current request."],
-            "signature": ["string | null | undefined"],
+            "description": [
+              "The base path of the current request."
+            ],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4158,15 +4582,21 @@
             "type": "CompoundType",
             "tags": [],
             "label": "serverBasePath",
-            "description": ["The server's base path."],
-            "signature": ["string | null | undefined"],
+            "description": [
+              "The server's base path."
+            ],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/lib/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": ["the space id."],
+        "returnComment": [
+          "the space id."
+        ],
         "initialIsOpen": false
       },
       {
@@ -4175,7 +4605,9 @@
         "type": "Function",
         "tags": [],
         "label": "isReservedSpace",
-        "description": ["\nReturns whether the given Space is reserved or not.\n"],
+        "description": [
+          "\nReturns whether the given Space is reserved or not.\n"
+        ],
         "signature": [
           "(space: Partial<",
           {
@@ -4197,7 +4629,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "space",
-            "description": ["the space"],
+            "description": [
+              "the space"
+            ],
             "signature": [
               "Partial<",
               {
@@ -4215,7 +4649,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": ["boolean"],
+        "returnComment": [
+          "boolean"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -4226,7 +4662,9 @@
         "type": "Interface",
         "tags": [],
         "label": "GetAllSpacesOptions",
-        "description": ["\nControls how spaces are retrieved."],
+        "description": [
+          "\nControls how spaces are retrieved."
+        ],
         "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4235,7 +4673,9 @@
             "parentPluginId": "spaces",
             "id": "def-common.GetAllSpacesOptions.purpose",
             "type": "CompoundType",
-            "tags": ["see"],
+            "tags": [
+              "see"
+            ],
             "label": "purpose",
             "description": [
               "\nAn optional purpose describing how the set of spaces will be used.\nThe default purpose (`any`) will retrieve all spaces the user is authorized to see,\nwhereas a more specific purpose will retrieve all spaces the user is authorized to perform a specific action within.\n"
@@ -4258,12 +4698,16 @@
             "parentPluginId": "spaces",
             "id": "def-common.GetAllSpacesOptions.includeAuthorizedPurposes",
             "type": "CompoundType",
-            "tags": ["see"],
+            "tags": [
+              "see"
+            ],
             "label": "includeAuthorizedPurposes",
             "description": [
               "\nSet to true to return a set of flags indicating which purposes the user is authorized for.\n"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4277,7 +4721,9 @@
         "type": "Interface",
         "tags": [],
         "label": "GetSpaceResult",
-        "description": ["\nResponse format when querying for spaces."],
+        "description": [
+          "\nResponse format when querying for spaces."
+        ],
         "signature": [
           {
             "pluginId": "spaces",
@@ -4332,7 +4778,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Space",
-        "description": ["\nA Space."],
+        "description": [
+          "\nA Space."
+        ],
         "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4356,7 +4804,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["\nDisplay name for this space."],
+            "description": [
+              "\nDisplay name for this space."
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4367,8 +4817,12 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["\nOptional description for this space."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional description for this space."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4382,7 +4836,9 @@
             "description": [
               "\nOptional color (hex code) for this space.\nIf neither `color` nor `imageUrl` is specified, then a color will be automatically generated."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4396,7 +4852,9 @@
             "description": [
               "\nOptional display initials for this space's avatar. Supports a maximum of 2 characters.\nIf initials are not provided, then they will be derived from the space name automatically.\n\nInitials are not displayed if an `imageUrl` has been specified."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4410,7 +4868,9 @@
             "description": [
               "\nOptional base-64 encoded data image url to show as this space's avatar.\nThis setting takes precedence over any configured `color` or `initials`."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4421,8 +4881,12 @@
             "type": "Array",
             "tags": [],
             "label": "disabledFeatures",
-            "description": ["\nThe set of feature ids that should be hidden within this space."],
-            "signature": ["string[]"],
+            "description": [
+              "\nThe set of feature ids that should be hidden within this space."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4431,12 +4895,16 @@
             "parentPluginId": "spaces",
             "id": "def-common.Space._reserved",
             "type": "CompoundType",
-            "tags": ["private"],
+            "tags": [
+              "private"
+            ],
             "label": "_reserved",
             "description": [
               "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/spaces/common/types/space/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4454,7 +4922,9 @@
         "tags": [],
         "label": "DEFAULT_SPACE_ID",
         "description": [],
-        "signature": ["\"default\""],
+        "signature": [
+          "\"default\""
+        ],
         "path": "x-pack/plugins/spaces/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4466,8 +4936,12 @@
         "type": "string",
         "tags": [],
         "label": "ENTER_SPACE_PATH",
-        "description": ["\nThe path to enter a space."],
-        "signature": ["\"/spaces/enter\""],
+        "description": [
+          "\nThe path to enter a space."
+        ],
+        "signature": [
+          "\"/spaces/enter\""
+        ],
         "path": "x-pack/plugins/spaces/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4499,7 +4973,9 @@
         "description": [
           "\nThe maximum number of characters allowed in the Space Avatar's initials"
         ],
-        "signature": ["2"],
+        "signature": [
+          "2"
+        ],
         "path": "x-pack/plugins/spaces/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4511,8 +4987,12 @@
         "type": "number",
         "tags": [],
         "label": "SPACE_SEARCH_COUNT_THRESHOLD",
-        "description": ["\nThe minimum number of spaces required to show a search control."],
-        "signature": ["8"],
+        "description": [
+          "\nThe minimum number of spaces required to show a search control."
+        ],
+        "signature": [
+          "8"
+        ],
         "path": "x-pack/plugins/spaces/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

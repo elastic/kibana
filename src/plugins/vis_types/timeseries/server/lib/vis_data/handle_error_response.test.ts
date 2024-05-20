@@ -7,7 +7,7 @@
  */
 
 import { Panel } from '../../../common/types';
-import { ErrorResponse, handleErrorResponse } from './handle_error_response';
+import { handleErrorResponse, ErrorResponse } from './handle_error_response';
 
 describe('handleErrorResponse', () => {
   const handleError = handleErrorResponse({

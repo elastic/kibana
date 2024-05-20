@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import { FieldDefinition, UnsavedFieldChange, SettingType } from '@kbn/management-settings-types';
 import { hasUnsavedChange } from '@kbn/management-settings-utilities';
 
 /**

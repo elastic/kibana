@@ -12,8 +12,8 @@ import { act, fireEvent, waitFor, within } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import {
-  sendGetAgentsAvailableVersions,
   sendGetAllFleetServerAgents,
+  sendGetAgentsAvailableVersions,
   sendPostBulkAgentUpgrade,
 } from '../../../../hooks';
 

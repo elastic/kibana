@@ -68,7 +68,9 @@
             "description": [
               "The {@link GetDefinitionParams } for creating the {@link FieldDefinition }."
             ],
-            "signature": ["GetDefinitionParams<T>"],
+            "signature": [
+              "GetDefinitionParams<T>"
+            ],
             "path": "packages/kbn-management/settings/field_definition/get_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -132,7 +134,9 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
-            "description": ["The settings retreived from the UiSettingsClient."],
+            "description": [
+              "The settings retreived from the UiSettingsClient."
+            ],
             "signature": [
               "Record<string, ",
               {
@@ -166,14 +170,18 @@
             "description": [
               "The client itself, used to determine if a setting is custom or overridden."
             ],
-            "signature": ["SettingsClient"],
+            "signature": [
+              "SettingsClient"
+            ],
             "path": "packages/kbn-management/settings/field_definition/get_definitions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["An array of {@link FieldDefinition } objects."],
+        "returnComment": [
+          "An array of {@link FieldDefinition } objects."
+        ],
         "initialIsOpen": false
       },
       {
@@ -205,8 +213,12 @@
             "type": "Object",
             "tags": [],
             "label": "d",
-            "description": ["The {@link FieldDefinition } to check."],
-            "signature": ["Definition"],
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -245,8 +257,12 @@
             "type": "Object",
             "tags": [],
             "label": "c",
-            "description": ["The {@link FieldUnsavedChange } to check."],
-            "signature": ["Change | undefined"],
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -285,8 +301,12 @@
             "type": "Object",
             "tags": [],
             "label": "d",
-            "description": ["The {@link FieldDefinition } to check."],
-            "signature": ["Definition"],
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -325,8 +345,12 @@
             "type": "Object",
             "tags": [],
             "label": "c",
-            "description": ["The {@link FieldUnsavedChange } to check."],
-            "signature": ["Change | undefined"],
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -365,8 +389,12 @@
             "type": "Object",
             "tags": [],
             "label": "d",
-            "description": ["The {@link FieldDefinition } to check."],
-            "signature": ["Definition"],
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -405,8 +433,12 @@
             "type": "Object",
             "tags": [],
             "label": "c",
-            "description": ["The {@link FieldUnsavedChange } to check."],
-            "signature": ["Change | undefined"],
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -445,8 +477,12 @@
             "type": "Object",
             "tags": [],
             "label": "d",
-            "description": ["The {@link FieldDefinition } to check."],
-            "signature": ["Definition"],
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -485,8 +521,12 @@
             "type": "Object",
             "tags": [],
             "label": "c",
-            "description": ["The {@link FieldUnsavedChange } to check."],
-            "signature": ["Change | undefined"],
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -525,8 +565,12 @@
             "type": "Object",
             "tags": [],
             "label": "d",
-            "description": ["The {@link FieldDefinition } to check."],
-            "signature": ["Definition"],
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -565,8 +609,12 @@
             "type": "Object",
             "tags": [],
             "label": "c",
-            "description": ["The {@link FieldUnsavedChange } to check."],
-            "signature": ["Change | undefined"],
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -605,8 +653,12 @@
             "type": "Object",
             "tags": [],
             "label": "d",
-            "description": ["The {@link FieldDefinition } to check."],
-            "signature": ["Definition"],
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -645,8 +697,12 @@
             "type": "Object",
             "tags": [],
             "label": "c",
-            "description": ["The {@link FieldUnsavedChange } to check."],
-            "signature": ["Change | undefined"],
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -685,8 +741,12 @@
             "type": "Object",
             "tags": [],
             "label": "d",
-            "description": ["The {@link FieldDefinition } to check."],
-            "signature": ["Definition"],
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -725,8 +785,12 @@
             "type": "Object",
             "tags": [],
             "label": "c",
-            "description": ["The {@link FieldUnsavedChange } to check."],
-            "signature": ["Change | undefined"],
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -765,8 +829,12 @@
             "type": "Object",
             "tags": [],
             "label": "d",
-            "description": ["The {@link FieldDefinition } to check."],
-            "signature": ["Definition"],
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -805,8 +873,12 @@
             "type": "Object",
             "tags": [],
             "label": "c",
-            "description": ["The {@link FieldUnsavedChange } to check."],
-            "signature": ["Change | undefined"],
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -845,8 +917,12 @@
             "type": "Object",
             "tags": [],
             "label": "d",
-            "description": ["The {@link FieldDefinition } to check."],
-            "signature": ["Definition"],
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -885,8 +961,12 @@
             "type": "Object",
             "tags": [],
             "label": "c",
-            "description": ["The {@link FieldUnsavedChange } to check."],
-            "signature": ["Change | undefined"],
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -925,8 +1005,12 @@
             "type": "Object",
             "tags": [],
             "label": "d",
-            "description": ["The {@link FieldDefinition } to check."],
-            "signature": ["Definition"],
+            "description": [
+              "The {@link FieldDefinition } to check."
+            ],
+            "signature": [
+              "Definition"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/field_definition.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -965,8 +1049,12 @@
             "type": "Object",
             "tags": [],
             "label": "c",
-            "description": ["The {@link FieldUnsavedChange } to check."],
-            "signature": ["Change | undefined"],
+            "description": [
+              "The {@link FieldUnsavedChange } to check."
+            ],
+            "signature": [
+              "Change | undefined"
+            ],
             "path": "packages/kbn-management/settings/field_definition/is/unsaved_change.ts",
             "deprecated": false,
             "trackAdoption": false,

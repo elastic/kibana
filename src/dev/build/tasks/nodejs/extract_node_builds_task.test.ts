@@ -9,9 +9,9 @@
 import { readFileSync } from 'fs';
 import Path from 'path';
 
-import { createAbsolutePathSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { createAbsolutePathSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 
 import { Config } from '../../lib';
 import { ExtractNodeBuilds } from './extract_node_builds_task';

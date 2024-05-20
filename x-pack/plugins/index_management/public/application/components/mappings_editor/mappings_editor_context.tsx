@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { ConfigProvider } from './config_context';
 import { StateProvider } from './mappings_state_context';
+import { ConfigProvider } from './config_context';
 
 export const MappingsEditorProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   return (

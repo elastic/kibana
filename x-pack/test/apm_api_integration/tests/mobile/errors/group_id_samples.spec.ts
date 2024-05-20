@@ -1,7 +1,3 @@
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { timerange } from '@kbn/apm-synthtrace-client';
-import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
-import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,7 +5,11 @@ import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { timerange } from '@kbn/apm-synthtrace-client';
+import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import { orderBy } from 'lodash';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { config, generateData } from './generate_data';
 

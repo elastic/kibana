@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { ChangeEvent } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent } from 'react';
 
 export enum OBSERVABILITY_LAYER_TYPE {
   APM_RUM_PERFORMANCE = 'APM_RUM_PERFORMANCE',

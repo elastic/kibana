@@ -1,5 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiNotificationBadge } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLink } from '../../../hooks';
 import type { Section } from '../sections';

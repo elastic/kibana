@@ -8,8 +8,8 @@
 
 import { StartServicesAccessor } from '@kbn/core/public';
 import { UiSettingsCommon } from '../../../common';
-import { getEsqlFn } from '../../../common/search/expressions/esql';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import { getEsqlFn } from '../../../common/search/expressions/esql';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies

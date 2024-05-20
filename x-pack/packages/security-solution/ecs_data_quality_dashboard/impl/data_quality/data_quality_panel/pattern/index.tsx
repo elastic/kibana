@@ -20,6 +20,17 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
+import { ErrorEmptyPrompt } from '../error_empty_prompt';
+import {
+  defaultSort,
+  getIlmExplainPhaseCounts,
+  getIlmPhase,
+  getPageIndex,
+  getSummaryTableItems,
+  MIN_PAGE_SIZE,
+  shouldCreateIndexNames,
+  shouldCreatePatternRollup,
+} from './helpers';
 import {
   getDocsCount,
   getIndexId,
@@ -29,28 +40,17 @@ import {
   getTotalPatternIndicesChecked,
   getTotalSizeInBytes,
 } from '../../helpers';
+import { IndexProperties } from '../index_properties';
+import { LoadingEmptyPrompt } from '../loading_empty_prompt';
+import { PatternSummary } from './pattern_summary';
+import { RemoteClustersCallout } from '../remote_clusters_callout';
+import { SummaryTable } from '../summary_table';
+import { getSummaryTableColumns } from '../summary_table/helpers';
+import * as i18n from './translations';
 import type { PatternRollup, SelectedIndex, SortConfig } from '../../types';
 import { useIlmExplain } from '../../use_ilm_explain';
 import { useStats } from '../../use_stats';
 import { useDataQualityContext } from '../data_quality_context';
-import { ErrorEmptyPrompt } from '../error_empty_prompt';
-import { IndexProperties } from '../index_properties';
-import { LoadingEmptyPrompt } from '../loading_empty_prompt';
-import { RemoteClustersCallout } from '../remote_clusters_callout';
-import { SummaryTable } from '../summary_table';
-import { getSummaryTableColumns } from '../summary_table/helpers';
-import {
-  MIN_PAGE_SIZE,
-  defaultSort,
-  getIlmExplainPhaseCounts,
-  getIlmPhase,
-  getPageIndex,
-  getSummaryTableItems,
-  shouldCreateIndexNames,
-  shouldCreatePatternRollup,
-} from './helpers';
-import { PatternSummary } from './pattern_summary';
-import * as i18n from './translations';
 
 const IndexPropertiesContainer = styled.div`
   margin-bottom: ${euiThemeVars.euiSizeS};

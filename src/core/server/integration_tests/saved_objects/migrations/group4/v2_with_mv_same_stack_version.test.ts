@@ -7,15 +7,15 @@
  */
 
 import Path from 'path';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
-import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import fs from 'fs/promises';
 import { range, sortBy } from 'lodash';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import '../jest_matchers';
-import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { createType, delay, parseLogFile } from '../test_utils';
+import { delay, createType, parseLogFile } from '../test_utils';
+import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 
 const logFilePath = Path.join(__dirname, 'v2_with_mv_same_stack_version.test.log');
 

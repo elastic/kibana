@@ -7,8 +7,8 @@
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { FollowerIndexEdit } from '../../../app/sections/follower_index_edit';
-import { routing } from '../../../app/services/routing';
 import { ccrStore } from '../../../app/store';
+import { routing } from '../../../app/services/routing';
 
 import { FOLLOWER_INDEX_EDIT_NAME } from './constants';
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { Suspense } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React, { Suspense } from 'react';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import EmailActionConnectorFields from './email_connector';
+import * as hooks from './use_email_config';
 import {
   AppMockRenderer,
   ConnectorFormTestProvider,
   createAppMockRenderer,
   waitForComponentToUpdate,
 } from '../lib/test_utils';
-import EmailActionConnectorFields from './email_connector';
-import * as hooks from './use_email_config';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiCodeBlock, EuiFieldText, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
+import { EuiCallOut, EuiCodeBlock, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { MultiRowInput } from '../multi_row_input';
 
-import { SecretFormRow } from './output_form_secret_form_row';
 import type { OutputFormInputsType } from './use_output_form';
+import { SecretFormRow } from './output_form_secret_form_row';
 
 interface Props {
   inputs: OutputFormInputsType;

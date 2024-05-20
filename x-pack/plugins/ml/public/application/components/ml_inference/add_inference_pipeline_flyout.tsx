@@ -11,8 +11,8 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -20,22 +20,22 @@ import {
 import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 
-import { useMlApiContext } from '../../contexts/kibana';
 import type { ModelItem } from '../../model_management/models_list';
+import type { AddInferencePipelineSteps } from './types';
+import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
 import { AddInferencePipelineFooter } from '../shared';
 import { AddInferencePipelineHorizontalSteps } from '../shared';
-import { OnFailureConfiguration } from '../shared';
-import { ReviewAndCreatePipeline } from '../shared';
+import { getInitialState, getModelType } from './state';
 import { PipelineDetails } from './components/pipeline_details';
 import { ProcessorConfiguration } from './components/processor_configuration';
+import { OnFailureConfiguration } from '../shared';
 import { TestPipeline } from './components/test_pipeline';
-import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
+import { ReviewAndCreatePipeline } from '../shared';
+import { useMlApiContext } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
-import { useFetchPipelines } from './hooks/use_fetch_pipelines';
-import { getInitialState, getModelType } from './state';
-import type { AddInferencePipelineSteps } from './types';
-import { type InferenceModelTypes, type MlInferenceState, TEST_PIPELINE_MODE } from './types';
 import { validateInferencePipelineConfigurationStep } from './validation';
+import { type MlInferenceState, type InferenceModelTypes, TEST_PIPELINE_MODE } from './types';
+import { useFetchPipelines } from './hooks/use_fetch_pipelines';
 
 export interface AddInferencePipelineFlyoutProps {
   onClose: () => void;

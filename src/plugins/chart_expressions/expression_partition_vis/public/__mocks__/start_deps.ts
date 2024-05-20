@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { from } from 'rxjs';
+import { action } from '@storybook/addon-actions';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { action } from '@storybook/addon-actions';
-import { from } from 'rxjs';
-import { VisTypePieDependencies } from '../plugin';
 import { getFormatService } from './format_service';
 import { palettes } from './palettes';
 import { theme } from './theme';
+import { VisTypePieDependencies } from '../plugin';
 
 const data = {
   actions: {

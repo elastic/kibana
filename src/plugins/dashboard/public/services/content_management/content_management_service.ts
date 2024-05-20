@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { DashboardStartDependencies } from '../../plugin';
 
 export type ContentManagementServiceFactory = KibanaPluginServiceFactory<

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { flashErrorToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { ApiTokenTypes } from '../credentials/constants';
 import { ApiToken } from '../credentials/types';
 
-import { POLLING_DURATION, POLLING_ERROR_TEXT, POLLING_ERROR_TITLE } from './constants';
+import { POLLING_DURATION, POLLING_ERROR_TITLE, POLLING_ERROR_TEXT } from './constants';
 import { EngineDetails, EngineTypes } from './types';
 
 interface EngineValues {

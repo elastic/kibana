@@ -9,12 +9,12 @@
 import { parse } from '@babel/parser';
 import { isCallExpression, isJSXOpeningElement } from '@babel/types';
 
-import { traverseNodes } from '../utils';
 import {
   extractCodeMessages,
   isFormattedMessageElement,
   isIntlFormatMessageFunction,
 } from './code';
+import { traverseNodes } from '../utils';
 
 const extractCodeMessagesSource = Buffer.from(`
 i18n('kbn.mgmt.id-1', { defaultMessage: 'Message text 1' });

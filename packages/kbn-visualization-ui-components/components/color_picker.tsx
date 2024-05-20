@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
+  EuiFormRow,
   EuiColorPicker,
   EuiColorPickerProps,
-  EuiFormRow,
-  EuiIcon,
   EuiToolTip,
+  EuiIcon,
   euiPaletteColorBlind,
 } from '@elastic/eui';
 import { getColorAlpha, makeColorWithAlpha } from '@kbn/coloring';
-import { i18n } from '@kbn/i18n';
-import { TooltipWrapper } from '@kbn/visualization-utils';
-import React, { useEffect, useRef, useState } from 'react';
 
 const tooltipContent = {
   auto: i18n.translate('visualizationUiComponents.colorPicker.tooltip.auto', {

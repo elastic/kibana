@@ -1,4 +1,3 @@
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,16 +5,17 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
  * 2.0.
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
-import type { DataViewsState } from '../../state_management';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
+import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
+import type { DataViewsState } from '../../state_management';
 import { addColumnsToCache } from './fieldlist_cache';
-import type { IndexPatternRef, TextBasedLayerColumn, TextBasedPrivateState } from './types';
 
 export const MAX_NUM_OF_COLUMNS = 5;
 

@@ -7,21 +7,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SuggestionRawDefinition } from './types';
+import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionsDefinitions } from '../definitions/functions';
-import { groupingFunctionDefinitions } from '../definitions/grouping';
-import { getCommandSignature, getFunctionSignatures } from '../definitions/helpers';
+import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import {
-  CommandDefinition,
-  CommandModeDefinition,
-  CommandOptionsDefinition,
   FunctionDefinition,
+  CommandDefinition,
+  CommandOptionsDefinition,
+  CommandModeDefinition,
 } from '../definitions/types';
-import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
-import { SuggestionRawDefinition } from './types';
+import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
 const allFunctions = statsAggregationFunctionDefinitions
   .concat(evalFunctionsDefinitions)

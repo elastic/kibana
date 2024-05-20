@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
-import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { getElasticOutline, getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getRevealImageRenderer } from '..';
 import { Origin } from '../../../common/types/expression_functions';
 

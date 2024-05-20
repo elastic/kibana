@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { ActionFactoryPicker as ActionFactoryPickerUi } from '../../../../components/action_factory_picker';
-import { ActionFactoryView } from '../action_factory_view';
 import { useDrilldownManager } from '../context';
+import { ActionFactoryView } from '../action_factory_view';
 
 export const ActionFactoryPicker: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();

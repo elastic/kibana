@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expectedDsl, mockOptions } from './__mocks__';
 import { buildTopCountriesQuery } from './query.top_countries_network.dsl';
+import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildTopCountriesQuery', () => {
   test('build query from options correctly', () => {

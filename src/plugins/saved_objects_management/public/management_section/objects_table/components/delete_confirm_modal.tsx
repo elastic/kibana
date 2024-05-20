@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
+import React, { FC, useMemo } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLoadingElastic,
-  EuiLoadingSpinner,
+  EuiToolTip,
+  EuiIcon,
+  EuiOverlayMask,
   EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
   EuiSpacer,
-  EuiToolTip,
+  EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, useMemo } from 'react';
-import type { SavedObjectManagementTypeInfo, SavedObjectWithMetadata } from '../../../../common';
+import { css } from '@emotion/react';
+import type { SavedObjectWithMetadata, SavedObjectManagementTypeInfo } from '../../../../common';
 import { getSavedObjectLabel } from '../../../lib';
 
 export interface DeleteConfirmModalProps {

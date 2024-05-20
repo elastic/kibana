@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
-import React, { useEffect, useMemo, useState } from 'react';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import { AutoAbortedAPMClient, callApmApi } from '../services/rest/create_call_apm_api';
 

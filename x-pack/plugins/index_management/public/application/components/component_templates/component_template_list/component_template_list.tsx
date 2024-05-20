@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ScopedHistory } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ScopedHistory } from '@kbn/core/public';
+import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import {
   APP_WRAPPER_CLASS,
-  PageError,
   PageLoading,
+  PageError,
   attemptToURIDecode,
 } from '../../../../shared_imports';
-import { useRedirectPath } from '../../../hooks/redirect_path';
-import { IndexManagementBreadcrumb, breadcrumbService } from '../../../services/breadcrumbs';
+import { ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
+import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
+import { useComponentTemplatesContext } from '../component_templates_context';
 import {
   ComponentTemplateDetailsFlyoutContent,
-  ComponentTemplateDetailsProps,
   defaultFlyoutProps,
+  ComponentTemplateDetailsProps,
 } from '../component_template_details';
-import { useComponentTemplatesContext } from '../component_templates_context';
-import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
-import { ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
-import { ComponentTemplatesDeleteModal } from './delete_modal';
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
+import { ComponentTemplatesDeleteModal } from './delete_modal';
+import { useRedirectPath } from '../../../hooks/redirect_path';
 
 interface Props {
   componentTemplateName?: string;

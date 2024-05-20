@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { Feature } from 'geojson';
 import { ReactNode } from 'react';
+import { Feature } from 'geojson';
+import { i18n } from '@kbn/i18n';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { GeoFileImporter, GeoFilePreview } from './types';
+import { CreateDocsResponse, ImportResults } from '../types';
+import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
 import { MB } from '../../../common/constants';
 import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
-import { IMPORT_RETRIES, Importer, MAX_CHUNK_CHAR_COUNT, callImportRoute } from '../importer';
-import { CreateDocsResponse, ImportResults } from '../types';
-import { createChunks } from './create_chunks';
 import { geoJsonCleanAndValidate } from './geojson_clean_and_validate';
-import { GeoFileImporter, GeoFilePreview } from './types';
+import { createChunks } from './create_chunks';
 
 const BLOCK_SIZE_MB = 5 * MB;
 

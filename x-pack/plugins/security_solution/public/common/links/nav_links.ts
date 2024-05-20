@@ -9,9 +9,9 @@ import type { CoreStart } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map } from 'rxjs';
-import type { SecurityPageName } from '../../app/types';
 import { appLinks$ } from './links';
-import type { AppLinkItems, NavigationLink, SecurityNavLink } from './types';
+import type { SecurityPageName } from '../../app/types';
+import type { SecurityNavLink, AppLinkItems, NavigationLink } from './types';
 
 export const formatNavigationLinks = (appLinks: AppLinkItems): SecurityNavLink[] =>
   appLinks.map<SecurityNavLink>((link) => ({

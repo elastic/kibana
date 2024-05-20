@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { IConfigServiceMock } from '@kbn/config-mocks';
-import { schema } from '@kbn/config-schema';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
-import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import supertest from 'supertest';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type { IRouter, RouteRegistrar } from '@kbn/core-http-server';
-import { HttpServerSetup, HttpService } from '@kbn/core-http-server-internal';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createConfigService, createHttpService } from '@kbn/core-http-server-mocks';
+import { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { schema } from '@kbn/config-schema';
+import { IConfigServiceMock } from '@kbn/config-mocks';
 import { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
-import { kibanaPackageJson } from '@kbn/repo-info';
-import supertest from 'supertest';
+import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 
 const actualVersion = kibanaPackageJson.version;
 const versionHeader = 'kbn-version';

@@ -9,17 +9,17 @@
 import { getCapabilitiesForRollupIndices } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/common';
-import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
 import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
+import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
 
-import { UI_SETTINGS } from '../../../../common/constants';
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
+import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import type {
   VisTypeTimeseriesRequest,
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
+import { UI_SETTINGS } from '../../../../common/constants';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 const isIndexPatternContainsWildcard = (indexPattern: string) => indexPattern.includes('*');

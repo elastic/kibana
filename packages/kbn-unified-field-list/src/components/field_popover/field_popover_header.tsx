@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import {
   EuiButtonIcon,
   EuiButtonIconProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopoverProps,
-  EuiSpacer,
-  EuiTitle,
   EuiToolTip,
+  EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldDescription } from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { FieldDescription } from '@kbn/field-utils';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler } from '../../types';
 
 export interface FieldPopoverHeaderProps {

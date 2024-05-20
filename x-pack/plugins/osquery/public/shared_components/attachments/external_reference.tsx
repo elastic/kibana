@@ -6,12 +6,12 @@
  */
 
 import { EuiAvatar } from '@elastic/eui';
-import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import React from 'react';
+import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { CASE_ATTACHMENT_TYPE_ID } from '../../../common/constants';
-import OsqueryLogo from '../../components/osquery_icon/osquery.svg';
-import type { ServicesWrapperProps } from '../services_wrapper';
 import { getLazyExternalContent } from './lazy_external_reference_content';
+import type { ServicesWrapperProps } from '../services_wrapper';
+import OsqueryLogo from '../../components/osquery_icon/osquery.svg';
 
 export const getExternalReferenceAttachmentRegular = (
   services: ServicesWrapperProps['services']

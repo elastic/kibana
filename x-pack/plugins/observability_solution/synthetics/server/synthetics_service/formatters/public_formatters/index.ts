@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { BrowserFormatMap, browserFormatters } from './browser';
-import { CommonFormatMap, commonFormatters } from './common';
-import { HTTPFormatMap, httpFormatters } from './http';
-import { ICMPFormatMap, icmpFormatters } from './icmp';
-import { TCPFormatMap, tcpFormatters } from './tcp';
+import { httpFormatters, HTTPFormatMap } from './http';
+import { tcpFormatters, TCPFormatMap } from './tcp';
+import { icmpFormatters, ICMPFormatMap } from './icmp';
+import { browserFormatters, BrowserFormatMap } from './browser';
+import { commonFormatters, CommonFormatMap } from './common';
 
 type Formatters = HTTPFormatMap & TCPFormatMap & ICMPFormatMap & BrowserFormatMap & CommonFormatMap;
 

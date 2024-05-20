@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { getAdvancedButton } from '../../screens/integrations';
-import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { SAVED_QUERY_DROPDOWN_SELECT } from '../../screens/packs';
-import { ServerlessRoleName } from '../../support/roles';
-import { cleanupSavedQuery, loadSavedQuery } from '../../tasks/api_fixtures';
+import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
   checkResults,
@@ -21,7 +18,10 @@ import {
   typeInOsqueryFieldInput,
   verifyQueryTimeout,
 } from '../../tasks/live_query';
-import { navigateTo } from '../../tasks/navigation';
+import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { getAdvancedButton } from '../../screens/integrations';
+import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;

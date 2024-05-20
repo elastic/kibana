@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 
 export function useBehaviorSubject<T>(o$: BehaviorSubject<T>) {
   return useObservable(o$, o$.getValue());

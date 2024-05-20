@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { identity } from 'lodash';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type { GenericBulkCreateResponse } from '../factories';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { singleSearchAfter } from './single_search_after';
+import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
+import { sendAlertTelemetryEvents } from './send_telemetry_events';
+import {
+  createSearchAfterReturnType,
+  createSearchResultReturnType,
+  createSearchAfterReturnTypeFromResponse,
+  getTotalHitsValue,
+  mergeReturns,
+  mergeSearchResults,
+  getSafeSortIds,
+} from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   SignalSourceHit,
 } from '../types';
-import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
-import { sendAlertTelemetryEvents } from './send_telemetry_events';
-import { singleSearchAfter } from './single_search_after';
-import {
-  createSearchAfterReturnType,
-  createSearchAfterReturnTypeFromResponse,
-  createSearchResultReturnType,
-  getSafeSortIds,
-  getTotalHitsValue,
-  mergeReturns,
-  mergeSearchResults,
-} from './utils';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { GenericBulkCreateResponse } from '../factories';
 
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 

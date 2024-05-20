@@ -9,15 +9,15 @@ import { isObject } from 'lodash';
 
 import { getFlattenedObject } from '@kbn/std';
 
+import type { AgentPolicy, OutputType, ValueOf } from '../types';
 import {
   FLEET_APM_PACKAGE,
   FLEET_SERVER_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
+  outputType,
   OUTPUT_TYPES_WITH_PRESET_SUPPORT,
   RESERVED_CONFIG_YML_KEYS,
-  outputType,
 } from '../constants';
-import type { AgentPolicy, OutputType, ValueOf } from '../types';
 
 const sameClusterRestrictedPackages = [
   FLEET_SERVER_PACKAGE,

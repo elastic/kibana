@@ -12,10 +12,10 @@ import styled, { css } from 'styled-components';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFieldText,
+  EuiButtonIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { ColorPicker } from '@kbn/visualization-ui-components';
-import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiBadge,
@@ -21,27 +21,27 @@ import {
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { getColorCategories } from '@kbn/chart-expressions-common';
 import {
-  AVAILABLE_PALETTES,
-  CategoricalColorMapping,
+  PaletteRegistry,
   ColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
+  CategoricalColorMapping,
   PaletteOutput,
-  PaletteRegistry,
   SPECIAL_TOKENS_STRING_CONVERTION,
+  AVAILABLE_PALETTES,
   getColorsFromMapping,
 } from '@kbn/coloring';
-import { FormatFactory } from '../../../../common/types';
-import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
-import { PalettePanelContainer, PalettePicker } from '../../../shared_components';
-import { CollapseSetting } from '../../../shared_components/collapse_setting';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { VisualizationDimensionEditorProps } from '../../../types';
-import { getAssignedColorConfig, getColorAssignments } from '../color_assignment';
+import { State, XYState, XYDataLayerConfig, YConfig, YAxisMode } from '../types';
+import { FormatFactory } from '../../../../common/types';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
-import { getSortedAccessors } from '../to_expression';
-import { State, XYDataLayerConfig, XYState, YAxisMode, YConfig } from '../types';
+import { PalettePanelContainer, PalettePicker } from '../../../shared_components';
 import { getDataLayers } from '../visualization_helpers';
+import { CollapseSetting } from '../../../shared_components/collapse_setting';
+import { getSortedAccessors } from '../to_expression';
+import { getColorAssignments, getAssignedColorConfig } from '../color_assignment';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 

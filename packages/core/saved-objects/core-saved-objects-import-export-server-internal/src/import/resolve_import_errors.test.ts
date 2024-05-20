@@ -7,40 +7,40 @@
  */
 
 import {
+  mockCheckReferenceOrigins,
+  mockValidateRetries,
+  mockCreateObjectsFilter,
+  mockCollectSavedObjects,
+  mockRegenerateIds,
+  mockValidateReferences,
   mockCheckConflicts,
   mockCheckOriginConflicts,
-  mockCheckReferenceOrigins,
-  mockCollectSavedObjects,
-  mockCreateObjectsFilter,
+  mockGetImportStateMapForRetries,
+  mockSplitOverwrites,
   mockCreateSavedObjects,
   mockExecuteImportHooks,
-  mockGetImportStateMapForRetries,
-  mockRegenerateIds,
-  mockSplitOverwrites,
-  mockValidateReferences,
-  mockValidateRetries,
 } from './resolve_import_errors.test.mock';
 
 import { Readable } from 'stream';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsImportWarning,
 } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
+  SavedObjectsType,
   ISavedObjectTypeRegistry,
+  SavedObjectsImportHook,
   SavedObject,
   SavedObjectReference,
-  SavedObjectsImportHook,
-  SavedObjectsType,
 } from '@kbn/core-saved-objects-server';
-import { v4 as uuidv4 } from 'uuid';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
-  type ResolveSavedObjectsImportErrorsOptions,
   resolveSavedObjectsImportErrors,
+  type ResolveSavedObjectsImportErrorsOptions,
 } from './resolve_import_errors';
 
 describe('#importSavedObjectsFromStream', () => {
@@ -90,7 +90,7 @@ describe('#importSavedObjectsFromStream', () => {
       ({
         // other attributes aren't needed for the purposes of injecting metadata
         management: { icon: `${type}-icon` },
-      }) as any,
+      } as any),
     importHooks = {},
     managed,
   }: {

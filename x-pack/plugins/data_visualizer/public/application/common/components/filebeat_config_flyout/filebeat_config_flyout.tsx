@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCode,
-  EuiCodeBlock,
-  EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
-import { useDataVisualizerKibana } from '../../../kibana_context'; // copy context?
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlyout,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiSpacer,
+  EuiCodeBlock,
+  EuiCode,
+  EuiCopy,
+} from '@elastic/eui';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { createFilebeatConfig } from './filebeat_config';
+import { useDataVisualizerKibana } from '../../../kibana_context'; // copy context?
 
 export enum EDITOR_MODE {
   HIDDEN,

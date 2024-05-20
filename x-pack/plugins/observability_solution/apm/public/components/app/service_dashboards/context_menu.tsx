@@ -1,4 +1,3 @@
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } fr
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 interface Props {
   items: React.ReactNode[];

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@kbn/datemath';
 import d3 from 'd3';
+import dateMath from '@kbn/datemath';
 
 export class TimeMarker {
   constructor(times, xScale, height) {

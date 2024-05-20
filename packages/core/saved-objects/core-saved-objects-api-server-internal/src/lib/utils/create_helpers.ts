@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import type {
   IKibanaMigrator,
   SavedObjectsSerializer,
@@ -14,19 +15,18 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
-import type { Logger } from '@kbn/logging';
 import {
+  RepositoryHelpers,
   CommonHelper,
   EncryptionHelper,
-  MigrationHelper,
-  PreflightCheckHelper,
-  RepositoryHelpers,
-  SerializerHelper,
-  UserHelper,
   ValidationHelper,
+  PreflightCheckHelper,
+  SerializerHelper,
+  MigrationHelper,
+  UserHelper,
 } from '../apis/helpers';
-import { CreatePointInTimeFinderFn } from '../point_in_time_finder';
 import type { RepositoryEsClient } from '../repository_es_client';
+import { CreatePointInTimeFinderFn } from '../point_in_time_finder';
 
 interface CreateRepositoryHelpersOptions {
   index: string;

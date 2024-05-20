@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 import './setup_jest_mocks';
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { act } from '@testing-library/react';
-import { BehaviorSubject, of } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import { renderNavigation } from './utils';
 

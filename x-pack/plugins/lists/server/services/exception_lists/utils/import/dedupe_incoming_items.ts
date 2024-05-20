@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import {
   BulkErrorSchema,
   ImportExceptionListItemSchemaDecoded,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Reports on duplicates and returns unique array of items

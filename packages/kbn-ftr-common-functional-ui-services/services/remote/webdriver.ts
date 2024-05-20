@@ -6,31 +6,31 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import { resolve } from 'path';
+import Fs from 'fs';
 
+import * as Rx from 'rxjs';
+import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
-import { installDriver } from 'ms-chromium-edge-driver';
-import * as Rx from 'rxjs';
-import { catchError, ignoreElements, map, mergeMap, takeWhile } from 'rxjs';
-import { Builder, WebDriver, logging } from 'selenium-webdriver';
+import { Builder, logging, WebDriver } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
-import edge from 'selenium-webdriver/edge';
 import firefox from 'selenium-webdriver/firefox';
+import edge from 'selenium-webdriver/edge';
 // @ts-ignore internal modules are not typed
 import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore internal modules are not typed
 import { getLogger } from 'selenium-webdriver/lib/logging';
+import { installDriver } from 'ms-chromium-edge-driver';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { createStdoutSocket } from './create_stdout_stream';
 import { FINAL_LOG_ENTRY_PREFIX, pollForLogEntry$ } from './poll_for_log_entry';
+import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
-import { NETWORK_PROFILES, NetworkProfile } from './network_profiles';
+import { NetworkProfile, NETWORK_PROFILES } from './network_profiles';
 
 const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
 const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;

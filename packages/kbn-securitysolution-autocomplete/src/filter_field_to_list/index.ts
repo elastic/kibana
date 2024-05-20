@@ -7,8 +7,8 @@
  */
 
 import { DataViewFieldBase } from '@kbn/es-query';
-import { AutocompleteListsData } from '../field_value_lists';
 import { typeMatch } from '../type_match';
+import { AutocompleteListsData } from '../field_value_lists';
 
 /**
  * Given an array of lists and optionally a field this will return all

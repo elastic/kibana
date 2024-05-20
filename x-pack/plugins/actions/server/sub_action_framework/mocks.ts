@@ -6,10 +6,10 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { Type, TypeOf, schema } from '@kbn/config-schema';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { AxiosError } from 'axios';
-import { CaseConnector } from './case';
 import { SubActionConnector } from './sub_action_connector';
+import { CaseConnector } from './case';
 import { ExternalServiceIncidentResponse, ServiceParams } from './types';
 
 export const TestConfigSchema = schema.object({ url: schema.string() });

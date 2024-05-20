@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { EuiResizeObserver, EuiResizeObserverProps, useEuiTheme } from '@elastic/eui';
 import { throttle } from 'lodash';
-import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 
 import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';
-import { VegaParser } from '../data_model/vega_parser';
-import { VegaVisualizationDependencies } from '../plugin';
 import { createVegaVisualization } from '../vega_visualization';
+import { VegaVisualizationDependencies } from '../plugin';
+import { VegaParser } from '../data_model/vega_parser';
 
 import { GlobalVegaVisStyles, wrapperStyles } from './vega_vis.styles';
 

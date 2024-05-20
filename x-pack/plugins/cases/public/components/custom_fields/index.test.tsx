@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 
-import { CustomFields } from '.';
-import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
-import { CustomFieldTypes } from '../../../common/types/domain';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { customFieldsConfigurationMock } from '../../containers/mock';
+import { CustomFieldTypes } from '../../../common/types/domain';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
+import { CustomFields } from '.';
 import * as i18n from './translations';
 
 // FLAKY: https://github.com/elastic/kibana/issues/176805

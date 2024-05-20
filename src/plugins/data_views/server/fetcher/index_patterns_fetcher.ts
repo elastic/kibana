@@ -13,12 +13,12 @@ import { defer, from } from 'rxjs';
 import { rateLimitingForkJoin } from '../../common/data_views/utils';
 import type { QueryDslQueryContainer } from '../../common/types';
 
-import { DataViewType } from '../../common/types';
 import {
-  getCapabilitiesForRollupIndices,
   getFieldCapabilities,
+  getCapabilitiesForRollupIndices,
   mergeCapabilitiesWithFields,
 } from './lib';
+import { DataViewType } from '../../common/types';
 
 export interface FieldDescriptor {
   aggregatable: boolean;

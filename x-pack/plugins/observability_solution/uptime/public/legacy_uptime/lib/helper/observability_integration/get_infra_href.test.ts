@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MonitorSummary, Ping, makePing } from '../../../../../common/runtime_types';
-import { getInfraContainerHref, getInfraIpHref, getInfraKubernetesHref } from './get_infra_href';
+import { getInfraContainerHref, getInfraKubernetesHref, getInfraIpHref } from './get_infra_href';
+import { MonitorSummary, makePing, Ping } from '../../../../../common/runtime_types';
 
 describe('getInfraHref', () => {
   let summary: MonitorSummary;

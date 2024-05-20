@@ -8,8 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import type {
-  SavedObjectSanitizedDoc,
   SavedObjectsValidationMap,
+  SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { createSavedObjectSanitizedDocSchema } from './schema';
 

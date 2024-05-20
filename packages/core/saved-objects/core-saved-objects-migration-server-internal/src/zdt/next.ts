@@ -6,40 +6,40 @@
  * Side Public License, v 1.
  */
 
-import { createDelayFn } from '../common/utils';
-import { buildPickupMappingsQuery } from '../core/build_pickup_mappings_query';
-import * as Actions from './actions';
-import type { MigratorContext } from './context';
 import type {
   AllActionStates,
-  CleanupUnknownAndExcludedDocsRefreshState,
+  State,
+  InitState,
+  CreateTargetIndexState,
+  UpdateIndexMappingsState,
+  UpdateIndexMappingsWaitForTaskState,
+  UpdateMappingModelVersionState,
+  UpdateAliasesState,
   CleanupUnknownAndExcludedDocsState,
   CleanupUnknownAndExcludedDocsWaitForTaskState,
-  CreateTargetIndexState,
   DocumentsUpdateInitState,
   IndexStateUpdateDoneState,
-  InitState,
   OutdatedDocumentsSearchBulkIndexState,
   OutdatedDocumentsSearchClosePitState,
   OutdatedDocumentsSearchOpenPitState,
   OutdatedDocumentsSearchReadState,
-  OutdatedDocumentsSearchRefreshState,
   OutdatedDocumentsSearchTransformState,
+  CleanupUnknownAndExcludedDocsRefreshState,
   SetDocMigrationStartedState,
   SetDocMigrationStartedWaitForInstancesState,
-  State,
-  UpdateAliasesState,
+  OutdatedDocumentsSearchRefreshState,
   UpdateDocumentModelVersionsState,
   UpdateDocumentModelVersionsWaitForInstancesState,
-  UpdateIndexMappingsState,
-  UpdateIndexMappingsWaitForTaskState,
-  UpdateMappingModelVersionState,
 } from './state';
+import type { MigratorContext } from './context';
+import * as Actions from './actions';
+import { createDelayFn } from '../common/utils';
 import {
+  setMetaMappingMigrationComplete,
   setMetaDocMigrationComplete,
   setMetaDocMigrationStarted,
-  setMetaMappingMigrationComplete,
 } from './utils';
+import { buildPickupMappingsQuery } from '../core/build_pickup_mappings_query';
 
 export type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -205,7 +205,7 @@ export const next = (context: MigratorContext) => {
       // instead of the union.
       const nextAction = map[state.controlState] as (
         state: State
-      ) => ReturnType<(typeof map)[AllActionStates]>;
+      ) => ReturnType<typeof map[AllActionStates]>;
       return delay(nextAction(state));
     }
   };

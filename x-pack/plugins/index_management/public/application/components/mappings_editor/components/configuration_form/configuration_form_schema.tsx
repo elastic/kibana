@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
-import { FIELD_TYPES, FormSchema, fieldValidators } from '../../shared_imports';
+import { FormSchema, FIELD_TYPES, fieldValidators } from '../../shared_imports';
 import { ComboBoxOption } from '../../types';
 
 const { isJsonField } = fieldValidators;

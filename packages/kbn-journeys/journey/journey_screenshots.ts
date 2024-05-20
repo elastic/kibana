@@ -9,9 +9,9 @@
 import Path from 'path';
 import Fsp from 'fs/promises';
 
-import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
-import { REPO_ROOT } from '@kbn/repo-info';
 import * as Rx from 'rxjs';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
 
 import type { AnyStep } from './journey';
 

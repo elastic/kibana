@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor, within } from '@testing-library/react';
-import { clone, set } from 'lodash';
-import React from 'react';
-import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
-import type {
-  EndpointPendingActions,
-  HostInfoInterface,
-} from '../../../../../../common/endpoint/types';
-import { HostStatus } from '../../../../../../common/endpoint/types';
-import type { ResponseActionsHttpMocksInterface } from '../../../../../management/mocks/response_actions_http_mocks';
-import { responseActionsHttpMocks } from '../../../../../management/mocks/response_actions_http_mocks';
-import type { EndpointMetadataHttpMocksInterface } from '../../../../../management/pages/endpoint_hosts/mocks';
-import { endpointMetadataHttpMocks } from '../../../../../management/pages/endpoint_hosts/mocks';
 import type { AppContextTestRender } from '../../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../mock/endpoint';
-import { composeHttpHandlerMocks } from '../../../../mock/endpoint/http_handler_mock_factory';
-import { getEmptyValue } from '../../../empty_value';
 import type {
   EndpointAgentStatusByIdProps,
   EndpointAgentStatusProps,
 } from './endpoint_agent_status';
 import { EndpointAgentStatus, EndpointAgentStatusById } from './endpoint_agent_status';
+import type {
+  EndpointPendingActions,
+  HostInfoInterface,
+} from '../../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../../common/endpoint/types';
+import React from 'react';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
+import { composeHttpHandlerMocks } from '../../../../mock/endpoint/http_handler_mock_factory';
+import type { EndpointMetadataHttpMocksInterface } from '../../../../../management/pages/endpoint_hosts/mocks';
+import { endpointMetadataHttpMocks } from '../../../../../management/pages/endpoint_hosts/mocks';
+import type { ResponseActionsHttpMocksInterface } from '../../../../../management/mocks/response_actions_http_mocks';
+import { responseActionsHttpMocks } from '../../../../../management/mocks/response_actions_http_mocks';
+import { waitFor, within, fireEvent } from '@testing-library/react';
+import { getEmptyValue } from '../../../empty_value';
+import { clone, set } from 'lodash';
 
 type AgentStatusApiMocksInterface = EndpointMetadataHttpMocksInterface &
   ResponseActionsHttpMocksInterface;

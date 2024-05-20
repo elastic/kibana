@@ -6,16 +6,16 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import {
+  cloneRuleRequestParamsSchemaV1,
   CloneRuleRequestParamsV1,
   CloneRuleResponseV1,
-  cloneRuleRequestParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/clone';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 
 export const cloneRuleRoute = (

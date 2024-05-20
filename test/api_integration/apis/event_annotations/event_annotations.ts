@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
+import expect from '@kbn/expect';
 import type {
+  EventAnnotationGroupSavedObjectAttributes,
   EventAnnotationGroupCreateIn,
   EventAnnotationGroupCreateOut,
-  EventAnnotationGroupDeleteIn,
-  EventAnnotationGroupDeleteOut,
-  EventAnnotationGroupGetIn,
-  EventAnnotationGroupGetOut,
-  EventAnnotationGroupSavedObjectAttributes,
+  EventAnnotationGroupUpdateIn,
   EventAnnotationGroupSearchIn,
   EventAnnotationGroupSearchOut,
-  EventAnnotationGroupUpdateIn,
+  EventAnnotationGroupGetIn,
+  EventAnnotationGroupGetOut,
+  EventAnnotationGroupDeleteIn,
+  EventAnnotationGroupDeleteOut,
 } from '@kbn/event-annotation-plugin/common';
 import { CONTENT_ID } from '@kbn/event-annotation-plugin/common';
-import expect from '@kbn/expect';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CONTENT_ENDPOINT = '/api/content_management/rpc';

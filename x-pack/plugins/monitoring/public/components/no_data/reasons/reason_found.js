@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiCode, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { EuiText, EuiCode } from '@elastic/eui';
 import {
   ExplainCollectionEnabled,
   ExplainCollectionInterval,
@@ -16,6 +15,7 @@ import {
   ExplainExportersCloud,
   ExplainPluginEnabled,
 } from '../explanations';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const ExplainWhyNoData = (props) => {
   const { reason } = props;

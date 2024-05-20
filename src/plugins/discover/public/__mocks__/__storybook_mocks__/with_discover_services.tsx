@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React, { FunctionComponent, ReactNode } from 'react';
+import { action } from '@storybook/addon-actions';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { identity } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { SavedQuery } from '@kbn/data-plugin/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_TABLE_LEGACY,
@@ -17,14 +21,10 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { action } from '@storybook/addon-actions';
-import { identity } from 'lodash';
-import React, { FunctionComponent, ReactNode } from 'react';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { DiscoverServices } from '../../build_services';
 import { LocalStorageMock } from '../local_storage_mock';
+import { DiscoverServices } from '../../build_services';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { SavedQuery } from '@kbn/data-plugin/public';
 
 interface DiscoverServicesProviderProps {
   children: ReactNode;

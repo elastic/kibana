@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
@@ -15,21 +15,21 @@ import semverMinor from 'semver/functions/minor';
 
 import moment from 'moment';
 
+import type { PostAgentUpgradeResponse } from '../../../common/types';
+import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
+import * as AgentService from '../../services/agents';
+import { appContextService } from '../../services';
+import { defaultFleetErrorHandler, AgentRequestInvalidError } from '../../errors';
 import {
-  AGENT_UPGRADE_COOLDOWN_IN_MIN,
-  differsOnlyInPatch,
-  getNotUpgradeableMessage,
   getRecentUpgradeInfoForAgent,
-  isAgentUpgradeableToVersion,
+  AGENT_UPGRADE_COOLDOWN_IN_MIN,
   isAgentUpgrading,
+  getNotUpgradeableMessage,
+  isAgentUpgradeableToVersion,
+  differsOnlyInPatch,
 } from '../../../common/services';
 import { checkFleetServerVersion } from '../../../common/services/check_fleet_server_versions';
-import type { PostAgentUpgradeResponse } from '../../../common/types';
-import { AgentRequestInvalidError, defaultFleetErrorHandler } from '../../errors';
-import { appContextService } from '../../services';
-import * as AgentService from '../../services/agents';
 import { getAgentById } from '../../services/agents';
-import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
 import { getLatestAvailableAgentVersion } from '../../services/agents/versions';

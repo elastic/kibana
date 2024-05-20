@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import type {
+  TypedLensByValueInput,
+  InlineEditLensEmbeddableContext,
+} from '@kbn/lens-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { css } from '@emotion/react';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
+  EuiPanel,
+  EuiButtonIcon,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder/config_builder';
-import type {
-  InlineEditLensEmbeddableContext,
-  TypedLensByValueInput,
-} from '@kbn/lens-plugin/public';
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import type { StartDependencies } from './plugin';
 import { getConfigOptions } from './utils';
 

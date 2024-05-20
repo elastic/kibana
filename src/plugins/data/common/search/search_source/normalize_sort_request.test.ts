@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { SortDirection } from './types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 describe('SearchSource#normalizeSortRequest', function () {
   const scriptedField = {

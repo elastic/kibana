@@ -8,6 +8,14 @@
 import { getNewRule } from '../../../../../objects/rule';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
+import { login } from '../../../../../tasks/login';
+import {
+  openEditException,
+  openExceptionFlyoutFromEmptyViewerPrompt,
+  searchForExceptionItem,
+  visitRuleDetailsPage,
+  waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
+} from '../../../../../tasks/rule_details';
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,
@@ -17,30 +25,22 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
 } from '../../../../../tasks/exceptions';
-import { login } from '../../../../../tasks/login';
-import {
-  openEditException,
-  openExceptionFlyoutFromEmptyViewerPrompt,
-  searchForExceptionItem,
-  visitRuleDetailsPage,
-  waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
-} from '../../../../../tasks/rule_details';
 
-import {
-  ADD_TO_RULE_OR_LIST_SECTION,
-  CLOSE_ALERTS_CHECKBOX,
-  CLOSE_SINGLE_ALERT_CHECKBOX,
-  CONFIRM_BTN,
-  EXCEPTION_CARD_ITEM_CONDITIONS,
-  EXCEPTION_CARD_ITEM_NAME,
-  EXCEPTION_ITEM_CONTAINER,
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
-  FIELD_INPUT_PARENT,
-  NO_EXCEPTIONS_EXIST_PROMPT,
-  NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT,
-  VALUES_INPUT,
-} from '../../../../../screens/exceptions';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import {
+  NO_EXCEPTIONS_EXIST_PROMPT,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT,
+  CLOSE_ALERTS_CHECKBOX,
+  CONFIRM_BTN,
+  ADD_TO_RULE_OR_LIST_SECTION,
+  CLOSE_SINGLE_ALERT_CHECKBOX,
+  EXCEPTION_ITEM_CONTAINER,
+  VALUES_INPUT,
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_CARD_ITEM_CONDITIONS,
+  FIELD_INPUT_PARENT,
+} from '../../../../../screens/exceptions';
 import {
   createEndpointExceptionList,
   createEndpointExceptionListItem,

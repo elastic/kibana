@@ -22,8 +22,8 @@ import {
 
 import { isManagedTransform } from '../../../common/managed_transforms_utils';
 
-import type { EditAction } from '../../transform_management/components/action_edit';
 import { ManagedTransformsWarningCallout } from '../../transform_management/components/managed_transforms_callout/managed_transforms_callout';
+import type { EditAction } from '../../transform_management/components/action_edit';
 
 import { EditTransformFlyoutProvider } from '../state_management/edit_transform_flyout_state';
 

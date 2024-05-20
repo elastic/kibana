@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import React from 'react';
+import { PointSeriesOptions } from './point_series';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import { ChartType } from '../../../../../common';
-import { PointSeriesOptions } from './point_series';
-import { getAggs, getStateParams, getVis } from './point_series.mocks';
+import { getAggs, getVis, getStateParams } from './point_series.mocks';
 
 jest.mock('../../../../services', () => ({
   getPalettesService: jest.fn(() => {

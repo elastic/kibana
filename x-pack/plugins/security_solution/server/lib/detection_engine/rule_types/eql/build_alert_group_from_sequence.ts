@@ -6,30 +6,30 @@
  */
 
 import { ALERT_URL, ALERT_UUID } from '@kbn/rule-data-utils';
-import { isArray, intersection as lodashIntersection } from 'lodash';
+import { intersection as lodashIntersection, isArray } from 'lodash';
 
+import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
+import type { ConfigType } from '../../../../config';
+import type { Ancestor, SignalSource, SignalSourceHit } from '../types';
+import { buildAlert, buildAncestors, generateAlertId } from '../factories/utils/build_alert';
+import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import type { EqlSequence } from '../../../../../common/detection_engine/types';
+import { generateBuildingBlockIds } from '../factories/utils/generate_building_block_ids';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
+import type { CompleteRule, RuleParams } from '../../rule_schema';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import {
+  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_GROUP_ID,
+  ALERT_GROUP_INDEX,
+} from '../../../../../common/field_maps/field_names';
 import type {
   BaseFieldsLatest,
   EqlBuildingBlockFieldsLatest,
   EqlShellFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
-import type { EqlSequence } from '../../../../../common/detection_engine/types';
-import {
-  ALERT_BUILDING_BLOCK_TYPE,
-  ALERT_GROUP_ID,
-  ALERT_GROUP_INDEX,
-} from '../../../../../common/field_maps/field_names';
-import { getAlertDetailsUrl } from '../../../../../common/utils/alert_detail_path';
-import type { ConfigType } from '../../../../config';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import type { CompleteRule, RuleParams } from '../../rule_schema';
-import { buildAlert, buildAncestors, generateAlertId } from '../factories/utils/build_alert';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
-import { generateBuildingBlockIds } from '../factories/utils/generate_building_block_ids';
-import type { Ancestor, SignalSource, SignalSourceHit } from '../types';
-import type { BuildReasonMessage } from '../utils/reason_formatters';
 
 /**
  * Takes N raw documents from ES that form a sequence and builds them into N+1 signals ready to be indexed -

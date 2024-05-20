@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
 import { Story } from '@storybook/react';
+import { HttpStart } from '@kbn/core/public';
 import React from 'react';
-import TutorialConfigAgent from '.';
 import { POLICY_ELASTIC_AGENT_ON_CLOUD } from '../../../common/fleet';
+import TutorialConfigAgent from '.';
 import { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 export type APIResponseType = APIReturnType<'GET /internal/apm/fleet/agents'>;

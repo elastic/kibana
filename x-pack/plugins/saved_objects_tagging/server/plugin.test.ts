@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createTagUsageCollectorMock, registerRoutesMock } from './plugin.test.mocks';
+import { registerRoutesMock, createTagUsageCollectorMock } from './plugin.test.mocks';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { savedObjectsTaggingFeature } from './features';
 import { SavedObjectTaggingPlugin } from './plugin';
+import { savedObjectsTaggingFeature } from './features';
 
 describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import type * as H from 'history';
 import { memo, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import type { RouteComponentProps } from 'react-router-dom';
+import deepEqual from 'fast-deep-equal';
 
 import { omit } from 'lodash';
 import type { SecurityPageName } from '../../../../common/constants';
 import type { FlowTarget } from '../../../../common/search_strategy';
-import type { RouteSpyState } from './types';
 import { useRouteSpy } from './use_route_spy';
+import type { RouteSpyState } from './types';
 
 type SpyRouteProps = RouteComponentProps<{
   detailName: string | undefined;

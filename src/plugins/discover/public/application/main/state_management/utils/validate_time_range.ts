@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { ToastsStart } from '@kbn/core/public';
 import { isTimeRangeValid } from '../../../../utils/validate_time';
 
 /**

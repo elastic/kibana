@@ -1,4 +1,3 @@
-import { SvgElementTypes } from '../../reusable';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { SvgElementTypes } from '../../reusable';
  * Side Public License, v 1.
  */
 import { createShape } from '../../reusable/shape_factory';
+import { SvgElementTypes } from '../../reusable';
 
 export const HorizontalPill = createShape({
   viewBox: {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { GetConnectorSoResult, GetConnectorSoParams } from './types';
 import { RawAction } from '../../types';
-import { GetConnectorSoParams, GetConnectorSoResult } from './types';
 
 export const getConnectorSo = async ({
   unsecuredSavedObjectsClient,

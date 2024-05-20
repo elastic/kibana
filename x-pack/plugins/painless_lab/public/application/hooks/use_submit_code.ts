@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { useRef, useCallback, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 import { debounce } from 'lodash';
-import { useCallback, useRef, useState } from 'react';
 
 import { API_BASE_PATH } from '../../../common/constants';
+import { Response, PayloadFormat, Payload } from '../types';
 import { formatRequestPayload } from '../lib/format';
-import { Payload, PayloadFormat, Response } from '../types';
 
 const DEBOUNCE_MS = 800;
 

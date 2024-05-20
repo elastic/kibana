@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type {
   IKibanaMigrator,
   KibanaMigratorStatus,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { createDocumentMigratorMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
   buildActiveMappings,
   buildTypesMappings,
 } from '@kbn/core-saved-objects-migration-server-internal';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { BehaviorSubject } from 'rxjs';
+import { createDocumentMigratorMock } from '@kbn/core-saved-objects-base-server-mocks';
 
 const defaultSavedObjectTypes: SavedObjectsType[] = [
   {

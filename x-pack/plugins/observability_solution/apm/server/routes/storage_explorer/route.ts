@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import {
-  IndexLifecyclePhaseSelectOption,
   indexLifecyclePhaseRt,
+  IndexLifecyclePhaseSelectOption,
 } from '../../../common/storage_explorer_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
@@ -20,14 +20,14 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
 import { getServiceNamesFromTermsEnum } from '../services/get_services/get_service_names_from_terms_enum';
 import {
-  StorageExplorerServiceStatisticsResponse,
   getServiceStatistics,
+  StorageExplorerServiceStatisticsResponse,
 } from './get_service_statistics';
-import { SizeTimeseriesResponse, getSizeTimeseries } from './get_size_timeseries';
-import { StorageDetailsResponse, getStorageDetails } from './get_storage_details';
+import { getSizeTimeseries, SizeTimeseriesResponse } from './get_size_timeseries';
+import { getStorageDetails, StorageDetailsResponse } from './get_storage_details';
 import {
-  StorageExplorerSummaryStatisticsResponse,
   getSummaryStatistics,
+  StorageExplorerSummaryStatisticsResponse,
 } from './get_summary_statistics';
 import { hasStorageExplorerPrivileges } from './has_storage_explorer_privileges';
 import { isCrossClusterSearch } from './is_cross_cluster_search';

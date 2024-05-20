@@ -7,10 +7,10 @@
 
 import { RuleMonitoring, RuleMonitoringHistory } from '../types';
 import {
-  convertMonitoringFromRawAndVerify,
   getExecutionDurationPercentiles,
-  resetMonitoringLastRun,
   updateMonitoring,
+  convertMonitoringFromRawAndVerify,
+  resetMonitoringLastRun,
 } from './monitoring';
 
 const mockHistory: RuleMonitoringHistory[] = [

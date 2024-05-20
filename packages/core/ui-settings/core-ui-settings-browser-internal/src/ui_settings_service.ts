@@ -8,8 +8,8 @@
 
 import { Subject } from 'rxjs';
 
-import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { UiSettingsApi } from './ui_settings_api';

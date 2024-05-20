@@ -7,12 +7,12 @@
 
 import { merge } from 'lodash/fp';
 
-import type { IKibanaResponse } from '@kbn/core/server';
 import { readPrivileges, transformError } from '@kbn/securitysolution-es-utils';
-import type { ReadPrivilegesResponse } from '../../../../../common/api/detection_engine';
-import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
+import type { IKibanaResponse } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
+import type { ReadPrivilegesResponse } from '../../../../../common/api/detection_engine';
 
 export const readPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,

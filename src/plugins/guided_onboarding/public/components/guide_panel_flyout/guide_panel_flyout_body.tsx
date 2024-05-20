@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -18,12 +19,11 @@ import {
 } from '@elastic/eui';
 import { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import wellDoneAnimatedGif from '../../../assets/well_done_animated.gif';
 import wellDoneAnimatedDarkGif from '../../../assets/well_done_animated_dark.gif';
 import { PluginState } from '../../../common';
-import { getGuidePanelStyles } from '../guide_panel.styles';
 import { GuideProgress } from './guide_progress';
+import wellDoneAnimatedGif from '../../../assets/well_done_animated.gif';
+import { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyoutBody = ({
   styles,

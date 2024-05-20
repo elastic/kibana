@@ -8,31 +8,31 @@
 import {
   Axis,
   BarSeries,
+  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
   XYBrushEvent,
-  niceTimeFormatter,
 } from '@elastic/charts';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, euiPaletteColorBlind } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiSpacer, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { FETCH_STATUS, useChartThemes, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useChartThemes, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
-import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import { useHasData } from '../../../../../hooks/use_has_data';
+import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import { LogsFetchDataResponse } from '../../../../../typings';
 import { formatStatValue } from '../../../../../utils/format_stat_value';
-import type { BucketSize } from '../../../helpers/calculate_bucket_size';
-import { onBrushEnd } from '../../../helpers/on_brush_end';
 import { ChartContainer } from '../../chart_container/chart_container';
 import { StyledStat } from '../../styled_stat/styled_stat';
-import { SectionContainer } from '../section_container';
+import { onBrushEnd } from '../../../helpers/on_brush_end';
+import type { BucketSize } from '../../../helpers/calculate_bucket_size';
 
 interface Props {
   bucketSize: BucketSize;

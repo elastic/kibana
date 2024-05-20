@@ -10,25 +10,20 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
+import { omit, get } from 'lodash';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
-import { get, omit } from 'lodash';
+import type {
+  UserActionAction,
+  CaseUserActionWithoutReferenceIds,
+  ConnectorUserAction,
+} from '../../../common/types/domain';
+import { UserActionActions, CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
-import type {
-  CaseUserActionWithoutReferenceIds,
-  ConnectorUserAction,
-  UserActionAction,
-} from '../../../common/types/domain';
-import { CaseSeverity, CaseStatuses, UserActionActions } from '../../../common/types/domain';
-import {
-  externalReferenceAttachmentSO,
-  persistableStateAttachment,
-} from '../../attachment_framework/mocks';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
@@ -42,6 +37,11 @@ import {
   createJiraConnector,
   createSOFindResponse,
 } from '../test_utils';
+import {
+  externalReferenceAttachmentSO,
+  persistableStateAttachment,
+} from '../../attachment_framework/mocks';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { transformFindResponseToExternalModel } from './transform';
 
 export const createUserActionFindSO = (

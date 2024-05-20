@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { addEphemeralProjectId } from '../../../lib/add_ephemeral_project_id';
-import { Doc, EventFunction, EventTemplate, GeneratorFunction } from '../../../types';
-import { weightedSample } from '../common/weighted_sample';
-import { createUser } from './lib/events/create_user';
-import { deleteUser } from './lib/events/delete_user';
-import { editUser } from './lib/events/edit_user';
-import { internalError } from './lib/events/internal_error';
-import { listCustomers } from './lib/events/list_customers';
+import { createStartupEvents } from './lib/events/startup';
 import { login } from './lib/events/login';
 import { loginError } from './lib/events/login_error';
+import { internalError } from './lib/events/internal_error';
+import { weightedSample } from '../common/weighted_sample';
+import { listCustomers } from './lib/events/list_customers';
 import { mongodbConnectionError } from './lib/events/mongodb_connection_error';
-import { mongodbProxyTimeout } from './lib/events/mongodb_proxy_timeout';
-import { qaDeployedToProduction } from './lib/events/qa_deployed_to_production';
-import { createStartupEvents } from './lib/events/startup';
 import { viewUsers } from './lib/events/view_user';
+import { deleteUser } from './lib/events/delete_user';
+import { createUser } from './lib/events/create_user';
+import { editUser } from './lib/events/edit_user';
+import { Doc, EventFunction, EventTemplate, GeneratorFunction } from '../../../types';
+import { qaDeployedToProduction } from './lib/events/qa_deployed_to_production';
+import { mongodbProxyTimeout } from './lib/events/mongodb_proxy_timeout';
+import { addEphemeralProjectId } from '../../../lib/add_ephemeral_project_id';
 
 const GOOD_EVENT_TEMPLATES: EventTemplate = [
   [mongodbProxyTimeout, 1],

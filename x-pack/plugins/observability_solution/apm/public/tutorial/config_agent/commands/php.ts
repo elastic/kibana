@@ -5,10 +5,10 @@
  * 2.0.
  */
 import {
+  serviceNameHint,
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
-  serviceNameHint,
 } from './shared_hints';
 
 export const phpVariables = {

@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { first, map, take } from 'rxjs';
 
 import {
-  docLinksMock,
-  getDocLinksMock,
   mockApplyDeprecations,
   mockedChangedPaths,
+  docLinksMock,
+  getDocLinksMock,
 } from './config_service.test.mocks';
 import { createRawConfigServiceMock } from './internal_mocks';
 
 import { schema } from '@kbn/config-schema';
 import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 
-import { ConfigService, Env, RawPackageInfo } from '..';
 import type { ConfigDeprecationContext } from './deprecation';
+import { ConfigService, Env, RawPackageInfo } from '..';
 
 import { getEnvOptions } from './internal_mocks';
 

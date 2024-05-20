@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/es-query';
 import { url } from '@kbn/kibana-utils-plugin/common';
+import { encode } from '@kbn/rison';
+import type { Query } from '@kbn/es-query';
+import { parse, stringify } from 'query-string';
+import moment, { DurationInputObject } from 'moment';
 import {
-  DEFAULT_REFRESH_INTERVAL,
-  LogViewReference,
   defaultFilterStateKey,
   defaultPositionStateKey,
+  DEFAULT_REFRESH_INTERVAL,
+  LogViewReference,
 } from '@kbn/logs-shared-plugin/common';
-import { encode } from '@kbn/rison';
-import moment, { DurationInputObject } from 'moment';
-import { parse, stringify } from 'query-string';
-import type { PositionStateInUrl } from '../public/observability_logs/log_stream_position_state/src/url_state_storage_service';
 import type { FilterStateInUrl } from '../public/observability_logs/log_stream_query_state';
+import type { PositionStateInUrl } from '../public/observability_logs/log_stream_position_state/src/url_state_storage_service';
 import type { TimeRange } from './time';
 
 export const defaultLogViewKey = 'logView';

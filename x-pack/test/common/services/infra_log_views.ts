@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
 import {
-  PutLogViewRequestPayload,
   getLogViewResponsePayloadRT,
+  PutLogViewRequestPayload,
   putLogViewRequestPayloadRT,
   putLogViewResponsePayloadRT,
 } from '@kbn/logs-shared-plugin/common/http_api';
 import { getLogViewUrl } from '@kbn/logs-shared-plugin/common/http_api/log_views';
+import { decodeOrThrow } from '@kbn/infra-plugin/common/runtime_types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraLogViewsServiceProvider({ getService }: FtrProviderContext) {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/public';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { createSelector } from '@reduxjs/toolkit';
-import { Datasource, DatasourceMap, VisualizationMap } from '../types';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { SavedObjectReference } from '@kbn/core/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { LensState } from './types';
+import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from './utils';
 
 export const selectPersistedDoc = (state: LensState) => state.lens.persistedDoc;

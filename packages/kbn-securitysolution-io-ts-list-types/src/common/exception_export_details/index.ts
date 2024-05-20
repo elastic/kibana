@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 export const exportExceptionDetails = {
   exported_exception_list_count: t.number,

@@ -7,29 +7,29 @@
  */
 
 import Url from 'url';
-import { format, inspect } from 'util';
+import { inspect, format } from 'util';
+import { setTimeout as setTimer } from 'timers/promises';
+import * as Rx from 'rxjs';
+import apmNode from 'elastic-apm-node';
+import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
+import { asyncMap, asyncForEach } from '@kbn/std';
+import { ToolingLog } from '@kbn/tooling-log';
+import { Config } from '@kbn/test';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { asyncForEach, asyncMap } from '@kbn/std';
-import { Config } from '@kbn/test';
-import { ToolingLog } from '@kbn/tooling-log';
-import apmNode from 'elastic-apm-node';
-import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
-import * as Rx from 'rxjs';
-import { setTimeout as setTimer } from 'timers/promises';
 
 import { AxiosError } from 'axios';
 import { Auth, Es, EsArchiver, KibanaServer, Retry } from '../services';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
-import { getNewPageObject } from '../services/page';
-import { getSynthtraceClient } from '../services/synthtrace';
-import type { AnyStep, Step } from './journey';
+import type { Step, AnyStep } from './journey';
 import type { JourneyConfig } from './journey_config';
 import { JourneyScreenshots } from './journey_screenshots';
+import { getNewPageObject } from '../services/page';
+import { getSynthtraceClient } from '../services/synthtrace';
 
 export class JourneyFtrHarness {
   private readonly screenshots: JourneyScreenshots;

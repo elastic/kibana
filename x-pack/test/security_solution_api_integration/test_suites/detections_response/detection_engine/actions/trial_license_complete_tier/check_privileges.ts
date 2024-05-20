@@ -6,22 +6,22 @@
  */
 
 import expect from '@kbn/expect';
-import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
+import { createRuleWithAuth, getThresholdRuleForAlertTesting } from '../../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  createAlertsIndex,
+  waitForRulePartialFailure,
+  getRuleForAlertTesting,
+} from '../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,
 } from '../../../../../../common/services/security_solution';
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-  getRuleForAlertTesting,
-  waitForRulePartialFailure,
-} from '../../../../../../common/utils/security_solution';
-import { createRuleWithAuth, getThresholdRuleForAlertTesting } from '../../../utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {

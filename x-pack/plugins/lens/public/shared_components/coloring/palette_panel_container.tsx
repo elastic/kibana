@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiColorPaletteDisplay, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { FIXED_PROGRESSION } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import React, { MutableRefObject } from 'react';
+import { EuiButtonIcon, EuiFlexItem, EuiColorPaletteDisplay, EuiToolTip } from '@elastic/eui';
+import { FIXED_PROGRESSION } from '@kbn/coloring';
 import { SettingWithSiblingFlyout } from '../setting_with_sibling_flyout';
 
 export function PalettePanelContainer(props: {

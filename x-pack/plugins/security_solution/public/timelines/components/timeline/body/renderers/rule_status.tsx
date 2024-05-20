@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React, { useMemo } from 'react';
 
 import styled from 'styled-components';
 import { DefaultDraggable } from '../../../../../common/components/draggables';

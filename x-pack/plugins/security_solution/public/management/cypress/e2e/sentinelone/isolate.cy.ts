@@ -7,12 +7,12 @@
 
 import { recurse } from 'cypress-recurse';
 import { openAlertDetailsView } from '../../screens/alerts';
-import { waitForAlertsToPopulate } from '../../tasks/alerts';
-import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
-import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
-import { ROLE, login } from '../../tasks/login';
 import { closeAllToasts } from '../../tasks/toasts';
+import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
+import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
+import { ROLE, login } from '../../tasks/login';
+import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
+import { waitForAlertsToPopulate } from '../../tasks/alerts';
 
 describe.skip(
   'Isolate command',

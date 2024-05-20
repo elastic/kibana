@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/public';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { DataDecorationConfigResult, DataLayerConfig, YAxisConfigResult } from '../../common';
+import { DataLayerConfig, YAxisConfigResult, DataDecorationConfigResult } from '../../common';
 import { LayerTypes } from '../../common/constants';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
 import { LayersFieldFormats } from './layers';
 

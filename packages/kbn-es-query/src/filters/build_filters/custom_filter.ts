@@ -7,7 +7,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FILTERS, Filter, FilterMeta, FilterStateStore } from './types';
+import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
 
 /** @public */
 export type CustomFilter = Filter;

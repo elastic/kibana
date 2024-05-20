@@ -6,9 +6,9 @@
  */
 
 import { first, sortBy } from 'lodash';
+import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
 import { InfraWaffleMapGroup } from '../../../../lib/lib';
 import { sizeOfSquares } from './size_of_squares';
-import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
 
 export function getColumns(n: number, w = 1, h = 1) {
   const pageRatio = w / h;

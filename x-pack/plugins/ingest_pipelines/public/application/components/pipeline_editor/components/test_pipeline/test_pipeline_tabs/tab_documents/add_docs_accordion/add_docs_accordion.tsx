@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { FunctionComponent, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useState, useEffect } from 'react';
 
-import { EuiAccordion, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 
 import { useKibana } from '../../../../../../../../shared_imports';
 import { useIsMounted } from '../../../../../use_is_mounted';

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
-import { get } from 'lodash';
-import immutable from 'object-path-immutable';
-import PropTypes from 'prop-types';
 import React, { Fragment, FunctionComponent } from 'react';
-import { ArgTypesStrings } from '../../../../i18n';
-import { CanvasWorkpad, ExpressionAstExpression } from '../../../../types';
-import { ColorPickerPopover } from '../../../components/color_picker_popover';
-import { IconType, TooltipIcon } from '../../../components/tooltip_icon';
+import PropTypes from 'prop-types';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiButtonIcon, EuiText } from '@elastic/eui';
+import immutable from 'object-path-immutable';
+import { get } from 'lodash';
 import { ResolvedArgProps, ResolvedLabels } from '../../arg';
+import { ColorPickerPopover } from '../../../components/color_picker_popover';
+import { TooltipIcon, IconType } from '../../../components/tooltip_icon';
+import { ExpressionAstExpression, CanvasWorkpad } from '../../../../types';
+import { ArgTypesStrings } from '../../../../i18n';
 
 const { set, del } = immutable;
 const { SeriesStyle: strings } = ArgTypesStrings;

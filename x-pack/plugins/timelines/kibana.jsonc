@@ -6,9 +6,22 @@
     "id": "timelines",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "timelines"],
-    "requiredPlugins": ["alerting", "cases", "data", "kibanaReact", "kibanaUtils"],
-    "optionalPlugins": ["security"],
-    "extraPublicDirs": ["common"]
+    "configPath": [
+      "xpack",
+      "timelines"
+    ],
+    "requiredPlugins": [
+      "alerting",
+      "cases",
+      "data",
+      "kibanaReact",
+      "kibanaUtils"
+    ],
+    "optionalPlugins": [
+      "security"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

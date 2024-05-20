@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -18,12 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type { FC } from 'react';
-import React, { memo } from 'react';
-import type { DatafeedResponse, JobOverride } from '../../../../../../common/types/modules';
-import { tabColor } from '../../../../../../common/util/group_color_utils';
 import type { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
+import { tabColor } from '../../../../../../common/util/group_color_utils';
+import type { JobOverride, DatafeedResponse } from '../../../../../../common/types/modules';
 
 interface JobItemProps {
   job: ModuleJobUI;

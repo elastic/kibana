@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ManagementEmptyStateWrapper } from '../../management_empty_state_wrapper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`

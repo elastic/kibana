@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { EuiResizeObserver, EuiResizeObserverProps } from '@elastic/eui';
 import { debounce } from 'lodash';
-import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
-import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { VisTypeVislibCoreSetup } from './plugin';
-import { VislibVisController, createVislibVisController } from './vis_controller';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { VislibRenderValue } from './vis_type_vislib_vis_fn';
+import { createVislibVisController, VislibVisController } from './vis_controller';
+import { VisTypeVislibCoreSetup } from './plugin';
 
 import './index.scss';
 import { getUsageCollectionStart } from './services';

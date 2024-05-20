@@ -10,7 +10,9 @@
         "tags": [],
         "label": "DATA_QUALITY_PROMPT_CONTEXT_PILL",
         "description": [],
-        "signature": ["(indexName: string) => string"],
+        "signature": [
+          "(indexName: string) => string"
+        ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -22,7 +24,9 @@
             "tags": [],
             "label": "indexName",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -38,8 +42,12 @@
         "type": "Function",
         "tags": [],
         "label": "DataQualityPanel",
-        "description": ["Renders the `Data Quality` dashboard content"],
-        "signature": ["React.NamedExoticComponent<Props>"],
+        "description": [
+          "Renders the `Data Quality` dashboard content"
+        ],
+        "signature": [
+          "React.NamedExoticComponent<Props>"
+        ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -52,7 +60,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -66,8 +76,12 @@
         "type": "Function",
         "tags": [],
         "label": "getIlmPhaseDescription",
-        "description": ["\nReturns an i18n description of an an ILM phase"],
-        "signature": ["(phase: string) => string"],
+        "description": [
+          "\nReturns an i18n description of an an ILM phase"
+        ],
+        "signature": [
+          "(phase: string) => string"
+        ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -79,7 +93,9 @@
             "tags": [],
             "label": "phase",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -111,7 +127,9 @@
         "type": "string",
         "tags": [],
         "label": "DATA_QUALITY_SUBTITLE",
-        "description": ["The subtitle displayed on the Data Quality dashboard"],
+        "description": [
+          "The subtitle displayed on the Data Quality dashboard"
+        ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -135,8 +153,12 @@
         "type": "string",
         "tags": [],
         "label": "ECS_REFERENCE_URL",
-        "description": ["The documentation link shown in the `Data Quality` dashboard"],
-        "signature": ["\"https://www.elastic.co/guide/en/ecs/current/ecs-reference.html\""],
+        "description": [
+          "The documentation link shown in the `Data Quality` dashboard"
+        ],
+        "signature": [
+          "\"https://www.elastic.co/guide/en/ecs/current/ecs-reference.html\""
+        ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/data_quality_panel/index_properties/markdown/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -162,7 +184,9 @@
         "type": "string",
         "tags": [],
         "label": "INDEX_LIFECYCLE_MANAGEMENT_PHASES",
-        "description": ["The tooltip for the `ILM phase` combo box on the Data Quality Dashboard"],
+        "description": [
+          "The tooltip for the `ILM phase` combo box on the Data Quality Dashboard"
+        ],
         "path": "x-pack/packages/security-solution/ecs_data_quality_dashboard/impl/data_quality/translations.ts",
         "deprecated": false,
         "trackAdoption": false,

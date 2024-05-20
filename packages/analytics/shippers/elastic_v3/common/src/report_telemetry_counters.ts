@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Event, TelemetryCounter, TelemetryCounterType } from '@kbn/analytics-client';
 import type { Subject } from 'rxjs';
+import type { Event, TelemetryCounter, TelemetryCounterType } from '@kbn/analytics-client';
 
 /**
  * Creates a telemetry counter helper to make it easier to generate them
@@ -51,15 +51,12 @@ export function createTelemetryCounterHelper(
 }
 
 function countEventTypes(events: Event[]) {
-  return events.reduce(
-    (acc, event) => {
-      if (acc[event.event_type]) {
-        acc[event.event_type] += 1;
-      } else {
-        acc[event.event_type] = 1;
-      }
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  return events.reduce((acc, event) => {
+    if (acc[event.event_type]) {
+      acc[event.event_type] += 1;
+    } else {
+      acc[event.event_type] = 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
 }

@@ -8,10 +8,22 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { Payload } from 'elastic-apm-node';
 import {
-  type ElasticsearchClientMock,
-  elasticsearchClientMock,
-} from '@kbn/core-elasticsearch-client-server-mocks';
+  type AuthorizationTypeEntry,
+  type AuthorizeAndRedactMultiNamespaceReferencesParams,
+  type CheckAuthorizationResult,
+  type ISavedObjectsSecurityExtension,
+  type SavedObjectsMappingProperties,
+  type SavedObjectsRawDocSource,
+  type SavedObjectsType,
+  type SavedObjectsTypeMappingDefinition,
+  type SavedObject,
+  type SavedObjectReference,
+  type AuthorizeFindParams,
+  MAIN_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -26,35 +38,23 @@ import type {
   SavedObjectsUpdateOptions,
 } from '@kbn/core-saved-objects-api-server';
 import {
-  SavedObjectTypeRegistry,
-  SavedObjectsSerializer,
   encodeHitVersion,
+  SavedObjectsSerializer,
+  SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  elasticsearchClientMock,
+  type ElasticsearchClientMock,
+} from '@kbn/core-elasticsearch-client-server-mocks';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 import {
-  type AuthorizationTypeEntry,
-  type AuthorizeAndRedactMultiNamespaceReferencesParams,
-  type AuthorizeFindParams,
-  type CheckAuthorizationResult,
-  type ISavedObjectsSecurityExtension,
-  MAIN_SAVED_OBJECT_INDEX,
-  type SavedObject,
-  type SavedObjectReference,
-  type SavedObjectsMappingProperties,
-  type SavedObjectsRawDocSource,
-  type SavedObjectsType,
-  type SavedObjectsTypeMappingDefinition,
-} from '@kbn/core-saved-objects-server';
-import {
-  type AuthorizationTypeMap,
   type AuthorizeAndRedactInternalBulkResolveParams,
   type GetFindRedactTypeMapParams,
+  type AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import { loggerMock } from '@kbn/logging-mocks';
-import type { Payload } from 'elastic-apm-node';
-import { SavedObjectsRepository } from '../lib/repository';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
+import { SavedObjectsRepository } from '../lib/repository';
 
 export const DEFAULT_SPACE = 'default';
 
@@ -480,7 +480,7 @@ export const getMockMgetResponse = (
         ? obj
         : getMockGetResponse(registry, obj, obj.initialNamespaces ?? namespace)
     ),
-  }) as estypes.MgetResponse<SavedObjectsRawDocSource>;
+  } as estypes.MgetResponse<SavedObjectsRawDocSource>);
 
 expect.extend({
   toBeDocumentWithoutError(received, type, id) {
@@ -918,7 +918,7 @@ export const getMockEsBulkDeleteResponse = (
         result: 'deleted',
       },
     })),
-  }) as estypes.BulkResponse;
+  } as estypes.BulkResponse);
 
 export const bulkDeleteSuccess = async (
   client: ElasticsearchClientMock,

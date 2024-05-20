@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { once } from 'lodash';
-import { Subject, Subscription, combineLatest } from 'rxjs';
+import { Subscription, Subject, combineLatest } from 'rxjs';
 import { map } from 'rxjs';
+import { once } from 'lodash';
 
 import { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 
 // @ts-ignore
 import { LogstashLicenseService } from './services';

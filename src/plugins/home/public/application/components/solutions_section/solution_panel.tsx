@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { snakeCase } from 'lodash';
+import React, { FC, MouseEvent } from 'react';
 import { EuiCard, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaPageTemplateSolutionNavAvatar } from '@kbn/kibana-react-plugin/public';
-import { snakeCase } from 'lodash';
-import React, { FC, MouseEvent } from 'react';
 import { FeatureCatalogueSolution } from '../../..';
-import { getServices } from '../../kibana_services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
+import { getServices } from '../../kibana_services';
 
 interface Props {
   addBasePath: (path: string) => string;

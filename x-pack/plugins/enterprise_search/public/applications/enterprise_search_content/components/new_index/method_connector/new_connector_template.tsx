@@ -7,7 +7,7 @@
 
 import React, { ChangeEvent } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
   EuiButton,

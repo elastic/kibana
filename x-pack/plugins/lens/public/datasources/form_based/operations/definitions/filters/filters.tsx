@@ -6,27 +6,27 @@
  */
 
 import './filters.scss';
-import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
-import { queryFilterToAst } from '@kbn/data-plugin/common';
-import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import type { Query } from '@kbn/es-query';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import React, { useState } from 'react';
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
+import type { Query } from '@kbn/es-query';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { queryFilterToAst } from '@kbn/data-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
+  NewBucketButton,
   DragDropBuckets,
   DraggableBucketContainer,
-  NewBucketButton,
   isQueryValid,
 } from '@kbn/visualization-ui-components';
-import { omit } from 'lodash';
-import React, { useState } from 'react';
-import type { OperationDefinition } from '..';
 import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
+import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
-import { isColumnOfType } from '../helpers';
-import { TermsIndexPatternColumn } from '../terms';
 import { FilterPopover } from './filter_popover';
+import { TermsIndexPatternColumn } from '../terms';
+import { isColumnOfType } from '../helpers';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';

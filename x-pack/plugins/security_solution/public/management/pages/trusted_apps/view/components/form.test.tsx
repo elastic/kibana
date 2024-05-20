@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
-import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import { act, cleanup, fireEvent, getByTestId, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { screen, cleanup, act, fireEvent, getByTestId } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
+import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import type { PolicyData, TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
-import { licenseService } from '../../../../../common/hooks/use_license';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import { TrustedAppsForm } from './form';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
 } from '../../../../components/artifact_list_page';
-import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { INPUT_ERRORS } from '../translations';
-import { TrustedAppsForm } from './form';
+import { licenseService } from '../../../../../common/hooks/use_license';
+import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
+import type { PolicyData, TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
 

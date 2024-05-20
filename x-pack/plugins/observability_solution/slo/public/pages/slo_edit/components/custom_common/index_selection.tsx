@@ -8,10 +8,10 @@
 import { EuiFormRow } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useFetchDataViews } from '@kbn/observability-plugin/public';
-import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { useFetchDataViews } from '@kbn/observability-plugin/public';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
 

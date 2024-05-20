@@ -7,12 +7,12 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  getExecutionTimeoutsPerDayCount,
   getExecutionsPerDayCount,
-  parseExecutionCountAggregationResults,
   parseExecutionFailureByRuleType,
-  parsePercentileAggs,
   parseRuleTypeBucket,
+  parsePercentileAggs,
+  parseExecutionCountAggregationResults,
+  getExecutionTimeoutsPerDayCount,
 } from './get_telemetry_from_event_log';
 
 const elasticsearch = elasticsearchServiceMock.createStart();

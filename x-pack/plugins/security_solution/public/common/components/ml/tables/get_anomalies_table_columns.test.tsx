@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import * as i18n from './translations';
+import type { AnomaliesBy, Anomaly } from '../types';
 import type { Columns } from '../../../../explore/components/paginated_table';
+import React from 'react';
 import { TestProviders } from '../../../mock';
 import { useMountAppended } from '../../../utils/use_mount_appended';
-import type { AnomaliesBy, Anomaly } from '../types';
 import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
-import * as i18n from './translations';
 
 jest.mock('../../../lib/kibana');
 

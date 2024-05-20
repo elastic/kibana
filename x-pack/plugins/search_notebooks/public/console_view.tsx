@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EmbeddedConsoleView } from '@kbn/console-plugin/public';
+import React from 'react';
 import { CoreStart } from '@kbn/core/public';
+import { EmbeddedConsoleView } from '@kbn/console-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { QueryClient } from '@tanstack/react-query';
-import React from 'react';
 
 import { SearchNotebooksButton } from './components/notebooks_button';
 

@@ -10,7 +10,7 @@ import {
   ObservabilityAIAssistantFtrConfigName,
   observabilityAIAssistantFtrConfigs,
 } from '../../observability_ai_assistant_api_integration/configs';
-import { CreateTestConfig, createTestConfig } from '../common/config';
+import { createTestConfig, CreateTestConfig } from '../common/config';
 
 export const configs: Record<ObservabilityAIAssistantFtrConfigName, CreateTestConfig> = mapValues(
   observabilityAIAssistantFtrConfigs,

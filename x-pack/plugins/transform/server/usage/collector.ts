@@ -6,9 +6,9 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { TRANSFORM_RULE_TYPE } from '../../common';
-import type { TransformHealthRuleParams } from '../../common/types/alerting';
 import { getResultTestConfig } from '../../common/utils/alerts';
+import type { TransformHealthRuleParams } from '../../common/types/alerting';
+import { TRANSFORM_RULE_TYPE } from '../../common';
 
 export interface TransformAlertsUsageData {
   alertRules: {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { OutPortal } from 'react-reverse-portal';
 import styled from 'styled-components';
+import { OutPortal } from 'react-reverse-portal';
 import { useGlobalHeaderPortal } from '../../../../common/hooks/use_global_header_portal';
 
 const StyledStickyWrapper = styled.div`

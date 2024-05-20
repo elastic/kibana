@@ -6,8 +6,14 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["GET", "POST"],
-    "patterns": ["_ml/data_frame/analytics/_preview", "_ml/data_frame/analytics/{id}/_preview"],
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/data_frame/analytics/_preview",
+      "_ml/data_frame/analytics/{id}/_preview"
+    ],
     "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/preview-dfanalytics.html",
     "availability": {
       "stack": true,

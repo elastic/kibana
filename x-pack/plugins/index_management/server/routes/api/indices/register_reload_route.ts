@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { chunk } from 'lodash';
+import { schema } from '@kbn/config-schema';
 
-import { addBasePath } from '..';
 import { MAX_INDICES_PER_REQUEST } from '../../../../common/constants';
-import { fetchIndices } from '../../../lib/fetch_indices';
 import { RouteDependencies } from '../../../types';
+import { fetchIndices } from '../../../lib/fetch_indices';
+import { addBasePath } from '..';
 
 const bodySchema = schema.maybe(
   schema.object({

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
+import React, { FunctionComponent, ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { FunctionComponent, ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 
 interface Props {
   title: string;

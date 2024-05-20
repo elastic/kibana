@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { LogMeta, Logger } from '@kbn/logging';
+import type { Logger, LogMeta } from '@kbn/logging';
 import { MigrationLog } from '../../types';
 
 export interface LogAwareState {

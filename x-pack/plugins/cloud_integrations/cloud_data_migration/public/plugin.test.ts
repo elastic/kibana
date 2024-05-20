@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { CloudDataMigrationPlugin } from './plugin';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { createBreadcrumbsMock } from './application/services/breadcrumb.mock';
-import { CloudDataMigrationPlugin } from './plugin';
 
 describe('Cloud Data Migration Plugin', () => {
   describe('#setup', () => {

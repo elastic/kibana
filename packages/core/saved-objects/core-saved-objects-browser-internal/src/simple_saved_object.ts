@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { set } from '@kbn/safer-lodash-set';
+import { get, has } from 'lodash';
+import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsClientContract,
   SimpleSavedObject,
 } from '@kbn/core-saved-objects-api-browser';
-import type { SavedObject as SavedObjectType } from '@kbn/core-saved-objects-common';
-import { set } from '@kbn/safer-lodash-set';
-import { get, has } from 'lodash';
 
 /**
  * Core internal implementation of {@link SimpleSavedObject}

@@ -55,44 +55,12 @@ export const BOTTOM_LEFT: Vector3d = [-1, -1, 0, 1];
 export const BOTTOM_RIGHT: Vector3d = [1, -1, 0, 1];
 
 // prettier-ignore
-export const translate = (x: number, y: number, z: number): TransformMatrix3d => [
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  x,
-  y,
-  z,
-  1,
-];
+export const translate = (x: number, y: number, z: number): TransformMatrix3d =>
+  [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
 
 // prettier-ignore
-export const scale = (x: number, y: number, z: number): TransformMatrix3d => [
-  x,
-  0,
-  0,
-  0,
-  0,
-  y,
-  0,
-  0,
-  0,
-  0,
-  z,
-  0,
-  0,
-  0,
-  0,
-  1,
-];
+export const scale = (x: number, y: number, z: number): TransformMatrix3d =>
+  [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
 
 export const rotateZ = (a: number): TransformMatrix3d => {
   const sinA = Math.sin(a);
@@ -121,27 +89,28 @@ export const rotateZ = (a: number): TransformMatrix3d => {
 const mult = (
   [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: TransformMatrix3d,
   [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]: TransformMatrix3d
-): TransformMatrix3d => [
-  a * A + e * B + i * C + m * D,
-  b * A + f * B + j * C + n * D,
-  c * A + g * B + k * C + o * D,
-  d * A + h * B + l * C + p * D,
+): TransformMatrix3d =>
+  [
+    a * A + e * B + i * C + m * D,
+    b * A + f * B + j * C + n * D,
+    c * A + g * B + k * C + o * D,
+    d * A + h * B + l * C + p * D,
 
-  a * E + e * F + i * G + m * H,
-  b * E + f * F + j * G + n * H,
-  c * E + g * F + k * G + o * H,
-  d * E + h * F + l * G + p * H,
+    a * E + e * F + i * G + m * H,
+    b * E + f * F + j * G + n * H,
+    c * E + g * F + k * G + o * H,
+    d * E + h * F + l * G + p * H,
 
-  a * I + e * J + i * K + m * L,
-  b * I + f * J + j * K + n * L,
-  c * I + g * J + k * K + o * L,
-  d * I + h * J + l * K + p * L,
+    a * I + e * J + i * K + m * L,
+    b * I + f * J + j * K + n * L,
+    c * I + g * J + k * K + o * L,
+    d * I + h * J + l * K + p * L,
 
-  a * M + e * N + i * O + m * P,
-  b * M + f * N + j * O + n * P,
-  c * M + g * N + k * O + o * P,
-  d * M + h * N + l * O + p * P,
-];
+    a * M + e * N + i * O + m * P,
+    b * M + f * N + j * O + n * P,
+    c * M + g * N + k * O + o * P,
+    d * M + h * N + l * O + p * P,
+  ];
 
 export const multiply = (
   first: TransformMatrix3d,
@@ -169,12 +138,13 @@ export const multiply = (
 export const mvMultiply = (
   [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: TransformMatrix3d,
   [A, B, C, D]: Vector3d
-): Vector3d => [
-  a * A + e * B + i * C + m * D,
-  b * A + f * B + j * C + n * D,
-  c * A + g * B + k * C + o * D,
-  d * A + h * B + l * C + p * D,
-];
+): Vector3d =>
+  [
+    a * A + e * B + i * C + m * D,
+    b * A + f * B + j * C + n * D,
+    c * A + g * B + k * C + o * D,
+    d * A + h * B + l * C + p * D,
+  ];
 
 export const normalize = ([A, B, C, D]: Vector3d): Vector3d =>
   D === 1 ? [A, B, C, D] : [A / D, B / D, C / D, 1];
@@ -243,24 +213,8 @@ export const invert = ([
 };
 
 // prettier-ignore
-export const translateComponent = (a: TransformMatrix3d): TransformMatrix3d => [
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-  a[12],
-  a[13],
-  a[14],
-  1,
-];
+export const translateComponent = (a: TransformMatrix3d): TransformMatrix3d =>
+  [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, a[12], a[13], a[14], 1];
 
 export const compositeComponent = ([
   a,
@@ -285,47 +239,49 @@ export const compositeComponent = ([
 export const add = (
   [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: TransformMatrix3d,
   [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]: TransformMatrix3d
-): TransformMatrix3d => [
-  a + A,
-  b + B,
-  c + C,
-  d + D,
-  e + E,
-  f + F,
-  g + G,
-  h + H,
-  i + I,
-  j + J,
-  k + K,
-  l + L,
-  m + M,
-  n + N,
-  o + O,
-  p + P,
-];
+): TransformMatrix3d =>
+  [
+    a + A,
+    b + B,
+    c + C,
+    d + D,
+    e + E,
+    f + F,
+    g + G,
+    h + H,
+    i + I,
+    j + J,
+    k + K,
+    l + L,
+    m + M,
+    n + N,
+    o + O,
+    p + P,
+  ];
 
 // prettier-ignore
 export const subtract = (
   [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: TransformMatrix3d,
   [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]: TransformMatrix3d
-): TransformMatrix3d => [
-  a - A,
-  b - B,
-  c - C,
-  d - D,
-  e - E,
-  f - F,
-  g - G,
-  h - H,
-  i - I,
-  j - J,
-  k - K,
-  l - L,
-  m - M,
-  n - N,
-  o - O,
-  p - P,
-];
+): TransformMatrix3d =>
+  [
+    a - A,
+    b - B,
+    c - C,
+    d - D,
+    e - E,
+    f - F,
+    g - G,
+    h - H,
+    i - I,
+    j - J,
+    k - K,
+    l - L,
+    m - M,
+    n - N,
+    o - O,
+    p - P,
+  ];
 
 export const componentProduct = ([a, b, c, d]: Vector3d, [A, B, C, D]: Vector3d): Vector3d => [
   a * A,

@@ -6,16 +6,15 @@
  */
 
 import { getTimeline } from '../../../objects/timeline';
-import { OPEN_TIMELINE_MODAL, TIMELINE_TITLE } from '../../../screens/timeline';
+import { TIMELINE_TITLE, OPEN_TIMELINE_MODAL } from '../../../screens/timeline';
 import {
   TIMELINES_DESCRIPTION,
-  TIMELINES_FAVORITE,
-  TIMELINES_NOTES_COUNT,
   TIMELINES_PINNED_EVENT_COUNT,
+  TIMELINES_NOTES_COUNT,
+  TIMELINES_FAVORITE,
 } from '../../../screens/timelines';
 import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
@@ -26,6 +25,7 @@ import {
   refreshTimelinesUntilTimeLinePresent,
 } from '../../../tasks/timeline';
 import { TIMELINES_URL } from '../../../urls/navigation';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 const mockTimeline = getTimeline();
 

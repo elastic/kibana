@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
-import type { ComponentMeta } from '@storybook/react';
 import React from 'react';
+import type { ComponentMeta } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 
-import { FieldRow } from '@kbn/management-settings-components-field-row';
+import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { categorizeFields } from '@kbn/management-settings-utilities';
-import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+import { FieldRow } from '@kbn/management-settings-components-field-row';
 
 import { FieldCategory as Component, type FieldCategoryProps as ComponentProps } from '../category';
-import { FieldCategoryProvider } from '../services';
 import { Params, useCategoryStory } from './use_category_story';
+import { FieldCategoryProvider } from '../services';
 
 const settings = getSettingsMock();
 

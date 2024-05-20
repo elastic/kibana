@@ -7,10 +7,10 @@
 
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
-import type { StartServices } from '../../../../types';
 import { createShowTopNCellActionFactory } from './show_top_n';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { StartServices } from '../../../../types';
 
 jest.mock('../../../../common/lib/kibana');
 

@@ -17,10 +17,10 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { EcsSummaryDonutChart } from '../../../ecs_summary_donut_chart';
-import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
-import { ALL_TAB_ID } from '../../index_properties/helpers';
 import { CalloutSummary } from './callout_summary';
+import { EcsSummaryDonutChart } from '../../../ecs_summary_donut_chart';
+import { ALL_TAB_ID } from '../../index_properties/helpers';
+import type { IlmPhase, PartitionedFieldMetadata } from '../../../types';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;

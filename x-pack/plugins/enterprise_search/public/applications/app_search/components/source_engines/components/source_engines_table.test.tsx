@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
+import { EuiInMemoryTable, EuiButtonIcon } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../test_helpers';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { TestNowResponse } from '../../../../../common/types';
 import { apiService } from '../../../../utils/api_service';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export const triggerTestNowMonitor = async ({
   configId,

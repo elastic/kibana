@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
-import { pick } from 'lodash';
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 import { Subject } from 'rxjs';
+import { pick } from 'lodash';
+import useMount from 'react-use/lib/useMount';
+import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import {
   UnifiedHistogramExternalVisContextStatus,
@@ -18,15 +18,15 @@ import {
   UnifiedHistogramRequestContext,
   UnifiedHistogramVisContext,
 } from '../types';
-import { exportVisContext } from '../utils/external_vis_context';
-import { useStateProps } from './hooks/use_state_props';
 import {
+  createStateService,
   UnifiedHistogramStateOptions,
   UnifiedHistogramStateService,
-  createStateService,
 } from './services/state_service';
-import { topPanelHeightSelector } from './utils/state_selectors';
+import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
+import { topPanelHeightSelector } from './utils/state_selectors';
+import { exportVisContext } from '../utils/external_vis_context';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,

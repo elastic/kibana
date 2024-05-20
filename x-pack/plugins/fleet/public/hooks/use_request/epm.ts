@@ -11,33 +11,33 @@ import { useState } from 'react';
 
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
-import { API_VERSIONS } from '../../../common/constants';
-import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
 import { epmRouteService, isVerificationError } from '../../services';
 import type {
-  DeletePackageResponse,
-  GetBulkAssetsRequest,
-  GetBulkAssetsResponse,
   GetCategoriesRequest,
   GetCategoriesResponse,
-  GetInfoResponse,
-  GetInputsTemplatesRequest,
-  GetInputsTemplatesResponse,
-  GetLimitedPackagesResponse,
   GetPackagesRequest,
   GetPackagesResponse,
-  GetVerificationKeyIdResponse,
+  GetLimitedPackagesResponse,
+  GetInfoResponse,
   InstallPackageResponse,
+  DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  GetBulkAssetsRequest,
+  GetBulkAssetsResponse,
+  GetVerificationKeyIdResponse,
+  GetInputsTemplatesRequest,
+  GetInputsTemplatesResponse,
 } from '../../types';
+import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { getCustomIntegrations } from '../../services/custom_integrations';
 
 import { useConfirmOpenUnverified } from '../../applications/integrations/hooks/use_confirm_open_unverified';
 
 import type { RequestError } from './use_request';
-import { sendRequest, sendRequestForRq, useRequest } from './use_request';
+import { useRequest, sendRequest, sendRequestForRq } from './use_request';
 
 export function useGetAppendCustomIntegrationsQuery() {
   return useQuery(['get-append-custom-integrations'], () => {

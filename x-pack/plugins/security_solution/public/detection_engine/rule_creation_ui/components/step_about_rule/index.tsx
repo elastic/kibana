@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
@@ -13,37 +13,37 @@ import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { isEsqlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type {
-  AboutStepRule,
   RuleStepProps,
+  AboutStepRule,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import type { FieldHook, FormHook } from '../../../../shared_imports';
-import { Field, Form, UseField, getUseField } from '../../../../shared_imports';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';
+import type { FieldHook, FormHook } from '../../../../shared_imports';
+import { Field, Form, getUseField, UseField } from '../../../../shared_imports';
 
+import { defaultRiskScoreBySeverity, severityOptions } from './data';
+import { isUrlInvalid } from '../../../../common/utils/validators';
+import { schema as defaultSchema } from './schema';
+import * as I18n from './translations';
+import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
+import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/eui_form';
+import { SeverityField } from '../severity_mapping';
+import { RiskScoreField } from '../risk_score_mapping';
+import { AutocompleteField } from '../autocomplete_field';
+import { useFetchIndex } from '../../../../common/containers/source';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DEFAULT_MAX_SIGNALS,
 } from '../../../../../common/constants';
-import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/eui_form';
-import { useFetchIndex } from '../../../../common/containers/source';
 import { useKibana } from '../../../../common/lib/kibana';
-import { isUrlInvalid } from '../../../../common/utils/validators';
-import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { useRuleIndices } from '../../../rule_management/logic/use_rule_indices';
-import { useInvestigationFields } from '../../hooks/use_investigation_fields';
-import { AutocompleteField } from '../autocomplete_field';
 import { EsqlAutocomplete } from '../esql_autocomplete';
-import { MaxSignals } from '../max_signals';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
-import { RiskScoreField } from '../risk_score_mapping';
-import { SeverityField } from '../severity_mapping';
-import { defaultRiskScoreBySeverity, severityOptions } from './data';
-import { schema as defaultSchema } from './schema';
-import * as I18n from './translations';
+import { useInvestigationFields } from '../../hooks/use_investigation_fields';
+import { MaxSignals } from '../max_signals';
 
 const CommonUseField = getUseField({ component: Field });
 

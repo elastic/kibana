@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { VectorStyle } from './vector_style';
 import {
   FIELD_ORIGIN,
   STYLE_TYPE,
@@ -12,7 +13,6 @@ import {
   VECTOR_STYLES,
 } from '../../../../common/constants';
 import { MockField } from './properties/test_helpers/test_util';
-import { VectorStyle } from './vector_style';
 
 jest.mock('../../../kibana_services');
 

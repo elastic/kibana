@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { type ContentClient, ContentClientProvider } from '@kbn/content-management-plugin/public';
+import React from 'react';
+import { ContentClientProvider, type ContentClient } from '@kbn/content-management-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import React from 'react';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 
 export const FinderApp = (props: {
   contentClient: ContentClient;

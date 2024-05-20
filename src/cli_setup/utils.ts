@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson } from '@kbn/repo-info';
 import { getConfigPath, getDataPath } from '@kbn/utils';
 import inquirer from 'inquirer';
-import { merge } from 'lodash';
 import { duration } from 'moment';
+import { merge } from 'lodash';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
+import { Logger } from '@kbn/core/server';
 import { AgentManager, ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { configSchema } from '@kbn/core-elasticsearch-server-internal';
-import { Logger } from '@kbn/core/server';
-import type { EnrollmentToken } from '@kbn/interactive-setup-plugin/common';
 import { ElasticsearchService } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
 import { KibanaConfigWriter } from '@kbn/interactive-setup-plugin/server/kibana_config_writer';
+import type { EnrollmentToken } from '@kbn/interactive-setup-plugin/common';
 
 const noop = () => {};
 const logger: Logger = {

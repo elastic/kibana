@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
-import { createCategoryRequest } from '@kbn/aiops-log-pattern-analysis/create_category_request';
-import type { CategoriesAgg, Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import {
-  type RandomSamplerWrapper,
   createRandomSamplerWrapper,
+  type RandomSamplerWrapper,
 } from '@kbn/ml-random-sampler-utils';
+import { createCategoryRequest } from '@kbn/aiops-log-pattern-analysis/create_category_request';
+import type { Category, CategoriesAgg } from '@kbn/aiops-log-pattern-analysis/types';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
-import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 import { RANDOM_SAMPLER_SEED } from '../constants';
+import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
 import { getQueryWithParams } from './get_query_with_params';
 

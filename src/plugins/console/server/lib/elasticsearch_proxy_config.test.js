@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import http from 'http';
-import https from 'https';
 import moment from 'moment';
 import { getElasticsearchProxyConfig } from './elasticsearch_proxy_config';
+import https from 'https';
+import http from 'http';
 
 const getDefaultElasticsearchConfig = () => {
   return {

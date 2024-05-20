@@ -8,10 +8,10 @@
 import type { IconSize, IconType } from '@elastic/eui';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import type { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 
 function getStyles(iconSide: string) {
   return {

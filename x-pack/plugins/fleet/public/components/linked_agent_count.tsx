@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
 
-import { AGENTS_PREFIX, PRIVILEGED_AGENT_KUERY, UNPRIVILEGED_AGENT_KUERY } from '../constants';
 import { useLink } from '../hooks';
+import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY, PRIVILEGED_AGENT_KUERY } from '../constants';
 
 /**
  * Displays the provided `count` number as a link to the Agents list if it is greater than zero

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/cell-actions';
-import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { createCopyToClipboardCellActionFactory } from './copy_to_clipboard';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 
 const services = createStartServicesMock();
 const mockSuccessToast = services.notifications.toasts.addSuccess;

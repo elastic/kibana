@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
-import { listMock } from '@kbn/lists-plugin/server/mocks';
-import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
-import { v4 as uuidv4 } from 'uuid';
 import {
-  repeatedSearchResultsWithNoSortId,
+  sampleEmptyDocSearchResults,
   repeatedSearchResultsWithSortId,
+  repeatedSearchResultsWithNoSortId,
   sampleDocSearchResultsNoSortIdNoHits,
   sampleDocWithSortId,
-  sampleEmptyDocSearchResults,
 } from '../__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { v4 as uuidv4 } from 'uuid';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
+import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import type { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { createPersistenceServicesMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
+import type { PersistenceServices } from '@kbn/rule-registry-plugin/server';
+import type { CommonAlertFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
@@ -38,18 +40,16 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import type { CommonAlertFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { PersistenceServices } from '@kbn/rule-registry-plugin/server';
-import { createPersistenceServicesMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
-import { SERVER_APP_ID } from '../../../../../common/constants';
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
-import type { QueryRuleParams } from '../../rule_schema';
+import type { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from '../types';
+import { getRuleRangeTuples } from './utils';
 import { getCompleteRuleMock, getQueryRuleParams } from '../../rule_schema/mocks';
 import { bulkCreateFactory } from '../factories/bulk_create_factory';
 import { wrapHitsFactory } from '../factories/wrap_hits_factory';
-import type { BulkCreate, BulkResponse, RuleRangeTuple, WrapHits } from '../types';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
-import { getRuleRangeTuples } from './utils';
+import type { QueryRuleParams } from '../../rule_schema';
+import { SERVER_APP_ID } from '../../../../../common/constants';
+import type { PluginSetupContract } from '@kbn/alerting-plugin/server';
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: RuleExecutorServicesMock;

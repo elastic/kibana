@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import React, { memo } from 'react';
-import type { IsolateHostPanelProps } from './document_details/isolate_host';
-import { IsolateHostPanel } from './document_details/isolate_host';
-import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
-import type { LeftPanelProps } from './document_details/left';
-import { LeftPanel } from './document_details/left';
-import { LeftPanelProvider } from './document_details/left/context';
-import type { PreviewPanelProps } from './document_details/preview';
-import { PreviewPanel } from './document_details/preview';
-import { PreviewPanelProvider } from './document_details/preview/context';
-import type { RightPanelProps } from './document_details/right';
-import { RightPanel } from './document_details/right';
-import { RightPanelProvider } from './document_details/right/context';
+import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
+import { useEuiTheme } from '@elastic/eui';
 import {
   DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsRightPanelKey,
 } from './document_details/shared/constants/panel_keys';
-import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
-import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
-import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
-import { HostPanel, HostPanelKey } from './entity_details/host_right';
-import type { UserDetailsPanelProps } from './entity_details/user_details_left';
-import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
+import type { IsolateHostPanelProps } from './document_details/isolate_host';
+import { IsolateHostPanel } from './document_details/isolate_host';
+import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
+import type { RightPanelProps } from './document_details/right';
+import { RightPanel } from './document_details/right';
+import { RightPanelProvider } from './document_details/right/context';
+import type { LeftPanelProps } from './document_details/left';
+import { LeftPanel } from './document_details/left';
+import { LeftPanelProvider } from './document_details/left/context';
+import type { PreviewPanelProps } from './document_details/preview';
+import { PreviewPanel } from './document_details/preview';
+import { PreviewPanelProvider } from './document_details/preview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
+import type { UserDetailsPanelProps } from './entity_details/user_details_left';
+import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
+import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
+import { HostPanel, HostPanelKey } from './entity_details/host_right';
+import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
+import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { GlobalTask, downloadToDisk } from '../../lib';
-import { getNodeDownloadInfo } from './node_download_info';
+import { downloadToDisk, GlobalTask } from '../../lib';
 import { getNodeShasums } from './node_shasums';
+import { getNodeDownloadInfo } from './node_download_info';
 
 export const DownloadNodeBuilds: GlobalTask = {
   global: true,

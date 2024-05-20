@@ -10,14 +10,14 @@
 
 const MAX_INDICES = 20;
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  ElasticsearchClient,
-  IKibanaResponse,
   IRouter,
-  KibanaRequest,
-  KibanaResponseFactory,
   RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 

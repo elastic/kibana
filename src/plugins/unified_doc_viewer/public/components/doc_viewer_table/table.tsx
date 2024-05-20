@@ -7,24 +7,30 @@
  */
 
 import './table.scss';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiI18n,
-  EuiSelectableMessage,
+  EuiFieldSearch,
   EuiSpacer,
   EuiTable,
   EuiTableBody,
+  EuiTableRowCell,
+  EuiTableRow,
   EuiTableHeader,
   EuiTableHeaderCell,
-  EuiTablePagination,
-  EuiTableRow,
-  EuiTableRowCell,
   EuiText,
+  EuiTablePagination,
+  EuiSelectableMessage,
+  EuiI18n,
   useEuiTheme,
   useResizeObserver,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { debounce } from 'lodash';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
 import {
   SHOW_MULTIFIELDS,
   formatFieldValue,
@@ -38,17 +44,11 @@ import {
   getFieldSearchMatchingHighlight,
   getTextBasedColumnIconType,
 } from '@kbn/field-utils';
-import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { FieldName } from '@kbn/unified-doc-viewer';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
-import { debounce } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { TableActions } from './table_cell_actions';
 import { TableFieldValue } from './table_cell_value';
+import { TableActions } from './table_cell_actions';
 
 export interface FieldRecord {
   action: Omit<FieldRecordLegacy['action'], 'isActive'>;
@@ -182,10 +182,10 @@ export const DocViewerTable = ({
       const fieldType = columnIconType
         ? columnIconType // for text-based results types come separately
         : isNestedFieldParent(field, dataView)
-          ? 'nested'
-          : fieldMapping
-            ? getFieldIconType(fieldMapping)
-            : undefined;
+        ? 'nested'
+        : fieldMapping
+        ? getFieldIconType(fieldMapping)
+        : undefined;
 
       const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);
 

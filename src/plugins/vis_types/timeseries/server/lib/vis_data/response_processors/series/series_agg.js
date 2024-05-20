@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { first, last } from 'lodash';
+import { last, first } from 'lodash';
+import { SeriesAgg } from './_series_agg';
+import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { calculateLabel } from '../../../../../common/calculate_label';
 import { SERIES_SEPARATOR } from '../../../../../common/constants';
-import { getDefaultDecoration } from '../../helpers/get_default_decoration';
-import { SeriesAgg } from './_series_agg';
 
 export function seriesAgg(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {

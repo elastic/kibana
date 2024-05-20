@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiSuperSelect } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
+import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import React from 'react';
+import { EuiSuperSelect } from '@elastic/eui';
+import { render, screen } from '@testing-library/react';
 
-import userEvent from '@testing-library/user-event';
-import { useApplicationCapabilities } from '../../common/lib/kibana';
-import { TestProviders } from '../../common/mock';
-import { connectors } from './__mock__';
 import type { Props } from './connectors_dropdown';
 import { ConnectorsDropdown } from './connectors_dropdown';
+import { TestProviders } from '../../common/mock';
+import { connectors } from './__mock__';
+import userEvent from '@testing-library/user-event';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
 
 const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
   typeof useApplicationCapabilities

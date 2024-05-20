@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { GeoFieldSelect } from '../../../../../components/geo_field_select';
+import { i18n } from '@kbn/i18n';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { GeoIndexPatternSelect } from '../../../../../components/geo_index_pattern_select';
+import { GeoFieldSelect } from '../../../../../components/geo_field_select';
 
 interface Props {
   dataView?: DataView;

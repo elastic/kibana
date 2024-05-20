@@ -6,18 +6,18 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import React, { useMemo } from 'react';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { UrlStateContainer } from '../../utils/url_state';
 import {
-  type MetricsExplorerChartOptions,
   type MetricsExplorerOptions,
   type MetricsExplorerTimeOptions,
-  metricsExplorerChartOptionsRT,
-  metricsExplorerOptionsRT,
-  metricsExplorerTimeOptionsRT,
+  type MetricsExplorerChartOptions,
   useMetricsExplorerOptionsContainerContext,
+  metricsExplorerOptionsRT,
+  metricsExplorerChartOptionsRT,
+  metricsExplorerTimeOptionsRT,
 } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { UrlStateContainer } from '../../utils/url_state';
 
 interface MetricsExplorerUrlState {
   timerange?: MetricsExplorerTimeOptions;

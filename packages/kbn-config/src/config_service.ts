@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
-import { DocLinks, getDocLinks } from '@kbn/doc-links';
-import { Logger, LoggerFactory } from '@kbn/logging';
-import { set } from '@kbn/safer-lodash-set';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
 import { cloneDeep, isEqual, merge } from 'lodash';
-import { BehaviorSubject, Observable, combineLatest, firstValueFrom, identity } from 'rxjs';
+import { set } from '@kbn/safer-lodash-set';
+import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity } from 'rxjs';
 import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs';
+import { Logger, LoggerFactory } from '@kbn/logging';
+import { getDocLinks, DocLinks } from '@kbn/doc-links';
 
 import { getFlattenedObject } from '@kbn/std';
 import { Config, ConfigPath, Env } from '..';
 import { hasConfigPathIntersection } from './config';
+import { RawConfigurationProvider } from './raw';
 import {
-  ChangedDeprecatedPaths,
+  applyDeprecations,
+  ConfigDeprecationWithContext,
   ConfigDeprecationContext,
   ConfigDeprecationProvider,
-  ConfigDeprecationWithContext,
-  DeprecatedConfigDetails,
-  applyDeprecations,
   configDeprecationFactory,
+  DeprecatedConfigDetails,
+  ChangedDeprecatedPaths,
 } from './deprecation';
 import { ObjectToConfigAdapter } from './object_to_config_adapter';
-import { RawConfigurationProvider } from './raw';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;

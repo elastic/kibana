@@ -10,14 +10,14 @@ import React from 'react';
 import { EuiDataGridSorting } from '@elastic/eui';
 import { Datatable } from '@kbn/expressions-plugin/common';
 
-import type { ColumnConfig, LensGridDirection } from '../../../../common/expressions';
 import {
   createGridFilterHandler,
-  createGridHideHandler,
   createGridResizeHandler,
   createGridSortingConfig,
+  createGridHideHandler,
   createTransposeColumnFilterHandler,
 } from './table_actions';
+import type { LensGridDirection, ColumnConfig } from '../../../../common/expressions';
 
 function getDefaultConfig(): ColumnConfig {
   return {

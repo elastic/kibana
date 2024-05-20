@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useQuery as _useQuery } from '@tanstack/react-query';
-import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { useGetActionDetails } from './use_get_action_details';
+import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
+import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
+import { useQuery as _useQuery } from '@tanstack/react-query';
 
 const useQueryMock = _useQuery as jest.Mock;
 

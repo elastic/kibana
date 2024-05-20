@@ -12,13 +12,13 @@ import type { BulkActionEditPayload } from '../../../../../../common/api/detecti
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
-import type { RuleAlertType } from '../../../rule_schema';
 import { enrichFilterWithRuleTypeMapping } from '../search/enrich_filter_with_rule_type_mappings';
+import type { RuleAlertType } from '../../../rule_schema';
 
-import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 import { ruleParamsModifier } from './rule_params_modifier';
 import { splitBulkEditActions } from './split_bulk_edit_actions';
 import { validateBulkEditRule } from './validations';
+import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 
 export interface BulkEditRulesArguments {
   rulesClient: RulesClient;

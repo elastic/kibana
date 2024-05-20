@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
-  ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
-  ApmRuleType,
-  LOG_THRESHOLD_ALERT_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  LOG_THRESHOLD_ALERT_TYPE_ID,
+  ALERT_EVALUATION_THRESHOLD,
+  ApmRuleType,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
+import { i18n } from '@kbn/i18n';
 import { asDuration, asPercent } from '../../../../common';
 import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
-import { METRIC_FORMATTERS } from '../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
 import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
+import { METRIC_FORMATTERS } from '../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../pages/alert_details/alert_details';
 import {
   BaseMetricExpressionParams,
   CustomMetricExpressionParams,
 } from '../../../../common/custom_threshold_rule/types';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../pages/alert_details/alert_details';
 import { TopAlert } from '../../../typings/alerts';
 import { isFieldsSameType } from './is_fields_same_type';
 export interface FlyoutThresholdData {

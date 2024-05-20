@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { v4 as uuidv4 } from 'uuid';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
-import { v4 as uuidv4 } from 'uuid';
-import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
 import { asNotificationExecutionSource } from '../lib';
 import { actionExecutorMock } from '../lib/action_executor.mock';
 import { UnsecuredActionsClient } from './unsecured_actions_client';
+import { Logger } from '@kbn/core/server';
+import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
 
 jest.mock('../application/connector/methods/get_all/get_all');
 

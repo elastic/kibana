@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { memo, useMemo } from 'react';
+import { startCase } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { startCase } from 'lodash';
-import React, { memo, useMemo } from 'react';
-import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
-import { getField } from '../../shared/utils';
-import { useRightPanelContext } from '../context';
-import { EVENT_CATEGORY_TO_FIELD } from '../utils/event_utils';
 import { DocumentSeverity } from './severity';
+import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useRightPanelContext } from '../context';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
+import { getField } from '../../shared/utils';
+import { EVENT_CATEGORY_TO_FIELD } from '../utils/event_utils';
 
 /**
  * Event details flyout right section header

@@ -6,11 +6,20 @@
  * Side Public License, v 1.
  */
 
+import React, { Fragment, useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiText, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CellActionsProvider } from '@kbn/cell-actions';
-import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import {
+  type SearchResponseWarning,
+  SearchResponseWarningsCallout,
+} from '@kbn/search-response-warnings';
 import {
   CONTEXT_STEP_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -18,28 +27,19 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import {
-  type SearchResponseWarning,
-  SearchResponseWarningsCallout,
-} from '@kbn/search-response-warnings';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import React, { Fragment, useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
-import { getDefaultRowsPerPage } from '../../../common/constants';
 import { DiscoverGrid } from '../../components/discover_grid';
-import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
+import { getDefaultRowsPerPage } from '../../../common/constants';
+import { LoadingStatus } from './services/context_query_state';
+import { ActionBar } from './components/action_bar/action_bar';
+import { AppState } from './services/context_state';
+import { SurrDocType } from './services/context';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
-import { ActionBar } from './components/action_bar/action_bar';
-import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
-import { SurrDocType } from './services/context';
-import { LoadingStatus } from './services/context_query_state';
-import { AppState } from './services/context_state';
 
 export interface ContextAppContentProps {
   columns: string[];

@@ -1,26 +1,3 @@
-import {
-  EuiAccordion,
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiCheckbox,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiIcon,
-  EuiPopover,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  euiPaletteColorBlindBehindText,
-  useEuiTheme,
-} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -28,16 +5,39 @@ import {
  * 2.0.
  */
 import React, { useMemo, useState, useCallback, ChangeEvent, useEffect } from 'react';
+import {
+  EuiCallOut,
+  EuiIcon,
+  EuiToolTip,
+  EuiText,
+  EuiBadge,
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiForm,
+  EuiFormRow,
+  EuiComboBox,
+  EuiCheckbox,
+  EuiComboBoxOptionOption,
+  EuiSpacer,
+  euiPaletteColorBlindBehindText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { useStyles } from './styles';
+import { useStyles as useSelectorStyles } from '../control_general_view_selector/styles';
+import { ControlGeneralViewResponseDeps, ControlFormErrorMap } from '../../types';
 import { Response, ResponseAction } from '../../../common';
+import * as i18n from '../control_general_view/translations';
 import {
   getSelectorTypeIcon,
-  selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar,
   validateBlockRestrictions,
+  selectorsIncludeConditionsForFIMOperationsUsingSlashStarStar,
 } from '../../common/utils';
-import { ControlFormErrorMap, ControlGeneralViewResponseDeps } from '../../types';
-import * as i18n from '../control_general_view/translations';
-import { useStyles as useSelectorStyles } from '../control_general_view_selector/styles';
-import { useStyles } from './styles';
 
 // max number of names to show in title (in collapsed state)
 // selectorA, selectorB, selectorC, selectorD [+5]

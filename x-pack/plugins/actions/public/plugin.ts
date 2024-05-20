@@ -7,9 +7,9 @@
 
 import { Plugin as CorePlugin, PluginInitializerContext } from '@kbn/core/public';
 import {
-  ValidateEmailAddressesOptions,
   ValidatedEmail,
   validateEmailAddresses as validateEmails,
+  ValidateEmailAddressesOptions,
 } from '../common';
 
 export interface ActionsPublicPluginSetup {

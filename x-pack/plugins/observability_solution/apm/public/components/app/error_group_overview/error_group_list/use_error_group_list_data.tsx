@@ -6,13 +6,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { useStateDebounced } from '../../../../hooks/use_debounce';
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useStateDebounced } from '../../../../hooks/use_debounce';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TableOptions } from '../../../shared/managed_table';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 
 type MainStatistics =

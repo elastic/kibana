@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject, distinctUntilChanged, skipWhile, switchMap } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, skipWhile, Subject, switchMap } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
 import type {

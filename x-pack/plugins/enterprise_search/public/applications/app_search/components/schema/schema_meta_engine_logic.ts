@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
-import { SchemaBaseActions, SchemaBaseLogic, SchemaBaseValues } from './schema_base_logic';
+import { SchemaBaseLogic, SchemaBaseValues, SchemaBaseActions } from './schema_base_logic';
 import { MetaEngineSchemaApiResponse } from './types';
 
 interface MetaEngineSchemaValues extends SchemaBaseValues {

@@ -1,4 +1,3 @@
-import { promisify } from 'util';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,13 +5,14 @@ import { promisify } from 'util';
  * 2.0.
  */
 import { unzip as unzipAsyncCallback } from 'zlib';
-import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import pRetry from 'p-retry';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { ApmSourceMap } from '@kbn/apm-plugin/server/routes/source_maps/create_apm_source_map_index_template';
 import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
 import expect from '@kbn/expect';
 import { first, last, times } from 'lodash';
-import pRetry from 'p-retry';
+import { promisify } from 'util';
+import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const unzip = promisify(unzipAsyncCallback);

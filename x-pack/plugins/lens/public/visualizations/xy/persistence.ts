@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { cloneDeep } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 
 import { layerTypes } from '../../../common/layer_types';
 import { AnnotationGroups } from '../../types';
-import { nonNullable } from '../../utils';
-import { annotationLayerHasUnsavedChanges } from './state_helpers';
 import {
+  XYLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYState,
   XYAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
-  XYDataLayerConfig,
-  XYLayerConfig,
-  XYReferenceLineLayerConfig,
-  XYState,
 } from './types';
 import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
+import { nonNullable } from '../../utils';
+import { annotationLayerHasUnsavedChanges } from './state_helpers';
 
 export const isPersistedByReferenceAnnotationsLayer = (
   layer: XYPersistedAnnotationLayerConfig

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { includes, isFunction } from 'lodash';
 import React from 'react';
+import { includes, isFunction } from 'lodash';
+import { EuiFlexItem, EuiFlexGroup, EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import './horizontal_legend.scss';
 
 export class HorizontalLegend extends React.Component {

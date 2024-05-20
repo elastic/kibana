@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
+import type { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
 /**
  * Only 2 bulk actions are supported for for confirmation dry run modal:

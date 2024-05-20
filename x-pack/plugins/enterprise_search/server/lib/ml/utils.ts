@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
-import { MlModel, MlModelDeploymentState } from '../../../common/types/ml';
+import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
 
 export const ELSER_MODEL_ID = '.elser_model_2';
 export const ELSER_LINUX_OPTIMIZED_MODEL_ID = '.elser_model_2_linux-x86_64';

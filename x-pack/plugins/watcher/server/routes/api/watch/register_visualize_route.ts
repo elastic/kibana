@@ -10,9 +10,9 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 
 // @ts-ignore
-import { VisualizeOptions } from '../../../models/visualize_options';
-// @ts-ignore
 import { Watch } from '../../../models/watch';
+// @ts-ignore
+import { VisualizeOptions } from '../../../models/visualize_options';
 
 const bodySchema = schema.object({
   watch: schema.object({}, { unknowns: 'allow' }),

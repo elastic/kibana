@@ -10,8 +10,8 @@ import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
-  MockApmPluginContextWrapper,
   mockApmPluginContextValue,
+  MockApmPluginContextWrapper,
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../../../utils/test_helpers';
 import { CustomLinkToolbar } from './custom_link_toolbar';

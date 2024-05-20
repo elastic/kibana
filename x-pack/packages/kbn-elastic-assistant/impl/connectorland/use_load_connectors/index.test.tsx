@@ -6,7 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { Props, useLoadConnectors } from '.';
+import { useLoadConnectors, Props } from '.';
 import { mockConnectors } from '../../mock/connectors';
 
 const mockConnectorsAndExtras = [

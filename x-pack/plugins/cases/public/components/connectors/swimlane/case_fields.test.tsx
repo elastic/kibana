@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
-import { SwimlaneConnectorType } from '../../../../common/types/domain';
-import { swimlaneConnector as connector } from '../mock';
-import { MockFormWrapperComponent } from '../test_utils';
 import Fields from './case_fields';
 import * as i18n from './translations';
+import { swimlaneConnector as connector } from '../mock';
+import { MockFormWrapperComponent } from '../test_utils';
+import { SwimlaneConnectorType } from '../../../../common/types/domain';
 
 const fields = {
   caseId: '123',

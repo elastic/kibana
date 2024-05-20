@@ -6,7 +6,11 @@
     "id": "telemetryTestPlugin",
     "server": false,
     "browser": true,
-    "configPath": ["telemetryTestPlugin"],
-    "requiredPlugins": ["telemetry"]
+    "configPath": [
+      "telemetryTestPlugin"
+    ],
+    "requiredPlugins": [
+      "telemetry"
+    ]
   }
 }

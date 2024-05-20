@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { login } from '../../tasks/login';
 import {
   getConsoleActionMenuItem,
   getUnIsolateActionMenuItem,
   openRowActionMenu,
   visitEndpointList,
 } from '../../screens';
-import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
-import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
-import { login } from '../../tasks/login';
 
 describe(
   'When on the Endpoint List in Security Essentials PLI',

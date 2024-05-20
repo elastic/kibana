@@ -8,7 +8,7 @@
 
 import { CharStreams } from 'antlr4';
 import { ESQLErrorListener } from './antlr_error_listener';
-import { ROOT_STATEMENT, getParser } from './antlr_facade';
+import { getParser, ROOT_STATEMENT } from './antlr_facade';
 import { AstListener } from './ast_factory';
 import type { ESQLAst, EditorError } from './types';
 

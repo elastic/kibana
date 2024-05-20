@@ -9,9 +9,9 @@ import React, { useMemo } from 'react';
 
 import { UrlStateContainer } from '../../utils/url_state';
 import {
-  TextScale,
   availableTextScales,
   useLogViewConfigurationContext,
+  TextScale,
 } from './log_view_configuration';
 
 interface LogTextviewUrlState {

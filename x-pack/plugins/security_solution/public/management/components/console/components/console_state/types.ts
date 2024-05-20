@@ -9,13 +9,13 @@
 
 import type { Dispatch, Reducer } from 'react';
 import type { ParsedCommandInterface } from '../../service/types';
+import type { CommandInputProps } from '../command_input';
 import type {
   Command,
-  CommandArgDefinition,
   CommandDefinition,
   CommandExecutionComponent,
+  CommandArgDefinition,
 } from '../../types';
-import type { CommandInputProps } from '../command_input';
 
 export interface ConsoleDataState {
   /**

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { mount } from 'enzyme';
 
-import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 
 import { EnterpriseSearchOverviewHeaderActions } from './kibana_header_actions';
 

@@ -6,8 +6,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 
 import { type TagValidation, validateTagName } from '../../../common';
 import type { ITagsClient, TagAttributes } from '../../../common/types';

@@ -7,11 +7,11 @@
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
-import {
-  RulesSettingsClientMock,
-  rulesSettingsClientMock,
-} from '../../../../rules_settings_client.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import {
+  rulesSettingsClientMock,
+  RulesSettingsClientMock,
+} from '../../../../rules_settings_client.mock';
 import { updateQueryDelaySettingsRoute } from './update_query_delay_settings';
 
 let rulesSettingsClient: RulesSettingsClientMock;
@@ -71,9 +71,8 @@ describe('updateQueryDelaySettingsRoute', () => {
     await handler(context, req, res);
 
     expect(rulesSettingsClient.queryDelay().update).toHaveBeenCalledTimes(1);
-    expect(
-      (rulesSettingsClient.queryDelay().update as jest.Mock).mock.calls[0]
-    ).toMatchInlineSnapshot(`
+    expect((rulesSettingsClient.queryDelay().update as jest.Mock).mock.calls[0])
+      .toMatchInlineSnapshot(`
       Array [
         Object {
           "delay": 6,

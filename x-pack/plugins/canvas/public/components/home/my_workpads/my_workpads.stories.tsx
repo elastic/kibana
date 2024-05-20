@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React from 'react';
+import { EuiPanel } from '@elastic/eui';
 
 import { reduxDecorator } from '../../../../storybook';
 import { argTypes } from '../../../services/storybook';

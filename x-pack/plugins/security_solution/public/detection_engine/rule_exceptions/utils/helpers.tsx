@@ -5,58 +5,58 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiAvatar, EuiText } from '@elastic/eui';
+import { EuiText, EuiAvatar } from '@elastic/eui';
 import { capitalize, get, omit } from 'lodash';
 import type { Moment } from 'moment';
 import moment from 'moment';
-import React from 'react';
 
 import type {
-  Comment,
   CommentsArray,
+  Comment,
   CreateComment,
-  EntriesArray,
   Entry,
-  EntryNested,
-  ExceptionListItemSchema,
-  ExceptionListSchema,
   NamespaceType,
+  EntryNested,
   OsTypeArray,
+  ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
+  ExceptionListSchema,
+  EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ListOperatorEnum,
   ListOperatorTypeEnum,
+  ListOperatorEnum,
   comment,
   osType,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import { addIdToEntries, getNewExceptionItem } from '@kbn/securitysolution-list-utils';
+import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
+import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
-import type { CodeSignature, EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { getEventFieldsToDisplay } from '../../../common/components/event_details/get_alert_summary_rows';
+import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
 import type { EventSummaryField } from '../../../common/components/event_details/types';
+import { getEventFieldsToDisplay } from '../../../common/components/event_details/get_alert_summary_rows';
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
-import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 import { WithCopyToClipboard } from '../../../common/lib/clipboard/with_copy_to_clipboard';
+import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 import {
-  AGENT_ID,
-  AGENT_TYPE,
-  ENDPOINT_ALERT,
-  EVENT_CATEGORY,
   EVENT_CODE,
-  KIBANA_ALERT_RULE_TYPE,
-  KIBANA_ALERT_RULE_UUID,
+  EVENT_CATEGORY,
   getKibanaAlertIdField,
   highlightedFieldsPrefixToExclude,
+  KIBANA_ALERT_RULE_TYPE,
+  AGENT_ID,
+  AGENT_TYPE,
+  KIBANA_ALERT_RULE_UUID,
+  ENDPOINT_ALERT,
 } from './highlighted_fields_config';
 
 /**

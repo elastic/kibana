@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { SecurityPageName } from '../../../../common';
 import { useNavigateTo } from '../../lib/kibana';
 import type { GetSecuritySolutionUrl } from '../link_to';

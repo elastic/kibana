@@ -12,13 +12,13 @@ import { MlTrainedModels } from '@kbn/ml-plugin/server';
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import {
-  InferencePipelineData,
   fetchAndAddTrainedModelData,
-  fetchMlInferencePipelineProcessors,
-  fetchMlInferencePipelines,
-  fetchPipelineProcessorInferenceData,
-  getMlInferencePipelineProcessorNamesFromPipelines,
   getMlModelConfigsForModelIds,
+  getMlInferencePipelineProcessorNamesFromPipelines,
+  fetchMlInferencePipelines,
+  fetchMlInferencePipelineProcessors,
+  fetchPipelineProcessorInferenceData,
+  InferencePipelineData,
 } from './get_ml_inference_pipeline_processors';
 
 const mockGetPipeline = {

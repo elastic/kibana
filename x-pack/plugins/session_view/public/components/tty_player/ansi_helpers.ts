@@ -7,8 +7,8 @@
 
 import type { Teletype } from '../../../common';
 import {
-  PROCESS_DATA_LIMIT_EXCEEDED_END,
   PROCESS_DATA_LIMIT_EXCEEDED_START,
+  PROCESS_DATA_LIMIT_EXCEEDED_END,
   VIEW_POLICIES,
 } from './translations';
 

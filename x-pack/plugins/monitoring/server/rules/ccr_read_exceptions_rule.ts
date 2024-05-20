@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { AlertInstanceContext, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
-import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
+import { SanitizedRule, RawAlertInstance, AlertInstanceContext } from '@kbn/alerting-plugin/common';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { RULE_CCR_READ_EXCEPTIONS, RULE_DETAILS } from '../../common/constants';
-import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import {
-  AlertCluster,
-  AlertData,
-  AlertInstanceState,
-  AlertMessage,
-  AlertMessageLinkToken,
-  AlertMessageTimeToken,
-  AlertState,
-  CCRReadExceptionsStats,
-  CCRReadExceptionsUIMeta,
-  CommonAlertFilter,
-  CommonAlertParams,
-} from '../../common/types/alerts';
-import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
-import { Globals } from '../static_globals';
-import { AlertingDefaults, createLink } from './alert_helpers';
 import { BaseRule } from './base_rule';
+import {
+  AlertData,
+  AlertCluster,
+  AlertState,
+  AlertMessage,
+  CCRReadExceptionsUIMeta,
+  AlertMessageTimeToken,
+  AlertMessageLinkToken,
+  AlertInstanceState,
+  CommonAlertParams,
+  CommonAlertFilter,
+  CCRReadExceptionsStats,
+} from '../../common/types/alerts';
+import { RULE_CCR_READ_EXCEPTIONS, RULE_DETAILS } from '../../common/constants';
+import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
+import { AlertingDefaults, createLink } from './alert_helpers';
+import { Globals } from '../static_globals';
 
 export class CCRReadExceptionsRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {

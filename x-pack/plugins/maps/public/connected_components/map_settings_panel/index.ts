@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
+import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
+import { FLYOUT_STATE } from '../../reducers/ui';
+import { MapStoreState } from '../../reducers/store';
+import { MapSettingsPanel } from './map_settings_panel';
 import { CustomIcon } from '../../../common/descriptor_types';
 import {
   deleteCustomIcon,
   rollbackMapSettings,
   updateCustomIcons,
-  updateFlyout,
   updateMapSetting,
+  updateFlyout,
 } from '../../actions';
-import { MapStoreState } from '../../reducers/store';
-import { FLYOUT_STATE } from '../../reducers/ui';
 import {
   getCustomIcons,
   getMapCenter,
@@ -25,7 +26,6 @@ import {
   getMapZoom,
   hasMapSettingsChanges,
 } from '../../selectors/map_selectors';
-import { MapSettingsPanel } from './map_settings_panel';
 
 function mapStateToProps(state: MapStoreState) {
   return {

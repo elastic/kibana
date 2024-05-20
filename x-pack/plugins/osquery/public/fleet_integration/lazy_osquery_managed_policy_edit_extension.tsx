@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PackagePolicyEditExtensionComponent } from '@kbn/fleet-plugin/public';
 import { lazy } from 'react';
+import type { PackagePolicyEditExtensionComponent } from '@kbn/fleet-plugin/public';
 
 export const LazyOsqueryManagedPolicyEditExtension = lazy<PackagePolicyEditExtensionComponent>(
   async () => {

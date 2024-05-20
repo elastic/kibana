@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { mount } from 'enzyme';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { DebouncedInput } from './debounced_input';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

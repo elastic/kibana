@@ -6,12 +6,12 @@
  */
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
-import { validateMonitor } from '../monitor_cruds/monitor_validation';
 import { SyntheticsRestApiRouteFactory } from '../types';
+import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { validateMonitor } from '../monitor_cruds/monitor_validation';
 
 export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',

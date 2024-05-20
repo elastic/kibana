@@ -1,16 +1,16 @@
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import type { State } from '../../common/store/types';
 import * as selectors from '../store/selectors';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useFormattedDate } from './panels/use_formatted_date';
+import type { State } from '../../common/store/types';
 
 export function useAutotuneTimerange({ id }: { id: string }) {
   const { addSuccess } = useAppToasts();

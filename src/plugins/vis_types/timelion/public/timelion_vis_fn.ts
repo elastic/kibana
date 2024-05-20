@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { KibanaContext } from '@kbn/data-plugin/public';
+import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import { TIMELION_VIS_NAME } from '../common/constants';
+import { KibanaContext } from '@kbn/data-plugin/public';
 import { TimelionSuccessResponse } from './helpers/timelion_request_handler';
+import { TIMELION_VIS_NAME } from '../common/constants';
 import { TimelionVisDependencies } from './plugin';
 
 type Input = KibanaContext | null;

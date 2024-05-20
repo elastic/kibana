@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
+import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { UptimeSettingsContext } from '../../../contexts';
-import { getMLCapabilitiesAction } from '../../../state/actions';
 import * as labels from './translations';
+import { getMLCapabilitiesAction } from '../../../state/actions';
 
 export const ShowLicenseInfo = () => {
   const { basePath } = useContext(UptimeSettingsContext);

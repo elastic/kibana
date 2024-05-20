@@ -9,17 +9,17 @@ import { toNumberRt } from '@kbn/io-ts-utils';
 import {
   StackTracesDisplayOption,
   TopNComparisonFunctionSortField,
-  TopNFunctionSortField,
-  TopNType,
   topNComparisonFunctionSortFieldRt,
+  TopNFunctionSortField,
   topNFunctionSortFieldRt,
+  TopNType,
 } from '@kbn/profiling-utils';
-import { Outlet, createRouter } from '@kbn/typed-react-router-config';
+import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import {
-  IndexLifecyclePhaseSelectOption,
   indexLifecyclePhaseRt,
+  IndexLifecyclePhaseSelectOption,
 } from '../../common/storage_explorer';
 import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';

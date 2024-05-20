@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { ChangeEvent, FocusEvent, FunctionComponent, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
-import React, { ChangeEvent, FocusEvent, FunctionComponent, useEffect, useState } from 'react';
 
 const strings = {
   getMatchAllOptionLabel: () =>

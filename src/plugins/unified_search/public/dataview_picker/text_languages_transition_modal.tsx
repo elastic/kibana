@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { getLanguageDisplayName } from '@kbn/es-query';
 import {
-  EuiButton,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiButton,
   EuiText,
+  EuiCheckbox,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
-import { getLanguageDisplayName } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback } from 'react';
 
 export interface TextBasedLanguagesTransitionModalProps {
   closeModal: (dismissFlag: boolean, needsSave?: boolean) => void;

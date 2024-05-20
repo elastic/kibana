@@ -8,8 +8,8 @@
 import { OnRefreshChangeProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
-import { Integration } from '../../common/data_streams_stats/integration';
 import { QualityIndicators } from '../../common/types';
+import { Integration } from '../../common/data_streams_stats/integration';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';
 import { NamespaceItem } from '../components/dataset_quality/filters/namespaces_selector';

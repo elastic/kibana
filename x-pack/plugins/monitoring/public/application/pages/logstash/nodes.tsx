@@ -1,6 +1,3 @@
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,17 +5,20 @@ import { find } from 'lodash';
  * 2.0.
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
-import { LOGSTASH_SYSTEM_ID, RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
-import { AlertsByName } from '../../../alerts/types';
+import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { ComponentProps } from '../../route_init';
 import { Listing } from '../../../components/logstash/listing';
+import { LogstashTemplate } from './logstash_template';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { useTable } from '../../hooks/use_table';
-import { ComponentProps } from '../../route_init';
-import { LogstashTemplate } from './logstash_template';
+import { LOGSTASH_SYSTEM_ID, RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 interface SetupModeProps {
   setupMode: any;

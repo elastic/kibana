@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import React, { FC, PropsWithChildren } from 'react';
 import {
+  EuiTextColor,
+  EuiTextColorProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiTextColor,
-  EuiTextColorProps,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { FC, PropsWithChildren } from 'react';
 
 export interface TextWithIconProps {
   color?: EuiTextColorProps['color'];

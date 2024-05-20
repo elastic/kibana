@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { metricsServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { Subject } from 'rxjs';
+import { savedObjectsRepositoryMock, metricsServiceMock } from '@kbn/core/server/mocks';
 import { startTrackingEventLoopDelaysUsage } from './track_delays';
 
 describe('startTrackingEventLoopDelaysUsage', () => {

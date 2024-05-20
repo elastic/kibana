@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TableId, dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useCallback, useMemo } from 'react';
-import { VIEW_SELECTION } from '../../../../common/constants';
-import { SecurityCellActionType, SecurityCellActionsTrigger } from '../../../app/actions/constants';
+import { TableId, tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
-import { useDataViewId } from '../../../common/hooks/use_data_view_id';
-import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
+import { VIEW_SELECTION } from '../../../../common/constants';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useGetFieldSpec } from '../../../common/hooks/use_get_field_spec';
+import { useDataViewId } from '../../../common/hooks/use_data_view_id';
 
 export const getUseCellActionsHook = (tableId: TableId) => {
   const useCellActions: AlertsTableConfigurationRegistry['useCellActions'] = ({

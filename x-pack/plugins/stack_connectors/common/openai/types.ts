@@ -8,14 +8,14 @@
 import { TypeOf } from '@kbn/config-schema';
 import {
   ConfigSchema,
-  DashboardActionParamsSchema,
-  DashboardActionResponseSchema,
-  InvokeAIActionParamsSchema,
-  InvokeAIActionResponseSchema,
+  SecretsSchema,
   RunActionParamsSchema,
   RunActionResponseSchema,
-  SecretsSchema,
+  DashboardActionParamsSchema,
+  DashboardActionResponseSchema,
   StreamActionParamsSchema,
+  InvokeAIActionParamsSchema,
+  InvokeAIActionResponseSchema,
 } from './schema';
 
 export type Config = TypeOf<typeof ConfigSchema>;

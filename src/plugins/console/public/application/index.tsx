@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { DocLinksStart, HttpSetup, NotificationsSetup } from '@kbn/core/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { loadActiveApi } from '../lib/kb';
-import * as localStorageObjectClient from '../lib/local_storage_object_client';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
-  AutocompleteInfo,
+  createStorage,
   createHistory,
   createSettings,
-  createStorage,
+  AutocompleteInfo,
   setStorage,
 } from '../services';
 import { createUsageTracker } from '../services/tracker';
-import { ConsoleStartServices } from '../types';
+import { loadActiveApi } from '../lib/kb';
+import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { Main } from './containers';
-import { EditorContextProvider, RequestContextProvider, ServicesContextProvider } from './contexts';
+import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { createApi, createEsHostService } from './lib';
+import { ConsoleStartServices } from '../types';
 
 export interface BootDependencies {
   http: HttpSetup;

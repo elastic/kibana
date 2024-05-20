@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core/server';
 
 import type { GetRuleHealthResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  GET_RULE_HEALTH_URL,
   GetRuleHealthRequestBody,
+  GET_RULE_HEALTH_URL,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';

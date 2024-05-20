@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { merge, omit } from 'lodash';
+import { useState } from 'react';
 import type {
   Conversation,
   ConversationCreateRequest,
@@ -16,12 +18,10 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AbortableAsyncState } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseChatResult } from '@kbn/observability-ai-assistant-plugin/public';
-import { merge, omit } from 'lodash';
-import { useState } from 'react';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import { useKibana } from './use_kibana';
-import { useObservabilityAIAssistantAppService } from './use_observability_ai_assistant_app_service';
 import { useOnce } from './use_once';
+import { useObservabilityAIAssistantAppService } from './use_observability_ai_assistant_app_service';
 
 function createNewConversation({
   title = EMPTY_CONVERSATION_TITLE,

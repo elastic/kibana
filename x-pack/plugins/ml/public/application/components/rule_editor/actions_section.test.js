@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
 
 import { ActionsSection } from './actions_section';
 

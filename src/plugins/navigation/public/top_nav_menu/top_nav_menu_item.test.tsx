@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
+import { TopNavMenuData } from './top_nav_menu_data';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 describe('TopNavMenu', () => {
   const ensureMenuItemDisabled = (data: TopNavMenuData) => {

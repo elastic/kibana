@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
 import { api } from './api';
+import { ExternalService } from './types';
 import {
   apiParams,
   externalServiceMock,
   recordResponseCreate,
   recordResponseUpdate,
 } from './mocks';
-import { ExternalService } from './types';
+import { Logger } from '@kbn/logging';
 
 let mockedLogger: jest.Mocked<Logger>;
 

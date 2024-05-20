@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isArray, mergeWith } from 'lodash';
+import { mergeWith, isArray } from 'lodash';
 
 import type { ApplyEnrichmentsToEvents, MergeEnrichments } from '../types';
 

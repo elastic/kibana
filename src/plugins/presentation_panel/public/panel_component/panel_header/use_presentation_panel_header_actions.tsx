@@ -13,16 +13,16 @@ import { Subscription } from 'rxjs';
 
 import { uiActions } from '../../kibana_services';
 import {
-  PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
   panelBadgeTrigger,
   panelNotificationTrigger,
+  PANEL_BADGE_TRIGGER,
+  PANEL_NOTIFICATION_TRIGGER,
 } from '../../panel_actions';
 import { AnyApiAction } from '../../panel_actions/types';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
 export const usePresentationPanelHeaderActions = <
-  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
+  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
 >(
   showNotifications: boolean,
   showBadges: boolean,

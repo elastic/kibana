@@ -25,8 +25,12 @@
         "type": "Function",
         "tags": [],
         "label": "DataGrid",
-        "description": ["\nCustom data grid component with support for mini histograms."],
-        "signature": ["React.FunctionComponent<Props>"],
+        "description": [
+          "\nCustom data grid component with support for mini histograms."
+        ],
+        "signature": [
+          "React.FunctionComponent<Props>"
+        ],
         "path": "x-pack/packages/ml/data_grid/components/data_grid.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -39,7 +43,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P & { children?: React.ReactNode; }"],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -51,7 +57,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -65,7 +73,9 @@
         "type": "Function",
         "tags": [],
         "label": "getDataGridSchemaFromESFieldType",
-        "description": ["\nCreates a data grid schema from an ES field type."],
+        "description": [
+          "\nCreates a data grid schema from an ES field type."
+        ],
         "signature": [
           "(fieldType: \"number\" | ",
           {
@@ -89,7 +99,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldType",
-            "description": ["- The ES field type."],
+            "description": [
+              "- The ES field type."
+            ],
             "signature": [
               "\"number\" | ",
               {
@@ -109,7 +121,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": ["- The data grid schema corresponding to the field type."],
+        "returnComment": [
+          "- The data grid schema corresponding to the field type."
+        ],
         "initialIsOpen": false
       },
       {
@@ -118,7 +132,9 @@
         "type": "Function",
         "tags": [],
         "label": "getDataGridSchemaFromKibanaFieldType",
-        "description": ["\nRetrieves the data grid schema from the Kibana field type."],
+        "description": [
+          "\nRetrieves the data grid schema from the Kibana field type."
+        ],
         "signature": [
           "(field: ",
           {
@@ -140,7 +156,9 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": ["- The Kibana field object."],
+            "description": [
+              "- The Kibana field object."
+            ],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -157,7 +175,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": ["- The data grid schema corresponding to the field type."],
+        "returnComment": [
+          "- The data grid schema corresponding to the field type."
+        ],
         "initialIsOpen": false
       },
       {
@@ -190,7 +210,9 @@
             "type": "Object",
             "tags": [],
             "label": "fieldTypes",
-            "description": ["- The field types object."],
+            "description": [
+              "- The field types object."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-grid",
@@ -211,15 +233,21 @@
             "type": "string",
             "tags": [],
             "label": "resultsField",
-            "description": ["- The results field."],
-            "signature": ["string"],
+            "description": [
+              "- The results field."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["- The array of data grid schemas."],
+        "returnComment": [
+          "- The array of data grid schemas."
+        ],
         "initialIsOpen": false
       },
       {
@@ -260,7 +288,9 @@
             "type": "Object",
             "tags": [],
             "label": "row",
-            "description": ["- EUI data grid data row"],
+            "description": [
+              "- EUI data grid data row"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-grid",
@@ -281,8 +311,12 @@
             "type": "string",
             "tags": [],
             "label": "mlResultsField",
-            "description": ["- Data frame analytics results field"],
-            "signature": ["string"],
+            "description": [
+              "- Data frame analytics results field"
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -294,15 +328,21 @@
             "type": "boolean",
             "tags": [],
             "label": "isClassTypeBoolean",
-            "description": ["- Flag if the class type is boolean"],
-            "signature": ["boolean"],
+            "description": [
+              "- Flag if the class type is boolean"
+            ],
+            "signature": [
+              "boolean"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["nested object structure of feature importance values"],
+        "returnComment": [
+          "nested object structure of feature importance values"
+        ],
         "initialIsOpen": false
       },
       {
@@ -311,7 +351,9 @@
         "type": "Function",
         "tags": [],
         "label": "getFieldsFromKibanaDataView",
-        "description": ["\nRetrieves fields from a Kibana data view."],
+        "description": [
+          "\nRetrieves fields from a Kibana data view."
+        ],
         "signature": [
           "(dataView: ",
           {
@@ -333,7 +375,9 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": ["- The Kibana data view."],
+            "description": [
+              "- The Kibana data view."
+            ],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -349,7 +393,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["- The array of field names from the data view."],
+        "returnComment": [
+          "- The array of field names from the data view."
+        ],
         "initialIsOpen": false
       },
       {
@@ -358,7 +404,9 @@
         "type": "Function",
         "tags": [],
         "label": "getFieldType",
-        "description": ["\nGets the Kibana field type from a EUI data grid column schema.\n"],
+        "description": [
+          "\nGets the Kibana field type from a EUI data grid column schema.\n"
+        ],
         "signature": [
           "(schema: string | undefined) => ",
           {
@@ -380,8 +428,12 @@
             "type": "string",
             "tags": [],
             "label": "schema",
-            "description": ["- EUI data grid column schema."],
-            "signature": ["string | undefined"],
+            "description": [
+              "- EUI data grid column schema."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/hooks/use_column_chart.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -400,7 +452,9 @@
         "description": [
           "\nValue can be nested or the fieldName itself might contain other special characters like `.`"
         ],
-        "signature": ["(obj: unknown, sortId: string) => any"],
+        "signature": [
+          "(obj: unknown, sortId: string) => any"
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -411,8 +465,12 @@
             "type": "Unknown",
             "tags": [],
             "label": "obj",
-            "description": ["- The object to get the nested property from."],
-            "signature": ["unknown"],
+            "description": [
+              "- The object to get the nested property from."
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -424,8 +482,12 @@
             "type": "string",
             "tags": [],
             "label": "sortId",
-            "description": ["- The sort id attribute."],
-            "signature": ["string"],
+            "description": [
+              "- The sort id attribute."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -457,8 +519,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "originalObj",
-            "description": ["- The original object to get the processed fields from."],
-            "signature": ["object"],
+            "description": [
+              "- The original object to get the processed fields from."
+            ],
+            "signature": [
+              "object"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -470,15 +536,21 @@
             "type": "Function",
             "tags": [],
             "label": "omitBy",
-            "description": ["- Optional callback."],
-            "signature": ["((key: string) => boolean) | undefined"],
+            "description": [
+              "- Optional callback."
+            ],
+            "signature": [
+              "((key: string) => boolean) | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [") => { [key: string]: any; }}"],
+        "returnComment": [
+          ") => { [key: string]: any; }}"
+        ],
         "initialIsOpen": false
       },
       {
@@ -518,7 +590,9 @@
             "type": "Object",
             "tags": [],
             "label": "row",
-            "description": ["- EUI data grid data row"],
+            "description": [
+              "- EUI data grid data row"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-grid",
@@ -539,15 +613,21 @@
             "type": "string",
             "tags": [],
             "label": "mlResultsField",
-            "description": ["- Data frame analytics results field"],
-            "signature": ["string"],
+            "description": [
+              "- Data frame analytics results field"
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["nested object structure of feature importance values"],
+        "returnComment": [
+          "nested object structure of feature importance values"
+        ],
         "initialIsOpen": false
       },
       {
@@ -556,7 +636,9 @@
         "type": "Function",
         "tags": [],
         "label": "isNumericChartData",
-        "description": ["\nDetermines if the provided argument is of type NumericChartData."],
+        "description": [
+          "\nDetermines if the provided argument is of type NumericChartData."
+        ],
         "signature": [
           "(arg: unknown) => arg is ",
           {
@@ -577,8 +659,12 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": ["- The argument to check."],
-            "signature": ["unknown"],
+            "description": [
+              "- The argument to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -594,7 +680,9 @@
         "type": "Function",
         "tags": [],
         "label": "isOrdinalChartData",
-        "description": ["\nDetermines if the provided argument is of type OrdinalChartData."],
+        "description": [
+          "\nDetermines if the provided argument is of type OrdinalChartData."
+        ],
         "signature": [
           "(arg: unknown) => arg is ",
           {
@@ -615,8 +703,12 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": ["- The argument to check."],
-            "signature": ["unknown"],
+            "description": [
+              "- The argument to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -632,7 +724,9 @@
         "type": "Function",
         "tags": [],
         "label": "isUnsupportedChartData",
-        "description": ["\nDetermines if the provided argument is of type UnsupportedChartData."],
+        "description": [
+          "\nDetermines if the provided argument is of type UnsupportedChartData."
+        ],
         "signature": [
           "(arg: unknown) => arg is ",
           {
@@ -653,8 +747,12 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": ["- The argument to check."],
-            "signature": ["unknown"],
+            "description": [
+              "- The argument to check."
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -694,7 +792,9 @@
             "type": "Array",
             "tags": [],
             "label": "sortingColumns",
-            "description": ["- The EUI data grid sorting configuration"],
+            "description": [
+              "- The EUI data grid sorting configuration"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-grid",
@@ -722,7 +822,9 @@
         "type": "Function",
         "tags": [],
         "label": "showDataGridColumnChartErrorMessageToast",
-        "description": ["\nDisplays an error toast message for the data grid column chart.\n"],
+        "description": [
+          "\nDisplays an error toast message for the data grid column chart.\n"
+        ],
         "signature": [
           "(e: unknown, toastNotifications: ",
           {
@@ -744,8 +846,12 @@
             "type": "Unknown",
             "tags": [],
             "label": "e",
-            "description": ["- The error object or message."],
-            "signature": ["unknown"],
+            "description": [
+              "- The error object or message."
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -757,7 +863,9 @@
             "type": "Object",
             "tags": [],
             "label": "toastNotifications",
-            "description": ["- The toast notifications service."],
+            "description": [
+              "- The toast notifications service."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
@@ -782,7 +890,9 @@
         "type": "Function",
         "tags": [],
         "label": "useDataGrid",
-        "description": ["\nCustom hook to manage DataGrid state.\n"],
+        "description": [
+          "\nCustom hook to manage DataGrid state.\n"
+        ],
         "signature": [
           "(columns: ",
           "EuiDataGridColumn",
@@ -805,8 +915,13 @@
             "type": "Array",
             "tags": [],
             "label": "columns",
-            "description": ["- EUI column spec"],
-            "signature": ["EuiDataGridColumn", "[]"],
+            "description": [
+              "- EUI column spec"
+            ],
+            "signature": [
+              "EuiDataGridColumn",
+              "[]"
+            ],
             "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -818,8 +933,12 @@
             "type": "number",
             "tags": [],
             "label": "defaultPageSize",
-            "description": ["- Default page size"],
-            "signature": ["number"],
+            "description": [
+              "- Default page size"
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -831,8 +950,12 @@
             "type": "number",
             "tags": [],
             "label": "defaultVisibleColumnsCount",
-            "description": ["- Default count of visible columns"],
-            "signature": ["number"],
+            "description": [
+              "- Default count of visible columns"
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -844,8 +967,12 @@
             "type": "Function",
             "tags": [],
             "label": "defaultVisibleColumnsFilter",
-            "description": ["- Optional external columns filter"],
-            "signature": ["((id: string) => boolean) | undefined"],
+            "description": [
+              "- Optional external columns filter"
+            ],
+            "signature": [
+              "((id: string) => boolean) | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/hooks/use_data_grid.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -861,7 +988,9 @@
         "type": "Function",
         "tags": [],
         "label": "useRenderCellValue",
-        "description": ["\nCustom hook for rendering cell values in the data grid.\n"],
+        "description": [
+          "\nCustom hook for rendering cell values in the data grid.\n"
+        ],
         "signature": [
           "(dataView: ",
           {
@@ -910,7 +1039,9 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": ["- The data view."],
+            "description": [
+              "- The data view."
+            ],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -932,7 +1063,9 @@
             "type": "Object",
             "tags": [],
             "label": "pagination",
-            "description": ["- The pagination settings."],
+            "description": [
+              "- The pagination settings."
+            ],
             "signature": [
               "Required<Pick<",
               "EuiDataGridPaginationProps",
@@ -949,7 +1082,9 @@
             "type": "Array",
             "tags": [],
             "label": "tableItems",
-            "description": ["- The table items."],
+            "description": [
+              "- The table items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-grid",
@@ -971,8 +1106,12 @@
             "type": "string",
             "tags": [],
             "label": "resultsField",
-            "description": ["- The results field."],
-            "signature": ["string | undefined"],
+            "description": [
+              "- The results field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -984,7 +1123,9 @@
             "type": "Function",
             "tags": [],
             "label": "cellPropsCallback",
-            "description": ["- The callback function for setting cell properties."],
+            "description": [
+              "- The callback function for setting cell properties."
+            ],
             "signature": [
               "((columnId: string, cellValue: any, fullItem: ",
               {
@@ -1004,7 +1145,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": ["- The render cell value function."],
+        "returnComment": [
+          "- The render cell value function."
+        ],
         "initialIsOpen": false
       }
     ],
@@ -1015,7 +1158,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldTypes",
-        "description": ["\nRecord of ES field types."],
+        "description": [
+          "\nRecord of ES field types."
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1050,7 +1195,9 @@
         "type": "Interface",
         "tags": [],
         "label": "MultiColumnSorter",
-        "description": ["\nInterface definition for multi column sorter"],
+        "description": [
+          "\nInterface definition for multi column sorter"
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1061,7 +1208,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nThe id."],
+            "description": [
+              "\nThe id."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1072,8 +1221,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "direction",
-            "description": ["\nThe direction."],
-            "signature": ["\"asc\" | \"desc\""],
+            "description": [
+              "\nThe direction."
+            ],
+            "signature": [
+              "\"asc\" | \"desc\""
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1084,7 +1237,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["\nThe type of the sorter."],
+            "description": [
+              "\nThe type of the sorter."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/common.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1098,7 +1253,9 @@
         "type": "Interface",
         "tags": [],
         "label": "NumericChartData",
-        "description": ["\nRepresents numeric chart data."],
+        "description": [
+          "\nRepresents numeric chart data."
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1109,7 +1266,9 @@
             "type": "Array",
             "tags": [],
             "label": "data",
-            "description": ["\nArray of numeric data items."],
+            "description": [
+              "\nArray of numeric data items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-grid",
@@ -1130,7 +1289,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nIdentifier of the chart."],
+            "description": [
+              "\nIdentifier of the chart."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1141,7 +1302,9 @@
             "type": "number",
             "tags": [],
             "label": "interval",
-            "description": ["\nInterval value."],
+            "description": [
+              "\nInterval value."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1152,8 +1315,12 @@
             "type": "Object",
             "tags": [],
             "label": "stats",
-            "description": ["\nStatistics values."],
-            "signature": ["[number, number]"],
+            "description": [
+              "\nStatistics values."
+            ],
+            "signature": [
+              "[number, number]"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1164,8 +1331,12 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["\nType of the chart data (numeric)."],
-            "signature": ["\"numeric\""],
+            "description": [
+              "\nType of the chart data (numeric)."
+            ],
+            "signature": [
+              "\"numeric\""
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1179,7 +1350,9 @@
         "type": "Interface",
         "tags": [],
         "label": "NumericDataItem",
-        "description": ["\nRepresents a numeric data item."],
+        "description": [
+          "\nRepresents a numeric data item."
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1190,7 +1363,9 @@
             "type": "number",
             "tags": [],
             "label": "key",
-            "description": ["\nNumeric key."],
+            "description": [
+              "\nNumeric key."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1201,8 +1376,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "key_as_string",
-            "description": ["\nOptional string or numeric key."],
-            "signature": ["string | number | undefined"],
+            "description": [
+              "\nOptional string or numeric key."
+            ],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1213,7 +1392,9 @@
             "type": "number",
             "tags": [],
             "label": "doc_count",
-            "description": ["\nNumber of documents."],
+            "description": [
+              "\nNumber of documents."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1227,7 +1408,9 @@
         "type": "Interface",
         "tags": [],
         "label": "OrdinalChartData",
-        "description": ["\nRepresents ordinal chart data."],
+        "description": [
+          "\nRepresents ordinal chart data."
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1238,7 +1421,9 @@
             "type": "number",
             "tags": [],
             "label": "cardinality",
-            "description": ["\nCardinality value."],
+            "description": [
+              "\nCardinality value."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1249,7 +1434,9 @@
             "type": "Array",
             "tags": [],
             "label": "data",
-            "description": ["\nArray of ordinal data items."],
+            "description": [
+              "\nArray of ordinal data items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-grid",
@@ -1270,7 +1457,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nIdentifier of the chart."],
+            "description": [
+              "\nIdentifier of the chart."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1281,8 +1470,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": ["\nType of the chart data (ordinal or boolean)."],
-            "signature": ["\"boolean\" | \"ordinal\""],
+            "description": [
+              "\nType of the chart data (ordinal or boolean)."
+            ],
+            "signature": [
+              "\"boolean\" | \"ordinal\""
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1296,7 +1489,9 @@
         "type": "Interface",
         "tags": [],
         "label": "OrdinalDataItem",
-        "description": ["\nRepresents an ordinal data item."],
+        "description": [
+          "\nRepresents an ordinal data item."
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1307,7 +1502,9 @@
             "type": "string",
             "tags": [],
             "label": "key",
-            "description": ["\nKey."],
+            "description": [
+              "\nKey."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1318,8 +1515,12 @@
             "type": "string",
             "tags": [],
             "label": "key_as_string",
-            "description": ["\nOptional key as string."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional key as string."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1330,7 +1531,9 @@
             "type": "number",
             "tags": [],
             "label": "doc_count",
-            "description": ["\nNumber of documents."],
+            "description": [
+              "\nNumber of documents."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1344,7 +1547,9 @@
         "type": "Interface",
         "tags": [],
         "label": "RowCountInfo",
-        "description": ["\nInformation about the row count."],
+        "description": [
+          "\nInformation about the row count."
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1355,7 +1560,9 @@
             "type": "number",
             "tags": [],
             "label": "rowCount",
-            "description": ["\nRow count."],
+            "description": [
+              "\nRow count."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1366,8 +1573,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "rowCountRelation",
-            "description": ["\nRow count relation."],
-            "signature": ["SearchTotalHitsRelation", " | undefined"],
+            "description": [
+              "\nRow count relation."
+            ],
+            "signature": [
+              "SearchTotalHitsRelation",
+              " | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1381,7 +1593,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UnsupportedChartData",
-        "description": ["\nRepresents unsupported chart data."],
+        "description": [
+          "\nRepresents unsupported chart data."
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1392,7 +1606,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nIdentifier of the chart."],
+            "description": [
+              "\nIdentifier of the chart."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1403,8 +1619,12 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["\nType of the chart data (unsupported)."],
-            "signature": ["\"unsupported\""],
+            "description": [
+              "\nType of the chart data (unsupported)."
+            ],
+            "signature": [
+              "\"unsupported\""
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/field_histograms.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1418,7 +1638,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UseDataGridReturnType",
-        "description": ["\nReturn type of the `useDataGrid` custom hook."],
+        "description": [
+          "\nReturn type of the `useDataGrid` custom hook."
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1429,7 +1651,9 @@
             "type": "boolean",
             "tags": [],
             "label": "ccsWarning",
-            "description": ["\nBoolean flag for CCS warning."],
+            "description": [
+              "\nBoolean flag for CCS warning."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1440,8 +1664,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "chartsVisible",
-            "description": ["\nBoolean flag for charts visibility."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nBoolean flag for charts visibility."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1452,7 +1680,9 @@
             "type": "boolean",
             "tags": [],
             "label": "chartsButtonVisible",
-            "description": ["\nBoolean flag for charts button visibily."],
+            "description": [
+              "\nBoolean flag for charts button visibily."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1463,8 +1693,13 @@
             "type": "Array",
             "tags": [],
             "label": "columnsWithCharts",
-            "description": ["\nArray of columns with charts data."],
-            "signature": ["EuiDataGridColumn", "[]"],
+            "description": [
+              "\nArray of columns with charts data."
+            ],
+            "signature": [
+              "EuiDataGridColumn",
+              "[]"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1475,7 +1710,9 @@
             "type": "string",
             "tags": [],
             "label": "errorMessage",
-            "description": ["\nError message."],
+            "description": [
+              "\nError message."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1486,8 +1723,12 @@
             "type": "Array",
             "tags": [],
             "label": "invalidSortingColumnns",
-            "description": ["\nArray of invalid sorting columns."],
-            "signature": ["string[]"],
+            "description": [
+              "\nArray of invalid sorting columns."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1498,7 +1739,9 @@
             "type": "string",
             "tags": [],
             "label": "noDataMessage",
-            "description": ["\nNo data message."],
+            "description": [
+              "\nNo data message."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1509,8 +1752,12 @@
             "type": "Function",
             "tags": [],
             "label": "onChangeItemsPerPage",
-            "description": ["\nCallback function for changing the number of items per page."],
-            "signature": ["(pageSize: number) => void"],
+            "description": [
+              "\nCallback function for changing the number of items per page."
+            ],
+            "signature": [
+              "(pageSize: number) => void"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1535,8 +1782,12 @@
             "type": "Function",
             "tags": [],
             "label": "onChangePage",
-            "description": ["\nCallback function for handling change of current page."],
-            "signature": ["(pageIndex: number) => void"],
+            "description": [
+              "\nCallback function for handling change of current page."
+            ],
+            "signature": [
+              "(pageIndex: number) => void"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1561,8 +1812,12 @@
             "type": "Function",
             "tags": [],
             "label": "onSort",
-            "description": ["\nCallback function for handling sort."],
-            "signature": ["(sortSettings: SortSettings) => void"],
+            "description": [
+              "\nCallback function for handling sort."
+            ],
+            "signature": [
+              "(sortSettings: SortSettings) => void"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1575,7 +1830,9 @@
                 "tags": [],
                 "label": "sortSettings",
                 "description": [],
-                "signature": ["{ id: string; direction: \"asc\" | \"desc\"; }[]"],
+                "signature": [
+                  "{ id: string; direction: \"asc\" | \"desc\"; }[]"
+                ],
                 "path": "x-pack/packages/ml/data_grid/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1588,8 +1845,12 @@
             "type": "Object",
             "tags": [],
             "label": "pagination",
-            "description": ["\nIndex pagination information."],
-            "signature": ["{ pageSize: number; pageIndex: number; }"],
+            "description": [
+              "\nIndex pagination information."
+            ],
+            "signature": [
+              "{ pageSize: number; pageIndex: number; }"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1600,8 +1861,12 @@
             "type": "Function",
             "tags": [],
             "label": "resetPagination",
-            "description": ["\nFunction to reset pagination."],
-            "signature": ["() => void"],
+            "description": [
+              "\nFunction to reset pagination."
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1614,7 +1879,9 @@
             "type": "number",
             "tags": [],
             "label": "rowCount",
-            "description": ["\nRow count."],
+            "description": [
+              "\nRow count."
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1625,8 +1892,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "rowCountRelation",
-            "description": ["\nRow count relation."],
-            "signature": ["SearchTotalHitsRelation", " | undefined"],
+            "description": [
+              "\nRow count relation."
+            ],
+            "signature": [
+              "SearchTotalHitsRelation",
+              " | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1637,8 +1909,12 @@
             "type": "Function",
             "tags": [],
             "label": "setCcsWarning",
-            "description": ["\nSetter function for the CCS warning flag."],
-            "signature": ["(value: React.SetStateAction<boolean>) => void"],
+            "description": [
+              "\nSetter function for the CCS warning flag."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<boolean>) => void"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1651,7 +1927,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["A"],
+                "signature": [
+                  "A"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1664,7 +1942,9 @@
             "type": "Function",
             "tags": [],
             "label": "setColumnCharts",
-            "description": ["\nSetter function for the column charts."],
+            "description": [
+              "\nSetter function for the column charts."
+            ],
             "signature": [
               "(value: React.SetStateAction<",
               {
@@ -1688,7 +1968,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["A"],
+                "signature": [
+                  "A"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1701,8 +1983,12 @@
             "type": "Function",
             "tags": [],
             "label": "setErrorMessage",
-            "description": ["\nSetter function for the error message."],
-            "signature": ["(value: React.SetStateAction<string>) => void"],
+            "description": [
+              "\nSetter function for the error message."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<string>) => void"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1715,7 +2001,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["A"],
+                "signature": [
+                  "A"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1728,8 +2016,12 @@
             "type": "Function",
             "tags": [],
             "label": "setNoDataMessage",
-            "description": ["\nSetter function for the no data message."],
-            "signature": ["(value: React.SetStateAction<string>) => void"],
+            "description": [
+              "\nSetter function for the no data message."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<string>) => void"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1742,7 +2034,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["A"],
+                "signature": [
+                  "A"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1755,7 +2049,9 @@
             "type": "Function",
             "tags": [],
             "label": "setPagination",
-            "description": ["\nSetter function for pagination."],
+            "description": [
+              "\nSetter function for pagination."
+            ],
             "signature": [
               "(value: React.SetStateAction<Required<Pick<",
               "EuiDataGridPaginationProps",
@@ -1773,7 +2069,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["A"],
+                "signature": [
+                  "A"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1786,7 +2084,9 @@
             "type": "Function",
             "tags": [],
             "label": "setRowCountInfo",
-            "description": ["\nSetter function for the row count info."],
+            "description": [
+              "\nSetter function for the row count info."
+            ],
             "signature": [
               "(value: React.SetStateAction<",
               {
@@ -1810,7 +2110,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["A"],
+                "signature": [
+                  "A"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1823,7 +2125,9 @@
             "type": "Function",
             "tags": [],
             "label": "setSortingColumns",
-            "description": ["\nSetter function for the sorting columns."],
+            "description": [
+              "\nSetter function for the sorting columns."
+            ],
             "signature": [
               "(value: React.SetStateAction<",
               "EuiDataGridColumnSortingConfig",
@@ -1841,7 +2145,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["A"],
+                "signature": [
+                  "A"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1854,7 +2160,9 @@
             "type": "Function",
             "tags": [],
             "label": "setStatus",
-            "description": ["\nSetter function for the index status."],
+            "description": [
+              "\nSetter function for the index status."
+            ],
             "signature": [
               "(value: React.SetStateAction<",
               {
@@ -1878,7 +2186,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["A"],
+                "signature": [
+                  "A"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1891,7 +2201,9 @@
             "type": "Function",
             "tags": [],
             "label": "setTableItems",
-            "description": ["\nSetter function for the table items."],
+            "description": [
+              "\nSetter function for the table items."
+            ],
             "signature": [
               "(value: React.SetStateAction<",
               {
@@ -1915,7 +2227,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["A"],
+                "signature": [
+                  "A"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1928,8 +2242,12 @@
             "type": "Function",
             "tags": [],
             "label": "setVisibleColumns",
-            "description": ["\nSetter function for the visible columns."],
-            "signature": ["(value: React.SetStateAction<string[]>) => void"],
+            "description": [
+              "\nSetter function for the visible columns."
+            ],
+            "signature": [
+              "(value: React.SetStateAction<string[]>) => void"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1942,7 +2260,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["A"],
+                "signature": [
+                  "A"
+                ],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1955,8 +2275,13 @@
             "type": "Array",
             "tags": [],
             "label": "sortingColumns",
-            "description": ["\nSorting columns."],
-            "signature": ["EuiDataGridColumnSortingConfig", "[]"],
+            "description": [
+              "\nSorting columns."
+            ],
+            "signature": [
+              "EuiDataGridColumnSortingConfig",
+              "[]"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1967,7 +2292,9 @@
             "type": "Enum",
             "tags": [],
             "label": "status",
-            "description": ["\nIndex status."],
+            "description": [
+              "\nIndex status."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-grid",
@@ -1987,7 +2314,9 @@
             "type": "Array",
             "tags": [],
             "label": "tableItems",
-            "description": ["\nTable items."],
+            "description": [
+              "\nTable items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-grid",
@@ -2008,8 +2337,12 @@
             "type": "Function",
             "tags": [],
             "label": "toggleChartVisibility",
-            "description": ["\nFunction to toggle chart visibility."],
-            "signature": ["() => void"],
+            "description": [
+              "\nFunction to toggle chart visibility."
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2022,8 +2355,12 @@
             "type": "Array",
             "tags": [],
             "label": "visibleColumns",
-            "description": ["\nArray of visible columns."],
-            "signature": ["string[]"],
+            "description": [
+              "\nArray of visible columns."
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2034,7 +2371,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "baseline",
-            "description": ["\nOptional feature importance baseline."],
+            "description": [
+              "\nOptional feature importance baseline."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-data-frame-analytics-utils",
@@ -2055,8 +2394,12 @@
             "type": "string",
             "tags": [],
             "label": "predictionFieldName",
-            "description": ["\nOptional prediction field name."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional prediction field name."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2067,8 +2410,12 @@
             "type": "string",
             "tags": [],
             "label": "resultsField",
-            "description": ["\nOptional results field."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional results field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2082,7 +2429,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UseIndexDataReturnType",
-        "description": ["\nReturn type of the `useIndexData` custom hook."],
+        "description": [
+          "\nReturn type of the `useIndexData` custom hook."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-data-grid",
@@ -2111,8 +2460,12 @@
             "type": "Function",
             "tags": [],
             "label": "renderCellValue",
-            "description": ["\nCallback to render cell values."],
-            "signature": ["(options: CellValue) => any"],
+            "description": [
+              "\nCallback to render cell values."
+            ],
+            "signature": [
+              "(options: CellValue) => any"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2125,7 +2478,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["CellValue"],
+                "signature": [
+                  "CellValue"
+                ],
                 "path": "x-pack/packages/ml/data_grid/lib/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2138,8 +2493,12 @@
             "type": "Array",
             "tags": [],
             "label": "dataViewFields",
-            "description": ["\nOptional data view fields."],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "\nOptional data view fields."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2150,7 +2509,9 @@
             "type": "Object",
             "tags": [],
             "label": "timeRangeMs",
-            "description": ["\nOptional time range."],
+            "description": [
+              "\nOptional time range."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-date-picker",
@@ -2176,7 +2537,9 @@
         "type": "Enum",
         "tags": [],
         "label": "INDEX_STATUS",
-        "description": ["\nEnum for index status"],
+        "description": [
+          "\nEnum for index status"
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2229,7 +2592,9 @@
         "type": "Type",
         "tags": [],
         "label": "ChartDataItem",
-        "description": ["\nRepresents a chart data item that can be either numeric or ordinal."],
+        "description": [
+          "\nRepresents a chart data item that can be either numeric or ordinal."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-data-grid",
@@ -2258,8 +2623,12 @@
         "type": "Type",
         "tags": [],
         "label": "DataGridItem",
-        "description": ["\nType definition for a data grid item."],
-        "signature": ["{ [x: string]: any; }"],
+        "description": [
+          "\nType definition for a data grid item."
+        ],
+        "signature": [
+          "{ [x: string]: any; }"
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2271,8 +2640,12 @@
         "type": "Type",
         "tags": [],
         "label": "EsSorting",
-        "description": ["\nType representing ES sorting configuration."],
-        "signature": ["Dictionary<{ order: \"asc\" | \"desc\"; }>"],
+        "description": [
+          "\nType representing ES sorting configuration."
+        ],
+        "signature": [
+          "Dictionary<{ order: \"asc\" | \"desc\"; }>"
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2284,8 +2657,12 @@
         "type": "Type",
         "tags": [],
         "label": "IndexPagination",
-        "description": ["\nType representing the pagination settings for an index."],
-        "signature": ["{ pageSize: number; pageIndex: number; }"],
+        "description": [
+          "\nType representing the pagination settings for an index."
+        ],
+        "signature": [
+          "{ pageSize: number; pageIndex: number; }"
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2297,8 +2674,12 @@
         "type": "number",
         "tags": [],
         "label": "INIT_MAX_COLUMNS",
-        "description": ["\nThe initial maximum number of columns for the data grid."],
-        "signature": ["10"],
+        "description": [
+          "\nThe initial maximum number of columns for the data grid."
+        ],
+        "signature": [
+          "10"
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2310,8 +2691,12 @@
         "type": "Type",
         "tags": [],
         "label": "RenderCellValue",
-        "description": ["\nFunction used to render the cell value in a data grid."],
-        "signature": ["(options: CellValue) => any"],
+        "description": [
+          "\nFunction used to render the cell value in a data grid."
+        ],
+        "signature": [
+          "(options: CellValue) => any"
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2323,8 +2708,12 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": ["- The options for rendering the cell value."],
-            "signature": ["CellValue"],
+            "description": [
+              "- The options for rendering the cell value."
+            ],
+            "signature": [
+              "CellValue"
+            ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2341,7 +2730,10 @@
         "description": [
           "\nRow count relation for the data grid's number of rows.\nIt's an alias of `estypes.SearchTotalHitsRelation` (\"eq\" or \"gte\")\nthat can also be undefined."
         ],
-        "signature": ["SearchTotalHitsRelation", " | undefined"],
+        "signature": [
+          "SearchTotalHitsRelation",
+          " | undefined"
+        ],
         "path": "x-pack/packages/ml/data_grid/lib/types.ts",
         "deprecated": false,
         "trackAdoption": false,

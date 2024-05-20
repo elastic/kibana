@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DecoratorFn, Meta } from '@storybook/react';
 import React, { useMemo } from 'react';
+import { DecoratorFn, Meta } from '@storybook/react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { EmbeddableInput, EmbeddableRoot } from '..';
 import { HelloWorldEmbeddable } from './hello_world_embeddable';

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import fn from './average';
+import moment from 'moment';
 import expect from '@kbn/expect';
 import _ from 'lodash';
-import moment from 'moment';
-import fn from './average';
 
 describe('average.js', function () {
   describe('average', function () {

@@ -9,22 +9,22 @@ import React, { useEffect, useState } from 'react';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiCode,
-  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiButtonEmpty,
+  EuiText,
+  EuiLink,
   EuiRadioGroup,
   EuiSpacer,
-  EuiText,
+  EuiCode,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useAlertsModal } from '../application/hooks/use_alerts_modal';
+import { i18n } from '@kbn/i18n';
 import { Legacy } from '../legacy_shims';
+import { useAlertsModal } from '../application/hooks/use_alerts_modal';
 
 interface Props {
   alerts: {};

@@ -8,13 +8,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
-import type { GenericBuckets } from '../../../../../common/search_strategy';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
+import type { GenericBuckets } from '../../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
-import { ITEMS_PER_PAGE, getPageCount } from '../utils';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
+import { getPageCount, ITEMS_PER_PAGE } from '../utils';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 const USERS_BY_SEVERITY_AGG = 'usersBySeverity';
 const defaultPagination = {

@@ -7,28 +7,28 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
 import type { RollingFileAppenderConfig } from '@kbn/core-logging-server';
-import type { DisposableAppender, Layout, LogRecord } from '@kbn/logging';
 import { Layouts } from '../../layouts/layouts';
 import { BufferAppender } from '../buffer/buffer_appender';
 import {
-  type TriggeringPolicy,
   createTriggeringPolicy,
   triggeringPolicyConfigSchema,
+  type TriggeringPolicy,
 } from './policies';
 import {
-  type RetentionPolicy,
+  createRollingStrategy,
+  rollingStrategyConfigSchema,
+  type RollingStrategy,
+} from './strategies';
+import {
   createRetentionPolicy,
   mergeRetentionPolicyConfig,
   retentionPolicyConfigSchema,
+  type RetentionPolicy,
 } from './retention';
-import { RollingFileContext } from './rolling_file_context';
 import { RollingFileManager } from './rolling_file_manager';
-import {
-  type RollingStrategy,
-  createRollingStrategy,
-  rollingStrategyConfigSchema,
-} from './strategies';
+import { RollingFileContext } from './rolling_file_context';
 
 /**
  * Appender that formats all the `LogRecord` instances it receives and writes them to the specified file.

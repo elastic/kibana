@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { screen, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
+import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import {
-  createAppMockRenderer,
   noCasesPermissions,
   onlyDeleteCasesPermission,
+  createAppMockRenderer,
 } from '../../../common/mock';
 import { UserCommentPropertyActions } from './user_comment_property_actions';
+import { waitFor } from '@testing-library/react';
 
 describe('UserCommentPropertyActions', () => {
   let appMock: AppMockRenderer;

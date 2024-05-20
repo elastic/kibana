@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { deleteStoredScriptRequestBody } from '../../../../common/api/entity_analytics/risk_score';
+import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { RISK_SCORE_DELETE_STORED_SCRIPT } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { deleteStoredScript } from './lib/delete_script';
+import { deleteStoredScriptRequestBody } from '../../../../common/api/entity_analytics/risk_score';
 
 export const deleteStoredScriptRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

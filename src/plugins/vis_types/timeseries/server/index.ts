@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { VisTypeTimeseriesConfig, config as configSchema } from '../config';
 
 export type { VisTypeTimeseriesSetup } from './plugin';

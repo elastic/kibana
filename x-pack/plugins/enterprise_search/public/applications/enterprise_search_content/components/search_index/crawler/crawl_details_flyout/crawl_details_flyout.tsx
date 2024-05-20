@@ -9,13 +9,13 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiCodeBlock,
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiCodeBlock,
   EuiTab,
   EuiTabs,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

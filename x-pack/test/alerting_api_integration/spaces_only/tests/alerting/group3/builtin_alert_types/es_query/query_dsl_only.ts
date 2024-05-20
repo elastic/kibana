@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import expect from '@kbn/expect';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { pull } from 'lodash';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
-import { ObjectRemover, getUrlPrefix } from '../../../../../../common/lib';
 import { Spaces } from '../../../../../scenarios';
+import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 import {
+  createConnector,
   CreateRuleParams,
   ES_GROUPS_TO_WRITE,
   ES_TEST_DATA_STREAM_NAME,
   ES_TEST_INDEX_REFERENCE,
   ES_TEST_INDEX_SOURCE,
   ES_TEST_OUTPUT_INDEX_NAME,
+  getRuleServices,
   RULE_INTERVALS_TO_WRITE,
   RULE_INTERVAL_MILLIS,
   RULE_INTERVAL_SECONDS,
   RULE_TYPE_ID,
-  createConnector,
-  getRuleServices,
 } from './common';
 
 // eslint-disable-next-line import/no-default-export

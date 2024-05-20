@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { Ping } from '../../../../../../common/runtime_types';
-import { render } from '../../../../lib/helper/rtl_helpers';
-import { mockMoment } from '../../../../lib/helper/test_helpers';
 import { MonitorStatusList } from './monitor_status_list';
+import { Ping } from '../../../../../../common/runtime_types';
+import { mockMoment } from '../../../../lib/helper/test_helpers';
+import { render } from '../../../../lib/helper/rtl_helpers';
 
 describe('MonitorStatusList component', () => {
   let pings: Ping[];

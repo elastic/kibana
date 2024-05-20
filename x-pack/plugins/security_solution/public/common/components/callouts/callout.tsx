@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
+import { EuiCallOut } from '@elastic/eui';
 
 import { assertUnreachable } from '../../../../common/utility_types';
+import type { CallOutType, CallOutMessage } from './callout_types';
 import { CallOutDismissButton } from './callout_dismiss_button';
-import type { CallOutMessage, CallOutType } from './callout_types';
 
 export interface CallOutProps {
   message: CallOutMessage;

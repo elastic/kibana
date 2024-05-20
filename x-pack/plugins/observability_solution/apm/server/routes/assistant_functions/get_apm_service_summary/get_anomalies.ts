@@ -8,14 +8,14 @@ import { Logger } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { compact, keyBy } from 'lodash';
 import {
-  AnomalyDetectorType,
-  getAnomalyDetectorType,
-} from '../../../../common/anomaly_detection/apm_ml_detectors';
-import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
+import {
+  AnomalyDetectorType,
+  getAnomalyDetectorType,
+} from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { maybe } from '../../../../common/utils/maybe';
 import { anomalySearch } from '../../../lib/anomaly_detection/anomaly_search';

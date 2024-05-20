@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import { EuiBasicTable, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { formatDate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC, ReactNode } from 'react';
-import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { FieldDataRowProps } from '../../types/field_data_row';

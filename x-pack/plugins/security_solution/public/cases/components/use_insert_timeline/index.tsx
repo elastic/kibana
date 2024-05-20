@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { isEmpty } from 'lodash/fp';
 
-import { SecurityPageName } from '../../../app/types';
 import { getTimelineUrl, useFormatUrl } from '../../../common/components/link_to';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { timelineActions, timelineSelectors } from '../../../timelines/store';
+import { timelineSelectors, timelineActions } from '../../../timelines/store';
+import { SecurityPageName } from '../../../app/types';
 import { setInsertTimeline } from '../../../timelines/store/actions';
 
 export interface UseInsertTimelineReturn {

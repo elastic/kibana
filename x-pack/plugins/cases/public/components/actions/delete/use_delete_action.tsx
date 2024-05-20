@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import { EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { CasesUI } from '../../../../common';
 import { useDeleteCases } from '../../../containers/use_delete_cases';
 
-import { useCasesContext } from '../../cases_context/use_cases_context';
-import type { UseActionProps } from '../types';
 import * as i18n from './translations';
+import type { UseActionProps } from '../types';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 const getDeleteActionTitle = (totalCases: number): string =>
   totalCases > 1 ? i18n.BULK_ACTION_DELETE_LABEL : i18n.DELETE_ACTION_LABEL;

@@ -6,32 +6,32 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { sortBy, slice, get, cloneDeep } from 'lodash';
+import moment from 'moment';
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import {
-  ML_JOB_ID,
-  ML_PARTITION_FIELD_VALUE,
+  showActualForFunction,
+  showTypicalForFunction,
   type MlAnomaliesTableRecord,
   type MlAnomalyCategorizerStatsDoc,
   type MlAnomalyRecordDoc,
-  showActualForFunction,
-  showTypicalForFunction,
+  ML_JOB_ID,
+  ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
-import { cloneDeep, get, slice, sortBy } from 'lodash';
-import moment from 'moment';
+import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 import type {
-  DatafeedResultsChartDataParams,
-  GetDatafeedResultsChartDataResult,
   GetStoppedPartitionResult,
+  GetDatafeedResultsChartDataResult,
+  DatafeedResultsChartDataParams,
 } from '../../../common/types/results';
 import { defaultSearchQuery } from '../../../common/types/results';
 import type { MlClient } from '../../lib/ml_client';
-import { annotationServiceProvider } from '../annotation_service';
 import { datafeedsProvider } from '../job_service/datafeeds';
+import { annotationServiceProvider } from '../annotation_service';
 import { anomalyChartsDataProvider } from './anomaly_charts';
-import { buildAnomalyTableItems } from './build_anomaly_table_items';
-import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.

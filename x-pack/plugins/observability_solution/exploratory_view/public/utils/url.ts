@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { url } from '@kbn/kibana-utils-plugin/public';
 import { parse, stringify } from 'query-string';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 export function toQuery(search?: string) {
   return search ? parse(search.slice(1), { sort: false }) : {};

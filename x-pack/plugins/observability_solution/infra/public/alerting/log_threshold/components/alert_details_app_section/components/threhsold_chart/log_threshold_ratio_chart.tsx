@@ -1,5 +1,3 @@
-import { useEuiTheme } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +5,14 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
  * 2.0.
  */
 import React from 'react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import {
+  createLensDefinitionForRatioChart,
   IndexPattern,
   Threshold,
   Timerange,
-  createLensDefinitionForRatioChart,
 } from './create_lens_definition';
 
 interface LogThresholdRatioChartProps {

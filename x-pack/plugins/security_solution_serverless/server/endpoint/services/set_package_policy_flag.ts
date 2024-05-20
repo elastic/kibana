@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   FLEET_ENDPOINT_PACKAGE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '@kbn/fleet-plugin/common';
-import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 
 // set all endpoint policies serverless flag to true
 // required so that endpoint will write heartbeats

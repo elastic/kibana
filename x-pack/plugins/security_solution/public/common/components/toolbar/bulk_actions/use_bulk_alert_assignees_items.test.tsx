@@ -6,24 +6,24 @@
  */
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
-import type { TimelineItem } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/bulk_actions/components/toolbar';
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { TimelineItem } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/bulk_actions/components/toolbar';
 import { act, fireEvent, render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useLicense } from '../../../hooks/use_license';
 import { TestProviders } from '../../../mock';
-import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
-import { useBulkGetUserProfiles } from '../../user_profiles/use_bulk_get_user_profiles';
-import { useGetCurrentUserProfile } from '../../user_profiles/use_get_current_user_profile';
-import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 import type {
   UseBulkAlertAssigneesItemsProps,
   UseBulkAlertAssigneesPanel,
 } from './use_bulk_alert_assignees_items';
 import { useBulkAlertAssigneesItems } from './use_bulk_alert_assignees_items';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
+import { useGetCurrentUserProfile } from '../../user_profiles/use_get_current_user_profile';
+import { useBulkGetUserProfiles } from '../../user_profiles/use_bulk_get_user_profiles';
+import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
+import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useLicense } from '../../../hooks/use_license';
 
 jest.mock('./use_set_alert_assignees');
 jest.mock('../../user_profiles/use_get_current_user_profile');

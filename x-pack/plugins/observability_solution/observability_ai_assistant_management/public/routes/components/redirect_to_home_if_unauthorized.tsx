@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
+import type { CoreStart } from '@kbn/core/public';
 export function RedirectToHomeIfUnauthorized({
   coreStart,
   children,

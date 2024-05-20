@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
+import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import { TableTab } from './table_tab';
 import { TABLE_TAB_CONTENT_TEST_ID } from './test_ids';
+import { TableTab } from './table_tab';
+import { TestProviders } from '../../../../common/mock';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

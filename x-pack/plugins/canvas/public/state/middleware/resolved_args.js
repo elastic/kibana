@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { clearValues } from '../actions/resolved_args';
 import { getAllElements } from '../selectors/workpad';
+import { clearValues } from '../actions/resolved_args';
 
 /**
  * This middleware is responsible for keeping the resolved_args collection in transient state

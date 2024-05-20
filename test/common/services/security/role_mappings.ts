@@ -7,14 +7,11 @@
  */
 
 import util from 'util';
-import { KbnClient } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClient } from '@kbn/test';
 
 export class RoleMappings {
-  constructor(
-    private log: ToolingLog,
-    private kbnClient: KbnClient
-  ) {}
+  constructor(private log: ToolingLog, private kbnClient: KbnClient) {}
 
   public async getAll() {
     this.log.debug(`Getting role mappings`);

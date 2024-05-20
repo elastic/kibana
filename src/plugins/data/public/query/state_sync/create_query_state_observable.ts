@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
-import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs';
-import { FilterManager } from '../filter_manager';
-import { QueryState, getQueryState } from '../query_state';
-import type { QueryStringContract } from '../query_string';
+import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { TimefilterSetup } from '../timefilter';
+import { FilterManager } from '../filter_manager';
+import { getQueryState, QueryState } from '../query_state';
 import { QueryStateChange } from './types';
+import type { QueryStringContract } from '../query_string';
 
 export type QueryState$ = Observable<{ changes: QueryStateChange; state: QueryState }>;
 

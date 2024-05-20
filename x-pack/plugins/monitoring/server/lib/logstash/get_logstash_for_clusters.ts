@@ -6,12 +6,12 @@
  */
 
 import { get } from 'lodash';
+import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { LOGSTASH } from '../../../common/constants';
-import { Globals } from '../../static_globals';
-import { Bucket, Cluster, LegacyRequest } from '../../types';
-import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { LogstashClusterMetric } from '../metrics';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 const { MEMORY, PERSISTED } = LOGSTASH.QUEUE_TYPES;
 

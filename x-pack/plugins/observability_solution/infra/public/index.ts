@@ -8,10 +8,10 @@
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
 import {
-  InfraClientSetupDeps,
   InfraClientSetupExports,
-  InfraClientStartDeps,
   InfraClientStartExports,
+  InfraClientSetupDeps,
+  InfraClientStartDeps,
 } from './types';
 
 export const plugin: PluginInitializer<

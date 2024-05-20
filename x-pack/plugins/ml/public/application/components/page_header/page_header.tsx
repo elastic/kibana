@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiSkeletonText } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useContext, useEffect } from 'react';
 import { InPortal, OutPortal } from 'react-reverse-portal';
+import { EuiSkeletonText } from '@elastic/eui';
 import { MlPageControlsContext } from '../ml_page/ml_page';
 
 /**

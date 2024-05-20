@@ -8,7 +8,7 @@
 
 import { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
 import type { File } from '../../../common';
-import { FileServiceStart, errors } from '../../file_service';
+import { errors, FileServiceStart } from '../../file_service';
 
 type ResultOrHttpError =
   | { result: File; error?: undefined }

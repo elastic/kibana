@@ -6,11 +6,11 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { RequestHandler, RequestHandlerContext, kibanaResponseFactory } from '@kbn/core/server';
-import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { AwaitedProperties } from '@kbn/utility-types';
-import { getMockedRouterDeps } from '../test_helpers';
 import { initializeListTemplates } from './list';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
+import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {
   core: {

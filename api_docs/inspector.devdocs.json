@@ -54,7 +54,10 @@
             "tags": [],
             "label": "views",
             "description": [],
-            "signature": ["InspectorViewRegistry", " | undefined"],
+            "signature": [
+              "InspectorViewRegistry",
+              " | undefined"
+            ],
             "path": "src/plugins/inspector/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -66,7 +69,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/inspector/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -237,7 +242,9 @@
                 "tags": [],
                 "label": "startDeps",
                 "description": [],
-                "signature": ["InspectorPluginStartDeps"],
+                "signature": [
+                  "InspectorPluginStartDeps"
+                ],
                 "path": "src/plugins/inspector/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -253,7 +260,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/inspector/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -267,7 +276,9 @@
         "parentPluginId": "inspector",
         "id": "def-public.RequestAdapter",
         "type": "Class",
-        "tags": ["extends"],
+        "tags": [
+          "extends"
+        ],
         "label": "RequestAdapter",
         "description": [
           "\nAn generic inspector adapter to log requests.\nThese can be presented in the inspector using the requests view.\nThe adapter is not coupled to a specific implementation or even Elasticsearch\ninstead it offers a generic API to log requests of any kind."
@@ -294,7 +305,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -305,7 +318,9 @@
             "parentPluginId": "inspector",
             "id": "def-public.RequestAdapter.start",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "start",
             "description": [
               "\nStart logging a new request into this request adapter. The new request will\nby default be in a processing state unless you explicitly finish it via\n{@link RequestResponder#finish}, {@link RequestResponder#ok} or\n{@link RequestResponder#error}.\n"
@@ -332,8 +347,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "name",
-                "description": ["The name of this request as it should be shown in the UI."],
-                "signature": ["string"],
+                "description": [
+                  "The name of this request as it should be shown in the UI."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -345,8 +364,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["Additional arguments for the request."],
-                "signature": ["RequestParams"],
+                "description": [
+                  "Additional arguments for the request."
+                ],
+                "signature": [
+                  "RequestParams"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -358,15 +381,21 @@
                 "type": "number",
                 "tags": [],
                 "label": "startTime",
-                "description": ["Set an optional start time for the request"],
-                "signature": ["number"],
+                "description": [
+                  "Set an optional start time for the request"
+                ],
+                "signature": [
+                  "number"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["An instance to add information to the request and finish it."]
+            "returnComment": [
+              "An instance to add information to the request and finish it."
+            ]
           },
           {
             "parentPluginId": "inspector",
@@ -375,7 +404,9 @@
             "tags": [],
             "label": "reset",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -389,7 +420,9 @@
             "tags": [],
             "label": "resetRequest",
             "description": [],
-            "signature": ["(id: string) => void"],
+            "signature": [
+              "(id: string) => void"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -401,7 +434,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -457,7 +492,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -490,7 +527,9 @@
                 "tags": [],
                 "label": "onChange",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -527,7 +566,9 @@
                 "tags": [],
                 "label": "reqJson",
                 "description": [],
-                "signature": ["object"],
+                "signature": [
+                  "object"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -641,7 +682,9 @@
                 "tags": [],
                 "label": "response",
                 "description": [],
-                "signature": ["Response"],
+                "signature": [
+                  "Response"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -657,7 +700,11 @@
             "tags": [],
             "label": "ok",
             "description": [],
-            "signature": ["(response: ", "Response", ") => void"],
+            "signature": [
+              "(response: ",
+              "Response",
+              ") => void"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -669,7 +716,9 @@
                 "tags": [],
                 "label": "response",
                 "description": [],
-                "signature": ["Response"],
+                "signature": [
+                  "Response"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -685,7 +734,11 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["(response: ", "Response", ") => void"],
+            "signature": [
+              "(response: ",
+              "Response",
+              ") => void"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -697,7 +750,9 @@
                 "tags": [],
                 "label": "response",
                 "description": [],
-                "signature": ["Response"],
+                "signature": [
+                  "Response"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -739,7 +794,9 @@
             "tags": [],
             "label": "api",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "src/plugins/inspector/public/adapters/has_inspector_adapters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -792,7 +849,9 @@
             "tags": [],
             "label": "[key: string]: any",
             "description": [],
-            "signature": ["[key: string]:  any"],
+            "signature": [
+              "[key: string]:  any"
+            ],
             "path": "src/plugins/inspector/common/adapters/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -842,9 +901,14 @@
         "parentPluginId": "inspector",
         "id": "def-public.InspectorOptions",
         "type": "Interface",
-        "tags": ["property", "property"],
+        "tags": [
+          "property",
+          "property"
+        ],
         "label": "InspectorOptions",
-        "description": ["\nOptions that can be specified when opening the inspector."],
+        "description": [
+          "\nOptions that can be specified when opening the inspector."
+        ],
         "path": "src/plugins/inspector/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -856,7 +920,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -868,7 +934,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "src/plugins/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -880,9 +948,13 @@
         "parentPluginId": "inspector",
         "id": "def-public.InspectorViewDescription",
         "type": "Interface",
-        "tags": ["typedef"],
+        "tags": [
+          "typedef"
+        ],
         "label": "InspectorViewDescription",
-        "description": ["\nAn object describing an inspector view."],
+        "description": [
+          "\nAn object describing an inspector view."
+        ],
         "path": "src/plugins/inspector/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -940,7 +1012,9 @@
             "tags": [],
             "label": "help",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -952,7 +1026,9 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1046,8 +1122,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "adapters",
-            "description": ["\nAdapters used to open the inspector."],
-            "signature": ["TAdapters"],
+            "description": [
+              "\nAdapters used to open the inspector."
+            ],
+            "signature": [
+              "TAdapters"
+            ],
             "path": "src/plugins/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1071,8 +1151,12 @@
             "type": "Unknown",
             "tags": [],
             "label": "options",
-            "description": ["\nA set of specific options for each view."],
-            "signature": ["unknown"],
+            "description": [
+              "\nA set of specific options for each view."
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "src/plugins/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1131,7 +1215,9 @@
             "tags": [],
             "label": "json",
             "description": [],
-            "signature": ["object | undefined"],
+            "signature": [
+              "object | undefined"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1143,7 +1229,10 @@
             "tags": [],
             "label": "response",
             "description": [],
-            "signature": ["Response", " | undefined"],
+            "signature": [
+              "Response",
+              " | undefined"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1207,7 +1296,9 @@
             "tags": [],
             "label": "time",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1244,7 +1335,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1256,7 +1349,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1307,7 +1402,9 @@
         "type": "Enum",
         "tags": [],
         "label": "RequestStatus",
-        "description": ["\nThe status a request can have."],
+        "description": [
+          "\nThe status a request can have."
+        ],
         "path": "src/plugins/inspector/common/adapters/request/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1401,7 +1498,11 @@
           "tags": [],
           "label": "__LEGACY",
           "description": [],
-          "signature": ["{ views: ", "InspectorViewRegistry", "; }"],
+          "signature": [
+            "{ views: ",
+            "InspectorViewRegistry",
+            "; }"
+          ],
           "path": "src/plugins/inspector/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false
@@ -1478,7 +1579,10 @@
           "parentPluginId": "inspector",
           "id": "def-public.Start.open",
           "type": "Function",
-          "tags": ["return", "throws"],
+          "tags": [
+            "return",
+            "throws"
+          ],
           "label": "open",
           "description": [
             "\nOpens the inspector panel for the given adapters and close any previously opened\ninspector panel. The previously panel will be closed also if no new panel will be\nopened (e.g. because of the passed adapters no view is available). You can use\n{@link InspectorSession#close} on the return value to close that opened panel again.\n"
@@ -1542,7 +1646,9 @@
               "type": "Object",
               "tags": [],
               "label": "options",
-              "description": ["- Options that configure the inspector. See InspectorOptions type."],
+              "description": [
+                "- Options that configure the inspector. See InspectorOptions type."
+              ],
               "signature": [
                 {
                   "pluginId": "inspector",
@@ -1559,7 +1665,9 @@
               "isRequired": false
             }
           ],
-          "returnComment": ["The session instance for the opened inspector."]
+          "returnComment": [
+            "The session instance for the opened inspector."
+          ]
         }
       ],
       "lifecycle": "start",
@@ -1580,7 +1688,9 @@
         "parentPluginId": "inspector",
         "id": "def-common.RequestAdapter",
         "type": "Class",
-        "tags": ["extends"],
+        "tags": [
+          "extends"
+        ],
         "label": "RequestAdapter",
         "description": [
           "\nAn generic inspector adapter to log requests.\nThese can be presented in the inspector using the requests view.\nThe adapter is not coupled to a specific implementation or even Elasticsearch\ninstead it offers a generic API to log requests of any kind."
@@ -1607,7 +1717,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1618,7 +1730,9 @@
             "parentPluginId": "inspector",
             "id": "def-common.RequestAdapter.start",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "start",
             "description": [
               "\nStart logging a new request into this request adapter. The new request will\nby default be in a processing state unless you explicitly finish it via\n{@link RequestResponder#finish}, {@link RequestResponder#ok} or\n{@link RequestResponder#error}.\n"
@@ -1645,8 +1759,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "name",
-                "description": ["The name of this request as it should be shown in the UI."],
-                "signature": ["string"],
+                "description": [
+                  "The name of this request as it should be shown in the UI."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1658,8 +1776,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["Additional arguments for the request."],
-                "signature": ["RequestParams"],
+                "description": [
+                  "Additional arguments for the request."
+                ],
+                "signature": [
+                  "RequestParams"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1671,15 +1793,21 @@
                 "type": "number",
                 "tags": [],
                 "label": "startTime",
-                "description": ["Set an optional start time for the request"],
-                "signature": ["number"],
+                "description": [
+                  "Set an optional start time for the request"
+                ],
+                "signature": [
+                  "number"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["An instance to add information to the request and finish it."]
+            "returnComment": [
+              "An instance to add information to the request and finish it."
+            ]
           },
           {
             "parentPluginId": "inspector",
@@ -1688,7 +1816,9 @@
             "tags": [],
             "label": "reset",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1702,7 +1832,9 @@
             "tags": [],
             "label": "resetRequest",
             "description": [],
-            "signature": ["(id: string) => void"],
+            "signature": [
+              "(id: string) => void"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1714,7 +1846,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1770,7 +1904,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1803,7 +1939,9 @@
                 "tags": [],
                 "label": "onChange",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1840,7 +1978,9 @@
                 "tags": [],
                 "label": "reqJson",
                 "description": [],
-                "signature": ["object"],
+                "signature": [
+                  "object"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1954,7 +2094,9 @@
                 "tags": [],
                 "label": "response",
                 "description": [],
-                "signature": ["Response"],
+                "signature": [
+                  "Response"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1970,7 +2112,11 @@
             "tags": [],
             "label": "ok",
             "description": [],
-            "signature": ["(response: ", "Response", ") => void"],
+            "signature": [
+              "(response: ",
+              "Response",
+              ") => void"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1982,7 +2128,9 @@
                 "tags": [],
                 "label": "response",
                 "description": [],
-                "signature": ["Response"],
+                "signature": [
+                  "Response"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1998,7 +2146,11 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["(response: ", "Response", ") => void"],
+            "signature": [
+              "(response: ",
+              "Response",
+              ") => void"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2010,7 +2162,9 @@
                 "tags": [],
                 "label": "response",
                 "description": [],
-                "signature": ["Response"],
+                "signature": [
+                  "Response"
+                ],
                 "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2066,7 +2220,9 @@
             "tags": [],
             "label": "[key: string]: any",
             "description": [],
-            "signature": ["[key: string]:  any"],
+            "signature": [
+              "[key: string]:  any"
+            ],
             "path": "src/plugins/inspector/common/adapters/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2125,7 +2281,9 @@
             "tags": [],
             "label": "json",
             "description": [],
-            "signature": ["object | undefined"],
+            "signature": [
+              "object | undefined"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2137,7 +2295,10 @@
             "tags": [],
             "label": "response",
             "description": [],
-            "signature": ["Response", " | undefined"],
+            "signature": [
+              "Response",
+              " | undefined"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2201,7 +2362,9 @@
             "tags": [],
             "label": "time",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2238,7 +2401,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2250,7 +2415,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2301,7 +2468,9 @@
         "type": "Enum",
         "tags": [],
         "label": "RequestStatus",
-        "description": ["\nThe status a request can have."],
+        "description": [
+          "\nThe status a request can have."
+        ],
         "path": "src/plugins/inspector/common/adapters/request/types.ts",
         "deprecated": false,
         "trackAdoption": false,

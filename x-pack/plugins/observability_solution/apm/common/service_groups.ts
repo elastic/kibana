@@ -7,13 +7,13 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { getKueryFields } from './utils/get_kuery_fields';
 import {
   AGENT_NAME,
+  SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
-  SERVICE_NAME,
 } from './es_fields/apm';
-import { getKueryFields } from './utils/get_kuery_fields';
 
 export const LABELS = 'labels'; // implies labels.* wildcard
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import '../../../../__mocks__/shallow_useeffect.mock';
 import '../../../__mocks__/engine_logic.mock';
 
@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
 import { SchemaAddFieldModal } from '../../../../shared/schema';
-import { getPageDescription, getPageHeaderActions, getPageTitle } from '../../../../test_helpers';
+import { getPageHeaderActions, getPageTitle, getPageDescription } from '../../../../test_helpers';
 
 import { SchemaCallouts, SchemaTable } from '../components';
 

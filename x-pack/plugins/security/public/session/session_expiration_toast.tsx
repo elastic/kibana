@@ -17,9 +17,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
+import type { SessionState } from './session_timeout';
 import type { StartServices } from '..';
 import { SESSION_GRACE_PERIOD_MS } from '../../common/constants';
-import type { SessionState } from './session_timeout';
 
 export interface SessionExpirationToastProps {
   sessionState$: Observable<SessionState>;

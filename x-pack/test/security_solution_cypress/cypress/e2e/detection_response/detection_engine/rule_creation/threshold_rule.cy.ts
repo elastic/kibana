@@ -24,10 +24,10 @@ import {
   ABOUT_RULE_DESCRIPTION,
   ADDITIONAL_LOOK_BACK_DETAILS,
   CUSTOM_QUERY_DETAILS,
-  DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
+  DEFINITION_DETAILS,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
-  INTERVAL_ABBR_VALUE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -38,11 +38,11 @@ import {
   RUNS_EVERY_DETAILS,
   SCHEDULE_DETAILS,
   SEVERITY_DETAILS,
-  SUPPRESS_FOR_DETAILS,
   TAGS_DETAILS,
   THRESHOLD_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
-  removeExternalLinkText,
+  SUPPRESS_FOR_DETAILS,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -50,20 +50,20 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
   createRuleWithoutEnabling,
-  enablesAndPopulatesThresholdSuppression,
-  fillAboutRuleAndContinue,
   fillAboutRuleMinimumAndContinue,
+  enablesAndPopulatesThresholdSuppression,
+  skipScheduleRuleAction,
+  fillAboutRuleAndContinue,
   fillDefineThresholdRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectThresholdRuleType,
-  skipScheduleRuleAction,
   waitForAlertsToPopulate,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import {
-  assertDetailsNotExist,
   getDetails,
+  assertDetailsNotExist,
   waitForTheRuleToBeExecuted,
 } from '../../../../tasks/rule_details';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';

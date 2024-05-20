@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { renderHook, act } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
-import { act, renderHook } from '@testing-library/react-hooks';
 
-import { SavedVisInstance, VisualizeAppStateContainer, VisualizeServices } from '../../types';
-import type { IEditorController } from '../../types';
-import { createVisualizeServicesMock } from '../mocks';
-import { visualizeAppStateStub } from '../stubs';
 import { useEditorUpdates } from './use_editor_updates';
+import { VisualizeServices, VisualizeAppStateContainer, SavedVisInstance } from '../../types';
+import type { IEditorController } from '../../types';
+import { visualizeAppStateStub } from '../stubs';
+import { createVisualizeServicesMock } from '../mocks';
 
 jest.mock('../../../utils/saved_visualize_utils', () => {
   const stubs = jest.requireActual('../stubs');

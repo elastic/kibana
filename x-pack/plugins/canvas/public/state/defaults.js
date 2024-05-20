@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DEFAULT_GROUP_BY_FIELD, DEFAULT_WORKPAD_CSS } from '../../common/lib/constants';
 import { getId } from '../lib/get_id';
+import { DEFAULT_WORKPAD_CSS, DEFAULT_GROUP_BY_FIELD } from '../../common/lib/constants';
 
 export const getDefaultElement = () => {
   return {

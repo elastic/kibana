@@ -5,14 +5,14 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { processorEventRt } from '../../../common/processor_event';
-import { SpanLinkDetails } from '../../../common/span_links';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { kueryRt, rangeRt } from '../default_api_types';
-import { getLinkedChildrenOfSpan } from './get_linked_children';
-import { getLinkedParentsOfSpan } from './get_linked_parents';
 import { getSpanLinksDetails } from './get_span_links_details';
+import { getLinkedChildrenOfSpan } from './get_linked_children';
+import { kueryRt, rangeRt } from '../default_api_types';
+import { SpanLinkDetails } from '../../../common/span_links';
+import { processorEventRt } from '../../../common/processor_event';
+import { getLinkedParentsOfSpan } from './get_linked_parents';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const linkedParentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents',

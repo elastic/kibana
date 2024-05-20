@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
-import React from 'react';
 import type { CellValueElementProps } from '../../../../../common/types';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { RenderCellValue } from '../../../../detections/configurations/security_solution_detections';

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import apm from 'elastic-apm-node';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ISavedObjectsRepository,
   KibanaRequest,
@@ -12,30 +14,17 @@ import {
   SavedObject,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import {
   ConcreteTaskInstance,
-  TaskErrorSource,
   createTaskRunError,
+  TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
+import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import { RunResult } from '@kbn/task-manager-plugin/server/task';
-import apm from 'elastic-apm-node';
-import { v4 as uuidv4 } from 'uuid';
 import { AdHocRunStatus, adHocRunStatus } from '../../common/constants';
-import { initializeAlertsClient } from '../alerts_client';
-import { AdHocRun, AdHocRunSO, AdHocRunSchedule } from '../data/ad_hoc_run/types';
+import { RuleRunnerErrorStackTraceLog, RuleTaskStateAndMetrics, TaskRunnerContext } from './types';
+import { getExecutorServices } from './get_executor_services';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
-import {
-  AlertingEventLogger,
-  executionType,
-} from '../lib/alerting_event_logger/alerting_event_logger';
-import { getEsErrorMessage } from '../lib/errors';
-import { Result, asErr, asOk, isOk } from '../lib/result_type';
-import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
-import { RuleResultService } from '../monitoring/rule_result_service';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -45,13 +34,24 @@ import {
   RuleTypeRegistry,
   RuleTypeState,
 } from '../types';
-import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
-import { getExecutorServices } from './get_executor_services';
-import { partiallyUpdateAdHocRun, processRunResults } from './lib';
-import { getFakeKibanaRequest } from './rule_loader';
-import { RuleTypeRunner } from './rule_type_runner';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { RuleRunnerErrorStackTraceLog, RuleTaskStateAndMetrics, TaskRunnerContext } from './types';
+import { AdHocRun, AdHocRunSchedule, AdHocRunSO } from '../data/ad_hoc_run/types';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
+import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
+import { getFakeKibanaRequest } from './rule_loader';
+import { RuleResultService } from '../monitoring/rule_result_service';
+import { RuleTypeRunner } from './rule_type_runner';
+import { initializeAlertsClient } from '../alerts_client';
+import { partiallyUpdateAdHocRun, processRunResults } from './lib';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import {
+  AlertingEventLogger,
+  executionType,
+} from '../lib/alerting_event_logger/alerting_event_logger';
+import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { getEsErrorMessage } from '../lib/errors';
+import { Result, isOk, asOk, asErr } from '../lib/result_type';
 
 interface ConstructorParams {
   context: TaskRunnerContext;

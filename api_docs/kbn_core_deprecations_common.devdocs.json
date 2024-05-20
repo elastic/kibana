@@ -26,7 +26,9 @@
         "type": "Interface",
         "tags": [],
         "label": "BaseDeprecationDetails",
-        "description": ["\nBase properties shared by all types of deprecations\n"],
+        "description": [
+          "\nBase properties shared by all types of deprecations\n"
+        ],
         "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -66,7 +68,9 @@
             "description": [
               "\nlevels:\n- warning: will not break deployment upon upgrade\n- critical: needs to be addressed before upgrade.\n- fetch_error: Deprecations service failed to grab the deprecation details for the domain."
             ],
-            "signature": ["\"warning\" | \"critical\" | \"fetch_error\""],
+            "signature": [
+              "\"warning\" | \"critical\" | \"fetch_error\""
+            ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -80,7 +84,9 @@
             "description": [
               "\n(optional) Used to identify between different deprecation types.\nExample use case: in Upgrade Assistant, we may want to allow the user to sort by\ndeprecation type or show each type in a separate tab.\n\nFeel free to add new types if necessary.\nPredefined types are necessary to reduce having similar definitions with different keywords\nacross kibana deprecations."
             ],
-            "signature": ["\"config\" | \"feature\" | undefined"],
+            "signature": [
+              "\"config\" | \"feature\" | undefined"
+            ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -94,7 +100,9 @@
             "description": [
               "(optional) link to the documentation for more details on the deprecation."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -108,7 +116,9 @@
             "description": [
               "(optional) specify the fix for this deprecation requires a full kibana restart."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -119,7 +129,9 @@
             "type": "Object",
             "tags": [],
             "label": "correctiveActions",
-            "description": ["corrective action needed to fix this deprecation."],
+            "description": [
+              "corrective action needed to fix this deprecation."
+            ],
             "signature": [
               "{ api?: { path: string; method: \"POST\" | \"PUT\"; body?: { [key: string]: any; } | undefined; omitContextFromBody?: boolean | undefined; } | undefined; manualSteps: string[]; }"
             ],
@@ -176,7 +188,9 @@
             "tags": [],
             "label": "deprecationType",
             "description": [],
-            "signature": ["\"config\""],
+            "signature": [
+              "\"config\""
+            ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -254,7 +268,9 @@
             "tags": [],
             "label": "deprecationType",
             "description": [],
-            "signature": ["\"feature\" | undefined"],
+            "signature": [
+              "\"feature\" | undefined"
+            ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false

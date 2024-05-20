@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CrudClient } from '../crud_client';
 import { ContentTypeDefinition } from './content_type_definition';
+import type { CrudClient } from '../crud_client';
 
 export class ContentType {
   constructor(public readonly definition: ContentTypeDefinition) {}

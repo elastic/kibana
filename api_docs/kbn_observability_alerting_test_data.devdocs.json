@@ -26,7 +26,11 @@
         "tags": [],
         "label": "createApmErrorCountRule",
         "description": [],
-        "signature": ["(actionId: string) => Promise<", "AxiosResponse", "<any, any>>"],
+        "signature": [
+          "(actionId: string) => Promise<",
+          "AxiosResponse",
+          "<any, any>>"
+        ],
         "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_error_count_threshold_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +42,9 @@
             "tags": [],
             "label": "actionId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_error_count_threshold_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,7 +61,11 @@
         "tags": [],
         "label": "createApmFailedTransactionRateRule",
         "description": [],
-        "signature": ["(actionId: string) => Promise<", "AxiosResponse", "<any, any>>"],
+        "signature": [
+          "(actionId: string) => Promise<",
+          "AxiosResponse",
+          "<any, any>>"
+        ],
         "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_failed_transaction_rate_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -67,7 +77,9 @@
             "tags": [],
             "label": "actionId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/observability/alerting_test_data/src/create_apm_failed_transaction_rate_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -100,7 +112,9 @@
             "tags": [],
             "label": "actionId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -113,7 +127,9 @@
             "tags": [],
             "label": "dataViewId",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -137,7 +153,9 @@
                 "tags": [],
                 "label": "consumer",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -149,7 +167,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/packages/observability/alerting_test_data/src/create_custom_threshold_rule.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -236,7 +256,11 @@
         "tags": [],
         "label": "createIndexConnector",
         "description": [],
-        "signature": ["() => Promise<", "AxiosResponse", "<any, any>>"],
+        "signature": [
+          "() => Promise<",
+          "AxiosResponse",
+          "<any, any>>"
+        ],
         "path": "x-pack/packages/observability/alerting_test_data/src/create_index_connector.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -251,7 +275,11 @@
         "tags": [],
         "label": "createRule",
         "description": [],
-        "signature": ["(ruleParams: any) => Promise<", "AxiosResponse", "<any, any>>"],
+        "signature": [
+          "(ruleParams: any) => Promise<",
+          "AxiosResponse",
+          "<any, any>>"
+        ],
         "path": "x-pack/packages/observability/alerting_test_data/src/create_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -263,7 +291,9 @@
             "tags": [],
             "label": "ruleParams",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/observability/alerting_test_data/src/create_rule.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -280,7 +310,9 @@
         "tags": [],
         "label": "run",
         "description": [],
-        "signature": ["() => Promise<void>"],
+        "signature": [
+          "() => Promise<void>"
+        ],
         "path": "x-pack/packages/observability/alerting_test_data/src/run.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -582,7 +614,9 @@
                     "tags": [],
                     "label": "groupBy",
                     "description": [],
-                    "signature": ["string[]"],
+                    "signature": [
+                      "string[]"
+                    ],
                     "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_log_count_groupby.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1083,7 +1117,9 @@
                     "tags": [],
                     "label": "groupBy",
                     "description": [],
-                    "signature": ["string[]"],
+                    "signature": [
+                      "string[]"
+                    ],
                     "path": "x-pack/packages/observability/alerting_test_data/src/scenarios/custom_threshold_metric_avg_groupby.ts",
                     "deprecated": false,
                     "trackAdoption": false

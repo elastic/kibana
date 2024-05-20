@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import React, { Fragment, useState, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiDescribedFormGroup,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFieldText,
   EuiFormRow,
   EuiLink,
   EuiPanel,
@@ -22,10 +21,11 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiTitle,
+  EuiCallOut,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useState, useMemo } from 'react';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../common/constants';
 import { csvToArray, isDataStreamBackingIndex } from '../../../../../../common/lib';
@@ -33,8 +33,8 @@ import { RestoreSettings } from '../../../../../../common/types';
 
 import { useCore, useServices } from '../../../../app_context';
 
-import { DataStreamBadge } from '../../../data_stream_badge';
 import { orderDataStreamsAndIndices } from '../../../lib';
+import { DataStreamBadge } from '../../../data_stream_badge';
 
 import { StepProps } from '..';
 

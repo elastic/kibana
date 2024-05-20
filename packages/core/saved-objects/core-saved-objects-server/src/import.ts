@@ -8,9 +8,9 @@
 
 import { Readable } from 'stream';
 import {
-  SavedObjectsImportResponse,
   SavedObjectsImportRetry,
   SavedObjectsImportWarning,
+  SavedObjectsImportResponse,
 } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '..';
 

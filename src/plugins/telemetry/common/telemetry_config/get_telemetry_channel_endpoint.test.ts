@@ -7,9 +7,9 @@
  */
 
 import {
-  getBaseUrl,
-  getChannel,
   getTelemetryChannelEndpoint,
+  getChannel,
+  getBaseUrl,
 } from './get_telemetry_channel_endpoint';
 
 describe('getBaseUrl', () => {

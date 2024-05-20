@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
 import { cloneDeep } from 'lodash';
-import { throwBadResponse } from '../../../model/helpers';
-import { getAliases } from '../../../model/helpers';
+import * as Either from 'fp-ts/lib/Either';
 import { delayRetryState } from '../../../model/retry_state';
+import { throwBadResponse } from '../../../model/helpers';
 import type { MigrationLog } from '../../../types';
 import { isTypeof } from '../../actions';
+import { getAliases } from '../../../model/helpers';
 import {
-  buildIndexMappings,
-  checkIndexCurrentAlgorithm,
+  getCurrentIndex,
   checkVersionCompatibility,
-  generateAdditiveMappingDiff,
+  buildIndexMappings,
   getAliasActions,
   getCreationAliases,
-  getCurrentIndex,
+  generateAdditiveMappingDiff,
+  checkIndexCurrentAlgorithm,
   removePropertiesFromV2,
 } from '../../utils';
 import type { ModelStage } from '../types';

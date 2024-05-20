@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { isEmpty, pickBy, some, isBoolean, isNumber } from 'lodash';
 import type { IRouter } from '@kbn/core/server';
-import { isBoolean, isEmpty, isNumber, pickBy, some } from 'lodash';
-import { PLUGIN_ID } from '../../../common';
 import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/api';
-import { createSavedQueryRequestSchema } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
-import { savedQuerySavedObjectType } from '../../../common/types';
-import type { SavedQuerySavedObject } from '../../common/types';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-import { convertECSMappingToArray } from '../utils';
 import type { SavedQueryResponse } from './types';
+import type { SavedQuerySavedObject } from '../../common/types';
+import { PLUGIN_ID } from '../../../common';
+import { savedQuerySavedObjectType } from '../../../common/types';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { convertECSMappingToArray } from '../utils';
+import { createSavedQueryRequestSchema } from '../../../common/api';
 
 export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

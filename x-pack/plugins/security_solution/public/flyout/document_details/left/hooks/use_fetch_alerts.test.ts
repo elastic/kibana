@@ -7,9 +7,9 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../../../common/lib/kibana';
-import { createReactQueryWrapper } from '../../../../common/mock';
 import { createFindAlerts } from '../services/find_alerts';
-import { type UseAlertsQueryParams, useFetchAlerts } from './use_fetch_alerts';
+import { useFetchAlerts, type UseAlertsQueryParams } from './use_fetch_alerts';
+import { createReactQueryWrapper } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../services/find_alerts');

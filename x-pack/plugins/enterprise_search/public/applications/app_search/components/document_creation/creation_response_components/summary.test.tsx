@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton, EuiCallOut, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyoutBody, EuiCallOut, EuiButton } from '@elastic/eui';
 
-import { FlyoutBody, FlyoutFooter, FlyoutHeader } from './summary';
+import { FlyoutHeader, FlyoutBody, FlyoutFooter } from './summary';
 import {
   InvalidDocumentsSummary,
-  SchemaFieldsSummary,
   ValidDocumentsSummary,
+  SchemaFieldsSummary,
 } from './summary_sections';
 
 import { Summary } from '.';

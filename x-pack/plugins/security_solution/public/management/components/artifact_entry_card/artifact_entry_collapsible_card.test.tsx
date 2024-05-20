@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { act, fireEvent } from '@testing-library/react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { act, fireEvent } from '@testing-library/react';
+import type { AnyArtifact } from './types';
+import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 import type { ArtifactEntryCollapsibleCardProps } from './artifact_entry_collapsible_card';
 import { ArtifactEntryCollapsibleCard } from './artifact_entry_collapsible_card';
-import { getExceptionProviderMock, getTrustedAppProviderMock } from './test_utils';
-import type { AnyArtifact } from './types';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],

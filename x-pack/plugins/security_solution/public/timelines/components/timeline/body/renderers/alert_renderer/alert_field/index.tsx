@@ -8,8 +8,8 @@
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-import { AlertFieldFlexGroup } from '../helpers';
 import { AlertFieldBadge } from './alert_field_badge';
+import { AlertFieldFlexGroup } from '../helpers';
 
 export const DEFAULT_FIELD_TYPE = 'keyword';
 

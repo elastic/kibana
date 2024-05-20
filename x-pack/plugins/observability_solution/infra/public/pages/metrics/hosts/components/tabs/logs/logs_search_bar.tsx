@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFieldSearch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
+import { EuiFieldSearch } from '@elastic/eui';
 import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
 
 const debounceIntervalInMs = 1000;

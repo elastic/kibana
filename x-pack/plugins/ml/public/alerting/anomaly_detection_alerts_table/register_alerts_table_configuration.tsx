@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { type TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  AlertsTableConfigurationRegistry,
+  RenderCustomActionsRowArgs,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { EuiDataGridColumn } from '@elastic/eui';
-import { APP_ID as CASE_APP_ID, FEATURE_ID as CASE_GENERAL_ID } from '@kbn/cases-plugin/common';
-import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
-import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -20,21 +23,18 @@ import {
   ALERT_START,
   ALERT_STATUS,
 } from '@kbn/rule-data-utils';
-import { type TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import type {
-  AlertsTableConfigurationRegistry,
-  RenderCustomActionsRowArgs,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
-import React from 'react';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { APP_ID as CASE_APP_ID, FEATURE_ID as CASE_GENERAL_ID } from '@kbn/cases-plugin/common';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+import { getAlertFlyout } from './use_alerts_flyout';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
   ML_ALERT_TYPES,
 } from '../../../common/constants/alerts';
-import { AlertActions } from './alert_actions';
 import { getAlertFormatters, getRenderCellValue } from './render_cell_value';
-import { getAlertFlyout } from './use_alerts_flyout';
+import { AlertActions } from './alert_actions';
 
 export function registerAlertsTableConfiguration(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,

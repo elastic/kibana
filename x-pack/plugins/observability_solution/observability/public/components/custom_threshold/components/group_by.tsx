@@ -40,13 +40,13 @@ export function GroupBy({ options, onChange, fields, errorOptions, ...rest }: Pr
         color: errorOptions?.includes(field) ? 'danger' : undefined,
       }))
     : options.groupBy
-      ? [
-          {
-            label: options.groupBy,
-            color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
-          },
-        ]
-      : [];
+    ? [
+        {
+          label: options.groupBy,
+          color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
+        },
+      ]
+    : [];
 
   return (
     <EuiComboBox

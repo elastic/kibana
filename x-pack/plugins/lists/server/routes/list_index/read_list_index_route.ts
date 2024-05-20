@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
-import { getListClient } from '..';
-import { readListIndexResponse } from '../../../common/api';
 import type { ListsPluginRouter } from '../../types';
+import { readListIndexResponse } from '../../../common/api';
 import { buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
 export const readListIndexRoute = (router: ListsPluginRouter): void => {
   router.versioned

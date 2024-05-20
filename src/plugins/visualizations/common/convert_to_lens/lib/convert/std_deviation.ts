@@ -11,7 +11,7 @@ import { isFieldValid } from '../../utils';
 import { addTimeRangeToFormula } from '../metrics/formula';
 import { getFieldNameFromField } from '../utils';
 import { createFormulaColumn } from './formula';
-import { SUPPORTED_METRICS, getFormulaFromMetric } from './supported_metrics';
+import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { CommonColumnConverterArgs, FormulaColumn } from './types';
 
 const STD_LOWER = 'std_lower';

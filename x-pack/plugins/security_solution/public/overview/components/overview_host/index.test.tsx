@@ -10,10 +10,10 @@ import React from 'react';
 
 import { TestProviders } from '../../../common/mock';
 
-import { render } from '@testing-library/react';
 import { OverviewHost } from '.';
-import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { useHostOverview } from '../../containers/overview_host';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { render } from '@testing-library/react';
 
 jest.mock('../../../common/components/link_to');
 jest.mock('../../../common/containers/query_toggle');

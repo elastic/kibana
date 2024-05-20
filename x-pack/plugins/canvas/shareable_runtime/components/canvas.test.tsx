@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ReactWrapper, mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../test/context_jest';
-import { getPageControlsCenter as center, getScrubber as scrubber } from '../test/selectors';
+import { getScrubber as scrubber, getPageControlsCenter as center } from '../test/selectors';
 import { Canvas } from './canvas';
 
 jest.mock('../supported_renderers');

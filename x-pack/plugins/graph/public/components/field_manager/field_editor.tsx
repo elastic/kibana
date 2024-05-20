@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import React, { useState, useEffect, ButtonHTMLAttributes } from 'react';
 import {
+  EuiPopover,
+  EuiFormRow,
   EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiColorPicker,
   EuiComboBox,
-  EuiContextMenu,
+  EuiColorPicker,
   EuiFieldNumber,
+  EuiHighlight,
+  EuiContextMenu,
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
   EuiForm,
-  EuiFormRow,
-  EuiHighlight,
-  EuiIcon,
-  EuiIconTip,
-  EuiPopover,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
-import React, { useState, useEffect, ButtonHTMLAttributes } from 'react';
-import { iconChoices } from '../../helpers/style_choices';
 import { WorkspaceField } from '../../types';
+import { iconChoices } from '../../helpers/style_choices';
 import { UpdateableFieldProperties } from './field_manager';
 
 import { isEqual } from '../helpers';

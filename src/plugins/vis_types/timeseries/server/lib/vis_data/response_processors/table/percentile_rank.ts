@@ -7,12 +7,12 @@
  */
 
 import { last } from 'lodash';
-import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
+import { getSplits, getAggValue, getLastMetric } from '../../helpers';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
-import { getAggValue, getLastMetric, getSplits } from '../../helpers';
+import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
-import type { PanelDataArray } from '../../../../../common/types/vis_data';
 import type { TableResponseProcessorsFunction } from './types';
+import type { PanelDataArray } from '../../../../../common/types/vis_data';
 
 export const percentileRank: TableResponseProcessorsFunction =
   ({ response, panel, series, meta, extractFields }) =>

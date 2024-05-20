@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useContext, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,15 +15,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { getCoreVitalsComponent } from '@kbn/observability-plugin/public';
-import React, { useContext, useMemo } from 'react';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useCoreWebVitalsQuery } from '../../../../hooks/use_core_web_vitals_query';
 import { useINPQuery } from '../../../../hooks/use_inp_query';
-import { CsmSharedContext } from '../csm_shared_context';
-import { useUxQuery } from '../hooks/use_ux_query';
 import { I18LABELS } from '../translations';
 import { KeyUXMetrics } from './key_ux_metrics';
+import { useUxQuery } from '../hooks/use_ux_query';
+import { CsmSharedContext } from '../csm_shared_context';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getPercentileLabel } from './translations';
+import { useCoreWebVitalsQuery } from '../../../../hooks/use_core_web_vitals_query';
 
 export function UXMetrics() {
   const {

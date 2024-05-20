@@ -27,14 +27,14 @@ import {
 import { CoreStart } from '@kbn/core/public';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
 import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { lastValueFrom } from 'rxjs';

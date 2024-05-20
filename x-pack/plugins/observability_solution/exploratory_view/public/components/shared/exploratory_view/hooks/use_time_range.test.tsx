@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { allSeriesKey, reportTypeKey, UrlStorageContextProvider } from './use_series_storage';
 import { renderHook } from '@testing-library/react-hooks';
-import { ReportTypes } from '../configurations/constants';
-import {
-  METRIC_SYSTEM_MEMORY_USAGE,
-  TRANSACTION_DURATION,
-} from '../configurations/constants/elasticsearch_fieldnames';
-import { UrlStorageContextProvider, allSeriesKey, reportTypeKey } from './use_series_storage';
 import { useExpViewTimeRange } from './use_time_range';
+import { ReportTypes } from '../configurations/constants';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import {
+  TRANSACTION_DURATION,
+  METRIC_SYSTEM_MEMORY_USAGE,
+} from '../configurations/constants/elasticsearch_fieldnames';
 
 const mockSingleSeries = [
   {

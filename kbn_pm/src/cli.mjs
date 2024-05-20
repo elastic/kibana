@@ -15,13 +15,13 @@
  *    beyond bootstrapping
  */
 
-import { getCmd } from './commands/index.mjs';
 import { Args } from './lib/args.mjs';
-import { createFlagError, isCliError } from './lib/cli_error.mjs';
-import External from './lib/external_packages.js';
 import { getHelp } from './lib/help.mjs';
-import { Log } from './lib/log.mjs';
+import { createFlagError, isCliError } from './lib/cli_error.mjs';
 import { checkIfRunningNativelyOnWindows } from './lib/windows.mjs';
+import { getCmd } from './commands/index.mjs';
+import { Log } from './lib/log.mjs';
+import External from './lib/external_packages.js';
 
 const start = Date.now();
 const args = new Args(process.argv.slice(2), []);

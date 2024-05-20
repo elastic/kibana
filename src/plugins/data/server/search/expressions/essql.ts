@@ -7,8 +7,8 @@
  */
 
 import { StartServicesAccessor } from '@kbn/core/server';
-import { getEssqlFn } from '../../../common/search/expressions/essql';
 import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
+import { getEssqlFn } from '../../../common/search/expressions/essql';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies

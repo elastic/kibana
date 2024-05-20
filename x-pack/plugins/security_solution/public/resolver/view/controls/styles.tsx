@@ -6,10 +6,10 @@
  */
 import type { EuiRangeProps } from '@elastic/eui';
 import {
-  EuiButtonIcon,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiRange,
+  EuiButtonIcon,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
 import styled from 'styled-components';
 

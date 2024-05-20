@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
+  EuiPage,
+  EuiPageSection,
+  EuiPageBody,
+  EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageSection,
   EuiPanel,
   EuiScreenReaderOnly,
-  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { AlertsCallout } from '../../../alerts/callout';
-import { MonitoringTimeseriesContainer } from '../../chart';
-import { Logs } from '../../logs';
 import { NodeDetailStatus } from '../node_detail_status';
+import { Logs } from '../../logs';
+import { MonitoringTimeseriesContainer } from '../../chart';
+import { AlertsCallout } from '../../../alerts/callout';
 import { ShardAllocation } from '../shard_allocation';
 
 export const Node = ({ nodeSummary, metrics, logs, alerts, nodeId, clusterUuid, ...props }) => {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { sumBy } from 'lodash/fp';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { sumBy } from 'lodash/fp';
 
 import type { HostRiskScore, RiskStats, UserRiskScore } from '../../../../common/search_strategy';
 import { formatRiskScore } from '../../common';

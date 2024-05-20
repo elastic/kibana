@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
+import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
 
 const LINE_CLAMP = 2;
 

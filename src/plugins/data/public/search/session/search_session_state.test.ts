@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SearchSessionState, createSessionStateContainer } from './search_session_state';
+import { createSessionStateContainer, SearchSessionState } from './search_session_state';
 import type { SearchSessionSavedObject } from './sessions_client';
 
 const mockSavedObject: SearchSessionSavedObject = {

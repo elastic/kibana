@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  getBulkDisableRuleActionSchemaMock,
-  getPerformBulkActionEditSchemaMock,
-} from '../../../../../../../common/api/detection_engine/rule_management/mocks';
-import {
-  BulkActionsDryRunErrCode,
   DETECTION_ENGINE_RULES_BULK_ACTION,
+  BulkActionsDryRunErrCode,
 } from '../../../../../../../common/constants';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
+import { buildMlAuthz } from '../../../../../machine_learning/authz';
+import {
+  getEmptyFindResult,
+  getBulkDisableRuleActionRequest,
+  getBulkActionEditRequest,
+  getFindResultWithSingleHit,
+  getFindResultWithMultiHits,
+} from '../../../../routes/__mocks__/request_responses';
 import {
   createMockConfig,
   requestContextMock,
-  requestMock,
   serverMock,
+  requestMock,
 } from '../../../../routes/__mocks__';
-import {
-  getBulkActionEditRequest,
-  getBulkDisableRuleActionRequest,
-  getEmptyFindResult,
-  getFindResultWithMultiHits,
-  getFindResultWithSingleHit,
-} from '../../../../routes/__mocks__/request_responses';
-import { readRules } from '../../../logic/crud/read_rules';
 import { performBulkActionRoute } from './route';
+import {
+  getPerformBulkActionEditSchemaMock,
+  getBulkDisableRuleActionSchemaMock,
+} from '../../../../../../../common/api/detection_engine/rule_management/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { readRules } from '../../../logic/crud/read_rules';
 
 jest.mock('../../../../../machine_learning/authz');
 jest.mock('../../../logic/crud/read_rules', () => ({ readRules: jest.fn() }));

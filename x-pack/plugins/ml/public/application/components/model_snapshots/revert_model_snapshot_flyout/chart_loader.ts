@@ -6,10 +6,10 @@
  */
 
 import { getSeverityType } from '@kbn/ml-anomaly-utils';
-import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
-import type { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
-import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import type { MlResultsService } from '../../../services/results_service';
+import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
+import type { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
 
 export function chartLoaderProvider(mlResultsService: MlResultsService) {
   async function loadEventRateForJob(
@@ -83,7 +83,7 @@ export function chartLoaderProvider(mlResultsService: MlResultsService) {
     const anomalies: Record<number, Anomaly[]> = {};
     anomalies[0] = Object.entries(results).map(
       ([time, value]) =>
-        ({ time: +time, value, severity: getSeverityType(value as number) }) as Anomaly
+        ({ time: +time, value, severity: getSeverityType(value as number) } as Anomaly)
     );
     return anomalies;
   }

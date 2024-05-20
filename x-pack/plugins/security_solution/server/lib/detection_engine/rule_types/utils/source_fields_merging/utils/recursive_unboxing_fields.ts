@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set/fp';
 import { get } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import type { SearchTypes } from '../../../../../../../common/detection_engine/types';
 import type { FieldsType } from '../types';
 

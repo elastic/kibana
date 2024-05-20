@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { render } from 'enzyme';
 import React from 'react';
+import { render } from 'enzyme';
 import { VisualizationNoResults } from './visualization_noresults';
 
 describe('VisualizationNoResults', () => {

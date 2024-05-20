@@ -7,21 +7,21 @@
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
-  TimesliceMetricIndicator,
   timesliceMetricComparatorMapping,
+  TimesliceMetricIndicator,
   timesliceMetricIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 
-import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
+import { InvalidTransformError } from '../../errors';
+import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
+import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../common/constants';
-import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { SLODefinition } from '../../domain/models';
-import { InvalidTransformError } from '../../errors';
 import { GetTimesliceMetricIndicatorAggregation } from '../aggregations';
 
 const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;

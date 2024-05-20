@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { isRunningResponse } from '@kbn/data-plugin/common';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { useCallback, useRef, useState } from 'react';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import { tap } from 'rxjs';
 import { useAiopsAppContext } from './use_aiops_app_context';
 

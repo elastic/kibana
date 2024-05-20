@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["POST"],
-    "patterns": ["_ml/data_frame/analytics/{id}/_update"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/data_frame/analytics/{id}/_update"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/update-dfanalytics.html",
     "availability": {
       "stack": true,

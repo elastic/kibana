@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore, buildQueryFilter } from '@kbn/es-query';
 import { sortFilters } from './sort_filters';
+import { FilterStateStore, buildQueryFilter } from '@kbn/es-query';
 
 describe('sortFilters', () => {
   describe('sortFilters()', () => {

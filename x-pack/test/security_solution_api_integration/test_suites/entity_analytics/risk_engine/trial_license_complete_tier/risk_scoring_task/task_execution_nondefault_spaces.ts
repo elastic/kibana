@@ -7,17 +7,17 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { deleteAllAlerts, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { dataGeneratorFactory } from '../../../../detections_response/utils';
+import { deleteAllRules, deleteAllAlerts } from '../../../../../../common/utils/security_solution';
 import {
   buildDocument,
-  cleanRiskEngine,
   createAndSyncRuleAndAlertsFactory,
-  deleteRiskScoreIndices,
-  normalizeScores,
   readRiskScores,
-  riskEngineRouteHelpersFactory,
   waitForRiskScoresToBePresent,
+  normalizeScores,
+  riskEngineRouteHelpersFactory,
+  cleanRiskEngine,
+  deleteRiskScoreIndices,
 } from '../../../utils';
 
 import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';

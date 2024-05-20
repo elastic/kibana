@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { PassThrough } from 'stream';
 import { Logger } from '@kbn/logging';
 import OpenAI from 'openai';
 import {
-  Observable,
   catchError,
   concatMap,
   endWith,
@@ -17,8 +15,10 @@ import {
   from,
   ignoreElements,
   map,
+  Observable,
   of,
 } from 'rxjs';
+import { PassThrough } from 'stream';
 import {
   BufferFlushEvent,
   ChatCompletionChunkEvent,

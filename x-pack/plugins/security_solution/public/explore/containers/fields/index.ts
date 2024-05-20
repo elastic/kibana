@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import memoizeOne from 'memoize-one';
 import { useMemo } from 'react';
-import { useKibana } from '../../../common/lib/kibana';
+import memoizeOne from 'memoize-one';
 import { getRequiredMapsFields } from '../../network/components/embeddables/map_config';
+import { useKibana } from '../../../common/lib/kibana';
 
 type FieldValidationCheck = (pattern: string) => Promise<boolean>;
 

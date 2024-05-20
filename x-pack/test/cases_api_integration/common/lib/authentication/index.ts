@@ -6,11 +6,11 @@
  */
 
 import { FtrProviderContext as CommonFtrProviderContext } from '../../ftr_provider_context';
-import { loginUsers } from '../api';
-import { roles } from './roles';
-import { spaces } from './spaces';
 import { Role, User, UserInfo } from './types';
 import { obsOnly, secOnly, secOnlyNoDelete, secOnlyRead, users } from './users';
+import { roles } from './roles';
+import { spaces } from './spaces';
+import { loginUsers } from '../api';
 
 export const getUserInfo = (user: User): UserInfo => ({
   username: user.username,

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppDefinition, AppId, AppIds, appCategories } from './types';
+import { AppIds, AppId, AppDefinition, appCategories } from './types';
 
 export { AppIds, appCategories } from './types';
 

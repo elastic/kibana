@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
-import { cloneDeep, set } from 'lodash';
-import React from 'react';
-import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
-import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
-import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
-import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
+import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import React from 'react';
 import type { AttackSurfaceReductionCardProps } from './attack_surface_reduction_card';
 import {
   AttackSurfaceReductionCard,
   LOCKED_CARD_ATTACK_SURFACE_REDUCTION,
   SWITCH_LABEL,
 } from './attack_surface_reduction_card';
+import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
+import { cloneDeep, set } from 'lodash';
+import userEvent from '@testing-library/user-event';
+import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
+import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
 
 jest.mock('../../../../../../../common/hooks/use_license');
 

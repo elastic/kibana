@@ -6,10 +6,10 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import styled from '@emotion/styled';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useController } from 'react-hook-form';
+import styled from '@emotion/styled';
 
 const StyledEuiCard = styled(EuiCard)`
   padding: 0;

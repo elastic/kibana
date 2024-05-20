@@ -6,18 +6,18 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import type { RiskSeverity } from '../../../../common/search_strategy';
-import type { FillColor } from '../../../common/components/charts/donutchart';
-import { DonutChart } from '../../../common/components/charts/donutchart';
-import { emptyDonutColor } from '../../../common/components/charts/donutchart_empty';
-import { Legend } from '../../../common/components/charts/legend';
+import { i18n } from '@kbn/i18n';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { RISK_SEVERITY_COLOUR } from '../../common/utils';
 import type { SeverityCount } from '../severity/types';
 import { useRiskDonutChartData } from './use_risk_donut_chart_data';
+import type { FillColor } from '../../../common/components/charts/donutchart';
+import { emptyDonutColor } from '../../../common/components/charts/donutchart_empty';
+import { DonutChart } from '../../../common/components/charts/donutchart';
+import { Legend } from '../../../common/components/charts/legend';
+import type { RiskSeverity } from '../../../../common/search_strategy';
 
 const DONUT_HEIGHT = 120;
 

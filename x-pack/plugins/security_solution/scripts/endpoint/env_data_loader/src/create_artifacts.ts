@@ -8,23 +8,23 @@
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { BaseDataGenerator } from '../../../../common/endpoint/data_generators/base_data_generator';
+import type { NewTrustedApp } from '../../../../common/endpoint/types';
+import { stringify } from '../../../../server/endpoint/utils/stringify';
 import { EndpointExceptionsGenerator } from '../../../../common/endpoint/data_generators/endpoint_exceptions_generator';
-import { EventFiltersGenerator } from '../../../../common/endpoint/data_generators/event_filters_generator';
-import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../common/endpoint/service/artifacts';
-import type { NewTrustedApp } from '../../../../common/endpoint/types';
-import { stringify } from '../../../../server/endpoint/utils/stringify';
+import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import type { ExecutionThrottler } from '../../common/execution_throttler';
+import { EventFiltersGenerator } from '../../../../common/endpoint/data_generators/event_filters_generator';
+import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import {
   createBlocklist,
   createEventFilter,
   createHostIsolationException,
   createTrustedApp,
 } from '../../common/endpoint_artifact_services';
-import type { ExecutionThrottler } from '../../common/execution_throttler';
 import type { ReportProgressCallback } from './types';
 import { loop } from './utils';
 

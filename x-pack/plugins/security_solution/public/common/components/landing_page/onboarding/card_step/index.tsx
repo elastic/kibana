@@ -6,32 +6,32 @@
  */
 
 import {
-  EuiBadge,
-  EuiButtonIcon,
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPanel,
+  EuiBadge,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
 import classnames from 'classnames';
+import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
 
-import { ALL_DONE_TEXT, EXPAND_STEP_BUTTON_LABEL } from '../translations';
 import type {
   CardId,
   OnStepClicked,
-  SectionId,
-  Step,
-  StepId,
   ToggleTaskCompleteStatus,
+  SectionId,
+  StepId,
+  Step,
 } from '../types';
+import { ALL_DONE_TEXT, EXPAND_STEP_BUTTON_LABEL } from '../translations';
 
-import { useStepContext } from '../context/step_context';
-import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
-import { useCardStepStyles } from '../styles/card_step.styles';
 import { StepContent } from './step_content';
+import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
+import { useStepContext } from '../context/step_context';
+import { useCardStepStyles } from '../styles/card_step.styles';
 
 const CardStepComponent: React.FC<{
   cardId: CardId;

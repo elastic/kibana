@@ -6,46 +6,46 @@
  * Side Public License, v 1.
  */
 
+import React, { Component, Fragment, ReactNode } from 'react';
+import { take } from 'lodash';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiForm,
-  EuiFormRow,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiLoadingElastic,
-  EuiLoadingSpinner,
-  EuiSelect,
-  EuiSpacer,
+  EuiButtonEmpty,
+  EuiButton,
   EuiText,
   EuiTitle,
+  EuiForm,
+  EuiFormRow,
+  EuiFilePicker,
+  EuiInMemoryTable,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingElastic,
+  EuiCallOut,
+  EuiSpacer,
+  EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { HttpStart, IBasePath } from '@kbn/core/public';
-import { ISearchStart } from '@kbn/data-plugin/public';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { take } from 'lodash';
-import React, { Component, Fragment, ReactNode } from 'react';
+import { HttpStart, IBasePath } from '@kbn/core/public';
+import { ISearchStart } from '@kbn/data-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import {
-  ProcessedImportResponse,
   importFile,
-  processImportResponse,
   resolveImportErrors,
+  processImportResponse,
+  ProcessedImportResponse,
 } from '../../../lib';
 import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
-import { ImportMode, ImportModeControl } from './import_mode_control';
-import { ImportSummary } from './import_summary';
 import { OverwriteModal } from './overwrite_modal';
+import { ImportModeControl, ImportMode } from './import_mode_control';
+import { ImportSummary } from './import_summary';
 
 const CREATE_NEW_COPIES_DEFAULT = false;
 const OVERWRITE_ALL_DEFAULT = true;
@@ -345,7 +345,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
                   text: indexPattern.title,
                   value: indexPattern.id,
                   'data-test-subj': `indexPatternOption-${indexPattern.title}`,
-                }) as { text: string; value: string; 'data-test-subj'?: string }
+                } as { text: string; value: string; 'data-test-subj'?: string })
             ),
           ];
 

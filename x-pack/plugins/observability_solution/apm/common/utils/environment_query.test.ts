@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../es_fields/apm';
+import { ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 import { environmentQuery } from './environment_query';
 
 describe('environmentQuery', () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import sinon from 'sinon';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { SavedObject } from '@kbn/core/server';
@@ -23,64 +24,31 @@ import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
-import {
-  ALERT_ACTION_GROUP,
-  ALERT_CONSECUTIVE_MATCHES,
-  ALERT_DURATION,
-  ALERT_FLAPPING,
-  ALERT_FLAPPING_HISTORY,
-  ALERT_INSTANCE_ID,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_RULE_CATEGORY,
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_RULE_EXECUTION_UUID,
-  ALERT_RULE_NAME,
-  ALERT_RULE_PARAMETERS,
-  ALERT_RULE_PRODUCER,
-  ALERT_RULE_REVISION,
-  ALERT_RULE_TAGS,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_UUID,
-  ALERT_START,
-  ALERT_STATUS,
-  ALERT_TIME_RANGE,
-  ALERT_UUID,
-  ALERT_WORKFLOW_STATUS,
-  EVENT_ACTION,
-  EVENT_KIND,
-  SPACE_IDS,
-  TAGS,
-  TIMESTAMP,
-  VERSION,
-} from '@kbn/rule-data-utils';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { ReplaySubject } from 'rxjs';
-import sinon from 'sinon';
-import { adHocRunStatus } from '../../common/constants';
-import { AlertsService } from '../alerts_service';
-import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
+import { AdHocTaskRunner } from './ad_hoc_task_runner';
+import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
-import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { AdHocRunSO, AdHocRunSchedule } from '../data/ad_hoc_run/types';
-import {
-  AlertingEventLogger,
-  ContextOpts,
-  executionType,
-} from '../lib/alerting_event_logger/alerting_event_logger';
-import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { validateRuleTypeParams } from '../lib/validate_rule_type_params';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
-import { alertsMock } from '../mocks';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { rulesClientMock } from '../rules_client.mock';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import {
+  AlertingEventLogger,
+  executionType,
+  ContextOpts,
+} from '../lib/alerting_event_logger/alerting_event_logger';
+import { AdHocRunSchedule, AdHocRunSO } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { adHocRunStatus } from '../../common/constants';
+import { DATE_1970, ruleType } from './fixtures';
+import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
+import { alertsMock } from '../mocks';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { AlertsService } from '../alerts_service';
+import { ReplaySubject } from 'rxjs';
+import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -90,9 +58,41 @@ import {
   RuleTypeParams,
   RuleTypeState,
 } from '../types';
-import { AdHocTaskRunner } from './ad_hoc_task_runner';
-import { DATE_1970, ruleType } from './fixtures';
-import { TaskRunnerContext } from './types';
+import {
+  TIMESTAMP,
+  EVENT_ACTION,
+  EVENT_KIND,
+  ALERT_ACTION_GROUP,
+  ALERT_DURATION,
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_UUID,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_TIME_RANGE,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  SPACE_IDS,
+  TAGS,
+  VERSION,
+  ALERT_CONSECUTIVE_MATCHES,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
+} from '@kbn/rule-data-utils';
+import { validateRuleTypeParams } from '../lib/validate_rule_type_params';
+import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 

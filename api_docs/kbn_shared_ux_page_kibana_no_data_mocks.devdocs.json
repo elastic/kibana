@@ -139,7 +139,9 @@
                     "tags": [],
                     "label": "options",
                     "description": [],
-                    "signature": ["(string | undefined)[]"],
+                    "signature": [
+                      "(string | undefined)[]"
+                    ],
                     "path": "packages/shared-ux/page/kibana_no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -151,7 +153,9 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "signature": ["undefined"],
+                    "signature": [
+                      "undefined"
+                    ],
                     "path": "packages/shared-ux/page/kibana_no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -382,7 +386,10 @@
         "description": [
           "\nReturns the Jest-compatible service abstractions for the `KibanaNoDataPage` Provider."
         ],
-        "signature": ["(params?: Partial<Params> | undefined) => ", "KibanaNoDataPageServices"],
+        "signature": [
+          "(params?: Partial<Params> | undefined) => ",
+          "KibanaNoDataPageServices"
+        ],
         "path": "packages/shared-ux/page/kibana_no_data/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -394,7 +401,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Partial<Params> | undefined"],
+            "signature": [
+              "Partial<Params> | undefined"
+            ],
             "path": "packages/shared-ux/page/kibana_no_data/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,

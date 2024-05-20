@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { keys, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback, useEffect } from 'react';
+import { useEuiTheme, keys } from '@elastic/eui';
+import { css } from '@emotion/react';
 import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
 

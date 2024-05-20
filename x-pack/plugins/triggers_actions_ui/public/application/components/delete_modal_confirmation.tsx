@@ -6,15 +6,15 @@
  */
 
 import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core/public';
 import React, { useEffect, useState } from 'react';
+import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
 import {
-  CANCEL_BUTTON_TEXT,
+  getSuccessfulDeletionNotificationText,
+  getFailedDeletionNotificationText,
   getConfirmDeletionButtonText,
   getConfirmDeletionModalText,
-  getFailedDeletionNotificationText,
-  getSuccessfulDeletionNotificationText,
+  CANCEL_BUTTON_TEXT,
 } from '../sections/rules_list/translations';
 
 export const DeleteModalConfirmation = ({

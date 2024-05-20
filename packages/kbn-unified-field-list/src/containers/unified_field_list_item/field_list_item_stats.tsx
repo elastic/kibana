@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import React, { useMemo } from 'react';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   FieldStats,
   type FieldStatsProps,
   type FieldStatsServices,
 } from '../../components/field_stats';
-import { hasQuerySubscriberData, useQuerySubscriber } from '../../hooks/use_query_subscriber';
+import { useQuerySubscriber, hasQuerySubscriberData } from '../../hooks/use_query_subscriber';
 import type { UnifiedFieldListSidebarContainerStateService } from '../../types';
 
 export interface UnifiedFieldListItemStatsProps {

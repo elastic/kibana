@@ -1,4 +1,3 @@
-import type { Logger } from '@kbn/logging';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +5,15 @@ import type { Logger } from '@kbn/logging';
  * 2.0.
  */
 import OpenAI from 'openai';
-import { Observable, filter, map, tap } from 'rxjs';
+import { filter, map, Observable, tap } from 'rxjs';
 import { v4 } from 'uuid';
+import type { Logger } from '@kbn/logging';
 import { Message } from '..';
 import {
   type ChatCompletionChunkEvent,
-  StreamingChatResponseEventType,
   createInternalServerError,
   createTokenLimitReachedError,
+  StreamingChatResponseEventType,
 } from '../conversation_complete';
 
 export type CreateChatCompletionResponseChunk = OpenAI.ChatCompletionChunk;

@@ -9,8 +9,8 @@ import { noop } from 'lodash/fp';
 import React from 'react';
 
 import type { ColumnHeaderOptions } from '../../../../../../../common/types';
-import type { OnFilterChange } from '../../../events';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../constants';
+import type { OnFilterChange } from '../../../events';
 import { TextFilter } from '../text_filter';
 
 interface Props {

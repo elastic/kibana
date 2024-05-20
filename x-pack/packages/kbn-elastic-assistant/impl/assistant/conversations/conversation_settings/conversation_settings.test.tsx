@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { mockConnectors } from '../../../mock/connectors';
+import { fireEvent, render } from '@testing-library/react';
+import { ConversationSettings, ConversationSettingsProps } from './conversation_settings';
+import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversation';
 import { mockSystemPrompts } from '../../../mock/system_prompt';
-import { TestProviders } from '../../../mock/test_providers/test_providers';
-import { ConversationSettings, ConversationSettingsProps } from './conversation_settings';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { mockConnectors } from '../../../mock/connectors';
 
 const mockConvos = {
   '1234': { ...welcomeConvo, id: '1234' },

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
 import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { useKibana } from '../../lib/kibana';
 
-import type { DataViewBase } from '@kbn/es-query';
 import { ThreatMatchComponent } from '.';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 import type { ThreatMapEntries } from './types';
+import type { DataViewBase } from '@kbn/es-query';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({
   eui: {

@@ -10,13 +10,13 @@ import deepmerge from 'deepmerge';
 import { isPlainObject } from 'lodash';
 
 import type {
-  NoDataPageKibanaDependencies,
   NoDataPageServices,
+  NoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-no-data-types';
 
 import {
-  getNoDataCardKibanaDependenciesMock,
   getNoDataCardServicesMock,
+  getNoDataCardKibanaDependenciesMock,
 } from '@kbn/shared-ux-card-no-data-mocks';
 
 const defaultParams = {

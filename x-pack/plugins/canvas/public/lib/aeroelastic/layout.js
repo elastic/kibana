@@ -10,8 +10,8 @@ import { select } from './select';
 import {
   actionEvent,
   cursorPosition,
-  dragVector,
   dragging,
+  dragVector,
   gestureEnd,
   gestureState,
   metaHeld,

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { coreMock } from '@kbn/core/public/mocks';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactWrapper } from 'enzyme';
 import * as React from 'react';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { useKibana } from '../../../common/lib/kibana';
-import { GenericValidationResult, Rule, ValidationResult } from '../../../types';
+import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { ValidationResult, Rule, GenericValidationResult } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
+import { ReactWrapper } from 'enzyme';
 import RuleEdit from './rule_edit';
+import { useKibana } from '../../../common/lib/kibana';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();

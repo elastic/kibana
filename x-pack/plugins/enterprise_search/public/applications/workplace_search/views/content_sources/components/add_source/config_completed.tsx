@@ -23,13 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../shared/doc_links';
-import { EuiButtonTo, EuiLinkTo } from '../../../../../shared/react_router_helpers';
-import { ADD_SOURCE_PATH, SECURITY_PATH, getSourcesPath } from '../../../../routes';
+import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
+import { getSourcesPath, ADD_SOURCE_PATH, SECURITY_PATH } from '../../../../routes';
 
 import {
-  CONFIG_COMPLETED_CONFIGURE_NEW_BUTTON,
   CONFIG_COMPLETED_PRIVATE_SOURCES_DISABLED_LINK,
   CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK,
+  CONFIG_COMPLETED_CONFIGURE_NEW_BUTTON,
 } from './constants';
 
 interface ConfigCompletedProps {

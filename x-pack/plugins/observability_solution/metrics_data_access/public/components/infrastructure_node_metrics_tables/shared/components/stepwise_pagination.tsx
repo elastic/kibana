@@ -6,8 +6,8 @@
  */
 
 import { EuiPagination } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 interface CursorPaginationProps {
   ariaLabel: string;

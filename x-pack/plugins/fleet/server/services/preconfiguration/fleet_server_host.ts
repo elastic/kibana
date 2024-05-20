@@ -14,16 +14,16 @@ import { DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 import { FleetError } from '../../errors';
 
 import type { FleetServerHost } from '../../types';
-import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 import {
   bulkGetFleetServerHosts,
   createFleetServerHost,
   deleteFleetServerHost,
-  getDefaultFleetServerHost,
   listFleetServerHosts,
   updateFleetServerHost,
+  getDefaultFleetServerHost,
 } from '../fleet_server_host';
+import { agentPolicyService } from '../agent_policy';
 
 import { isDifferent } from './utils';
 

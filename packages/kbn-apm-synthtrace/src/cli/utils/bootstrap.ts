@@ -8,12 +8,12 @@
 
 import { createLogger } from '../../lib/utils/create_logger';
 import { getApmEsClient } from './get_apm_es_client';
-import { getAssetsEsClient } from './get_assets_es_client';
+import { getLogsEsClient } from './get_logs_es_client';
 import { getInfraEsClient } from './get_infra_es_client';
 import { getKibanaClient } from './get_kibana_client';
-import { getLogsEsClient } from './get_logs_es_client';
 import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
+import { getAssetsEsClient } from './get_assets_es_client';
 
 export async function bootstrap(runOptions: RunOptions) {
   const logger = createLogger(runOptions.logLevel);

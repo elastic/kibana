@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
 import React from 'react';
+import type { Filter } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 type CancelFnType = () => void;
 type SubmitFnType = (filters: Filter[]) => void;

@@ -6,9 +6,9 @@
  */
 
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { SUPPORTED_CLOUDBEAT_INPUTS } from '../../../common/constants';
 import type { PostureInput } from '../../../common/types_old';
-import { type CloudPostureIntegrations, cloudPostureIntegrations } from '../constants';
+import { SUPPORTED_CLOUDBEAT_INPUTS } from '../../../common/constants';
+import { cloudPostureIntegrations, type CloudPostureIntegrations } from '../constants';
 
 const isPolicyTemplate = (name: unknown): name is keyof CloudPostureIntegrations =>
   typeof name === 'string' && name in cloudPostureIntegrations;

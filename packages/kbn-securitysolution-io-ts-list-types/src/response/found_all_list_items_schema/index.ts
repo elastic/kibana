@@ -8,8 +8,8 @@
 
 import * as t from 'io-ts';
 
-import { total } from '../../common/total';
 import { listItemSchema } from '../list_item_schema';
+import { total } from '../../common/total';
 
 export const foundAllListItemsSchema = t.exact(
   t.type({

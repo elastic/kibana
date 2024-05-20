@@ -8,18 +8,18 @@
 import { EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { v4 as uuid } from 'uuid';
+import type { ChartsPanelProps } from '../alerts_summary_charts_panel/types';
+import { AlertsByType } from './alerts_by_type';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import {
-  alertRuleAggregations,
-  alertTypeAggregations,
-} from '../alerts_summary_charts_panel/aggregations';
-import type { ChartsPanelProps } from '../alerts_summary_charts_panel/types';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
-import { AlertsByType } from './alerts_by_type';
+import {
+  alertTypeAggregations,
+  alertRuleAggregations,
+} from '../alerts_summary_charts_panel/aggregations';
 import { getIsAlertsTypeData } from './helpers';
 import * as i18n from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const ALERTS_BY_TYPE_CHART_ID = 'alerts-summary-alert_by_type';
 

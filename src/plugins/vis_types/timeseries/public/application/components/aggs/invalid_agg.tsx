@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import React from 'react';
+import { EuiTitle, useEuiTheme } from '@elastic/eui';
+import { AggRow } from './agg_row';
 import type { Metric } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 import { titleStyles } from '../../styles/common.styles';
-import { AggRow } from './agg_row';
 
 interface InvalidAggProps {
   disableDelete: boolean;

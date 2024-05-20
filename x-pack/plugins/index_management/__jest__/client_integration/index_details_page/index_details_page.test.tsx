@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../helpers';
 import { IndexDetailsPageTestBed, setup } from './index_details_page.helpers';
+import { act } from 'react-dom/test-utils';
 
 import React from 'react';
 
-import { API_BASE_PATH, INTERNAL_API_BASE_PATH, Index } from '../../../common';
 import { IndexDetailsSection, IndexDetailsTab, IndexDetailsTabId } from '../../../common/constants';
+import { API_BASE_PATH, Index, INTERNAL_API_BASE_PATH } from '../../../common';
 
-import { humanizeTimeStamp } from '../../../public/application/sections/home/data_stream_list/humanize_time_stamp';
 import {
-  IndexManagementBreadcrumb,
   breadcrumbService,
+  IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
+import { humanizeTimeStamp } from '../../../public/application/sections/home/data_stream_list/humanize_time_stamp';
 import { createDataStreamPayload } from '../home/data_streams_tab.helpers';
 import {
   testIndexEditableSettingsAll,

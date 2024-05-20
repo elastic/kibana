@@ -7,18 +7,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Map, MapOptions, StyleSpecification } from '@kbn/mapbox-gl';
+import type { Map, StyleSpecification, MapOptions } from '@kbn/mapbox-gl';
 
-import { View, expressionFunction, parse } from 'vega';
+import { View, parse, expressionFunction } from 'vega';
 
 import { maplibregl } from '@kbn/mapbox-gl';
 
-import { getThemeService } from '../../services';
-import { VegaBaseView } from '../vega_base_view';
 import { initTmsRasterLayer, initVegaLayer } from './layers';
+import { VegaBaseView } from '../vega_base_view';
+import { getThemeService } from '../../services';
 
-import { defaultMabBoxStyle, defaultMapConfig, vegaLayerId } from './constants';
-import { injectMapPropsIntoSpec, validateZoomSettings } from './utils';
+import { defaultMapConfig, defaultMabBoxStyle, vegaLayerId } from './constants';
+import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
 import './vega_map_view.scss';
 import { TMS_IN_YML_ID } from './service_settings/service_settings_types';
 

@@ -1,22 +1,3 @@
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiFormRow,
-  EuiLink,
-  EuiSelect,
-  EuiSpacer,
-  EuiSuperSelect,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -24,13 +5,32 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiTitle,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlyoutFooter,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiSelect,
+  EuiSuperSelect,
+  EuiFormRow,
+} from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../common/doc_links';
-import { AnalyticsEvents } from '../../analytics/constants';
-import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
+import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { getDefaultSourceFields } from '../../utils/create_query';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface EditContextFlyoutProps {
   onClose: () => void;

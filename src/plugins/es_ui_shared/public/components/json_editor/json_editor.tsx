@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { debounce } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
+import { EuiFormRow } from '@elastic/eui';
+import { debounce } from 'lodash';
+import { CodeEditor } from '@kbn/code-editor';
 
-import { OnJsonEditorUpdateHandler, useJson } from './use_json';
+import { useJson, OnJsonEditorUpdateHandler } from './use_json';
 
 interface Props<T extends object = { [key: string]: any }> {
   onUpdate: OnJsonEditorUpdateHandler<T>;

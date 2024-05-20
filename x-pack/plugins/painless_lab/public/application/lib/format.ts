@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExecutionError, Payload, PayloadFormat, Response } from '../types';
+import { Response, ExecutionError, PayloadFormat, Payload } from '../types';
 
 function prettifyPayload(payload = '', indentationLevel = 0) {
   const indentation = new Array(indentationLevel + 1).join(' ');
@@ -49,11 +49,11 @@ export function formatRequestPayload(
   const requestPayload = `{
   "script": {
     "source": ${formattedCode}${
-      parameters
-        ? `,
+    parameters
+      ? `,
     "params": ${formattedParameters}`
-        : ``
-    }
+      : ``
+  }
   }${
     isAdvancedContext
       ? `,
@@ -61,11 +61,11 @@ export function formatRequestPayload(
   "context_setup": {
     "index": "${formattedIndex}",
     "document": ${formattedDocument}${
-      query && context === 'score'
-        ? `,
+          query && context === 'score'
+            ? `,
     "query": ${formattedQuery}`
-        : ''
-    }
+            : ''
+        }
   }`
       : ``
   }

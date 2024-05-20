@@ -14,11 +14,11 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
 import type { ConfigType } from '../../../../config';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
-import type { SignalSource } from '../types';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
+import type { SignalSource } from '../types';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { buildBulkBody } from '../factories/utils/build_bulk_body';
 
 export interface EventsAndTerms {
   event: estypes.SearchHit<SignalSource>;

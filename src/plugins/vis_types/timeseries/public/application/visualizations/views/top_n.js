@@ -8,8 +8,8 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { getValueOrEmpty } from '../../../../common/empty_label';
 import { getLastValue, isEmptyValue } from '../../../../common/last_value_utils';
+import { getValueOrEmpty } from '../../../../common/empty_label';
 import { RenderCounter } from '../../components/render_counter';
 
 import './_top_n.scss';

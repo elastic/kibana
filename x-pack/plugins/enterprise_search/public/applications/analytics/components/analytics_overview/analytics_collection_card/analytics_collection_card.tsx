@@ -14,10 +14,10 @@ import {
   AreaSeries,
   Chart,
   CurveType,
-  LEGACY_LIGHT_THEME,
   ScaleType,
   Settings,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import {
   EuiBadge,
@@ -25,8 +25,8 @@ import {
   EuiFlexGroup,
   EuiI18nNumber,
   EuiIcon,
-  EuiLoadingChart,
   EuiText,
+  EuiLoadingChart,
   useEuiTheme,
 } from '@elastic/eui';
 

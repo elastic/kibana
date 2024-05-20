@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ContextService,
-  InternalContextPreboot,
   InternalContextSetup,
+  InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { contextMock } from './context_container.mock';
 
 const createPrebootContractMock = (mockContext = {}) => {

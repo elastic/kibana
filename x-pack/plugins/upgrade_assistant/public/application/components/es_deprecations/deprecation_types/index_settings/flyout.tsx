@@ -5,33 +5,33 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
   EuiText,
   EuiTextColor,
-  EuiTitle,
+  EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
 
 import {
   EnrichedDeprecationInfo,
   IndexSettingAction,
   ResponseError,
 } from '../../../../../../common/types';
-import { UIM_INDEX_SETTINGS_DELETE_CLICK, uiMetricService } from '../../../../lib/ui_metric';
-import { DeprecationBadge, DeprecationFlyoutLearnMoreLink } from '../../../shared';
+import { uiMetricService, UIM_INDEX_SETTINGS_DELETE_CLICK } from '../../../../lib/ui_metric';
 import type { Status } from '../../../types';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
 
 export interface RemoveIndexSettingsFlyoutProps {
   deprecation: EnrichedDeprecationInfo;

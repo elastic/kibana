@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { compact, uniq } from 'lodash';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 
 export function getApmIndexPatterns(indices: string[]) {
   return uniq(indices.flatMap((index): string[] => index.split(',')));

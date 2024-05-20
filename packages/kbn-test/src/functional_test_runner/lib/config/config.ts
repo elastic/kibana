@@ -9,8 +9,8 @@
 import { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 
-import { ConfigModule } from './config_loading';
 import { schema } from './schema';
+import { ConfigModule } from './config_loading';
 
 const $values = Symbol('values');
 

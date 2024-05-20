@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createMockPieParams, createMockVisData } from '../mocks';
 import { getColumns } from './get_columns';
+import { createMockPieParams, createMockVisData } from '../mocks';
 
 const visParams = createMockPieParams();
 const dimensions = {

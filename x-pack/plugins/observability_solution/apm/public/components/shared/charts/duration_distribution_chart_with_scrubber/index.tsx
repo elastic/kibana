@@ -5,6 +5,9 @@
  * 2.0.
  */
 import { BrushEndListener, BrushEvent, XYBrushEvent } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -14,18 +17,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ChartTitleToolTip } from '../../../app/correlations/chart_title_tool_tip';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import {
   DurationDistributionChart,
   DurationDistributionChartData,
 } from '../duration_distribution_chart';
 import { TotalDocCountLabel } from '../duration_distribution_chart/total_doc_count_label';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 // Format the selected latency range for the "Clear selection" badge.
 // If the two values share the same unit, it will only displayed once.

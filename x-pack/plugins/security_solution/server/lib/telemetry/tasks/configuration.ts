@@ -6,14 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { ITelemetryEventsSender } from '../sender';
+import { TelemetryChannel, type TelemetryConfiguration } from '../types';
+import type { ITelemetryReceiver } from '../receiver';
+import type { TaskExecutionPeriod } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
 import { artifactService } from '../artifact';
 import { telemetryConfiguration } from '../configuration';
 import { newTelemetryLogger } from '../helpers';
-import type { ITelemetryReceiver } from '../receiver';
-import type { ITelemetryEventsSender } from '../sender';
-import type { TaskExecutionPeriod } from '../task';
-import type { ITaskMetricsService } from '../task_metrics.types';
-import { TelemetryChannel, type TelemetryConfiguration } from '../types';
 
 export function createTelemetryConfigurationTaskConfig() {
   const taskName = 'Security Solution Telemetry Configuration Task';

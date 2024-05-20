@@ -1,4 +1,3 @@
-import { Route, Routes } from '@kbn/shared-ux-router';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,21 +5,22 @@ import { Route, Routes } from '@kbn/shared-ux-router';
  * 2.0.
  */
 import React from 'react';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import * as i18n from './translations';
 import {
-  EXCEPTIONS_PATH,
   EXCEPTION_LIST_DETAIL_PATH,
+  EXCEPTIONS_PATH,
   SecurityPageName,
 } from '../../common/constants';
-import * as i18n from './translations';
 
+import { ListsDetailView, SharedLists } from './pages';
+import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
+import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
-import { SpyRoute } from '../common/utils/route/spy_routes';
-import { useReadonlyHeader } from '../use_readonly_header';
-import { ListsDetailView, SharedLists } from './pages';
 
 const ExceptionsRoutes = () => (
   <PluginTemplateWrapper>

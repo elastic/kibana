@@ -6,12 +6,12 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { SuggestionsSelect } from '.';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+import { SuggestionsSelect } from '.';
 
 interface Args {
   allOption: EuiComboBoxOptionOption<string>;

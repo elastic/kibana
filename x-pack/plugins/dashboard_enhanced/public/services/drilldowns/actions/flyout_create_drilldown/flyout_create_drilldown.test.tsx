@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import type { ViewMode } from '@kbn/presentation-publishing';
-import {
-  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
-  UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
-} from '@kbn/ui-actions-enhanced-plugin/public';
-import { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
-import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { BehaviorSubject, Subject } from 'rxjs';
+import {
+  UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
+  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+} from '@kbn/ui-actions-enhanced-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   FlyoutCreateDrilldownAction,
   OpenFlyoutAddDrilldownParams,
 } from './flyout_create_drilldown';
+import { coreMock } from '@kbn/core/public/mocks';
+import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
+import { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 
 function createAction(
   allPossibleTriggers = ['VALUE_CLICK_TRIGGER'],

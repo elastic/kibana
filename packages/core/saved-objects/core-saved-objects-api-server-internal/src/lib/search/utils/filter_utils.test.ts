@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import * as esKuery from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
+import * as esKuery from '@kbn/es-query';
 
 import {
+  validateFilterKueryNode,
+  validateConvertFilterToKueryNode,
   fieldDefined,
   hasFilterKeyError,
-  validateConvertFilterToKueryNode,
-  validateFilterKueryNode,
 } from './filter_utils';
 
 const mockMappings = {

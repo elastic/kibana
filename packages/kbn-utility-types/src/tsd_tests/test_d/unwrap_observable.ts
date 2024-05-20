@@ -7,7 +7,7 @@
  */
 
 import { expectAssignable } from 'tsd';
-import { ObservableLike, UnwrapObservable } from '../../..';
+import { UnwrapObservable, ObservableLike } from '../../..';
 
 type STRING = UnwrapObservable<ObservableLike<string>>;
 

@@ -6,17 +6,17 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 import { ILicenseState } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
 } from '../../../../types';
-import { verifyAccessAndContext } from '../../../lib';
+import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 
 import {
-  DeleteMaintenanceWindowRequestParamsV1,
   deleteParamsSchemaV1,
+  DeleteMaintenanceWindowRequestParamsV1,
 } from '../../../../../common/routes/maintenance_window/apis/delete';
 
 export const deleteMaintenanceWindowRoute = (

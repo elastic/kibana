@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { DataViewBase } from '@kbn/es-query';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import type { DataViewBase } from '@kbn/es-query';
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
-import type { SearchHit } from '../../../../../common/search_strategy';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { getAlertIndexAlias } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
+import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import type { SearchHit } from '../../../../../common/search_strategy';
+import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 
 export interface UseEventDetailsParams {
   /**

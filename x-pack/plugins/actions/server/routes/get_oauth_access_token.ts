@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
-import { ActionsConfigurationUtilities } from '../actions_config';
 import { ILicenseState } from '../lib';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 const oauthJwtBodySchema = schema.object({
   tokenUrl: schema.string(),

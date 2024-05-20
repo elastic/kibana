@@ -6,9 +6,9 @@
  */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { VECTOR_STYLES } from '../../../../../common/constants';
-import { LabelZoomRangeStylePropertyDescriptor } from '../../../../../common/descriptor_types';
 import { AbstractStyleProperty } from './style_property';
+import { LabelZoomRangeStylePropertyDescriptor } from '../../../../../common/descriptor_types';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 
 export class LabelZoomRangeProperty extends AbstractStyleProperty<
   LabelZoomRangeStylePropertyDescriptor['options']

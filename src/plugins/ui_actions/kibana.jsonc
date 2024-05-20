@@ -8,6 +8,8 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [],
-    "requiredBundles": ["kibanaUtils"]
+    "requiredBundles": [
+      "kibanaUtils"
+    ]
   }
 }

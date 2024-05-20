@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CoreStart, IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IScopedClusterClient, CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { ML_JOB_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
-import { mlLog } from '../../lib/log';
+import { savedObjectClientsFactory } from '../util';
+import { syncSavedObjectsFactory } from '../sync';
 import type { JobObject } from '../service';
 import { mlSavedObjectServiceFactory } from '../service';
-import { syncSavedObjectsFactory } from '../sync';
-import { savedObjectClientsFactory } from '../util';
+import { mlLog } from '../../lib/log';
+import { ML_JOB_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import { createJobSpaceOverrides } from './space_overrides';
 
 /**

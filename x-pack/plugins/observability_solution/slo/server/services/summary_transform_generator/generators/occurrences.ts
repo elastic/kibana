@@ -6,14 +6,14 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import { SLODefinition } from '../../../domain/models';
 import {
+  getSLOSummaryPipelineId,
+  getSLOSummaryTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
-  getSLOSummaryPipelineId,
-  getSLOSummaryTransformId,
 } from '../../../../common/constants';
-import { SLODefinition } from '../../../domain/models';
 import { getGroupBy } from './common';
 
 export function generateSummaryTransformForOccurrences(

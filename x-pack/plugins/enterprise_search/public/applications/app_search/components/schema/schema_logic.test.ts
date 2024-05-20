@@ -14,7 +14,7 @@ import { mockEngineActions } from '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { Schema, SchemaType } from '../../../shared/schema/types';
+import { SchemaType, Schema } from '../../../shared/schema/types';
 
 import { SchemaLogic } from './schema_logic';
 

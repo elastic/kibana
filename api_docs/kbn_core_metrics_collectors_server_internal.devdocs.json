@@ -62,7 +62,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -122,7 +124,9 @@
             "tags": [],
             "label": "reset",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -178,7 +182,9 @@
             "description": [
               "\nCreating a new instance from EventLoopDelaysMonitor will\nautomatically start tracking event loop delays."
             ],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -216,8 +222,12 @@
             "type": "Function",
             "tags": [],
             "label": "reset",
-            "description": ["\nResets the collected histogram data."],
-            "signature": ["() => void"],
+            "description": [
+              "\nResets the collected histogram data."
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -233,7 +243,9 @@
             "description": [
               "\nDisables updating the interval timer for collecting new data points."
             ],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -287,7 +299,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -347,7 +361,9 @@
             "tags": [],
             "label": "reset",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -480,7 +496,9 @@
             "tags": [],
             "label": "reset",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -534,7 +552,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -546,7 +566,9 @@
                 "tags": [],
                 "label": "server",
                 "description": [],
-                "signature": ["Server"],
+                "signature": [
+                  "Server"
+                ],
                 "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -586,7 +608,9 @@
             "tags": [],
             "label": "reset",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -637,7 +661,9 @@
             "tags": [],
             "label": "cpuPath",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -649,7 +675,9 @@
             "tags": [],
             "label": "cpuAcctPath",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
             "deprecated": false,
             "trackAdoption": false

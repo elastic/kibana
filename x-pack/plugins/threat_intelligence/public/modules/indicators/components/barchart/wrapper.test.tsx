@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { render } from '@testing-library/react';
-import moment from 'moment';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { TimeRange } from '@kbn/es-query';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
+import { IndicatorsBarChartWrapper } from './wrapper';
 import {
   BARCHART_WRAPPER_TEST_ID,
   CHART_UPDATE_PROGRESS_TEST_ID,
   LOADING_TEST_ID,
 } from './test_ids';
+import moment from 'moment';
 import { DROPDOWN_TEST_ID } from './test_ids';
-import { IndicatorsBarChartWrapper } from './wrapper';
 
 jest.mock('../../../query_bar/hooks/use_filters');
 

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { type DataViewField } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { useTimefilter } from '@kbn/ml-date-picker';
-import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
-import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
+import type { Filter, Query } from '@kbn/es-query';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { type QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { TimeBuckets, TimeBucketsInterval } from '@kbn/ml-time-buckets';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
+import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
 } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
-import { type ChangePointType, DEFAULT_AGG_FUNCTION } from './constants';
 
 export interface ChangePointDetectionPageUrlState {
   pageKey: 'changePoint';

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataViewBase } from '../../es_query';
+import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 import * as ast from '../ast';
-import { nodeTypes } from '../node_types';
 import * as and from './and';
+import { DataViewBase } from '../../es_query';
 import { KqlAndFunctionNode } from './and';
 
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');

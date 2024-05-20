@@ -7,8 +7,8 @@
  */
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
-import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
+import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
 import { IndicesResponse, IndicesResponseModified } from '../types';
 
 export class HasData {

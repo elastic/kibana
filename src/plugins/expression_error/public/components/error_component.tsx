@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon, EuiPopover, useResizeObserver } from '@elastic/eui';
+import React, { useState, useEffect, useCallback } from 'react';
+import { EuiIcon, useResizeObserver, EuiPopover } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import React, { useState, useEffect, useCallback } from 'react';
-import { LazyErrorComponent } from '.';
 import { ErrorRendererConfig } from '../../common/types';
+import { LazyErrorComponent } from '.';
 
 const Error = withSuspense(LazyErrorComponent);
 

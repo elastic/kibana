@@ -5,43 +5,43 @@
  * 2.0.
  */
 
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { sumBy } from 'lodash';
-import { isEmpty, noop } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { isEmpty, noop } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
+import { sumBy } from 'lodash';
 
 import type { Filter } from '@kbn/es-query';
 
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { SecurityPageName } from '../../../../app/types';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
-import { LinkButton } from '../../../../common/components/links';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
-import { KpiPanel, StackByComboBox } from '../common/components';
-import { DEFAULT_STACK_BY_FIELD, PANEL_HEIGHT } from '../common/config';
-import type { AlertsStackByField } from '../common/types';
 import {
-  createEmbeddedDataSubtitle,
-  createGenericSubtitle,
   showInitialLoadingSpinner,
+  createGenericSubtitle,
+  createEmbeddedDataSubtitle,
 } from './helpers';
 import * as i18n from './translations';
+import { LinkButton } from '../../../../common/components/links';
+import { SecurityPageName } from '../../../../app/types';
+import { DEFAULT_STACK_BY_FIELD, PANEL_HEIGHT } from '../common/config';
+import type { AlertsStackByField } from '../common/types';
+import { KpiPanel, StackByComboBox } from '../common/components';
 
-import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
-import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { useAlertHistogramCount } from '../../../hooks/alerts_visualization/use_alert_histogram_count';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import { useAlertHistogramCount } from '../../../hooks/alerts_visualization/use_alert_histogram_count';
+import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 
 export const DETECTIONS_HISTOGRAM_ID = 'detections-histogram';
 

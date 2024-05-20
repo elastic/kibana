@@ -5,82 +5,82 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiLink, EuiText, EuiTextColor } from '@elastic/eui';
-import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { DropIllustration } from '@kbn/chart-icons';
-import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DragDropIdentifier, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type {
-  ExpressionRenderError,
-  ExpressionRendererEvent,
-  ReactExpressionRendererType,
-} from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { toExpression } from '@kbn/interpreter';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import classNames from 'classnames';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
-import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
-import type { LensInspector } from '../../../lens_inspector_service';
+import classNames from 'classnames';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toExpression } from '@kbn/interpreter';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { i18n } from '@kbn/i18n';
+import { EuiText, EuiButtonEmpty, EuiLink, EuiTextColor } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type {
+  ExpressionRendererEvent,
+  ExpressionRenderError,
+  ReactExpressionRendererType,
+} from '@kbn/expressions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { DropIllustration } from '@kbn/chart-icons';
+import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
-import {
-  DataViewsState,
-  DatasourceStates,
-  VisualizationState,
-  applyChanges,
-  editVisualizationAction,
-  onActiveDataChange,
-  selectActiveDatasourceId,
-  selectAutoApplyEnabled,
-  selectChangesApplied,
-  selectDatasourceLayers,
-  selectDatasourceStates,
-  selectExecutionContextSearch,
-  selectIsFullscreenDatasource,
-  selectSearchSessionId,
-  selectTriggerApplyChanges,
-  selectVisualization,
-  setSaveable,
-  useLensDispatch,
-  useLensSelector,
-} from '../../../state_management';
-import { setChangesApplied } from '../../../state_management/lens_slice';
-import {
-  AddUserMessages,
-  DatasourceLayers,
-  DatasourceMap,
-  FramePublicAPI,
-  Suggestion,
-  UserMessage,
-  UserMessagesGetter,
-  VisualizationDisplayOptions,
-  VisualizationMap,
-  isLensBrushEvent,
-  isLensEditEvent,
-  isLensFilterEvent,
-  isLensMultiFilterEvent,
-  isMessageRemovable,
-} from '../../../types';
 import { getSearchWarningMessages } from '../../../utils';
 import {
+  FramePublicAPI,
+  isLensBrushEvent,
+  isLensFilterEvent,
+  isLensMultiFilterEvent,
+  isLensEditEvent,
+  VisualizationMap,
+  DatasourceMap,
+  Suggestion,
+  DatasourceLayers,
+  UserMessage,
+  UserMessagesGetter,
+  AddUserMessages,
+  isMessageRemovable,
+  VisualizationDisplayOptions,
+} from '../../../types';
+import { switchToSuggestion } from '../suggestion_helpers';
+import { buildExpression } from '../expression_helpers';
+import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
+import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
+import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
+import { getOriginalRequestErrorMessages } from '../../error_helper';
+import {
+  onActiveDataChange,
+  useLensDispatch,
+  editVisualizationAction,
+  setSaveable,
+  useLensSelector,
+  selectIsFullscreenDatasource,
+  selectVisualization,
+  selectDatasourceStates,
+  selectActiveDatasourceId,
+  selectSearchSessionId,
+  selectAutoApplyEnabled,
+  selectTriggerApplyChanges,
+  selectDatasourceLayers,
+  applyChanges,
+  selectChangesApplied,
+  VisualizationState,
+  DatasourceStates,
+  DataViewsState,
+  selectExecutionContextSearch,
+} from '../../../state_management';
+import type { LensInspector } from '../../../lens_inspector_service';
+import {
+  inferTimeField,
   DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS,
   EXPRESSION_BUILD_ERROR_ID,
-  inferTimeField,
 } from '../../../utils';
-import { getOriginalRequestErrorMessages } from '../../error_helper';
-import { buildExpression } from '../expression_helpers';
-import { switchToSuggestion } from '../suggestion_helpers';
+import { setChangesApplied } from '../../../state_management/lens_slice';
 import { WorkspaceErrors } from './workspace_errors';
-import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -634,8 +634,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     const renderWorkspaceContents = hasSomethingToRender
       ? renderVisualization
       : !changesApplied
-        ? renderApplyChangesPrompt
-        : renderDragDropPrompt;
+      ? renderApplyChangesPrompt
+      : renderDragDropPrompt;
 
     return (
       <Droppable
@@ -787,8 +787,8 @@ export const VisualizationWrapper = ({
           const visibleErrorMessages = errorsFromRequest.length
             ? errorsFromRequest
             : errorMessage
-              ? [errorMessage]
-              : [];
+            ? [errorMessage]
+            : [];
 
           if (!hasDynamicError) {
             setDynamicError(true);

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core-http-server';
 import { coreMock } from '@kbn/core/server/mocks';
+import { ContentManagementPlugin } from './plugin';
+import type { IRouter } from '@kbn/core-http-server';
 import type { ProcedureName } from '../common';
 import { procedureNames } from '../common/rpc';
 import { MSearchService } from './core/msearch';
-import { ContentManagementPlugin } from './plugin';
 
 jest.mock('./core', () => ({
   ...jest.requireActual('./core'),

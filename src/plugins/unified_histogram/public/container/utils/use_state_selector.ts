@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
+import { useEffect, useState } from 'react';
 
 export const useStateSelector = <S, R>(
   state$: Observable<S> | undefined,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { find, reduce, sortBy, values } from 'lodash';
+import { find, reduce, values, sortBy } from 'lodash';
 import { decorateShards } from '../lib/decorate_shards';
 
 export function indicesByNodes() {

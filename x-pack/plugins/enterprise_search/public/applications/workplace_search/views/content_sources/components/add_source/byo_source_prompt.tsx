@@ -10,19 +10,19 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiButton,
   EuiEmptyPrompt,
+  EuiImage,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
   EuiSpacer,
+  EuiButton,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
-import { getAddPath, getEditPath, getSourcesPath } from '../../../../routes';
+import { getSourcesPath, getAddPath, getEditPath } from '../../../../routes';
 
 import { SourcesLogic } from '../../sources_logic';
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CodeEditor } from '@kbn/code-editor';
-import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import React from 'react';
+import { CodeEditor } from '@kbn/code-editor';
 import { UrlTemplateEditor } from './url_template_editor';
 
 storiesOf('UrlTemplateEditor', module)

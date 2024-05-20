@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type {
-  IKibanaMigrator,
   SavedObjectConfig,
+  IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
-import { registerBulkCreateRoute } from './bulk_create';
-import { registerBulkDeleteRoute } from './bulk_delete';
-import { registerBulkGetRoute } from './bulk_get';
-import { registerBulkResolveRoute } from './bulk_resolve';
-import { registerBulkUpdateRoute } from './bulk_update';
+import { registerGetRoute } from './get';
+import { registerResolveRoute } from './resolve';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
-import { registerDeleteUnknownTypesRoute } from './deprecations';
-import { registerExportRoute } from './export';
 import { registerFindRoute } from './find';
-import { registerGetRoute } from './get';
-import { registerImportRoute } from './import';
-import { registerLegacyExportRoute } from './legacy_import_export/export';
-import { registerLegacyImportRoute } from './legacy_import_export/import';
-import { registerMigrateRoute } from './migrate';
-import { registerResolveRoute } from './resolve';
-import { registerResolveImportErrorsRoute } from './resolve_import_errors';
 import { registerUpdateRoute } from './update';
+import { registerBulkGetRoute } from './bulk_get';
+import { registerBulkCreateRoute } from './bulk_create';
+import { registerBulkUpdateRoute } from './bulk_update';
+import { registerBulkDeleteRoute } from './bulk_delete';
+import { registerExportRoute } from './export';
+import { registerImportRoute } from './import';
+import { registerResolveImportErrorsRoute } from './resolve_import_errors';
+import { registerMigrateRoute } from './migrate';
+import { registerLegacyImportRoute } from './legacy_import_export/import';
+import { registerLegacyExportRoute } from './legacy_import_export/export';
+import { registerBulkResolveRoute } from './bulk_resolve';
+import { registerDeleteUnknownTypesRoute } from './deprecations';
 
 export function registerRoutes({
   http,

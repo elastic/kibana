@@ -41,7 +41,9 @@
             "tags": [],
             "label": "logErrorRate",
             "description": [],
-            "signature": ["number | null"],
+            "signature": [
+              "number | null"
+            ],
             "path": "x-pack/plugins/observability_solution/logs_data_access/server/services/get_logs_rates_service/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -95,7 +97,9 @@
       "tags": [],
       "label": "LogsDataAccessPluginSetup",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "x-pack/plugins/observability_solution/logs_data_access/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,

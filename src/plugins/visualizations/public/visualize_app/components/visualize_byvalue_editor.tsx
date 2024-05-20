@@ -7,23 +7,23 @@
  */
 
 import './visualize_editor.scss';
-import { EventEmitter } from 'events';
 import React, { useEffect, useState } from 'react';
+import { EventEmitter } from 'events';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeInput } from '../..';
-import { VisualizeConstants } from '../../../common/constants';
-import { VisualizeAppProps } from '../app';
-import { VisualizeServices } from '../types';
 import {
   useChromeVisibility,
-  useDataViewUpdates,
-  useEditorUpdates,
-  useLinkedSearchUpdates,
   useVisByValue,
   useVisualizeAppState,
+  useEditorUpdates,
+  useLinkedSearchUpdates,
+  useDataViewUpdates,
 } from '../utils';
+import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
+import { VisualizeAppProps } from '../app';
+import { VisualizeConstants } from '../../../common/constants';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();

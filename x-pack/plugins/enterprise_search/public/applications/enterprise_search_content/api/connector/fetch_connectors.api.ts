@@ -9,7 +9,7 @@ import { Connector } from '@kbn/search-connectors';
 
 import { Meta } from '../../../../../common/types/pagination';
 
-import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { createApiLogic, Actions } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchConnectorsApiLogicArgs {

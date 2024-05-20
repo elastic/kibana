@@ -6,11 +6,15 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import React from 'react';
-import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import { TestProviders } from '../../../../common/mock';
+import React from 'react';
+import { RightPanelContext } from '../context';
+import { mockContextValue } from '../mocks/mock_context';
+import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import * as mock from '../mocks/mock_analyzer_data';
 import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
@@ -19,11 +23,7 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { RightPanelContext } from '../context';
-import * as mock from '../mocks/mock_analyzer_data';
-import { mockContextValue } from '../mocks/mock_context';
-import { AnalyzerPreviewContainer } from './analyzer_preview_container';
-import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'

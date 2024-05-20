@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { Subject, firstValueFrom } from 'rxjs';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { firstValueFrom, Subject } from 'rxjs';
 
+import { v4 as uuidv4 } from 'uuid';
+import _ from 'lodash';
+import stats from 'stats-lite';
+import prettyMilliseconds from 'pretty-ms';
+import { performance, PerformanceObserver } from 'perf_hooks';
 import {
-  ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import _ from 'lodash';
-import { PerformanceObserver, performance } from 'perf_hooks';
-import prettyMilliseconds from 'pretty-ms';
-import stats from 'stats-lite';
-import { v4 as uuidv4 } from 'uuid';
+import { PerfState, PerfApi, PerfResult } from './types';
 import { initRoutes } from './init_routes';
-import { PerfApi, PerfResult, PerfState } from './types';
 
 // this plugin's dependendencies
 export interface SampleTaskManagerFixtureSetupDeps {

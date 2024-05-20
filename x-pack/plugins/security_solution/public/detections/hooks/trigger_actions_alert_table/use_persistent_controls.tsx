@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import {
-  dataTableActions,
-  dataTableSelectors,
-  tableDefaults,
-} from '@kbn/securitysolution-data-table';
-import type { TableId, ViewSelection } from '@kbn/securitysolution-data-table';
-import { useGetGroupSelectorStateless } from '@kbn/securitysolution-grouping/src/hooks/use_get_group_selector';
-import { getTelemetryEvent } from '@kbn/securitysolution-grouping/src/telemetry/const';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
+import {
+  dataTableSelectors,
+  tableDefaults,
+  dataTableActions,
+} from '@kbn/securitysolution-data-table';
+import type { ViewSelection, TableId } from '@kbn/securitysolution-data-table';
+import { useGetGroupSelectorStateless } from '@kbn/securitysolution-grouping/src/hooks/use_get_group_selector';
+import { getTelemetryEvent } from '@kbn/securitysolution-grouping/src/telemetry/const';
+import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { updateGroups } from '../../../common/store/grouping/actions';
 import { useKibana } from '../../../common/lib/kibana';
 import { METRIC_TYPE, track } from '../../../common/lib/telemetry';
-import { updateGroups } from '../../../common/store/grouping/actions';
-import { groupIdSelector } from '../../../common/store/grouping/selectors';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
 import { AdditionalFiltersAction } from '../../components/alerts_table/additional_filters_action';
 
 const { changeViewMode } = dataTableActions;

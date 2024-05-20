@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { AnomalyChartsEmbeddableFactory } from './anomaly_charts_embeddable_factory';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { AnomalyChartsEmbeddableInput } from '..';
 import { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
-import { AnomalyChartsEmbeddableFactory } from './anomaly_charts_embeddable_factory';
+import type { AnomalyChartsEmbeddableInput } from '..';
 
 jest.mock('./anomaly_charts_embeddable', () => ({
   AnomalyChartsEmbeddable: jest.fn(),

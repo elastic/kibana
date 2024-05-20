@@ -18,10 +18,10 @@ jest.mock('../../../../utils/use_kibana_ui_setting', () => ({
   ]),
 }));
 
-import { mount } from 'enzyme';
 import React from 'react';
-import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { MetricsTimeControls } from './time_controls';
+import { mount } from 'enzyme';
+import { MetricsTimeInput } from '../hooks/use_metrics_time';
 
 describe('MetricsTimeControls', () => {
   it('should set a valid from and to value for Today', () => {

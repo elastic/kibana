@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from '..';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import type { NotificationsStart } from '@kbn/core/public';
 import {
+  MessageRole,
+  type Message,
   ConversationCreateEvent,
   ConversationUpdateEvent,
-  type Message,
-  MessageRole,
-  StreamingChatResponseEventType,
   isTokenLimitReachedError,
+  StreamingChatResponseEventType,
 } from '../../common';
+import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from '..';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
 import { useUserPreferredLanguage } from './use_user_preferred_language';

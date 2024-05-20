@@ -75,13 +75,10 @@ async function getSpacesUsage(
   const count = hits?.total?.value ?? 0;
   const disabledFeatureBuckets = aggregations?.disabledFeatures?.buckets ?? [];
 
-  const initialCounts = knownFeatureIds.reduce(
-    (acc, featureId) => {
-      acc[featureId] = 0;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const initialCounts = knownFeatureIds.reduce((acc, featureId) => {
+    acc[featureId] = 0;
+    return acc;
+  }, {} as Record<string, number>);
 
   const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
     // eslint-disable-next-line @typescript-eslint/naming-convention

@@ -5,34 +5,34 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiComboBox,
-  EuiFieldText,
-  EuiFormLabel,
   EuiFormRow,
-  EuiLink,
-  EuiRange,
+  EuiComboBox,
   EuiSpacer,
+  EuiRange,
+  EuiFieldText,
   EuiSwitch,
+  EuiFormLabel,
+  EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { DocLinksStart } from '@kbn/core/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,
   DEFAULT_DURATION_OUTPUT_FORMAT,
   FORMATS_UI_SETTINGS,
 } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
+import type { DocLinksStart } from '@kbn/core/public';
 import { LensAppServices } from '../../../app_plugin/types';
-import { Prepend, PrependWidthProvider } from '../../../shared_components/prepend_provider';
 import { GenericIndexPatternColumn } from '../form_based';
-import { ValueFormatConfig } from '../operations/definitions/column_types';
 import { isColumnFormatted } from '../operations/definitions/helpers';
+import { ValueFormatConfig } from '../operations/definitions/column_types';
 import { DurationRowInputs } from './formatting/duration_input';
+import { Prepend, PrependWidthProvider } from '../../../shared_components/prepend_provider';
 
 const supportedFormats: Record<
   string,

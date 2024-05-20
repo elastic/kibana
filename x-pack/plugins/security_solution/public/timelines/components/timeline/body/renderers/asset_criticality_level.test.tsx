@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { TestProviders } from '../../../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../../common/mock';
 import { AssetCriticalityLevel } from './asset_criticality_level';
 
 jest.mock('../../../../../common/components/draggables', () => ({

@@ -10,11 +10,11 @@ import {
   INDEX_CLEARING_CACHE,
   INDEX_CLOSED,
   INDEX_CLOSING,
-  INDEX_FLUSHING,
-  INDEX_FORCEMERGING,
   INDEX_MERGING,
   INDEX_OPENING,
   INDEX_REFRESHING,
+  INDEX_FLUSHING,
+  INDEX_FORCEMERGING,
 } from '../../../common/constants';
 
 export const indexStatusLabels = {

@@ -7,24 +7,24 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Lifecycle } from '@hapi/hapi';
-import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plugin/server';
-import { VersionedRouteConfig } from '@kbn/core-http-server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { RouteConfig, RouteMethod } from '@kbn/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plugin/server';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import { VersionedRouteConfig } from '@kbn/core-http-server';
 import { MetricsDataPluginSetup } from '../../../types';
 
 export interface InfraServerPluginSetupDeps {

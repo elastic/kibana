@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import supertestLib from 'supertest';
 import url from 'url';
 import {
   ALERT_REASON,
@@ -14,17 +15,13 @@ import {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_UUID,
-  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
 import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import {
-  DETECTION_ENGINE_RULES_URL,
-  ENABLE_ASSET_CRITICALITY_SETTING,
-} from '@kbn/security-solution-plugin/common/constants';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -32,16 +29,10 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { expect } from 'expect';
-import supertestLib from 'supertest';
 import {
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-  routeWithNamespace,
-  waitForRuleFailure,
-} from '../../../../../../../common/utils/security_solution';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+  DETECTION_ENGINE_RULES_URL,
+  ENABLE_ASSET_CRITICALITY_SETTING,
+} from '@kbn/security-solution-plugin/common/constants';
 import {
   createListsIndex,
   deleteAllExceptions,
@@ -56,6 +47,15 @@ import {
   previewRule,
   previewRuleWithExceptionEntries,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRuleFailure,
+  routeWithNamespace,
+} from '../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { getMetricsRequest, getMetricsWithRetry } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {

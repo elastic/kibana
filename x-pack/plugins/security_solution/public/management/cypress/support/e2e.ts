@@ -27,8 +27,8 @@ import 'cypress-data-session';
 // @ts-ignore
 import registerCypressGrep from '@cypress/grep';
 
+import { login, ROLE } from '../tasks/login';
 import { loadPage } from '../tasks/common';
-import { ROLE, login } from '../tasks/login';
 
 registerCypressGrep();
 

@@ -147,7 +147,9 @@
       "tags": [],
       "label": "ExpressionMetricPluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "src/plugins/expression_metric/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -169,7 +171,9 @@
       "tags": [],
       "label": "ExpressionMetricPluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "src/plugins/expression_metric/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -324,7 +328,9 @@
             "type": "string",
             "tags": [],
             "label": "label",
-            "description": ["The text to display under the metric"],
+            "description": [
+              "The text to display under the metric"
+            ],
             "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -335,7 +341,9 @@
             "type": "Object",
             "tags": [],
             "label": "labelFont",
-            "description": ["Font settings for the label"],
+            "description": [
+              "Font settings for the label"
+            ],
             "signature": [
               {
                 "pluginId": "expressions",
@@ -355,8 +363,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "metric",
-            "description": ["Value of the metric to display"],
-            "signature": ["string | number | null"],
+            "description": [
+              "Value of the metric to display"
+            ],
+            "signature": [
+              "string | number | null"
+            ],
             "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -367,7 +379,9 @@
             "type": "Object",
             "tags": [],
             "label": "metricFont",
-            "description": ["Font settings for the metric"],
+            "description": [
+              "Font settings for the metric"
+            ],
             "signature": [
               {
                 "pluginId": "expressions",
@@ -387,7 +401,9 @@
             "type": "string",
             "tags": [],
             "label": "metricFormat",
-            "description": ["NumeralJS format string"],
+            "description": [
+              "NumeralJS format string"
+            ],
             "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -441,7 +457,9 @@
         "tags": [],
         "label": "CSS",
         "description": [],
-        "signature": ["\"CSS\""],
+        "signature": [
+          "\"CSS\""
+        ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -527,7 +545,9 @@
         "tags": [],
         "label": "FONT_FAMILY",
         "description": [],
-        "signature": ["\"`font-family`\""],
+        "signature": [
+          "\"`font-family`\""
+        ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -540,7 +560,9 @@
         "tags": [],
         "label": "FONT_WEIGHT",
         "description": [],
-        "signature": ["\"`font-weight`\""],
+        "signature": [
+          "\"`font-weight`\""
+        ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -575,7 +597,9 @@
         "tags": [],
         "label": "Input",
         "description": [],
-        "signature": ["string | number | null"],
+        "signature": [
+          "string | number | null"
+        ],
         "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -588,7 +612,9 @@
         "tags": [],
         "label": "NUMERALJS",
         "description": [],
-        "signature": ["\"Numeral pattern\""],
+        "signature": [
+          "\"Numeral pattern\""
+        ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -601,7 +627,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"expressionMetric\""],
+        "signature": [
+          "\"expressionMetric\""
+        ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -614,7 +642,9 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": ["\"expressionMetric\""],
+        "signature": [
+          "\"expressionMetric\""
+        ],
         "path": "src/plugins/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

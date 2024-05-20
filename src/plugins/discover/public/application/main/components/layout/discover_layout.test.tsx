@@ -6,31 +6,20 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { BehaviorSubject, of } from 'rxjs';
 import { EuiPageSidebar } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { Query, AggregateQuery } from '@kbn/es-query';
+import { DiscoverLayout } from './discover_layout';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import {
   createSearchSourceMock,
   searchSourceInstanceMock,
 } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { BehaviorSubject, of } from 'rxjs';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { createSearchSessionMock } from '../../../../__mocks__/search_session';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { ErrorCallout } from '../../../../components/common/error_callout';
-import { PanelsToggle } from '../../../../components/panels_toggle';
-import { FetchStatus } from '../../../types';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -38,8 +27,19 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../state_management/discover_data_state_container';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import { FetchStatus } from '../../../types';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { createSearchSessionMock } from '../../../../__mocks__/search_session';
+import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import { DiscoverLayout } from './discover_layout';
+import { act } from 'react-dom/test-utils';
+import { ErrorCallout } from '../../../../components/common/error_callout';
+import { PanelsToggle } from '../../../../components/panels_toggle';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),

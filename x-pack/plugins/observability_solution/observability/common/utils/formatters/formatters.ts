@@ -6,8 +6,8 @@
  */
 
 import numeral from '@elastic/numeral';
-import { NOT_AVAILABLE_LABEL } from '../../i18n';
 import { Maybe } from '../../typings';
+import { NOT_AVAILABLE_LABEL } from '../../i18n';
 import { isFiniteNumber } from '../is_finite_number';
 
 export function asDecimal(value?: number | null) {

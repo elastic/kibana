@@ -7,9 +7,9 @@
 
 import { lazy } from 'react';
 
+import type { CaseConnector } from '../types';
 import type { ResilientFieldsType } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
-import type { CaseConnector } from '../types';
 import * as i18n from './translations';
 
 export * from './types';

@@ -6,22 +6,22 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
-import { PLUGIN_ID } from '../../../common';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { FindLiveQueryRequestQuerySchema } from '../../../common/api';
-import { API_VERSIONS } from '../../../common/constants';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { API_VERSIONS } from '../../../common/constants';
+import { PLUGIN_ID } from '../../../common';
 
-import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import type {
   ActionsRequestOptions,
   ActionsStrategyResponse,
   Direction,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
+import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 
 export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) => {

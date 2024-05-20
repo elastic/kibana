@@ -8,21 +8,21 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { EndpointActionFileInfoParams } from '../../../../common/api/endpoint';
 import { EndpointActionFileInfoSchema } from '../../../../common/api/endpoint';
-import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
-import type { ActionFileInfoApiResponse } from '../../../../common/endpoint/types';
-import type {
-  SecuritySolutionPluginRouter,
-  SecuritySolutionRequestHandlerContext,
-} from '../../../types';
 import type { ResponseActionsClient } from '../../services';
 import {
+  getResponseActionsClient,
   NormalizedExternalConnectorClient,
   getActionAgentType,
-  getResponseActionsClient,
 } from '../../services';
+import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointAppContext } from '../../types';
-import { errorHandler } from '../error_handler';
+import type {
+  SecuritySolutionRequestHandlerContext,
+  SecuritySolutionPluginRouter,
+} from '../../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import { errorHandler } from '../error_handler';
+import type { ActionFileInfoApiResponse } from '../../../../common/endpoint/types';
 
 export const getActionFileInfoRouteHandler = (
   endpointContext: EndpointAppContext

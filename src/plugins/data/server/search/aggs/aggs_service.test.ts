@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, ElasticsearchClient } from '@kbn/core/server';
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/server/mocks';
+import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
-import { BucketAggType, MetricAggType, getAggTypes } from '../../../common';
 import { createIndexPatternsStartMock } from '../../data_views/mocks';
 
 import { AggsService, AggsSetupDependencies, AggsStartDependencies } from './aggs_service';
@@ -90,11 +90,11 @@ describe('AggsService - server', () => {
       const setup = service.setup(setupDeps);
       setup.types.registerBucket(
         'foo',
-        () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>
+        () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
       );
       setup.types.registerMetric(
         'bar',
-        () => ({ name: 'bar', type: 'metrics' }) as MetricAggType<any>
+        () => ({ name: 'bar', type: 'metrics' } as MetricAggType<any>)
       );
 
       const start = await service

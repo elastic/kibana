@@ -6,8 +6,8 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { LinkAnchor } from '../../links';
 import * as i18n from '../translations';
+import { LinkAnchor } from '../../links';
 import type { ActionsNavigation } from '../types';
 
 interface EndpointInfo {

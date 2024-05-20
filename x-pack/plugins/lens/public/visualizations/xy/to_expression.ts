@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import { PaletteRegistry } from '@kbn/coloring';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionFunctionTheme,
+} from '@kbn/expressions-plugin/common';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   AvailableReferenceLineIcon,
   DataDecorationConfigFn,
@@ -30,41 +35,36 @@ import {
   XYCurveType,
   YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import type {
+  State as XYState,
+  YConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYAnnotationLayerConfig,
+  AxisConfig,
+  ValidXYDataLayerConfig,
+  XYLayerConfig,
+} from './types';
+import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
+import { getColumnToLabelMap } from './state_helpers';
+import { defaultReferenceLineColor } from './color_assignment';
+import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import {
-  ExpressionFunctionTheme,
-  buildExpression,
-  buildExpressionFunction,
-} from '@kbn/expressions-plugin/common';
-import { Ast } from '@kbn/interpreter';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
-import type { CollapseExpressionFunction } from '../../../common/expressions';
+  getLayerTypeOptions,
+  getDataLayers,
+  getReferenceLayers,
+  getAnnotationsLayers,
+  isTimeChart,
+} from './visualization_helpers';
+import { getUniqueLabels } from './annotations/helpers';
 import {
   axisExtentConfigToExpression,
   hasNumericHistogramDimension,
 } from '../../shared_components';
-import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import type { DatasourceLayers, DatasourcePublicAPI, OperationMetadata } from '../../types';
-import { getUniqueLabels } from './annotations/helpers';
-import { defaultReferenceLineColor } from './color_assignment';
-import { getColumnToLabelMap } from './state_helpers';
-import type {
-  AxisConfig,
-  ValidXYDataLayerConfig,
-  XYAnnotationLayerConfig,
-  XYDataLayerConfig,
-  XYLayerConfig,
-  XYReferenceLineLayerConfig,
-  State as XYState,
-  YConfig,
-} from './types';
-import {
-  getAnnotationsLayers,
-  getDataLayers,
-  getLayerTypeOptions,
-  getReferenceLayers,
-  isTimeChart,
-} from './visualization_helpers';
+import type { CollapseExpressionFunction } from '../../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
 
 type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
@@ -289,10 +289,10 @@ export const buildXYExpression = (
     legendSize: state.legend.isInside
       ? undefined
       : state.legend.position === Position.Top || state.legend.position === Position.Bottom
-        ? LegendSize.AUTO
-        : state.legend.legendSize
-          ? state.legend.legendSize
-          : undefined,
+      ? LegendSize.AUTO
+      : state.legend.legendSize
+      ? state.legend.legendSize
+      : undefined,
     horizontalAlignment:
       state.legend.horizontalAlignment && state.legend.isInside
         ? state.legend.horizontalAlignment

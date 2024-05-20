@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiCard,
-  EuiFilePicker,
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiFilePicker,
+  EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
-import { getIsDataStreamTabOk } from './summary_tab/data_streams_status';
 import { getIsIndexTemplateOk } from './summary_tab/index_templates_status';
 import { getIsIndicesTabOk } from './summary_tab/indicies_status';
+import { getIsDataStreamTabOk } from './summary_tab/data_streams_status';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 

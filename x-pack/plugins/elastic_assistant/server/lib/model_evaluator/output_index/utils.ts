@@ -8,8 +8,8 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
-import { EvaluationResult, EvaluationSummary } from '../evaluation';
 import { evaluationIndexMappings as mappings } from './mappings';
+import { EvaluationResult, EvaluationSummary } from '../evaluation';
 
 interface SetupIndexParams {
   esClient: ElasticsearchClient;

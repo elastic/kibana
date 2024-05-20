@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
-import Chance from 'chance';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { ChartPanel } from './chart_panel';
 import { CHART_PANEL_TEST_SUBJECTS } from './test_subjects';
+import Chance from 'chance';
 
 const chance = new Chance();
 const testData = chance.word();

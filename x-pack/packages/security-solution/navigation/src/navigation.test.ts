@@ -1,6 +1,3 @@
-import { fireEvent } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
-import { mockGetUrlForApp, mockNavigateToApp, mockNavigateToUrl } from '../mocks/context';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import { mockGetUrlForApp, mockNavigateToApp, mockNavigateToUrl } from '../mocks
  * 2.0.
  */
 import { useGetAppUrl, useNavigateTo } from './navigation';
+import { mockGetUrlForApp, mockNavigateToApp, mockNavigateToUrl } from '../mocks/context';
+import { renderHook } from '@testing-library/react-hooks';
+import { fireEvent } from '@testing-library/react';
 
 jest.mock('./context');
 

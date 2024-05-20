@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ENTITIES, getAutocompleteInfo } from '../../../services';
 import { ListComponent } from './list_component';
+import { getAutocompleteInfo, ENTITIES } from '../../../services';
 
 export class DataStreamAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {

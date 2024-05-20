@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { TimelineBottomBar } from '.';
-import { TimelineId } from '../../../../common/types';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { timelineActions } from '../../store';
+import { TimelineBottomBar } from '.';
+import { TimelineId } from '../../../../common/types';
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');

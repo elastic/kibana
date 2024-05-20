@@ -7,28 +7,23 @@
 
 import { Theme } from '@elastic/charts';
 import { RecursivePartial } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { BoolQuery } from '@kbn/es-query';
+import React, { useMemo } from 'react';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { BoolQuery } from '@kbn/es-query';
+import { getDurationFormatter } from '@kbn/observability-plugin/common';
+import { ALERT_RULE_TYPE_ID, ALERT_EVALUATION_THRESHOLD, ALERT_END } from '@kbn/rule-data-utils';
+import type { TopAlert } from '@kbn/observability-plugin/public';
 import {
   AlertActiveTimeRangeAnnotation,
-  AlertAnnotation,
   AlertThresholdAnnotation,
   AlertThresholdTimeRangeRect,
+  AlertAnnotation,
 } from '@kbn/observability-alert-details';
-import { getDurationFormatter } from '@kbn/observability-plugin/common';
-import type { TopAlert } from '@kbn/observability-plugin/public';
-import { ALERT_END, ALERT_EVALUATION_THRESHOLD, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { useEuiTheme } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
-import React, { useMemo } from 'react';
-import { ApmDocumentType } from '../../../../../common/document_type';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { LatencyAggregationTypeSelect } from '../../../shared/charts/latency_chart/latency_aggregation_type_select';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
@@ -37,8 +32,13 @@ import {
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { DEFAULT_DATE_FORMAT } from './constants';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { isLatencyThresholdRuleType } from './helpers';
+import { ApmDocumentType } from '../../../../../common/document_type';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { DEFAULT_DATE_FORMAT } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
 
 function LatencyChart({

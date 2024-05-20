@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React from 'react';
-import { StatementList } from './statement_list';
+import PropTypes from 'prop-types';
 import { StatementListHeading } from './statement_list_heading';
+import { EuiSpacer } from '@elastic/eui';
+import { StatementList } from './statement_list';
 
 export function StatementSection({ iconType, headingText, elements, onShowVertexDetails }) {
   if (!elements.length) {

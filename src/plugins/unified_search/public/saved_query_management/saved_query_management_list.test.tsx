@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock, applicationServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import {
+  SavedQueryManagementListProps,
+  SavedQueryManagementList,
+} from './saved_query_management_list';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
-import {
-  SavedQueryManagementList,
-  SavedQueryManagementListProps,
-} from './saved_query_management_list';
 
 describe('Saved query management list component', () => {
   const startMock = coreMock.createStart();

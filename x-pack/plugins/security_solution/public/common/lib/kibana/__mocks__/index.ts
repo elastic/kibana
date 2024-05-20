@@ -9,16 +9,16 @@ import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { APP_UI_ID } from '../../../../../common/constants';
-import { mockApm } from '../../apm/service.mock';
 import {
   createKibanaContextProviderMock,
-  createStartServicesMock,
-  createUseUiSetting$Mock,
   createUseUiSettingMock,
+  createUseUiSetting$Mock,
+  createStartServicesMock,
   createWithKibanaMock,
 } from '../kibana_react.mock';
+import { mockApm } from '../../apm/service.mock';
+import { APP_UI_ID } from '../../../../../common/constants';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 const mockStartServicesMock = createStartServicesMock();
 export const KibanaServices = {

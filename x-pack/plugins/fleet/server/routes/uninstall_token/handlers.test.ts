@@ -7,8 +7,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, VersionedRouter } from '@kbn/core-http-server';
+import { httpServerMock, coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { makeRouterWithFleetAuthz } from '../../services/security/fleet_router';
 import type { FleetAuthzRouter } from '../../services/security/types';

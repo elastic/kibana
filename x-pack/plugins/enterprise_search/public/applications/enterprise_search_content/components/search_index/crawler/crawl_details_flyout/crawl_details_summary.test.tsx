@@ -9,7 +9,7 @@ import '../../_mocks_/index_name_logic.mock';
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiPanel } from '@elastic/eui';
 

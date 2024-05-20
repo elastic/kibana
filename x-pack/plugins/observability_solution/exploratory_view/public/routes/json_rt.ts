@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { either } from 'fp-ts/lib/Either';
 
 export const jsonRt = new t.Type<any, string, unknown>(
   'JSON',

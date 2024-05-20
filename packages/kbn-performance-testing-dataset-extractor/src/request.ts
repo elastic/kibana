@@ -7,7 +7,7 @@
  */
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { ESClient, Headers, SpanDocument, TransactionDocument } from './es_client';
+import { ESClient, TransactionDocument, Headers, SpanDocument } from './es_client';
 import { Request } from './types';
 
 const httpMethodRegExp = /(GET|POST|DELETE|HEAD|PUT|OPTIONS)/;

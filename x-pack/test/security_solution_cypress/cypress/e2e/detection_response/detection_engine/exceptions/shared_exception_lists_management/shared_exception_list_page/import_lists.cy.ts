@@ -6,17 +6,17 @@
  */
 
 import {
-  EXCEPTIONS_TABLE_SHOWING_LISTS,
   IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN,
+  EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../../../../screens/exceptions';
 import {
-  importExceptionListWithSelectingCreateNewOption,
-  importExceptionListWithSelectingOverwriteExistingOption,
-  importExceptionLists,
-  validateImportExceptionListCreateNewOptionDisabled,
-  validateImportExceptionListFailedBecauseExistingListFound,
-  validateImportExceptionListWentSuccessfully,
   waitForExceptionsTableToBeLoaded,
+  importExceptionLists,
+  importExceptionListWithSelectingOverwriteExistingOption,
+  importExceptionListWithSelectingCreateNewOption,
+  validateImportExceptionListWentSuccessfully,
+  validateImportExceptionListFailedBecauseExistingListFound,
+  validateImportExceptionListCreateNewOptionDisabled,
 } from '../../../../../../tasks/exceptions_table';
 import { login } from '../../../../../../tasks/login';
 import { visit } from '../../../../../../tasks/navigation';

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
-import React, { Fragment } from 'react';
+import { Query } from '@kbn/es-query';
+import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
   type GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '.';
-import type { IndexPattern, IndexPatternField } from '../../../../types';
-import { hasField } from '../../pure_utils';
-import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
 import {
   FieldBasedIndexPatternColumn,
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
+import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
+import { hasField } from '../../pure_utils';
 
 export function getInvalidFieldMessage(
   layer: FormBasedLayer,

@@ -9,11 +9,11 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
-import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
-import { Globals } from '../../static_globals';
-import { getElasticsearchDataset, getIndexPatterns } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
 interface NodeBucketESResponse {
   key: string;

@@ -7,12 +7,12 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import type { ActionConnector } from '../../../../common/types/domain';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
+import type { ActionConnector } from '../../../../common/types/domain';
+import { useGetChoices } from './use_get_choices';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import * as api from './api';
-import { useGetChoices } from './use_get_choices';
 
 jest.mock('./api');
 jest.mock('../../../common/lib/kibana');

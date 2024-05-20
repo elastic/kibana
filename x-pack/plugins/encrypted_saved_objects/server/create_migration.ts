@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { EncryptionError } from './crypto';
-import type { EncryptedSavedObjectTypeRegistration, EncryptedSavedObjectsService } from './crypto';
+import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
 import { normalizeNamespace } from './saved_objects';
 import { mapAttributes } from './saved_objects/map_attributes';
 
@@ -31,7 +31,7 @@ export type IsMigrationNeededPredicate<InputAttributes, MigratedAttributes> = (
 
 export interface CreateEncryptedSavedObjectsMigrationFnOpts<
   InputAttributes = unknown,
-  MigratedAttributes = InputAttributes,
+  MigratedAttributes = InputAttributes
 > {
   isMigrationNeededPredicate: IsMigrationNeededPredicate<InputAttributes, MigratedAttributes>;
   migration: SavedObjectMigrationFn<InputAttributes, MigratedAttributes>;
@@ -42,7 +42,7 @@ export interface CreateEncryptedSavedObjectsMigrationFnOpts<
 
 export type CreateEncryptedSavedObjectsMigrationFn = <
   InputAttributes = unknown,
-  MigratedAttributes = InputAttributes,
+  MigratedAttributes = InputAttributes
 >(
   opts: CreateEncryptedSavedObjectsMigrationFnOpts<InputAttributes, MigratedAttributes>
 ) => SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes>;

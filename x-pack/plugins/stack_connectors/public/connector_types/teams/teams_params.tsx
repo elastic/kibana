@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useEffect } from 'react';
 import { TeamsActionParams } from '../types';
 
 const TeamsParamsFields: React.FunctionComponent<ActionParamsProps<TeamsActionParams>> = ({

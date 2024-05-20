@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { ApplicationStart } from '@kbn/core/public';
+import React, { Component, Fragment } from 'react';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { get } from 'lodash';
-import React, { Component, Fragment } from 'react';
+import { ApplicationStart } from '@kbn/core/public';
 
 import {
-  EuiCallOut,
-  EuiConfirmModal,
+  EuiLink,
+  EuiSelect,
   EuiForm,
   EuiFormRow,
-  EuiLink,
+  EuiConfirmModal,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiSelect,
+  EuiCallOut,
   EuiSpacer,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 
 import { Index } from '@kbn/index-management-plugin/common';
-import { PolicyFromES } from '../../../common/types';
-import { addLifecyclePolicyToIndex, loadPolicies } from '../../application/services/api';
+import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
+import { PolicyFromES } from '../../../common/types';
 
 interface Props {
   indexName: string;

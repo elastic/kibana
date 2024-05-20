@@ -6,7 +6,10 @@
     "id": "actions",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "actions"],
+    "configPath": [
+      "xpack",
+      "actions"
+    ],
     "requiredPlugins": [
       "licensing",
       "taskManager",
@@ -21,6 +24,8 @@
       "monitoringCollection",
       "serverless"
     ],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

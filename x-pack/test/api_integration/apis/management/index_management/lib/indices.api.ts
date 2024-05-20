@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { API_BASE_PATH } from '../constants';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function indicesApi(getService: FtrProviderContext['getService']) {
   const supertest = getService('supertest');

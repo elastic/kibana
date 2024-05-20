@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { format as formatUrl } from 'url';
-import { Client, HttpConnection } from '@elastic/elasticsearch';
 import supertest from 'supertest';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
+import { format as formatUrl } from 'url';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 

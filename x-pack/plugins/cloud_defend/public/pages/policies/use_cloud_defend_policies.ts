@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ListResult } from '@kbn/fleet-plugin/common';
 import { useQuery } from '@tanstack/react-query';
-import type { PoliciesQueryParams } from '../../../common';
-import type { CloudDefendPolicy } from '../../../common';
+import type { ListResult } from '@kbn/fleet-plugin/common';
 import { CURRENT_API_VERSION, POLICIES_ROUTE_PATH } from '../../../common/constants';
+import type { PoliciesQueryParams } from '../../../common';
 import { useKibana } from '../../common/hooks/use_kibana';
+import type { CloudDefendPolicy } from '../../../common';
 
 const QUERY_KEY = 'cloud_defend_policies';
 

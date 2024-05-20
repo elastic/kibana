@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { useContext, useMemo } from 'react';
 import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import React, { useContext, useMemo } from 'react';
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
-import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
-import { getFilterAggTypeConfig } from '../config';
 import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
+import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, PivotAggsConfigFilter } from '../types';
+import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
 
 /**
  * Resolves supported filters for provided field.

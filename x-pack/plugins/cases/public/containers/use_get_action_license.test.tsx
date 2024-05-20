@@ -6,11 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useToasts } from '../common/lib/kibana';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import * as api from './api';
 import { useGetActionLicense } from './use_get_action_license';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

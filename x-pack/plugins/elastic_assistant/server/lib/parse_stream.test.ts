@@ -6,9 +6,9 @@
  */
 import { Readable, Transform } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
+import { handleStreamStorage } from './parse_stream';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
-import { handleStreamStorage } from './parse_stream';
 
 function createStreamMock() {
   const transform: Transform = new Transform({});

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
+import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
+import { AVAILABILITY_LABEL } from './availability_panel';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
-import { AVAILABILITY_LABEL } from './availability_panel';
 
 interface AvailabilitySparklinesProps {
   from: string;

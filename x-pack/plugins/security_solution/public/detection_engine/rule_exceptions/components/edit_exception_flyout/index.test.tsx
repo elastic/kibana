@@ -5,36 +5,36 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { ThemeProvider } from 'styled-components';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import { TestProviders } from '../../../../common/mock';
 
+import { EditExceptionFlyout } from '.';
+import { useCurrentUser } from '../../../../common/lib/kibana';
+import { useFetchIndex } from '../../../../common/containers/source';
 import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import type { Rule } from '../../../rule_management/logic/types';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { EditExceptionFlyout } from '.';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
 } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { useFetchIndex } from '../../../../common/containers/source';
-import { useCurrentUser } from '../../../../common/lib/kibana';
-import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import type { Rule } from '../../../rule_management/logic/types';
 
-import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
-import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
-import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
-import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
+import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import * as i18n from './translations';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 const mockTheme = getMockTheme({
   eui: {

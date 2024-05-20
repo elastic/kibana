@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as path from 'path';
 import ts from 'typescript';
+import * as path from 'path';
 import { createKibanaProgram } from './ts_program';
 
 export function loadFixtureProgram(fixtureFile: string, basepath = __dirname) {

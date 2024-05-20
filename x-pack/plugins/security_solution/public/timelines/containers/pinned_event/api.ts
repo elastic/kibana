@@ -1,4 +1,3 @@
-import type { PinnedEvent } from '../../../../common/api/timeline';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import type { PinnedEvent } from '../../../../common/api/timeline';
  * 2.0.
  */
 import { PINNED_EVENT_URL } from '../../../../common/constants';
+import type { PinnedEvent } from '../../../../common/api/timeline';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistPinnedEvent = async ({

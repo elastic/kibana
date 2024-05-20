@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { MouseEventHandler, FC } from 'react';
+import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
-import React, { MouseEventHandler, FC } from 'react';
-import { ArgAdd } from '../arg_add';
 import { Popover } from '../popover';
+import { ArgAdd } from '../arg_add';
 
 const strings = {
   getAddAriaLabel: () =>

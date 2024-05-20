@@ -7,7 +7,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { FIELD_TYPES, FieldHook } from '../hook_form_lib';
+import { FieldHook, FIELD_TYPES } from '../hook_form_lib';
 
 interface Props {
   field: FieldHook;
@@ -16,23 +16,23 @@ interface Props {
 }
 
 import {
-  ButtonGroupField,
+  TextField,
+  TextAreaField,
+  NumericField,
   CheckBoxField,
   ComboBoxField,
-  DatePickerField,
-  HiddenField,
-  JsonEditorField,
-  MultiButtonGroupField,
   MultiSelectField,
-  NumericField,
-  PasswordField,
   RadioGroupField,
   RangeField,
   SelectField,
   SuperSelectField,
-  TextAreaField,
-  TextField,
   ToggleField,
+  JsonEditorField,
+  ButtonGroupField,
+  MultiButtonGroupField,
+  DatePickerField,
+  PasswordField,
+  HiddenField,
 } from './fields';
 
 const mapTypeToFieldComponent: { [key: string]: ComponentType<any> } = {

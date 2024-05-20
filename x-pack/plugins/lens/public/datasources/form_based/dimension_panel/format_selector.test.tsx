@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFieldNumber } from '@elastic/eui';
-import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { FormatSelector } from './format_selector';
 import { act } from 'react-dom/test-utils';
 import { GenericIndexPatternColumn } from '../../..';
 import { LensAppServices } from '../../../app_plugin/types';
-import { FormatSelector } from './format_selector';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
+import { EuiComboBox, EuiFieldNumber } from '@elastic/eui';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

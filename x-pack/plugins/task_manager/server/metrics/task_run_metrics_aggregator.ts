@@ -7,19 +7,19 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { merge } from 'lodash';
-import { Ok, isOk, unwrap } from '../lib/result_type';
+import { isUserError } from '../task_running';
+import { isOk, Ok, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import {
   ErroredTask,
+  isTaskManagerStatEvent,
+  isTaskRunEvent,
   RanTask,
   TaskManagerStat,
   TaskRun,
-  isTaskManagerStatEvent,
-  isTaskRunEvent,
 } from '../task_events';
-import { isUserError } from '../task_running';
 import type { SerializedHistogram } from './lib';
-import { MetricCounterService, SimpleHistogram, getTaskTypeGroup } from './lib';
+import { getTaskTypeGroup, MetricCounterService, SimpleHistogram } from './lib';
 import { ITaskMetricsAggregator } from './types';
 
 const HDR_HISTOGRAM_MAX = 5400; // 90 minutes

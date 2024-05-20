@@ -11,8 +11,8 @@ import semverLt from 'semver/functions/lt';
 import { installationStatuses } from '../../common/constants';
 import type { PackagePolicy } from '../types';
 
-import { useGetAgentPoliciesQuery } from './use_request/agent_policy';
 import { useGetPackagesQuery } from './use_request/epm';
+import { useGetAgentPoliciesQuery } from './use_request/agent_policy';
 
 interface UpdatableIntegration {
   currentVersion: string;

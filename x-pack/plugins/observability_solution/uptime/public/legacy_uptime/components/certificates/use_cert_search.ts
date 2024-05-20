@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { useContext } from 'react';
 import { useSelector } from 'react-redux';
+import { useContext } from 'react';
+import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 
 import { CertResult, GetCertsParams, Ping } from '../../../../common/runtime_types';
 
+import { selectDynamicSettings } from '../../state/selectors';
 import {
   DEFAULT_DIRECTION,
   DEFAULT_FROM,
@@ -21,7 +22,6 @@ import {
   processCertsResult,
 } from '../../../../common/requests/get_certs_request_body';
 import { UptimeRefreshContext } from '../../contexts';
-import { selectDynamicSettings } from '../../state/selectors';
 
 export const useCertSearch = ({
   pageIndex,

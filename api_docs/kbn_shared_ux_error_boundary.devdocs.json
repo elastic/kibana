@@ -25,8 +25,12 @@
         "type": "Function",
         "tags": [],
         "label": "KibanaErrorBoundary",
-        "description": ["\nImplementation of Kibana Error Boundary"],
-        "signature": ["(props: ErrorBoundaryProps) => JSX.Element"],
+        "description": [
+          "\nImplementation of Kibana Error Boundary"
+        ],
+        "signature": [
+          "(props: ErrorBoundaryProps) => JSX.Element"
+        ],
         "path": "packages/shared-ux/error_boundary/src/ui/error_boundary.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -37,8 +41,12 @@
             "type": "Object",
             "tags": [],
             "label": "props",
-            "description": ["- ErrorBoundaryProps"],
-            "signature": ["ErrorBoundaryProps"],
+            "description": [
+              "- ErrorBoundaryProps"
+            ],
+            "signature": [
+              "ErrorBoundaryProps"
+            ],
             "path": "packages/shared-ux/error_boundary/src/ui/error_boundary.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -96,7 +104,9 @@
         "description": [
           "\nThis component allows errors to be caught outside of a render tree, and re-thrown within a render tree\nwrapped by KibanaErrorBoundary. The purpose is to let KibanaErrorBoundary control the user experience when\nReact can not render due to an error.\n"
         ],
-        "signature": ["({ error }: React.PropsWithChildren<{ error: Error | null; }>) => null"],
+        "signature": [
+          "({ error }: React.PropsWithChildren<{ error: Error | null; }>) => null"
+        ],
         "path": "packages/shared-ux/error_boundary/src/ui/throw_if_error.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -108,7 +118,9 @@
             "tags": [],
             "label": "{ error }",
             "description": [],
-            "signature": ["React.PropsWithChildren<{ error: Error | null; }>"],
+            "signature": [
+              "React.PropsWithChildren<{ error: Error | null; }>"
+            ],
             "path": "packages/shared-ux/error_boundary/src/ui/throw_if_error.ts",
             "deprecated": false,
             "trackAdoption": false,

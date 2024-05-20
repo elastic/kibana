@@ -6,18 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiForm, IconType } from '@elastic/eui';
-import { ComponentStory } from '@storybook/react';
 import React, { FC, ComponentType } from 'react';
+import { EuiFlexItem, EuiFlexGroup, EuiEmptyPrompt, EuiForm, IconType } from '@elastic/eui';
+import { ComponentStory } from '@storybook/react';
 
 import {
-  DropIllustration,
+  IconCircle,
+  IconTriangle,
   EuiIconAxisBottom,
   EuiIconAxisLeft,
   EuiIconAxisRight,
   EuiIconAxisTop,
-  EuiIconLegend,
-  GlobeIllustration,
   IconChartArea,
   IconChartAreaPercentage,
   IconChartAreaStacked,
@@ -31,19 +30,20 @@ import {
   IconChartBarStacked,
   IconChartDatatable,
   IconChartDonut,
-  IconChartHeatmap,
-  IconChartHorizontalBullet,
   IconChartLine,
   IconChartMetric,
   IconChartMixedXy,
   IconChartMosaic,
   IconChartPie,
   IconChartTreemap,
-  IconChartVerticalBullet,
   IconChartWaffle,
-  IconCircle,
+  DropIllustration,
+  GlobeIllustration,
+  EuiIconLegend,
   IconRegionMap,
-  IconTriangle,
+  IconChartHeatmap,
+  IconChartHorizontalBullet,
+  IconChartVerticalBullet,
 } from '../..';
 
 export default {

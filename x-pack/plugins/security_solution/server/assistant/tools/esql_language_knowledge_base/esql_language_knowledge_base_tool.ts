@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { DynamicTool } from '@langchain/core/tools';
+import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
 
 export type EsqlKnowledgeBaseToolParams = AssistantToolParams;

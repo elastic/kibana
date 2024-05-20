@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEffect, useRef, useCallback, useState } from 'react';
 import type {
   CreateExceptionListItemSchema,
   CreateRuleExceptionListItemSchema,
@@ -12,19 +13,18 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ExceptionListTypeEnum,
   createExceptionListItemSchema,
-  createRuleExceptionListItemSchema,
   exceptionListItemSchema,
+  ExceptionListTypeEnum,
+  createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
-import { useCallback, useEffect, useRef, useState } from 'react';
 
+import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { Rule } from '../../../rule_management/logic/types';
-import { useAddRuleDefaultException } from '../../logic/use_add_rule_exception';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
-import * as i18n from './translations';
+import { useAddRuleDefaultException } from '../../logic/use_add_rule_exception';
 
 export interface AddNewExceptionItemHookProps {
   itemsToAdd: ExceptionsBuilderReturnExceptionItem[];

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { UseQueryOptions } from '@tanstack/react-query';
-import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useFetchRuleByIdQuery } from '../api/hooks/use_fetch_rule_by_id_query';
 import * as i18n from './translations';
 

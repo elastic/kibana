@@ -7,7 +7,7 @@
 
 import { get, set } from 'lodash';
 import type { PolicyConfig } from '../types';
-import { AntivirusRegistrationModes, PolicyOperatingSystem, ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 
 interface PolicyProtectionReference {
   keyPath: string;

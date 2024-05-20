@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import faker from 'faker';
 import React from 'react';
+import { screen } from '@testing-library/react';
+import faker from 'faker';
 import {
   createMockDatasource,
   createMockFramePublicAPI,
@@ -16,9 +15,10 @@ import {
   mockDatasourceStates,
   mockStoreDeps,
 } from '../../../mocks';
-import { renderWithReduxStore } from '../../../mocks';
-import { LensAppState } from '../../../state_management';
 import { LayerHeader } from './layer_header';
+import { renderWithReduxStore } from '../../../mocks';
+import userEvent from '@testing-library/user-event';
+import { LensAppState } from '../../../state_management';
 
 describe('LayerHeader', () => {
   const renderLayerSettings = (

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
-import { css } from '@kbn/kibana-react-plugin/common';
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
+import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { css } from '@kbn/kibana-react-plugin/common';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 

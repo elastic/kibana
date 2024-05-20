@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { EuiIcon } from '@elastic/eui';
 import { REPOSITORY_TYPES } from '../../../common/constants';
 import { RepositoryType } from '../../../common/types';
 

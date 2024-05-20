@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiText, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import type { MutableRefObject } from 'react';
 import ReactMarkdown from 'react-markdown';

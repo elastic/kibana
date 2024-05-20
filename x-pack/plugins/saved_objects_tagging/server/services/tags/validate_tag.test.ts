@@ -7,8 +7,8 @@
 
 import {
   validateTagColorMock,
-  validateTagDescriptionMock,
   validateTagNameMock,
+  validateTagDescriptionMock,
 } from './validate_tag.test.mocks';
 
 import { TagAttributes } from '../../../common/types';

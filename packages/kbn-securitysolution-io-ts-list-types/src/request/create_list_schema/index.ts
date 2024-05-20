@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import * as t from 'io-ts';
 import {
   DefaultVersionNumber,
   DefaultVersionNumberDecoded,
 } from '@kbn/securitysolution-io-ts-types';
-import * as t from 'io-ts';
 
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { name } from '../../common/name';
 import { description } from '../../common/description';
+import { type } from '../../common/type';
 import { deserializer } from '../../common/deserializer';
 import { id } from '../../common/id';
 import { meta } from '../../common/meta';
-import { name } from '../../common/name';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { serializer } from '../../common/serializer';
-import { type } from '../../common/type';
 
 export const createListSchema = t.intersection([
   t.exact(

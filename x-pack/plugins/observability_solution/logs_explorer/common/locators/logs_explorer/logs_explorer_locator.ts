@@ -6,11 +6,11 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import {
-  LOGS_EXPLORER_LOCATOR_ID,
-  LogsExplorerLocatorParams,
-} from '@kbn/deeplinks-observability/locators';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import {
+  LogsExplorerLocatorParams,
+  LOGS_EXPLORER_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
 import { LogsExplorerLocatorDependencies } from './types';
 
 export type LogsExplorerLocator = LocatorPublic<LogsExplorerLocatorParams>;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DocLinksStart } from '@kbn/core/public';
 import React from 'react';
+import { DocLinksStart } from '@kbn/core/public';
 
-import { getLinks } from '../../lib';
 import { RuntimeField } from '../../types';
-import { Props as FormProps, RuntimeFieldForm } from '../runtime_field_form/runtime_field_form';
+import { getLinks } from '../../lib';
+import { RuntimeFieldForm, Props as FormProps } from '../runtime_field_form/runtime_field_form';
 
 export interface Props {
   docLinks: DocLinksStart;

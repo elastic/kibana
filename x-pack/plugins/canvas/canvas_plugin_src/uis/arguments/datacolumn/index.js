@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import { getType } from '@kbn/interpreter';
-import { sortBy } from 'lodash';
-import PropTypes from 'prop-types';
 import React, { useState, useCallback, useEffect } from 'react';
-import deepEqual from 'react-fast-compare';
+import PropTypes from 'prop-types';
+import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { sortBy } from 'lodash';
+import { getType } from '@kbn/interpreter';
 import usePrevious from 'react-use/lib/usePrevious';
-import { ArgumentStrings } from '../../../../i18n';
+import deepEqual from 'react-fast-compare';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
-import { getFormObject } from './get_form_object';
+import { ArgumentStrings } from '../../../../i18n';
 import { SimpleMathFunction } from './simple_math_function';
+import { getFormObject } from './get_form_object';
 
 const { DataColumn: strings } = ArgumentStrings;
 
@@ -135,7 +135,7 @@ const DatacolumnArgInput = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSelect
-          compressed={true}
+          compressed
           options={[firstColumnOption, ...options]}
           value={mathValue.column}
           onChange={onChangeColumn}

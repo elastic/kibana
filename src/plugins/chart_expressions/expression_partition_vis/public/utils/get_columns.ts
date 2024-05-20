@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
 import { BucketColumns } from '../../common/types';
 
 const getMetricColumn = (

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React from 'react';
+import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
+import { from } from 'rxjs';
+import { pick } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { pick } from 'lodash';
-import React from 'react';
-import { distinctUntilChanged, skip, takeUntil } from 'rxjs';
-import { from } from 'rxjs';
 
-import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { AiopsPluginStartDeps } from '../../types';
-import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 import { LogCategorizationFlyout } from './log_categorization_for_flyout';
+import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 const localStorage = new Storage(window.localStorage);
 

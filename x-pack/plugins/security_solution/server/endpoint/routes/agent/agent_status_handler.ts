@@ -6,6 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { getAgentStatus } from '../../services/agent/agent_status';
+import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
@@ -13,12 +15,10 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
+import type { EndpointAppContext } from '../../types';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { getAgentStatusClient } from '../../services';
-import { getAgentStatus } from '../../services/agent/agent_status';
-import type { EndpointAppContext } from '../../types';
-import { errorHandler } from '../error_handler';
-import { withEndpointAuthz } from '../with_endpoint_authz';
 
 export const registerAgentStatusRoute = (
   router: SecuritySolutionPluginRouter,

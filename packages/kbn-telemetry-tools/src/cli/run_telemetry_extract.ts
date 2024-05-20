@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { run } from '@kbn/dev-cli-runner';
 import { Listr } from 'listr2';
+import { run } from '@kbn/dev-cli-runner';
 
 import {
-  ErrorReporter,
   createTaskContext,
+  ErrorReporter,
+  parseConfigsTask,
   extractCollectorsTask,
   generateSchemasTask,
-  parseConfigsTask,
   writeToFileTask,
 } from '../tools/tasks';
 

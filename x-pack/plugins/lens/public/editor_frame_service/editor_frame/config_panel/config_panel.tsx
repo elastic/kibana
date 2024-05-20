@@ -5,40 +5,40 @@
  * 2.0.
  */
 
+import React, { useMemo, memo, useCallback } from 'react';
 import { EuiForm } from '@elastic/eui';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import React, { useMemo, memo, useCallback } from 'react';
 
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { generateId } from '../../../id_generator';
-import {
-  addLayer as addLayerAction,
-  cloneLayer,
-  registerLibraryAnnotationGroup,
-  removeOrClearLayer,
-  selectVisualization,
-  setLayerDefaultDimension,
-  setToggleFullscreen,
-  updateDatasourceState,
-  updateVisualizationState,
-  useLensDispatch,
-  useLensSelector,
-} from '../../../state_management';
 import {
   changeIndexPattern,
   onDropToDimension,
   removeDimension,
 } from '../../../state_management/lens_slice';
 import { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
-import { getRemoveOperation } from '../../../utils';
 import { LayerPanel } from './layer_panel';
+import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps } from './types';
 import { useFocusUpdate } from './use_focus_update';
+import {
+  setLayerDefaultDimension,
+  useLensDispatch,
+  removeOrClearLayer,
+  cloneLayer,
+  addLayer as addLayerAction,
+  updateDatasourceState,
+  updateVisualizationState,
+  setToggleFullscreen,
+  useLensSelector,
+  selectVisualization,
+  registerLibraryAnnotationGroup,
+} from '../../../state_management';
+import { getRemoveOperation } from '../../../utils';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);

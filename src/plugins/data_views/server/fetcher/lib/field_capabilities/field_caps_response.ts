@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { uniq } from 'lodash';
-import { FieldDescriptor } from '../..';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
+import { FieldDescriptor } from '../..';
 
 // The array will have different values if values vary across indices
 const unitsArrayToFormatter = (unitArr: string[]) => {
@@ -115,13 +115,10 @@ export function readFieldCapsResponse(
           searchable: isSearchable,
           aggregatable: isAggregatable,
           readFromDocValues: false,
-          conflictDescriptions: types.reduce(
-            (acc, esType) => {
-              acc[esType] = capsByType[esType].indices;
-              return acc;
-            },
-            {} as Record<string, estypes.Indices | undefined>
-          ),
+          conflictDescriptions: types.reduce((acc, esType) => {
+            acc[esType] = capsByType[esType].indices;
+            return acc;
+          }, {} as Record<string, estypes.Indices | undefined>),
           metadata_field: capsByType[types[0]].metadata_field,
         };
         // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes

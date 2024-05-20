@@ -10,10 +10,10 @@ import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   GroupByEntry,
-  LatestTransformTestData,
-  PivotTransformTestData,
   isLatestTransformTestData,
   isPivotTransformTestData,
+  LatestTransformTestData,
+  PivotTransformTestData,
 } from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {

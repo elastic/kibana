@@ -1,5 +1,3 @@
-import { EuiTextColor } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,13 +5,15 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React, { ReactNode, useCallback, useMemo } from 'react';
+import { EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Process } from '../../../common';
-import { dataOrDash } from '../../utils/data_or_dash';
 import { DetailPanelAccordion } from '../detail_panel_accordion';
 import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelDescriptionList } from '../detail_panel_description_list';
 import { DetailPanelListItem } from '../detail_panel_list_item';
-import { getDetailPanelProcess, getProcessExecutableCopyText } from './helpers';
+import { dataOrDash } from '../../utils/data_or_dash';
+import { getProcessExecutableCopyText, getDetailPanelProcess } from './helpers';
 import { useStyles } from './styles';
 
 interface DetailPanelProcessTabDeps {

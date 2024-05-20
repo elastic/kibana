@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverCustomization, createCustomizationService } from './customization_service';
+import { createCustomizationService, DiscoverCustomization } from './customization_service';
 
 describe('createCustomizatonService', () => {
   it('should return a service', () => {

@@ -7,11 +7,11 @@
 
 import { getNewRule } from '../../../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../../../screens/alerts';
+import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../../../tasks/alerts';
-import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   editException,
   editExceptionFlyoutItemName,
@@ -20,8 +20,8 @@ import {
 import { login } from '../../../../../tasks/login';
 import {
   addFirstExceptionFromRuleDetails,
-  clickDisableRuleSwitch,
   clickEnableRuleSwitch,
+  clickDisableRuleSwitch,
   goToAlertsTab,
   goToExceptionsTab,
   openEditException,
@@ -31,19 +31,19 @@ import {
 } from '../../../../../tasks/rule_details';
 
 import {
-  EXCEPTION_CARD_ITEM_CONDITIONS,
-  EXCEPTION_CARD_ITEM_NAME,
-  EXCEPTION_ITEM_CONTAINER,
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
-  FIELD_INPUT_PARENT,
-  NO_EXCEPTIONS_EXIST_PROMPT,
-  VALUES_INPUT,
-} from '../../../../../screens/exceptions';
-import {
+  postDataView,
   deleteAlertsAndRules,
   deleteDataView,
-  postDataView,
 } from '../../../../../tasks/api_calls/common';
+import {
+  NO_EXCEPTIONS_EXIST_PROMPT,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_CARD_ITEM_CONDITIONS,
+  EXCEPTION_ITEM_CONTAINER,
+  VALUES_INPUT,
+  FIELD_INPUT_PARENT,
+} from '../../../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 const DATAVIEW = 'exceptions-*';

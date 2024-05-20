@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils/types';
-import { Filter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { CloudSecurityDataTable } from '../../../components/cloud_security_data_table';
-import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
-import { TimestampTableCell } from '../../../components/timestamp_table_cell';
-import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
-import { ErrorCallout } from '../layout/error_callout';
-import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
+import { Filter } from '@kbn/es-query';
+import { DataTableRecord } from '@kbn/discover-utils/types';
+import { i18n } from '@kbn/i18n';
+import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as TEST_SUBJECTS from '../test_subjects';
-import { defaultColumns, getDefaultQuery } from './constants';
+import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
+import { ErrorCallout } from '../layout/error_callout';
+import { CloudSecurityDataTable } from '../../../components/cloud_security_data_table';
+import { getDefaultQuery, defaultColumns } from './constants';
 import { useLatestFindingsTable } from './use_latest_findings_table';
+import { TimestampTableCell } from '../../../components/timestamp_table_cell';
+import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
+import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 
 interface LatestFindingsTableProps {
   groupSelectorComponent?: JSX.Element;

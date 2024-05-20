@@ -6,8 +6,8 @@
  */
 import React from 'react';
 
-import { StepFieldTrend } from '../../../../synthetics/check_steps/step_field_trend';
 import { useWaterfallContext } from '../context/waterfall_chart';
+import { StepFieldTrend } from '../../../../synthetics/check_steps/step_field_trend';
 
 export function WaterfallMarkerTrend({ title, field }: { title: string; field: string }) {
   const { activeStep } = useWaterfallContext();

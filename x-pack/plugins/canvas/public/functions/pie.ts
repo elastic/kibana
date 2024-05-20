@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import { get, groupBy, keyBy, map } from 'lodash';
+import { get, keyBy, map, groupBy } from 'lodash';
+import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { getLegendConfig } from '../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../i18n';
 import {
-  ExpressionFunctionDefinition,
   Legend,
   PointSeries,
   Render,
   SeriesStyle,
   Style,
+  ExpressionFunctionDefinition,
 } from '../../types';
 
 interface PieSeriesOptions {

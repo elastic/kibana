@@ -7,11 +7,11 @@
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { RangeFilter } from '@kbn/es-query';
-import { BytesFormat, FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import { createFiltersFromValueClickAction } from './create_filters_from_value_click';
+import { FieldFormatsGetConfigFn, BytesFormat } from '@kbn/field-formats-plugin/common';
+import { RangeFilter } from '@kbn/es-query';
 
 const mockField = {
   name: 'bytes',

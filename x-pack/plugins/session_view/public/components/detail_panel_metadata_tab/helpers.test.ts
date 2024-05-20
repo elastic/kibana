@@ -5,13 +5,13 @@
  * 2.0.
  */
 import type {
-  ProcessEventCloud,
-  ProcessEventContainer,
   ProcessEventHost,
+  ProcessEventContainer,
   ProcessEventOrchestrator,
+  ProcessEventCloud,
 } from '../../../common';
 import { DASH } from '../../constants';
-import { getCloudData, getContainerData, getHostData, getOrchestratorData } from './helpers';
+import { getHostData, getContainerData, getOrchestratorData, getCloudData } from './helpers';
 
 const MOCK_HOST_DATA: ProcessEventHost = {
   architecture: 'x86_64',

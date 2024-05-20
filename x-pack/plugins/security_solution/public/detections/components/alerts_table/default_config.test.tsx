@@ -10,9 +10,9 @@ import { tableDefaults } from '@kbn/securitysolution-data-table';
 import { createLicenseServiceMock } from '../../../../common/license/mocks';
 import {
   buildAlertAssigneesFilter,
-  buildAlertStatusFilter,
-  buildAlertStatusesFilter,
   buildAlertsFilter,
+  buildAlertStatusesFilter,
+  buildAlertStatusFilter,
   buildThreatMatchFilter,
   getAlertsDefaultModel,
   getAlertsPreviewDefaultModel,

@@ -8,8 +8,8 @@
 
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
 
-import { ContentType } from './content_type';
 import type { ContentTypeDefinition } from './content_type_definition';
+import { ContentType } from './content_type';
 
 export class ContentTypeRegistry {
   private readonly types: Map<string, ContentType> = new Map();

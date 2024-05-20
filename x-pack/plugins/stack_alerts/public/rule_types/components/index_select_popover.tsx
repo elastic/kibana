@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { isString, debounce } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -18,18 +22,14 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { HttpSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  IErrorObject,
   firstFieldOption,
   getFields,
   getIndexOptions,
   getTimeFieldOptions,
+  IErrorObject,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { debounce, isString } from 'lodash';
-import React, { useEffect, useState } from 'react';
 
 interface KibanaDeps {
   http: HttpSetup;

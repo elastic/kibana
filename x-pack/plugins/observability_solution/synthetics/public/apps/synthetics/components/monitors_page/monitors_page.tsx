@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
-import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
-import { useOverviewStatus } from './hooks/use_overview_status';
 import { DisabledCallout } from './management/disabled_callout';
+import { useOverviewStatus } from './hooks/use_overview_status';
+import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 
-import { useLocations } from '../../hooks';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
+import { useLocations } from '../../hooks';
 
-import { useEnablement } from '../../hooks/use_enablement';
 import { Loader } from './management/loader/loader';
+import { useEnablement } from '../../hooks/use_enablement';
 
+import { EnablementEmptyState } from './management/synthetics_enablement/synthetics_enablement';
+import { MonitorListContainer } from './management/monitor_list_container';
 import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useMonitorList } from './hooks/use_monitor_list';
 import * as labels from './management/labels';
-import { MonitorListContainer } from './management/monitor_list_container';
-import { EnablementEmptyState } from './management/synthetics_enablement/synthetics_enablement';
 
 const MonitorManagementPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'monitors' });

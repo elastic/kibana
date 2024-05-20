@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { ReactNode, useState } from 'react';
+import { EuiFlexItem, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
 
 export interface ContainerNameRowDeps {

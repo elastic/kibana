@@ -29,21 +29,21 @@ import {
   transactionDataSourceRt,
 } from '../default_api_types';
 import {
-  ServiceTransactionGroupDetailedStatisticsResponse,
-  getServiceTransactionGroupDetailedStatisticsPeriods,
-} from '../services/get_service_transaction_group_detailed_statistics';
-import {
-  ServiceTransactionGroupsResponse,
   getServiceTransactionGroups,
+  ServiceTransactionGroupsResponse,
 } from '../services/get_service_transaction_groups';
 import { getServiceTransactionGroupsAlerts } from '../services/get_service_transaction_groups_alerts';
-import { TransactionBreakdownResponse, getTransactionBreakdown } from './breakdown';
+import {
+  getServiceTransactionGroupDetailedStatisticsPeriods,
+  ServiceTransactionGroupDetailedStatisticsResponse,
+} from '../services/get_service_transaction_group_detailed_statistics';
+import { getTransactionBreakdown, TransactionBreakdownResponse } from './breakdown';
 import {
   FailedTransactionRateResponse,
   getFailedTransactionRatePeriods,
 } from './get_failed_transaction_rate_periods';
-import { TransactionLatencyResponse, getLatencyPeriods } from './get_latency_charts';
-import { TransactionTraceSamplesResponse, getTraceSamples } from './trace_samples';
+import { getLatencyPeriods, TransactionLatencyResponse } from './get_latency_charts';
+import { getTraceSamples, TransactionTraceSamplesResponse } from './trace_samples';
 
 export interface MergedServiceTransactionGroupsResponse
   extends Omit<ServiceTransactionGroupsResponse, 'transactionGroups'> {

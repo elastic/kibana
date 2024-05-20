@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { lazy, useEffect, useMemo } from 'react';
+import { isEmpty } from 'lodash';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import { InvalidEmailReason } from '@kbn/actions-plugin/common';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import {
-  NumericField,
-  PasswordField,
-  SelectField,
-  TextField,
-  ToggleField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import {
-  FieldConfig,
   UseField,
   useFormContext,
   useFormData,
+  FieldConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  NumericField,
+  SelectField,
+  TextField,
+  ToggleField,
+  PasswordField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { isEmpty } from 'lodash';
-import React, { lazy, useEffect, useMemo } from 'react';
 import { AdditionalEmailServices } from '../../../common';
 import { getEmailServices } from './email';
-import * as i18n from './translations';
 import { useEmailConfig } from './use_email_config';
+import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;
 

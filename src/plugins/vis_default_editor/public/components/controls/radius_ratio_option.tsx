@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback } from 'react';
 import { EuiFormRow, EuiIconTip, EuiRange, EuiRangeProps, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
 import useMount from 'react-use/lib/useMount';
 
 import { AggControlProps } from './agg_control_props';

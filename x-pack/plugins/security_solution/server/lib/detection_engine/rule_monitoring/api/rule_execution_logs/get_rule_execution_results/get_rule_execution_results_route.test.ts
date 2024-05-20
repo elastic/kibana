@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
+import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
 
 import { GET_RULE_EXECUTION_RESULTS_URL } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { getRuleExecutionResultsResponseMock } from '../../../../../../../common/api/detection_engine/rule_monitoring/mocks';

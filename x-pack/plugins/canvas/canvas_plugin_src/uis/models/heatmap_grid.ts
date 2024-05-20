@@ -6,9 +6,9 @@
  */
 
 import { get } from 'lodash';
+import { getState, getValue } from '../../../public/lib/resolved_arg';
 import { ModelStrings } from '../../../i18n';
 import { ResolvedColumns } from '../../../public/expression_types/arg';
-import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 const { HeatmapGrid: strings } = ModelStrings;
 

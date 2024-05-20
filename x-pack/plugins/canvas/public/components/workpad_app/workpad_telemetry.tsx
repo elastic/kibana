@@ -6,12 +6,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import deepEqual from 'react-fast-compare';
 import { shallowEqual, useSelector } from 'react-redux';
-import { State } from '../../../types';
-import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
-import { getArgs } from '../../state/selectors/resolved_args';
+import deepEqual from 'react-fast-compare';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { getElementCounts } from '../../state/selectors/workpad';
+import { getArgs } from '../../state/selectors/resolved_args';
+import { State } from '../../../types';
 
 const WorkpadLoadedMetric = 'workpad-loaded';
 const WorkpadLoadedWithErrorsMetric = 'workpad-loaded-with-errors';

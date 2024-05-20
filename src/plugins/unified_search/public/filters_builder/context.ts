@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React, { Dispatch } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
-import React, { Dispatch } from 'react';
-import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 import type { FiltersBuilderActions } from './reducer';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 interface FiltersBuilderContextType {
   dataView: DataView;

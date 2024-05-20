@@ -1,4 +1,3 @@
-import { act, renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +5,13 @@ import { act, renderHook } from '@testing-library/react-hooks';
  * 2.0.
  */
 import React from 'react';
-import { TestProviders } from '../../../mock';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useEnableDataFeed } from './use_enable_data_feed';
+import { TestProviders } from '../../../mock';
 
-import { ML_JOB_TELEMETRY_STATUS } from '../../../lib/telemetry';
-import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
 import type { SecurityJob } from '../types';
+import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
+import { ML_JOB_TELEMETRY_STATUS } from '../../../lib/telemetry';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>{children}</TestProviders>

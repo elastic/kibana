@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { APP_ID } from '../../../common/constants';
 import { useNavigation } from '../lib/kibana';
 import { TestProviders } from '../mock';
-import { CasesDeepLinkId } from './deep_links';
 import {
-  useAllCasesNavigation,
-  useCaseViewNavigation,
   useCasesNavigation,
-  useConfigureCasesNavigation,
+  useAllCasesNavigation,
   useCreateCaseNavigation,
+  useConfigureCasesNavigation,
+  useCaseViewNavigation,
 } from './hooks';
+import { CasesDeepLinkId } from './deep_links';
 
 const useNavigationMock = useNavigation as jest.Mock;
 jest.mock('../lib/kibana');

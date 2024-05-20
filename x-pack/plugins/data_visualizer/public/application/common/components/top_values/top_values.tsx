@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { Fragment } from 'react';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
-  EuiSpacer,
   EuiText,
+  EuiButtonIcon,
+  EuiSpacer,
 } from '@elastic/eui';
-import type { FC } from 'react';
-import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { css } from '@emotion/react';
+import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
-import classNames from 'classnames';
-import type { FieldVisStats } from '../../../../../common/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { EMPTY_EXAMPLE } from '../examples_list/examples_list';
-import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
-import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
 import { kibanaFieldFormat } from '../utils';
+import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
+import type { FieldVisStats } from '../../../../../common/types';
+import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
+import { EMPTY_EXAMPLE } from '../examples_list/examples_list';
 
 interface Props {
   stats: FieldVisStats | undefined;

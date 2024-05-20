@@ -8,16 +8,16 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiHighlight, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { euiThemeVars } from '@kbn/ui-theme';
 
-import { useFieldFormatter } from '../../hooks/use_field_formatter';
-import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
+import { OptionsListStrings } from './options_list_strings';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverEmptyMessage } from './options_list_popover_empty_message';
 import { OptionsListPopoverSuggestionBadge } from './options_list_popover_suggestion_badge';
-import { OptionsListStrings } from './options_list_strings';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 interface OptionsListPopoverSuggestionsProps {
   showOnlySelected: boolean;

@@ -12,11 +12,11 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiCode,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiFieldText,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';

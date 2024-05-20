@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiBadge, EuiTextBlockTruncate, EuiTextColor, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isCombinedFilter } from '@kbn/es-query';
-import React from 'react';
+import { css } from '@emotion/react';
+import { FilterBadgeGroup } from './filter_badge_group';
 import type { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
 import { badgePaddingCss, marginLeftLabelCss } from './filter_badge.styles';
-import { FilterBadgeGroup } from './filter_badge_group';
 import { strings } from './i18n';
 
 export interface FilterBadgeProps {

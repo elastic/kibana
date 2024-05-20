@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { sortBy } from 'lodash';
 import {
   EuiButton,
   EuiContextMenu,
@@ -14,8 +16,6 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { sortBy } from 'lodash';
-import React from 'react';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import { useServices } from '../services';

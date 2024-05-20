@@ -6,12 +6,12 @@
  */
 
 import { EuiBadge, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import React, { useCallback, useMemo } from 'react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { DraggableBadge } from '../../../common/components/draggables';
-import type { ParsedField } from '../types';
 import { getFlyoutPanelProps } from './helpers';
+import type { ParsedField } from '../types';
 
 const contextId = 'FieldMarkdownRenderer';
 

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { KbnError } from '@kbn/kibana-utils-plugin/common';
-import React from 'react';
 
 export enum TimeoutErrorMode {
   CONTACT,

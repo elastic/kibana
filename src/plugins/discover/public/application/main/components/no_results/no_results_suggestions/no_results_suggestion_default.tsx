@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiCode, EuiText } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiText, EuiCode } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 export interface NoResultsSuggestionDefaultProps {
   dataView: DataView;

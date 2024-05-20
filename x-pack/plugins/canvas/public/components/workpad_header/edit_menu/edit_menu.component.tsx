@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { Fragment, FunctionComponent, useState } from 'react';
+import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
-import React, { Fragment, FunctionComponent, useState } from 'react';
-import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
+import { Popover, ClosePopoverFn } from '../../popover';
 import { ShortcutStrings } from '../../../../i18n/shortcuts';
-import { PositionedElement } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { CustomElementModal } from '../../custom_element_modal';
-import { ClosePopoverFn, Popover } from '../../popover';
+import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
+import { PositionedElement } from '../../../../types';
 
 const shortcutHelp = ShortcutStrings.getShortcutHelp();
 const strings = {

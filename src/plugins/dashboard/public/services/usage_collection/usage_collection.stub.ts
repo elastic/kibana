@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardUsageCollectionService } from './types';
 
 type UsageCollectionServiceFactory = PluginServiceFactory<DashboardUsageCollectionService>;

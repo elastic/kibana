@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { SyntheticsRestApiRouteFactory } from '../types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getConnectorTypesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

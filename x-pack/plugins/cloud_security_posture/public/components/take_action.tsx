@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -15,16 +16,15 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react';
-import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
-import { useKibana } from '../common/hooks/use_kibana';
 import type { RuleResponse } from '../common/types';
-import { CloudSecurityPostureStartServices } from '../types';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
+import { useKibana } from '../common/hooks/use_kibana';
+import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
+import { CloudSecurityPostureStartServices } from '../types';
 
 const RULE_PAGE_PATH = '/app/security/rules/id/';
 

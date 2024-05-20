@@ -7,28 +7,28 @@
  */
 
 import './inspector_panel.scss';
+import { i18n } from '@kbn/i18n';
+import React, { Component, Suspense } from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiLoadingSpinner,
   EuiTitle,
+  EuiFlyoutBody,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import {
   ApplicationStart,
   HttpStart,
   IUiSettingsClient,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
-import PropTypes from 'prop-types';
-import React, { Component, Suspense } from 'react';
-import { Adapters } from '../../common';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { InspectorViewDescription } from '../types';
+import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {

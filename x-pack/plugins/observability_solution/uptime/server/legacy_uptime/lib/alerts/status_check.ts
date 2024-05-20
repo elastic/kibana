@@ -1,4 +1,3 @@
-import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,43 +5,55 @@ import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-
  * 2.0.
  */
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { min } from 'lodash';
 import moment from 'moment';
 
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { schema } from '@kbn/config-schema';
 import datemath from '@kbn/datemath';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { JsonObject } from '@kbn/utility-types';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import {
-  AlertsLocatorParams,
-  TimeUnitChar,
   alertsLocatorID,
+  AlertsLocatorParams,
   formatDurationFromTimeUnitChar,
   getAlertUrl,
   observabilityPaths,
+  TimeUnitChar,
 } from '@kbn/observability-plugin/common';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import { JsonObject } from '@kbn/utility-types';
-import { UNNAMED_LOCATION } from '../../../../common/constants';
-import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
-import { combineFiltersAndUserSearch, stringifyKueries } from '../../../../common/lib';
+import { UptimeAlertTypeFactory } from './types';
 import {
-  GetMonitorAvailabilityParams,
-  Ping,
   StatusCheckFilters,
+  Ping,
+  GetMonitorAvailabilityParams,
 } from '../../../../common/runtime_types';
-import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
-import { UMServerLibs, UptimeEsClient } from '../lib';
-import { IndexPatternTitleAndFields, getUptimeIndexPattern } from '../requests/get_index_pattern';
+import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
+import {
+  updateState,
+  getViewInAppUrl,
+  setRecoveredAlertsContext,
+  UptimeRuleTypeAlertDefinition,
+} from './common';
+import {
+  commonMonitorStateI18,
+  commonStateTranslations,
+  statusCheckTranslations,
+} from './translations';
+import { stringifyKueries, combineFiltersAndUserSearch } from '../../../../common/lib';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 import {
-  GetMonitorDownStatusMessageParams,
   GetMonitorStatusResult,
+  GetMonitorDownStatusMessageParams,
   getMonitorDownStatusMessageParams,
 } from '../requests/get_monitor_status';
+import { UNNAMED_LOCATION } from '../../../../common/constants';
+import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
+import { UMServerLibs, UptimeEsClient } from '../lib';
 import {
   ACTION_VARIABLES,
   ALERT_DETAILS_URL,
@@ -50,18 +61,7 @@ import {
   MESSAGE,
   VIEW_IN_APP_URL,
 } from './action_variables';
-import {
-  UptimeRuleTypeAlertDefinition,
-  getViewInAppUrl,
-  setRecoveredAlertsContext,
-  updateState,
-} from './common';
-import {
-  commonMonitorStateI18,
-  commonStateTranslations,
-  statusCheckTranslations,
-} from './translations';
-import { UptimeAlertTypeFactory } from './types';
+import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 

@@ -6,8 +6,8 @@
  */
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import { ProfileTree, Props } from '../profile_tree';
 import { searchResponse } from './fixtures/search_response';
+import { ProfileTree, Props } from '../profile_tree';
 
 describe('ProfileTree', () => {
   it('renders', async () => {

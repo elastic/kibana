@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SortDirection } from '@kbn/data-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
 import {
+  getEsQuerySort,
   getESQuerySortForTieBreaker,
   getESQuerySortForTimeField,
-  getEsQuerySort,
   getTieBreakerFieldName,
 } from './get_es_query_sort';
+import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 const dataView = createStubDataView({
   spec: {

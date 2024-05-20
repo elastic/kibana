@@ -9,8 +9,8 @@ import datemath from '@kbn/datemath';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
 import { useDataView } from '../components/app/rum_dashboard/local_uifilters/use_data_view';
-import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { jsErrorsQuery } from '../services/data/js_errors_query';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 
 function callDateMath(value: unknown): number {
   const DEFAULT_RETURN_VALUE = 0;

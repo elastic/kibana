@@ -7,8 +7,8 @@
  */
 import { ServerlessType } from '@kbn/elastic-agent-utils';
 import defaultIcon from '../../../assets/default.svg';
-import azureFunctionsIcon from '../../../assets/functions.svg';
 import lambdaIcon from '../../../assets/lambda.svg';
+import azureFunctionsIcon from '../../../assets/functions.svg';
 
 const serverlessIcons: Record<ServerlessType, string> = {
   'aws.lambda': lambdaIcon,

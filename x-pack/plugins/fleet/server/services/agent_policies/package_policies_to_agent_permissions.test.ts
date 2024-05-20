@@ -11,9 +11,9 @@ import type { PackagePolicy, RegistryDataStream } from '../../types';
 
 import type { DataStreamMeta } from './package_policies_to_agent_permissions';
 import {
-  UNIVERSAL_PROFILING_PERMISSIONS,
   getDataStreamPrivileges,
   storedPackagePoliciesToAgentPermissions,
+  UNIVERSAL_PROFILING_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 
 const packageInfoCache = new Map();

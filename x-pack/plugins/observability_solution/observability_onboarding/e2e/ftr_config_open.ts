@@ -7,8 +7,8 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import cypress from 'cypress';
-import { cypressTestRunner } from './cypress_test_runner';
 import { FtrProviderContext } from './ftr_provider_context';
+import { cypressTestRunner } from './cypress_test_runner';
 
 async function ftrConfigOpen({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(require.resolve('./ftr_config.ts'));

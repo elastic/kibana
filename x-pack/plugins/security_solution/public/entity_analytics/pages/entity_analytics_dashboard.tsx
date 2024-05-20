@@ -1,4 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,24 +5,25 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
  * 2.0.
  */
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { RiskScoreEntity } from '../../../common/search_strategy';
 import { ENTITY_ANALYTICS } from '../../app/translations';
-import { SecurityPageName } from '../../app/types';
-import { EmptyPrompt } from '../../common/components/empty_prompt';
-import { FiltersGlobal } from '../../common/components/filters_global';
-import { HeaderPage } from '../../common/components/header_page';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { SiemSearchBar } from '../../common/components/search_bar';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { InputsModelId } from '../../common/store/inputs/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useHasSecurityCapability } from '../../helper_hooks';
+import { SecurityPageName } from '../../app/types';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { HeaderPage } from '../../common/components/header_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
+import { SiemSearchBar } from '../../common/components/search_bar';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { FiltersGlobal } from '../../common/components/filters_global';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
-import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
-import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
-import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 import { RiskScoreUpdatePanel } from '../components/risk_score_update_panel';
+import { useHasSecurityCapability } from '../../helper_hooks';
+import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
+import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
+import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();

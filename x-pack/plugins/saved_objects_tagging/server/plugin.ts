@@ -7,20 +7,20 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { savedObjectsTaggingFeature } from './features';
+import { tagType } from './saved_objects';
+import type {
+  TagsHandlerContext,
+  SavedObjectTaggingStart,
+  CreateTagClientOptions,
+  CreateTagAssignmentServiceOptions,
+} from './types';
 import { TagsRequestHandlerContext } from './request_handler_context';
 import { registerRoutes } from './routes';
-import { tagType } from './saved_objects';
-import { AssignmentService, TagsClient } from './services';
-import type {
-  CreateTagAssignmentServiceOptions,
-  CreateTagClientOptions,
-  SavedObjectTaggingStart,
-  TagsHandlerContext,
-} from './types';
 import { createTagUsageCollector } from './usage';
+import { TagsClient, AssignmentService } from './services';
 
 interface SetupDeps {
   features: FeaturesPluginSetup;

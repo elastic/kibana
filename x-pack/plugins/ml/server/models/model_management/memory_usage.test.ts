@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { MemoryStatsResponse } from '../../../common/types/trained_models';
+import { MemoryUsageService } from './memory_usage';
 import type { MlClient } from '../../lib/ml_client';
 import mockResponse from './__mocks__/mock_deployment_response.json';
-import { MemoryUsageService } from './memory_usage';
+import type { MemoryStatsResponse } from '../../../common/types/trained_models';
 
 describe('Model service', () => {
   const mlClient = {

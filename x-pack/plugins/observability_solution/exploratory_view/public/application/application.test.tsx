@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { createMemoryHistory } from 'history';
 import { noop } from 'lodash';
 import React from 'react';
 import { Observable } from 'rxjs';
-import { renderApp } from '.';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 import { ExploratoryViewPublicPluginsStart } from '../plugin';
+import { renderApp } from '.';
+import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 describe('renderApp', () => {
   const originalConsole = global.console;

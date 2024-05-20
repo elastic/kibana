@@ -8,15 +8,15 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
-import { TooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import { LineToolTipContentComponent } from './line_tool_tip_content';
 import {
   SUM_OF_CLIENT_BYTES,
   SUM_OF_DESTINATION_BYTES,
   SUM_OF_SERVER_BYTES,
   SUM_OF_SOURCE_BYTES,
 } from '../map_config';
-import { LineToolTipContentComponent } from './line_tool_tip_content';
+import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import { TooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 
 describe('LineToolTipContent', () => {
   const mockFeatureProps: ITooltipProperty[] = [

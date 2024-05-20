@@ -6,10 +6,10 @@
  */
 
 import { functions as commonFunctions } from '../common';
-import { escount } from './escount';
-import { esdocs } from './esdocs';
 import { location } from './location';
 import { markdown } from './markdown';
 import { urlparam } from './urlparam';
+import { escount } from './escount';
+import { esdocs } from './esdocs';
 
 export const functions = [location, markdown, urlparam, escount, esdocs, ...commonFunctions];

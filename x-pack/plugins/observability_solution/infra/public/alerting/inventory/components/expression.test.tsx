@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
-import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
-import { AlertContextMeta, ExpressionRow, Expressions, defaultExpression } from './expression';
+import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../../../containers/metrics_source/source', () => ({
   withSourceProvider: () => jest.fn,

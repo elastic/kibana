@@ -7,10 +7,10 @@
  */
 
 import { createFailError } from '@kbn/dev-cli-errors';
-import { I18nConfig } from '../config';
 import { matchEntriesWithExctractors } from '../extract_default_translations';
+import { I18nConfig } from '../config';
+import { normalizePath, readFileAsync, ErrorReporter } from '../utils';
 import { I18nCheckTaskContext } from '../types';
-import { ErrorReporter, normalizePath, readFileAsync } from '../utils';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>

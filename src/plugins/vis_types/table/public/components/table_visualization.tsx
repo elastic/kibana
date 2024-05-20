@@ -7,16 +7,16 @@
  */
 
 import './table_visualization.scss';
+import React, { useLayoutEffect } from 'react';
+import classNames from 'classnames';
 import { CoreStart } from '@kbn/core/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import classNames from 'classnames';
-import React, { useLayoutEffect } from 'react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TableVisConfig, TableVisData } from '../types';
-import { useUiState } from '../utils';
 import { TableVisBasic } from './table_vis_basic';
 import { TableVisSplit } from './table_vis_split';
+import { useUiState } from '../utils';
 
 interface TableVisualizationComponentProps {
   core: CoreStart;

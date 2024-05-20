@@ -8,17 +8,17 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import type { Rule, RuleAction } from '@kbn/alerting-plugin/common';
 import type {
-  AlertInstanceContext,
-  AlertInstanceState,
+  RulesClient,
   PartialRule,
-  RuleExecutorOptions,
   RuleType,
   RuleTypeParams,
   RuleTypeState,
-  RulesClient,
+  AlertInstanceState,
+  AlertInstanceContext,
+  RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
+import type { Rule, RuleAction } from '@kbn/alerting-plugin/common';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../../../common/constants';
 

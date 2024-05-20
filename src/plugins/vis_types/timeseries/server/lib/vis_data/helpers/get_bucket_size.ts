@@ -8,16 +8,16 @@
 import type { Unit } from '@kbn/datemath';
 
 import { search } from '@kbn/data-plugin/server';
-import { GTE_INTERVAL_RE, INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
-import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
-import type { SearchCapabilities } from '../../search_strategies';
-import { getTimerange } from './get_timerange';
 import {
-  ASCENDING_UNIT_ORDER,
-  convertIntervalToUnit,
   getUnitValue,
   parseInterval,
+  convertIntervalToUnit,
+  ASCENDING_UNIT_ORDER,
 } from './unit_to_seconds';
+import { getTimerange } from './get_timerange';
+import { INTERVAL_STRING_RE, GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
+import type { SearchCapabilities } from '../../search_strategies';
+import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
 
 const calculateBucketData = (timeInterval: string, capabilities: SearchCapabilities) => {
   let intervalString = capabilities?.getValidTimeInterval(timeInterval) ?? timeInterval;

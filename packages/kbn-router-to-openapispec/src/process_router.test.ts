@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { OasConverter } from './oas_converter';
-import { type InternalRouterRoute, extractResponses } from './process_router';
+import { extractResponses, type InternalRouterRoute } from './process_router';
 
 describe('extractResponses', () => {
   let oasConverter: OasConverter;

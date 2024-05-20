@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ControlGroupInput, ControlGroupOutput } from '@kbn/controls-plugin/public';
+import type { ControlGroupOutput, ControlGroupInput } from '@kbn/controls-plugin/public';
 import { Subject } from 'rxjs';
 
 export const controlGroupFilterOutputMock$ = new Subject<ControlGroupOutput>();

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  createTestServers,
   type TestElasticsearchUtils,
   type TestKibanaUtils,
-  createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { EventStreamLoggerMock } from '../../tests/event_stream_logger_mock';
-import { testEventStreamClient } from '../../tests/test_event_stream_client';
 import { EsEventStreamClient } from '../es_event_stream_client';
 import { EsEventStreamNames } from '../es_event_stream_names';
+import { EventStreamLoggerMock } from '../../tests/event_stream_logger_mock';
+import { testEventStreamClient } from '../../tests/test_event_stream_client';
 
 describe('EsEventStreamClient', () => {
   let manageES: TestElasticsearchUtils;

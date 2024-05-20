@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import expect from '@kbn/expect';
-import { get } from 'lodash';
 import moment from 'moment';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
+import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
+import { get } from 'lodash';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { SuperuserAtSpace1 } from '../../../../scenarios';
 import {
-  ObjectRemover,
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
+  ObjectRemover,
 } from '../../../../../common/lib';
-import { SuperuserAtSpace1 } from '../../../../scenarios';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function apiKeyBackfillTests({ getService }: FtrProviderContext) {

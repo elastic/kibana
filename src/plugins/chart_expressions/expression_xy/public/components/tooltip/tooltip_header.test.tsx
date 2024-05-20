@@ -8,8 +8,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { EndzoneTooltipHeader } from './endzone_tooltip_header';
 import { TooltipHeader } from './tooltip_header';
+import { EndzoneTooltipHeader } from './endzone_tooltip_header';
 
 describe('TooltipHeader', () => {
   const formatter = (value: unknown) => `formatted-${value}`;

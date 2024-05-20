@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../../../common/constants';
 import { FilterStateStore } from '@kbn/es-query';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { LAYER_TYPE, SCALING_TYPES, SOURCE_TYPES } from '../../../common/constants';
-import type { LayerDescriptor } from '../../../common/descriptor_types';
 import { MapsAppLocatorDefinition } from './locator_definition';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { LayerDescriptor } from '../../../common/descriptor_types';
 
 const MAP_ID: string = '2c9c1f60-1909-11e9-919b-ffe5949a18d2';
 const LAYER_ID: string = '13823000-99b9-11ea-9eb6-d9e8adceb647';

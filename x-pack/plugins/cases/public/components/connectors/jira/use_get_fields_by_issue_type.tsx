@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
+import type { HttpSetup } from '@kbn/core/public';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { isEmpty } from 'lodash';
-import type { ActionConnector } from '../../../../common/types/domain';
-import { useCasesToast } from '../../../common/use_cases_toast';
 import type { ServerError } from '../../../types';
-import { connectorsQueriesKeys } from '../constants';
+import { useCasesToast } from '../../../common/use_cases_toast';
+import type { ActionConnector } from '../../../../common/types/domain';
 import { getFieldsByIssueType } from './api';
-import * as i18n from './translations';
 import type { Fields } from './types';
+import * as i18n from './translations';
+import { connectorsQueriesKeys } from '../constants';
 
 interface Props {
   http: HttpSetup;

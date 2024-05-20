@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 export function SectionError(props) {
   const { title, error, ...rest } = props;

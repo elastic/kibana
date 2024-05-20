@@ -1,4 +1,3 @@
-import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { renderHook } from '@testing-library/react-hooks';
  * 2.0.
  */
 import { useLocation } from 'react-router-dom';
+import { renderHook } from '@testing-library/react-hooks';
+import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
 import { useResolveConflict } from './use_resolve_conflict';
-import { useDeepEqualSelector } from './use_selector';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');

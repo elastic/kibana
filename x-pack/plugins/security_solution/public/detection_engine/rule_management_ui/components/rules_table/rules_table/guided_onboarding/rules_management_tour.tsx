@@ -11,8 +11,8 @@ import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import { siemGuideId } from '../../../../../../../common/guided_onboarding/siem_guide_config';
+import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFindRulesQuery } from '../../../../../rule_management/api/hooks/use_find_rules_query';
 import { useExecuteBulkAction } from '../../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
@@ -36,11 +36,11 @@ const GUIDED_ONBOARDING_RULES_FILTER = {
 };
 
 export enum GuidedOnboardingRulesStatus {
-  inactive = 'inactive',
-  installRules = 'installRules',
-  searchRules = 'searchRules',
-  enableRules = 'enableRules',
-  completed = 'completed',
+  'inactive' = 'inactive',
+  'installRules' = 'installRules',
+  'searchRules' = 'searchRules',
+  'enableRules' = 'enableRules',
+  'completed' = 'completed',
 }
 
 export const RulesManagementTour = () => {

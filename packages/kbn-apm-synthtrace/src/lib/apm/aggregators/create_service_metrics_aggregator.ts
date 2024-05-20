@@ -1,4 +1,3 @@
-import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
  * Side Public License, v 1.
  */
 import { pick } from 'lodash';
+import { hashKeysOf, ApmFields } from '@kbn/apm-synthtrace-client';
 import { createLosslessHistogram } from '../../utils/create_lossless_histogram';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import type { DataViewsContract, DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataView, DataViewSpec, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import { generateId } from '../id_generator';
-import type { DataViewsState } from '../state_management';
 import type { IndexPattern, IndexPatternMap } from '../types';
 import { ensureIndexPattern, loadIndexPatterns } from './loader';
+import type { DataViewsState } from '../state_management';
+import { generateId } from '../id_generator';
 
 export interface IndexPatternServiceProps {
   core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;

@@ -9,16 +9,16 @@
 /* eslint-disable max-classes-per-file */
 
 import { EuiFlyout } from '@elastic/eui';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type { OverlayFlyoutOpenOptions, OverlayFlyoutStart } from '@kbn/core-overlays-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { Subject } from 'rxjs';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to

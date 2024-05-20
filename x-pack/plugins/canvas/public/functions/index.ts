@@ -6,13 +6,13 @@
  */
 
 import type { PaletteRegistry } from '@kbn/coloring';
-import { CanvasSetupDeps, CoreSetup } from '../plugin';
 import { asset } from './asset';
 import { filtersFunctionFactory } from './filters';
-import { pieFunctionFactory } from './pie';
-import { plotFunctionFactory } from './plot';
 import { timelionFunctionFactory } from './timelion';
 import { toFunctionFactory } from './to';
+import { CanvasSetupDeps, CoreSetup } from '../plugin';
+import { plotFunctionFactory } from './plot';
+import { pieFunctionFactory } from './pie';
 
 export interface InitializeArguments {
   prependBasePath: CoreSetup['http']['basePath']['prepend'];

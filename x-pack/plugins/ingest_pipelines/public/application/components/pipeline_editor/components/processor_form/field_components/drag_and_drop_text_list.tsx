@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import React, { useState, useCallback, memo } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiIcon,
+  EuiFieldText,
+  EuiFormRow,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, memo } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 import {
-  ArrayItem,
   UseField,
+  ArrayItem,
   ValidationFunc,
   getFieldValidityAndErrorMessage,
 } from '../../../../../../shared_imports';

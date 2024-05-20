@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-import { ListArray, list } from '../lists';
+import { Either } from 'fp-ts/lib/Either';
+import { list, ListArray } from '../lists';
 
 /**
  * Types the DefaultListArray as:

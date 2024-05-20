@@ -1,7 +1,8 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
+    "aliases": {
+    },
     "index": ".monitoring-beats-6-2018.08.31",
     "mappings": {
       "dynamic": false,

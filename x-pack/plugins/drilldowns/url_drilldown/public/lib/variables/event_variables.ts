@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { monaco } from '@kbn/monaco';
+import { getPanelTitle, type PublishesPanelTitle } from '@kbn/presentation-publishing';
 import {
   ChartActionContext,
+  isRangeSelectTriggerContext,
+  isValueClickTriggerContext,
+  isRowClickTriggerContext,
+  isContextMenuTriggerContext,
   RangeSelectContext,
   SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
   ValueClickContext,
-  isContextMenuTriggerContext,
-  isRangeSelectTriggerContext,
-  isRowClickTriggerContext,
-  isValueClickTriggerContext,
+  VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { RowClickContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
-import { monaco } from '@kbn/monaco';
-import { type PublishesPanelTitle, getPanelTitle } from '@kbn/presentation-publishing';
-import { ROW_CLICK_TRIGGER, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import type { ActionFactoryContext } from '../url_drilldown';
-import { Primitive, deleteUndefinedKeys, toPrimitiveOrUndefined } from './util';
+import { deleteUndefinedKeys, toPrimitiveOrUndefined, Primitive } from './util';
 
 /**
  * URL drilldown event scope, available as `{{event.*}}` Handlebars variables.

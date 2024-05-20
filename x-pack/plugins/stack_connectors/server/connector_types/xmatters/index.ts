@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  AlertingConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+import { isString } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import { TypeOf, schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import { isString } from 'lodash';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
 import { postXmatters } from './post_xmatters';
 
 export type XmattersConnectorType = ConnectorType<

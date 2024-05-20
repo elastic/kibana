@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import { relative } from 'path';
+import Fs from 'fs';
+import { createGunzip, createGzip, constants } from 'zlib';
 import { promisify } from 'util';
-import { constants, createGunzip, createGzip } from 'zlib';
+import globby from 'globby';
 import { ToolingLog } from '@kbn/tooling-log';
 import { createPromiseFromStreams } from '@kbn/utils';
-import globby from 'globby';
 
 const unlinkAsync = promisify(Fs.unlink);
 

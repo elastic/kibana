@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -13,9 +14,8 @@ import {
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
-import React from 'react';
 import { useHistory } from 'react-router-dom';
+import moment from 'moment';
 import { SyntheticsJourneyApiResponse } from '../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../components/overview/monitor_list/columns/monitor_status_column';
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,19 +15,17 @@ import {
   EuiForm,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useState } from 'react';
 
-import { TIME_UNITS } from '../../../../common/constants';
 import { SlmPolicyPayload } from '../../../../common/types';
+import { TIME_UNITS } from '../../../../common/constants';
 import { PolicyValidation, validatePolicy } from '../../services/validation';
-import { PolicyNavigation } from './navigation';
 import {
   PolicyStepLogistics,
+  PolicyStepSettings,
   PolicyStepRetention,
   PolicyStepReview,
-  PolicyStepSettings,
 } from './steps';
+import { PolicyNavigation } from './navigation';
 
 interface Props {
   policy: SlmPolicyPayload;

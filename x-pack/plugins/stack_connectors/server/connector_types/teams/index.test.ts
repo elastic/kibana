@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
-import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { Services } from '@kbn/actions-plugin/server/types';
 import { Logger } from '@kbn/core/server';
-import { loggerMock } from '@kbn/logging-mocks';
+import { Services } from '@kbn/actions-plugin/server/types';
+import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import axios from 'axios';
-import { ConnectorTypeId, TeamsConnectorType, getConnectorType } from '.';
+import { getConnectorType, TeamsConnectorType, ConnectorTypeId } from '.';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {

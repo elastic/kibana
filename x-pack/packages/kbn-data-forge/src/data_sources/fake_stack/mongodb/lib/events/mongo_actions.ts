@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { faker } from '@faker-js/faker';
 import { memoize, sample } from 'lodash';
-import { Moment } from 'moment';
+import { faker } from '@faker-js/faker';
 import { v4 } from 'uuid';
-import { Doc } from '../../../../../types';
-import { MONGODB_HOSTS } from '../../../common/constants';
+import { Moment } from 'moment';
 import { createBaseEvent } from './create_base_event';
+import { MONGODB_HOSTS } from '../../../common/constants';
+import { Doc } from '../../../../../types';
 
 const getIpAddressAndPort = memoize((_source: string) => {
   const ip = faker.internet.ip();

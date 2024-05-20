@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type TypeOf, schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { SecuritySolutionPluginSetup } from '@kbn/security-solution-plugin/server/plugin_contract';
 import { productTypes } from '../common/config';

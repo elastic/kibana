@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
+import { TestBed } from '@kbn/test-jest-helpers';
 import { Phase } from '../../../common/types';
 
 const createWaitForValidationAction = (testBed: TestBed) => () => {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { type FlyoutTourProps, FlyoutTour } from './flyout_tour';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import {
-  TestProviders,
   createMockStore,
   createSecuritySolutionStorageMock,
+  TestProviders,
 } from '../../../../common/mock';
-import { FlyoutTour, type FlyoutTourProps } from './flyout_tour';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_TOUR_TEST_ID } from './test_ids';
 
 jest.mock('../../../../common/lib/kibana');

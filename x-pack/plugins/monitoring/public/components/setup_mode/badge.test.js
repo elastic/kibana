@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
+import { SetupModeBadge } from './badge';
 import {
-  APM_SYSTEM_ID,
-  BEATS_SYSTEM_ID,
   ELASTICSEARCH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
+  APM_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
 } from '../../../common/constants';
-import { SetupModeBadge } from './badge';
 
 const STATUSES = [
   {

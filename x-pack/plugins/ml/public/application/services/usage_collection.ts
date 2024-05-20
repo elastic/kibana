@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import type { MlUsageEvent } from '../../../common/constants/usage_collection';
 

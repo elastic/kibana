@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiBadge, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { max } from 'lodash/fp';
 import React, { useMemo } from 'react';
+import { max } from 'lodash/fp';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { UserItem } from '../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
 import type { ManagedUserData } from '../../../timelines/components/side_panel/new_user_detail/types';
 
-import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
+import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
@@ -30,9 +30,9 @@ interface UserPanelHeaderProps {
 const linkTitleCSS = { width: 'fit-content' };
 
 export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPanelHeaderProps) => {
-  const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.['@timestamp'][0] as
-    | string
-    | undefined;
+  const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
+    '@timestamp'
+  ][0] as string | undefined;
   const entraTimestamp = managedUser.data?.[ManagedUserDatasetKey.ENTRA]?.fields?.[
     '@timestamp'
   ][0] as string | undefined;

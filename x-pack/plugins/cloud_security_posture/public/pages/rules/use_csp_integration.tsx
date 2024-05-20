@@ -1,10 +1,3 @@
-import {
-  API_VERSIONS,
-  type CopyAgentPolicyResponse,
-  type GetOnePackagePolicyResponse,
-  agentPolicyRouteService,
-  packagePolicyRouteService,
-} from '@kbn/fleet-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,8 +5,15 @@ import {
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { PageUrlParams } from '../../../common/types/rules/v3';
+import {
+  type CopyAgentPolicyResponse,
+  type GetOnePackagePolicyResponse,
+  packagePolicyRouteService,
+  agentPolicyRouteService,
+  API_VERSIONS,
+} from '@kbn/fleet-plugin/common';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { PageUrlParams } from '../../../common/types/rules/v3';
 
 export const useCspIntegrationInfo = ({ packagePolicyId, policyId }: PageUrlParams) => {
   const { http } = useKibana().services;

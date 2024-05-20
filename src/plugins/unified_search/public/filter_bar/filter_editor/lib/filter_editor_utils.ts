@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IpAddress, isFilterable } from '@kbn/data-plugin/common';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import dateMath from '@kbn/datemath';
 import { Filter, RangeFilter, ScriptedRangeFilter, isRangeFilter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
+import { isFilterable, IpAddress } from '@kbn/data-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FILTER_OPERATORS, OPERATORS, Operator } from './filter_operators';
 
 export function getFieldFromFilter(filter: Filter, indexPattern?: DataView) {
@@ -19,10 +19,7 @@ export function getFieldFromFilter(filter: Filter, indexPattern?: DataView) {
 }
 
 function getRangeOperatorFromFilter({
-  meta: {
-    params: { gte, gt, lte, lt } = {},
-    negate,
-  },
+  meta: { params: { gte, gt, lte, lt } = {}, negate },
 }: RangeFilter | ScriptedRangeFilter) {
   if (negate) {
     // if filter is negated, always use 'is not between' operator

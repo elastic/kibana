@@ -18,16 +18,16 @@ import {
 import type { RegistryPackage } from '../../../../common/types';
 import type { PackagePolicySOAttributes } from '../../../types';
 
-import { PackageNotFoundError } from '../../../errors';
 import { createAppContextStartContractMock } from '../../../mocks';
 import { appContextService } from '../../app_context';
+import { PackageNotFoundError } from '../../../errors';
 
-import { auditLoggingService } from '../../audit_logging';
 import { getSettings } from '../../settings';
+import { auditLoggingService } from '../../audit_logging';
 
 import * as Registry from '../registry';
 
-import { getInstalledPackages, getPackageInfo, getPackageUsageStats, getPackages } from './get';
+import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
 jest.mock('../registry');
 jest.mock('../../settings');

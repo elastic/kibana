@@ -5,74 +5,62 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import Boom from '@hapi/boom';
+import { cloneDeep } from 'lodash';
+import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
-  SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkCreateObject,
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import { cloneDeep } from 'lodash';
-import pMap from 'p-map';
+import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RuleAction, RuleSystemAction } from '../../../../../common';
-import { getRuleCircuitBreakerErrorMessage, parseDuration } from '../../../../../common';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
-import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
-import { bulkCreateRulesSo, findRulesSo } from '../../../../data/rule';
-import { RuleActionAttributes, RuleAttributes } from '../../../../data/rule/types';
-import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { RuleTypeRegistry } from '../../../../types';
 import {
-  convertRuleIdsToKueryNode,
+  validateRuleTypeParams,
   getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
-  validateRuleTypeParams,
+  convertRuleIdsToKueryNode,
 } from '../../../../lib';
-import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
+  retryIfBulkEditConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
   getBulkSnooze,
   getBulkUnsnooze,
-  injectReferencesIntoActions,
-  retryIfBulkEditConflicts,
   verifySnoozeScheduleLimit,
+  injectReferencesIntoActions,
 } from '../../../../rules_client/common';
-import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import {
-  API_KEY_GENERATE_CONCURRENCY,
+  alertingAuthorizationFilterOpts,
   MAX_RULES_NUMBER_FOR_BULK_OPERATION,
   RULE_TYPE_CHECKS_CONCURRENCY,
-  alertingAuthorizationFilterOpts,
+  API_KEY_GENERATE_CONCURRENCY,
 } from '../../../../rules_client/common/constants';
 import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
 import {
+  extractReferences,
+  validateActions,
+  updateMeta,
   addGeneratedActionValues,
   createNewAPIKeySet,
-  extractReferences,
-  updateMeta,
-  validateActions,
 } from '../../../../rules_client/lib';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
 import {
   BulkOperationError,
-  NormalizedAlertAction,
-  NormalizedAlertActionWithGeneratedValues,
   RuleBulkOperationAggregation,
   RulesClientContext,
+  NormalizedAlertActionWithGeneratedValues,
+  NormalizedAlertAction,
 } from '../../../../rules_client/types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { RuleTypeRegistry } from '../../../../types';
-import { RawRule, RawRuleAction, SanitizedRule } from '../../../../types';
-import { ruleNotifyWhen } from '../../constants';
-import { actionRequestSchema, ruleDomainSchema, systemActionRequestSchema } from '../../schemas';
-import {
-  transformRuleAttributesToRuleDomain,
-  transformRuleDomainToRule,
-  transformRuleDomainToRuleAttributes,
-} from '../../transforms';
-import { RuleDomain, RuleParams, RuleSnoozeSchedule } from '../../types';
-import { ValidateScheduleLimitResult, validateScheduleLimit } from '../get_schedule_frequency';
+import { migrateLegacyActions } from '../../../../rules_client/lib';
 import {
   BulkEditFields,
   BulkEditOperation,
@@ -81,6 +69,18 @@ import {
   ParamsModifier,
   ShouldIncrementRevision,
 } from './types';
+import { RawRuleAction, RawRule, SanitizedRule } from '../../../../types';
+import { ruleNotifyWhen } from '../../constants';
+import { actionRequestSchema, ruleDomainSchema, systemActionRequestSchema } from '../../schemas';
+import { RuleParams, RuleDomain, RuleSnoozeSchedule } from '../../types';
+import { findRulesSo, bulkCreateRulesSo } from '../../../../data/rule';
+import { RuleAttributes, RuleActionAttributes } from '../../../../data/rule/types';
+import {
+  transformRuleAttributesToRuleDomain,
+  transformRuleDomainToRuleAttributes,
+  transformRuleDomainToRule,
+} from '../../transforms';
+import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;

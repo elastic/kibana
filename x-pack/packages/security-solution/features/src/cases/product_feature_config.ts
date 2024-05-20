@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APP_ID } from '../constants';
 import { ProductFeatureCasesKey } from '../product_features_keys';
+import { APP_ID } from '../constants';
 import type { DefaultCasesProductFeaturesConfig } from './types';
 
 /**

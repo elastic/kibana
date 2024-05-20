@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import path from 'path';
+import { createHash } from 'crypto';
 import type {
   Entry,
   EntryNested,
@@ -16,8 +16,6 @@ import type {
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EntryFieldType, hasSimpleExecutableName } from '@kbn/securitysolution-utils';
 
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   ENDPOINT_ARTIFACT_LISTS,
   type ENDPOINT_BLOCKLISTS_LIST_ID,
@@ -26,24 +24,26 @@ import {
   type ENDPOINT_LIST_ID,
   type ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
+  TranslatedPerformantEntries,
+  TranslatedEntryMatcher,
   TranslatedEntryMatchWildcard,
   TranslatedEntryMatchWildcardMatcher,
-  TranslatedEntryMatcher,
   TranslatedEntryNestedEntry,
   TranslatedExceptionListItem,
-  TranslatedPerformantEntries,
   WrappedTranslatedExceptionList,
 } from '../../schemas';
 import {
+  translatedPerformantEntries as translatedPerformantEntriesType,
+  translatedEntry as translatedEntryType,
   translatedEntryMatchAnyMatcher,
   translatedEntryMatchMatcher,
   translatedEntryMatchWildcardMatcher,
   translatedEntryNestedEntry,
-  translatedEntry as translatedEntryType,
-  translatedPerformantEntries as translatedPerformantEntriesType,
   wrappedTranslatedExceptionList,
 } from '../../schemas';
 
@@ -215,10 +215,10 @@ function getMatcherFunction({
         : 'exact_caseless_any'
       : 'exact_cased_any'
     : doesFieldEndWith
-      ? os === 'linux'
-        ? 'exact_cased'
-        : 'exact_caseless'
-      : 'exact_cased';
+    ? os === 'linux'
+      ? 'exact_cased'
+      : 'exact_caseless'
+    : 'exact_cased';
 }
 
 function getMatcherWildcardFunction({

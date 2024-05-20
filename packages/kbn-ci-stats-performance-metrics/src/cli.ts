@@ -12,8 +12,8 @@
  *
  *************************************************************/
 
-import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { reporter } from './reporter';
 
 export async function runCli() {

@@ -14,21 +14,21 @@ import {
 import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { Coordinate } from '../../../../typings/timeseries';
-import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
-import {
-  getLatencyAggregation,
-  getLatencyValue,
-} from '../../../lib/helpers/latency_aggregation_type';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
+import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
+import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import {
+  getLatencyAggregation,
+  getLatencyValue,
+} from '../../../lib/helpers/latency_aggregation_type';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;

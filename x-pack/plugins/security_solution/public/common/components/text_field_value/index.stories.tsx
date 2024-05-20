@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { euiLightVars } from '@kbn/ui-theme';
-import { addDecorator, storiesOf } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { storiesOf, addDecorator } from '@storybook/react';
+import { euiLightVars } from '@kbn/ui-theme';
 
 import { TextFieldValue } from '.';
 

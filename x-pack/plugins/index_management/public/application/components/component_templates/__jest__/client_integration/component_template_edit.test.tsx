@@ -8,10 +8,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { IndexManagementBreadcrumb, breadcrumbService } from '../../../../services/breadcrumbs';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from './helpers';
-import { ComponentTemplateEditTestBed, setup } from './helpers/component_template_edit.helpers';
 import { API_BASE_PATH } from './helpers/constants';
+import { setup, ComponentTemplateEditTestBed } from './helpers/component_template_edit.helpers';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');

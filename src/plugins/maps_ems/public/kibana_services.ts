@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { LICENSE_CHECK_ID } from '../common';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import type { MapConfig } from '../config';
+import { LICENSE_CHECK_ID } from '../common';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);

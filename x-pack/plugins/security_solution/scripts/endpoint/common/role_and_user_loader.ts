@@ -7,15 +7,15 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { inspect } from 'util';
-import type { Role } from '@kbn/security-plugin/common';
 import type { KbnClient } from '@kbn/test';
+import type { Role } from '@kbn/security-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { inspect } from 'util';
 import type { AxiosError } from 'axios';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
-import { COMMON_API_HEADERS } from './constants';
 import type { EndpointSecurityRoleDefinitions } from './roles_users';
 import { getAllEndpointSecurityRoles } from './roles_users';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { COMMON_API_HEADERS } from './constants';
 
 const ignoreHttp409Error = (error: AxiosError) => {
   if (error?.response?.status === 409) {
@@ -169,10 +169,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
  * Role and user loader for Endpoint security dev/testing
  */
 export class EndpointSecurityTestRolesLoader extends RoleAndUserLoader<EndpointSecurityRoleDefinitions> {
-  constructor(
-    protected readonly kbnClient: KbnClient,
-    protected readonly logger: ToolingLog
-  ) {
+  constructor(protected readonly kbnClient: KbnClient, protected readonly logger: ToolingLog) {
     super(kbnClient, logger, getAllEndpointSecurityRoles());
   }
 }

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
-import { noop } from 'lodash/fp';
 import React from 'react';
+import { noop } from 'lodash/fp';
+import { render, screen } from '@testing-library/react';
 
-import { getRuleExecutionResultsResponseMock } from '../../../../../../common/api/detection_engine/rule_monitoring/mocks';
 import { TestProviders } from '../../../../../common/mock';
 import { useRuleDetailsContextMock } from '../__mocks__/rule_details_context';
+import { getRuleExecutionResultsResponseMock } from '../../../../../../common/api/detection_engine/rule_monitoring/mocks';
 
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useExecutionResults } from '../../../../rule_monitoring';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useRuleDetailsContext } from '../rule_details_context';
 import { ExecutionLogTable } from './execution_log_table';
 

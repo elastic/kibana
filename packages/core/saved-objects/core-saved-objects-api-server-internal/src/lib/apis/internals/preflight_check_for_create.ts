@@ -9,22 +9,22 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
-  LEGACY_URL_ALIAS_TYPE,
-  type LegacyUrlAlias,
-  getObjectKey,
-} from '@kbn/core-saved-objects-base-server-internal';
-import {
   type ISavedObjectTypeRegistry,
   type ISavedObjectsSerializer,
-  SavedObjectsErrorHelpers,
   type SavedObjectsRawDoc,
   type SavedObjectsRawDocSource,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  getObjectKey,
+  type LegacyUrlAlias,
+} from '@kbn/core-saved-objects-base-server-internal';
+import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
 import type { RepositoryEsClient } from '../../repository_es_client';
-import { type Either, isLeft, isRight, left, rawDocExistsInNamespaces, right } from '../utils';
-import { findLegacyUrlAliases } from './find_legacy_url_aliases';
+import { left, right, isLeft, isRight, rawDocExistsInNamespaces, type Either } from '../utils';
 
 /**
  * If the object will be created in this many spaces (or "*" all current and future spaces), we use find to fetch all aliases.

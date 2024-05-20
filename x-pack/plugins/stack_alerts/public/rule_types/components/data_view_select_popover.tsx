@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -23,11 +26,8 @@ import type {
   DataViewSpec,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EsQueryRuleMetaData } from '../es_query/types';
 
 export interface DataViewSelectPopoverProps {

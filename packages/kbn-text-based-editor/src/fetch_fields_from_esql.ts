@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { type DataView, textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
+import { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { type DataView, textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 
 interface TextBasedLanguagesErrorResponse {
   error: {

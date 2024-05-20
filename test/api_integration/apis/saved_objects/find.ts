@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObject } from '@kbn/core/server';
-import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import expect from '@kbn/expect';
+import { SavedObject } from '@kbn/core/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

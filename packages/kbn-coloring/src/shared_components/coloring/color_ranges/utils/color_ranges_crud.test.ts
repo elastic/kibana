@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { ColorRange } from '../types';
 import {
   addColorRange,
   deleteColorRange,
-  updateColorRangeColor,
   updateColorRangeValue,
+  updateColorRangeColor,
 } from './color_ranges_crud';
+import type { ColorRange } from '../types';
 
 describe('addColorRange', () => {
   let colorRanges: ColorRange[];

@@ -9,8 +9,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import '@testing-library/jest-dom';
-import { DocumentList } from './document_list';
 import { DEFAULT_VALUES } from './documents_list.test';
+import { DocumentList } from './document_list';
 import { DocumentsOverview } from './documents_overview';
 
 describe('DocumentList', () => {

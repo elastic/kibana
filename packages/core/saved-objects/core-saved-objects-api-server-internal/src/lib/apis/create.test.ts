@@ -9,45 +9,45 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import {
-  mockGetCurrentTime,
-  mockGetSearchDsl,
-  mockPreflightCheckForCreate,
   pointInTimeFinderMock,
+  mockGetCurrentTime,
+  mockPreflightCheckForCreate,
+  mockGetSearchDsl,
 } from '../repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  type SavedObjectReference,
-  type SavedObjectUnsanitizedDoc,
   type SavedObjectsRawDoc,
   type SavedObjectsRawDocSource,
+  type SavedObjectUnsanitizedDoc,
+  type SavedObjectReference,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { loggerMock } from '@kbn/logging-mocks';
-import { kibanaMigratorMock } from '../../mocks';
 import { SavedObjectsRepository } from '../repository';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { kibanaMigratorMock } from '../../mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
   CUSTOM_INDEX_TYPE,
-  HIDDEN_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
-  MULTI_NAMESPACE_TYPE,
   NAMESPACE_AGNOSTIC_TYPE,
-  createBadRequestErrorPayload,
-  createConflictErrorPayload,
-  createDocumentMigrator,
-  createRegistry,
-  createSpySerializer,
-  createUnsupportedTypeErrorPayload,
-  mappings,
-  mockTimestamp,
-  mockTimestampFieldsWithCreated,
-  mockVersion,
+  MULTI_NAMESPACE_TYPE,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  HIDDEN_TYPE,
   mockVersionProps,
+  mockTimestamp,
+  mappings,
+  mockVersion,
+  createRegistry,
+  createDocumentMigrator,
+  createSpySerializer,
+  createBadRequestErrorPayload,
+  createUnsupportedTypeErrorPayload,
+  createConflictErrorPayload,
+  mockTimestampFieldsWithCreated,
 } from '../../test_helpers/repository.test.common';
 
 describe('#create', () => {

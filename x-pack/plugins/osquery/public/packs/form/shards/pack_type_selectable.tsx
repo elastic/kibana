@@ -6,10 +6,10 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadio } from '@elastic/eui';
-import styled from '@emotion/styled';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+import styled from '@emotion/styled';
 
 const StyledEuiCard = styled(EuiCard)`
   padding: 16px 92px 16px 16px !important;

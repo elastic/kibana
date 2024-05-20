@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { PropTypes } from 'prop-types';
 import React, { Component, Fragment } from 'react';
+import { PropTypes } from 'prop-types';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiPageBody } from '@elastic/eui';
 
+import { getCalendarSettingsData, validateCalendarId } from './utils';
+import { CalendarForm } from './calendar_form';
+import { NewEventModal } from './new_event_modal';
+import { ImportModal } from './import_modal';
+import { ml } from '../../../services/ml_api_service';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { HelpMenu } from '../../../components/help_menu';
-import { ml } from '../../../services/ml_api_service';
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { getDocLinks } from '../../../util/dependency_cache';
-import { CalendarForm } from './calendar_form';
-import { ImportModal } from './import_modal';
-import { NewEventModal } from './new_event_modal';
-import { getCalendarSettingsData, validateCalendarId } from './utils';
+import { HelpMenu } from '../../../components/help_menu';
 
 class NewCalendarUI extends Component {
   static propTypes = {

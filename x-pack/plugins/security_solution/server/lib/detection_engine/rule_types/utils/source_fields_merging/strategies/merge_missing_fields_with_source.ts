@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set';
 
 import type { SignalSource } from '../../../types';
-import type { FieldsType, MergeStrategyFunction } from '../types';
-import { buildFieldsKeyAsArrayMap } from '../utils/build_fields_key_as_array_map';
 import { filterFieldEntries } from '../utils/filter_field_entries';
+import type { FieldsType, MergeStrategyFunction } from '../types';
+import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
+import { isTypeObject } from '../utils/is_type_object';
 import { isNestedObject } from '../utils/is_nested_object';
 import { isPathValid } from '../utils/is_path_valid';
-import { isTypeObject } from '../utils/is_type_object';
-import { recursiveUnboxingFields } from '../utils/recursive_unboxing_fields';
+import { buildFieldsKeyAsArrayMap } from '../utils/build_fields_key_as_array_map';
 
 /**
  * Merges only missing sections of "doc._source" with its "doc.fields" on a "best effort" basis. See ../README.md for more information

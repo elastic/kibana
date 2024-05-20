@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import type { Ast } from '@kbn/interpreter';
 
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type {
   LabelPositions,
   MosaicVisExpressionFunctionDefinition,
   PartitionLabelsExpressionFunctionDefinition,
-  LegendDisplay as PartitionVisLegendDisplay,
   PieVisExpressionFunctionDefinition,
   TreemapVisExpressionFunctionDefinition,
   ValueFormats,
+  LegendDisplay as PartitionVisLegendDisplay,
   WaffleVisExpressionFunctionDefinition,
 } from '@kbn/expression-partition-vis-plugin/common';
 import { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
+import type { CollapseExpressionFunction } from '../../../common/expressions';
+import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
+import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { getLegendStats } from './render_helpers';
+import { PieLayerState, PieVisualizationState, EmptySizeRatios } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
 } from '../../../common/constants';
-import type { CollapseExpressionFunction } from '../../../common/expressions';
-import { EmptySizeRatios, PieLayerState, PieVisualizationState } from '../../../common/types';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import type { DatasourceLayers, DatasourcePublicAPI, Operation } from '../../types';
-import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { getLegendStats } from './render_helpers';
 import { hasNonCollapsedSliceBy, isCollapsed } from './visualization';
 
 interface Attributes {
@@ -281,7 +281,7 @@ const generateExprAst: GenerateExpressionAstFunction = (state, ...restArgs) =>
     [PieChartTypes.TREEMAP]: () => generateTreemapVisAst(state, ...restArgs),
     [PieChartTypes.MOSAIC]: () => generateMosaicVisAst(state, ...restArgs),
     [PieChartTypes.WAFFLE]: () => generateWaffleVisAst(state, ...restArgs),
-  })[state.shape]();
+  }[state.shape]());
 
 function expressionHelper(
   state: PieVisualizationState,

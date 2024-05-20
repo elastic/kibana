@@ -6,17 +6,17 @@
  */
 
 import type {
-  PackageInfo,
   RegistryPolicyInputOnlyTemplate,
   RegistryPolicyIntegrationTemplate,
+  PackageInfo,
   RegistryVarType,
 } from '../types';
 
 import {
-  getNormalizedDataStreams,
-  getNormalizedInputs,
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
+  getNormalizedInputs,
+  getNormalizedDataStreams,
 } from './policy_template';
 
 describe('isInputOnlyPolicyTemplate', () => {

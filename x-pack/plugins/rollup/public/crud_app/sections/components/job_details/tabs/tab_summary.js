@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiDescriptionList,
-  EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiSpacer,
+  EuiDescriptionListDescription,
   EuiTitle,
+  EuiSpacer,
+  EuiIconTip,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 
 import { JobStatus } from '../../job_status';

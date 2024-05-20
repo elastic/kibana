@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { createMemoryHistory } from 'history';
+import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of, type Observable } from 'rxjs';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type {
-  AppDeepLinkId,
-  ChromeBreadcrumb,
-  ChromeNavLink,
   ChromeNavLinks,
+  ChromeNavLink,
+  ChromeBreadcrumb,
+  AppDeepLinkId,
   ChromeProjectNavigationNode,
-  GroupDefinition,
   NavigationTreeDefinition,
+  GroupDefinition,
   SolutionNavigationDefinition,
 } from '@kbn/core-chrome-browser';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
-import { createMemoryHistory } from 'history';
-import { BehaviorSubject, type Observable, firstValueFrom, lastValueFrom, of, take } from 'rxjs';
 import { ProjectNavigationService } from './project_navigation_service';
 
 jest.mock('rxjs', () => {

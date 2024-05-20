@@ -7,12 +7,12 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { manageQuery } from '../../../../common/components/page/manage_query';
 import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
 import { ID, useNetworkTopNFlow } from '../../containers/network_top_n_flow';
+import { manageQuery } from '../../../../common/components/page/manage_query';
 
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { IPsQueryTabBodyProps } from './types';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
-import React, { useCallback } from 'react';
 import { useShareTabsContext } from '../../context';
 import { LinkContent } from './link_content';
 

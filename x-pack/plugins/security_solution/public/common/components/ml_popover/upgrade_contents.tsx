@@ -7,17 +7,17 @@
 
 import React from 'react';
 
+import styled from 'styled-components';
 import {
   EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import { useBasePath } from '../../lib/kibana';
 import * as i18n from './translations';
 

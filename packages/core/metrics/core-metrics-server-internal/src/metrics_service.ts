@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom, ReplaySubject } from 'rxjs';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type {
+  OpsMetrics,
   MetricsServiceSetup,
   MetricsServiceStart,
-  OpsMetrics,
 } from '@kbn/core-metrics-server';
-import type { Logger } from '@kbn/logging';
-import { ReplaySubject, firstValueFrom } from 'rxjs';
-import { getEcsOpsMetricsLog } from './logging';
-import { OPS_CONFIG_PATH, type OpsConfigType } from './ops_config';
 import { OpsMetricsCollector } from './ops_metrics_collector';
+import { OPS_CONFIG_PATH, type OpsConfigType } from './ops_config';
+import { getEcsOpsMetricsLog } from './logging';
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;

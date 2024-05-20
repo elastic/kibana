@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 
 import type { ActionStatus, AgentPolicy } from '../../../../../types';
 

@@ -7,7 +7,7 @@
 
 import type { FrameworkRequest } from '../../../framework';
 
-import { PINNED_EVENTS_PER_PAGE, getAllPinnedEventsByTimelineId } from '.';
+import { getAllPinnedEventsByTimelineId, PINNED_EVENTS_PER_PAGE } from '.';
 
 describe('pinned events', () => {
   let mockFindSavedObject: jest.Mock;

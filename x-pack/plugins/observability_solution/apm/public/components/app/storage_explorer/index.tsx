@@ -5,36 +5,36 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiButton,
-  EuiCallOut,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
+  EuiEmptyPrompt,
+  EuiLoadingSpinner,
+  EuiCallOut,
+  EuiLink,
+  EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
-import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
-import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { ApmEnvironmentFilter } from '../../shared/environment_filter';
-import { SearchBar } from '../../shared/search_bar/search_bar';
-import { getKibanaAdvancedSettingsHref } from './get_storage_explorer_links';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
-import { PermissionDenied } from './prompts/permission_denied';
-import { TipsAndResources } from './resources/tips_and_resources';
 import { ServicesTable } from './services_table';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { StorageChart } from './storage_chart';
+import { PermissionDenied } from './prompts/permission_denied';
+import { useFetcher, FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
 import { SummaryStats } from './summary_stats';
+import { ApmEnvironmentFilter } from '../../shared/environment_filter';
+import { TipsAndResources } from './resources/tips_and_resources';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { getKibanaAdvancedSettingsHref } from './get_storage_explorer_links';
+import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 type CalloutType = 'crossClusterSearch' | 'optimizePerformance';
 

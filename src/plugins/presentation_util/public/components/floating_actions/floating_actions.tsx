@@ -9,11 +9,11 @@ import classNames from 'classnames';
 import React, { FC, ReactElement, useEffect, useState } from 'react';
 
 import {
+  panelHoverTrigger,
+  PANEL_HOVER_TRIGGER,
   type EmbeddableInput,
   type IEmbeddable,
-  PANEL_HOVER_TRIGGER,
   type ViewMode,
-  panelHoverTrigger,
 } from '@kbn/embeddable-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 

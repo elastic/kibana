@@ -8,29 +8,29 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getParsedFilterQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { APMConfig } from '../../../..';
+import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
-  TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
-import { AggregationType } from '../../../../../common/rules/apm_rule_types';
-import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { AlertParams, PreviewChartResponse } from '../../route';
 import {
+  getSearchTransactionsEvents,
   getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
-  getSearchTransactionsEvents,
 } from '../../../../lib/helpers/transactions';
-import { AlertParams, PreviewChartResponse } from '../../route';
+import { averageOrPercentileAgg, getMultiTermsSortOrder } from './average_or_percentile_agg';
+import { APMConfig } from '../../../..';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getGroupByTerms } from '../utils/get_groupby_terms';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 import {
   BarSeriesDataMap,
   getFilteredBarSeries,
 } from '../utils/get_filtered_series_for_preview_chart';
-import { getGroupByTerms } from '../utils/get_groupby_terms';
-import { averageOrPercentileAgg, getMultiTermsSortOrder } from './average_or_percentile_agg';
 
 export async function getTransactionDurationChartPreview({
   alertParams,

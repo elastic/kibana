@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import moment from 'moment';
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import React from 'react';
+import { css } from '@emotion/react';
 
 import useObservable from 'react-use/lib/useObservable';
 
-import { type EuiDataGridColumn, euiPaletteColorBlind } from '@elastic/eui';
+import { euiPaletteColorBlind, type EuiDataGridColumn } from '@elastic/eui';
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import type {
   ChartData,

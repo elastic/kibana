@@ -15,8 +15,8 @@ import {
   cpuUsageSystem,
   cpuUsageUser,
   load1m,
-  load5m,
   load15m,
+  load5m,
   normalizedLoad1m,
 } from './cpu';
 
@@ -24,8 +24,8 @@ import {
   diskIORead,
   diskIOWrite,
   diskReadThroughput,
-  diskSpaceAvailability,
   diskSpaceAvailable,
+  diskSpaceAvailability,
   diskUsage,
   diskUsageAverage,
   diskWriteThroughput,
@@ -34,11 +34,11 @@ import {
 import { hostCount } from './host_count';
 import { logRate } from './log_rate';
 import {
-  memoryCache,
-  memoryFree,
-  memoryFreeExcludingCache,
   memoryUsage,
+  memoryCache,
+  memoryFreeExcludingCache,
   memoryUsed,
+  memoryFree,
 } from './memory';
 import { rx, tx } from './network';
 

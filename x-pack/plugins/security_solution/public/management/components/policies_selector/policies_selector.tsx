@@ -8,20 +8,20 @@
 import type { ChangeEvent } from 'react';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import type { FilterChecked } from '@elastic/eui';
 import {
-  EuiFieldSearch,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFilterGroup,
   EuiPopover,
   EuiPopoverTitle,
+  EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterSelectItem,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -80,8 +80,8 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
         defaultIncludedPoliciesByKey[id]
           ? 'on'
           : defaultExcludedPoliciesByKey[id]
-            ? 'off'
-            : undefined;
+          ? 'off'
+          : undefined;
 
       setItemsList([
         ...policies.map((policy) => ({

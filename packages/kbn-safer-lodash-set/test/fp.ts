@@ -4,7 +4,7 @@
  */
 
 import { expectType } from 'tsd';
-import { assoc, assocPath, set, setWith } from '../fp';
+import { set, setWith, assoc, assocPath } from '../fp';
 
 const someObj: object = {};
 const anyValue: any = 'any value';

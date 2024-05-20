@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AreaSeries, CurveType, ScaleType } from '@elastic/charts';
 import type { FC } from 'react';
 import React from 'react';
+import { ScaleType, AreaSeries, CurveType } from '@elastic/charts';
 import type { ModelItem } from '../../../../common/results_loader';
 import { seriesStyle, useChartColors } from '../common/settings';
 

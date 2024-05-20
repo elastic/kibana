@@ -1,5 +1,3 @@
-import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
  */
 import { render } from '@testing-library/react';
 import React from 'react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 
 import { TestProviders } from '../../common/mock';
 import { DashboardRenderer } from './dashboard_renderer';

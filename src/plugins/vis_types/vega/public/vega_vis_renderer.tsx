@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React, { lazy } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { VegaVisualizationDependencies } from './plugin';
 import { getUsageCollectionStart } from './services';
 import { RenderValue } from './vega_fn';

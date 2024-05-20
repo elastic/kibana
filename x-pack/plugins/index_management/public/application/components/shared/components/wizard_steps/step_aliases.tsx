@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiFormRow,
+  EuiText,
+  EuiCode,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { Forms } from '../../../../../shared_imports';
-import { documentationService } from '../../../mappings_editor/shared_imports';
 import { useJsonStep } from './use_json_step';
+import { documentationService } from '../../../mappings_editor/shared_imports';
 
 interface Props {
   defaultValue?: { [key: string]: any };

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { chain, isNil, pick, snakeCase } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
 import { GeoPoint, GeoPointOutput } from './geo_point';
 
 // The API Extractor is not handling encapsulated interfaces in union types properly.

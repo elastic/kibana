@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiResizableContainer } from '@elastic/eui';
 import React, { useState } from 'react';
+import { EuiResizableContainer } from '@elastic/eui';
 import { StateChange } from './components/state_change';
 
 import '@elastic/eui/dist/eui_theme_light.css';
 import './panel.css';
 
-import { ActionList, ActionTree } from './components';
 import { RecordedAction } from './types';
+import { ActionList, ActionTree } from './components';
 
 export const Panel = () => {
   const [selectedAction, setSelectedAction] = useState<RecordedAction | null>(null);

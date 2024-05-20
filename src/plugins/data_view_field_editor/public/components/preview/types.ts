@@ -8,10 +8,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type {
-  RuntimeField,
-  RuntimePrimitiveTypes,
   RuntimeType,
+  RuntimeField,
   SerializedFieldFormat,
+  RuntimePrimitiveTypes,
 } from '../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../types';
 import type { PreviewController } from './preview_controller';

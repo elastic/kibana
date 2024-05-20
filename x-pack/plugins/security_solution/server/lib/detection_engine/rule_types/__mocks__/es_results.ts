@@ -5,7 +5,17 @@
  * 2.0.
  */
 
+import { set } from '@kbn/safer-lodash-set';
+import type {
+  SignalSourceHit,
+  SignalSearchResponse,
+  BulkResponse,
+  BulkItem,
+  SignalHit,
+  AlertSourceHit,
+} from '../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_REASON,
@@ -49,9 +59,6 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { set } from '@kbn/safer-lodash-set';
-import { SERVER_APP_ID } from '../../../../../common/constants';
-import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -60,7 +67,6 @@ import {
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_FALSE_POSITIVES,
   ALERT_RULE_IMMUTABLE,
-  ALERT_RULE_INDICES,
   ALERT_RULE_MAX_SIGNALS,
   ALERT_RULE_RISK_SCORE_MAPPING,
   ALERT_RULE_SEVERITY_MAPPING,
@@ -69,15 +75,9 @@ import {
   ALERT_RULE_TIMELINE_ID,
   ALERT_RULE_TIMELINE_TITLE,
   ALERT_RULE_TIMESTAMP_OVERRIDE,
+  ALERT_RULE_INDICES,
 } from '../../../../../common/field_maps/field_names';
-import type {
-  AlertSourceHit,
-  BulkItem,
-  BulkResponse,
-  SignalHit,
-  SignalSearchResponse,
-  SignalSourceHit,
-} from '../types';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
 export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',

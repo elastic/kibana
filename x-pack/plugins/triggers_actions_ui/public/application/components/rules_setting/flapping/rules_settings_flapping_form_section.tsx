@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import {
-  MAX_LOOK_BACK_WINDOW,
-  MAX_STATUS_CHANGE_THRESHOLD,
-  MIN_LOOK_BACK_WINDOW,
-  MIN_STATUS_CHANGE_THRESHOLD,
-  RulesSettingsFlappingProperties,
-} from '@kbn/alerting-plugin/common';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText, EuiPanel } from '@elastic/eui';
+import {
+  RulesSettingsFlappingProperties,
+  MIN_LOOK_BACK_WINDOW,
+  MIN_STATUS_CHANGE_THRESHOLD,
+  MAX_LOOK_BACK_WINDOW,
+  MAX_STATUS_CHANGE_THRESHOLD,
+} from '@kbn/alerting-plugin/common';
 import { RulesSettingsRange } from '../rules_settings_range';
 
 type OnChangeKey = keyof Omit<RulesSettingsFlappingProperties, 'enabled'>;

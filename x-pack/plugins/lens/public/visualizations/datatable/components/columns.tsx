@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiDataGridColumn,
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
-import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { css } from '@emotion/react';
-import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import type { ColumnConfig } from '../../../../common/expressions';
+import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
+import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
-import { DEFAULT_HEADER_ROW_HEIGHT } from './constants';
 import { buildColumnsMetaLookup } from './helpers';
+import { DEFAULT_HEADER_ROW_HEIGHT } from './constants';
 
 const hasFilterCellAction = (actions: LensCellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);

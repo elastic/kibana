@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 
 import type { CombinedField } from './types';
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/server/mocks';
-import { IExecutionLogResult } from '../../common';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { rulesClientMock } from '../rules_client.mock';
-import { mockHandlerArguments } from './_mock_handler_arguments';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
+import { httpServiceMock } from '@kbn/core/server/mocks';
+import { licenseStateMock } from '../lib/license_state.mock';
+import { mockHandlerArguments } from './_mock_handler_arguments';
+import { rulesClientMock } from '../rules_client.mock';
+import { IExecutionLogResult } from '../../common';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({

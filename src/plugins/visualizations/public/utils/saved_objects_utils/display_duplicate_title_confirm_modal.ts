@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { StartServices, VisSavedObject } from '../../types';
-import { confirmModalPromise } from './confirm_modal_promise';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
+import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
   savedObject: Pick<VisSavedObject, 'title'>,

@@ -18,8 +18,8 @@ import {
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../../../tasks/alerts_detection_rules';
 import {
-  createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  createAndInstallMockedPrebuiltRules,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { Action, handleActions } from 'redux-actions';
+import { handleActions, Action } from 'redux-actions';
 import {
   PopoverState,
+  toggleIntegrationsPopover,
+  setBasePath,
+  setEsKueryString,
   UiPayload,
   setAlertFlyoutType,
   setAlertFlyoutVisible,
-  setBasePath,
-  setEsKueryString,
   setSearchTextAction,
   setSelectedMonitorId,
-  toggleIntegrationsPopover,
 } from '../actions';
 
 export interface UiState {

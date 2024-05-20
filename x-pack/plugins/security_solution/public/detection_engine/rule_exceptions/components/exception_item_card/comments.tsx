@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import {
   EuiAccordion,
@@ -14,7 +15,6 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { memo } from 'react';
 
 import * as i18n from './translations';
 

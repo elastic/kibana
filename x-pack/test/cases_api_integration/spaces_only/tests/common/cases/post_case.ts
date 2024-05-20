@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import {
-  createCase,
-  deleteCasesByESQuery,
-  getAuthWithSuperUser,
-  removeServerGeneratedPropertiesFromCase,
-} from '../../../../common/lib/api';
 import { getPostCaseRequest, nullUser, postCaseResp } from '../../../../common/lib/mock';
+import {
+  deleteCasesByESQuery,
+  createCase,
+  removeServerGeneratedPropertiesFromCase,
+  getAuthWithSuperUser,
+} from '../../../../common/lib/api';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LensConfigWithId } from '../../../types';
+import { formulas } from '../formulas';
 import {
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
@@ -13,8 +15,6 @@ import {
   DEFAULT_XY_LEGEND,
   NETWORK_LABEL,
 } from '../../../shared/charts/constants';
-import { LensConfigWithId } from '../../../types';
-import { formulas } from '../formulas';
 
 const rxTx: LensConfigWithId = {
   id: 'rxTx',

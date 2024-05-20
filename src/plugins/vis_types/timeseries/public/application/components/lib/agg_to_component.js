@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { CalculationAgg } from '../aggs/calculation';
-import { CumulativeSumAgg } from '../aggs/cumulative_sum';
-import { DerivativeAgg } from '../aggs/derivative';
-import { FilterRatioAgg } from '../aggs/filter_ratio';
-import { MathAgg } from '../aggs/math';
 import { MovingAverageAgg } from '../aggs/moving_average';
-import { PercentileAgg } from '../aggs/percentile';
-import { PercentileRankAgg } from '../aggs/percentile_rank';
-import { PositiveOnlyAgg } from '../aggs/positive_only';
-import { PositiveRateAgg } from '../aggs/positive_rate';
-import { SerialDiffAgg } from '../aggs/serial_diff';
-import { SeriesAgg } from '../aggs/series_agg';
-import { Static } from '../aggs/static';
+import { DerivativeAgg } from '../aggs/derivative';
+import { CalculationAgg } from '../aggs/calculation';
 import { StandardAgg } from '../aggs/std_agg';
+import { PercentileAgg } from '../aggs/percentile';
+import { CumulativeSumAgg } from '../aggs/cumulative_sum';
 import { StandardDeviationAgg } from '../aggs/std_deviation';
 import { StandardSiblingAgg } from '../aggs/std_sibling';
+import { SeriesAgg } from '../aggs/series_agg';
+import { SerialDiffAgg } from '../aggs/serial_diff';
+import { PositiveOnlyAgg } from '../aggs/positive_only';
+import { FilterRatioAgg } from '../aggs/filter_ratio';
+import { PercentileRankAgg } from '../aggs/percentile_rank';
+import { Static } from '../aggs/static';
+import { MathAgg } from '../aggs/math';
 import { TopHitAgg } from '../aggs/top_hit';
+import { PositiveRateAgg } from '../aggs/positive_rate';
 
 export const aggToComponent = {
   count: StandardAgg,

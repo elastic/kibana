@@ -11,10 +11,10 @@ import Path from 'path';
 
 import * as Rx from 'rxjs';
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import { observeLines } from '@kbn/stdio-dev-helpers';
-import { createTestEsCluster, kibanaServerTestUser } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
+import { createTestEsCluster, kibanaServerTestUser } from '@kbn/test';
+import { observeLines } from '@kbn/stdio-dev-helpers';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 describe('migrator-only node', () => {
   const log = new ToolingLog({ writeTo: process.stdout, level: 'debug' });

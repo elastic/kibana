@@ -7,13 +7,13 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow, mount } from 'enzyme';
 import { v4 as uuidv4 } from 'uuid';
-import { useKibana } from '../../../../common/lib/kibana';
-import { Rule } from '../../../../types';
+import { withBulkRuleOperations, ComponentOpts } from './with_bulk_rule_api_operations';
 import { SortField } from '../../../lib/rule_api/load_execution_log_aggregations';
-import { ComponentOpts, withBulkRuleOperations } from './with_bulk_rule_api_operations';
+import { Rule } from '../../../../types';
+import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
 

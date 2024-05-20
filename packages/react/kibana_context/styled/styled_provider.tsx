@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { euiDarkVars, euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import type { DecoratorFn } from '@storybook/react';
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import * as styledComponents from 'styled-components';
 // eslint-disable-next-line @kbn/eslint/module_migration
-import { ThemeProvider, ThemeProviderProps, ThemedStyledComponentsModule } from 'styled-components';
+import { ThemedStyledComponentsModule, ThemeProvider, ThemeProviderProps } from 'styled-components';
+import { euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
 /**
  * A `deprecated` structure representing a Kibana theme containing variables from the current EUI theme.
@@ -28,7 +28,7 @@ export interface EuiTheme {
  * A `styled-components` `ThemeProvider` that incorporates EUI dark mode.
  */
 const KibanaStyledComponentsThemeProvider = <
-  OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme,
+  OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme
 >({
   darkMode = false,
   ...otherProps

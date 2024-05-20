@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
-  EuiBreadcrumbs,
   EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSection,
-  EuiSpacer,
   EuiTitle,
+  EuiBreadcrumbs,
+  EuiSpacer,
+  EuiPageSection,
 } from '@elastic/eui';
 
 type PageProps = RouteComponentProps & {

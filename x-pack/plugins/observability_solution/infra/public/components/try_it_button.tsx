@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { EuiLinkColor } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LinkDescriptor, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
+import { css } from '@emotion/react';
+import { EuiLinkColor } from '@elastic/eui';
 import { BetaBadge } from './beta_badge';
 
 type OnClickEvent = React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>;

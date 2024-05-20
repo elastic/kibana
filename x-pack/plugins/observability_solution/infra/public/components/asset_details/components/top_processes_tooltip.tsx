@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiLink, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiText, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Popover } from '../tabs/common/popover';
 
 const DOCUMENTATION_LINK =

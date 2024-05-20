@@ -7,8 +7,8 @@
 
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels } from '../constants';
-import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../constants/elasticsearch_fieldnames';
 import { buildPhraseFilter } from '../utils';
+import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../constants/elasticsearch_fieldnames';
 
 export function getSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {
   return {

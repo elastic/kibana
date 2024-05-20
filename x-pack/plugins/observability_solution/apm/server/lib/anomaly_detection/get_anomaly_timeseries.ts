@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { parseInterval } from '@kbn/data-plugin/common';
 import type { Logger } from '@kbn/logging';
-import { rangeQuery } from '@kbn/observability-plugin/server';
 import { compact, keyBy } from 'lodash';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { parseInterval } from '@kbn/data-plugin/common';
+import { Environment } from '../../../common/environment_rt';
+import { apmMlAnomalyQuery } from './apm_ml_anomaly_query';
 import {
   AnomalyDetectorType,
   getAnomalyDetectorType,
 } from '../../../common/anomaly_detection/apm_ml_detectors';
 import type { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
-import { Environment } from '../../../common/environment_rt';
+import { apmMlJobsQuery } from './apm_ml_jobs_query';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { maybe } from '../../../common/utils/maybe';
 import type { MlClient } from '../helpers/get_ml_client';
 import { anomalySearch } from './anomaly_search';
-import { apmMlAnomalyQuery } from './apm_ml_anomaly_query';
-import { apmMlJobsQuery } from './apm_ml_jobs_query';
 import { getAnomalyResultBucketSize } from './get_anomaly_result_bucket_size';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 

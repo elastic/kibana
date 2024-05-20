@@ -20,7 +20,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -32,7 +34,9 @@
                 "tags": [],
                 "label": "descriptor",
                 "description": [],
-                "signature": ["DataRequestDescriptor"],
+                "signature": [
+                  "DataRequestDescriptor"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -48,7 +52,9 @@
             "tags": [],
             "label": "getData",
             "description": [],
-            "signature": ["() => object | undefined"],
+            "signature": [
+              "() => object | undefined"
+            ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -62,7 +68,9 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -76,7 +84,10 @@
             "tags": [],
             "label": "getMeta",
             "description": [],
-            "signature": ["() => ", "DataRequestMeta"],
+            "signature": [
+              "() => ",
+              "DataRequestMeta"
+            ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -90,7 +101,9 @@
             "tags": [],
             "label": "hasData",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -104,7 +117,9 @@
             "tags": [],
             "label": "hasDataOrRequestInProgress",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -118,7 +133,9 @@
             "tags": [],
             "label": "getDataId",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -132,7 +149,9 @@
             "tags": [],
             "label": "getRequestToken",
             "description": [],
-            "signature": ["() => symbol | undefined"],
+            "signature": [
+              "() => symbol | undefined"
+            ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -146,7 +165,9 @@
             "tags": [],
             "label": "renderError",
             "description": [],
-            "signature": ["() => React.ReactNode"],
+            "signature": [
+              "() => React.ReactNode"
+            ],
             "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -249,7 +270,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -261,7 +284,9 @@
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "signature": ["MapEmbeddableConfig"],
+                "signature": [
+                  "MapEmbeddableConfig"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -336,7 +361,11 @@
             "tags": [],
             "label": "getOnRenderComplete$",
             "description": [],
-            "signature": ["() => ", "Observable", "<void>"],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<void>"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -350,7 +379,9 @@
             "tags": [],
             "label": "reportsEmbeddableLoad",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -383,7 +414,11 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": ["MapByValueInput", " | ", "MapByReferenceInput"],
+                "signature": [
+                  "MapByValueInput",
+                  " | ",
+                  "MapByReferenceInput"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -399,7 +434,11 @@
             "tags": [],
             "label": "getInputAsRefType",
             "description": [],
-            "signature": ["() => Promise<", "MapByReferenceInput", ">"],
+            "signature": [
+              "() => Promise<",
+              "MapByReferenceInput",
+              ">"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -431,7 +470,13 @@
                 "tags": [],
                 "label": "lastExplicitInput",
                 "description": [],
-                "signature": ["Partial<", "MapByValueInput", " | ", "MapByReferenceInput", ">"],
+                "signature": [
+                  "Partial<",
+                  "MapByValueInput",
+                  " | ",
+                  "MapByReferenceInput",
+                  ">"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -447,7 +492,11 @@
             "tags": [],
             "label": "getInputAsValueType",
             "description": [],
-            "signature": ["() => Promise<", "MapByValueInput", ">"],
+            "signature": [
+              "() => Promise<",
+              "MapByValueInput",
+              ">"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -461,7 +510,11 @@
             "tags": [],
             "label": "getLayerList",
             "description": [],
-            "signature": ["() => ", "ILayer", "[]"],
+            "signature": [
+              "() => ",
+              "ILayer",
+              "[]"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -523,7 +576,9 @@
             "tags": [],
             "label": "supportedTriggers",
             "description": [],
-            "signature": ["() => string[]"],
+            "signature": [
+              "() => string[]"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -537,7 +592,11 @@
             "tags": [],
             "label": "setRenderTooltipContent",
             "description": [],
-            "signature": ["(renderTooltipContent: ", "RenderToolTipContent", ") => void"],
+            "signature": [
+              "(renderTooltipContent: ",
+              "RenderToolTipContent",
+              ") => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -549,7 +608,9 @@
                 "tags": [],
                 "label": "renderTooltipContent",
                 "description": [],
-                "signature": ["RenderToolTipContent"],
+                "signature": [
+                  "RenderToolTipContent"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -565,7 +626,11 @@
             "tags": [],
             "label": "setEventHandlers",
             "description": [],
-            "signature": ["(eventHandlers: ", "EventHandlers", ") => void"],
+            "signature": [
+              "(eventHandlers: ",
+              "EventHandlers",
+              ") => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -577,7 +642,9 @@
                 "tags": [],
                 "label": "eventHandlers",
                 "description": [],
-                "signature": ["EventHandlers"],
+                "signature": [
+                  "EventHandlers"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -593,7 +660,9 @@
             "tags": [],
             "label": "setIsSharable",
             "description": [],
-            "signature": ["(isSharable: boolean) => void"],
+            "signature": [
+              "(isSharable: boolean) => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -605,7 +674,9 @@
                 "tags": [],
                 "label": "isSharable",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -644,7 +715,9 @@
             "tags": [],
             "label": "onUpdate",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -658,7 +731,9 @@
             "tags": [],
             "label": "_getIsMovementSynchronized",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -672,7 +747,9 @@
             "tags": [],
             "label": "_getIsFilterByMapExtent",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -686,7 +763,9 @@
             "tags": [],
             "label": "_gotoSynchronizedLocation",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -700,7 +779,9 @@
             "tags": [],
             "label": "_propogateMapMovement",
             "description": [],
-            "signature": ["(lat: number, lon: number, zoom: number) => void"],
+            "signature": [
+              "(lat: number, lon: number, zoom: number) => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -712,7 +793,9 @@
                 "tags": [],
                 "label": "lat",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -725,7 +808,9 @@
                 "tags": [],
                 "label": "lon",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -738,7 +823,9 @@
                 "tags": [],
                 "label": "zoom",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -778,7 +865,9 @@
             "tags": [],
             "label": "_getSearchSessionId",
             "description": [],
-            "signature": ["() => string | undefined"],
+            "signature": [
+              "() => string | undefined"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -792,7 +881,9 @@
             "tags": [],
             "label": "_dispatchSetQuery",
             "description": [],
-            "signature": ["({ forceRefresh }: { forceRefresh: boolean; }) => void"],
+            "signature": [
+              "({ forceRefresh }: { forceRefresh: boolean; }) => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -831,7 +922,9 @@
             "tags": [],
             "label": "_dispatchSetChartsPaletteServiceGetColor",
             "description": [],
-            "signature": ["(syncColors?: boolean | undefined) => Promise<void>"],
+            "signature": [
+              "(syncColors?: boolean | undefined) => Promise<void>"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -843,7 +936,9 @@
                 "tags": [],
                 "label": "syncColors",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -858,8 +953,12 @@
             "type": "Function",
             "tags": [],
             "label": "render",
-            "description": ["\n"],
-            "signature": ["(domNode: HTMLElement) => void"],
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "(domNode: HTMLElement) => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -871,7 +970,9 @@
                 "tags": [],
                 "label": "domNode",
                 "description": [],
-                "signature": ["HTMLElement"],
+                "signature": [
+                  "HTMLElement"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -980,7 +1081,11 @@
             "tags": [],
             "label": "onSingleValueTrigger",
             "description": [],
-            "signature": ["(actionId: string, key: string, value: ", "RawValue", ") => void"],
+            "signature": [
+              "(actionId: string, key: string, value: ",
+              "RawValue",
+              ") => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -992,7 +1097,9 @@
                 "tags": [],
                 "label": "actionId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1005,7 +1112,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1018,7 +1127,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["RawValue"],
+                "signature": [
+                  "RawValue"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1078,7 +1189,9 @@
                 "tags": [],
                 "label": "actionId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1142,7 +1255,9 @@
             "tags": [],
             "label": "linkToLibrary",
             "description": [],
-            "signature": ["undefined"],
+            "signature": [
+              "undefined"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1154,7 +1269,9 @@
             "tags": [],
             "label": "unlinkFromLibrary",
             "description": [],
-            "signature": ["undefined"],
+            "signature": [
+              "undefined"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1180,7 +1297,9 @@
                 "tags": [],
                 "label": "newTitle",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1193,7 +1312,9 @@
                 "tags": [],
                 "label": "isTitleDuplicateConfirmed",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1206,7 +1327,9 @@
                 "tags": [],
                 "label": "onTitleDuplicate",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1222,7 +1345,9 @@
             "tags": [],
             "label": "saveToLibrary",
             "description": [],
-            "signature": ["(title: string) => Promise<string>"],
+            "signature": [
+              "(title: string) => Promise<string>"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1234,7 +1359,9 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1318,7 +1445,9 @@
                 "tags": [],
                 "label": "libraryId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1406,7 +1535,10 @@
             "tags": [],
             "label": "_setMapExtentFilter",
             "description": [],
-            "signature": ["(() => void) & ", "Cancelable"],
+            "signature": [
+              "(() => void) & ",
+              "Cancelable"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1420,7 +1552,9 @@
             "tags": [],
             "label": "_clearMapExtentFilter",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1434,7 +1568,9 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1448,7 +1584,9 @@
             "tags": [],
             "label": "reload",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1462,7 +1600,9 @@
             "tags": [],
             "label": "_mapSyncHandler",
             "description": [],
-            "signature": ["(lat: number, lon: number, zoom: number) => void"],
+            "signature": [
+              "(lat: number, lon: number, zoom: number) => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1474,7 +1614,9 @@
                 "tags": [],
                 "label": "lat",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1487,7 +1629,9 @@
                 "tags": [],
                 "label": "lon",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1500,7 +1644,9 @@
                 "tags": [],
                 "label": "zoom",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1516,7 +1662,9 @@
             "tags": [],
             "label": "_handleStoreChanges",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1556,7 +1704,9 @@
             "tags": [],
             "label": "api",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/plugins/maps/public/embeddable/map_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1715,7 +1865,10 @@
             "tags": [],
             "label": "timeslice",
             "description": [],
-            "signature": ["Timeslice", " | undefined"],
+            "signature": [
+              "Timeslice",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1919,7 +2072,9 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": ["GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>"],
+            "signature": [
+              "GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1931,7 +2086,10 @@
             "tags": [],
             "label": "meta",
             "description": [],
-            "signature": ["DataRequestMeta", " | undefined"],
+            "signature": [
+              "DataRequestMeta",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1990,7 +2148,9 @@
             "tags": [],
             "label": "geoFieldNames",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2050,7 +2210,9 @@
             "tags": [],
             "label": "getGeojsonGeometry",
             "description": [],
-            "signature": ["() => GeoJSON.Geometry | null"],
+            "signature": [
+              "() => GeoJSON.Geometry | null"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2078,7 +2240,9 @@
             "tags": [],
             "label": "onClose",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2106,7 +2270,9 @@
             "tags": [],
             "label": "getName",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2120,7 +2286,9 @@
             "tags": [],
             "label": "getMbFieldName",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2134,7 +2302,9 @@
             "tags": [],
             "label": "getRootName",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2148,7 +2318,9 @@
             "tags": [],
             "label": "canValueBeFormatted",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2162,7 +2334,9 @@
             "tags": [],
             "label": "getLabel",
             "description": [],
-            "signature": ["() => Promise<string>"],
+            "signature": [
+              "() => Promise<string>"
+            ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2176,7 +2350,9 @@
             "tags": [],
             "label": "getDataType",
             "description": [],
-            "signature": ["() => Promise<string>"],
+            "signature": [
+              "() => Promise<string>"
+            ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2212,7 +2388,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string | string[] | undefined"],
+                "signature": [
+                  "string | string[] | undefined"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2274,7 +2452,9 @@
             "tags": [],
             "label": "isValid",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2322,7 +2502,9 @@
                 "tags": [],
                 "label": "percentiles",
                 "description": [],
-                "signature": ["number[]"],
+                "signature": [
+                  "number[]"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2354,7 +2536,9 @@
                 "tags": [],
                 "label": "size",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2370,7 +2554,9 @@
             "tags": [],
             "label": "supportsFieldMetaFromLocalData",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2384,7 +2570,9 @@
             "tags": [],
             "label": "supportsFieldMetaFromEs",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2460,7 +2648,9 @@
                 "tags": [],
                 "label": "metaFeature",
                 "description": [],
-                "signature": ["TileMetaFeature"],
+                "signature": [
+                  "TileMetaFeature"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2476,7 +2666,9 @@
             "tags": [],
             "label": "isCount",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2566,7 +2758,9 @@
                 "tags": [],
                 "label": "nextRequestMeta",
                 "description": [],
-                "signature": ["DataRequestMeta"],
+                "signature": [
+                  "DataRequestMeta"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2598,7 +2792,9 @@
                 "tags": [],
                 "label": "mbSource",
                 "description": [],
-                "signature": ["maplibregl.RasterTileSource"],
+                "signature": [
+                  "maplibregl.RasterTileSource"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2611,7 +2807,9 @@
                 "tags": [],
                 "label": "sourceData",
                 "description": [],
-                "signature": ["RasterTileSourceData"],
+                "signature": [
+                  "RasterTileSourceData"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2627,7 +2825,9 @@
             "tags": [],
             "label": "hasLegendDetails",
             "description": [],
-            "signature": ["() => Promise<boolean>"],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2713,7 +2913,11 @@
             "tags": [],
             "label": "getUrlTemplate",
             "description": [],
-            "signature": ["(requestMeta: ", "SourceRequestMeta", ") => Promise<string>"],
+            "signature": [
+              "(requestMeta: ",
+              "SourceRequestMeta",
+              ") => Promise<string>"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2725,7 +2929,9 @@
                 "tags": [],
                 "label": "requestMeta",
                 "description": [],
-                "signature": ["SourceRequestMeta"],
+                "signature": [
+                  "SourceRequestMeta"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/tms_source/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2755,7 +2961,9 @@
             "tags": [],
             "label": "getPropertyKey",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2769,7 +2977,9 @@
             "tags": [],
             "label": "getPropertyName",
             "description": [],
-            "signature": ["() => React.ReactNode"],
+            "signature": [
+              "() => React.ReactNode"
+            ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2783,7 +2993,9 @@
             "tags": [],
             "label": "getHtmlDisplayValue",
             "description": [],
-            "signature": ["() => React.ReactNode"],
+            "signature": [
+              "() => React.ReactNode"
+            ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2797,7 +3009,9 @@
             "tags": [],
             "label": "getRawValue",
             "description": [],
-            "signature": ["() => string | string[] | undefined"],
+            "signature": [
+              "() => string | string[] | undefined"
+            ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2811,7 +3025,9 @@
             "tags": [],
             "label": "isFilterable",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2874,7 +3090,9 @@
             "tags": [],
             "label": "isMvt",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2918,7 +3136,9 @@
                 "tags": [],
                 "label": "properties",
                 "description": [],
-                "signature": ["GeoJSON.GeoJsonProperties"],
+                "signature": [
+                  "GeoJSON.GeoJsonProperties"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3000,7 +3220,9 @@
                 "tags": [],
                 "label": "registerCancelCallback",
                 "description": [],
-                "signature": ["(callback: () => void) => void"],
+                "signature": [
+                  "(callback: () => void) => void"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3054,7 +3276,9 @@
                 "tags": [],
                 "label": "layerName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3088,7 +3312,9 @@
                 "tags": [],
                 "label": "registerCancelCallback",
                 "description": [],
-                "signature": ["(callback: () => void) => void"],
+                "signature": [
+                  "(callback: () => void) => void"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3101,7 +3327,9 @@
                 "tags": [],
                 "label": "isRequestStillActive",
                 "description": [],
-                "signature": ["() => boolean"],
+                "signature": [
+                  "() => boolean"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3184,7 +3412,9 @@
                 "tags": [],
                 "label": "fieldName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3224,7 +3454,9 @@
             "tags": [],
             "label": "supportsJoins",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3284,7 +3516,9 @@
             "tags": [],
             "label": "hasTooltipProperties",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3322,7 +3556,9 @@
             "tags": [],
             "label": "isBoundsAware",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3390,7 +3626,9 @@
             "tags": [],
             "label": "getTimesliceMaskFieldName",
             "description": [],
-            "signature": ["() => Promise<string | null>"],
+            "signature": [
+              "() => Promise<string | null>"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3404,7 +3642,9 @@
             "tags": [],
             "label": "supportsFeatureEditing",
             "description": [],
-            "signature": ["() => Promise<boolean>"],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3418,7 +3658,9 @@
             "tags": [],
             "label": "addFeature",
             "description": [],
-            "signature": ["(geometry: GeoJSON.Geometry | GeoJSON.Position[]) => Promise<void>"],
+            "signature": [
+              "(geometry: GeoJSON.Geometry | GeoJSON.Position[]) => Promise<void>"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3430,7 +3672,9 @@
                 "tags": [],
                 "label": "geometry",
                 "description": [],
-                "signature": ["GeoJSON.Geometry | GeoJSON.Position[]"],
+                "signature": [
+                  "GeoJSON.Geometry | GeoJSON.Position[]"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3446,7 +3690,9 @@
             "tags": [],
             "label": "deleteFeature",
             "description": [],
-            "signature": ["(featureId: string) => Promise<void>"],
+            "signature": [
+              "(featureId: string) => Promise<void>"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3458,7 +3704,9 @@
                 "tags": [],
                 "label": "featureId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3528,7 +3776,9 @@
             "tags": [],
             "label": "getInspectorRequestIds",
             "description": [],
-            "signature": ["() => string[]"],
+            "signature": [
+              "() => string[]"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3578,7 +3828,9 @@
             "tags": [],
             "label": "closeTooltip",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3661,7 +3913,9 @@
             "tags": [],
             "label": "getLayerName",
             "description": [],
-            "signature": ["(layerId: string) => Promise<string | null>"],
+            "signature": [
+              "(layerId: string) => Promise<string | null>"
+            ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3673,7 +3927,9 @@
                 "tags": [],
                 "label": "layerId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3744,7 +4000,9 @@
                     "tags": [],
                     "label": "properties",
                     "description": [],
-                    "signature": ["{ [name: string]: any; } | null"],
+                    "signature": [
+                      "{ [name: string]: any; } | null"
+                    ],
                     "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -3797,7 +4055,9 @@
                     "tags": [],
                     "label": "featureId",
                     "description": [],
-                    "signature": ["string | number | undefined"],
+                    "signature": [
+                      "string | number | undefined"
+                    ],
                     "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -3830,7 +4090,9 @@
                 "tags": [],
                 "label": "actionId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3843,7 +4105,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3856,7 +4120,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["RawValue"],
+                "signature": [
+                  "RawValue"
+                ],
                 "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3886,7 +4152,9 @@
             "tags": [],
             "label": "sampleValues",
             "description": [],
-            "signature": ["(string | number)[] | undefined"],
+            "signature": [
+              "(string | number)[] | undefined"
+            ],
             "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3898,7 +4166,9 @@
             "tags": [],
             "label": "sampleValuesColumnName",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/maps/public/ems_autosuggest/ems_autosuggest.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3924,7 +4194,9 @@
             "tags": [],
             "label": "tooltipContent",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3947,7 +4219,9 @@
             "tags": [],
             "label": "isDeprecated",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3965,7 +4239,9 @@
         "tags": [],
         "label": "Attribution",
         "description": [],
-        "signature": ["{ label: string; url: string; }"],
+        "signature": [
+          "{ label: string; url: string; }"
+        ],
         "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3978,7 +4254,9 @@
         "tags": [],
         "label": "GEOJSON_FEATURE_ID_PROPERTY_NAME",
         "description": [],
-        "signature": ["\"__kbn__feature_id__\""],
+        "signature": [
+          "\"__kbn__feature_id__\""
+        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3991,7 +4269,9 @@
         "tags": [],
         "label": "ImmutableSourceProperty",
         "description": [],
-        "signature": ["{ label: string; value: string; link?: string | undefined; }"],
+        "signature": [
+          "{ label: string; value: string; link?: string | undefined; }"
+        ],
         "path": "x-pack/plugins/maps/public/classes/sources/source.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4037,7 +4317,9 @@
         "tags": [],
         "label": "MAP_SAVED_OBJECT_TYPE",
         "description": [],
-        "signature": ["\"map\""],
+        "signature": [
+          "\"map\""
+        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4146,7 +4428,11 @@
         "tags": [],
         "label": "MapEmbeddableInput",
         "description": [],
-        "signature": ["MapByValueInput", " | ", "MapByReferenceInput"],
+        "signature": [
+          "MapByValueInput",
+          " | ",
+          "MapByReferenceInput"
+        ],
         "path": "x-pack/plugins/maps/public/embeddable/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4189,7 +4475,9 @@
         "tags": [],
         "label": "MAPS_APP_LOCATOR",
         "description": [],
-        "signature": ["\"MAPS_APP_LOCATOR\""],
+        "signature": [
+          "\"MAPS_APP_LOCATOR\""
+        ],
         "path": "x-pack/plugins/maps/public/locators/map_locator/locator_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4305,7 +4593,11 @@
           "tags": [],
           "label": "registerSource",
           "description": [],
-          "signature": ["(entry: ", "SourceRegistryEntry", ") => void"],
+          "signature": [
+            "(entry: ",
+            "SourceRegistryEntry",
+            ") => void"
+          ],
           "path": "x-pack/plugins/maps/public/api/setup_api.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -4317,7 +4609,9 @@
               "tags": [],
               "label": "entry",
               "description": [],
-              "signature": ["SourceRegistryEntry"],
+              "signature": [
+                "SourceRegistryEntry"
+              ],
               "path": "x-pack/plugins/maps/public/api/setup_api.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -4394,7 +4688,11 @@
           "tags": [],
           "label": "Map",
           "description": [],
-          "signature": ["React.FunctionComponent<", "Props", ">"],
+          "signature": [
+            "React.FunctionComponent<",
+            "Props",
+            ">"
+          ],
           "path": "x-pack/plugins/maps/public/api/start_api.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -4407,7 +4705,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["P & { children?: React.ReactNode; }"],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -4419,7 +4719,9 @@
               "tags": [],
               "label": "context",
               "description": [],
-              "signature": ["any"],
+              "signature": [
+                "any"
+              ],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -4433,7 +4735,11 @@
           "tags": [],
           "label": "PassiveMap",
           "description": [],
-          "signature": ["React.FunctionComponent<", "Props", ">"],
+          "signature": [
+            "React.FunctionComponent<",
+            "Props",
+            ">"
+          ],
           "path": "x-pack/plugins/maps/public/api/start_api.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -4446,7 +4752,9 @@
               "tags": [],
               "label": "props",
               "description": [],
-              "signature": ["P & { children?: React.ReactNode; }"],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -4458,7 +4766,9 @@
               "tags": [],
               "label": "context",
               "description": [],
-              "signature": ["any"],
+              "signature": [
+                "any"
+              ],
               "path": "node_modules/@types/react/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -4726,7 +5036,9 @@
         "tags": [],
         "label": "APP_ID",
         "description": [],
-        "signature": ["\"maps\""],
+        "signature": [
+          "\"maps\""
+        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4816,7 +5128,9 @@
         "tags": [],
         "label": "DECIMAL_DEGREES_PRECISION",
         "description": [],
-        "signature": ["5"],
+        "signature": [
+          "5"
+        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4879,7 +5193,11 @@
         "tags": [],
         "label": "FieldFormatter",
         "description": [],
-        "signature": ["(value: ", "RawValue", ") => string | number"],
+        "signature": [
+          "(value: ",
+          "RawValue",
+          ") => string | number"
+        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4892,7 +5210,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["string | number | boolean | string[] | null | undefined"],
+            "signature": [
+              "string | number | boolean | string[] | null | undefined"
+            ],
             "path": "x-pack/plugins/maps/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4950,7 +5270,9 @@
         "tags": [],
         "label": "MAP_SAVED_OBJECT_TYPE",
         "description": [],
-        "signature": ["\"map\""],
+        "signature": [
+          "\"map\""
+        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4963,7 +5285,9 @@
         "tags": [],
         "label": "MAX_ZOOM",
         "description": [],
-        "signature": ["24"],
+        "signature": [
+          "24"
+        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4976,7 +5300,9 @@
         "tags": [],
         "label": "MIN_ZOOM",
         "description": [],
-        "signature": ["0"],
+        "signature": [
+          "0"
+        ],
         "path": "x-pack/plugins/maps/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

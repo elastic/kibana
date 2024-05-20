@@ -172,58 +172,55 @@ function createWildcardHashField(
 export const entriesToConditionEntriesMap = <T extends ConditionEntry = ConditionEntry>(
   entries: EntriesArray
 ): ConditionEntriesMap<T> => {
-  return entries.reduce(
-    (memo: ConditionEntriesMap<T>, entry) => {
-      const field = entry.field as AllConditionEntryFields;
-      if (field.includes(EntryFieldType.HASH) && entry.type === 'match') {
-        const wildcardHashField = createWildcardHashField(field);
-        return {
-          ...memo,
-          [wildcardHashField]: createConditionEntry(wildcardHashField, entry.type, entry.value),
-        } as ConditionEntriesMap<T>;
-      } else if (field.includes(EntryFieldType.HASH) && entry.type === 'match_any') {
-        const wildcardHashField = createWildcardHashField(field);
-        const currentValues = (memo[wildcardHashField]?.value as string[]) ?? [];
+  return entries.reduce((memo: ConditionEntriesMap<T>, entry) => {
+    const field = entry.field as AllConditionEntryFields;
+    if (field.includes(EntryFieldType.HASH) && entry.type === 'match') {
+      const wildcardHashField = createWildcardHashField(field);
+      return {
+        ...memo,
+        [wildcardHashField]: createConditionEntry(wildcardHashField, entry.type, entry.value),
+      } as ConditionEntriesMap<T>;
+    } else if (field.includes(EntryFieldType.HASH) && entry.type === 'match_any') {
+      const wildcardHashField = createWildcardHashField(field);
+      const currentValues = (memo[wildcardHashField]?.value as string[]) ?? [];
 
-        return {
-          ...memo,
-          [wildcardHashField]: createConditionEntry(wildcardHashField, entry.type, [
-            ...currentValues,
-            ...entry.value,
-          ]),
-        } as ConditionEntriesMap<T>;
-      } else if (
-        (field.includes(EntryFieldType.EXECUTABLE) || field.includes(EntryFieldType.PATH)) &&
-        (entry.type === 'match' || entry.type === 'match_any' || entry.type === 'wildcard')
-      ) {
-        return {
-          ...memo,
-          [field]: createConditionEntry(field, entry.type, entry.value),
-        } as ConditionEntriesMap<T>;
-      } else if (field.includes(EntryFieldType.SIGNER) && entry.type === 'nested') {
-        const subjectNameCondition = entry.entries.find((subEntry): subEntry is EntryMatch => {
-          return (
-            subEntry.field === 'subject_name' &&
-            (subEntry.type === 'match' || subEntry.type === 'match_any')
-          );
-        });
+      return {
+        ...memo,
+        [wildcardHashField]: createConditionEntry(wildcardHashField, entry.type, [
+          ...currentValues,
+          ...entry.value,
+        ]),
+      } as ConditionEntriesMap<T>;
+    } else if (
+      (field.includes(EntryFieldType.EXECUTABLE) || field.includes(EntryFieldType.PATH)) &&
+      (entry.type === 'match' || entry.type === 'match_any' || entry.type === 'wildcard')
+    ) {
+      return {
+        ...memo,
+        [field]: createConditionEntry(field, entry.type, entry.value),
+      } as ConditionEntriesMap<T>;
+    } else if (field.includes(EntryFieldType.SIGNER) && entry.type === 'nested') {
+      const subjectNameCondition = entry.entries.find((subEntry): subEntry is EntryMatch => {
+        return (
+          subEntry.field === 'subject_name' &&
+          (subEntry.type === 'match' || subEntry.type === 'match_any')
+        );
+      });
 
-        if (subjectNameCondition) {
-          return {
-            ...memo,
-            [field]: createConditionEntry(
-              field,
-              subjectNameCondition.type,
-              subjectNameCondition.value
-            ),
-          } as ConditionEntriesMap<T>;
-        }
+      if (subjectNameCondition) {
+        return {
+          ...memo,
+          [field]: createConditionEntry(
+            field,
+            subjectNameCondition.type,
+            subjectNameCondition.value
+          ),
+        } as ConditionEntriesMap<T>;
       }
+    }
 
-      return memo;
-    },
-    {} as ConditionEntriesMap<T>
-  );
+    return memo;
+  }, {} as ConditionEntriesMap<T>);
 };
 
 export const entriesToConditionEntries = <T extends ConditionEntry = ConditionEntry>(

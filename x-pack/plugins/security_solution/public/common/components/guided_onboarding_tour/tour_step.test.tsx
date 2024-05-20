@@ -1,5 +1,3 @@
-import type { EuiTourStepProps } from '@elastic/eui';
-import { act, fireEvent, render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,11 +5,13 @@ import { act, fireEvent, render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import { TimelineId } from '../../../../common/types';
-import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
-import { useTourContext } from './tour';
-import { AlertsCasesTourSteps, SecurityStepId } from './tour_config';
+import { act, fireEvent, render } from '@testing-library/react';
+import type { EuiTourStepProps } from '@elastic/eui';
 import { GuidedOnboardingTourStep, SecurityTourStep } from './tour_step';
+import { AlertsCasesTourSteps, SecurityStepId } from './tour_config';
+import { useTourContext } from './tour';
+import { mockGlobalState, TestProviders, createMockStore } from '../../mock';
+import { TimelineId } from '../../../../common/types';
 
 jest.mock('./tour');
 const mockTourStep = jest

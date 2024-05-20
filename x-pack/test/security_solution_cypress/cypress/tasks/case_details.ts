@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { TIMELINE_TITLE } from '../screens/timeline';
 import {
   CASE_ACTIONS,
   CASE_DELETE,
   CASE_DETAILS_TIMELINE_LINK_MARKDOWN,
   DELETE_CASE_CONFIRM_BUTTON,
 } from '../screens/case_details';
-import { TIMELINE_TITLE } from '../screens/timeline';
 
 export const deleteCase = () => {
   cy.get(CASE_ACTIONS).first().click();

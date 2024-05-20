@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 
-import {
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
-  EuiTextArea,
-  htmlIdGenerator,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
 import { CalculationVars, newVariable } from './vars';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiTextArea,
+  EuiLink,
+  EuiFormRow,
+  EuiCode,
+  EuiSpacer,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const checkModel = (model) => Array.isArray(model.variables) && model.script !== undefined;
 

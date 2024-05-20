@@ -10,13 +10,13 @@ import React from 'react';
 import { generatePath } from 'react-router-dom';
 
 import {
-  EuiButton,
-  EuiEmptyPrompt,
+  EuiImage,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
+  EuiButton,
   EuiLink,
   useEuiTheme,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

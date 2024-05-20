@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { Fragment, useState } from 'react';
 import {
-  EuiIcon,
-  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiScreenReaderOnly,
+  EuiIcon,
+  EuiIconTip,
   EuiTextColor,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useState } from 'react';
-import { AlertsStatus } from '../../../alerts/status';
+import { i18n } from '@kbn/i18n';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { AlertsStatus } from '../../../alerts/status';
 import './ccr.scss';
 
 function toSeconds(ms) {

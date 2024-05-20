@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
-import { LabelPosition } from '../../common/constants';
-import { MetricOptions, MetricStyle, VisParams } from '../../common/types';
 import { MetricVisValue } from './metric_value';
+import { MetricOptions, MetricStyle, VisParams } from '../../common/types';
+import { LabelPosition } from '../../common/constants';
 
 const baseMetric: MetricOptions = {
   label: 'Foo',

@@ -9,12 +9,12 @@ import './_time_range_selector.scss';
 import PropTypes from 'prop-types';
 import React, { Component, useState, useEffect } from 'react';
 
-import { EuiDatePicker, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiDatePicker, EuiFieldText, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
-import moment from 'moment';
 import { ManagedJobsWarningCallout } from '../../confirm_modals/managed_jobs_warning_callout';
 
 export class TimeRangeSelector extends Component {

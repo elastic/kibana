@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { deleteActionRoute } from './delete';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { actionsClientMock } from '../mocks';
-import { deleteActionRoute } from './delete';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
+import { actionsClientMock } from '../mocks';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 jest.mock('./verify_access_and_context', () => ({

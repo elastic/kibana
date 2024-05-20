@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { FileBasedFieldVisConfig } from '../stats_table/types';
 
 export const FileBasedNumberContentPreview = ({ config }: { config: FileBasedFieldVisConfig }) => {

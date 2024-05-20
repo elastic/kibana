@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { OnlySearchSourceRuleParams } from '../types';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import {
+  updateSearchSource,
+  generateLink,
+  updateFilterReferences,
+  getSmallerDataViewSpec,
+} from './fetch_search_source_query';
 import {
   createStubDataView,
   stubbedSavedObjectIndexPattern,
 } from '@kbn/data-views-plugin/common/data_view.stub';
+import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { Comparator } from '../../../../common/comparator_types';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { Comparator } from '../../../../common/comparator_types';
-import { OnlySearchSourceRuleParams } from '../types';
-import {
-  generateLink,
-  getSmallerDataViewSpec,
-  updateFilterReferences,
-  updateSearchSource,
-} from './fetch_search_source_query';
 
 const createDataView = () => {
   const id = 'test-id';

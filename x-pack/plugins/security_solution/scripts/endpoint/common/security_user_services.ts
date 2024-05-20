@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { userInfo } from 'os';
 import type { Client } from '@elastic/elasticsearch';
+import { userInfo } from 'os';
 
 export interface CreatedSecuritySuperuser {
   username: string;

@@ -14,7 +14,7 @@ import React from 'react';
 
 import { Redirect } from 'react-router-dom';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { VersionMismatchPage } from '../shared/version_mismatch';
 import { rerender } from '../test_helpers';
@@ -33,7 +33,7 @@ import { RoleMappings } from './components/role_mappings';
 import { Settings } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 
-import { AppSearch, AppSearchConfigured, AppSearchUnconfigured } from '.';
+import { AppSearch, AppSearchUnconfigured, AppSearchConfigured } from '.';
 
 describe('AppSearch', () => {
   it('always renders the Setup Guide', () => {

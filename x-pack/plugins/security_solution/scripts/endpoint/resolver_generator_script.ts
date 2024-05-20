@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+/* eslint-disable no-console,max-classes-per-file */
+import yargs from 'yargs';
 import fs from 'fs';
 import { Client, errors } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
-import type { ToolingLog } from '@kbn/tooling-log';
-/* eslint-disable no-console,max-classes-per-file */
-import yargs from 'yargs';
+import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
+import { EndpointSecurityTestRolesLoader } from './common/role_and_user_loader';
 import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
-import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
-import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
-import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
-import { EndpointSecurityTestRolesLoader } from './common/role_and_user_loader';
+import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion, isServerlessKibanaFlavor } from './common/stack_services';
+import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
 
 main();
 

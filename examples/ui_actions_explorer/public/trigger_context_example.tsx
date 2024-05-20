@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React, { Fragment, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiDataGrid } from '@elastic/eui';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import React, { Fragment, useMemo, useState } from 'react';
-import { COUNTRY_TRIGGER, PHONE_TRIGGER, USER_TRIGGER, User } from './actions/actions';
+import { USER_TRIGGER, PHONE_TRIGGER, COUNTRY_TRIGGER, User } from './actions/actions';
 
 export interface Props {
   uiActionsApi: UiActionsStart;

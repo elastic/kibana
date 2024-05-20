@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { InfraClientStartServicesAccessor } from '../../types';
 import {
-  LOG_STREAM_EMBEDDABLE,
   LogStreamEmbeddable,
   LogStreamEmbeddableInput,
+  LOG_STREAM_EMBEDDABLE,
 } from './log_stream_embeddable';
 
 export class LogStreamEmbeddableFactoryDefinition

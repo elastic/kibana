@@ -1,5 +1,3 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +5,12 @@ import userEvent from '@testing-library/user-event';
  * 2.0.
  */
 import React from 'react';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
+import userEvent from '@testing-library/user-event';
+import { FindingsRuleFlyout } from './findings_flyout';
+import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../../test/test_provider';
 import { mockFindingsHit } from '../__mocks__/findings';
-import { FindingsRuleFlyout } from './findings_flyout';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
 const onPaginate = jest.fn();
 

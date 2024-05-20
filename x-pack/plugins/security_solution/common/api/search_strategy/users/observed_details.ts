@@ -7,10 +7,10 @@
 
 import { z } from 'zod';
 
-import { UsersQueries } from '../model/factory_query_type';
-import { inspect } from '../model/inspect';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
+import { inspect } from '../model/inspect';
 import { timerange } from '../model/timerange';
+import { UsersQueries } from '../model/factory_query_type';
 
 export const observedUserDetailsSchema = requestBasicOptionsSchema.extend({
   userName: z.string(),

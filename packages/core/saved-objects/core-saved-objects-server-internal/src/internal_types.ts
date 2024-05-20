@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
 import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
+import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
 
 /**

@@ -23,13 +23,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { ClusterPrivileges } from './cluster_privileges';
+import { IndexPrivileges } from './index_privileges';
+import { RemoteClusterPrivileges } from './remote_cluster_privileges';
 import type { BuiltinESPrivileges, Role, SecurityLicense } from '../../../../../../common';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import type { RoleValidator } from '../../validate_role';
-import { ClusterPrivileges } from './cluster_privileges';
-import { IndexPrivileges } from './index_privileges';
-import { RemoteClusterPrivileges } from './remote_cluster_privileges';
 
 interface Props {
   role: Role;

@@ -28,7 +28,9 @@
         "description": [
           "\nCalculate the size of an image, fitting to our limits see {@link boxDimensions},\nwhile preserving the aspect ratio."
         ],
-        "signature": ["(width: number, height: number) => { width: number; height: number; }"],
+        "signature": [
+          "(width: number, height: number) => { width: number; height: number; }"
+        ],
         "path": "packages/shared-ux/file/util/src/image_metadata.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -40,7 +42,9 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/shared-ux/file/util/src/image_metadata.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -53,7 +57,9 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/shared-ux/file/util/src/image_metadata.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -133,7 +139,9 @@
         "type": "Function",
         "tags": [],
         "label": "getImageMetadata",
-        "description": ["\nExtract image metadata, assumes that file or blob as an image!"],
+        "description": [
+          "\nExtract image metadata, assumes that file or blob as an image!"
+        ],
         "signature": [
           "(file: Blob | File) => Promise<",
           {
@@ -156,7 +164,9 @@
             "tags": [],
             "label": "file",
             "description": [],
-            "signature": ["Blob | File"],
+            "signature": [
+              "Blob | File"
+            ],
             "path": "packages/shared-ux/file/util/src/image_metadata.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -173,7 +183,9 @@
         "tags": [],
         "label": "isImage",
         "description": [],
-        "signature": ["(file: { type?: string | undefined; }) => boolean"],
+        "signature": [
+          "(file: { type?: string | undefined; }) => boolean"
+        ],
         "path": "packages/shared-ux/file/util/src/image_metadata.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -196,7 +208,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/shared-ux/file/util/src/image_metadata.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -214,7 +228,11 @@
         "tags": [],
         "label": "useBehaviorSubject",
         "description": [],
-        "signature": ["(o$: ", "BehaviorSubject", "<T>) => T"],
+        "signature": [
+          "(o$: ",
+          "BehaviorSubject",
+          "<T>) => T"
+        ],
         "path": "packages/shared-ux/file/util/src/use_behavior_subject.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -226,7 +244,10 @@
             "tags": [],
             "label": "o$",
             "description": [],
-            "signature": ["BehaviorSubject", "<T>"],
+            "signature": [
+              "BehaviorSubject",
+              "<T>"
+            ],
             "path": "packages/shared-ux/file/util/src/use_behavior_subject.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -270,7 +291,9 @@
             "tags": [],
             "label": "file",
             "description": [],
-            "signature": ["Blob | File"],
+            "signature": [
+              "Blob | File"
+            ],
             "path": "packages/shared-ux/file/util/src/image_metadata.ts",
             "deprecated": false,
             "trackAdoption": false

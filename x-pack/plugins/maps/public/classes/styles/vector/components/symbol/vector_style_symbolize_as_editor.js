@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiButtonGroup, EuiFormRow, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { SYMBOLIZE_AS_TYPES, VECTOR_STYLES } from '../../../../../../common/constants';

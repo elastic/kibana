@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -14,9 +16,7 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React, { ReactNode } from 'react';
 
 const PopoverContent = euiStyled(EuiText)`
   max-width: 480px;

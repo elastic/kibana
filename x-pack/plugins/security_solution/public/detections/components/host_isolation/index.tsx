@@ -7,10 +7,10 @@
 
 import React, { useMemo } from 'react';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { getCrowdstrikeAgentId } from '../../../common/utils/crowdstrike_alert_check';
 import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
+import { getCrowdstrikeAgentId } from '../../../common/utils/crowdstrike_alert_check';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { getFieldValue } from './helpers';
 import { IsolateHost } from './isolate';
 import { UnisolateHost } from './unisolate';

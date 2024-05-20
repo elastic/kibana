@@ -8,21 +8,21 @@
 import { getNewRule } from '../../../../objects/rule';
 
 import {
-  ACTION_BTN,
-  EMAIL_ACTION_BTN,
   INDEX_SELECTOR,
-  SERVER_LOG_ACTION_BTN,
   SLACK_ACTION_BTN,
   WEBHOOK_ACTION_BTN,
+  EMAIL_ACTION_BTN,
   XMATTERS_ACTION_BTN,
+  SERVER_LOG_ACTION_BTN,
+  ACTION_BTN,
 } from '../../../../screens/common/rule_actions';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { goToActionsStepTab } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
-import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 

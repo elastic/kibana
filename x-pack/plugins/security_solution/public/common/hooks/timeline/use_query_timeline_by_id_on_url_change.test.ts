@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
-import { timelineDefaults } from '../../../timelines/store/defaults';
 import { useQueryTimelineByIdOnUrlChange } from './use_query_timeline_by_id_on_url_change';
+import { renderHook } from '@testing-library/react-hooks';
+import { timelineDefaults } from '../../../timelines/store/defaults';
 
 jest.mock('../use_experimental_features');
 

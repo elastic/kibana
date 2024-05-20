@@ -14,7 +14,7 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../common/constants';
-import type { OperationDetails, Verbs } from './types';
+import type { Verbs, OperationDetails } from './types';
 import { ReadOperations, WriteOperations } from './types';
 
 export * from './authorization';

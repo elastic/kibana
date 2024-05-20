@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
 
-import { ContextMenuActions } from '../../../../components';
-import { useDashboardLocator } from '../../../../hooks';
 import type { DataStream } from '../../../../types';
+import { useDashboardLocator } from '../../../../hooks';
+import { ContextMenuActions } from '../../../../components';
 
 import { useAPMServiceDetailHref } from '../../../../hooks/use_apm_service_href';
 

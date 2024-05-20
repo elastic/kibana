@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import * as buildQuery from './query.overview_host.dsl';
 import { hostOverview } from '.';
 import {
-  formattedSearchStrategyResponse,
   mockOptions,
   mockSearchStrategyResponse,
+  formattedSearchStrategyResponse,
 } from './__mocks__';
-import * as buildQuery from './query.overview_host.dsl';
 
 describe('hostOverview search strategy', () => {
   const buildOverviewHostQuery = jest.spyOn(buildQuery, 'buildOverviewHostQuery');

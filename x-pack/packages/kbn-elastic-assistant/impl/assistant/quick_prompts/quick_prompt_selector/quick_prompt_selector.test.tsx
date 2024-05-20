@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
+import { fireEvent, render } from '@testing-library/react';
 import { QuickPromptSelector } from './quick_prompt_selector';
+import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 
 const onQuickPromptSelectionChange = jest.fn();
 const onQuickPromptDeleted = jest.fn();

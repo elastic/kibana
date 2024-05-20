@@ -8,20 +8,20 @@
 
 import { dirname } from 'path';
 import { isPlainObject } from 'lodash';
-import { isPlainObjectType } from '../utils/is_plain_object_type';
-import { parseRef } from '../utils/parse_ref';
-import { toAbsolutePath } from '../utils/to_absolute_path';
-import { isChildContext } from './is_child_context';
 import { IRefResolver } from './ref_resolver';
 import {
   DocumentNode,
-  DocumentNodeProcessor,
-  PlainObjectNode,
-  RefNode,
   ResolvedDocument,
-  ResolvedRef,
   TraverseDocumentContext,
+  ResolvedRef,
+  DocumentNodeProcessor,
+  RefNode,
+  PlainObjectNode,
 } from './types';
+import { parseRef } from '../utils/parse_ref';
+import { toAbsolutePath } from '../utils/to_absolute_path';
+import { isPlainObjectType } from '../utils/is_plain_object_type';
+import { isChildContext } from './is_child_context';
 
 interface TraverseItem {
   node: DocumentNode;

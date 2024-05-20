@@ -7,27 +7,27 @@
 
 import React, { type FC, useMemo } from 'react';
 import './_index.scss';
-import { pick } from 'lodash';
 import ReactDOM from 'react-dom';
+import { pick } from 'lodash';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
-import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
 import type { ExperimentalFeatures, MlFeatures } from '../../common/constants/app';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
-import type { StartServices } from './contexts/kibana';
-import { EnabledFeaturesContextProvider } from './contexts/ml';
+import { clearCache, setDependencyCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
 import type { PageDependencies } from './routing/router';
-import { clearCache, setDependencyCache } from './util/dependency_cache';
+import { EnabledFeaturesContextProvider } from './contexts/ml';
+import type { StartServices } from './contexts/kibana';
 import { getMlGlobalServices } from './util/get_services';
 
 export type MlDependencies = Omit<

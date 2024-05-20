@@ -15,8 +15,8 @@ import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 import { getEsRequestTimeout } from '../lib';
 import {
-  WrappedScopedClusterClient,
   createWrappedScopedClusterClientFactory,
+  WrappedScopedClusterClient,
 } from '../lib/wrap_scoped_cluster_client';
 import {
   WrappedSearchSourceClient,

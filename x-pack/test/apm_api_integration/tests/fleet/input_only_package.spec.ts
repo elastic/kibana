@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { ApmSynthtraceEsClient, LogLevel, createLogger } from '@kbn/apm-synthtrace';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { createEsClientForFtrConfig } from '@kbn/test';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import pRetry from 'p-retry';
-import { getBettertest } from '../../common/bettertest';
-import { ApmApiClient } from '../../common/config';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { getBettertest } from '../../common/bettertest';
 import {
   createAgentPolicy,
   createPackagePolicy,
   deleteAgentPolicyAndPackagePolicyByName,
   setupFleet,
 } from './helpers';
+import { ApmApiClient } from '../../common/config';
 
 export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const { getService } = ftrProviderContext;

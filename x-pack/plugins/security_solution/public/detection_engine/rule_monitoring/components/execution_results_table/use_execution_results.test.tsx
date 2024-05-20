@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { cleanup, renderHook } from '@testing-library/react-hooks';
+import { renderHook, cleanup } from '@testing-library/react-hooks';
 
-import { useToasts } from '../../../../common/lib/kibana';
-import { createReactQueryWrapper } from '../../../../common/mock';
-import { api } from '../../api';
 import { useExecutionResults } from './use_execution_results';
+import { useToasts } from '../../../../common/lib/kibana';
+import { api } from '../../api';
+import { createReactQueryWrapper } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../api');

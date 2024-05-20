@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { getSourcererDataView } from './get_sourcerer_data_view';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 
 const dataViewId = 'test-id';
 const dataViewsService = {

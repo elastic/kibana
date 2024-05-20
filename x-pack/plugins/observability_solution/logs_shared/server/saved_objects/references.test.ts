@@ -7,9 +7,9 @@
 
 import { SavedObjectReference } from '@kbn/core/server';
 import {
-  SavedObjectAttributesWithReferences,
   extractSavedObjectReferences,
   resolveSavedObjectReferences,
+  SavedObjectAttributesWithReferences,
 } from './references';
 
 it('extractSavedObjectReferences extracts references using the given extractors', () => {

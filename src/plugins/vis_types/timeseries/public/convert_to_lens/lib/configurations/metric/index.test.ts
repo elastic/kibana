@@ -7,10 +7,10 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { getConfigurationForGauge, getConfigurationForMetric } from '.';
 import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
-import { createPanel, createSeries } from '../../__mocks__';
 import { Column, FormulaColumn, Layer } from '../../convert';
+import { createPanel, createSeries } from '../../__mocks__';
+import { getConfigurationForMetric, getConfigurationForGauge } from '.';
 
 const mockGetPalette = jest.fn();
 

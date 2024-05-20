@@ -8,8 +8,8 @@
 import StatsMock from './__mocks__/analytics_stats.json';
 
 import {
-  DATA_FRAME_TASK_STATE,
   type DataFrameAnalyticsStats,
+  DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import {

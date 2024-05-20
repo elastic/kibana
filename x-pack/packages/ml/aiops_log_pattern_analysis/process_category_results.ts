@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
-import type { CatResponse, CategoriesAgg, Category } from './types';
+import type { Category, CategoriesAgg, CatResponse } from './types';
 
 export function processCategoryResults(
   result: CatResponse,

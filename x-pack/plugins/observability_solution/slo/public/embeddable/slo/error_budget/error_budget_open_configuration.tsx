@@ -1,7 +1,3 @@
-import type { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,9 +5,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
  * 2.0.
  */
 import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SloPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';
-import type { EmbeddableSloProps, SloErrorBudgetEmbeddableState } from './types';
+import type { SloErrorBudgetEmbeddableState, EmbeddableSloProps } from './types';
 export async function openSloConfiguration(
   coreStart: CoreStart,
   pluginStart: SloPublicPluginsStart,

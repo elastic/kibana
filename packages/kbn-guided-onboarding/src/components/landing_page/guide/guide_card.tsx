@@ -9,12 +9,12 @@
 import React, { useCallback, useState } from 'react';
 
 import { EuiCard, EuiFlexGroup, EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
-import { i18n } from '@kbn/i18n';
 import { GuideState } from '../../../types';
-import { GuideCardsProps } from './guide_cards';
 import { GuideCardConstants } from './guide_cards.constants';
+import { GuideCardsProps } from './guide_cards';
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
   if (!guideState) {

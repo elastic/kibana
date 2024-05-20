@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { EuiPortal } from '@elastic/eui';
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useCallback } from 'react';
-import { Redirect, useHistory } from 'react-router-dom';
+import { EuiPortal } from '@elastic/eui';
+import { useHistory, Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
+import {
+  useBreadcrumbs,
+  useGetOutputs,
+  useGetDownloadSources,
+  useGetFleetServerHosts,
+  useFlyoutContext,
+  useGetFleetProxies,
+  useStartServices,
+} from '../../hooks';
+import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
+import { DefaultLayout } from '../../layouts';
+import { Loading } from '../../components';
 import {
   SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
 } from '../../../../../common/constants';
-import { Loading } from '../../components';
-import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
-import {
-  useBreadcrumbs,
-  useFlyoutContext,
-  useGetDownloadSources,
-  useGetFleetProxies,
-  useGetFleetServerHosts,
-  useGetOutputs,
-  useStartServices,
-} from '../../hooks';
-import { DefaultLayout } from '../../layouts';
 
 import { FleetServerFlyout } from '../../components';
 
+import { SettingsPage } from './components/settings_page';
+import { withConfirmModalProvider } from './hooks/use_confirm_modal';
+import { FleetServerHostsFlyout } from './components/fleet_server_hosts_flyout';
+import { useDeleteOutput, useDeleteFleetServerHost, useDeleteProxy } from './hooks';
 import { EditDownloadSourceFlyout } from './components/download_source_flyout';
 import { useDeleteDownloadSource } from './components/download_source_flyout/use_delete_download_source';
 import { FleetProxyFlyout } from './components/edit_fleet_proxy_flyout';
 import { EditOutputFlyout } from './components/edit_output_flyout';
-import { FleetServerHostsFlyout } from './components/fleet_server_hosts_flyout';
-import { SettingsPage } from './components/settings_page';
-import { useDeleteFleetServerHost, useDeleteOutput, useDeleteProxy } from './hooks';
-import { withConfirmModalProvider } from './hooks/use_confirm_modal';
 
 function useSettingsAppData() {
   const outputs = useGetOutputs();

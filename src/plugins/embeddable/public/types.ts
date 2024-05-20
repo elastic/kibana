@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from '@kbn/core/public';
-import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectAttributes } from '@kbn/core/public';
+import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
+import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import {
   EmbeddableFactory,
-  EmbeddableFactoryDefinition,
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
+  EmbeddableFactoryDefinition,
 } from './lib/embeddables';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
@@ -35,7 +35,7 @@ export type EmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T extends FinderAttributes = SavedObjectAttributes,
+  T extends FinderAttributes = SavedObjectAttributes
 >(
   def: EmbeddableFactoryDefinition<I, O, E, T>
 ) => EmbeddableFactory<I, O, E, T>;

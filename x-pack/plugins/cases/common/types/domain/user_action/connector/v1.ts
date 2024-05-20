@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseConnectorRt, CaseUserActionConnectorRt } from '../../connector/v1';
+import { CaseUserActionConnectorRt, CaseConnectorRt } from '../../connector/v1';
 import { UserActionTypes } from '../action/v1';
 
 export const ConnectorUserActionPayloadWithoutConnectorIdRt = rt.strict({

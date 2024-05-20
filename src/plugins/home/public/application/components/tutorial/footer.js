@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButton } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 

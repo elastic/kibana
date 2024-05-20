@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import {
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSkeletonText,
   EuiSkeletonTitle,
+  EuiSkeletonText,
+  EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
 
 const SkeletonComponent: React.FC = () => {
   return (

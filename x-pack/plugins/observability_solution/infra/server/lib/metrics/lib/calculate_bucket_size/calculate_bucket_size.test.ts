@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { calculateBucketSize } from '.';
+import moment from 'moment';
 
 const timerange = {
   from: moment('2017-01-01T00:00:00.000Z').valueOf(),

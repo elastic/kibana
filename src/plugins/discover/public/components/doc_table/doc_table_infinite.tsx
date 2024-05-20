@@ -8,15 +8,15 @@
 
 import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import './index.scss';
-import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../../application/main/components/skip_bottom_button';
-import { useAppStateSelector } from '../../application/main/state_management/discover_app_state_container';
+import { shouldLoadNextDocPatch } from './utils/should_load_next_doc_patch';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
-import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
-import { shouldLoadNextDocPatch } from './utils/should_load_next_doc_patch';
+import { useAppStateSelector } from '../../application/main/state_management/discover_app_state_container';
 
 const FOOTER_PADDING = { padding: 0 };
 

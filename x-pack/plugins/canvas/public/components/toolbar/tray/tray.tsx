@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
 import React, { ReactNode, MouseEventHandler } from 'react';
+import PropTypes from 'prop-types';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 const strings = {
   getCloseTrayAriaLabel: () =>

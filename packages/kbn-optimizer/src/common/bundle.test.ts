@@ -7,8 +7,8 @@
  */
 
 import { Bundle, BundleSpec, parseBundles } from './bundle';
-import { parseDllManifest } from './dll_manifest';
 import { Hashes } from './hashes';
+import { parseDllManifest } from './dll_manifest';
 
 jest.mock('fs');
 
@@ -50,9 +50,8 @@ it('creates cache keys', () => {
   });
   const dllRefKeys = ['./some-foo.ts'];
 
-  expect(
-    bundle.createCacheKey(['/foo/bar/a', '/foo/bar/c'], hashes, dllManifest, dllRefKeys)
-  ).toMatchInlineSnapshot(`
+  expect(bundle.createCacheKey(['/foo/bar/a', '/foo/bar/c'], hashes, dllManifest, dllRefKeys))
+    .toMatchInlineSnapshot(`
     Object {
       "checksums": Object {
         "/foo/bar/a": "123",

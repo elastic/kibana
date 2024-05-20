@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import React from 'react';
 import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataViewsContract,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import React from 'react';
 import { Document } from '../persistence/saved_object_store';
 import {
   Datasource,
-  EditorFrameInstance,
-  EditorFrameSetup,
-  EditorFrameStart,
   Visualization,
+  EditorFrameSetup,
+  EditorFrameInstance,
+  EditorFrameStart,
 } from '../types';
 
 export interface EditorFrameSetupPlugins {

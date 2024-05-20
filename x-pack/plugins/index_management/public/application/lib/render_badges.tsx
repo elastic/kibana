@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBadge, Query } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Fragment, ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiBadge, Query } from '@elastic/eui';
 
-import { Index } from '../..';
 import { ExtensionsService } from '../../services';
+import { Index } from '../..';
 
 export const renderBadges = (
   index: Index,

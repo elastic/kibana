@@ -12,10 +12,10 @@ import { EuiSideNavItemType } from '@elastic/eui';
 import { generateNavLink } from '../../../../shared/layout';
 import { NAV } from '../../../constants';
 import {
-  ORG_SETTINGS_CONNECTORS_PATH,
-  ORG_SETTINGS_CUSTOMIZE_PATH,
-  ORG_SETTINGS_OAUTH_APPLICATION_PATH,
   ORG_SETTINGS_PATH,
+  ORG_SETTINGS_CUSTOMIZE_PATH,
+  ORG_SETTINGS_CONNECTORS_PATH,
+  ORG_SETTINGS_OAUTH_APPLICATION_PATH,
 } from '../../../routes';
 
 export const useSettingsSubNav = () => {

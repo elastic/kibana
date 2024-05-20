@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { FunctionComponent, ChangeEvent } from 'react';
+import PropTypes from 'prop-types';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { ArgTypesStrings } from '../../../../i18n';
 
 const { ContainerStyle: strings } = ArgTypesStrings;

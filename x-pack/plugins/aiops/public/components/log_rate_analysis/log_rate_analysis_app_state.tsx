@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import type { FC } from 'react';
 import React from 'react';
+import { pick } from 'lodash';
 
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { LogRateAnalysisStateProvider } from '@kbn/aiops-components';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
@@ -23,8 +23,8 @@ import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
-import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 import { LogRateAnalysisPage } from './log_rate_analysis_page';
+import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
 
 const localStorage = new Storage(window.localStorage);
 

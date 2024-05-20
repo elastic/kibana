@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IconType } from '@elastic/eui';
 import { Capabilities } from '@kbn/core/public';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { IconType } from '@elastic/eui';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 
 /** @public */
 export type FeatureCatalogueCategory = 'admin' | 'data' | 'other';

@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { EuiFormLabel } from '@elastic/eui';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { coreMock } from '@kbn/core/public/mocks';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { waitFor } from '@testing-library/react';
-import { ReactWrapper } from 'enzyme';
-import React, { FunctionComponent } from 'react';
-import { act } from 'react-dom/test-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { triggersActionsUiConfig } from '../../../common/lib/config_api';
-import { triggersActionsUiHealth } from '../../../common/lib/health_api';
-import { useKibana } from '../../../common/lib/kibana';
-import {
-  GenericValidationResult,
-  Rule,
-  RuleAddProps,
-  RuleCreationValidConsumer,
-  RuleFlyoutCloseReason,
-  RuleType,
-  RuleTypeModel,
-  ValidationResult,
-} from '../../../types';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
+import React, { FunctionComponent } from 'react';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFormLabel } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
+import RuleAdd from './rule_add';
 import { createRule } from '../../lib/rule_api/create';
 import { alertingFrameworkHealth } from '../../lib/rule_api/health';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import {
+  Rule,
+  RuleAddProps,
+  RuleFlyoutCloseReason,
+  GenericValidationResult,
+  ValidationResult,
+  RuleCreationValidConsumer,
+  RuleType,
+  RuleTypeModel,
+} from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import RuleAdd from './rule_add';
+import { ReactWrapper } from 'enzyme';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { useKibana } from '../../../common/lib/kibana';
+import { triggersActionsUiConfig } from '../../../common/lib/config_api';
+import { triggersActionsUiHealth } from '../../../common/lib/health_api';
+import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { waitFor } from '@testing-library/react';
 jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/rule_api/rule_types', () => ({

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { AddMessageVariables } from '.';
 
 describe('AddMessageVariables', () => {

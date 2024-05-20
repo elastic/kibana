@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Request, ResponseToolkit } from '@hapi/hapi';
 import Joi from 'joi';
+import { Request, ResponseToolkit } from '@hapi/hapi';
 import {
-  HapiValidationError,
   defaultValidationErrorHandler,
+  HapiValidationError,
 } from './default_validation_error_handler';
 
 const emptyOutput = {

@@ -7,15 +7,15 @@
  */
 
 import './sense_editor.test.mocks';
-import $ from 'jquery';
-import _ from 'lodash';
 import { create } from './create';
+import _ from 'lodash';
+import $ from 'jquery';
 
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import * as kb from '../../../lib/kb/kb';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../../services';
-import { SettingsMock } from '../../../services/settings.mock';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { StorageMock } from '../../../services/storage.mock';
+import { SettingsMock } from '../../../services/settings.mock';
 
 describe('Integration', () => {
   let senseEditor;

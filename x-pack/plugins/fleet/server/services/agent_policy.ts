@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
+import { v5 as uuidv5 } from 'uuid';
+import { safeDump } from 'js-yaml';
+import pMap from 'p-map';
+import { lt } from 'semver';
 import type {
   ElasticsearchClient,
   SavedObjectsBulkUpdateResponse,
@@ -12,14 +17,9 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { safeDump } from 'js-yaml';
-import { chunk, groupBy, isEqual, keyBy, omit, pick } from 'lodash';
-import pMap from 'p-map';
-import { lt } from 'semver';
-import { v5 as uuidv5 } from 'uuid';
 
-import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -41,34 +41,12 @@ import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
-  AGENT_POLICY_INDEX,
-  FLEET_ELASTIC_AGENT_PACKAGE,
-  UUID_V5_NAMESPACE,
-  agentPolicyStatuses,
-} from '../../common/constants';
-import type {
-  DeleteAgentPolicyResponse,
-  FetchAllAgentPoliciesOptions,
-  FetchAllAgentPolicyIdsOptions,
-  FleetServerPolicy,
-  PackageInfo,
-} from '../../common/types';
-import {
-  AGENTS_PREFIX,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENTS_PREFIX,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../constants';
-import {
-  AgentPolicyInvalidError,
-  AgentPolicyNameExistsError,
-  AgentPolicyNotFoundError,
-  FleetError,
-  FleetUnauthorizedError,
-  HostedAgentPolicyRestrictionRelatedError,
-  PackagePolicyRestrictionRelatedError,
-} from '../errors';
 import type {
   AgentPolicy,
   AgentPolicySOAttributes,
@@ -82,6 +60,28 @@ import type {
   PostAgentPolicyUpdateCallback,
   PreconfiguredAgentPolicy,
 } from '../types';
+import {
+  AGENT_POLICY_INDEX,
+  agentPolicyStatuses,
+  FLEET_ELASTIC_AGENT_PACKAGE,
+  UUID_V5_NAMESPACE,
+} from '../../common/constants';
+import type {
+  DeleteAgentPolicyResponse,
+  FetchAllAgentPoliciesOptions,
+  FetchAllAgentPolicyIdsOptions,
+  FleetServerPolicy,
+  PackageInfo,
+} from '../../common/types';
+import {
+  AgentPolicyNameExistsError,
+  AgentPolicyNotFoundError,
+  AgentPolicyInvalidError,
+  FleetError,
+  FleetUnauthorizedError,
+  HostedAgentPolicyRestrictionRelatedError,
+  PackagePolicyRestrictionRelatedError,
+} from '../errors';
 
 import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
@@ -96,16 +96,16 @@ import {
   elasticAgentStandaloneManifest,
 } from './elastic_agent_manifest';
 
-import { getFullAgentPolicy, validateOutputForPolicy } from './agent_policies';
-import { agentPolicyUpdateEventHandler } from './agent_policy_update';
-import { getAgentsByKuery } from './agents';
-import { auditLoggingService } from './audit_logging';
 import { bulkInstallPackages } from './epm/packages';
-import { licenseService } from './license';
-import { outputService } from './output';
-import { incrementPackagePolicyCopyName } from './package_policies';
+import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
+import { incrementPackagePolicyCopyName } from './package_policies';
+import { outputService } from './output';
+import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
+import { getFullAgentPolicy, validateOutputForPolicy } from './agent_policies';
+import { auditLoggingService } from './audit_logging';
+import { licenseService } from './license';
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
@@ -1467,8 +1467,9 @@ class AgentPolicyService {
     if (agentPolicy?.is_protected) {
       const uninstallTokenService = appContextService.getUninstallTokenService();
 
-      const uninstallTokenError =
-        await uninstallTokenService?.checkTokenValidityForPolicy(policyId);
+      const uninstallTokenError = await uninstallTokenService?.checkTokenValidityForPolicy(
+        policyId
+      );
 
       if (uninstallTokenError) {
         throw new FleetError(

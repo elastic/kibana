@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ALERTING_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import type { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
-import { ruleDetailsLocatorID } from '../../../common';
-import { ALERT_STATUS_ALL } from '../../../common/constants';
-import { paths } from '../../../common/locators/paths';
-import type { AlertStatus } from '../../../common/typings';
-import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '../../utils/kibana_react';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
-import { usePluginContext } from '../../hooks/use_plugin_context';
+import { PageTitle } from './components/page_title';
+import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
+import { NoRuleFoundPanel } from './components/no_rule_found_panel';
+import { HeaderActions } from './components/header_actions';
+import { RuleDetailsTabs } from './components/rule_details_tabs';
+import { getHealthColor } from './helpers/get_health_color';
+import { isRuleEditable } from './helpers/is_rule_editable';
+import { ruleDetailsLocatorID } from '../../../common';
+import { ALERT_STATUS_ALL } from '../../../common/constants';
+import {
+  RULE_DETAILS_EXECUTION_TAB,
+  RULE_DETAILS_ALERTS_TAB,
+  RULE_DETAILS_TAB_URL_STORAGE_KEY,
+} from './constants';
+import { paths } from '../../../common/locators/paths';
 import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
 } from '../../utils/alert_summary_widget';
-import { useKibana } from '../../utils/kibana_react';
+import type { AlertStatus } from '../../../common/typings';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
-import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
-import { HeaderActions } from './components/header_actions';
-import { NoRuleFoundPanel } from './components/no_rule_found_panel';
-import { PageTitle } from './components/page_title';
-import { RuleDetailsTabs } from './components/rule_details_tabs';
-import {
-  RULE_DETAILS_ALERTS_TAB,
-  RULE_DETAILS_EXECUTION_TAB,
-  RULE_DETAILS_TAB_URL_STORAGE_KEY,
-} from './constants';
-import { getHealthColor } from './helpers/get_health_color';
-import { isRuleEditable } from './helpers/is_rule_editable';
 
 export type TabId = typeof RULE_DETAILS_ALERTS_TAB | typeof RULE_DETAILS_EXECUTION_TAB;
 
@@ -183,15 +183,15 @@ export function RuleDetailsPage() {
     rule?.consumer === ALERTING_FEATURE_ID && ruleType?.producer
       ? [ruleType.producer as AlertConsumers]
       : rule
-        ? [rule.consumer as AlertConsumers]
-        : [];
+      ? [rule.consumer as AlertConsumers]
+      : [];
 
   const ruleStatusMessage =
     rule?.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
       ? rulesStatusesTranslationsMapping.noLicense
       : rule
-        ? rulesStatusesTranslationsMapping[rule.executionStatus.status]
-        : '';
+      ? rulesStatusesTranslationsMapping[rule.executionStatus.status]
+      : '';
 
   if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OperatorFunction, filter, scan } from 'rxjs';
+import { filter, OperatorFunction, scan } from 'rxjs';
 import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,

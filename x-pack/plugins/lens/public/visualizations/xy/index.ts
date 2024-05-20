@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
-import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { FormatFactory } from '../../../common/types';
-import type { LensPluginStartDependencies } from '../../plugin';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import type { EditorFrameSetup } from '../../types';
+import type { LensPluginStartDependencies } from '../../plugin';
+import type { FormatFactory } from '../../../common/types';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;

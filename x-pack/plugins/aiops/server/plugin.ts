@@ -7,27 +7,27 @@
 
 import type { Subscription } from 'rxjs';
 
-import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import type {
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Logger,
   Plugin,
-  PluginInitializerContext,
+  Logger,
 } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import { isActiveLicense } from './lib/license';
-import { registerCasesPersistableState } from './register_cases';
-import { defineRoute as defineCategorizationFieldValidationRoute } from './routes/categorization_field_validation/define_route';
-import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
 import type {
   AiopsLicense,
   AiopsPluginSetup,
-  AiopsPluginSetupDeps,
   AiopsPluginStart,
+  AiopsPluginSetupDeps,
   AiopsPluginStartDeps,
 } from './types';
+import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
+import { defineRoute as defineCategorizationFieldValidationRoute } from './routes/categorization_field_validation/define_route';
+import { registerCasesPersistableState } from './register_cases';
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>

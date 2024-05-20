@@ -7,15 +7,17 @@
  */
 
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
-  Layer,
   getIndexPatternIds,
   isAnnotationsLayer,
+  Layer,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { v4 as uuidv4 } from 'uuid';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
+import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
+import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import {
   getConfigurationForTimeseries as getConfiguration,
   getLayers,
@@ -25,9 +27,7 @@ import {
   convertToDateHistogramColumn,
   excludeMetaFromColumn,
 } from '../lib/convert';
-import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { isValidMetrics } from '../lib/metrics';
-import { getBucketsColumns, getMetricsColumns } from '../lib/series';
 import { ConvertTsvbToLensVisualization } from '../types';
 
 const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<string, Layer> => {

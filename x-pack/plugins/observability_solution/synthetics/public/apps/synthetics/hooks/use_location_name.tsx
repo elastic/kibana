@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useMemo, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { MonitorOverviewItem } from '../../../../common/runtime_types';
-import { getServiceLocations, selectServiceLocationsState } from '../state';
+import { selectServiceLocationsState, getServiceLocations } from '../state';
 
 export function useLocationName(monitor: MonitorOverviewItem) {
   const dispatch = useDispatch();

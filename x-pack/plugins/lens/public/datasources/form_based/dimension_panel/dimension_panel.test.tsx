@@ -5,52 +5,52 @@
  * 2.0.
  */
 
-import {
-  EuiComboBox,
-  EuiComboBoxProps,
-  EuiListGroup,
-  EuiListGroupItemProps,
-  EuiRange,
-  EuiSelect,
-} from '@elastic/eui';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { CoreStart, HttpSetup, IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { act, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React, { ChangeEvent } from 'react';
-import { LensAppServices } from '../../../app_plugin/types';
-import { generateId } from '../../../id_generator';
-import { OperationMetadata } from '../../../types';
-import { documentField } from '../document_field';
+import { screen, act, render, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import {
-  FiltersIndexPatternColumn,
-  GenericIndexPatternColumn,
-  TermsIndexPatternColumn,
-  replaceColumn,
-} from '../operations';
-import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
-import { getFieldByNameFactory } from '../pure_helpers';
-import { FormBasedPrivateState } from '../types';
-import { AdvancedOptions } from './advanced_options';
-import { DimensionEditor } from './dimension_editor';
+  EuiComboBox,
+  EuiListGroupItemProps,
+  EuiListGroup,
+  EuiRange,
+  EuiSelect,
+  EuiComboBoxProps,
+} from '@elastic/eui';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import {
   FormBasedDimensionEditorComponent,
   FormBasedDimensionEditorProps,
 } from './dimension_panel';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
+import { generateId } from '../../../id_generator';
+import { FormBasedPrivateState } from '../types';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import {
+  FiltersIndexPatternColumn,
+  GenericIndexPatternColumn,
+  replaceColumn,
+  TermsIndexPatternColumn,
+} from '../operations';
+import { documentField } from '../document_field';
+import { OperationMetadata } from '../../../types';
+import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
+import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering, setFilter } from './filtering';
-import { ReducedTimeRange } from './reduced_time_range';
 import { TimeShift } from './time_shift';
+import { ReducedTimeRange } from './reduced_time_range';
+import { DimensionEditor } from './dimension_editor';
+import { AdvancedOptions } from './advanced_options';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { LensAppServices } from '../../../app_plugin/types';
 
 jest.mock('./reference_editor', () => ({
   ReferenceEditor: () => null,

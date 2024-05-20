@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Immutable } from '../../../common/endpoint/types';
-import type { ServerApiError } from '../../common/types';
 import type {
   FailedResourceState,
   LoadedResourceState,
@@ -14,6 +12,8 @@ import type {
   StaleResourceState,
   UninitialisedResourceState,
 } from './async_resource_state';
+import type { ServerApiError } from '../../common/types';
+import type { Immutable } from '../../../common/endpoint/types';
 
 export const createUninitialisedResourceState = (): UninitialisedResourceState => {
   return { type: 'UninitialisedResourceState' };

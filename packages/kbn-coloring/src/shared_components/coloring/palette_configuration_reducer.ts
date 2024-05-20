@@ -12,22 +12,22 @@ import {
   addColorRange,
   deleteColorRange,
   distributeEqually,
-  getValueForContinuity,
   reversePalette,
   sortColorRanges,
   updateColorRangeColor,
   updateColorRangeValue,
+  getValueForContinuity,
 } from './color_ranges/utils';
 
 import {
-  changeColorPalette,
   mergePaletteParams,
   updateRangeType,
-  withUpdatingColorRanges,
+  changeColorPalette,
   withUpdatingPalette,
+  withUpdatingColorRanges,
 } from './utils';
 
-import type { PaletteConfigurationActions, PaletteConfigurationState } from './types';
+import type { PaletteConfigurationState, PaletteConfigurationActions } from './types';
 
 export const paletteConfigurationReducer: Reducer<
   PaletteConfigurationState,

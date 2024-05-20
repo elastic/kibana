@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { EuiSideNavItemType } from '@elastic/eui';
-import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { i18n } from '@kbn/i18n';
-import { useUrlState } from '@kbn/ml-url-state';
+import type { EuiSideNavItemType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
+import { useUrlState } from '@kbn/ml-url-state';
+import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
-import { NotificationsIndicator } from './notifications_indicator';
+import { ML_PAGES } from '../../../../common/constants/locator';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 export interface Tab {
   id: string;

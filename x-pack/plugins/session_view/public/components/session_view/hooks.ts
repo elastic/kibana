@@ -1,35 +1,35 @@
-import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   AlertStatusEventEntityIdMap,
-  EventAction,
   ProcessEvent,
   ProcessEventResults,
+  EventAction,
 } from '../../../common';
 import {
-  ALERTS_PER_PAGE,
   ALERTS_ROUTE,
-  ALERT_STATUS_ROUTE,
-  CURRENT_API_VERSION,
-  EVENT_ACTION_END,
-  EVENT_ACTION_EXEC,
-  EVENT_ACTION_EXECUTED,
-  EVENT_ACTION_FORK,
-  GET_TOTAL_IO_BYTES_ROUTE,
-  PROCESS_EVENTS_PER_PAGE,
   PROCESS_EVENTS_ROUTE,
+  PROCESS_EVENTS_PER_PAGE,
+  ALERTS_PER_PAGE,
+  ALERT_STATUS_ROUTE,
+  GET_TOTAL_IO_BYTES_ROUTE,
+  QUERY_KEY_PROCESS_EVENTS,
   QUERY_KEY_ALERTS,
   QUERY_KEY_GET_TOTAL_IO_BYTES,
-  QUERY_KEY_PROCESS_EVENTS,
+  CURRENT_API_VERSION,
+  EVENT_ACTION_FORK,
+  EVENT_ACTION_EXEC,
+  EVENT_ACTION_EXECUTED,
+  EVENT_ACTION_END,
 } from '../../../common/constants';
 
 const isSessionEventAction = (action: EventAction | undefined): boolean => {

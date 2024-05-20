@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
-import createContainer from 'constate';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  BehaviorSubject,
-  Observable,
-  debounceTime,
+  first,
+  tap,
+  switchMap,
   distinctUntilChanged,
   filter,
-  first,
-  iif,
   map,
-  merge,
+  debounceTime,
   skipUntil,
-  switchMap,
-  tap,
   withLatestFrom,
+  BehaviorSubject,
+  iif,
+  merge,
+  Observable,
 } from 'rxjs';
+import createContainer from 'constate';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useDatePickerContext } from './use_date_picker';
 

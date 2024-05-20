@@ -7,8 +7,8 @@
 
 import { cloneDeep } from 'lodash';
 
-import { AGG_TYPES } from '../../../../common/constants';
 import { buildInput } from '../../../../common/lib/serialization';
+import { AGG_TYPES } from '../../../../common/constants';
 import { getIntervalType } from '../lib/get_interval_type';
 
 /*

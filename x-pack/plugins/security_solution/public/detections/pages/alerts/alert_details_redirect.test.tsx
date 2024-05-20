@@ -1,5 +1,3 @@
-import { Router } from '@kbn/shared-ux-router';
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,11 +5,13 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import { ALERTS_PATH, ALERT_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { TestProviders } from '../../../common/mock';
-import { mockHistory } from '../../../common/utils/route/mocks';
+import { render } from '@testing-library/react';
+import { Router } from '@kbn/shared-ux-router';
 import { AlertDetailsRedirect } from './alert_details_redirect';
+import { TestProviders } from '../../../common/mock';
+import { ALERTS_PATH, ALERT_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
+import { mockHistory } from '../../../common/utils/route/mocks';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 

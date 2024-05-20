@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect } from 'react';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { useCallback, useEffect } from 'react';
 import { ActionConnectorFieldsProps } from '../../../types';
 
 const TestConnector: React.FunctionComponent<ActionConnectorFieldsProps> = ({

@@ -12,39 +12,39 @@ import {
   CENTER_ALIGNMENT,
   EuiButtonIcon,
   EuiIcon,
-  EuiIconTip,
   EuiInMemoryTable,
-  EuiLoadingSpinner,
-  EuiResizeObserver,
   EuiText,
   EuiToolTip,
+  EuiIconTip,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
-  useEuiMinBreakpoint,
+  EuiResizeObserver,
+  EuiLoadingSpinner,
   useEuiTheme,
+  useEuiMinBreakpoint,
 } from '@elastic/eui';
-import type { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { throttle } from 'lodash';
+import { css } from '@emotion/react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
-import type { DataVisualizerTableState, SupportedFieldType } from '../../../../../common/types';
+import type { SupportedFieldType, DataVisualizerTableState } from '../../../../../common/types';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
 
+import { useTableSettings } from './use_table_settings';
+import { TopValuesPreview } from './components/field_data_row/top_values_preview';
 import type {
   FieldVisConfig,
   FileBasedFieldVisConfig,
 } from '../../../../../common/types/field_vis_config';
 import { isIndexBasedFieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { FileBasedNumberContentPreview } from '../field_data_row';
-import { FieldTypeIcon } from '../field_type_icon';
 import { BooleanContentPreview } from './components/field_data_row';
-import { DistinctValues } from './components/field_data_row/distinct_values';
-import { TopValuesPreview } from './components/field_data_row/top_values_preview';
-import { useTableSettings } from './use_table_settings';
 import { calculateTableColumnsDimensions } from './utils';
+import { DistinctValues } from './components/field_data_row/distinct_values';
+import { FieldTypeIcon } from '../field_type_icon';
 import './_index.scss';
 
 const FIELD_NAME = 'fieldName';

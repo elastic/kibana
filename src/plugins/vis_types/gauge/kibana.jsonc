@@ -7,9 +7,23 @@
     "id": "visTypeGauge",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["charts", "data", "expressions", "visualizations", "dataViews"],
-    "optionalPlugins": ["expressionGauge"],
-    "requiredBundles": ["visDefaultEditor", "expressionGauge", "kibanaUtils"],
-    "extraPublicDirs": ["common"]
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "expressions",
+      "visualizations",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "expressionGauge"
+    ],
+    "requiredBundles": [
+      "visDefaultEditor",
+      "expressionGauge",
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

@@ -7,13 +7,13 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  type IScopedClusterClient,
-  type KibanaRequest,
-  SavedObjectsClient,
   type SavedObjectsServiceStart,
+  type KibanaRequest,
+  type IScopedClusterClient,
+  SavedObjectsClient,
 } from '@kbn/core/server';
+import type { TrainedModelJob, MLSavedObjectService } from './service';
 import { ML_JOB_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
-import type { MLSavedObjectService, TrainedModelJob } from './service';
 
 export function savedObjectClientsFactory(
   getSavedObjectsStart: () => SavedObjectsServiceStart | null

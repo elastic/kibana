@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ConfigMappingSchema,
   ExecutorParamsSchema,

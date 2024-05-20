@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import * as rt from 'io-ts';
-import { AttachmentRt } from '../attachment/v1';
-import { CaseConnectorRt } from '../connector/v1';
-import { CaseCustomFieldsRt } from '../custom_field/v1';
+import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
+import { CaseConnectorRt } from '../connector/v1';
+import { AttachmentRt } from '../attachment/v1';
+import { CaseCustomFieldsRt } from '../custom_field/v1';
 
 export { CaseStatuses };
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ManagementAppLocator } from '@kbn/management-plugin/common';
 import { LocatorDefinition } from '@kbn/share-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { PLUGIN } from '../common/constants';
 import {
   getPoliciesListPath,
   getPolicyCreatePath,
   getPolicyEditPath,
 } from './application/services/navigation';
+import { PLUGIN } from '../common/constants';
 
 export const ILM_LOCATOR_ID = 'ILM_LOCATOR_ID';
 

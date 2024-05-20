@@ -7,15 +7,15 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
+import { TEST_CASES } from './resolve';
+import { SPACES } from '../lib/spaces';
 import {
   createRequest,
   expectResponses,
-  getTestTitle,
   getUrlPrefix,
+  getTestTitle,
 } from '../lib/saved_object_test_utils';
-import { SPACES } from '../lib/spaces';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
-import { TEST_CASES } from './resolve';
 
 export interface BulkResolveTestDefinition extends TestDefinition {
   request: Array<{ type: string; id: string }>;

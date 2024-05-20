@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import * as Either from 'fp-ts/lib/Either';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
-import * as Either from 'fp-ts/lib/Either';
-import { getBaseMappings } from '../core';
 import { checkTargetTypesMappings } from './check_target_mappings';
+import { getBaseMappings } from '../core';
 
 const indexTypes = ['type1', 'type2', 'type3'];
 

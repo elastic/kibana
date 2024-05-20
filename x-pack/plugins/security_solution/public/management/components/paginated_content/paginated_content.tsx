@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-import type { CommonProps, EuiTablePaginationProps, Pagination } from '@elastic/eui';
-import {
-  EuiEmptyPrompt,
-  EuiIcon,
-  EuiProgress,
-  EuiSpacer,
-  EuiTablePagination,
-  EuiText,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   ComponentProps,
   ComponentType,
@@ -24,11 +14,21 @@ import type {
   ReactNode,
 } from 'react';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import type { CommonProps, EuiTablePaginationProps, Pagination } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiIcon,
+  EuiProgress,
+  EuiSpacer,
+  EuiTablePagination,
+  EuiText,
+} from '@elastic/eui';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { v4 as generateUUI } from 'uuid';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
@@ -66,9 +66,10 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> exten
 // Work around below was created based on this discussion:
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/37087#issuecomment-568218789
 interface TypedGenericComponentMemo {
-  <T, C extends ComponentWithAnyProps>(
-    p: PaginatedContentProps<T, C>
-  ): ReactElement<PaginatedContentProps<T, C>, FunctionComponent<PaginatedContentProps<T, C>>>;
+  <T, C extends ComponentWithAnyProps>(p: PaginatedContentProps<T, C>): ReactElement<
+    PaginatedContentProps<T, C>,
+    FunctionComponent<PaginatedContentProps<T, C>>
+  >;
 
   displayName: string;
 }

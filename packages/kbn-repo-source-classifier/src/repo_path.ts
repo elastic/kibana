@@ -8,8 +8,8 @@
 
 import Path from 'path';
 
-import { ImportResolver } from '@kbn/import-resolver';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { ImportResolver } from '@kbn/import-resolver';
 import normalizePath from 'normalize-path';
 
 import { PkgInfo } from './pkg_info';
@@ -27,10 +27,7 @@ const getNormal = Path.sep === '/' ? (path: string) => path : normalizePath;
  * the tool running analysis on the repository
  */
 export class RepoPath {
-  constructor(
-    public readonly absolute: string,
-    public readonly resolver: ImportResolver
-  ) {}
+  constructor(public readonly absolute: string, public readonly resolver: ImportResolver) {}
 
   private extname: string | undefined;
   /** Get the extention for this path */

@@ -363,7 +363,9 @@
         "tags": [],
         "label": "INTERNAL_BASE_STACK_CONNECTORS_API_PATH",
         "description": [],
-        "signature": ["\"/internal/stack_connectors\""],
+        "signature": [
+          "\"/internal/stack_connectors\""
+        ],
         "path": "x-pack/plugins/stack_connectors/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -376,7 +378,9 @@
         "tags": [],
         "label": "OpsgenieConnectorTypeId",
         "description": [],
-        "signature": ["\".opsgenie\""],
+        "signature": [
+          "\".opsgenie\""
+        ],
         "path": "x-pack/plugins/stack_connectors/common/opsgenie/index.ts",
         "deprecated": false,
         "trackAdoption": false,

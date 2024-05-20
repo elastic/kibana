@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { EuiIconProps } from '@elastic/eui';
 import React from 'react';
+import type { EuiIconProps } from '@elastic/eui';
 import { colors } from './common_styles';
 
 export const IconChartGaugeSemiCircle = ({

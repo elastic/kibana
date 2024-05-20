@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
-import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import * as React from 'react';
 import type { FunctionComponent } from 'react';
+import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
+import { EuiConfirmModal } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useFilePickerContext } from '../../context';
 import { i18nTexts } from '../../i18n_texts';

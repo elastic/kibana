@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import {
-  Indicator,
   generateMockIndicator,
   generateMockUrlIndicator,
+  Indicator,
 } from '../../../../common/types/indicator';
-import { EMPTY_VALUE } from '../../../constants/common';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import {
-  InvestigateInTimelineButtonIcon,
   InvestigateInTimelineContextMenu,
+  InvestigateInTimelineButtonIcon,
 } from './investigate_in_timeline';
+import { EMPTY_VALUE } from '../../../constants/common';
 
 const TEST_ID = 'test';
 

@@ -6,13 +6,13 @@
  */
 
 import { navigateToAlertsList } from '../../screens/alerts';
-import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
-import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
-import { closeAllToasts } from '../../tasks/toasts';
 import { generateRandomStringName } from '../../tasks/utils';
+import { closeAllToasts } from '../../tasks/toasts';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../types';
+import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
-import { ROLE, login } from '../../tasks/login';
+import { login, ROLE } from '../../tasks/login';
 
 describe('Results', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;

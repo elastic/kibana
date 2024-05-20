@@ -7,13 +7,13 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ErrorSampleDetails } from './error_sample_detail';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   errorSampleIds: string[];

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import numeral from '@elastic/numeral';
-import type { DataViewBase } from '@kbn/es-query';
 import { get } from 'lodash/fp';
+import numeral from '@elastic/numeral';
 import React from 'react';
+import type { DataViewBase } from '@kbn/es-query';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
+import { CountryFlagAndName } from '../source_destination/country_flag';
 import type {
   NetworkTopCountriesEdges,
   TopNetworkTablesEcsField,
 } from '../../../../../common/search_strategy/security_solution/network';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { networkModel } from '../../store';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 import type { Columns } from '../../../components/paginated_table';
-import { networkModel } from '../../store';
-import { CountryFlagAndName } from '../source_destination/country_flag';
 import * as i18n from './translations';
+import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 
 export type NetworkTopCountriesColumns = [
   Columns<NetworkTopCountriesEdges>,
@@ -33,7 +33,7 @@ export type NetworkTopCountriesColumns = [
   Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopCountriesEdges>,
   Columns<NetworkTopCountriesEdges>,
-  Columns<NetworkTopCountriesEdges>,
+  Columns<NetworkTopCountriesEdges>
 ];
 
 export type NetworkTopCountriesColumnsNetworkDetails = [
@@ -41,7 +41,7 @@ export type NetworkTopCountriesColumnsNetworkDetails = [
   Columns<TopNetworkTablesEcsField['bytes_in']>,
   Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopCountriesEdges>,
-  Columns<NetworkTopCountriesEdges>,
+  Columns<NetworkTopCountriesEdges>
 ];
 
 export const getNetworkTopCountriesColumns = (

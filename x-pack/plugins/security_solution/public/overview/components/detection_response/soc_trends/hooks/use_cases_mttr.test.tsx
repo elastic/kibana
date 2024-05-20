@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { useKibana as useKibanaMock } from '../../../../../common/lib/kibana/__mocks__';
-import { TestProviders } from '../../../../../common/mock';
-import * as i18n from '../translations';
 import type { UseCasesMttr } from './use_cases_mttr';
 import { useCasesMttr } from './use_cases_mttr';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { TestProviders } from '../../../../../common/mock';
+import { useKibana as useKibanaMock } from '../../../../../common/lib/kibana/__mocks__';
+import * as i18n from '../translations';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

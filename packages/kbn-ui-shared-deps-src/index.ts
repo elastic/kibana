@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cssDistFilename, distDir, externals, jsFilename } from './src/definitions';
+import { distDir, jsFilename, cssDistFilename, externals } from './src/definitions';
 
 /**
  * Absolute path to the distributable directory

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Subject } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { type CoreStatus, ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
-import type { Logger } from '@kbn/logging';
-import { Subject } from 'rxjs';
+import { type CoreStatus, ServiceStatusLevels, ServiceStatus } from '@kbn/core-status-common';
 import { logCoreStatusChanges } from './log_core_services_status';
 
 const delay = async (millis: number = 10) =>

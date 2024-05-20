@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, PropsWithChildren } from 'react';
-import type { CreateIn, DeleteIn, UpdateIn } from '../../common';
-import { createCrudClientMock } from '../crud_client/crud_client.mock';
-import { ContentTypeRegistry } from '../registry';
-import { ContentClient } from './content_client';
+import { renderHook } from '@testing-library/react-hooks';
 import { ContentClientProvider } from './content_client_context';
+import { ContentClient } from './content_client';
+import { createCrudClientMock } from '../crud_client/crud_client.mock';
 import {
   useCreateContentMutation,
-  useDeleteContentMutation,
   useUpdateContentMutation,
+  useDeleteContentMutation,
 } from './content_client_mutation_hooks';
+import type { CreateIn, UpdateIn, DeleteIn } from '../../common';
+import { ContentTypeRegistry } from '../registry';
 
 const setup = () => {
   const crudClient = createCrudClientMock();

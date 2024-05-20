@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import * as and from './and';
-import * as exists from './exists';
 import * as is from './is';
-import * as nested from './nested';
-import * as not from './not';
+import * as and from './and';
 import * as or from './or';
+import * as not from './not';
 import * as range from './range';
+import * as exists from './exists';
+import * as nested from './nested';
 
 export { KQL_FUNCTION_AND } from './and';
 export { KQL_FUNCTION_EXISTS } from './exists';

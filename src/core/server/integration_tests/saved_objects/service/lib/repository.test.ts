@@ -7,12 +7,12 @@
  */
 
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { Root } from '@kbn/core-root-server-internal';
 import {
-  type TestElasticsearchUtils,
   createRootWithCorePlugins,
   createTestServers,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { Root } from '@kbn/core-root-server-internal';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),

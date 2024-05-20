@@ -1,7 +1,3 @@
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,8 +6,12 @@ import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { mean, meanBy, sumBy } from 'lodash';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

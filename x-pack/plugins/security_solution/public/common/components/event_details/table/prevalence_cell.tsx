@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { TimelineId } from '../../../../../common/types';
-import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
-import { getEmptyTagValue } from '../../empty_value';
 import type { AlertSummaryRow } from '../helpers';
+import { getEmptyTagValue } from '../../empty_value';
 import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
+import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 
 /**
  * Renders a Prevalence cell based on a regular alert prevalence query

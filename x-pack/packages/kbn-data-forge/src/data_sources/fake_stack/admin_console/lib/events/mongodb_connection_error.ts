@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { faker } from '@faker-js/faker';
 import { sample } from 'lodash';
-import { EventFunction } from '../../../../../types';
+import { faker } from '@faker-js/faker';
 import {
+  MONGO_DB_GATEWAY,
   ADMIN_CONSOLE,
   ADMIN_CONSOLE_HOSTS,
   DOMAINS,
-  MONGO_DB_GATEWAY,
 } from '../../../common/constants';
-import { createNginxLog } from '../../../nginx_proxy/lib/events/create_nginx_log';
-import { getLoggedInUser } from '../login_cache';
 import { createEvent } from './create_base_event';
+import { getLoggedInUser } from '../login_cache';
+import { EventFunction } from '../../../../../types';
+import { createNginxLog } from '../../../nginx_proxy/lib/events/create_nginx_log';
 
 interface Endpoint {
   path: string;

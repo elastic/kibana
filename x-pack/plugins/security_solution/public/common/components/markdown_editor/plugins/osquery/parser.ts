@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RemarkTokenizer } from '@elastic/eui';
 import type { Plugin } from 'unified';
+import type { RemarkTokenizer } from '@elastic/eui';
 
 export const OsqueryParser: Plugin = function () {
   const Parser = this.Parser;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
-import type { DatatableRow } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { uniq } from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { uniq } from 'lodash';
+import { EuiComboBox, EuiFormRow, EuiSpacer, EuiSwitch, EuiFieldText, EuiText } from '@elastic/eui';
+import type { DatatableRow } from '@kbn/expressions-plugin/common';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 
 export interface IncludeExcludeOptions {
   label: string;

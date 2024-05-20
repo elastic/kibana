@@ -6,13 +6,13 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
+import { encode } from '@kbn/rison';
 import {
   FetchData,
   FetchDataParams,
   LogsFetchDataResponse,
 } from '@kbn/observability-plugin/public';
-import { encode } from '@kbn/rison';
+import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
 import { TIMESTAMP_FIELD } from '../../common/constants';
 import { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
 
@@ -40,8 +40,9 @@ export function getLogsHasDataFetcher(getStartServices: InfraClientStartServices
   return async () => {
     const [, { logsShared }] = await getStartServices();
     const resolvedLogView = await logsShared.logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
-    const logViewStatus =
-      await logsShared.logViews.client.getResolvedLogViewStatus(resolvedLogView);
+    const logViewStatus = await logsShared.logViews.client.getResolvedLogViewStatus(
+      resolvedLogView
+    );
 
     const hasData = logViewStatus.index === 'available';
     const indices = resolvedLogView.indices;

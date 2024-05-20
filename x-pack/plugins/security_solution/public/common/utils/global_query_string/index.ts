@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { encode } from '@kbn/rison';
-import { difference, isEmpty, pickBy } from 'lodash/fp';
 import { useCallback, useEffect, useMemo } from 'react';
+import { difference, isEmpty, pickBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
+import { encode } from '@kbn/rison';
+import { encodeQueryString, useGetInitialUrlParamValue, useReplaceUrlParams } from './helpers';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
-import { getLinkInfo } from '../../links';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
 import { useRouteSpy } from '../route/use_route_spy';
-import { encodeQueryString, useGetInitialUrlParamValue, useReplaceUrlParams } from './helpers';
+import { getLinkInfo } from '../../links';
 
 /**
  * Adds urlParamKey and the initial value to redux store.

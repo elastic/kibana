@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Operator } from '../../filter_bar/filter_editor';
-import { GenericComboBox, getOperatorOptions } from '../../filter_bar/filter_editor';
+import { getOperatorOptions, GenericComboBox } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
 
 export const strings = {

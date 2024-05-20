@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
-import { useKibana } from '../../../../..';
-import { unmuteAlertInstance } from '../../../../lib/rule_api/unmute_alert';
+import { i18n } from '@kbn/i18n';
 import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
 import { ServerError, ToggleAlertParams } from '../../types';
+import { unmuteAlertInstance } from '../../../../lib/rule_api/unmute_alert';
+import { useKibana } from '../../../../..';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.unmuteAlert.error', {
   defaultMessage: 'Error unmuting alert',

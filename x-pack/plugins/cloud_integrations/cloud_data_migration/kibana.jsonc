@@ -7,8 +7,19 @@
     "id": "cloudDataMigration",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "cloud_integrations", "data_migration"],
-    "requiredPlugins": ["cloud", "management", "kibanaReact", "features"],
-    "requiredBundles": ["kibanaReact"]
+    "configPath": [
+      "xpack",
+      "cloud_integrations",
+      "data_migration"
+    ],
+    "requiredPlugins": [
+      "cloud",
+      "management",
+      "kibanaReact",
+      "features"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

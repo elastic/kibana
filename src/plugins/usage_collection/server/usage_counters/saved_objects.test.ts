@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { serializeCounterKey, storeCounter } from './saved_objects';
+import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 
 import { UsageCounters } from '../../common/types';
 

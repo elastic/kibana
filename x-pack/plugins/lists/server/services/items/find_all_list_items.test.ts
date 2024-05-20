@@ -9,8 +9,8 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 
 import { getEmptySearchListMock } from '../../schemas/elastic_response/search_es_list_schema.mock';
 
-import { findAllListItems } from './find_all_list_items';
 import { getFindAllListItemsOptionsMock } from './find_all_list_items.mock';
+import { findAllListItems } from './find_all_list_items';
 
 describe('find_all_list_items', () => {
   test('should return null if the list is null', async () => {

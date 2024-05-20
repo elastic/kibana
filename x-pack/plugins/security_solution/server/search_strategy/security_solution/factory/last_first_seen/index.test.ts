@@ -7,17 +7,17 @@
 
 import { ZodError } from 'zod';
 
-import { firstOrLastSeen } from '.';
-import type { FirstLastSeenRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import { Direction } from '../../../../../common/search_strategy';
+import * as buildQuery from './query.first_or_last_seen.dsl';
+import { firstOrLastSeen } from '.';
 import {
-  formattedSearchStrategyFirstResponse,
-  formattedSearchStrategyLastResponse,
   mockOptions,
   mockSearchStrategyFirstSeenResponse,
   mockSearchStrategyLastSeenResponse,
+  formattedSearchStrategyLastResponse,
+  formattedSearchStrategyFirstResponse,
 } from './__mocks__';
-import * as buildQuery from './query.first_or_last_seen.dsl';
+import type { FirstLastSeenRequestOptionsInput } from '../../../../../common/api/search_strategy';
 
 describe('firstLastSeen search strategy', () => {
   describe('first seen search strategy', () => {

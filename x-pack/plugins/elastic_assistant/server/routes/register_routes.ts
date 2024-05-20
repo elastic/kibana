@@ -8,30 +8,30 @@
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { once } from 'lodash/fp';
 
+import { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
 import {
   ElasticAssistantPluginRouter,
   ElasticAssistantPluginSetupDependencies,
   GetElser,
 } from '../types';
-import { bulkActionAnonymizationFieldsRoute } from './anonymization_fields/bulk_actions_route';
-import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route';
-import { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
-import { getCapabilitiesRoute } from './capabilities/get_capabilities_route';
-import { getEvaluateRoute } from './evaluate/get_evaluate';
-import { postEvaluateRoute } from './evaluate/post_evaluate';
+import { createConversationRoute } from './user_conversations/create_route';
+import { deleteConversationRoute } from './user_conversations/delete_route';
+import { readConversationRoute } from './user_conversations/read_route';
+import { updateConversationRoute } from './user_conversations/update_route';
+import { findUserConversationsRoute } from './user_conversations/find_route';
+import { bulkActionConversationsRoute } from './user_conversations/bulk_actions_route';
+import { appendConversationMessageRoute } from './user_conversations/append_conversation_messages_route';
 import { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';
 import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
+import { getEvaluateRoute } from './evaluate/get_evaluate';
+import { postEvaluateRoute } from './evaluate/post_evaluate';
 import { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
+import { getCapabilitiesRoute } from './capabilities/get_capabilities_route';
 import { bulkPromptsRoute } from './prompts/bulk_actions_route';
 import { findPromptsRoute } from './prompts/find_route';
-import { appendConversationMessageRoute } from './user_conversations/append_conversation_messages_route';
-import { bulkActionConversationsRoute } from './user_conversations/bulk_actions_route';
-import { createConversationRoute } from './user_conversations/create_route';
-import { deleteConversationRoute } from './user_conversations/delete_route';
-import { findUserConversationsRoute } from './user_conversations/find_route';
-import { readConversationRoute } from './user_conversations/read_route';
-import { updateConversationRoute } from './user_conversations/update_route';
+import { bulkActionAnonymizationFieldsRoute } from './anonymization_fields/bulk_actions_route';
+import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,

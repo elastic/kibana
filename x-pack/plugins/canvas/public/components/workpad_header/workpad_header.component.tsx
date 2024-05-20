@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
 import React, { FC, useCallback, useState } from 'react';
+import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { AddFromLibraryButton, IconButtonGroup, Toolbar } from '@kbn/shared-ux-button-toolbar';
 
 import { getElementStrings } from '../../../i18n';
 import { CommitFn, ElementSpec } from '../../../types';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
-import { EditMenu } from './edit_menu';
-import { EditorMenu } from './editor_menu';
-import { ElementMenu } from './element_menu';
+import { RefreshControl } from './refresh_control';
 // @ts-expect-error untyped local
 import { FullscreenControl } from './fullscreen_control';
-import { LabsControl } from './labs_control';
-import { RefreshControl } from './refresh_control';
+import { EditMenu } from './edit_menu';
+import { ElementMenu } from './element_menu';
 import { ShareMenu } from './share_menu';
 import { ViewMenu } from './view_menu';
+import { LabsControl } from './labs_control';
+import { EditorMenu } from './editor_menu';
 
 const strings = {
   getQuickCreateButtonGroupLegend: () =>

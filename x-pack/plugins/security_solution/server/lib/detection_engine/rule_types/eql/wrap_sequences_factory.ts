@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { WrapSequences } from '../types';
+import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
+import type { ConfigType } from '../../../../config';
+import type { CompleteRule, RuleParams } from '../../rule_schema';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { ConfigType } from '../../../../config';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import type { CompleteRule, RuleParams } from '../../rule_schema';
-import type { WrapSequences } from '../types';
-import { buildAlertGroupFromSequence } from './build_alert_group_from_sequence';
 
 export const wrapSequencesFactory =
   ({

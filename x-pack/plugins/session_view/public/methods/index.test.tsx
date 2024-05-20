@@ -6,11 +6,11 @@
  */
 
 import {
-  AUDITBEAT_INDEX,
-  CLOUD_DEFEND_INDEX,
-  DEFAULT_INDEX,
-  ENDPOINT_INDEX,
   getIndexPattern,
+  DEFAULT_INDEX,
+  CLOUD_DEFEND_INDEX,
+  ENDPOINT_INDEX,
+  AUDITBEAT_INDEX,
 } from '.';
 
 const ENDPOINT_EVENT_INDEX = '.ds-logs-endpoint.events.process-default';

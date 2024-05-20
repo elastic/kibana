@@ -1,5 +1,3 @@
-import { EuiButtonGroup, EuiFormRow, EuiIconTip, htmlIdGenerator, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,20 +8,22 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useReducer, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { css } from '@emotion/react';
+import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip, useEuiTheme } from '@elastic/eui';
+import { PalettePicker } from './palette_picker';
 import {
-  CustomPaletteParams,
-  DataBounds,
   PaletteOutput,
   PaletteRegistry,
-  RequiredPaletteParamTypes,
+  DataBounds,
   getFallbackDataBounds,
+  CustomPaletteParams,
+  RequiredPaletteParamTypes,
 } from '../../palettes';
-import { PalettePicker } from './palette_picker';
 
+import { toColorRanges } from './utils';
 import { ColorRanges, ColorRangesContext } from './color_ranges';
 import { allRangesValid } from './color_ranges/color_ranges_validation';
 import { paletteConfigurationReducer } from './palette_configuration_reducer';
-import { toColorRanges } from './utils';
 
 export interface CustomizablePaletteProps {
   palettes: PaletteRegistry;

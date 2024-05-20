@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ClientPluginsStart } from '../../../../../../../plugin';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
+import { ClientPluginsStart } from '../../../../../../../plugin';
 
 interface MonitorErrorsCountProps {
   from: string;

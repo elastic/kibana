@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LAYER_STYLE_TYPE, STYLE_TYPE } from '../constants';
 import { migrateOtherCategoryColor } from './migrate_other_category_color';
+import { LAYER_STYLE_TYPE, STYLE_TYPE } from '../constants';
 
 describe('migrateOtherCategoryColor', () => {
   test('Should handle missing layerListJSON attribute', () => {

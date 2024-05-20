@@ -12,7 +12,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiButtonIcon, EuiFieldText, EuiForm, EuiFormRow, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiForm, EuiFormRow, EuiFieldText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

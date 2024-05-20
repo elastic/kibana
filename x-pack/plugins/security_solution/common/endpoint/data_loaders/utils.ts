@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Flags } from '@kbn/dev-cli-runner';
+import { mergeWith } from 'lodash';
 import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { ToolingLog } from '@kbn/tooling-log';
-import { mergeWith } from 'lodash';
+import type { Flags } from '@kbn/dev-cli-runner';
 import moment from 'moment/moment';
 
 export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
@@ -17,10 +17,7 @@ export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
 ];
 
 export class EndpointDataLoadingError extends Error {
-  constructor(
-    message: string,
-    public meta?: unknown
-  ) {
+  constructor(message: string, public meta?: unknown) {
     super(message);
   }
 }
@@ -154,12 +151,12 @@ createToolingLogger.setDefaultLogLevelFromCliFlags = (flags) => {
   createToolingLogger.defaultLogLevel = flags.verbose
     ? 'verbose'
     : flags.debug
-      ? 'debug'
-      : flags.silent
-        ? 'silent'
-        : flags.quiet
-          ? 'error'
-          : 'info';
+    ? 'debug'
+    : flags.silent
+    ? 'silent'
+    : flags.quiet
+    ? 'error'
+    : 'info';
 };
 
 /**

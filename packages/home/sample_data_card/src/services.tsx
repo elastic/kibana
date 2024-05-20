@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import React, { FC, PropsWithChildren, MouseEventHandler, useContext } from 'react';
+import { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 
 import { SAMPLE_DATA_API } from './constants';
 

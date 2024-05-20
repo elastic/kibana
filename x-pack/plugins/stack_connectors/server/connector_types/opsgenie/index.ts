@@ -17,10 +17,10 @@ import {
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { OpsgenieConnectorTypeId } from '../../../common';
 import { OpsgenieConnector } from './connector';
-import { renderParameterTemplates } from './render_template_variables';
 import { ConfigSchema, SecretsSchema } from './schema';
-import * as i18n from './translations';
 import { Config, Secrets } from './types';
+import * as i18n from './translations';
+import { renderParameterTemplates } from './render_template_variables';
 
 export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secrets> => {
   return {

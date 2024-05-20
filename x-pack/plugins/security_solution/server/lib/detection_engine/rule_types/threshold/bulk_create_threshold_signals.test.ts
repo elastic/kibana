@@ -6,8 +6,8 @@
  */
 
 import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { getTransformedHits } from './bulk_create_threshold_signals';
 import { calculateThresholdSignalUuid } from './utils';
+import { getTransformedHits } from './bulk_create_threshold_signals';
 
 describe('transformThresholdNormalizedResultsToEcs', () => {
   it('should return transformed threshold results', () => {

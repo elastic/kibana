@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionAstArgument, ExpressionAstExpression } from './types';
+import { ExpressionAstExpression, ExpressionAstArgument } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { toExpression } = require('@kbn/interpreter');

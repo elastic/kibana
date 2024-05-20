@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { inventoryRuleName } from '.';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { inventoryRuleName } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');

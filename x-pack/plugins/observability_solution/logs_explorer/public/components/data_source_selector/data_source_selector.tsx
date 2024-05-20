@@ -11,24 +11,22 @@ import React, { useMemo } from 'react';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import { getDataViewTestSubj } from '../../utils/get_data_view_test_subj';
 import {
-  DATA_SOURCE_SELECTOR_WIDTH,
+  dataViewsLabel,
   DATA_VIEWS_PANEL_ID,
   DATA_VIEWS_TAB_ID,
+  DATA_SOURCE_SELECTOR_WIDTH,
+  integrationsLabel,
   INTEGRATIONS_PANEL_ID,
   INTEGRATIONS_TAB_ID,
+  uncategorizedLabel,
   UNCATEGORIZED_PANEL_ID,
   UNCATEGORIZED_TAB_ID,
-  dataViewsLabel,
-  integrationsLabel,
-  uncategorizedLabel,
 } from './constants';
 import { useDataSourceSelector } from './state_machine/use_data_source_selector';
-import { AddDataButton } from './sub_components/add_data_button';
-import { DataViewsFilter } from './sub_components/data_view_filter';
+import { SelectorPopover } from './sub_components/selector_popover';
 import { DataViewMenuItem } from './sub_components/data_view_menu_item';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
-import { SelectorPopover } from './sub_components/selector_popover';
 import { DataSourceSelectorProps } from './types';
 import {
   buildIntegrationsTree,
@@ -36,6 +34,8 @@ import {
   createIntegrationStatusItem,
   createUncategorizedStatusItem,
 } from './utils';
+import { AddDataButton } from './sub_components/add_data_button';
+import { DataViewsFilter } from './sub_components/data_view_filter';
 
 export function DataSourceSelector({
   datasets,

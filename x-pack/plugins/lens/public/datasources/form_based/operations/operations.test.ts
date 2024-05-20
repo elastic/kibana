@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAvailableOperationsByMetadata, getOperationTypesForField } from '.';
+import { getOperationTypesForField, getAvailableOperationsByMetadata } from '.';
 import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../loader');

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { ConfigSchema } from '../../config';
 import { termsEnumSuggestions } from './terms_enum';
+import { coreMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { ConfigSchema } from '../../config';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
 let esClientMock: DeeplyMockedKeys<ElasticsearchClient>;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableStart } from '../../../plugin';
 import { Container, ContainerInput } from '../../containers';
+import { EmbeddableStart } from '../../../plugin';
 import { MockFilter } from './filterable_embeddable';
 
 export const FILTERABLE_CONTAINER = 'FILTERABLE_CONTAINER';

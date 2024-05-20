@@ -13,8 +13,8 @@ import {
   EuiTabbedContentProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo } from 'react';
+import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';

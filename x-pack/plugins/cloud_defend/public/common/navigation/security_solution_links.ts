@@ -6,7 +6,7 @@
  */
 
 import { cloudDefendPages } from './constants';
-import type { CloudDefendPage, CloudDefendPageId } from './types';
+import type { CloudDefendPageId, CloudDefendPage } from './types';
 
 interface CloudDefendLinkItem<TId extends string = CloudDefendPageId> {
   id: TId;

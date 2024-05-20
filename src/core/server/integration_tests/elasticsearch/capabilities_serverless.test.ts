@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getCapabilitiesFromClient } from '@kbn/core-elasticsearch-server-internal';
 import {
   TestServerlessESUtils,
   createTestServerlessInstances,
 } from '@kbn/core-test-helpers-kbn-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { getCapabilitiesFromClient } from '@kbn/core-elasticsearch-server-internal';
 
 describe('ES capabilities for serverless ES', () => {
   let serverlessES: TestServerlessESUtils;

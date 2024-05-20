@@ -8,8 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
+import type { v1 } from '../../common';
 import type { ISavedObjectsManagement } from '../services';
 
 export const registerBulkGetRoute = (

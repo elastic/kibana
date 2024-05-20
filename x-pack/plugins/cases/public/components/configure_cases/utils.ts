@@ -8,11 +8,11 @@
 import type { ConnectorTypeFields } from '../../../common/types/domain';
 import { ConnectorTypes } from '../../../common/types/domain';
 import type {
+  ConnectorMappingSource,
+  ConnectorMappingActionType,
+  ConnectorMappingTarget,
   CaseConnector,
   CaseConnectorMapping,
-  ConnectorMappingActionType,
-  ConnectorMappingSource,
-  ConnectorMappingTarget,
 } from '../../containers/configure/types';
 import type { CaseActionConnector } from '../types';
 

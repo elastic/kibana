@@ -7,30 +7,30 @@
  */
 
 import {
-  AnalyticsServiceStart,
-  CoreSetup,
   CoreStart,
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-  Plugin,
   PluginInitializerContext,
-  RequestHandler,
-  RequestHandlerContext,
+  CoreSetup,
+  Plugin,
+  Logger,
+  KibanaRequest,
   StartServicesAccessor,
+  RequestHandlerContext,
+  RequestHandler,
+  KibanaResponseFactory,
+  AnalyticsServiceStart,
 } from '@kbn/core/server';
 
-import { schema } from '@kbn/config-schema';
 import { map$ } from '@kbn/std';
+import { schema } from '@kbn/config-schema';
+import { BFETCH_ROUTE_VERSION_LATEST } from '../common/constants';
 import {
+  StreamingResponseHandler,
   BatchRequestData,
   BatchResponseItem,
   ErrorLike,
-  StreamingResponseHandler,
-  normalizeError,
   removeLeadingSlash,
+  normalizeError,
 } from '../common';
-import { BFETCH_ROUTE_VERSION_LATEST } from '../common/constants';
 import { createStream } from './streaming';
 import { getUiSettings } from './ui_settings';
 

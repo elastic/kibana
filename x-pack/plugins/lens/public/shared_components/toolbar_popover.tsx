@@ -6,10 +6,10 @@
  */
 
 import './toolbar_popover.scss';
-import { EuiFlexItem, EuiPopover, EuiPopoverProps, EuiPopoverTitle, IconType } from '@elastic/eui';
-import { EuiIconLegend } from '@kbn/chart-icons';
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import React, { PropsWithChildren, useState } from 'react';
+import { EuiFlexItem, EuiPopover, EuiPopoverProps, EuiPopoverTitle, IconType } from '@elastic/eui';
+import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
+import { EuiIconLegend } from '@kbn/chart-icons';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,

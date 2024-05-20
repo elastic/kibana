@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { from } from 'rxjs';
-import * as indexNotFoundException from '../../../common/search/test_data/index_not_found_exception.json';
-import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
-import { DataPluginStart } from '../../plugin';
-import { KbnSearchError } from '../report_search_error';
+import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerSearchRoute } from './search';
+import { DataPluginStart } from '../../plugin';
+import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
+import * as indexNotFoundException from '../../../common/search/test_data/index_not_found_exception.json';
+import { KbnSearchError } from '../report_search_error';
 
 describe('Search service', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;

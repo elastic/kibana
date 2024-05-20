@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
-import {
-  TestProviders,
-  createMockStore,
-  createSecuritySolutionStorageMock,
-} from '../../../../common/mock';
-import { FLYOUT_TOUR_TEST_ID } from '../../shared/components/test_ids';
-import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
-import { FLYOUT_TOUR_CONFIG_ANCHORS } from '../../shared/utils/tour_step_config';
+import { render, waitFor, fireEvent } from '@testing-library/react';
+import { RightPanelTour } from './tour';
 import { RightPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
-import { RightPanelTour } from './tour';
+import {
+  createMockStore,
+  createSecuritySolutionStorageMock,
+  TestProviders,
+} from '../../../../common/mock';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { useKibana } from '../../../../common/lib/kibana';
+import { FLYOUT_TOUR_CONFIG_ANCHORS } from '../../shared/utils/tour_step_config';
+import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
+import { FLYOUT_TOUR_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../shared/hooks/use_is_timeline_flyout_open');

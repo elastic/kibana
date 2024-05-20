@@ -8,20 +8,20 @@
 import React, { useState } from 'react';
 
 import {
+  EuiHeaderLinks,
+  EuiIcon,
+  EuiCopy,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCopy,
+  EuiPopover,
+  EuiFormRow,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiHeaderLinks,
-  EuiIcon,
-  EuiPopover,
-  EuiPopoverFooter,
-  EuiPopoverTitle,
   EuiSpacer,
+  EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiText,
 } from '@elastic/eui';
 

@@ -8,12 +8,12 @@
 
 import Path from 'path';
 
-import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { withProcRunner } from '@kbn/dev-proc-runner';
+import * as Rx from 'rxjs';
+import dedent from 'dedent';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
-import dedent from 'dedent';
-import * as Rx from 'rxjs';
+import { withProcRunner } from '@kbn/dev-proc-runner';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { readConfigFile } from '../../functional_test_runner';
 import { runElasticsearch } from '../lib/run_elasticsearch';

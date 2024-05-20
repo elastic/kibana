@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
+import moment from 'moment';
+import styled from 'styled-components';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
-import React from 'react';
-import styled from 'styled-components';
+import { useCertStatus } from './use_cert_status';
 import { CERT_STATUS, DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 import { Cert } from '../../../../../common/runtime_types';
 import * as labels from './translations';
-import { useCertStatus } from './use_cert_status';
 
 interface Props {
   cert: Cert;

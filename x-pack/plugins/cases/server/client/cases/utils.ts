@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import type { IBasePath } from '@kbn/core-http-browser';
+import { uniqBy, isEmpty } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
+import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { isEmpty, uniqBy } from 'lodash';
-import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
-import type {
-  CasePostRequest,
-  CaseRequestCustomFields,
-  CaseUserActionsDeprecatedResponse,
-} from '../../../common/types/api';
 import type {
   ActionConnector,
   Attachment,
@@ -23,21 +17,27 @@ import type {
   CaseAssignees,
   CaseAttributes,
   CaseCustomField,
+  ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
-  ConnectorMappings,
   CustomFieldsConfiguration,
   ExternalService,
   User,
 } from '../../../common/types/domain';
-import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
+import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
+import type {
+  CasePostRequest,
+  CaseRequestCustomFields,
+  CaseUserActionsDeprecatedResponse,
+} from '../../../common/types/api';
+import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
-import { getCaseViewPath } from '../../common/utils';
-import type { CasesConnectorsMap } from '../../connectors';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
-import { getAlertIds } from '../utils';
-import * as i18n from './translations';
 import type { ExternalServiceComment, ExternalServiceIncident } from './types';
+import { getAlertIds } from '../utils';
+import type { CasesConnectorsMap } from '../../connectors';
+import { getCaseViewPath } from '../../common/utils';
+import * as i18n from './translations';
 
 interface CreateIncidentArgs {
   theCase: Case;

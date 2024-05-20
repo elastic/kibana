@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableContainerSettings, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { Subject } from 'rxjs';
+import { memoize } from 'lodash';
 import { Filter } from '@kbn/es-query';
 import deepEqual from 'fast-deep-equal';
-import { memoize } from 'lodash';
-import { Subject } from 'rxjs';
+import { EmbeddableContainerSettings, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
+import { ControlEmbeddable } from '../../types';
 import {
   ControlGroupChainingSystem,
   ControlGroupInput,
   ControlsPanels,
 } from '../../../common/control_group/types';
 import { TimeSlice } from '../../../common/types';
-import { ControlEmbeddable } from '../../types';
 
 interface GetPrecedingFiltersProps {
   id: string;

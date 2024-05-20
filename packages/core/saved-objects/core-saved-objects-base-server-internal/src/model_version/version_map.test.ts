@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsModelVersion, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import {
-  getCurrentVirtualVersion,
-  getLatestMappingsModelVersion,
-  getLatestMappingsVersionNumber,
-  getLatestMappingsVirtualVersionMap,
-  getLatestMigrationVersion,
-  getLatestModelVersion,
   getModelVersionMapForTypes,
+  getLatestModelVersion,
+  getLatestMigrationVersion,
+  getCurrentVirtualVersion,
   getVirtualVersionMap,
+  getLatestMappingsVersionNumber,
+  getLatestMappingsModelVersion,
+  getLatestMappingsVirtualVersionMap,
 } from './version_map';
 
 describe('ModelVersion map utilities', () => {

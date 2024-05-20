@@ -41,7 +41,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<MetricsServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<MetricsServiceContract>"
+            ],
             "path": "packages/core/metrics/core-metrics-server-mocks/src/metrics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

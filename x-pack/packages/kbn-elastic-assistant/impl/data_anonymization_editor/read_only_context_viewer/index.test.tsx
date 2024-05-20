@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
-import { Props, ReadOnlyContextViewer } from '.';
 import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
+import { ReadOnlyContextViewer, Props } from '.';
 
 const defaultProps: Props = {
   rawData: 'this content is NOT anonymized',

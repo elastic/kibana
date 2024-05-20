@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiButtonIconProps, EuiLink, EuiLinkProps } from '@elastic/eui';
 import React, { FC, useCallback, MouseEvent } from 'react';
+import { EuiLink, EuiLinkProps, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
 interface RoutingProps {

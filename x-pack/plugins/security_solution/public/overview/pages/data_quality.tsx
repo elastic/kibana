@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import {
+  DataQualityPanel,
+  DATA_QUALITY_SUBTITLE,
+  ECS_REFERENCE_URL,
+  getIlmPhaseDescription,
+  ILM_PHASE,
+  INDEX_LIFECYCLE_MANAGEMENT_PHASES,
+  SELECT_ONE_OR_MORE_ILM_PHASES,
+} from '@kbn/ecs-data-quality-dashboard';
 import type { EuiComboBoxOptionOption, OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiComboBox,
@@ -12,42 +22,32 @@ import {
   EuiFormLabel,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSuperDatePicker,
   EuiText,
   EuiToolTip,
   useGeneratedHtmlId,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import {
-  DATA_QUALITY_SUBTITLE,
-  DataQualityPanel,
-  ECS_REFERENCE_URL,
-  ILM_PHASE,
-  INDEX_LIFECYCLE_MANAGEMENT_PHASES,
-  SELECT_ONE_OR_MORE_ILM_PHASES,
-  getIlmPhaseDescription,
-} from '@kbn/ecs-data-quality-dashboard';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { APP_ID, DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
-import { SecurityPageName } from '../../app/types';
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
+import { SecurityPageName } from '../../app/types';
 import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
 import { useThemes } from '../../common/components/charts/common';
-import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { HeaderPage } from '../../common/components/header_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { APP_ID, DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../common/lib/kibana';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import * as i18n from './translations';
 import type {
   ReportDataQualityCheckAllCompletedParams,
   ReportDataQualityIndexCheckedParams,
 } from '../../common/lib/telemetry';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
-import * as i18n from './translations';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 

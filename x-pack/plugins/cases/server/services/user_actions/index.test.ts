@@ -5,51 +5,51 @@
  * 2.0.
  */
 
+import { set, omit, unset } from 'lodash';
+import { loggerMock } from '@kbn/logging-mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { omit, set, unset } from 'lodash';
 import type { CaseUserActionWithoutReferenceIds } from '../../../common/types/domain';
 import type { UserActionEvent } from './types';
 
-import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { CaseUserActionService } from '.';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import {
-  CaseSeverity,
-  CaseStatuses,
-  UserActionActions,
-  UserActionTypes,
-} from '../../../common/types/domain';
-import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
-import { comment } from '../../mocks';
 import { createSOFindResponse } from '../test_utils';
 import {
-  attachments,
   casePayload,
   externalService,
-  getAssigneesAddedRemovedUserActions,
+  attachments,
+  patchRemoveAssigneesCasesRequest,
+  patchCasesRequest,
+  patchAssigneesCasesRequest,
+  patchAddRemoveAssigneesCasesRequest,
+  patchTagsCasesRequest,
+  getBuiltUserActions,
   getAssigneesAddedUserActions,
   getAssigneesRemovedUserActions,
-  getBuiltUserActions,
+  getAssigneesAddedRemovedUserActions,
   getTagsAddedRemovedUserActions,
-  patchAddRemoveAssigneesCasesRequest,
-  patchAssigneesCasesRequest,
-  patchCasesRequest,
-  patchRemoveAssigneesCasesRequest,
-  patchTagsCasesRequest,
 } from './mocks';
+import { CaseUserActionService } from '.';
+import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
+import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
-  createConnectorUserAction,
   createUserActionFindSO,
+  createConnectorUserAction,
   createUserActionSO,
   pushConnectorUserAction,
 } from './test_utils';
+import { comment } from '../../mocks';
+import {
+  UserActionActions,
+  UserActionTypes,
+  CaseSeverity,
+  CaseStatuses,
+} from '../../../common/types/domain';
 
 describe('CaseUserActionService', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
@@ -1830,9 +1830,8 @@ describe('CaseUserActionService', () => {
             unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
             soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithExtraAttributes);
 
-            await expect(
-              service.getConnectorFieldsBeforeLatestPush('1', pushes)
-            ).resolves.toMatchInlineSnapshot(`
+            await expect(service.getConnectorFieldsBeforeLatestPush('1', pushes)).resolves
+              .toMatchInlineSnapshot(`
               Map {
                 "servicenow" => Object {
                   "attributes": Object {
@@ -2265,9 +2264,8 @@ describe('CaseUserActionService', () => {
               unsecuredSavedObjectsClient.find.mockResolvedValue({ ...soFindRes, aggregations });
               soSerializerMock.rawToSavedObject.mockReturnValue(userActionWithExtraAttributes);
 
-              await expect(
-                service.getCaseConnectorInformation('1')
-              ).resolves.toMatchInlineSnapshot(`
+              await expect(service.getCaseConnectorInformation('1')).resolves
+                .toMatchInlineSnapshot(`
                 Array [
                   Object {
                     "connectorId": undefined,
@@ -2461,9 +2459,8 @@ describe('CaseUserActionService', () => {
               soSerializerMock.rawToSavedObject.mockReturnValueOnce(pushActionWithExtraAttributes);
               soSerializerMock.rawToSavedObject.mockReturnValueOnce(pushActionWithExtraAttributes);
 
-              await expect(
-                service.getCaseConnectorInformation('1')
-              ).resolves.toMatchInlineSnapshot(`
+              await expect(service.getCaseConnectorInformation('1')).resolves
+                .toMatchInlineSnapshot(`
                 Array [
                   Object {
                     "connectorId": undefined,

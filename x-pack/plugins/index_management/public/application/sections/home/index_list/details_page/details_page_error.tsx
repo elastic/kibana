@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,8 +15,6 @@ import {
   EuiPageTemplate,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 export const DetailsPageError = ({
   indexName,

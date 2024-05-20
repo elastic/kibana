@@ -1,4 +1,3 @@
-import type { ColorSchemas } from '@kbn/charts-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,7 +6,8 @@ import type { ColorSchemas } from '@kbn/charts-plugin/common';
  * Side Public License, v 1.
  */
 import type { Range } from '@kbn/expressions-plugin/common';
-import { getStopsWithColorsFromColorsNumber, getStopsWithColorsFromRanges } from './palette';
+import type { ColorSchemas } from '@kbn/charts-plugin/common';
+import { getStopsWithColorsFromRanges, getStopsWithColorsFromColorsNumber } from './palette';
 
 describe('getFilterClickData', () => {
   const ranges = [

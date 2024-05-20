@@ -6,30 +6,30 @@
  */
 import { getEqlRule } from '../../../../objects/rule';
 
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import {
-  continueFromDefineStep,
-  createRuleWithoutEnabling,
-  fillAboutRuleMinimumAndContinue,
-  fillAlertSuppressionFields,
-  fillDefineEqlRule,
-  selectAlertSuppressionPerInterval,
-  selectDoNotSuppressForMissingFields,
-  selectEqlRuleType,
-  setAlertSuppressionDuration,
-  skipScheduleRuleAction,
-} from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import {
+  fillAlertSuppressionFields,
+  fillAboutRuleMinimumAndContinue,
+  createRuleWithoutEnabling,
+  skipScheduleRuleAction,
+  continueFromDefineStep,
+  selectAlertSuppressionPerInterval,
+  setAlertSuppressionDuration,
+  selectDoNotSuppressForMissingFields,
+  fillDefineEqlRule,
+  selectEqlRuleType,
+} from '../../../../tasks/create_new_rule';
 
 import {
   DEFINITION_DETAILS,
-  DETAILS_TITLE,
-  SUPPRESS_BY_DETAILS,
   SUPPRESS_FOR_DETAILS,
+  SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
+  DETAILS_TITLE,
 } from '../../../../screens/rule_details';
 
 const SUPPRESS_BY_FIELDS = ['agent.type'];

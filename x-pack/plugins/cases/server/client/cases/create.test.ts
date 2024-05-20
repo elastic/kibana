@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import type { CasePostRequest } from '../../../common';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TAGS_PER_CASE,
+  MAX_LENGTH_PER_TAG,
+  MAX_TITLE_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
-  MAX_DESCRIPTION_LENGTH,
-  MAX_LENGTH_PER_TAG,
-  MAX_TAGS_PER_CASE,
-  MAX_TITLE_LENGTH,
 } from '../../../common/constants';
+import type { CasePostRequest } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { mockCases } from '../../mocks';
+import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { create } from './create';
 import {
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
   CustomFieldTypes,
 } from '../../../common/types/domain';
-import { mockCases } from '../../mocks';
-import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
-import { create } from './create';
 
-import { omit } from 'lodash';
 import type { CaseCustomFields } from '../../../common/types/domain';
+import { omit } from 'lodash';
 
 describe('create', () => {
   const theCase = {

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   getCase1,
-  getCaseResponse,
   getConnectorIds,
+  getMockConnectorsResponse,
   getExecuteResponses,
   getIbmResilientConnectorOptions,
   getJiraConnectorOptions,
-  getMockConnectorsResponse,
   getServiceNowConnectorOptions,
+  getCaseResponse,
 } from '../../../objects/case';
-import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../../screens/case_details';
-import { goToCreateNewCase } from '../../../tasks/all_cases';
 import {
   createCase,
   fillCasesMandatoryfields,
@@ -24,9 +24,9 @@ import {
   fillJiraConnectorOptions,
   fillServiceNowConnectorOptions,
 } from '../../../tasks/create_new_case';
-import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+import { goToCreateNewCase } from '../../../tasks/all_cases';
 import { CASES_URL } from '../../../urls/navigation';
+import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../../screens/case_details';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165712
 describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, () => {

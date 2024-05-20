@@ -14,12 +14,12 @@ import {
   ExpressionValueSearchContext,
 } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { of as mockOf } from 'rxjs';
-import { getFetchEventAnnotations } from '.';
 import { EventAnnotationService } from '..';
+import { getFetchEventAnnotations } from '.';
 import { FetchEventAnnotationsArgs, QueryPointEventAnnotationOutput } from '../../common';
-import { handleRequest } from '../../common/fetch_event_annotations/handle_request';
 import { EventAnnotationStartDependencies } from '../plugin';
+import { of as mockOf } from 'rxjs';
+import { handleRequest } from '../../common/fetch_event_annotations/handle_request';
 jest.mock('../../common/fetch_event_annotations/handle_request', () => {
   const original = jest.requireActual('../../common/fetch_event_annotations/handle_request');
   return {

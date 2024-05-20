@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import { EuiButton, EuiCodeBlock, EuiCopy, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiCodeBlock, EuiCopy, EuiSpacer, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
 
 export const KubernetesManifestApplyStep = ({

@@ -6,7 +6,7 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { AntivirusRegistrationModes, ProtectionModes } from '../types';
+import { ProtectionModes, AntivirusRegistrationModes } from '../types';
 
 /** Calculates and updates Antivirus Registration `enabled` state based on the `mode` set by user
  * and by malware protection level in case antivirus registration mode is set to sync with malware.

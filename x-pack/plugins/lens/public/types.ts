@@ -1,30 +1,3 @@
-import { estypes } from '@elastic/elasticsearch';
-import type { EuiButtonIconProps } from '@elastic/eui';
-import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
-import type {
-  BrushTriggerEvent,
-  ClickTriggerEvent,
-  MultiClickTriggerEvent,
-} from '@kbn/charts-plugin/public';
-import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
-import type { CoreStart, ResolvedSimpleSavedObject, SavedObjectReference } from '@kbn/core/public';
-import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import { SearchRequest } from '@kbn/data-plugin/public';
-import type { DataView, DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DragDropIdentifier, DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { CellValueContext } from '@kbn/embeddable-plugin/public';
-import type { Filter, TimeRange } from '@kbn/es-query';
-import type { Query } from '@kbn/es-query';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
-import type {
-  Datatable,
-  ExpressionAstExpression,
-  ExpressionRendererEvent,
-  IInterpreterRenderHandlers,
-} from '@kbn/expressions-plugin/public';
-import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -32,39 +5,66 @@ import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
  * 2.0.
  */
 import type { Ast } from '@kbn/interpreter';
+import type { IconType } from '@elastic/eui/src/components/icon/icon';
+import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { MutableRefObject, ReactElement } from 'react';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type {
-  RowClickContext,
-  UiActionsStart,
-  VisualizeFieldContext,
-} from '@kbn/ui-actions-plugin/public';
-import type { AccessorConfig } from '@kbn/visualization-ui-components';
+  ExpressionAstExpression,
+  IInterpreterRenderHandlers,
+  Datatable,
+  ExpressionRendererEvent,
+} from '@kbn/expressions-plugin/public';
 import type {
   Configuration,
   NavigateToLensContext,
   SeriesType,
 } from '@kbn/visualizations-plugin/common';
-import type { MutableRefObject, ReactElement } from 'react';
+import type { Query } from '@kbn/es-query';
+import type {
+  UiActionsStart,
+  RowClickContext,
+  VisualizeFieldContext,
+} from '@kbn/ui-actions-plugin/public';
+import type {
+  ClickTriggerEvent,
+  BrushTriggerEvent,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
+import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
+import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { SearchRequest } from '@kbn/data-plugin/public';
+import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
+import { CellValueContext } from '@kbn/embeddable-plugin/public';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
-  LensPagesizeActionData,
-  LensResizeActionData,
   LensSortActionData,
+  LensResizeActionData,
   LensToggleActionData,
+  LensPagesizeActionData,
 } from './visualizations/datatable/components/types';
 
-import type { IndexPatternServiceAPI } from './data_views_service/service';
-import type { LensInspector } from './lens_inspector_service';
-import type { Document } from './persistence/saved_object_store';
-import type { DataViewsState } from './state_management/types';
 import {
-  LENS_EDIT_PAGESIZE_ACTION,
-  LENS_EDIT_RESIZE_ACTION,
   LENS_EDIT_SORT_ACTION,
+  LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
+  LENS_EDIT_PAGESIZE_ACTION,
 } from './visualizations/datatable/components/constants';
+import type { LensInspector } from './lens_inspector_service';
+import type { DataViewsState } from './state_management/types';
+import type { IndexPatternServiceAPI } from './data_views_service/service';
+import type { Document } from './persistence/saved_object_store';
 
 export type StartServices = Pick<
   CoreStart,

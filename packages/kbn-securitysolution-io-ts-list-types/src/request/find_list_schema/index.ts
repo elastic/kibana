@@ -11,9 +11,9 @@ import * as t from 'io-ts';
 import { StringToPositiveNumber } from '@kbn/securitysolution-io-ts-types';
 import { cursor } from '../../common/cursor';
 import { filter } from '../../common/filter';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { sort_field } from '../../common/sort_field';
 import { sort_order } from '../../common/sort_order';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
 export const findListSchema = t.exact(
   t.partial({

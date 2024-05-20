@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["GET"],
-    "patterns": ["_ingest/processor/grok"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ingest/processor/grok"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/grok-processor.html",
     "availability": {
       "stack": true,

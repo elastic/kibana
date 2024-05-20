@@ -9,9 +9,9 @@ import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logi
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiAccordion, EuiCheckbox, EuiNotificationBadge, EuiTabbedContent } from '@elastic/eui';
+import { EuiAccordion, EuiTabbedContent, EuiNotificationBadge, EuiCheckbox } from '@elastic/eui';
 
 import { UrlComboBox } from '../../../../../shared/url_combo_box/url_combo_box';
 

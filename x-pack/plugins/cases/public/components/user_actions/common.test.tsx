@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
-import React from 'react';
 
 import { UserActionActions } from '../../../common/types/domain';
-import { TestProviders } from '../../common/mock';
-import { getUserAction } from '../../containers/mock';
-import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { createCommonUpdateUserActionBuilder } from './common';
+import { getUserAction } from '../../containers/mock';
+import { TestProviders } from '../../common/mock';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

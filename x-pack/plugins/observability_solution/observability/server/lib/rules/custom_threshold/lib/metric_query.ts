@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Filter } from '@kbn/es-query';
-import moment from 'moment';
 import {
   Aggregators,
   CustomMetricExpressionParams,
   SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
 import { getSearchConfigurationBoolQuery } from '../../../../utils/get_parsed_filtered_query';
+import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import {
   CONTAINER_ID,
-  NUMBER_OF_DOCUMENTS,
   hasAdditionalContext,
+  NUMBER_OF_DOCUMENTS,
   shouldTermsAggOnContainer,
   validGroupByForContext,
 } from '../utils';
 import { createBucketSelector } from './create_bucket_selector';
-import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import { wrapInCurrentPeriod } from './wrap_in_period';
 
 export const calculateCurrentTimeFrame = (

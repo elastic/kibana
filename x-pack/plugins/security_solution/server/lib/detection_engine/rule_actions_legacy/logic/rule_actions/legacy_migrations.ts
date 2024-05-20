@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { isString } from 'lodash/fp';
 import type {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectSanitizedDoc,
   SavedObjectAttributes,
   SavedObjectReference,
-  SavedObjectSanitizedDoc,
-  SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { isString } from 'lodash/fp';
 
 // eslint-disable-next-line no-restricted-imports
 import type {

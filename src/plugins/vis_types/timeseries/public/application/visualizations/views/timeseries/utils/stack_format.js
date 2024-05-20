@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { STACKED_OPTIONS, STACK_ACCESSORS } from '../../../constants';
+import { STACK_ACCESSORS, STACKED_OPTIONS } from '../../../constants';
 
 export const getStackAccessors = (stack) => {
   switch (stack) {

@@ -7,20 +7,20 @@
  */
 
 import { Unit } from '@kbn/datemath';
-import { AGG_TYPE, getAggsByType } from '../../../../common/agg_utils';
-import {
-  BUCKET_TYPES,
-  PANEL_TYPES,
-  TIME_RANGE_DATA_MODES,
-  TSVB_METRIC_TYPES,
-} from '../../../../common/enums';
-import type { Panel } from '../../../../common/types';
-import { RESTRICTIONS_KEYS, TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 import {
   convertIntervalToUnit,
-  getSuitableUnit,
   parseInterval,
+  getSuitableUnit,
 } from '../../vis_data/helpers/unit_to_seconds';
+import { RESTRICTIONS_KEYS, TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
+import {
+  TIME_RANGE_DATA_MODES,
+  PANEL_TYPES,
+  BUCKET_TYPES,
+  TSVB_METRIC_TYPES,
+} from '../../../../common/enums';
+import { getAggsByType, AGG_TYPE } from '../../../../common/agg_utils';
+import type { Panel } from '../../../../common/types';
 
 export interface SearchCapabilitiesOptions {
   timezone?: string;
@@ -30,15 +30,12 @@ export interface SearchCapabilitiesOptions {
 }
 
 const convertAggsToRestriction = (allAvailableAggs: string[]) =>
-  allAvailableAggs.reduce(
-    (availableAggs, aggType) => {
-      availableAggs[aggType] = {
-        '*': true,
-      };
-      return availableAggs;
-    },
-    {} as Record<string, unknown>
-  );
+  allAvailableAggs.reduce((availableAggs, aggType) => {
+    availableAggs[aggType] = {
+      '*': true,
+    };
+    return availableAggs;
+  }, {} as Record<string, unknown>);
 
 export class DefaultSearchCapabilities {
   public timezone: SearchCapabilitiesOptions['timezone'];

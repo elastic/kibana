@@ -10,22 +10,22 @@ import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react'
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPageBody,
-  EuiPageHeader,
   EuiPageSection,
   EuiPanel,
   EuiSpacer,
+  EuiPageHeader,
+  EuiHorizontalRule,
+  EuiBadge,
 } from '@elastic/eui';
 
-import type { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
-import { css } from '@emotion/react';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { Filter, Query } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
+import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
+import type { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
+import { useStorage } from '@kbn/ml-local-storage';
 import type { FullTimeRangeSelectorProps } from '@kbn/ml-date-picker';
 import {
   DatePickerWrapper,
@@ -33,27 +33,27 @@ import {
   FullTimeRangeSelector,
   useTimefilter,
 } from '@kbn/ml-date-picker';
-import { useStorage } from '@kbn/ml-local-storage';
-import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
-import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import { useDataSource } from '../common/hooks/data_source_context';
-import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
-import { useData } from '../common/hooks/use_data';
-import { useSearch } from '../common/hooks/use_search';
-import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
-import type { DVKey, DVStorageMapped } from '../index_data_visualizer/types/storage';
-import { DV_FROZEN_TIER_PREFERENCE } from '../index_data_visualizer/types/storage';
-import { useDataVisualizerKibana } from '../kibana_context';
-import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
-import { DataDriftView } from './data_drift_view';
+import { css } from '@emotion/react';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
 import type { SingleBrushWindowParameters } from './document_count_chart_single_brush/single_brush';
-import { DocumentCountWithBrush } from './document_count_with_brush';
-import type { DataComparisonFullAppState } from './types';
-import { getDefaultDataComparisonState } from './types';
 import type { InitialSettings } from './use_data_drift_result';
 import { useDataDriftStateManagerContext } from './use_state_manager';
+import { useData } from '../common/hooks/use_data';
+import type { DVKey, DVStorageMapped } from '../index_data_visualizer/types/storage';
+import { DV_FROZEN_TIER_PREFERENCE } from '../index_data_visualizer/types/storage';
+import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
+import type { DataComparisonFullAppState } from './types';
+import { getDefaultDataComparisonState } from './types';
+import { useDataSource } from '../common/hooks/data_source_context';
+import { useDataVisualizerKibana } from '../kibana_context';
+import { DataDriftView } from './data_drift_view';
+import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
+import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
+import { useSearch } from '../common/hooks/use_search';
+import { DocumentCountWithBrush } from './document_count_with_brush';
 
 const dataViewTitleHeader = css({
   minWidth: '300px',

@@ -36,7 +36,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-rrule/rrule.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -48,7 +50,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["Options"],
+                "signature": [
+                  "Options"
+                ],
                 "path": "packages/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -64,7 +68,9 @@
             "tags": [],
             "label": "between",
             "description": [],
-            "signature": ["(start: Date, end: Date) => Date[]"],
+            "signature": [
+              "(start: Date, end: Date) => Date[]"
+            ],
             "path": "packages/kbn-rrule/rrule.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -76,7 +82,9 @@
                 "tags": [],
                 "label": "start",
                 "description": [],
-                "signature": ["Date"],
+                "signature": [
+                  "Date"
+                ],
                 "path": "packages/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -89,7 +97,9 @@
                 "tags": [],
                 "label": "end",
                 "description": [],
-                "signature": ["Date"],
+                "signature": [
+                  "Date"
+                ],
                 "path": "packages/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -105,7 +115,9 @@
             "tags": [],
             "label": "before",
             "description": [],
-            "signature": ["(dt: Date) => Date"],
+            "signature": [
+              "(dt: Date) => Date"
+            ],
             "path": "packages/kbn-rrule/rrule.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -117,7 +129,9 @@
                 "tags": [],
                 "label": "dt",
                 "description": [],
-                "signature": ["Date"],
+                "signature": [
+                  "Date"
+                ],
                 "path": "packages/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -133,7 +147,9 @@
             "tags": [],
             "label": "after",
             "description": [],
-            "signature": ["(dt: Date) => Date | null"],
+            "signature": [
+              "(dt: Date) => Date | null"
+            ],
             "path": "packages/kbn-rrule/rrule.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -145,7 +161,9 @@
                 "tags": [],
                 "label": "dt",
                 "description": [],
-                "signature": ["Date"],
+                "signature": [
+                  "Date"
+                ],
                 "path": "packages/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -161,7 +179,9 @@
             "tags": [],
             "label": "all",
             "description": [],
-            "signature": ["(limit?: number) => AllResult"],
+            "signature": [
+              "(limit?: number) => AllResult"
+            ],
             "path": "packages/kbn-rrule/rrule.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -173,7 +193,9 @@
                 "tags": [],
                 "label": "limit",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-rrule/rrule.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -237,7 +259,9 @@
         "tags": [],
         "label": "WeekdayStr",
         "description": [],
-        "signature": ["\"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\""],
+        "signature": [
+          "\"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\""
+        ],
         "path": "packages/kbn-rrule/index.ts",
         "deprecated": false,
         "trackAdoption": false,

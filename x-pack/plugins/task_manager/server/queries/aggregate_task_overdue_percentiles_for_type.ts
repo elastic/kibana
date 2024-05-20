@@ -7,8 +7,8 @@
 
 import type {
   AggregationsAggregationContainer,
-  MappingRuntimeFields,
   QueryDslQueryContainer,
+  MappingRuntimeFields,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   IdleTaskWithExpiredRunAt,

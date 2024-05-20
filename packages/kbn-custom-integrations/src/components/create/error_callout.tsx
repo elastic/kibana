@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
 import {
   AuthorizationError,
   IntegrationError,

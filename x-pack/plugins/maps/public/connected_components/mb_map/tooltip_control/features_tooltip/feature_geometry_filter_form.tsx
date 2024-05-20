@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { Component } from 'react';
 import type {
   GeoShapeRelation,
   QueryDslFieldLookup,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { URL_MAX_LENGTH } from '@kbn/core/public';
-import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import rison from '@kbn/rison';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { Filter } from '@kbn/es-query';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { MultiPolygon, Polygon } from 'geojson';
-import React, { Component } from 'react';
+import rison from '@kbn/rison';
+import { URL_MAX_LENGTH } from '@kbn/core/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { buildGeoShapeFilter } from '../../../../../common/elasticsearch_util';
 import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 

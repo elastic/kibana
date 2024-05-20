@@ -11,8 +11,8 @@ jest.mock('../constants', () => ({
 }));
 import { initDataFor } from '../init_data';
 
-import { processedResponseWithFirstShard } from './fixtures/processed_search_response';
 import { searchResponse } from './fixtures/search_response';
+import { processedResponseWithFirstShard } from './fixtures/processed_search_response';
 
 describe('ProfileTree init data', () => {
   test('provides the expected result', () => {
@@ -21,7 +21,12 @@ describe('ProfileTree init data', () => {
 
     /* prettier-ignore */
     expect(
-      actual[1].shards[0].searches![0].treeRoot!.children[0].children[0].children[0].children // level 0 // level 1 // level 2 // level 3 -- Max level! // level 4 (nothing here!)
+      actual[1].shards[0].searches![0]
+        .treeRoot!    // level 0
+        .children[0]  // level 1
+        .children[0]  // level 2
+        .children[0]  // level 3 -- Max level!
+        .children,    // level 4 (nothing here!)
     ).toEqual([]);
 
     expect(actual[0].name).toEqual(processedResponseWithFirstShard[0].name);

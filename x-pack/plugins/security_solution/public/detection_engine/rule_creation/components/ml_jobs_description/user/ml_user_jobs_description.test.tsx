@@ -1,5 +1,3 @@
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
-import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { render, screen } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 
 import { MlUserJobsDescription } from './ml_user_jobs_description';
 
@@ -19,7 +19,7 @@ jest.mock(
       MlUserJobDescription: (props) => {
         return <div data-test-subj="userMock">{props.job.id}</div>;
       },
-    }) as Record<string, React.FC<{ job: MlSummaryJob }>>
+    } as Record<string, React.FC<{ job: MlSummaryJob }>>)
 );
 
 jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs');

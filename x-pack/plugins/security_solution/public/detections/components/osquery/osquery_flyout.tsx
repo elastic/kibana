@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
+import styled from 'styled-components';
 import {
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useQueryClient } from '@tanstack/react-query';
-import React, { useCallback } from 'react';
-import styled from 'styled-components';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';

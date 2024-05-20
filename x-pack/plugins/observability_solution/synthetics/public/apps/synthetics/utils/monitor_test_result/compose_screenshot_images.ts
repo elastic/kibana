@@ -6,9 +6,9 @@
  */
 
 import {
-  ScreenshotBlockCache,
-  ScreenshotRefImageData,
   isScreenshotBlockDoc,
+  ScreenshotRefImageData,
+  ScreenshotBlockCache,
 } from '../../../../../common/runtime_types';
 
 /**

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { savedSearch } from './saved_search';
 import { buildEmbeddableFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter } from '../../../types';
-import { savedSearch } from './saved_search';
 
 const filterContext: ExpressionValueFilter = {
   type: 'filter',

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiCode, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PainlessLang } from '@kbn/monaco';
-import React, { useState, useEffect } from 'react';
+import { EuiCode, EuiSwitch, EuiFormRow } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
-  Field,
-  UseField,
   fieldValidators,
+  UseField,
+  Field,
   useFormData,
 } from '../../../../../../shared_imports';
 
-import { TextEditor, XJsonEditor } from '../field_components';
+import { XJsonEditor, TextEditor } from '../field_components';
 
-import { EDITOR_PX_HEIGHT, FieldsConfig, FormFieldsComponent, from, to } from './shared';
+import { FieldsConfig, to, from, FormFieldsComponent, EDITOR_PX_HEIGHT } from './shared';
 
 const { isJsonField, emptyField } = fieldValidators;
 

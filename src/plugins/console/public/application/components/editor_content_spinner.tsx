@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiPageSection, EuiSkeletonText } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
+import { EuiSkeletonText, EuiPageSection } from '@elastic/eui';
 
 export const EditorContentSpinner: FunctionComponent = () => {
   return (

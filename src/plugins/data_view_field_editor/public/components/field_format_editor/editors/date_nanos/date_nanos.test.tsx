@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { DateNanosFormatEditor } from './date_nanos';
 

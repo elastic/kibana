@@ -12,15 +12,15 @@ import {
   EuiSelectable,
   EuiSelectableOption,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useDispatch } from '../../../../components/mappings_editor/mappings_state_context';
+import { State } from '../../../../components/mappings_editor/types';
 import {
   getFieldsFromState,
   getFieldsMatchingFilterFromState,
   searchFields,
 } from '../../../../components/mappings_editor/lib';
-import { useDispatch } from '../../../../components/mappings_editor/mappings_state_context';
-import { State } from '../../../../components/mappings_editor/types';
 
 interface Props {
   isAddingFields: boolean;

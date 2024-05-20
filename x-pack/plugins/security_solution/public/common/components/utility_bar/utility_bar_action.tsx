@@ -6,7 +6,7 @@
  */
 
 import type { PanelPaddingSize } from '@elastic/eui';
-import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import styled, { css } from 'styled-components';
 

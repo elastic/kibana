@@ -9,8 +9,8 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
-import type { ClientConfigType } from '../common/types';
 import { getIndexPatternLoad } from './expressions';
+import type { ClientConfigType } from '../common/types';
 import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
@@ -25,7 +25,7 @@ import { ContentMagementWrapper } from './content_management_wrapper';
 import { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 
 import { DataViewsServicePublic } from './data_views_service_public';
-import { HasData, getIndices } from './services';
+import { getIndices, HasData } from './services';
 
 import { debounceByKey } from './debounce_by_key';
 

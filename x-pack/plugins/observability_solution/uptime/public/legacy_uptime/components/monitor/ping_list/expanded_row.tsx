@@ -15,12 +15,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { HttpResponseBody, Ping } from '../../../../../common/runtime_types';
+import { i18n } from '@kbn/i18n';
+import { Ping, HttpResponseBody } from '../../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
-import { PingHeaders } from './headers';
 import { PingRedirects } from './ping_redirects';
+import { PingHeaders } from './headers';
 
 interface Props {
   ping: Ping;

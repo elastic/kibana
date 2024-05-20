@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlyout } from '@elastic/eui';
 import React, {
   createContext,
   useContext,
@@ -18,6 +17,7 @@ import React, {
   FC,
   PropsWithChildren,
 } from 'react';
+import { EuiFlyout } from '@elastic/eui';
 
 interface Context {
   addContent: <P extends object = { [key: string]: any }>(content: Content<P>) => void;

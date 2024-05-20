@@ -10,7 +10,7 @@ import { Redirect } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -33,16 +33,16 @@ import { RoleMappings } from './components/role_mappings';
 import { Settings } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 import {
-  CREDENTIALS_PATH,
-  ENGINES_PATH,
   ENGINE_CREATION_PATH,
+  ROOT_PATH,
+  SETUP_GUIDE_PATH,
+  SETTINGS_PATH,
+  CREDENTIALS_PATH,
+  USERS_AND_ROLES_PATH,
+  ENGINES_PATH,
   ENGINE_PATH,
   LIBRARY_PATH,
   META_ENGINE_CREATION_PATH,
-  ROOT_PATH,
-  SETTINGS_PATH,
-  SETUP_GUIDE_PATH,
-  USERS_AND_ROLES_PATH,
 } from './routes';
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {

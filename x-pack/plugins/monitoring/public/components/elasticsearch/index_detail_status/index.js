@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
-import { AlertsStatus } from '../../../alerts/status';
-import { formatMetric } from '../../../lib/format_number';
 import { SummaryStatus } from '../../summary_status';
 import { ElasticsearchStatusIcon } from '../status_icon';
+import { formatMetric } from '../../../lib/format_number';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { AlertsStatus } from '../../../alerts/status';
 
 export function IndexDetailStatus({ stats, alerts = {} }) {
   const { dataSize, documents: documentCount, totalShards, unassignedShards, status } = stats;

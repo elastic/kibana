@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import React from 'react';
-import { AlertsStatus } from '../../../alerts/status';
-import { formatMetric } from '../../../lib/format_number';
+import { get } from 'lodash';
 import { SummaryStatus } from '../../summary_status';
+import { formatMetric } from '../../../lib/format_number';
+import { i18n } from '@kbn/i18n';
+import { AlertsStatus } from '../../../alerts/status';
 
 export function Status({ stat, formattedLeader, oldestStat, alerts = {} }) {
   const followerIndex = stat.follower_index || get(stat, 'follower.index');

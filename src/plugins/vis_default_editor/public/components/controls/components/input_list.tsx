@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useEffect, Fragment, useCallback } from 'react';
+import { isEmpty, isEqual, mapValues, omitBy, pick } from 'lodash';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   htmlIdGenerator,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isEmpty, isEqual, mapValues, omitBy, pick } from 'lodash';
-import React, { useState, useEffect, Fragment, useCallback } from 'react';
 
 export interface InputListConfig {
   defaultValue: InputItemModel;
@@ -89,7 +89,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
         ({
           id: generateId(),
           ...getModelValue(item),
-        }) as InputModel
+        } as InputModel)
     )
   );
   const hasInvalidValues = models.some(config.hasInvalidValuesFn);
@@ -171,7 +171,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
             ({
               id: generateId(),
               ...getModelValue(item),
-            }) as InputModel
+            } as InputModel)
         )
       );
     }

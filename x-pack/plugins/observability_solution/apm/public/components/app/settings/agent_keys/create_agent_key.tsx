@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiCheckbox,
-  EuiFieldText,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
+  EuiButtonEmpty,
   EuiForm,
-  EuiFormFieldset,
   EuiFormRow,
   EuiSpacer,
+  EuiFieldText,
   EuiText,
-  EuiTitle,
+  EuiFormFieldset,
+  EuiCheckbox,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React, { useState } from 'react';
-import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
-import { PrivilegeType } from '../../../../../common/privilege_type';
-import { useCurrentUser } from '../../../../hooks/use_current_user';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
+import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
+import { useCurrentUser } from '../../../../hooks/use_current_user';
+import { PrivilegeType } from '../../../../../common/privilege_type';
 
 interface Props {
   onCancel: () => void;

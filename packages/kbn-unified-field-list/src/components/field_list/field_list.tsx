@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { FC, PropsWithChildren } from 'react';
 
 const containerStyle = css`
   position: relative;

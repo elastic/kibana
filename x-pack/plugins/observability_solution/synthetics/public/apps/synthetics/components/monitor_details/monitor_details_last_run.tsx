@@ -1,6 +1,3 @@
-import { EuiDescriptionList, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import moment from 'moment';
  * 2.0.
  */
 import React, { ReactElement } from 'react';
+import moment from 'moment';
+import { EuiDescriptionList, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 

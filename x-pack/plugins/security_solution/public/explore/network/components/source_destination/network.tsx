@@ -10,10 +10,10 @@ import { uniq } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { DefaultDraggable, DraggableBadge } from '../../../../common/components/draggables';
 import { DirectionBadge } from '../direction';
+import { DefaultDraggable, DraggableBadge } from '../../../../common/components/draggables';
 
-import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
+import * as i18n from './translations';
 import {
   NETWORK_BYTES_FIELD_NAME,
   NETWORK_COMMUNITY_ID_FIELD_NAME,
@@ -21,7 +21,7 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
-import * as i18n from './translations';
+import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 
 const EuiFlexItemMarginRight = styled(EuiFlexItem)`
   margin-right: 3px;

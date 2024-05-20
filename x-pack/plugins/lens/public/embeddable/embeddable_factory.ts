@@ -12,27 +12,27 @@ import type {
   IUiSettingsClient,
   ThemeServiceStart,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { RecursiveReadonly } from '@kbn/utility-types';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataPublicPluginStart, FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import {
   EmbeddableFactoryDefinition,
-  ErrorEmbeddable,
   IContainer,
+  ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { RecursiveReadonly } from '@kbn/utility-types';
+import type { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
+import type { Document } from '../persistence/saved_object_store';
+import type { LensAttributeService } from '../lens_attribute_service';
 import { DOC_TYPE } from '../../common/constants';
 import { extract, inject } from '../../common/embeddable_factory';
-import type { DocumentToExpressionReturnType } from '../editor_frame_service/editor_frame';
-import type { LensAttributeService } from '../lens_attribute_service';
-import type { Document } from '../persistence/saved_object_store';
 import type { DatasourceMap, VisualizationMap } from '../types';
-import type { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
+import type { DocumentToExpressionReturnType } from '../editor_frame_service/editor_frame';
 
 export interface LensEmbeddableStartServices {
   data: DataPublicPluginStart;

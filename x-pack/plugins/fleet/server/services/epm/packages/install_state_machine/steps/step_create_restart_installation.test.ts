@@ -6,14 +6,14 @@
  */
 
 import type {
+  SavedObjectsClientContract,
   ElasticsearchClient,
   SavedObject,
-  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import {
+  savedObjectsClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
-  savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -22,14 +22,14 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
 } from '../../../../../../common/constants';
 
-import { createAppContextStartContractMock } from '../../../../../mocks';
 import { appContextService } from '../../../../app_context';
+import { createAppContextStartContractMock } from '../../../../../mocks';
 
 import { INSTALL_STATES } from '../../../../../../common/types';
 
-import type { Installation } from '../../../../../../common';
 import { auditLoggingService } from '../../../../audit_logging';
-import { createInstallation, restartInstallation } from '../../install';
+import { restartInstallation, createInstallation } from '../../install';
+import type { Installation } from '../../../../../../common';
 
 import { stepCreateRestartInstallation } from './step_create_restart_installation';
 

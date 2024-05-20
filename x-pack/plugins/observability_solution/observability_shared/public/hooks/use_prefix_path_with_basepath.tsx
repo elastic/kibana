@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemo } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export const usePrefixPathWithBasepath = () => {
   const getUrlForApp = useKibana().services.application?.getUrlForApp;

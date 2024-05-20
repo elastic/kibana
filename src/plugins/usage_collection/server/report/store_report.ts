@@ -7,12 +7,12 @@
  */
 
 import { ISavedObjectsRepository } from '@kbn/core/server';
-import { chain, sumBy } from 'lodash';
 import moment from 'moment';
-import { serializeUiCounterName } from '../../common/ui_counters';
-import { UsageCounter } from '../usage_counters';
+import { chain, sumBy } from 'lodash';
 import { ReportSchemaType } from './schema';
 import { storeApplicationUsage } from './store_application_usage';
+import { UsageCounter } from '../usage_counters';
+import { serializeUiCounterName } from '../../common/ui_counters';
 
 export async function storeReport(
   internalRepository: ISavedObjectsRepository,

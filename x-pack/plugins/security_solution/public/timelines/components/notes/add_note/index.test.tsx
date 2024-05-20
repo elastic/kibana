@@ -8,11 +8,11 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { useCurrentUser } from '../../../../common/lib/kibana/hooks';
 import { TestProviders } from '../../../../common/mock';
+import { useCurrentUser } from '../../../../common/lib/kibana/hooks';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { AddNote } from '.';
 
 const mockDispatch = jest.fn();

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Simulator } from '../../test_utilities/simulator';
 import { noAncestorsTwoChildren } from '../../data_access_layer/mocks/no_ancestors_two_children';
 import { nudgeAnimationDuration } from '../../store/camera/scaling_constants';
-import { Simulator } from '../../test_utilities/simulator';
 import '../../test_utilities/extend_jest';
 
 describe('graph controls: when relsover is loaded with an origin node', () => {

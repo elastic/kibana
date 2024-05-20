@@ -6,8 +6,8 @@
  */
 
 import { Config } from '@kbn/test';
+import { getRegistryUrlAsArray, createEndpointDockerConfig } from './registry';
 import { SUITE_TAGS } from '../security_solution_endpoint/config.base';
-import { createEndpointDockerConfig, getRegistryUrlAsArray } from './registry';
 
 export const generateConfig = async ({
   baseConfig,

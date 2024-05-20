@@ -8,10 +8,10 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { get, has, isPlainObject } from 'lodash';
-import type { DataViewBase, DataViewFieldBase } from '../../es_query';
+import type { Filter, FilterMeta } from './types';
+import type { DataViewFieldBase, DataViewBase } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
 import { hasRangeKeys } from './range_filter';
-import type { Filter, FilterMeta } from './types';
 
 export type PhraseFilterValue = string | number | boolean;
 

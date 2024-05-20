@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { createSavedQueryService } from './saved_query_service';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { SavedQueryAttributes } from '../../../common';
 import { SAVED_QUERY_BASE_URL } from '../../../common/constants';
-import { createSavedQueryService } from './saved_query_service';
 
 const http = httpServiceMock.createStartContract();
 

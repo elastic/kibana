@@ -7,10 +7,10 @@
  */
 
 import { CustomIntegrationsServices } from '..';
-import { CustomIntegrationsStartDependencies } from '../../types';
 import { findServiceFactory } from '../stub/find';
 import { platformServiceFactory } from '../stub/platform';
 import { PluginServiceFactory } from '../types';
+import { CustomIntegrationsStartDependencies } from '../../types';
 
 export { findServiceFactory } from '../stub/find';
 export { platformServiceFactory } from '../stub/platform';

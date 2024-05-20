@@ -10,14 +10,14 @@ import { useReducer } from 'react';
 import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import {
   JobStatus,
-  SetupStatus,
   getDatafeedId,
   getJobId,
   isJobStatusWithResults,
+  SetupStatus,
 } from '../../../../common/log_analysis';
-import { MandatoryProperty } from '../../../../common/utility_types';
 import { FetchJobStatusResponsePayload, JobSummary } from './api/ml_get_jobs_summary_api';
 import { SetupMlModuleResponsePayload } from './api/ml_setup_module_api';
+import { MandatoryProperty } from '../../../../common/utility_types';
 
 interface StatusReducerState<T extends JobType> {
   jobStatus: Record<T, JobStatus>;

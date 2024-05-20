@@ -1,6 +1,3 @@
-import type { UseQueryResult } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
-import Chance from 'chance';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,15 +5,18 @@ import Chance from 'chance';
  * 2.0.
  */
 import React from 'react';
-import { Policies } from '.';
-import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
+import Chance from 'chance';
+import { render, screen } from '@testing-library/react';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { createCloudDefendIntegrationFixture } from '../../test/fixtures/cloud_defend_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
+import { Policies } from '.';
 import * as TEST_SUBJ from './test_subjects';
 import { useCloudDefendPolicies } from './use_cloud_defend_policies';
+import { useCloudDefendSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useCloudDefendIntegrationLinks } from '../../common/navigation/use_cloud_defend_integration_links';
 
 jest.mock('./use_cloud_defend_policies');
 jest.mock('../../common/api/use_setup_status_api');

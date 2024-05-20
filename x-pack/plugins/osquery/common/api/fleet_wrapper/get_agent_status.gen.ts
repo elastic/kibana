@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 1
  */
 
-import { Id, KueryOrUndefined } from '../model/schema/common_attributes.gen';
+import { KueryOrUndefined, Id } from '../model/schema/common_attributes.gen';
 
 export type GetAgentStatusRequestParams = z.infer<typeof GetAgentStatusRequestParams>;
 export const GetAgentStatusRequestParams = z.object({});

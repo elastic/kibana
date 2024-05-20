@@ -5,44 +5,44 @@
  * 2.0.
  */
 
+import type React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import type React from 'react';
 
-import type {
-  EntriesArray,
-  ExceptionListItemSchema,
-  OsTypeArray,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  buildExceptionEntriesFromAlertFields,
-  buildRuleExceptionWithConditions,
-  defaultEndpointExceptionItems,
-  enrichExceptionItemsWithOS,
-  enrichExistingExceptionItemWithComments,
-  enrichNewExceptionItemsWithComments,
-  filterHighlightedFields,
-  formatExceptionItemForUpdate,
-  formatOperatingSystems,
-  getAlertHighlightedFields,
-  getCodeSignatureValue,
-  getFileCodeSignature,
   getFormattedComments,
-  getPrepopulatedEndpointException,
-  getPrepopulatedRuleExceptionWithHighlightFields,
-  getProcessCodeSignature,
-  lowercaseHashValues,
+  formatOperatingSystems,
+  formatExceptionItemForUpdate,
+  enrichNewExceptionItemsWithComments,
+  enrichExistingExceptionItemWithComments,
+  enrichExceptionItemsWithOS,
   prepareExceptionItemsForBulkClose,
+  lowercaseHashValues,
+  getPrepopulatedEndpointException,
+  defaultEndpointExceptionItems,
+  getFileCodeSignature,
+  getProcessCodeSignature,
   retrieveAlertOsTypes,
+  getCodeSignatureValue,
+  buildRuleExceptionWithConditions,
+  buildExceptionEntriesFromAlertFields,
+  filterHighlightedFields,
+  getPrepopulatedRuleExceptionWithHighlightFields,
+  getAlertHighlightedFields,
 } from './helpers';
 import * as mockHelpers from './helpers';
 import type { AlertData, Flattened } from './types';
+import type {
+  EntriesArray,
+  OsTypeArray,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ListOperatorTypeEnum, ListOperatorEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '@kbn/lists-plugin/common/constants.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
 import { getEntryMatchMock } from '@kbn/lists-plugin/common/schemas/types/entry_match.mock';
+import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
+import { ENTRIES, OLD_DATE_RELATIVE_TO_DATE_NOW } from '@kbn/lists-plugin/common/constants.mock';
 import type { CodeSignature } from '@kbn/securitysolution-ecs';
 import {
   ALERT_ORIGINAL_EVENT_KIND,

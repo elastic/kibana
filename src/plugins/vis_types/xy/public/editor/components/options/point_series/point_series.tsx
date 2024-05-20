@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
 
-import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 import {
   BasicOptions,
-  LegendSizeSettings,
-  LongLegendOptions,
   SwitchOption,
+  LongLegendOptions,
+  LegendSizeSettings,
 } from '@kbn/vis-default-editor-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { ChartType } from '../../../../../common';
 import { VisParams } from '../../../../types';
-import { getPositions } from '../../../collections';
-import { ValidationVisOptionsProps } from '../../common';
-import { ElasticChartsOptions } from './elastic_charts_options';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
+import { ChartType } from '../../../../../common';
+import { ValidationVisOptionsProps } from '../../common';
+import { ElasticChartsOptions } from './elastic_charts_options';
+import { getPositions } from '../../../collections';
 
 const legendPositions = getPositions();
 

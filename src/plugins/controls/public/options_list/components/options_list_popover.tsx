@@ -10,10 +10,10 @@ import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 
 import { useOptionsList } from '../embeddable/options_list_embeddable';
-import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
-import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
+import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
+import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
 
 export interface OptionsListPopoverProps {
   isLoading: boolean;

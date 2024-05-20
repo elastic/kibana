@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
-import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import type { AssigneesFilterPopoverProps } from './assignees_filter';
 import { AssigneesFilterPopover } from './assignees_filter';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
+import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 
 jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 

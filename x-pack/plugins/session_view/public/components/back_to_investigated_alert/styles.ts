@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
 import { euiLightVars } from '@kbn/ui-theme';
-import { useMemo } from 'react';
 import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {

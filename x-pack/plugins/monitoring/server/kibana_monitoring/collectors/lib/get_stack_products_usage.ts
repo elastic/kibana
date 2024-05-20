@@ -6,17 +6,17 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { MonitoringClusterStackProductUsage } from '../types';
+import { fetchESUsage } from './fetch_es_usage';
+import { MonitoringConfig } from '../../../config';
 import {
-  INDEX_PATTERN_BEATS,
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
+  INDEX_PATTERN_BEATS,
 } from '../../../../common/constants';
-import { MonitoringConfig } from '../../../config';
-import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
-import { MonitoringClusterStackProductUsage } from '../types';
-import { fetchESUsage } from './fetch_es_usage';
 import { fetchStackProductUsage } from './fetch_stack_product_usage';
+import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
 export const getStackProductsUsage = async (
   config: MonitoringConfig,

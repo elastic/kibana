@@ -13,11 +13,11 @@ import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { maybe } from '../../../../common/utils/maybe';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
-import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 import { MAX_NUMBER_OF_SERVICES } from './get_service_assets';
 
 export interface TraceMetrics {

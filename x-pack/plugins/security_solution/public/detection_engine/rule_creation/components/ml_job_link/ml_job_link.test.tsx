@@ -1,4 +1,3 @@
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { TestProviders } from '../../../../common/mock';
 import { MlJobLink } from './ml_job_link';
+import { TestProviders } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');

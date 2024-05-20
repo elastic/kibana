@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { EuiCode, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
-import { FormRow, ToggleField, UseField } from '../../shared_imports';
+import { UseField, FormRow, ToggleField } from '../../shared_imports';
 
 export const MapperSizePluginSection = () => {
   return (

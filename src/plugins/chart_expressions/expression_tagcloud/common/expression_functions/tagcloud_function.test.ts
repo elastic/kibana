@@ -8,11 +8,11 @@
 
 import { tagcloudFunction } from './tagcloud_function';
 
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
-import { Orientation, ScaleOptions } from '../constants';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import { ScaleOptions, Orientation } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 type Arguments = Parameters<ReturnType<typeof tagcloudFunction>['fn']>[1];
 

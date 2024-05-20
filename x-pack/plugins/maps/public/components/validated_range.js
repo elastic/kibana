@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFormErrorText, EuiRange } from '@elastic/eui';
+import { EuiRange, EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 function isWithinRange(min, max, value) {

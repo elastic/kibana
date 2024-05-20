@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { format } from 'url';
+import supertest from 'supertest';
+import request from 'superagent';
 import type {
-  APIClientRequestParamsOf,
   APIReturnType,
+  APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
-import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
-import request from 'superagent';
-import supertest from 'supertest';
 import { InheritedFtrProviderContext } from '../../../../services';
 
 export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {

@@ -6,10 +6,10 @@
  */
 
 import { RuleExecutorOptions, RuleTypeParams } from '../../types';
-import { StackAlertType } from '../types';
 import { ActionContext } from './action_context';
-import { ActionGroupId } from './constants';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
+import { ActionGroupId } from './constants';
+import { StackAlertType } from '../types';
 
 export type OnlyEsQueryRuleParams = Omit<EsQueryRuleParams, 'searchConfiguration' | 'esqlQuery'> & {
   searchType: 'esQuery';

@@ -7,11 +7,11 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { StartServices } from '../application';
-import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { jsonRt } from './json_rt';
+import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
+import { StartServices } from '../application';
 
-export type RouteParams<T extends keyof typeof routes> = DecodeParams<(typeof routes)[T]['params']>;
+export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
 type DecodeParams<TParams extends Params | undefined> = {
   [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;

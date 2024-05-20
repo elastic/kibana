@@ -6,39 +6,39 @@
  * Side Public License, v 1.
  */
 
+import React, { Dispatch, useCallback, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  CriteriaWithPagination,
-  Direction,
   EuiBasicTableColumn,
   EuiButton,
   EuiInMemoryTable,
-  type EuiTableSelectionType,
+  CriteriaWithPagination,
   PropertySort,
+  SearchFilterConfig,
+  Direction,
   Query,
   Search,
-  SearchFilterConfig,
+  type EuiTableSelectionType,
 } from '@elastic/eui';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Dispatch, useCallback, useMemo } from 'react';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
-import type { Action } from '../actions';
 import { useServices } from '../services';
+import type { Action } from '../actions';
 import type {
   State as TableListViewState,
   TableListViewTableProps,
 } from '../table_list_view_table';
 import type { TableItemsRowActions } from '../types';
 import { TableSortSelect } from './table_sort_select';
-import type { SortColumnField } from './table_sort_select';
 import { TagFilterPanel } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
 import type { Params as UseTagFilterPanelParams } from './use_tag_filter_panel';
+import type { SortColumnField } from './table_sort_select';
 import {
-  NULL_USER as USER_FILTER_NULL_USER,
-  UserFilterContextProvider,
   UserFilterPanel,
+  UserFilterContextProvider,
+  NULL_USER as USER_FILTER_NULL_USER,
 } from './user_filter_panel';
 
 type State<T extends UserContentCommonSchema> = Pick<

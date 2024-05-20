@@ -6,23 +6,23 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { isEmpty } from 'lodash';
 import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
+import { isEmpty } from 'lodash';
+import { css } from '@emotion/react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
-import { type PreviewPanelProps, RulePreviewPanel } from '../../preview';
-import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { useRightPanelContext } from '../context';
+import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import {
   ALERT_DESCRIPTION_DETAILS_TEST_ID,
   ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { type PreviewPanelProps, RulePreviewPanel } from '../../preview';
 
 /**
  * Displays the rule description of a signal document.

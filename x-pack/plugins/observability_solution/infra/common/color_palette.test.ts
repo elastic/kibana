@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Color, colorTransformer, sampleColor } from './color_palette';
+import { sampleColor, Color, colorTransformer } from './color_palette';
 describe('Color Palette', () => {
   describe('sampleColor()', () => {
     it('should just work', () => {

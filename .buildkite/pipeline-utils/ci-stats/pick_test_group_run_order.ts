@@ -9,8 +9,8 @@
 import * as Fs from 'fs';
 
 import * as globby from 'globby';
-import { load as loadYaml } from 'js-yaml';
 import minimatch from 'minimatch';
+import { load as loadYaml } from 'js-yaml';
 
 import { BuildkiteClient, BuildkiteStep } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
@@ -477,12 +477,12 @@ export async function pickTestGroupRunOrder() {
                 typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
                   ? a.sortBy - b.sortBy
                   : // if both groups are sorted by string, sort by that
-                    typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
-                    ? a.sortBy.localeCompare(b.sortBy)
-                    : // if a is sorted by number then order it later than b
-                      typeof a.sortBy === 'number'
-                      ? 1
-                      : -1
+                  typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
+                  ? a.sortBy.localeCompare(b.sortBy)
+                  : // if a is sorted by number then order it later than b
+                  typeof a.sortBy === 'number'
+                  ? 1
+                  : -1
               )
               .map(
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({

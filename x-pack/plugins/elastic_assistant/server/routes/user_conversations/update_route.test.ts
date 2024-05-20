@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { getUpdateConversationRequest, requestMock } from '../../__mocks__/request';
+import { requestContextMock } from '../../__mocks__/request_context';
+import { serverMock } from '../../__mocks__/server';
 import {
   getConversationMock,
   getQueryConversationParams,
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
-import { getUpdateConversationRequest, requestMock } from '../../__mocks__/request';
-import { requestContextMock } from '../../__mocks__/request_context';
-import { serverMock } from '../../__mocks__/server';
 import { updateConversationRoute } from './update_route';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Update conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;

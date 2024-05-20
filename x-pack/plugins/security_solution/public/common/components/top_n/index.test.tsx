@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { TestProviders, createMockStore, mockGlobalState, mockIndexPattern } from '../../mock';
+import { mockGlobalState, TestProviders, mockIndexPattern, createMockStore } from '../../mock';
 import type { State } from '../../store';
 
-import { TableId } from '@kbn/securitysolution-data-table';
+import type { Props } from './top_n';
 import { StatefulTopN } from '.';
 import { TimelineId } from '../../../../common/types/timeline';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { detectionAlertsTables } from './helpers';
-import type { Props } from './top_n';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');

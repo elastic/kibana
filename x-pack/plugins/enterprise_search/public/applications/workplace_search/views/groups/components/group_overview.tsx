@@ -17,9 +17,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -29,7 +29,7 @@ import noOrgSourcesIcon from '../../../assets/share_circle.svg';
 import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
-import { CANCEL_BUTTON, NAV } from '../../../constants';
+import { NAV, CANCEL_BUTTON } from '../../../constants';
 import { USERS_AND_ROLES_PATH } from '../../../routes';
 import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 

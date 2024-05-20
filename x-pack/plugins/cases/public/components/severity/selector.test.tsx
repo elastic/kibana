@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { CaseSeverity } from '../../../common/types/domain';
+import { render } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import React from 'react';
 import { SeveritySelector } from './selector';
+import userEvent from '@testing-library/user-event';
 
 describe('Severity field selector', () => {
   const onSeverityChange = jest.fn();

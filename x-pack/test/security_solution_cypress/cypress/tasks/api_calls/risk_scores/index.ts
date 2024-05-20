@@ -46,11 +46,11 @@ import {
   getRiskScorePivotTransformId,
   startTransforms,
 } from '../../risk_scores/transforms';
-import { rootRequest } from '../common';
 import { createIndex, deleteRiskScoreIndicies } from './indices';
 import { createIngestPipeline, deleteRiskScoreIngestPipelines } from './ingest_pipelines';
 import { deleteSavedObjects } from './saved_objects';
 import { createStoredScript, deleteStoredScripts } from './stored_scripts';
+import { rootRequest } from '../common';
 
 export const deleteRiskScore = ({
   riskScoreEntity,

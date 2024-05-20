@@ -7,8 +7,8 @@
 
 import type { EuiBreadcrumb } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { useColors } from '../use_colors';
 import { ThemedBreadcrumbs } from './styles';
+import { useColors } from '../use_colors';
 
 /**
  * Breadcrumb menu

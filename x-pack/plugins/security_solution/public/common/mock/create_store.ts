@@ -6,14 +6,14 @@
  */
 
 import type { Dispatch, Middleware } from 'redux';
-import type { Immutable } from '../../../common/endpoint/types';
-import type { StartServices } from '../../types';
+import { SUB_PLUGINS_REDUCER } from './utils';
 import type { State } from '../store';
 import { createStore } from '../store';
-import type { AppAction } from '../store/actions';
 import { mockGlobalState } from './global_state';
+import type { AppAction } from '../store/actions';
+import type { Immutable } from '../../../common/endpoint/types';
+import type { StartServices } from '../../types';
 import { createSecuritySolutionStorageMock } from './mock_local_storage';
-import { SUB_PLUGINS_REDUCER } from './utils';
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 

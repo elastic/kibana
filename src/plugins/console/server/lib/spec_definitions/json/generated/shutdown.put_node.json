@@ -5,11 +5,31 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "master_timeout": ["nanos", "micros", "ms", "s", "m", "h", "d"],
-      "timeout": ["nanos", "micros", "ms", "s", "m", "h", "d"]
+      "master_timeout": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "timeout": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ]
     },
-    "methods": ["PUT"],
-    "patterns": ["_nodes/{node_id}/shutdown"],
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_nodes/{node_id}/shutdown"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current",
     "availability": {
       "stack": true,

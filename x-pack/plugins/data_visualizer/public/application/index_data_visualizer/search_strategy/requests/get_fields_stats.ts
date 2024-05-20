@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { ISearchStart } from '@kbn/data-plugin/public';
-import type { ISearchOptions } from '@kbn/search-types';
 import type { Observable } from 'rxjs';
-import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
+import type { ISearchOptions } from '@kbn/search-types';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import type {
   FieldStatsCommonRequestParams,
   SupportedAggs,
 } from '../../../../../common/types/field_stats';
 import type { FieldStatsError } from '../../../../../common/types/field_stats';
 import type { FieldStats } from '../../../../../common/types/field_stats';
-import { fetchBooleanFieldsStats } from './get_boolean_field_stats';
+import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 import { fetchDateFieldsStats } from './get_date_field_stats';
+import { fetchBooleanFieldsStats } from './get_boolean_field_stats';
 import { fetchFieldsExamples } from './get_field_examples';
 import { fetchNumericFieldsStats } from './get_numeric_field_stats';
 import { fetchStringFieldsStats } from './get_string_field_stats';

@@ -7,10 +7,10 @@
  */
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DarkModeValue } from '@kbn/core-ui-settings-common';
 import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-server-internal';
-import type { Logger } from '@kbn/logging';
 
 export interface UserSettingsServiceStartDeps {
   userProfile: InternalUserProfileServiceStart;

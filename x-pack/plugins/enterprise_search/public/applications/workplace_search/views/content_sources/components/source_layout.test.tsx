@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { PersonalDashboardLayout, WorkplaceSearchPageTemplate } from '../../../components/layout';
+import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../../components/layout';
 
 import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 import { SourceInfoCard } from './source_info_card';

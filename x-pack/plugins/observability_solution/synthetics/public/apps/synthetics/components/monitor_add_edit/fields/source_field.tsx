@@ -1,6 +1,3 @@
-import { EuiFormRow, EuiTabbedContent } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,9 +5,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import { ConfigKey, MonacoEditorLangId } from '../types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { EuiTabbedContent, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from './code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
+import { ConfigKey, MonacoEditorLangId } from '../types';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
-import { DataViewEditorService } from '../data_view_editor_service';
 import { DataViewSpec, useKibana } from '../shared_imports';
-import { DataViewEditorContext, DataViewEditorProps } from '../types';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
+import { DataViewEditorContext, DataViewEditorProps } from '../types';
+import { DataViewEditorService } from '../data_view_editor_service';
 
 const DataViewFlyoutContentContainer = ({
   onSave,

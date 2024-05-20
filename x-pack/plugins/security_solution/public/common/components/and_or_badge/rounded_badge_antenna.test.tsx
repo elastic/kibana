@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { mount } from 'enzyme';
 
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 import { RoundedBadgeAntenna } from './rounded_badge_antenna';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorLightShade: '#ece' } });
 

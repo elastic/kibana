@@ -1,5 +1,3 @@
-import { EuiScreenReaderOnly } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,9 +7,11 @@ import { i18n } from '@kbn/i18n';
  */
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
+import { EuiScreenReaderOnly } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
-import { Mode } from '../../../../models/legacy_core_editor/mode/output';
 import { convertMapboxVectorTileToJson } from './mapbox_vector_tile';
+import { Mode } from '../../../../models/legacy_core_editor/mode/output';
 
 // Ensure the modes we might switch to dynamically are available
 import 'brace/mode/text';
@@ -23,10 +23,10 @@ import {
   useRequestReadContext,
   useServicesContext,
 } from '../../../../contexts';
-import { CustomAceEditor, createReadOnlyAceEditor } from '../../../../models/legacy_core_editor';
-import { isJSONContentType, isMapboxVectorTile, safeExpandLiteralStrings } from '../../utilities';
+import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/legacy_core_editor';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
+import { isJSONContentType, isMapboxVectorTile, safeExpandLiteralStrings } from '../../utilities';
 
 function modeForContentType(contentType?: string) {
   if (!contentType) {

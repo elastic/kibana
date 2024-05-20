@@ -6,17 +6,17 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ConfigType } from '../../../../config';
+import type { SignalSource, SimpleHit } from '../types';
+import type { CompleteRule, RuleParams } from '../../rule_schema';
+import { generateId } from '../utils/utils';
+import { buildBulkBody } from './utils/build_bulk_body';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { ConfigType } from '../../../../config';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import type { CompleteRule, RuleParams } from '../../rule_schema';
-import type { SignalSource, SimpleHit } from '../types';
-import type { BuildReasonMessage } from '../utils/reason_formatters';
-import { generateId } from '../utils/utils';
-import { buildBulkBody } from './utils/build_bulk_body';
 
 export const wrapHitsFactory =
   ({

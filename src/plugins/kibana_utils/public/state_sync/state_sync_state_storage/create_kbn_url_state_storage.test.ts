@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { CoreScopedHistory } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
+import { mockStorage } from '../../storage/hashed_item_store/mock';
+import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
 import { History, createBrowserHistory } from 'history';
 import { takeUntil, toArray } from 'rxjs';
 import { Subject } from 'rxjs';
-import { flushNotifyOnErrors, withNotifyOnErrors } from '../../state_management/url';
-import { mockStorage } from '../../storage/hashed_item_store/mock';
-import { IKbnUrlStateStorage, createKbnUrlStateStorage } from './create_kbn_url_state_storage';
+import { CoreScopedHistory } from '@kbn/core/public';
+import { withNotifyOnErrors, flushNotifyOnErrors } from '../../state_management/url';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('KbnUrlStateStorage', () => {
   describe('useHash: false', () => {

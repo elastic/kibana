@@ -1,4 +1,3 @@
-import { EuiSkeletonText, EuiSteps } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +5,18 @@ import { EuiSkeletonText, EuiSteps } from '@elastic/eui';
  * 2.0.
  */
 import React from 'react';
+import { EuiSkeletonText, EuiSteps } from '@elastic/eui';
 
 import { useAdvancedForm } from './hooks';
 import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
 
 import {
   getAddFleetServerHostStep,
-  getConfirmFleetServerConnectionStep,
-  getGenerateServiceTokenStep,
-  getInstallFleetServerStep,
   getSelectAgentPolicyStep,
+  getGenerateServiceTokenStep,
   getSetDeploymentModeStep,
+  getInstallFleetServerStep,
+  getConfirmFleetServerConnectionStep,
 } from './steps';
 
 interface AdvancedTabProps {

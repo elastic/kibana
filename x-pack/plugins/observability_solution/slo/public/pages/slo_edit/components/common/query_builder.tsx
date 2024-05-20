@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode, useState } from 'react';
 import { FieldPath } from 'react-hook-form';
+import { QuerySearchBar } from './query_search_bar';
+import { QueryDocumentsFlyout } from './query_documents_flyout';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../types';
-import { QueryDocumentsFlyout } from './query_documents_flyout';
-import { QuerySearchBar } from './query_search_bar';
 
 export interface SearchBarProps {
   dataTestSubj: string;

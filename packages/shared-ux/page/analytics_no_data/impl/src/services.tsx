@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import React, { FC, PropsWithChildren, useContext } from 'react';
 import {
   KibanaNoDataPageKibanaProvider,
   KibanaNoDataPageProvider,
 } from '@kbn/shared-ux-page-kibana-no-data';
-import React, { FC, PropsWithChildren, useContext } from 'react';
 
 import {
-  AnalyticsNoDataPageKibanaDependencies,
-  AnalyticsNoDataPageServices,
   Services,
+  AnalyticsNoDataPageServices,
+  AnalyticsNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-analytics-no-data-types';
 
 const Context = React.createContext<Services | null>(null);

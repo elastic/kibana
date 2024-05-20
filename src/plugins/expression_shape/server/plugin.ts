@@ -7,8 +7,8 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { ExpressionsServerSetup, ExpressionsServerStart } from '@kbn/expressions-plugin/server';
-import { progressFunction, shapeFunction } from '../common/expression_functions';
+import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { shapeFunction, progressFunction } from '../common/expression_functions';
 
 interface SetupDeps {
   expressions: ExpressionsServerSetup;

@@ -7,7 +7,12 @@
     "id": "encryptedSavedObjects",
     "server": true,
     "browser": false,
-    "configPath": ["xpack", "encryptedSavedObjects"],
-    "optionalPlugins": ["security"]
+    "configPath": [
+      "xpack",
+      "encryptedSavedObjects"
+    ],
+    "optionalPlugins": [
+      "security"
+    ]
   }
 }

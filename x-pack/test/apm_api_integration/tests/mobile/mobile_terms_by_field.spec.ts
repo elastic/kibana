@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // we generate 3 transactions per each mobile device

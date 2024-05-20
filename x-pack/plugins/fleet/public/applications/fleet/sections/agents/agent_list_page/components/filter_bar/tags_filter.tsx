@@ -1,8 +1,3 @@
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { EuiHorizontalRule } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +5,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   tags: string[];

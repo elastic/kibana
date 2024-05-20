@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DisposableAppender, LogRecord } from '@kbn/logging';
+import { LogRecord, DisposableAppender } from '@kbn/logging';
 
 /**
  * Simple appender that just buffers `LogRecord` instances it receives. It is a *reserved* appender

@@ -6,13 +6,13 @@
  */
 
 import { createHash } from 'node:crypto';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import stringify from 'json-stable-stringify';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-import { isEmpty, set } from 'lodash';
-import { CASE_RULES_SAVED_OBJECT } from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
+import { CASE_RULES_SAVED_OBJECT } from '../../../common/constants';
+import { isEmpty, set } from 'lodash';
 
 describe('CasesOracleService', () => {
   const savedObjectsClient = savedObjectsClientMock.create();

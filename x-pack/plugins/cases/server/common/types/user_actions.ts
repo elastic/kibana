@@ -8,8 +8,8 @@
 import type { SavedObject } from '@kbn/core/server';
 import type { UserActionAttributes } from '../../../common/types/domain';
 import {
-  CaseUserActionWithoutReferenceIdsRt,
   UserActionAttributesRt,
+  CaseUserActionWithoutReferenceIdsRt,
 } from '../../../common/types/domain';
 import type { User } from './user';
 

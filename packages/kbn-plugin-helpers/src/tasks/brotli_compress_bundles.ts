@@ -10,11 +10,11 @@ import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
-import zlib from 'zlib';
-import { REPO_ROOT } from '@kbn/repo-info';
+import vfs from 'vinyl-fs';
 import del from 'del';
 import gulpBrotli from 'gulp-brotli';
-import vfs from 'vinyl-fs';
+import zlib from 'zlib';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { TaskContext } from '../task_context';
 

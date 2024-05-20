@@ -13,11 +13,7 @@ import {
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 
-import { getTimelineModifiedSourcerer } from '../../../../objects/timeline';
-import { SOURCERER } from '../../../../screens/sourcerer';
-import { createTimeline, deleteTimelines } from '../../../../tasks/api_calls/timelines';
-import { waitForFleetSetup } from '../../../../tasks/fleet_integrations';
-import { openTimelineUsingToggle } from '../../../../tasks/security_main';
+import { TIMELINES_URL } from '../../../../urls/navigation';
 import {
   clickAlertCheckbox,
   deselectSourcererOptions,
@@ -34,8 +30,12 @@ import {
   resetSourcerer,
   saveSourcerer,
 } from '../../../../tasks/sourcerer';
+import { openTimelineUsingToggle } from '../../../../tasks/security_main';
+import { waitForFleetSetup } from '../../../../tasks/fleet_integrations';
+import { SOURCERER } from '../../../../screens/sourcerer';
+import { createTimeline, deleteTimelines } from '../../../../tasks/api_calls/timelines';
+import { getTimelineModifiedSourcerer } from '../../../../objects/timeline';
 import { closeTimeline, openTimelineById } from '../../../../tasks/timeline';
-import { TIMELINES_URL } from '../../../../urls/navigation';
 
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];

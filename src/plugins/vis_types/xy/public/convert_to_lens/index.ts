@@ -8,16 +8,16 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { CollapseFunction, Column } from '@kbn/visualizations-plugin/common';
-import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
   convertToLensModule,
-  getDataViewByIndexPatternId,
   getVisSchemas,
+  getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
 import { getSeriesParams } from '../utils/get_series_params';
-import { getConfiguration } from './configurations';
 import { ConvertXYToLensVisualization } from './types';
+import { getConfiguration } from './configurations';
 
 export interface Layer {
   indexPatternId: string;

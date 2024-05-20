@@ -9,8 +9,8 @@ import { act } from '@testing-library/react-hooks';
 
 import { useStartServices } from '../../../../hooks';
 
-import { createFleetTestRendererMock } from '../../../../../../mock';
 import { ExperimentalFeaturesService } from '../../../../services';
+import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { useFetchAgentsData } from './use_fetch_agents_data';
 

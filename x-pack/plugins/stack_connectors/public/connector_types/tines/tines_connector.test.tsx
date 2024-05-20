@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { TINES_CONNECTOR_ID, TINES_TITLE } from '../../../common/tines/constants';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import TinesConnectorFields from './tines_connector';
 
 const url = 'https://example.com';

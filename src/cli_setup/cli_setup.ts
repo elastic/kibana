@@ -7,24 +7,24 @@
  */
 
 import { kibanaPackageJson } from '@kbn/repo-info';
-import { getConfigPath } from '@kbn/utils';
 import chalk from 'chalk';
-import { Command } from 'commander';
 import ora from 'ora';
+import { Command } from 'commander';
+import { getConfigPath } from '@kbn/utils';
 
 import {
   ElasticsearchService,
   EnrollResult,
 } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';
 import { getDetailedErrorMessage } from '@kbn/interactive-setup-plugin/server/errors';
-import { Logger } from '../cli/logger';
 import {
-  decodeEnrollmentToken,
-  elasticsearch,
-  getCommand,
-  kibanaConfigWriter,
   promptToken,
+  getCommand,
+  decodeEnrollmentToken,
+  kibanaConfigWriter,
+  elasticsearch,
 } from './utils';
+import { Logger } from '../cli/logger';
 
 const program = new Command('bin/kibana-setup');
 

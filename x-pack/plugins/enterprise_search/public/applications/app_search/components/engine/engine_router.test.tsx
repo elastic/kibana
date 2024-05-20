@@ -7,8 +7,8 @@
 
 import {
   mockFlashMessageHelpers,
-  setMockActions,
   setMockValues,
+  setMockActions,
 } from '../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
@@ -25,7 +25,7 @@ import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';
 import { CrawlerRouter } from '../crawler';
 import { CurationsRouter } from '../curations';
-import { DocumentDetail, Documents } from '../documents';
+import { Documents, DocumentDetail } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';

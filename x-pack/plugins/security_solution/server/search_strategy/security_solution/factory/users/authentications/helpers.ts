@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set/fp';
-import { hostFieldsMap, sourceFieldsMap } from '@kbn/securitysolution-ecs';
 import { get, getOr, isEmpty } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
+import { sourceFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import type {
-  AuthenticationBucket,
-  AuthenticationHit,
   AuthenticationsEdges,
+  AuthenticationHit,
+  AuthenticationBucket,
   FactoryQueryTypes,
   StrategyResponseType,
 } from '../../../../../../common/search_strategy/security_solution';
-import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 
 export const authenticationsFields = ['timestamp', 'source.ip', 'host.id', 'host.name'];
 export const authenticationsFieldsMap: Readonly<Record<string, unknown>> = {

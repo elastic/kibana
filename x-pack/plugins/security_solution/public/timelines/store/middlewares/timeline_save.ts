@@ -5,39 +5,39 @@
  * 2.0.
  */
 
+import { get, has, set, omit, isObject, toString as fpToString } from 'lodash/fp';
+import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 import type { Filter, MatchAllFilter } from '@kbn/es-query';
 import {
+  isScriptedRangeFilter,
   isExistsFilter,
+  isRangeFilter,
   isMatchAllFilter,
   isPhraseFilter,
-  isPhrasesFilter,
   isQueryStringFilter,
-  isRangeFilter,
-  isScriptedRangeFilter,
+  isPhrasesFilter,
 } from '@kbn/es-query';
-import { toString as fpToString, get, has, isObject, omit, set } from 'lodash/fp';
-import type { Action, Middleware } from 'redux';
 
+import {
+  updateTimeline,
+  startTimelineSaving,
+  endTimelineSaving,
+  showCallOutUnauthorizedMsg,
+  saveTimeline,
+  setChanged,
+} from '../actions';
+import { copyTimeline, persistTimeline } from '../../containers/api';
+import type { State } from '../../../common/store/types';
+import { inputsSelectors } from '../../../common/store/inputs';
+import { selectTimelineById } from '../selectors';
+import * as i18n from '../../pages/translations';
+import type { inputsModel } from '../../../common/store/inputs';
 import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type { TimelineErrorResponse, TimelineResponse } from '../../../../common/api/timeline';
 import type { TimelineInput } from '../../../../common/search_strategy';
-import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { inputsSelectors } from '../../../common/store/inputs';
-import type { inputsModel } from '../../../common/store/inputs';
-import type { State } from '../../../common/store/types';
-import { copyTimeline, persistTimeline } from '../../containers/api';
-import * as i18n from '../../pages/translations';
-import {
-  endTimelineSaving,
-  saveTimeline,
-  setChanged,
-  showCallOutUnauthorizedMsg,
-  startTimelineSaving,
-  updateTimeline,
-} from '../actions';
 import type { TimelineModel } from '../model';
-import { selectTimelineById } from '../selectors';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { refreshTimelines } from './helpers';
 
 function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {

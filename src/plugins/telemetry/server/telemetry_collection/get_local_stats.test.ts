@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { merge, omit } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { getLocalStats, handleLocalStats } from './get_local_stats';
+import {
+  usageCollectionPluginMock,
+  createCollectorFetchContextMock,
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { StatsCollectionConfig } from '@kbn/telemetry-collection-manager-plugin/server';
-import {
-  createCollectorFetchContextMock,
-  usageCollectionPluginMock,
-} from '@kbn/usage-collection-plugin/server/mocks';
-import { getLocalStats, handleLocalStats } from './get_local_stats';
 
 function mockUsageCollection(kibanaUsage = {}) {
   const usageCollection = usageCollectionPluginMock.createSetupContract();

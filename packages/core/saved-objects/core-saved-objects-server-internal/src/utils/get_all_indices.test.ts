@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { type SavedObjectsType, MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
-import { MAIN_SAVED_OBJECT_INDEX, type SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { getAllIndices } from './get_all_indices';
 
 describe('getAllIndices', () => {

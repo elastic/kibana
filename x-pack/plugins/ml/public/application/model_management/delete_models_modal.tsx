@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,15 +21,11 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
 import { type WithRequired } from '../../../common/types/common';
-import { DeleteSpaceAwareItemCheckModal } from '../components/delete_space_aware_item_check_modal';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { useToastNotificationService } from '../services/toast_notification_service';
+import { DeleteSpaceAwareItemCheckModal } from '../components/delete_space_aware_item_check_modal';
 import { type ModelItem } from './models_list';
 
 interface DeleteModelsModalProps {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
+import React, { FunctionComponent, useState } from 'react';
+import moment from 'moment-timezone';
+import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import moment from 'moment-timezone';
-import React, { FunctionComponent, useState } from 'react';
+import { EuiCallOut, EuiButton, EuiSkeletonText } from '@elastic/eui';
 
 import { useAppContext } from '../../../../app_context';
-import { UIM_RESET_LOGS_COUNTER_CLICK, uiMetricService } from '../../../../lib/ui_metric';
+import { uiMetricService, UIM_RESET_LOGS_COUNTER_CLICK } from '../../../../lib/ui_metric';
 
 const i18nTexts = {
   calloutTitle: (warningsCount: number, previousCheck: string) => (

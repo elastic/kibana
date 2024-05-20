@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { Capabilities } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
+import { MetricsExplorerChartContextMenu, Props } from './chart_context_menu';
+import { ReactWrapper, mount } from 'enzyme';
 import {
-  chartOptions,
   options,
   source,
   timeRange,
+  chartOptions,
 } from '../../../../utils/fixtures/metrics_explorer';
-import { MetricsExplorerChartContextMenu, Props } from './chart_context_menu';
+import { Capabilities } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const coreStartMock = coreMock.createStart();
 const series = { id: 'exmaple-01', rows: [], columns: [] };

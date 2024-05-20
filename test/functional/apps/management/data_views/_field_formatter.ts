@@ -1,5 +1,3 @@
-import expect from '@kbn/expect';
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
  * Side Public License, v 1.
  */
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import expect from '@kbn/expect';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -480,26 +480,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         body: {
           mappings: {
             // @ts-expect-error Type 'Record<string, { type: ES_FIELD_TYPES; }>' is not assignable to type 'Record<string, MappingProperty>'.
-            properties: specs.reduce(
-              (properties, spec, index) => {
-                properties[`${index}`] = { type: spec.fieldType };
-                return properties;
-              },
-              {} as Record<string, { type: ES_FIELD_TYPES }>
-            ),
+            properties: specs.reduce((properties, spec, index) => {
+              properties[`${index}`] = { type: spec.fieldType };
+              return properties;
+            }, {} as Record<string, { type: ES_FIELD_TYPES }>),
           },
         },
       });
 
       const docResult = await es.index({
         index: indexTitle,
-        body: specs.reduce(
-          (properties, spec, index) => {
-            properties[`${index}`] = spec.fieldValue;
-            return properties;
-          },
-          {} as Record<string, FieldFormatEditorSpecDescriptor['fieldValue']>
-        ),
+        body: specs.reduce((properties, spec, index) => {
+          properties[`${index}`] = spec.fieldValue;
+          return properties;
+        }, {} as Record<string, FieldFormatEditorSpecDescriptor['fieldValue']>),
         refresh: 'wait_for',
       });
       testDocumentId = docResult._id;

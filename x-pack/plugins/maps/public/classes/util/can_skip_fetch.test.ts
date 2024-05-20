@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
-import { ISource } from '../sources/source';
 import { canSkipSourceUpdate, updateDueToExtent } from './can_skip_fetch';
 import { DataRequest } from './data_request';
+import { Filter } from '@kbn/es-query';
+import { ISource } from '../sources/source';
 
 describe('updateDueToExtent', () => {
   it('should be false when buffers are the same', async () => {

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import {
-  AssistantAvatar,
-  ObservabilityAIAssistantService,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import React, { lazy } from 'react';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import React, { lazy } from 'react';
+import {
+  AssistantAvatar,
+  ObservabilityAIAssistantService,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
+import { ObsAIAssistantActionParams } from './types';
 import {
   CONNECTOR_DESC,
   CONNECTOR_REQUIRED,
   CONNECTOR_TITLE,
   MESSAGE_REQUIRED,
 } from './translations';
-import { ObsAIAssistantActionParams } from './types';
 
 export function getConnectorType(
   service: ObservabilityAIAssistantService

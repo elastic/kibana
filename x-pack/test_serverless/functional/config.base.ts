@@ -9,9 +9,9 @@ import { resolve } from 'path';
 
 import { FtrConfigProviderContext } from '@kbn/test';
 
-import type { CreateTestConfigOptions } from '../shared/types';
 import { pageObjects } from './page_objects';
 import { services } from './services';
+import type { CreateTestConfigOptions } from '../shared/types';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {

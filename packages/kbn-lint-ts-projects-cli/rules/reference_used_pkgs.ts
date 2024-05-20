@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { addReferences, removeAllReferences, removeReferences } from '@kbn/json-ast';
 import { asyncForEachWithLimit } from '@kbn/std';
+import { addReferences, removeReferences, removeAllReferences } from '@kbn/json-ast';
 
-import { ImportLocator } from '@kbn/import-locator';
-import { TsProjectRule } from '@kbn/repo-linter';
+import { TS_PROJECTS, type RefableTsProject } from '@kbn/ts-projects';
 import { parseKbnImportReq } from '@kbn/repo-packages';
-import { type RefableTsProject, TS_PROJECTS } from '@kbn/ts-projects';
+import { TsProjectRule } from '@kbn/repo-linter';
+import { ImportLocator } from '@kbn/import-locator';
 
 function createCache() {
   const importable = new Map<string, Set<RefableTsProject>>();

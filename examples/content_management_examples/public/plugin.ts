@@ -7,7 +7,7 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { SetupDeps, StartDeps } from './types';
+import { StartDeps, SetupDeps } from './types';
 
 export class ContentManagementExamplesPlugin
   implements Plugin<unknown, unknown, SetupDeps, StartDeps>

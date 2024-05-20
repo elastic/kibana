@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { getEsPreference } from './get_es_preference';
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { MockedKeys } from '@kbn/utility-types-jest';
 import { UI_SETTINGS } from '../../../common';
-import { getEsPreference } from './get_es_preference';
 
 describe('Get ES preference', () => {
   let mockCoreStart: MockedKeys<CoreStart>;

@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
-import { RasterTileLayer } from '../../layers/raster_tile_layer/raster_tile_layer';
-import { WorldMapLayerIcon } from '../../layers/wizards/icons/world_map_layer_icon';
 import { XYZTMSEditor, XYZTMSSourceConfig } from './xyz_tms_editor';
 import { XYZTMSSource, sourceTitle } from './xyz_tms_source';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { RasterTileLayer } from '../../layers/raster_tile_layer/raster_tile_layer';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
+import { WorldMapLayerIcon } from '../../layers/wizards/icons/world_map_layer_icon';
 
 export const tmsLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.TMS_LAYER,

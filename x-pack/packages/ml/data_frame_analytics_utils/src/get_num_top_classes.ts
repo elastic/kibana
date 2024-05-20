@@ -6,7 +6,7 @@
  */
 
 import { isClassificationAnalysis } from './analytics_utils';
-import type { AnalysisConfig, ClassificationAnalysis } from './types';
+import type { ClassificationAnalysis, AnalysisConfig } from './types';
 
 /**
  * Get the `num_top_classes` attribute of a DFA classification configuration

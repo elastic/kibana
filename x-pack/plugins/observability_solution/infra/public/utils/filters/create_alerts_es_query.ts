@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { getTime } from '@kbn/data-plugin/common';
-import { BoolQuery, Filter, type TimeRange, buildEsQuery } from '@kbn/es-query';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import { ALERT_STATUS_QUERY } from '../../components/shared/alerts/constants';
+import { BoolQuery, buildEsQuery, Filter, type TimeRange } from '@kbn/es-query';
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { buildCombinedAssetFilter } from './build';
+import { ALERT_STATUS_QUERY } from '../../components/shared/alerts/constants';
 
 export interface AlertsEsQuery {
   bool: BoolQuery;

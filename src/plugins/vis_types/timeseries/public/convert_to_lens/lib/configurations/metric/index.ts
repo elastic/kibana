@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
 import color from 'color';
+import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { Panel } from '../../../../../common/types';
-import { findMetricColumn, getMetricWithCollapseFn } from '../../../utils';
 import { Column, Layer } from '../../convert';
 import { getPalette } from '../palette';
+import { findMetricColumn, getMetricWithCollapseFn } from '../../../utils';
 
 export const getConfigurationForMetric = (
   model: Panel,

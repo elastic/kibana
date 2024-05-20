@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import { AlertTypeInitializer } from '.';
+import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 import { TlsTranslationsLegacy } from '../../../../common/rules/legacy_uptime/translations';
+import { AlertTypeInitializer } from '.';
 
 const { defaultActionMessage, description } = TlsTranslationsLegacy;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));

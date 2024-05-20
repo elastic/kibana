@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { takeEvery } from 'redux-saga/effects';
+import { i18n } from '@kbn/i18n';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import { manualTestMonitorAction } from './actions';
 import { triggerTestNowMonitor } from './api';

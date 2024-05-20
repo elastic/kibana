@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["GET"],
-    "patterns": ["{index}/_ccr/stats"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "{index}/_ccr/stats"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ccr-get-follow-stats.html",
     "availability": {
       "stack": true,

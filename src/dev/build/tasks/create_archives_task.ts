@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 import { promisify } from 'util';
 
 import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
-import { Task, compressTar, compressZip, mkdirp } from '../lib';
+import { mkdirp, compressTar, compressZip, Task } from '../lib';
 
 const asyncStat = promisify(Fs.stat);
 

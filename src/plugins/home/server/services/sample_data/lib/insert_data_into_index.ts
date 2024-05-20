@@ -7,12 +7,12 @@
  */
 
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { loadData } from './load_data';
 import type { DataIndexSchema } from './sample_dataset_registry_types';
 import {
   translateTimeRelativeToDifference,
   translateTimeRelativeToWeek,
 } from './translate_timestamp';
+import { loadData } from './load_data';
 
 export const insertDataIntoIndex = ({
   dataIndexConfig,

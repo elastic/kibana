@@ -36,7 +36,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -48,7 +50,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -276,7 +280,9 @@
             "tags": [],
             "label": "format",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -290,7 +296,9 @@
             "tags": [],
             "label": "asSeconds",
             "description": [],
-            "signature": ["() => number"],
+            "signature": [
+              "() => number"
+            ],
             "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -304,7 +312,9 @@
             "tags": [],
             "label": "asMinutes",
             "description": [],
-            "signature": ["() => number"],
+            "signature": [
+              "() => number"
+            ],
             "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -344,7 +354,9 @@
             "tags": [],
             "label": "unit",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/kbn-slo-schema/src/models/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -464,7 +476,9 @@
             "tags": [],
             "label": "results",
             "description": [],
-            "signature": ["T[]"],
+            "signature": [
+              "T[]"
+            ],
             "path": "x-pack/packages/kbn-slo-schema/src/models/pagination.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -531,7 +545,9 @@
         "tags": [],
         "label": "ALL_VALUE",
         "description": [],
-        "signature": ["\"*\""],
+        "signature": [
+          "\"*\""
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -574,7 +590,9 @@
         "tags": [],
         "label": "BudgetingMethod",
         "description": [],
-        "signature": ["\"occurrences\" | \"timeslices\""],
+        "signature": [
+          "\"occurrences\" | \"timeslices\""
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -657,7 +675,9 @@
         "tags": [],
         "label": "CreateSLOResponse",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/create.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -754,7 +774,9 @@
         "tags": [],
         "label": "FetchSLOHealthParams",
         "description": [],
-        "signature": ["{ list: { sloId: string; sloInstanceId: string; }[]; }"],
+        "signature": [
+          "{ list: { sloId: string; sloInstanceId: string; }[]; }"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -925,7 +947,9 @@
         "tags": [],
         "label": "GetSLOBurnRatesResponse",
         "description": [],
-        "signature": ["{ burnRates: { name: string; burnRate: number; sli: number; }[]; }"],
+        "signature": [
+          "{ burnRates: { name: string; burnRate: number; sli: number; }[]; }"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_burn_rates.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -938,7 +962,9 @@
         "tags": [],
         "label": "GetSLOInstancesResponse",
         "description": [],
-        "signature": ["{ groupBy: string | string[]; instances: string[]; }"],
+        "signature": [
+          "{ groupBy: string | string[]; instances: string[]; }"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_instances.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -951,7 +977,9 @@
         "tags": [],
         "label": "GetSLOParams",
         "description": [],
-        "signature": ["{ instanceId?: string | undefined; remoteName?: string | undefined; }"],
+        "signature": [
+          "{ instanceId?: string | undefined; remoteName?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -994,7 +1022,9 @@
         "tags": [],
         "label": "GetSLOSuggestionsResponse",
         "description": [],
-        "signature": ["{ tags: { label: string; value: string; count: number; }[]; }"],
+        "signature": [
+          "{ tags: { label: string; value: string; count: number; }[]; }"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_suggestions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1007,7 +1037,9 @@
         "tags": [],
         "label": "GroupingsSchema",
         "description": [],
-        "signature": ["{ [x: string]: string | number; }"],
+        "signature": [
+          "{ [x: string]: string | number; }"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1125,7 +1157,9 @@
         "tags": [],
         "label": "ManageSLOParams",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/manage.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1213,7 +1247,9 @@
         "tags": [],
         "label": "ResetSLOParams",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/reset.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1346,7 +1382,9 @@
         "tags": [],
         "label": "TimeWindowType",
         "description": [],
-        "signature": ["\"rolling\" | \"calendarAligned\""],
+        "signature": [
+          "\"rolling\" | \"calendarAligned\""
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1446,7 +1484,14 @@
         "tags": [],
         "label": "allOrAnyString",
         "description": [],
-        "signature": ["UnionC", "<[", "LiteralC", "<\"*\">, ", "StringC", "]>"],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1585,7 +1630,10 @@
         "tags": [],
         "label": "apmTransactionDurationIndicatorTypeSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"sli.apm.transactionDuration\">"],
+        "signature": [
+          "LiteralC",
+          "<\"sli.apm.transactionDuration\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1694,7 +1742,10 @@
         "tags": [],
         "label": "apmTransactionErrorRateIndicatorTypeSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"sli.apm.transactionErrorRate\">"],
+        "signature": [
+          "LiteralC",
+          "<\"sli.apm.transactionErrorRate\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1755,7 +1806,10 @@
         "tags": [],
         "label": "calendarAlignedTimeWindowTypeSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"calendarAligned\">"],
+        "signature": [
+          "LiteralC",
+          "<\"calendarAligned\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/time_window.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3166,7 +3220,12 @@
         "tags": [],
         "label": "createSLOResponseSchema",
         "description": [],
-        "signature": ["TypeC", "<{ id: ", "StringC", "; }>"],
+        "signature": [
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/create.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3199,7 +3258,10 @@
         "tags": [],
         "label": "dateType",
         "description": [],
-        "signature": ["Type", "<Date, string, unknown>"],
+        "signature": [
+          "Type",
+          "<Date, string, unknown>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3244,7 +3306,14 @@
         "tags": [],
         "label": "deleteSLOParamsSchema",
         "description": [],
-        "signature": ["TypeC", "<{ path: ", "TypeC", "<{ id: ", "StringC", "; }>; }>"],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/delete.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -8143,7 +8212,14 @@
         "tags": [],
         "label": "getSLOInstancesParamsSchema",
         "description": [],
-        "signature": ["TypeC", "<{ path: ", "TypeC", "<{ id: ", "StringC", "; }>; }>"],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_instances.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -10138,7 +10214,10 @@
         "tags": [],
         "label": "histogramIndicatorTypeSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"sli.histogram.custom\">"],
+        "signature": [
+          "LiteralC",
+          "<\"sli.histogram.custom\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11491,7 +11570,10 @@
         "tags": [],
         "label": "indicatorTypesArraySchema",
         "description": [],
-        "signature": ["Type", "<string[], string, unknown>"],
+        "signature": [
+          "Type",
+          "<string[], string, unknown>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11700,7 +11782,10 @@
         "tags": [],
         "label": "kqlCustomIndicatorTypeSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"sli.kql.custom\">"],
+        "signature": [
+          "LiteralC",
+          "<\"sli.kql.custom\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11713,7 +11798,9 @@
         "tags": [],
         "label": "kqlQuerySchema",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11782,7 +11869,14 @@
         "tags": [],
         "label": "manageSLOParamsSchema",
         "description": [],
-        "signature": ["TypeC", "<{ path: ", "TypeC", "<{ id: ", "StringC", "; }>; }>"],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/manage.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12279,7 +12373,10 @@
         "tags": [],
         "label": "metricCustomIndicatorTypeSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"sli.metric.custom\">"],
+        "signature": [
+          "LiteralC",
+          "<\"sli.metric.custom\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12326,7 +12423,10 @@
         "tags": [],
         "label": "occurrencesBudgetingMethodSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"occurrences\">"],
+        "signature": [
+          "LiteralC",
+          "<\"occurrences\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12505,7 +12605,14 @@
         "tags": [],
         "label": "remoteSchema",
         "description": [],
-        "signature": ["TypeC", "<{ remoteName: ", "StringC", "; kibanaUrl: ", "StringC", "; }>"],
+        "signature": [
+          "TypeC",
+          "<{ remoteName: ",
+          "StringC",
+          "; kibanaUrl: ",
+          "StringC",
+          "; }>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -12518,7 +12625,14 @@
         "tags": [],
         "label": "resetSLOParamsSchema",
         "description": [],
-        "signature": ["TypeC", "<{ path: ", "TypeC", "<{ id: ", "StringC", "; }>; }>"],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/reset.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -13959,7 +14073,10 @@
         "tags": [],
         "label": "rollingTimeWindowTypeSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"rolling\">"],
+        "signature": [
+          "LiteralC",
+          "<\"rolling\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/time_window.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15464,7 +15581,9 @@
         "tags": [],
         "label": "sloIdSchema",
         "description": [],
-        "signature": ["StringC"],
+        "signature": [
+          "StringC"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -15477,7 +15596,12 @@
         "tags": [],
         "label": "sloServerlessSettingsSchema",
         "description": [],
-        "signature": ["TypeC", "<{ staleThresholdInHours: ", "NumberC", "; }>"],
+        "signature": [
+          "TypeC",
+          "<{ staleThresholdInHours: ",
+          "NumberC",
+          "; }>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/settings.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -17202,7 +17326,10 @@
         "tags": [],
         "label": "syntheticsAvailabilityIndicatorTypeSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"sli.synthetics.availability\">"],
+        "signature": [
+          "LiteralC",
+          "<\"sli.synthetics.availability\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -17215,7 +17342,12 @@
         "tags": [],
         "label": "tagsSchema",
         "description": [],
-        "signature": ["ArrayC", "<", "StringC", ">"],
+        "signature": [
+          "ArrayC",
+          "<",
+          "StringC",
+          ">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -17228,7 +17360,12 @@
         "tags": [],
         "label": "targetSchema",
         "description": [],
-        "signature": ["TypeC", "<{ target: ", "NumberC", "; }>"],
+        "signature": [
+          "TypeC",
+          "<{ target: ",
+          "NumberC",
+          "; }>"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -17701,7 +17838,10 @@
         "tags": [],
         "label": "timesliceMetricIndicatorTypeSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"sli.metric.timeslice\">"],
+        "signature": [
+          "LiteralC",
+          "<\"sli.metric.timeslice\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -17978,7 +18118,10 @@
         "tags": [],
         "label": "timeslicesBudgetingMethodSchema",
         "description": [],
-        "signature": ["LiteralC", "<\"timeslices\">"],
+        "signature": [
+          "LiteralC",
+          "<\"timeslices\">"
+        ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/slo.ts",
         "deprecated": false,
         "trackAdoption": false,

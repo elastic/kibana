@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiHealth, EuiText, EuiTextProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiHealth, EuiText, EuiTextProps } from '@elastic/eui';
 import { HEALTH_HEX_CODES } from './gradient';
 
 interface Props {

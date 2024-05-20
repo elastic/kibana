@@ -6,16 +6,16 @@
  */
 
 import { ATTACH_TO_NEW_CASE_BUTTON, TAKE_ACTION_BTN } from '../screens/alerts';
+import { createCase } from './create_new_case';
 import {
-  ALERTS_STEP_GUIDE_BUTTON,
-  CLOSE_CREATE_CASE_FLYOUT,
-  COMPLETE_SIEM_GUIDE_BUTTON,
-  COMPLETION_POPOVER,
-  GLOBAL_TOUR_BUTTON,
   NEXT_STEP_BUTTON,
+  GLOBAL_TOUR_BUTTON,
+  ALERTS_STEP_GUIDE_BUTTON,
+  COMPLETION_POPOVER,
+  COMPLETE_SIEM_GUIDE_BUTTON,
+  CLOSE_CREATE_CASE_FLYOUT,
 } from '../screens/guided_onboarding';
 import { expandFirstAlert } from './alerts';
-import { createCase } from './create_new_case';
 
 export const goToNextStep = (currentStep: number) => {
   cy.get(

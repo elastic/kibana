@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiForm, EuiFormRow, EuiLink, EuiSelect, EuiText } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render, screen, waitFor } from '@testing-library/react';
-import { none, some } from 'fp-ts/lib/Option';
 import React, { lazy } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+import TestConnectorForm from './test_connector_form';
+import { none, some } from 'fp-ts/lib/Option';
 import {
   ActionConnector,
   ActionConnectorMode,
@@ -18,7 +16,9 @@ import {
   GenericValidationResult,
 } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import TestConnectorForm from './test_connector_form';
+import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { waitFor, screen, render } from '@testing-library/react';
 jest.mock('../../../common/lib/kibana');
 
 const mockedActionParamsFields = lazy(async () => ({

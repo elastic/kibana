@@ -7,8 +7,8 @@
  */
 
 import { existsSync } from 'fs';
-import path from 'path';
 import { pick } from 'lodash';
+import path from 'path';
 import { LogLevel } from '../../lib/utils/create_logger';
 import { RunCliFlags } from '../run_synthtrace';
 

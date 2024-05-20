@@ -7,8 +7,8 @@
 import { orderBy } from 'lodash';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
-  ServiceInventoryFieldName,
   ServiceListItem,
+  ServiceInventoryFieldName,
 } from '../../../../../common/service_inventory';
 
 type SortValueGetter = (item: ServiceListItem) => string | number;

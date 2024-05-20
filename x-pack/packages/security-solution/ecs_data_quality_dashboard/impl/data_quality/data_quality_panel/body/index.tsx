@@ -18,9 +18,9 @@ import type {
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
-import { useResultsRollup } from '../../use_results_rollup';
-import { DataQualitySummary } from '../data_quality_summary';
 import { DataQualityDetails } from './data_quality_details';
+import { DataQualitySummary } from '../data_quality_summary';
+import { useResultsRollup } from '../../use_results_rollup';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;

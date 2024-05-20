@@ -6,7 +6,7 @@
  */
 
 import type { HostIsolationResponse } from '../../../../../common/endpoint/types/actions';
-import type { AlertSearchResponse, AlertsIndex, CasesFromAlertsResponse, Privilege } from './types';
+import type { AlertSearchResponse, AlertsIndex, Privilege, CasesFromAlertsResponse } from './types';
 
 export const alertsMock: AlertSearchResponse<unknown, unknown> = {
   took: 7,

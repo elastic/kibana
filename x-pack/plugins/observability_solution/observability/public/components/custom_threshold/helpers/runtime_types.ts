@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RouteValidationFunction } from '@kbn/core/server';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
+import type { RouteValidationFunction } from '@kbn/core/server';
 
 type ErrorFactory = (message: string) => Error;
 

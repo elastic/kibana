@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 
 import { sendGetEnrollmentSettings, useAuthz, useStartServices } from '../../../hooks';
 

@@ -6,8 +6,8 @@
  */
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
-import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
 import { CreateAgentKeyFlyout } from './create_agent_key';
+import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
 
 type Args = ComponentProps<typeof CreateAgentKeyFlyout>;
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useMemo } from 'react';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 import { TimeBuckets } from './time_buckets';
 

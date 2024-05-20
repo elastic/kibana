@@ -7,7 +7,7 @@
 
 import { loadClusters as sendLoadClustersRequest } from '../../services';
 
-import { LOAD_CLUSTERS_FAILURE, LOAD_CLUSTERS_START, LOAD_CLUSTERS_SUCCESS } from '../action_types';
+import { LOAD_CLUSTERS_START, LOAD_CLUSTERS_SUCCESS, LOAD_CLUSTERS_FAILURE } from '../action_types';
 
 export const loadClusters = () => async (dispatch) => {
   dispatch({

@@ -6,11 +6,11 @@
  */
 
 import { format } from 'url';
-import type { APIClientRequestParamsOf, APIReturnType } from '@kbn/dataset-quality-plugin/common';
+import supertest from 'supertest';
+import request from 'superagent';
 import type { APIEndpoint } from '@kbn/dataset-quality-plugin/server/routes';
 import { formatRequest } from '@kbn/server-route-repository';
-import request from 'superagent';
-import supertest from 'supertest';
+import type { APIClientRequestParamsOf, APIReturnType } from '@kbn/dataset-quality-plugin/common';
 
 export function createDatasetQualityApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(

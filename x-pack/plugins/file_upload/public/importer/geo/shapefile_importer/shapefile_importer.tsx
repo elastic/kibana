@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
+import { Feature } from 'geojson';
 import { _BrowserFileSystem as BrowserFileSystem, loadInBatches } from '@loaders.gl/core';
 import { DBFLoader, ShapefileLoader } from '@loaders.gl/shapefile';
-import { Feature } from 'geojson';
-import React from 'react';
 import type { ImportFailure } from '../../../../common/types';
-import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 import { ShapefileEditor } from './shapefile_editor';
+import { AbstractGeoFileImporter } from '../abstract_geo_file_importer';
 
 export const SHAPEFILE_TYPES = ['.shp'];
 

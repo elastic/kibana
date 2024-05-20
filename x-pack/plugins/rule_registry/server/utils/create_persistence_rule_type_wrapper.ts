@@ -5,33 +5,33 @@
  * 2.0.
  */
 
+import sortBy from 'lodash/sortBy';
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_NAMESPACE,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_RULE_EXECUTION_UUID,
   ALERT_START,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
   ALERT_UUID,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
   VERSION,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { chunk, partition } from 'lodash';
 import { mapKeys, snakeCase } from 'lodash/fp';
-import sortBy from 'lodash/sortBy';
 import type { IRuleDataClient } from '..';
-import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
+import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 
 /**
  * Alerts returned from BE have date type coerced to ISO strings
@@ -148,7 +148,7 @@ export const suppressAlertsInMemory = <
       [ALERT_SUPPRESSION_START]: Date;
       [ALERT_SUPPRESSION_END]: Date;
     };
-  },
+  }
 >(
   alerts: T[]
 ): {
@@ -199,7 +199,7 @@ export const suppressAlertsInMemory = <
  * Compare existing alert suppression date props with alert to suppressed alert values
  **/
 export const isExistingDateGtEqThanAlert = <
-  T extends { [ALERT_SUPPRESSION_END]: Date; [ALERT_SUPPRESSION_START]: Date },
+  T extends { [ALERT_SUPPRESSION_END]: Date; [ALERT_SUPPRESSION_START]: Date }
 >(
   existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
   alert: { _id: string; _source: T },

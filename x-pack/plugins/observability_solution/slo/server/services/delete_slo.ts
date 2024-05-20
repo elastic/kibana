@@ -8,11 +8,11 @@
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  SLO_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  SLO_DESTINATION_INDEX_PATTERN,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { filter, isEmpty } from 'lodash';
+import { isEmpty, filter } from 'lodash';
 
 import { DashboardItem } from '../../embeddable/types';
 import { dashboardServices } from '../../services/kibana_services';

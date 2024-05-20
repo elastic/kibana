@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { waitFor } from '@testing-library/react';
 import { cloneDeep } from 'lodash/fp';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { waitFor } from '@testing-library/react';
 
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
-import { mockTimelineResults } from '../../../common/mock/timeline_results';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
-import { OpenTimeline } from './open_timeline';
+import type { OpenTimelineResult, OpenTimelineProps } from './types';
 import type { TimelinesTableProps } from './timelines_table';
-import type { OpenTimelineProps, OpenTimelineResult } from './types';
+import { mockTimelineResults } from '../../../common/mock/timeline_results';
+import { OpenTimeline } from './open_timeline';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 jest.mock('../../../common/lib/kibana');
 

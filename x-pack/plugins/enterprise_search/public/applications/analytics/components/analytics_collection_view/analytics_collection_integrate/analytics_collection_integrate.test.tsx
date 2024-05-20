@@ -51,9 +51,8 @@ describe('AnalyticsCollectionIntegrate', () => {
       'https://cdn.jsdelivr.net/npm/@elastic/behavioral-analytics-browser-tracker@2'
     );
 
-    expect(
-      wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(2).dive().text()
-    ).toMatchInlineSnapshot(`
+    expect(wrapper.find(EuiSteps).dive().find(EuiCodeBlock).at(2).dive().text())
+      .toMatchInlineSnapshot(`
       "<script type=\\"text/javascript\\">
       window.elasticAnalytics.createTracker({
         endpoint: \\"elasticsearch-url\\",

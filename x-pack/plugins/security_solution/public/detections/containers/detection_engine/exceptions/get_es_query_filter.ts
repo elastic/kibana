@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DataViewBase, EsQueryConfig, Filter } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
 import type { Language } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
 import { getExceptionFilterFromExceptions } from '@kbn/securitysolution-list-api';
+import { buildEsQuery } from '@kbn/es-query';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { KibanaServices } from '../../../../common/lib/kibana';

@@ -8,8 +8,8 @@
 import type { IEsSearchResponse } from '@kbn/search-types';
 
 import type { HostsFields } from '../../../../api/search_strategy/hosts/model/sort';
-import type { CursorType, Direction, Inspect, Maybe, PageInfoPaginated } from '../../../common';
 import type { HostItem } from '../common';
+import type { CursorType, Direction, Inspect, Maybe, PageInfoPaginated } from '../../../common';
 
 export interface HostsEdges {
   node: HostItem;

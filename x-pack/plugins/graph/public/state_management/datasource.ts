@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { reset } from './global';
+import { createSelector } from 'reselect';
 import { GraphState } from './store';
+import { reset } from './global';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/datasource');
 

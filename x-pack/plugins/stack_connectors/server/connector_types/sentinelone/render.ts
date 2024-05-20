@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { Logger } from '@kbn/core/server';
+import { map } from 'lodash';
 import { set } from '@kbn/safer-lodash-set/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { map } from 'lodash';
+import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { Logger } from '@kbn/core/server';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 
 interface Context {

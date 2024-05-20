@@ -58,13 +58,10 @@ export function disableUICapabilitiesFactory(
     .reduce<Record<string, string[]>>((acc, p) => {
       return {
         ...acc,
-        ...Object.entries(p.requiredIndexPrivileges!).reduce(
-          (acc2, [indexName, privileges]) => {
-            acc2[indexName] = [...(acc[indexName] ?? []), ...privileges];
-            return acc2;
-          },
-          {} as Record<string, string[]>
-        ),
+        ...Object.entries(p.requiredIndexPrivileges!).reduce((acc2, [indexName, privileges]) => {
+          acc2[indexName] = [...(acc[indexName] ?? []), ...privileges];
+          return acc2;
+        }, {} as Record<string, string[]>),
       };
     }, {});
 

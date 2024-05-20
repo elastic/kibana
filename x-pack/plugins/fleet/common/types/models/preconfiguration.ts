@@ -7,13 +7,13 @@
 
 import type { SimplifiedPackagePolicy } from '../../services/simplified_package_policy_helper';
 
-import type { NewAgentPolicy } from './agent_policy';
-import type { Output } from './output';
 import type {
+  PackagePolicyPackage,
   NewPackagePolicy,
   NewPackagePolicyInput,
-  PackagePolicyPackage,
 } from './package_policy';
+import type { NewAgentPolicy } from './agent_policy';
+import type { Output } from './output';
 
 // TODO: This type is not usable directly, and instead we typically use a type assertion
 // e.g. `NewPackagePolicyInput as InputsOverride[]`. This type should be altered so that it's

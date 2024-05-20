@@ -7,16 +7,16 @@
 
 import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common/rules_settings';
 import {
-  ALERT_CONSECUTIVE_MATCHES,
-  ALERT_DURATION,
   ALERT_END,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
-  ALERT_TIME_RANGE,
+  ALERT_START,
+  ALERT_DURATION,
   EVENT_ACTION,
+  ALERT_TIME_RANGE,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
 
 export function getAlertsForNotification(

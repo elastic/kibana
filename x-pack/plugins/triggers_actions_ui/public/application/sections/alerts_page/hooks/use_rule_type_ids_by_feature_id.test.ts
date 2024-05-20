@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { renderHook } from '@testing-library/react-hooks/dom';
-import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../../constants';
-import { ruleTypesIndex } from '../../../mock/rule_types_index';
 import { useRuleTypeIdsByFeatureId } from './use_rule_type_ids_by_feature_id';
+import { ruleTypesIndex } from '../../../mock/rule_types_index';
+import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../../constants';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
 describe('useRuleTypeIdsByFeatureId', () => {
   it('should correctly reverse the rule types index', () => {

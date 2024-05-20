@@ -9,13 +9,13 @@
 import type { Stream } from 'stream';
 import type {
   CustomHttpResponseOptions,
-  ErrorHttpResponseOptions,
-  FileHttpResponseOptions,
   HttpResponseOptions,
   HttpResponsePayload,
   IKibanaResponse,
   RedirectResponseOptions,
+  FileHttpResponseOptions,
   ResponseError,
+  ErrorHttpResponseOptions,
 } from './response';
 
 /**

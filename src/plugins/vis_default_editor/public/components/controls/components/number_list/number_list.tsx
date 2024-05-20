@@ -8,19 +8,19 @@
 
 import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
 
-import { EuiButtonEmpty, EuiFlexItem, EuiFormErrorText, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFormErrorText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useValidation } from '../../utils';
 import { NumberRow, NumberRowModel } from './number_row';
 import {
+  parse,
   EMPTY_STRING,
-  getInitModelList,
-  getNextModel,
   getRange,
+  getNextModel,
+  getInitModelList,
   getValidatedModels,
   hasInvalidValues,
-  parse,
 } from './utils';
+import { useValidation } from '../../utils';
 
 export interface NumberListProps {
   labelledbyId: string;

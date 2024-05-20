@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
-import type { DocLinks } from '@kbn/doc-links';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
+import type { DocLinks } from '@kbn/doc-links';
+import { EuiLink } from '@elastic/eui';
 
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
 import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
-import { SEARCHABLE_FIELDS } from '../constants';
 import { TrustedAppsApiClient } from '../service';
-import { TrustedAppsArtifactsDocsLink } from './components/artifacts_docs_link';
 import { TrustedAppsForm } from './components/form';
+import { SEARCHABLE_FIELDS } from '../constants';
+import { TrustedAppsArtifactsDocsLink } from './components/artifacts_docs_link';
 
 const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedApps.pageTitle', {

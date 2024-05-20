@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CommonXYLayerConfig, DataLayerConfig } from '..';
 import { LayerTypes } from '../constants';
+import { DataLayerConfig, CommonXYLayerConfig } from '..';
 
 export const isDataLayer = (layer: CommonXYLayerConfig): layer is DataLayerConfig =>
   layer.layerType === LayerTypes.DATA;

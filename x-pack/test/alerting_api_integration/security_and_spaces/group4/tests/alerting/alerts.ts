@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import expect from '@kbn/expect';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
 import { expect as expectExpect } from 'expect';
 import { omit, padStart } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { UserAtSpaceScenarios, Superuser, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  AlertUtils,
+  getUrlPrefix,
+  getTestRuleData,
   ObjectRemover,
+  AlertUtils,
+  getUnauthorizedErrorMessage,
   TaskManagerUtils,
   getEventLog,
-  getTestRuleData,
-  getUnauthorizedErrorMessage,
-  getUrlPrefix,
 } from '../../../../common/lib';
-import { Superuser, SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {

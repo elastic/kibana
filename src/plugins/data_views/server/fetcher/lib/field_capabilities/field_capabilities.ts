@@ -10,13 +10,13 @@ import { defaults, keyBy, sortBy } from 'lodash';
 
 import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
-import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../../../../common/constants';
-import { QueryDslQueryContainer } from '../../../../common/types';
-import { getIndexFilterDsl } from '../../../utils';
-import { FieldDescriptor } from '../../index_patterns_fetcher';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
+import { FieldDescriptor } from '../../index_patterns_fetcher';
+import { QueryDslQueryContainer } from '../../../../common/types';
+import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../../../../common/constants';
+import { getIndexFilterDsl } from '../../../utils';
 
 interface FieldCapabilitiesParams {
   callCluster: ElasticsearchClient;

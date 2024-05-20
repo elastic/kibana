@@ -1,5 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
-import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB } from '../../../../screens/expandable_flyout/alert_details_left_panel';
 import {
   CORRELATIONS_ANCESTRY_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON,
   CORRELATIONS_ANCESTRY_SECTION_TABLE,
@@ -14,22 +20,16 @@ import {
   CORRELATIONS_SOURCE_SECTION_TITLE,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
+import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB } from '../../../../screens/expandable_flyout/alert_details_left_panel';
 import { openCorrelationsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
+import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import {
   createNewCaseFromExpandableFlyout,
   expandAlertAtIndexExpandableFlyout,
 } from '../../../../tasks/expandable_flyout/common';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';

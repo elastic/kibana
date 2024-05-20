@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useParams, useRouteMatch } from 'react-router-dom';
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useParams, useRouteMatch } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
 import { SyntheticsMonitor } from '../../../../../../common/runtime_types';
-import { kibanaService } from '../../../../../utils/kibana_service';
-import { useSyntheticsRefreshContext } from '../../../contexts';
-import { IHttpSerializedFetchError, cleanMonitorListState } from '../../../state';
 import { createMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
+import { kibanaService } from '../../../../../utils/kibana_service';
+import { cleanMonitorListState, IHttpSerializedFetchError } from '../../../state';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonitor }) => {
   const dispatch = useDispatch();

@@ -7,9 +7,9 @@
  */
 
 import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import moment from 'moment';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import moment from 'moment';
 import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
   getEmptyValueSuggestions,
@@ -18,12 +18,12 @@ import {
 import type { ValueSuggestionsGetFn } from './providers/value_suggestion_provider';
 
 import { ConfigSchema } from '../../config';
-import { UnifiedSearchPublicPluginStart, UnifiedSearchStartDependencies } from '../types';
 import { createUsageCollector } from './collectors';
 import {
   KUERY_LANGUAGE_NAME,
   setupKqlQuerySuggestionProvider,
 } from './providers/kql_query_suggestion';
+import { UnifiedSearchPublicPluginStart, UnifiedSearchStartDependencies } from '../types';
 
 export class AutocompleteService {
   autocompleteConfig: ConfigSchema['autocomplete'];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -15,16 +15,16 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiLoadingSpinner,
   EuiStepsHorizontal,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
 import {
-  AddInferencePipelineContent,
   AddInferencePipelineFlyout,
-  AddInferencePipelineFooter,
+  AddInferencePipelineContent,
   AddInferencePipelineHorizontalSteps,
+  AddInferencePipelineFooter,
 } from './add_inference_pipeline_flyout';
 import { ConfigureFields } from './configure_fields';
 import { ConfigurePipeline } from './configure_pipeline';

@@ -1,9 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/data-plugin",
-  "owner": ["@elastic/kibana-visualizations", "@elastic/kibana-data-discovery"],
+  "owner": [
+    "@elastic/kibana-visualizations",
+    "@elastic/kibana-data-discovery"
+  ],
   "description": "Data services are useful for searching and querying data from Elasticsearch. Helpful utilities include: a re-usable react query bar, KQL autocomplete, async search, Data Views (Index Patterns) and field formatters.",
-  "serviceFolders": ["search", "query", "ui"],
+  "serviceFolders": [
+    "search",
+    "query",
+    "ui"
+  ],
   "plugin": {
     "id": "data",
     "server": true,
@@ -19,8 +26,17 @@
       "screenshotMode",
       "management"
     ],
-    "optionalPlugins": ["usageCollection", "security"],
-    "requiredBundles": ["kibanaUtils", "kibanaReact", "inspector"],
-    "extraPublicDirs": ["common"]
+    "optionalPlugins": [
+      "usageCollection",
+      "security"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
+      "inspector"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

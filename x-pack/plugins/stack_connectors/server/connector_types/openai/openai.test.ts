@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { PassThrough, Transform } from 'stream';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { AxiosError } from 'axios';
+import { OpenAIConnector } from './openai';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import {
   DEFAULT_OPENAI_MODEL,
   DEFAULT_TIMEOUT_MS,
   OPENAI_CONNECTOR_ID,
   OpenAiProviderType,
 } from '../../../common/openai/constants';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { OpenAIConnector } from './openai';
+import { PassThrough, Transform } from 'stream';
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 const mockTee = jest.fn();
 

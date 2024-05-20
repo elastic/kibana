@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import { isNil, omitBy } from 'lodash';
 import React from 'react';
+import { omitBy, isNil } from 'lodash';
+import { css } from '@emotion/react';
 
 import { ExpressionRenderer } from '@kbn/expressions-plugin/common';
 import { getType } from '@kbn/interpreter';
-import { Renderable } from '../../../canvas_plugin_src/functions/common/render';
-import { RendererHandlers } from '../../../types';
-// @ts-expect-error Untyped local
-import { ElementShareContainer } from '../element_share_container';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
-import { InvalidElementType } from './invalid_element_type';
+// @ts-expect-error Untyped local
+import { ElementShareContainer } from '../element_share_container';
 import { InvalidExpression } from './invalid_expression';
+import { InvalidElementType } from './invalid_element_type';
+import { RendererHandlers } from '../../../types';
+import { Renderable } from '../../../canvas_plugin_src/functions/common/render';
 
 export interface Props {
   renderable: Renderable | null;

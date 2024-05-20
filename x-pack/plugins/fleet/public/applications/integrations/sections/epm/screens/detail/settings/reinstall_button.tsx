@@ -6,12 +6,12 @@
  */
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
 import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
+import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
 
 type ReinstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> & {
   installSource: string;

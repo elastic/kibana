@@ -8,12 +8,12 @@
 import { AggregationOptionsByType } from '@kbn/es-types';
 
 import Boom from '@hapi/boom';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { afterKeyObjectRT } from '../../../../common/http_api';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
-import { calculateBucketSize } from './calculate_bucket_size';
 import { calculateDateHistogramOffset } from './calculate_date_histogram_offset';
 import { createMetricsAggregations } from './create_metrics_aggregations';
+import { calculateBucketSize } from './calculate_bucket_size';
 
 const DEFAULT_LIMIT = 9;
 const METRICSET_AGGS = {

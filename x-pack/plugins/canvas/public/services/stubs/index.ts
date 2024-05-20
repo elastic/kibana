@@ -8,8 +8,8 @@
 export * from '../legacy/stubs';
 
 import {
-  PluginServiceProvider,
   PluginServiceProviders,
+  PluginServiceProvider,
   PluginServiceRegistry,
 } from '@kbn/presentation-util-plugin/public';
 
@@ -18,15 +18,15 @@ import { customElementServiceFactory } from './custom_element';
 import { dataViewsServiceFactory } from './data_views';
 import { embeddablesServiceFactory } from './embeddables';
 import { expressionsServiceFactory } from './expressions';
-import { filtersServiceFactory } from './filters';
 import { labsServiceFactory } from './labs';
 import { navLinkServiceFactory } from './nav_link';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
 import { reportingServiceFactory } from './reporting';
-import { uiActionsServiceFactory } from './ui_actions';
 import { visualizationsServiceFactory } from './visualizations';
 import { workpadServiceFactory } from './workpad';
+import { filtersServiceFactory } from './filters';
+import { uiActionsServiceFactory } from './ui_actions';
 
 export { customElementServiceFactory } from './custom_element';
 export { dataViewsServiceFactory } from './data_views';

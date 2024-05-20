@@ -7,11 +7,11 @@
 
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
-import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
-import { createRuntimeServices } from '../common/stack_services';
 import { dump } from '../common/utils';
 import { startExternalEdrServerEmulator } from './external_edr_server_emulator';
 import type { ExternalEdrServerEmulatorCoreServices } from './external_edr_server_emulator.types';
+import { createRuntimeServices } from '../common/stack_services';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 
 export {
   startExternalEdrServerEmulator,

@@ -9,21 +9,21 @@ import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
-  EMPTY_SEVERITY_COUNT,
-  RiskQueries,
-  RiskScoreEntity,
-  RiskSeverity,
   getHostRiskIndex,
   getUserRiskIndex,
+  RiskQueries,
+  RiskSeverity,
+  RiskScoreEntity,
+  EMPTY_SEVERITY_COUNT,
 } from '../../../../common/search_strategy';
-import type { ESQuery } from '../../../../common/typed_json';
-import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
-import type { inputsModel } from '../../../common/store';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
-import type { InspectResponse } from '../../../types';
+import type { ESQuery } from '../../../../common/typed_json';
 import type { SeverityCount } from '../../components/severity/types';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
+import type { InspectResponse } from '../../../types';
+import type { inputsModel } from '../../../common/store';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
 import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
 

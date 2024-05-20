@@ -8,11 +8,11 @@
 
 import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
 import {
-  type TestElasticsearchUtils,
   createRoot,
-  createRootWithCorePlugins,
   createTestServers,
+  createRootWithCorePlugins,
   request as kbnServerRequest,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 
 import { RequestHandlerContext } from '../..';

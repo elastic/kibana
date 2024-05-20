@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
+import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
+import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 
 // Formatted item result
 export interface RuleAlertsItem {
@@ -42,7 +42,7 @@ export interface SeverityRuleAlertsAggsResponse {
                 'kibana.alert.rule.uuid': string[];
                 'kibana.alert.severity': Severity[];
               };
-            },
+            }
           ];
         };
       };

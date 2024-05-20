@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { statSync } from 'fs';
 import path from 'path';
+import { statSync } from 'fs';
 
-import { cleanVersion, versionSatisfies } from './utils/version';
+import { versionSatisfies, cleanVersion } from './utils/version';
 
 export function existingInstall(settings, logger) {
   try {

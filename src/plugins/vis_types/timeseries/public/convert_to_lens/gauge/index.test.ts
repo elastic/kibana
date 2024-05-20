@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { convertToLens } from '.';
 import { TSVB_METRIC_TYPES } from '../../../common/enums';
-import { Metric, Panel } from '../../../common/types';
+import { Panel, Metric } from '../../../common/types';
+import { convertToLens } from '.';
 import { createPanel, createSeries } from '../lib/__mocks__';
 import { AvgColumn } from '../lib/convert';
 

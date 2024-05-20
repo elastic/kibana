@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { useToasts } from '../common/lib/kibana';
-import { TestProviders } from '../common/mock';
+import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
+import { TestProviders } from '../common/mock';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useGetCategories } from './use_get_categories';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

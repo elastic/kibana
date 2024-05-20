@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useQuery } from '@tanstack/react-query';
-import { APIRoutes } from '../types';
+import { IndexName } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from './use_kibana';
+import { APIRoutes } from '../types';
 
 export const useQueryIndices = (
   query: string = ''

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { mockSystemPrompts } from '../../../../../mock/system_prompt';
+import { fireEvent, render } from '@testing-library/react';
 import { SystemPromptSelector } from './system_prompt_selector';
+import { mockSystemPrompts } from '../../../../../mock/system_prompt';
 
 const onSystemPromptSelectionChange = jest.fn();
 const onSystemPromptDeleted = jest.fn();

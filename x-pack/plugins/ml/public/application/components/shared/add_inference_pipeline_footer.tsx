@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { AddInferencePipelineSteps } from '../ml_inference/types';
 import {
   BACK_BUTTON_LABEL,
   CANCEL_BUTTON_LABEL,
@@ -17,7 +18,6 @@ import {
   CONTINUE_BUTTON_LABEL,
 } from '../ml_inference/constants';
 import { getSteps } from '../ml_inference/get_steps';
-import type { AddInferencePipelineSteps } from '../ml_inference/types';
 
 interface Props {
   isDetailsStepValid: boolean;

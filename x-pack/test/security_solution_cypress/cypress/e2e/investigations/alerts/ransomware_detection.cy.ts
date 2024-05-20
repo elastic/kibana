@@ -9,12 +9,12 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
+import { ALERTS_URL, TIMELINES_URL } from '../../../urls/navigation';
 import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../../screens/alerts';
 import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../../screens/timeline';
 import { selectAlertsHistogram } from '../../../tasks/alerts';
-import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { ALERTS_URL, TIMELINES_URL } from '../../../urls/navigation';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {

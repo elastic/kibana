@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 
-import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { CaseSeverity, CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
+import { CaseStatuses, CustomFieldTypes, CaseSeverity } from '../../../common/types/domain';
+import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/constants';
-import { useGetCategories } from '../../containers/use_get_categories';
-import { useGetTags } from '../../containers/use_get_tags';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
-import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
-import { useCaseConfigureResponse } from '../configure_cases/__mock__';
-import { CUSTOM_FIELD_KEY_PREFIX } from './constants';
 import type { CasesTableFiltersProps } from './table_filters';
 import { CasesTableFilters } from './table_filters';
+import { useGetTags } from '../../containers/use_get_tags';
+import { useGetCategories } from '../../containers/use_get_categories';
+import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { CUSTOM_FIELD_KEY_PREFIX } from './constants';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_categories');

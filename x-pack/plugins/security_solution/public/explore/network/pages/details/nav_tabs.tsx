@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NETWORK_PATH } from '../../../../../common/constants';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { NETWORK_PATH } from '../../../../../common/constants';
 import * as i18n from '../translations';
 import type { NetworkDetailsNavTabs } from './types';
 import { NetworkDetailsRouteType } from './types';

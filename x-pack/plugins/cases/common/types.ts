@@ -18,8 +18,8 @@ export type SnakeToCamelCase<T> = T extends Record<string, unknown>
       [K in keyof T as SnakeToCamelCaseString<K & string>]: SnakeToCamelCase<T[K]>;
     }
   : T extends unknown[]
-    ? SnakeToCamelCaseArray<T>
-    : T;
+  ? SnakeToCamelCaseArray<T>
+  : T;
 
 export enum CASE_VIEW_PAGE_TABS {
   ALERTS = 'alerts',

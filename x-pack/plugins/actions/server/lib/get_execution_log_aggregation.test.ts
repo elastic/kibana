@@ -8,11 +8,11 @@
 import { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
 import {
-  ExecutionUuidAggResult,
-  formatExecutionKPIResult,
-  formatExecutionLogResult,
-  getExecutionKPIAggregation,
   getExecutionLogAggregation,
+  formatExecutionLogResult,
+  ExecutionUuidAggResult,
+  getExecutionKPIAggregation,
+  formatExecutionKPIResult,
 } from './get_execution_log_aggregation';
 
 describe('getExecutionLogAggregation', () => {

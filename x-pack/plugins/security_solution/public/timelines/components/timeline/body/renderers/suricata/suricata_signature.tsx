@@ -17,11 +17,11 @@ import { escapeDataProviderId } from '../../../../../../common/components/drag_a
 import { GoogleLink } from '../../../../../../common/components/links';
 import { Provider } from '../../../data_providers/provider';
 
+import { TokensFlexItem } from '../helpers';
+import { getBeginningTokens } from './suricata_links';
 import { DefaultDraggable } from '../../../../../../common/components/draggables';
 import type { QueryOperator } from '../../../data_providers/data_provider';
 import { IS_OPERATOR } from '../../../data_providers/data_provider';
-import { TokensFlexItem } from '../helpers';
-import { getBeginningTokens } from './suricata_links';
 
 export const SURICATA_SIGNATURE_FIELD_NAME = 'suricata.eve.alert.signature';
 export const SURICATA_SIGNATURE_ID_FIELD_NAME = 'suricata.eve.alert.signature_id';

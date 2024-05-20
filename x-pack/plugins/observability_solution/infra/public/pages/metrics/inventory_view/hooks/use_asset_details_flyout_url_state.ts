@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
 import { useUrlState } from '../../../../utils/use_url_state';
 
 export const GET_DEFAULT_PROPERTIES: AssetDetailsFlyoutProperties = {
@@ -19,7 +19,7 @@ const ASSET_DETAILS_FLYOUT_URL_STATE_KEY = 'assetDetailsFlyout';
 
 export const useAssetDetailsFlyoutState = (): [
   AssetDetailsFlyoutProperties,
-  AssetDetailsFlyoutPropertiesUpdater,
+  AssetDetailsFlyoutPropertiesUpdater
 ] => {
   const [urlState, setUrlState] = useUrlState<AssetDetailsFlyoutProperties>({
     defaultState: {

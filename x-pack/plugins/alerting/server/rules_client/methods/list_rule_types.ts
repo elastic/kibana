@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertingAuthorizationEntity, ReadOperations, WriteOperations } from '../../authorization';
+import { WriteOperations, ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { RulesClientContext } from '../types';
 
 export async function listRuleTypes(context: RulesClientContext) {

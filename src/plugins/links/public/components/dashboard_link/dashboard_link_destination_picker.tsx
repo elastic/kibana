@@ -7,18 +7,18 @@
  */
 
 import { debounce } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import useMount from 'react-use/lib/useMount';
 import useUnmount from 'react-use/lib/useUnmount';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiBadge,
   EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
+  EuiFlexGroup,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 

@@ -10,15 +10,15 @@ import { AggGroupNames, BUCKET_TYPES, IAggConfig, IAggType } from '@kbn/data-plu
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
-import { groupAndSortBy } from '../utils';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
   isInvalidParamsTouched,
 } from './agg_params_helper';
 import { FieldParamEditor, OrderByParamEditor } from './controls';
-import { EditorVisState } from './sidebar/state/reducers';
 import { EditorConfig } from './utils';
+import { EditorVisState } from './sidebar/state/reducers';
+import { groupAndSortBy } from '../utils';
 
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),

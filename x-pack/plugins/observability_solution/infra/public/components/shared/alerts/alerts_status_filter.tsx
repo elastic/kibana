@@ -7,8 +7,8 @@
 
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import React from 'react';
+import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import { ACTIVE_ALERTS, ALL_ALERTS, RECOVERED_ALERTS, UNTRACKED_ALERTS } from './constants';
 
 export interface AlertStatusFilterProps {

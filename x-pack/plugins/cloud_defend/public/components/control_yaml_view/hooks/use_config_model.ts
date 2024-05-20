@@ -1,11 +1,11 @@
-import { YAML_LANG_ID, configureMonacoYamlSchema, monaco } from '@kbn/monaco';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { monaco, configureMonacoYamlSchema, YAML_LANG_ID } from '@kbn/monaco';
 import { getSelectorsAndResponsesFromYaml } from '../../../../common/utils/helpers';
 
 /**

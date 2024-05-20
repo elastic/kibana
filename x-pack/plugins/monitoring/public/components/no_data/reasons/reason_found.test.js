@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithIntl } from '@kbn/test-jest-helpers';
 import { ReasonFound } from '.';
 
 jest.mock('../../../legacy_shims', () => ({

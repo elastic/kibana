@@ -6,10 +6,10 @@
  */
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { ALL_VALUE } from '@kbn/slo-schema';
-import { GetSLOInstances, SLORepository } from '.';
 import { createSLO } from './fixtures/slo';
+import { GetSLOInstances, SLORepository } from '.';
 import { createSLORepositoryMock } from './mocks';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
 describe('Get SLO Instances', () => {
   let repositoryMock: jest.Mocked<SLORepository>;

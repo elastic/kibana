@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { MetricsDataClient, MetricsDataClientMock } from '@kbn/metrics-data-access-plugin/server';
+import { GetApmIndicesMethod } from '../../asset_client_types';
+import { getContainers } from './get_containers';
 import {
   createGetApmIndicesMock,
   expectToThrowValidationErrorWithStatusCode,
 } from '../../../test_utils';
-import { GetApmIndicesMethod } from '../../asset_client_types';
-import { getContainers } from './get_containers';
+import { MetricsDataClient, MetricsDataClientMock } from '@kbn/metrics-data-access-plugin/server';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 function createBaseOptions({
   getApmIndicesMock,

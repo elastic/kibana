@@ -9,30 +9,30 @@ import { getNewThreatIndicatorRule } from '../../../../objects/rule';
 
 import {
   DEFINITION_DETAILS,
-  DETAILS_TITLE,
-  SUPPRESS_BY_DETAILS,
   SUPPRESS_FOR_DETAILS,
+  SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
+  DETAILS_TITLE,
 } from '../../../../screens/rule_details';
 
 import {
-  continueFromDefineStep,
-  createRuleWithoutEnabling,
-  fillAboutRuleMinimumAndContinue,
-  fillAlertSuppressionFields,
   fillDefineIndicatorMatchRule,
-  selectAlertSuppressionPerInterval,
-  selectDoNotSuppressForMissingFields,
+  fillAlertSuppressionFields,
   selectIndicatorMatchType,
-  setAlertSuppressionDuration,
+  fillAboutRuleMinimumAndContinue,
+  createRuleWithoutEnabling,
   skipScheduleRuleAction,
+  continueFromDefineStep,
+  selectAlertSuppressionPerInterval,
+  setAlertSuppressionDuration,
+  selectDoNotSuppressForMissingFields,
 } from '../../../../tasks/create_new_rule';
 
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
 

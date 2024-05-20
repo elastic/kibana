@@ -1,4 +1,3 @@
-import { Route } from '@kbn/typed-react-router-config';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,13 +6,14 @@ import { Route } from '@kbn/typed-react-router-config';
  */
 import * as t from 'io-ts';
 import React from 'react';
+import { Route } from '@kbn/typed-react-router-config';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 
 export function page<
   TPath extends string,
   TChildren extends Record<string, Route> | undefined = undefined,
-  TParams extends t.Type<any> | undefined = undefined,
+  TParams extends t.Type<any> | undefined = undefined
 >({
   path,
   element,

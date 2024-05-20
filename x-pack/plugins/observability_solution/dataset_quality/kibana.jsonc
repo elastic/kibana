@@ -7,7 +7,10 @@
     "id": "datasetQuality",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "datasetQuality"],
+    "configPath": [
+      "xpack",
+      "datasetQuality"
+    ],
     "requiredPlugins": [
       "data",
       "kibanaReact",
@@ -23,6 +26,8 @@
     ],
     "optionalPlugins": [],
     "requiredBundles": ["unifiedHistogram"],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 import { FieldButton, SIZES } from './field_button';
 
 const noop = () => {};

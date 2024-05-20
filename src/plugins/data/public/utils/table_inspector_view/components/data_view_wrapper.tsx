@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { lazy } from 'react';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
 
 const DataViewComponent = lazy(() => import('./data_view'));
 

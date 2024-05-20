@@ -5,10 +5,19 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "refresh": ["true", "false", "wait_for"]
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ]
     },
-    "methods": ["PUT", "POST"],
-    "patterns": ["_security/api_key"],
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_security/api_key"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-api-key.html",
     "availability": {
       "stack": true,

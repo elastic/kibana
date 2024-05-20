@@ -5,11 +5,19 @@
   "description": "Asset manager plugin for entity assets (inventory, topology, etc)",
   "plugin": {
     "id": "assetManager",
-    "configPath": ["xpack", "assetManager"],
-    "optionalPlugins": [],
-    "requiredPlugins": ["apmDataAccess", "metricsDataAccess"],
+    "configPath": [
+      "xpack",
+      "assetManager"
+    ],
+    "optionalPlugins": [
+    ],
+    "requiredPlugins": [
+      "apmDataAccess",
+      "metricsDataAccess"
+    ],
     "browser": true,
     "server": true,
-    "requiredBundles": []
+    "requiredBundles": [
+    ]
   }
 }

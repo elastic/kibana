@@ -6,8 +6,8 @@
  */
 
 import { sortBy } from 'lodash';
-import { Mark } from '.';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
+import { Mark } from '.';
 
 // Extends Mark without adding new properties to it.
 export interface AgentMark extends Mark {

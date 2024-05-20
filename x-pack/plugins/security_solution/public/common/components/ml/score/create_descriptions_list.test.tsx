@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiDescriptionList } from '@elastic/eui';
-import { waitFor } from '@testing-library/react';
-import { mount, shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
 import { mockAnomalies } from '../mock';
-import type { Anomaly } from '../types';
 import { createDescriptionList } from './create_description_list';
+import { EuiDescriptionList } from '@elastic/eui';
+import type { Anomaly } from '../types';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../lib/kibana');
 

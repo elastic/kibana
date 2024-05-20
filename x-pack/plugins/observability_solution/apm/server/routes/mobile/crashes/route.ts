@@ -1,4 +1,3 @@
-import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,19 +5,20 @@ import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
  * 2.0.
  */
 import * as t from 'io-ts';
-import { offsetRt } from '../../../../common/comparison_rt';
+import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
-import { CrashDistributionResponse, getCrashDistribution } from './distribution/get_distribution';
+import { offsetRt } from '../../../../common/comparison_rt';
 import {
-  MobileCrashGroupMainStatisticsResponse,
   getMobileCrashGroupMainStatistics,
+  MobileCrashGroupMainStatisticsResponse,
 } from './get_crash_groups/get_crash_group_main_statistics';
 import {
   MobileCrashesGroupPeriodsResponse,
   getMobileCrashesGroupPeriods,
 } from './get_mobile_crash_group_detailed_statistics';
+import { CrashDistributionResponse, getCrashDistribution } from './distribution/get_distribution';
 
 const mobileCrashDistributionRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/mobile-services/{serviceName}/crashes/distribution',

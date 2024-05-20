@@ -7,8 +7,8 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import { ExpressionsServiceFork } from './expressions_fork';
 import { ExpressionsService } from './expressions_services';
+import { ExpressionsServiceFork } from './expressions_fork';
 
 describe('ExpressionsService', () => {
   test('can instantiate', () => {

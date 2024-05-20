@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { IToasts } from '@kbn/core/public';
-import { fromKueryExpression } from '@kbn/es-query';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fromKueryExpression } from '@kbn/es-query';
+import type { IToasts } from '@kbn/core/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
-import { useKibana } from '../../../common/lib/kibana';
-import { ActionConnector } from '../../../types';
-import {} from '../../lib/rule_api/rules_kuery_filter';
-import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helpers';
 import { ConnectorRulesList } from './connector_rules_list';
+import { useKibana } from '../../../common/lib/kibana';
+import {} from '../../lib/rule_api/rules_kuery_filter';
+import { ActionConnector } from '../../../types';
+import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helpers';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/rule_api/rules_kuery_filter', () => ({

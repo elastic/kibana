@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiTextColor } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useController } from 'react-hook-form';
 import type { PackSavedObject } from '../../packs/types';

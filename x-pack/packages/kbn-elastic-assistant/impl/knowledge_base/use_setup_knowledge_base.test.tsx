@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useMutation as _useMutation } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react-hooks';
+import { useSetupKnowledgeBase, UseSetupKnowledgeBaseParams } from './use_setup_knowledge_base';
 import { postKnowledgeBase as _postKnowledgeBase } from '../assistant/api';
-import { UseSetupKnowledgeBaseParams, useSetupKnowledgeBase } from './use_setup_knowledge_base';
+import { useMutation as _useMutation } from '@tanstack/react-query';
 
 const postKnowledgeBaseMock = _postKnowledgeBase as jest.Mock;
 const useMutationMock = _useMutation as jest.Mock;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Args } from './args.mjs';
 import type { Log } from './log.mjs';
+import type { Args } from './args.mjs';
 
 /**
  * Helper function to easily time specific parts of a kbn command. Does not produce

@@ -8,25 +8,25 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from '@kbn/expect';
-import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import {
-  createAlertsIndex,
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-  getRuleForAlertTesting,
-} from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
-import {
+  fetchRule,
+  installMockPrebuiltRules,
+  getSecurityTelemetryStats,
   createExceptionList,
   createExceptionListItem,
-  fetchRule,
-  getSecurityTelemetryStats,
-  installMockPrebuiltRules,
   removeExtraFieldsFromTelemetryStats,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+} from '../../../../../../common/utils/security_solution';
+import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

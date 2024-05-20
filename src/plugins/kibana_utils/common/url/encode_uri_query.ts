@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { transform } from 'lodash';
 import { ParsedQuery, parse, stringify } from 'query-string';
+import { transform } from 'lodash';
 
 /**
  * This method is intended for encoding *key* or *value* parts of query component. We need a custom

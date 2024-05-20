@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink, EuiPopover } from '@elastic/eui';
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
-import React, { useState, useCallback, useMemo } from 'react';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { AlertFlyout } from './alert_flyout';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const readOnlyUserTooltipContent = i18n.translate(
   'xpack.infra.logs.alertDropdown.readOnlyCreateAlertContent',

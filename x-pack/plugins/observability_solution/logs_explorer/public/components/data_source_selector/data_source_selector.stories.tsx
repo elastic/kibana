@@ -7,22 +7,22 @@
 
 /* eslint-disable no-console */
 
-import { CoreStart } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { IndexPattern } from '@kbn/io-ts-utils';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import type { Meta, Story } from '@storybook/react';
 import React, { useState } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { Meta, Story } from '@storybook/react';
+import { IndexPattern } from '@kbn/io-ts-utils';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
 import {
   AllDatasetSelection,
-  DataSourceSelection,
   DataSourceSelectionChangeHandler,
+  DataSourceSelection,
 } from '../../../common/data_source_selection';
-import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
 import { Dataset, Integration } from '../../../common/datasets';
-import { IsDataViewAvailable } from '../../hooks/use_data_views';
 import { DataSourceSelector } from './data_source_selector';
 import { DataSourceSelectorProps, DataSourceSelectorSearchParams } from './types';
+import { IsDataViewAvailable } from '../../hooks/use_data_views';
 
 const meta: Meta<typeof DataSourceSelector> = {
   component: DataSourceSelector,

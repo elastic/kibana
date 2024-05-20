@@ -1,5 +1,3 @@
-import { Readable } from 'stream';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
  * 2.0.
  */
 import { observer } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { Readable } from 'stream';
 
 export function addAgentConfigEtagMetric({
   apmSynthtraceEsClient,

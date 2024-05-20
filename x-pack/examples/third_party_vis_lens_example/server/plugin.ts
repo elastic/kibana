@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { DEFAULT_COLOR } from '../common/constants';
 import { RotatingNumberState as Post81RotatingNumberState } from '../common/types';

@@ -8,8 +8,8 @@
 import type { FC } from 'react';
 import React, { memo, useReducer } from 'react';
 
+import type { ManageRoutesSpyProps, RouteSpyState, RouteSpyAction } from './types';
 import { RouterSpyStateContext, initRouteSpy } from './helpers';
-import type { ManageRoutesSpyProps, RouteSpyAction, RouteSpyState } from './types';
 
 const ManageRoutesSpyComponent: FC<ManageRoutesSpyProps> = ({ children }) => {
   const reducerSpyRoute = (state: RouteSpyState, action: RouteSpyAction): RouteSpyState => {

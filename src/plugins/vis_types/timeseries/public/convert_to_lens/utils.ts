@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Layer, Operations, TermsColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { uniqWith } from 'lodash';
 import deepEqual from 'react-fast-compare';
-import { Metric, Series } from '../../common/types';
+import { Layer, Operations, TermsColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
-  Column,
-  ColumnsWithoutMeta,
   Layer as ExtendedLayer,
   excludeMetaFromColumn,
+  ColumnsWithoutMeta,
+  Column,
 } from './lib/convert';
 import { getSeriesAgg } from './lib/series';
+import { Metric, Series } from '../../common/types';
 
 export const excludeMetaFromLayers = (
   layers: Record<string, ExtendedLayer>

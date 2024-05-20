@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { fromExpression } from '@kbn/interpreter';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { fromExpression } from '@kbn/interpreter';
+import { ErrorStrings } from '../../../../i18n';
 import { CANVAS_APP } from '../../../../common/lib';
 import { decode } from '../../../../common/lib/embeddable_dataurl';
-import { ErrorStrings } from '../../../../i18n';
 import { CanvasElement, CanvasPage } from '../../../../types';
 import { useEmbeddablesService, useLabsService, useNotifyService } from '../../../services';
 // @ts-expect-error unconverted file
@@ -18,12 +18,12 @@ import { addElement, fetchAllRenderables } from '../../../state/actions/elements
 // @ts-expect-error unconverted file
 import { selectToplevelNodes } from '../../../state/actions/transient';
 
-import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import {
-  fetchEmbeddableRenderable,
   updateEmbeddableExpression,
+  fetchEmbeddableRenderable,
 } from '../../../state/actions/embeddable';
 import { clearValue } from '../../../state/actions/resolved_args';
+import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 
 const { actionsElements: strings } = ErrorStrings;
 

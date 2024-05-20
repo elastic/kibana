@@ -7,9 +7,9 @@
 
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
-import type { Props as MapProps } from '../embeddable/map_component';
-import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
+import type { SampleValuesConfig, EMSTermJoinConfig } from '../ems_autosuggest';
 import type { Props as PassiveMapProps } from '../lens/passive_map';
+import type { Props as MapProps } from '../embeddable/map_component';
 
 export interface MapsStartApi {
   createLayerDescriptors: {

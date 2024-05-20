@@ -6,12 +6,12 @@
  */
 
 import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React, { FC } from 'react';
+import { CodeBlockAccordion } from './code_block_accordion';
 import { JourneyStep } from '../../../../common/runtime_types/ping';
 import { StepScreenshots } from './check_steps/step_expanded_row/step_screenshots';
-import { CodeBlockAccordion } from './code_block_accordion';
 
 const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 

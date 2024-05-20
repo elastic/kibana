@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { REFERENCE_LINE, XY_VIS } from '../constants';
-import { strings } from '../i18n';
 import { XyVisFn } from '../types';
-import { commonDataLayerArgs } from './common_data_layer_args';
+import { XY_VIS, REFERENCE_LINE } from '../constants';
+import { strings } from '../i18n';
 import { commonXYArgs } from './common_xy_args';
+import { commonDataLayerArgs } from './common_data_layer_args';
 
 export const xyVisFunction: XyVisFn = {
   name: XY_VIS,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { History } from 'history';
 import { useEffect } from 'react';
+import { History } from 'history';
 
 export function useUrl({
   history,

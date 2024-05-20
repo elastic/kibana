@@ -12,9 +12,9 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { ITelemetryReceiver } from '../../../telemetry/receiver';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { getDetectionRulesPreview } from './utils/get_detecton_rules_preview';
-import { getDiagnosticsPreview } from './utils/get_diagnostics_preview';
-import { getEndpointPreview } from './utils/get_endpoint_preview';
 import { getSecurityListsPreview } from './utils/get_security_lists_preview';
+import { getEndpointPreview } from './utils/get_endpoint_preview';
+import { getDiagnosticsPreview } from './utils/get_diagnostics_preview';
 
 export const telemetryDetectionRulesPreviewRoute = (
   router: SecuritySolutionPluginRouter,

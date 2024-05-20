@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ExampleContext } from '../../../../test/context_example';
 

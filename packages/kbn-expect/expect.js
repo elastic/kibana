@@ -20,14 +20,14 @@ expect.version = '0.3.1';
  */
 
 var flags = {
-  not: ['to', 'be', 'have', 'include', 'only'],
-  to: ['be', 'have', 'include', 'only', 'not'],
-  only: ['have'],
-  have: ['own'],
-  be: ['an'],
+    not: ['to', 'be', 'have', 'include', 'only']
+  , to: ['be', 'have', 'include', 'only', 'not']
+  , only: ['have']
+  , have: ['own']
+  , be: ['an']
 };
 
-function expect(obj) {
+function expect (obj) {
   return new Assertion(obj);
 }
 
@@ -37,7 +37,7 @@ function expect(obj) {
  * @api private
  */
 
-function Assertion(obj, flag, parent) {
+function Assertion (obj, flag, parent) {
   this.obj = obj;
   this.flags = {};
 
@@ -51,16 +51,16 @@ function Assertion(obj, flag, parent) {
     }
   }
 
-  var $flags = flag ? flags[flag] : keys(flags),
-    self = this;
+  var $flags = flag ? flags[flag] : keys(flags)
+    , self = this;
 
   if ($flags) {
     for (var i = 0, l = $flags.length; i < l; i++) {
       // avoid recursion
       if (this.flags[$flags[i]]) continue;
 
-      var name = $flags[i],
-        assertion = new Assertion(this.obj, name, this);
+      var name = $flags[i]
+        , assertion = new Assertion(this.obj, name, this)
 
       if ('function' == typeof Assertion.prototype[name]) {
         // clone the function, make sure we dont touch the prot reference
@@ -92,9 +92,9 @@ function Assertion(obj, flag, parent) {
  */
 
 Assertion.prototype.assert = function (truth, msg, error, expected) {
-  var msg = this.flags.not ? error : msg,
-    ok = this.flags.not ? !truth : truth,
-    err;
+  var msg = this.flags.not ? error : msg
+    , ok = this.flags.not ? !truth : truth
+    , err;
 
   if (!ok) {
     err = new Error(msg.call(this));
@@ -120,14 +120,9 @@ Assertion.prototype.assert = function (truth, msg, error, expected) {
 
 Assertion.prototype.ok = function () {
   this.assert(
-    !!this.obj,
-    function () {
-      return 'expected ' + i(this.obj) + ' to be truthy';
-    },
-    function () {
-      return 'expected ' + i(this.obj) + ' to be falsy';
-    }
-  );
+      !!this.obj
+    , function(){ return 'expected ' + i(this.obj) + ' to be truthy' }
+    , function(){ return 'expected ' + i(this.obj) + ' to be falsy' });
 };
 
 /**
@@ -136,13 +131,11 @@ Assertion.prototype.ok = function () {
  * @api public
  */
 
-Assertion.prototype.withArgs = function () {
+Assertion.prototype.withArgs = function() {
   expect(this.obj).to.be.a('function');
   var fn = this.obj;
   var args = Array.prototype.slice.call(arguments);
-  return expect(function () {
-    fn.apply(null, args);
-  });
+  return expect(function() { fn.apply(null, args); });
 };
 
 /**
@@ -153,47 +146,41 @@ Assertion.prototype.withArgs = function () {
  */
 
 Assertion.prototype['throw'] =
-  Assertion.prototype.throwError =
-  Assertion.prototype.throwException =
-    function (fn) {
-      expect(this.obj).to.be.a('function');
+Assertion.prototype.throwError =
+Assertion.prototype.throwException = function (fn) {
+  expect(this.obj).to.be.a('function');
 
-      var thrown = false,
-        not = this.flags.not;
+  var thrown = false
+    , not = this.flags.not;
 
-      try {
-        this.obj();
-      } catch (e) {
-        if (isRegExp(fn)) {
-          var subject = 'string' == typeof e ? e : e.message;
-          if (not) {
-            expect(subject).to.not.match(fn);
-          } else {
-            expect(subject).to.match(fn);
-          }
-        } else if ('function' == typeof fn) {
-          fn(e);
-        }
-        thrown = true;
+  try {
+    this.obj();
+  } catch (e) {
+    if (isRegExp(fn)) {
+      var subject = 'string' == typeof e ? e : e.message;
+      if (not) {
+        expect(subject).to.not.match(fn);
+      } else {
+        expect(subject).to.match(fn);
       }
+    } else if ('function' == typeof fn) {
+      fn(e);
+    }
+    thrown = true;
+  }
 
-      if (isRegExp(fn) && not) {
-        // in the presence of a matcher, ensure the `not` only applies to
-        // the matching.
-        this.flags.not = false;
-      }
+  if (isRegExp(fn) && not) {
+    // in the presence of a matcher, ensure the `not` only applies to
+    // the matching.
+    this.flags.not = false;
+  }
 
-      var name = this.obj.name || 'fn';
-      this.assert(
-        thrown,
-        function () {
-          return 'expected ' + name + ' to throw an exception';
-        },
-        function () {
-          return 'expected ' + name + ' not to throw an exception';
-        }
-      );
-    };
+  var name = this.obj.name || 'fn';
+  this.assert(
+      thrown
+    , function(){ return 'expected ' + name + ' to throw an exception' }
+    , function(){ return 'expected ' + name + ' not to throw an exception' });
+};
 
 /**
  * Checks if the array is empty.
@@ -220,14 +207,9 @@ Assertion.prototype.empty = function () {
   }
 
   this.assert(
-    expectation,
-    function () {
-      return 'expected ' + i(this.obj) + ' to be empty';
-    },
-    function () {
-      return 'expected ' + i(this.obj) + ' to not be empty';
-    }
-  );
+      expectation
+    , function(){ return 'expected ' + i(this.obj) + ' to be empty' }
+    , function(){ return 'expected ' + i(this.obj) + ' to not be empty' });
   return this;
 };
 
@@ -237,19 +219,15 @@ Assertion.prototype.empty = function () {
  * @api public
  */
 
-Assertion.prototype.be = Assertion.prototype.equal = function (obj, msg) {
-  if (typeof msg === 'string') {
+Assertion.prototype.be =
+Assertion.prototype.equal = function (obj, msg) {
+  if (typeof(msg) === 'string') {
     this.customMsg = msg;
   }
   this.assert(
-    obj === this.obj,
-    function () {
-      return 'expected ' + i(this.obj) + ' to equal ' + i(obj);
-    },
-    function () {
-      return 'expected ' + i(this.obj) + ' to not equal ' + i(obj);
-    }
-  );
+      obj === this.obj
+    , function(){ return 'expected ' + i(this.obj) + ' to equal ' + i(obj) }
+    , function(){ return 'expected ' + i(this.obj) + ' to not equal ' + i(obj) });
   return this;
 };
 
@@ -260,19 +238,14 @@ Assertion.prototype.be = Assertion.prototype.equal = function (obj, msg) {
  */
 
 Assertion.prototype.eql = function (obj, msg) {
-  if (typeof msg === 'string') {
+  if (typeof(msg) === 'string') {
     this.customMsg = msg;
   }
   this.assert(
-    expect.eql(this.obj, obj),
-    function () {
-      return 'expected ' + i(this.obj) + ' to sort of equal ' + i(obj);
-    },
-    function () {
-      return 'expected ' + i(this.obj) + ' to sort of not equal ' + i(obj);
-    },
-    obj
-  );
+      expect.eql(this.obj, obj)
+    , function(){ return 'expected ' + i(this.obj) + ' to sort of equal ' + i(obj) }
+    , function(){ return 'expected ' + i(this.obj) + ' to sort of not equal ' + i(obj) }
+    , obj);
   return this;
 };
 
@@ -285,19 +258,14 @@ Assertion.prototype.eql = function (obj, msg) {
  */
 
 Assertion.prototype.within = function (start, finish, msg) {
-  if (typeof msg === 'string') {
+  if (typeof(msg) === 'string') {
     this.customMsg = msg;
   }
   var range = start + '..' + finish;
   this.assert(
-    this.obj >= start && this.obj <= finish,
-    function () {
-      return 'expected ' + i(this.obj) + ' to be within ' + range;
-    },
-    function () {
-      return 'expected ' + i(this.obj) + ' to not be within ' + range;
-    }
-  );
+      this.obj >= start && this.obj <= finish
+    , function(){ return 'expected ' + i(this.obj) + ' to be within ' + range }
+    , function(){ return 'expected ' + i(this.obj) + ' to not be within ' + range });
   return this;
 };
 
@@ -307,39 +275,28 @@ Assertion.prototype.within = function (start, finish, msg) {
  * @api public
  */
 
-Assertion.prototype.a = Assertion.prototype.an = function (type) {
+Assertion.prototype.a =
+Assertion.prototype.an = function (type) {
   if ('string' == typeof type) {
     // proper english in error msg
     var n = /^[aeiou]/.test(type) ? 'n' : '';
 
     // typeof with support for 'array'
     this.assert(
-      'array' == type
-        ? isArray(this.obj)
-        : 'regexp' == type
-          ? isRegExp(this.obj)
-          : 'object' == type
-            ? 'object' == typeof this.obj && null !== this.obj
-            : type == typeof this.obj,
-      function () {
-        return 'expected ' + i(this.obj) + ' to be a' + n + ' ' + type;
-      },
-      function () {
-        return 'expected ' + i(this.obj) + ' not to be a' + n + ' ' + type;
-      }
-    );
+        'array' == type ? isArray(this.obj) :
+          'regexp' == type ? isRegExp(this.obj) :
+            'object' == type
+              ? 'object' == typeof this.obj && null !== this.obj
+              : type == typeof this.obj
+      , function(){ return 'expected ' + i(this.obj) + ' to be a' + n + ' ' + type }
+      , function(){ return 'expected ' + i(this.obj) + ' not to be a' + n + ' ' + type });
   } else {
     // instanceof
     var name = type.name || 'supplied constructor';
     this.assert(
-      this.obj instanceof type,
-      function () {
-        return 'expected ' + i(this.obj) + ' to be an instance of ' + name;
-      },
-      function () {
-        return 'expected ' + i(this.obj) + ' not to be an instance of ' + name;
-      }
-    );
+        this.obj instanceof type
+      , function(){ return 'expected ' + i(this.obj) + ' to be an instance of ' + name }
+      , function(){ return 'expected ' + i(this.obj) + ' not to be an instance of ' + name });
   }
 
   return this;
@@ -352,19 +309,15 @@ Assertion.prototype.a = Assertion.prototype.an = function (type) {
  * @api public
  */
 
-Assertion.prototype.greaterThan = Assertion.prototype.above = function (n, msg) {
-  if (typeof msg === 'string') {
+Assertion.prototype.greaterThan =
+Assertion.prototype.above = function (n, msg) {
+  if (typeof(msg) === 'string') {
     this.customMsg = msg;
   }
   this.assert(
-    this.obj > n,
-    function () {
-      return 'expected ' + i(this.obj) + ' to be above ' + n;
-    },
-    function () {
-      return 'expected ' + i(this.obj) + ' to be below ' + n;
-    }
-  );
+      this.obj > n
+    , function(){ return 'expected ' + i(this.obj) + ' to be above ' + n }
+    , function(){ return 'expected ' + i(this.obj) + ' to be below ' + n });
   return this;
 };
 
@@ -375,19 +328,15 @@ Assertion.prototype.greaterThan = Assertion.prototype.above = function (n, msg) 
  * @api public
  */
 
-Assertion.prototype.lessThan = Assertion.prototype.below = function (n, msg) {
-  if (typeof msg === 'string') {
+Assertion.prototype.lessThan =
+Assertion.prototype.below = function (n, msg) {
+  if (typeof(msg) === 'string') {
     this.customMsg = msg;
   }
   this.assert(
-    this.obj < n,
-    function () {
-      return 'expected ' + i(this.obj) + ' to be below ' + n;
-    },
-    function () {
-      return 'expected ' + i(this.obj) + ' to be above ' + n;
-    }
-  );
+      this.obj < n
+    , function(){ return 'expected ' + i(this.obj) + ' to be below ' + n }
+    , function(){ return 'expected ' + i(this.obj) + ' to be above ' + n });
   return this;
 };
 
@@ -399,18 +348,13 @@ Assertion.prototype.lessThan = Assertion.prototype.below = function (n, msg) {
  */
 
 Assertion.prototype.match = function (regexp, msg) {
-  if (typeof msg === 'string') {
+  if (typeof(msg) === 'string') {
     this.customMsg = msg;
   }
   this.assert(
-    regexp.exec(this.obj),
-    function () {
-      return 'expected ' + i(this.obj) + ' to match ' + regexp;
-    },
-    function () {
-      return 'expected ' + i(this.obj) + ' not to match ' + regexp;
-    }
-  );
+      regexp.exec(this.obj)
+    , function(){ return 'expected ' + i(this.obj) + ' to match ' + regexp }
+    , function(){ return 'expected ' + i(this.obj) + ' not to match ' + regexp });
   return this;
 };
 
@@ -422,20 +366,15 @@ Assertion.prototype.match = function (regexp, msg) {
  */
 
 Assertion.prototype.length = function (n, msg) {
-  if (typeof msg === 'string') {
+  if (typeof(msg) === 'string') {
     this.customMsg = msg;
   }
   expect(this.obj).to.have.property('length');
   var len = this.obj.length;
   this.assert(
-    n == len,
-    function () {
-      return 'expected ' + i(this.obj) + ' to have a length of ' + n + ' but got ' + len;
-    },
-    function () {
-      return 'expected ' + i(this.obj) + ' to not have a length of ' + len;
-    }
-  );
+      n == len
+    , function(){ return 'expected ' + i(this.obj) + ' to have a length of ' + n + ' but got ' + len }
+    , function(){ return 'expected ' + i(this.obj) + ' to not have a length of ' + len });
   return this;
 };
 
@@ -450,14 +389,9 @@ Assertion.prototype.length = function (n, msg) {
 Assertion.prototype.property = function (name, val) {
   if (this.flags.own) {
     this.assert(
-      Object.prototype.hasOwnProperty.call(this.obj, name),
-      function () {
-        return 'expected ' + i(this.obj) + ' to have own property ' + i(name);
-      },
-      function () {
-        return 'expected ' + i(this.obj) + ' to not have own property ' + i(name);
-      }
-    );
+        Object.prototype.hasOwnProperty.call(this.obj, name)
+      , function(){ return 'expected ' + i(this.obj) + ' to have own property ' + i(name) }
+      , function(){ return 'expected ' + i(this.obj) + ' to not have own property ' + i(name) });
     return this;
   }
 
@@ -468,41 +402,24 @@ Assertion.prototype.property = function (name, val) {
   } else {
     var hasProp;
     try {
-      hasProp = name in this.obj;
+      hasProp = name in this.obj
     } catch (e) {
-      hasProp = undefined !== this.obj[name];
+      hasProp = undefined !== this.obj[name]
     }
 
     this.assert(
-      hasProp,
-      function () {
-        return 'expected ' + i(this.obj) + ' to have a property ' + i(name);
-      },
-      function () {
-        return 'expected ' + i(this.obj) + ' to not have a property ' + i(name);
-      }
-    );
+        hasProp
+      , function(){ return 'expected ' + i(this.obj) + ' to have a property ' + i(name) }
+      , function(){ return 'expected ' + i(this.obj) + ' to not have a property ' + i(name) });
   }
 
   if (undefined !== val) {
     this.assert(
-      val === this.obj[name],
-      function () {
-        return (
-          'expected ' +
-          i(this.obj) +
-          ' to have a property ' +
-          i(name) +
-          ' of ' +
-          i(val) +
-          ', but got ' +
-          i(this.obj[name])
-        );
-      },
-      function () {
-        return 'expected ' + i(this.obj) + ' to not have a property ' + i(name) + ' of ' + i(val);
-      }
-    );
+        val === this.obj[name]
+      , function(){ return 'expected ' + i(this.obj) + ' to have a property ' + i(name)
+        + ' of ' + i(val) + ', but got ' + i(this.obj[name]) }
+      , function(){ return 'expected ' + i(this.obj) + ' to not have a property ' + i(name)
+        + ' of ' + i(val) });
   }
 
   this.obj = this.obj[name];
@@ -516,30 +433,21 @@ Assertion.prototype.property = function (name, val) {
  * @api public
  */
 
-Assertion.prototype.string = Assertion.prototype.contain = function (obj, msg) {
-  if (typeof msg === 'string') {
+Assertion.prototype.string =
+Assertion.prototype.contain = function (obj, msg) {
+  if (typeof(msg) === 'string') {
     this.customMsg = msg;
   }
   if ('string' == typeof this.obj) {
     this.assert(
-      ~this.obj.indexOf(obj),
-      function () {
-        return 'expected ' + i(this.obj) + ' to contain ' + i(obj);
-      },
-      function () {
-        return 'expected ' + i(this.obj) + ' to not contain ' + i(obj);
-      }
-    );
+        ~this.obj.indexOf(obj)
+      , function(){ return 'expected ' + i(this.obj) + ' to contain ' + i(obj) }
+      , function(){ return 'expected ' + i(this.obj) + ' to not contain ' + i(obj) });
   } else {
     this.assert(
-      ~indexOf(this.obj, obj),
-      function () {
-        return 'expected ' + i(this.obj) + ' to contain ' + i(obj);
-      },
-      function () {
-        return 'expected ' + i(this.obj) + ' to not contain ' + i(obj);
-      }
-    );
+        ~indexOf(this.obj, obj)
+      , function(){ return 'expected ' + i(this.obj) + ' to contain ' + i(obj) }
+      , function(){ return 'expected ' + i(this.obj) + ' to not contain ' + i(obj) });
   }
   return this;
 };
@@ -552,16 +460,19 @@ Assertion.prototype.string = Assertion.prototype.contain = function (obj, msg) {
  * @api public
  */
 
-Assertion.prototype.key = Assertion.prototype.keys = function ($keys) {
-  var str,
-    ok = true;
+Assertion.prototype.key =
+Assertion.prototype.keys = function ($keys) {
+  var str
+    , ok = true;
 
-  $keys = isArray($keys) ? $keys : Array.prototype.slice.call(arguments);
+  $keys = isArray($keys)
+    ? $keys
+    : Array.prototype.slice.call(arguments);
 
   if (!$keys.length) throw new Error('keys required');
 
-  var actual = keys(this.obj),
-    len = $keys.length;
+  var actual = keys(this.obj)
+    , len = $keys.length;
 
   // Inclusion
   ok = every($keys, function (key) {
@@ -592,14 +503,9 @@ Assertion.prototype.key = Assertion.prototype.keys = function ($keys) {
 
   // Assertion
   this.assert(
-    ok,
-    function () {
-      return 'expected ' + i(this.obj) + ' to ' + str;
-    },
-    function () {
-      return 'expected ' + i(this.obj) + ' to not ' + str;
-    }
-  );
+      ok
+    , function(){ return 'expected ' + i(this.obj) + ' to ' + str }
+    , function(){ return 'expected ' + i(this.obj) + ' to not ' + str });
 
   return this;
 };
@@ -611,9 +517,7 @@ Assertion.prototype.key = Assertion.prototype.keys = function ($keys) {
  * @api public
  */
 Assertion.prototype.fail = function (msg) {
-  var error = function () {
-    return msg || 'explicit failure';
-  };
+  var error = function() { return msg || "explicit failure"; }
   this.assert(false, error, error);
   return this;
 };
@@ -622,10 +526,10 @@ Assertion.prototype.fail = function (msg) {
  * Function bind implementation.
  */
 
-function bind(fn, scope) {
+function bind (fn, scope) {
   return function () {
     return fn.apply(scope, arguments);
-  };
+  }
 }
 
 /**
@@ -635,7 +539,7 @@ function bind(fn, scope) {
  * @api public
  */
 
-function every(arr, fn, thisObj) {
+function every (arr, fn, thisObj) {
   var scope = thisObj || global;
   for (var i = 0, j = arr.length; i < j; ++i) {
     if (!fn.call(scope, arr[i], i, arr)) {
@@ -652,7 +556,7 @@ function every(arr, fn, thisObj) {
  * @api public
  */
 
-function indexOf(arr, o, i) {
+function indexOf (arr, o, i) {
   if (Array.prototype.indexOf) {
     return Array.prototype.indexOf.call(arr, o, i);
   }
@@ -661,19 +565,16 @@ function indexOf(arr, o, i) {
     return -1;
   }
 
-  for (
-    var j = arr.length, i = i < 0 ? (i + j < 0 ? 0 : i + j) : i || 0;
-    i < j && arr[i] !== o;
-    i++
-  );
+  for (var j = arr.length, i = i < 0 ? i + j < 0 ? 0 : i + j : i || 0
+      ; i < j && arr[i] !== o; i++);
 
   return j <= i ? -1 : i;
 }
 
 // https://gist.github.com/1044128/
-var getOuterHTML = function (element) {
+var getOuterHTML = function(element) {
   if ('outerHTML' in element) return element.outerHTML;
-  var ns = 'http://www.w3.org/1999/xhtml';
+  var ns = "http://www.w3.org/1999/xhtml";
   var container = document.createElementNS(ns, '_');
   var xmlSerializer = new XMLSerializer();
   var html;
@@ -692,12 +593,10 @@ var isDOMElement = function (object) {
   if (typeof HTMLElement === 'object') {
     return object instanceof HTMLElement;
   } else {
-    return (
-      object &&
+    return object &&
       typeof object === 'object' &&
       object.nodeType === 1 &&
-      typeof object.nodeName === 'string'
-    );
+      typeof object.nodeName === 'string';
   }
 };
 
@@ -708,24 +607,21 @@ var isDOMElement = function (object) {
  * @api private
  */
 
-function i(obj, showHidden, depth) {
+function i (obj, showHidden, depth) {
   var seen = [];
 
-  function stylize(str) {
+  function stylize (str) {
     return str;
   }
 
-  function format(value, recurseTimes) {
+  function format (value, recurseTimes) {
     // Provide a hook for user-specified inspect functions.
     // Check that value is an object with an inspect function on it
-    if (
-      value &&
-      typeof value.inspect === 'function' &&
-      // Filter out the util module, it's inspect function is special
-      value !== exports &&
-      // Also filter out any prototype objects using the circular check.
-      !(value.constructor && value.constructor.prototype === value)
-    ) {
+    if (value && typeof value.inspect === 'function' &&
+        // Filter out the util module, it's inspect function is special
+        value !== exports &&
+        // Also filter out any prototype objects using the circular check.
+        !(value.constructor && value.constructor.prototype === value)) {
       return value.inspect(recurseTimes);
     }
 
@@ -735,10 +631,9 @@ function i(obj, showHidden, depth) {
         return stylize('undefined', 'undefined');
 
       case 'string':
-        var simple =
-          "'" +
-          JSON.stringify(value).replace(/^"|"$/g, '').replace(/'/g, "\\'").replace(/\\"/g, '"') +
-          "'";
+        var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                                  .replace(/'/g, "\\'")
+                                                  .replace(/\\"/g, '"') + '\'';
         return stylize(simple, 'string');
 
       case 'number':
@@ -777,7 +672,7 @@ function i(obj, showHidden, depth) {
 
     // Error objects can be shortcutted
     if (value instanceof Error) {
-      return stylize('[' + value.toString() + ']', 'Error');
+      return stylize("["+value.toString()+"]", 'Error');
     }
 
     var base, type, braces;
@@ -793,7 +688,7 @@ function i(obj, showHidden, depth) {
     // Make functions say that they are functions
     if (typeof value === 'function') {
       var n = value.name ? ': ' + value.name : '';
-      base = isRegExp(value) ? ' ' + value : ' [Function' + n + ']';
+      base = (isRegExp(value)) ? ' ' + value : ' [Function' + n + ']';
     } else {
       base = '';
     }
@@ -846,15 +741,11 @@ function i(obj, showHidden, depth) {
             if (isArray(value)) {
               str = map(str.split('\n'), function (line) {
                 return '  ' + line;
-              })
-                .join('\n')
-                .substr(2);
+              }).join('\n').substr(2);
             } else {
-              str =
-                '\n' +
-                map(str.split('\n'), function (line) {
-                  return '   ' + line;
-                }).join('\n');
+              str = '\n' + map(str.split('\n'), function (line) {
+                return '   ' + line;
+              }).join('\n');
             }
           }
         } else {
@@ -870,10 +761,9 @@ function i(obj, showHidden, depth) {
           name = name.substr(1, name.length - 2);
           name = stylize(name, 'name');
         } else {
-          name = name
-            .replace(/'/g, "\\'")
-            .replace(/\\"/g, '"')
-            .replace(/(^"|"$)/g, "'");
+          name = name.replace(/'/g, "\\'")
+                      .replace(/\\"/g, '"')
+                      .replace(/(^"|"$)/g, "'");
           name = stylize(name, 'string');
         }
       }
@@ -884,36 +774,32 @@ function i(obj, showHidden, depth) {
     seen.pop();
 
     var numLinesEst = 0;
-    var length = reduce(
-      output,
-      function (prev, cur) {
-        numLinesEst++;
-        if (indexOf(cur, '\n') >= 0) numLinesEst++;
-        return prev + cur.length + 1;
-      },
-      0
-    );
+    var length = reduce(output, function (prev, cur) {
+      numLinesEst++;
+      if (indexOf(cur, '\n') >= 0) numLinesEst++;
+      return prev + cur.length + 1;
+    }, 0);
 
     if (length > 50) {
-      output =
-        braces[0] +
-        (base === '' ? '' : base + '\n ') +
-        ' ' +
-        output.join(',\n  ') +
-        ' ' +
-        braces[1];
+      output = braces[0] +
+                (base === '' ? '' : base + '\n ') +
+                ' ' +
+                output.join(',\n  ') +
+                ' ' +
+                braces[1];
+
     } else {
       output = braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
     }
 
     return output;
   }
-  return format(obj, typeof depth === 'undefined' ? 2 : depth);
+  return format(obj, (typeof depth === 'undefined' ? 2 : depth));
 }
 
 expect.stringify = i;
 
-function isArray(ar) {
+function isArray (ar) {
   return Object.prototype.toString.call(ar) === '[object Array]';
 }
 
@@ -925,23 +811,21 @@ function isRegExp(re) {
     return false;
   }
 
-  return (
-    re instanceof RegExp || // easy case
-    // duck-type for context-switching evalcx case
-    (typeof re === 'function' &&
-      re.constructor.name === 'RegExp' &&
-      re.compile &&
-      re.test &&
-      re.exec &&
-      s.match(/^\/.*\/[gim]{0,3}$/))
-  );
+  return re instanceof RegExp || // easy case
+          // duck-type for context-switching evalcx case
+          typeof(re) === 'function' &&
+          re.constructor.name === 'RegExp' &&
+          re.compile &&
+          re.test &&
+          re.exec &&
+          s.match(/^\/.*\/[gim]{0,3}$/);
 }
 
 function isDate(d) {
   return d instanceof Date;
 }
 
-function keys(obj) {
+function keys (obj) {
   if (Object.keys) {
     return Object.keys(obj);
   }
@@ -957,30 +841,36 @@ function keys(obj) {
   return keys;
 }
 
-function map(arr, mapper, that) {
+function map (arr, mapper, that) {
   if (Array.prototype.map) {
     return Array.prototype.map.call(arr, mapper, that);
   }
 
-  var other = new Array(arr.length);
+  var other= new Array(arr.length);
 
-  for (var i = 0, n = arr.length; i < n; i++)
-    if (i in arr) other[i] = mapper.call(that, arr[i], i, arr);
+  for (var i= 0, n = arr.length; i<n; i++)
+    if (i in arr)
+      other[i] = mapper.call(that, arr[i], i, arr);
 
   return other;
 }
 
-function reduce(arr, fun) {
+function reduce (arr, fun) {
   if (Array.prototype.reduce) {
-    return Array.prototype.reduce.apply(arr, Array.prototype.slice.call(arguments, 1));
+    return Array.prototype.reduce.apply(
+        arr
+      , Array.prototype.slice.call(arguments, 1)
+    );
   }
 
   var len = +this.length;
 
-  if (typeof fun !== 'function') throw new TypeError();
+  if (typeof fun !== "function")
+    throw new TypeError();
 
   // no value to return if no initial value and an empty array
-  if (len === 0 && arguments.length === 1) throw new TypeError();
+  if (len === 0 && arguments.length === 1)
+    throw new TypeError();
 
   var i = 0;
   if (arguments.length >= 2) {
@@ -993,12 +883,14 @@ function reduce(arr, fun) {
       }
 
       // if array contains no values, no initial value to return
-      if (++i >= len) throw new TypeError();
+      if (++i >= len)
+        throw new TypeError();
     } while (true);
   }
 
   for (; i < len; i++) {
-    if (i in this) rv = fun.call(null, rv, this[i], i, this);
+    if (i in this)
+      rv = fun.call(null, rv, this[i], i, this);
   }
 
   return rv;
@@ -1015,7 +907,8 @@ expect.eql = function eql(actual, expected) {
   // 7.1. All identical values are equivalent, as determined by ===.
   if (actual === expected) {
     return true;
-  } else if ('undefined' != typeof Buffer && Buffer.isBuffer(actual) && Buffer.isBuffer(expected)) {
+  } else if ('undefined' != typeof Buffer
+    && Buffer.isBuffer(actual) && Buffer.isBuffer(expected)) {
     if (actual.length != expected.length) return false;
 
     for (var i = 0; i < actual.length; i++) {
@@ -1033,40 +926,37 @@ expect.eql = function eql(actual, expected) {
     // equivalence is determined by ==.
   } else if (typeof actual != 'object' && typeof expected != 'object') {
     return actual == expected;
-    // If both are regular expression use the special `regExpEquiv` method
-    // to determine equivalence.
+  // If both are regular expression use the special `regExpEquiv` method
+  // to determine equivalence.
   } else if (isRegExp(actual) && isRegExp(expected)) {
     return regExpEquiv(actual, expected);
-    // 7.4. For all other Object pairs, including Array objects, equivalence is
-    // determined by having the same number of owned properties (as verified
-    // with Object.prototype.hasOwnProperty.call), the same set of keys
-    // (although not necessarily the same order), equivalent values for every
-    // corresponding key, and an identical "prototype" property. Note: this
-    // accounts for both named and indexed properties on Arrays.
+  // 7.4. For all other Object pairs, including Array objects, equivalence is
+  // determined by having the same number of owned properties (as verified
+  // with Object.prototype.hasOwnProperty.call), the same set of keys
+  // (although not necessarily the same order), equivalent values for every
+  // corresponding key, and an identical "prototype" property. Note: this
+  // accounts for both named and indexed properties on Arrays.
   } else {
     return objEquiv(actual, expected);
   }
 };
 
-function isUndefinedOrNull(value) {
+function isUndefinedOrNull (value) {
   return value === null || value === undefined;
 }
 
-function isArguments(object) {
+function isArguments (object) {
   return Object.prototype.toString.call(object) == '[object Arguments]';
 }
 
-function regExpEquiv(a, b) {
-  return (
-    a.source === b.source &&
-    a.global === b.global &&
-    a.ignoreCase === b.ignoreCase &&
-    a.multiline === b.multiline
-  );
+function regExpEquiv (a, b) {
+  return a.source === b.source && a.global === b.global &&
+          a.ignoreCase === b.ignoreCase && a.multiline === b.multiline;
 }
 
-function objEquiv(a, b) {
-  if (isUndefinedOrNull(a) || isUndefinedOrNull(b)) return false;
+function objEquiv (a, b) {
+  if (isUndefinedOrNull(a) || isUndefinedOrNull(b))
+    return false;
   // an identical "prototype" property.
   if (a.prototype !== b.prototype) return false;
   //~~~I've managed to break Object.keys through screwy arguments passing.
@@ -1079,29 +969,30 @@ function objEquiv(a, b) {
     b = pSlice.call(b);
     return expect.eql(a, b);
   }
-  try {
+  try{
     var ka = keys(a),
       kb = keys(b),
-      key,
-      i;
-  } catch (e) {
-    //happens when one is a string literal and the other isn't
+      key, i;
+  } catch (e) {//happens when one is a string literal and the other isn't
     return false;
   }
   // having the same number of owned properties (keys incorporates hasOwnProperty)
-  if (ka.length != kb.length) return false;
+  if (ka.length != kb.length)
+    return false;
   //the same set of keys (although not necessarily the same order),
   ka.sort();
   kb.sort();
   //~~~cheap key test
   for (i = ka.length - 1; i >= 0; i--) {
-    if (ka[i] != kb[i]) return false;
+    if (ka[i] != kb[i])
+      return false;
   }
   //equivalent values for every corresponding key, and
   //~~~possibly expensive deep test
   for (i = ka.length - 1; i >= 0; i--) {
     key = ka[i];
-    if (!expect.eql(a[key], b[key])) return false;
+    if (!expect.eql(a[key], b[key]))
+        return false;
   }
   return true;
 }

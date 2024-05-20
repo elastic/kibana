@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { CoreStart, ToastsStart } from '@kbn/core/public';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { CoreStart, ToastsStart } from '@kbn/core/public';
 import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
-import { Filter } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Markdown } from '@kbn/shared-ux-markdown';
-import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { Filter } from '@kbn/es-query';
 import { DiscoverAppLocatorParams } from '../../../common/app_locator';
 
 export interface SearchThresholdAlertParams extends RuleTypeParams {

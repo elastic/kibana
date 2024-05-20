@@ -8,10 +8,10 @@
 
 import React, { useState } from 'react';
 
-import { EuiButtonGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ControlGroupAPI, ControlGroupRenderer, ControlStyle } from '@kbn/controls-plugin/public';
-import { AwaitingControlGroupAPI } from '@kbn/controls-plugin/public/control_group';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { EuiButtonGroup, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { ControlGroupRenderer, ControlStyle, ControlGroupAPI } from '@kbn/controls-plugin/public';
+import { AwaitingControlGroupAPI } from '@kbn/controls-plugin/public/control_group';
 
 export const BasicReduxExample = ({ dataViewId }: { dataViewId: string }) => {
   const [controlGroupAPI, setControlGroupApi] = useState<AwaitingControlGroupAPI>(null);

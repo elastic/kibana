@@ -8,11 +8,11 @@
 
 import { cloneDeep } from 'lodash';
 
-import { AggGroupNames, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Vis } from '@kbn/visualizations-plugin/public';
+import { AggGroupNames, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { EditorStateActionTypes } from './constants';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';
 import { EditorAction } from './actions';
-import { EditorStateActionTypes } from './constants';
 
 function initEditorState(vis: Vis) {
   return {

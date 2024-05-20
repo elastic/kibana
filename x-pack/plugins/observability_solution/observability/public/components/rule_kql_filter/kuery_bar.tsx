@@ -6,12 +6,12 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
+import React, { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import React, { useEffect, useState } from 'react';
 
-import { AutocompleteField } from './autocomplete_field';
 import { WithKueryAutocompletion } from './with_kuery_autocompletion';
+import { AutocompleteField } from './autocomplete_field';
 
 type LoadSuggestionsFn = (
   e: string,

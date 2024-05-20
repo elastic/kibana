@@ -1,6 +1,3 @@
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,26 +5,29 @@ import { pipe } from 'fp-ts/lib/pipeable';
  * 2.0.
  */
 import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
 
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
-import {
-  CreateInventoryViewAttributesRequestPayload,
-  UpdateInventoryViewAttributesRequestPayload,
-} from '../../common/http_api/latest';
-import type { InventoryView } from '../../common/inventory_views';
-import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
 import {
   MutationContext,
   SavedViewResult,
   ServerError,
   UpdateViewParams,
 } from '../../common/saved_views';
-import { useSourceContext } from '../containers/metrics_source';
-import { useUrlState } from '../utils/use_url_state';
+import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
+import {
+  CreateInventoryViewAttributesRequestPayload,
+  UpdateInventoryViewAttributesRequestPayload,
+} from '../../common/http_api/latest';
+import type { InventoryView } from '../../common/inventory_views';
 import { useKibanaContextForPlugin } from './use_kibana';
+import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
+import { useSourceContext } from '../containers/metrics_source';
 
 export type UseInventoryViewsResult = SavedViewResult<
   InventoryView,

@@ -6,8 +6,8 @@
  */
 
 import {
-  buildEventEnrichmentRawResponseMock,
   buildEventEnrichmentRequestOptionsMock,
+  buildEventEnrichmentRawResponseMock,
 } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
 import { parseEventEnrichmentResponse } from './response';
 

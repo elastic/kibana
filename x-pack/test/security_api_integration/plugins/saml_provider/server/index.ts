@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { PluginInitializer, Plugin } from '@kbn/core/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { Plugin, PluginInitializer } from '@kbn/core/server';
 import { initRoutes } from './init_routes';
 
 export interface PluginSetupDependencies {

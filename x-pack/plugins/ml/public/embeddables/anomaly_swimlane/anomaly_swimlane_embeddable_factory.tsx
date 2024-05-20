@@ -26,15 +26,15 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subscription, combineLatest, map, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, of, Subscription } from 'rxjs';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '..';
 import type { MlDependencies } from '../../application/app';
 import { Y_AXIS_LABEL_WIDTH } from '../../application/explorer/constants';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import {
-  SwimlaneContainer,
   isViewBySwimLaneData,
+  SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';

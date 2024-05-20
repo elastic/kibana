@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
-import { PanelEdit } from './panel_edit';
-import { PanelEditWithDrilldowns } from './panel_edit_with_drilldowns';
-import { PanelEditWithDrilldownsAndContextActions } from './panel_edit_with_drilldowns_and_context_actions';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { PanelView } from './panel_view';
 import { PanelViewWithSharing } from './panel_view_with_sharing';
 import { PanelViewWithSharingLong } from './panel_view_with_sharing_long';
+import { PanelEdit } from './panel_edit';
+import { PanelEditWithDrilldowns } from './panel_edit_with_drilldowns';
+import { PanelEditWithDrilldownsAndContextActions } from './panel_edit_with_drilldowns_and_context_actions';
 
 export const ContextMenuExamples: React.FC = () => {
   return (

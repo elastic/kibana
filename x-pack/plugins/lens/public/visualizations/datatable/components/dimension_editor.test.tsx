@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import React from 'react';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 import {
-  DatasourcePublicAPI,
   FramePublicAPI,
   OperationDescriptor,
   VisualizationDimensionEditorProps,
+  DatasourcePublicAPI,
 } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
+import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { TableDimensionEditor } from './dimension_editor';
 
 describe('data table dimension editor', () => {
@@ -204,7 +204,7 @@ describe('data table dimension editor', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
     datasourceLayers.first.getOperationForColumnId = jest.fn(
-      () => ({ isBucketed: true }) as OperationDescriptor
+      () => ({ isBucketed: true } as OperationDescriptor)
     );
     state.columns[0].colorMode = 'cell';
 

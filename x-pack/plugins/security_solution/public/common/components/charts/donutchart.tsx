@@ -9,12 +9,12 @@ import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import type { Datum, ElementClickListener, NodeColorAccessor, PartialTheme } from '@elastic/charts';
+import type { Datum, NodeColorAccessor, PartialTheme, ElementClickListener } from '@elastic/charts';
 import {
   Chart,
   Partition,
-  PartitionLayout,
   Settings,
+  PartitionLayout,
   defaultPartitionValueFormatter,
 } from '@elastic/charts';
 import { isEmpty } from 'lodash';
@@ -23,9 +23,9 @@ import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { useThemes } from './common';
-import { DonutChartEmpty } from './donutchart_empty';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
+import { DonutChartEmpty } from './donutchart_empty';
 
 const donutTheme: PartialTheme = {
   chartMargins: { top: 0, bottom: 0, left: 0, right: 0 },

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
-import { useApmParams } from '../../../hooks/use_apm_params';
 import * as urlHelpers from '../../shared/links/url_helpers';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
 export function IndexLifecyclePhaseSelect() {
   const history = useHistory();

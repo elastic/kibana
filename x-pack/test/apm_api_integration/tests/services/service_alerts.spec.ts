@@ -1,5 +1,3 @@
-import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +5,14 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ApmAlertFields, createApmRule, runRuleSoon } from '../alerts/helpers/alerting_api_helper';
-import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
+import { createApmRule, runRuleSoon, ApmAlertFields } from '../alerts/helpers/alerting_api_helper';
 import { waitForActiveRule } from '../alerts/helpers/wait_for_active_rule';
 import { waitForAlertsForRule } from '../alerts/helpers/wait_for_alerts_for_rule';
+import { cleanupRuleAndAlertState } from '../alerts/helpers/cleanup_rule_and_alert_state';
 
 export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const registry = getService('registry');

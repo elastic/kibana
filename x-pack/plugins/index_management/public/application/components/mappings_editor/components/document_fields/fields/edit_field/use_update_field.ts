@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useState } from 'react';
 
+import { useMappingsState, useDispatch } from '../../../../mappings_state_context';
+import { shouldDeleteChildFieldsAfterTypeChange, getAllDescendantAliases } from '../../../../lib';
+import { NormalizedField, DataType } from '../../../../types';
 import { PARAMETERS_DEFINITION } from '../../../../constants';
-import { getAllDescendantAliases, shouldDeleteChildFieldsAfterTypeChange } from '../../../../lib';
-import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
-import { DataType, NormalizedField } from '../../../../types';
 
 export type UpdateFieldFunc = (field: NormalizedField) => void;
 

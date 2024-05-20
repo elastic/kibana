@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
+import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { useRightPanelContext } from '../context';
+import { getField } from '../../shared/utils';
+import { HostEntityOverview } from './host_entity_overview';
+import { UserEntityOverview } from './user_entity_overview';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { getField } from '../../shared/utils';
-import { useRightPanelContext } from '../context';
-import { HostEntityOverview } from './host_entity_overview';
-import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
-import { UserEntityOverview } from './user_entity_overview';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.

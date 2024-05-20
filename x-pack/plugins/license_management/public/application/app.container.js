@@ -9,12 +9,12 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
 import { App as PresentationComponent } from './app';
-import { loadPermissions } from './store/actions/permissions';
 import {
   getPermission,
-  getPermissionsError,
   isPermissionsLoading,
+  getPermissionsError,
 } from './store/reducers/license_management';
+import { loadPermissions } from './store/actions/permissions';
 
 const mapStateToProps = (state) => {
   return {

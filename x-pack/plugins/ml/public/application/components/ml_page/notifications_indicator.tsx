@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,10 +17,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
-import React from 'react';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
 

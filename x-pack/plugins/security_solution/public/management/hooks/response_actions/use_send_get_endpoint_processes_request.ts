@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import { GET_PROCESSES_ROUTE } from '../../../../common/endpoint/constants';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
-  GetProcessesActionOutputContent,
   ProcessesRequestBody,
   ResponseActionApiResponse,
+  GetProcessesActionOutputContent,
 } from '../../../../common/endpoint/types/actions';
+import { GET_PROCESSES_ROUTE } from '../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 /**

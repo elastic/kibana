@@ -8,8 +8,6 @@ import * as t from 'io-ts';
 import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
-  filtersSchema,
-  groupingsSchema,
   histogramIndicatorSchema,
   indicatorSchema,
   indicatorTypesSchema,
@@ -17,6 +15,8 @@ import {
   kqlWithFiltersSchema,
   metricCustomIndicatorSchema,
   querySchema,
+  filtersSchema,
+  groupingsSchema,
   syntheticsAvailabilityIndicatorSchema,
   timesliceMetricBasicMetricWithField,
   timesliceMetricDocCountMetric,

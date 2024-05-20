@@ -57,5 +57,7 @@
       "job_id": "rare_destination_country"
     }
   ],
-  "tags": ["security"]
+  "tags": [
+    "security"
+  ]
 }

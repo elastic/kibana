@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { indices } from '../../../../shared_imports';
 
 export function validateRollupIndex(rollupIndex, indexPattern) {

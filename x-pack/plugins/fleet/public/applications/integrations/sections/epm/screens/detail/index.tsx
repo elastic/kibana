@@ -1,4 +1,3 @@
-import { Route, Routes } from '@kbn/shared-ux-router';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +6,10 @@ import { Route, Routes } from '@kbn/shared-ux-router';
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
+import { Redirect, useLocation, useParams, useHistory } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
+import styled from 'styled-components';
 import {
   EuiBadge,
   EuiCallOut,
@@ -24,67 +25,66 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
-import styled from 'styled-components';
 
 import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
 
-import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 import {
   getPackageReleaseLabel,
   isPackagePrerelease,
-  packageToPackagePolicyInputs,
   splitPkgKey,
+  packageToPackagePolicyInputs,
 } from '../../../../../../../common/services';
+import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
 import {
-  Error,
-  HeaderReleaseBadge,
-  Loading,
-  WithGuidedOnboardingTour,
-} from '../../../../components';
-import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import {
-  useAuthz,
-  useBreadcrumbs,
   useGetPackageInstallStatus,
-  useGetSettingsQuery,
-  useIntegrationsStateContext,
-  usePermissionCheckQuery,
   useSetPackageInstallStatus,
-  useStartServices,
   useUIExtension,
+  useBreadcrumbs,
+  useStartServices,
+  useAuthz,
+  usePermissionCheckQuery,
+  useIntegrationsStateContext,
+  useGetSettingsQuery,
 } from '../../../../hooks';
-import {
-  useAgentPolicyContext,
-  useGetPackageInfoByKeyQuery,
-  useIsGuidedOnboardingActive,
-  useLink,
-} from '../../../../hooks';
-import type { WithHeaderLayoutProps } from '../../../../layouts';
-import { WithHeaderLayout } from '../../../../layouts';
+import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService } from '../../../../services';
+import {
+  useGetPackageInfoByKeyQuery,
+  useLink,
+  useAgentPolicyContext,
+  useIsGuidedOnboardingActive,
+} from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-
-import { AssetsPage } from './assets';
-import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import {
-  AddIntegrationButton,
-  BackLink,
-  IconPanel,
-  IntegrationAgentPolicyCount,
-  LoadingIconPanel,
-  UpdateIcon,
-} from './components';
-import { Configs } from './configs';
-import { CustomViewPage } from './custom';
-import { DocumentationPage, hasDocumentation } from './documentation';
+  Error,
+  Loading,
+  HeaderReleaseBadge,
+  WithGuidedOnboardingTour,
+} from '../../../../components';
+import type { WithHeaderLayoutProps } from '../../../../layouts';
+import { WithHeaderLayout } from '../../../../layouts';
+
+import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
+import { getInstallPkgRouteOptions } from './utils';
+import {
+  BackLink,
+  IntegrationAgentPolicyCount,
+  UpdateIcon,
+  IconPanel,
+  LoadingIconPanel,
+  AddIntegrationButton,
+} from './components';
+import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
-import { getInstallPkgRouteOptions } from './utils';
+import { CustomViewPage } from './custom';
+import { DocumentationPage, hasDocumentation } from './documentation';
+import { Configs } from './configs';
 
 import './index.scss';
 
@@ -312,8 +312,8 @@ export function Detail() {
     fromIntegrations === 'updates_available'
       ? getHref('integrations_installed_updates_available')
       : fromIntegrations === 'installed'
-        ? getHref('integrations_installed')
-        : getHref('integrations_all');
+      ? getHref('integrations_installed')
+      : getHref('integrations_all');
 
   const numOfDeferredInstallations = useMemo(
     () => getDeferredInstallationsCnt(packageInfo),

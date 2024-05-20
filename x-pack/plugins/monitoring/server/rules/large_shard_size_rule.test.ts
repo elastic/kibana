@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { LargeShardSizeRule } from './large_shard_size_rule';
+import { RULE_LARGE_SHARD_SIZE } from '../../common/constants';
+import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { RULE_LARGE_SHARD_SIZE } from '../../common/constants';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
-import { LargeShardSizeRule } from './large_shard_size_rule';
 
 type ILargeShardSizeRuleMock = LargeShardSizeRule & {
   defaultParams: {

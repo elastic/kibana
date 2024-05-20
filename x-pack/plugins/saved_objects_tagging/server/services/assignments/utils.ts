@@ -6,8 +6,8 @@
  */
 
 import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
-import { tagSavedObjectTypeName } from '../../../common';
 import { AssignableObject } from '../../../common/assignments';
+import { tagSavedObjectTypeName } from '../../../common';
 
 export const toAssignableObject = (
   object: SavedObject,

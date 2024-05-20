@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import * as api from '../apis/get_rules_muted_alerts';
+import { waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
-import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
-import * as api from '../apis/get_rules_muted_alerts';
 import { useGetMutedAlerts } from './use_get_muted_alerts';
+import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
 
 jest.mock('../apis/get_rules_muted_alerts');
 jest.mock('../../../../../common/lib/kibana');

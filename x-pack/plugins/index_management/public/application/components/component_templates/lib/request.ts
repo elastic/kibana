@@ -8,13 +8,13 @@
 import { HttpSetup } from '@kbn/core/public';
 
 import {
-  Error,
-  SendRequestConfig,
-  SendRequestResponse,
   UseRequestConfig,
   UseRequestResponse,
+  SendRequestConfig,
+  SendRequestResponse,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
+  Error,
 } from '../shared_imports';
 
 export type UseRequestHook = <T = any, E = Error>(

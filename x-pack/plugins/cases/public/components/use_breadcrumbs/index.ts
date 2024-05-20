@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { useCallback, useEffect } from 'react';
 import { KibanaServices, useKibana, useNavigation } from '../../common/lib/kibana';
-import { useApplication } from '../../common/lib/kibana/use_application';
 import type { ICasesDeepLinkId } from '../../common/navigation';
 import { CasesDeepLinkId } from '../../common/navigation';
+import { useApplication } from '../../common/lib/kibana/use_application';
 
 const casesBreadcrumbTitle: Record<ICasesDeepLinkId, string> = {
   [CasesDeepLinkId.cases]: i18n.translate('xpack.cases.breadcrumbs.all_cases', {

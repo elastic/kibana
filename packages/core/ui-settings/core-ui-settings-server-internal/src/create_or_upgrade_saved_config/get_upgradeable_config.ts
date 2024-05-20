@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import Semver from 'semver';
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import Semver from 'semver';
 import type { ConfigAttributes } from '../saved_objects';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 

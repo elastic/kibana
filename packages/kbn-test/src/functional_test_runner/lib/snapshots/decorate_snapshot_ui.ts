@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import path from 'path';
-import type { SyncExpectationResult } from 'expect';
 import {
   SnapshotState,
-  addSerializer,
-  toMatchInlineSnapshot,
   toMatchSnapshot,
+  toMatchInlineSnapshot,
+  addSerializer,
 } from 'jest-snapshot';
+import path from 'path';
 import { once } from 'lodash';
-import { Suite, Test } from '../../fake_mocha_types';
+import type { SyncExpectationResult } from 'expect';
 import { Lifecycle } from '../lifecycle';
+import { Suite, Test } from '../../fake_mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 

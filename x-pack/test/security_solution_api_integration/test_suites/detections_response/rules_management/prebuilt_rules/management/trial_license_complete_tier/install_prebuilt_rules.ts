@@ -5,19 +5,19 @@
  * 2.0.
  */
 import expect from 'expect';
-import { deleteAllRules, deleteRule } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
-  createPrebuiltRuleAssetSavedObjects,
-  createRuleAssetSavedObject,
-  deleteAllPrebuiltRuleAssets,
   deleteAllTimelines,
-  getInstalledRules,
+  deleteAllPrebuiltRuleAssets,
+  createRuleAssetSavedObject,
+  createPrebuiltRuleAssetSavedObjects,
+  installPrebuiltRulesAndTimelines,
   getPrebuiltRulesAndTimelinesStatus,
   getPrebuiltRulesStatus,
   installPrebuiltRules,
-  installPrebuiltRulesAndTimelines,
+  getInstalledRules,
 } from '../../../../utils';
+import { deleteAllRules, deleteRule } from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');

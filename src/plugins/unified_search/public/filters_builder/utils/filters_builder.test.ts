@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { buildEmptyFilter, type Filter, isCombinedFilter, BooleanRelation } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { BooleanRelation, type Filter, buildEmptyFilter, isCombinedFilter } from '@kbn/es-query';
-import { getBooleanRelationType } from '../../utils';
 import {
-  addFilter,
   getFilterByPath,
   getPathInArray,
+  addFilter,
+  removeFilter,
   moveFilter,
   normalizeFilters,
-  removeFilter,
 } from './filters_builder';
+import { getBooleanRelationType } from '../../utils';
 
 import {
   getDataAfterNormalized,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { render, waitFor } from '@testing-library/react';
-import React from 'react';
-import { getRiskScoreDonutAttributes } from '../../../entity_analytics/lens_attributes/risk_score_donut';
-import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
-import * as inputActions from '../../store/inputs/actions';
-import { InputsModelId } from '../../store/inputs/constants';
-import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { VisualizationEmbeddable } from './visualization_embeddable';
+import * as inputActions from '../../store/inputs/actions';
+import { InputsModelId } from '../../store/inputs/constants';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
+import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
+import { getRiskScoreDonutAttributes } from '../../../entity_analytics/lens_attributes/risk_score_donut';
 
 jest.mock('./lens_embeddable');
 jest.mock('../page/use_refetch_by_session', () => ({

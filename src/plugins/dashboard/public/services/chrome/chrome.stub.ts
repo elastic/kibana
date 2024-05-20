@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { chromeServiceMock, coreMock } from '@kbn/core/public/mocks';
+import { coreMock, chromeServiceMock } from '@kbn/core/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardChromeService } from './types';
 

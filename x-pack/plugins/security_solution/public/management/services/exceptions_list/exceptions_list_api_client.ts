@@ -16,12 +16,12 @@ import type {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { HttpStart } from '@kbn/core/public';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
   INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
 } from '@kbn/securitysolution-list-constants';
+import type { HttpStart } from '@kbn/core/public';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 /**
@@ -40,7 +40,7 @@ export class ExceptionsListApiClient {
     private readonly listDefinition: CreateExceptionListSchema,
     private readonly readTransform?: (item: ExceptionListItemSchema) => ExceptionListItemSchema,
     private readonly writeTransform?: <
-      T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema,
+      T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema
     >(
       item: T
     ) => T,

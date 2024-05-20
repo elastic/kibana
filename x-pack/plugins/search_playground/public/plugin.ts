@@ -6,16 +6,16 @@
  */
 
 import {
-  AppMountParameters,
   CoreSetup,
-  CoreStart,
   Plugin,
+  CoreStart,
+  AppMountParameters,
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { docLinks } from '../common/doc_links';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
-import { Playground, PlaygroundToolbar, getPlaygroundProvider } from './embeddable';
+import { PlaygroundToolbar, Playground, getPlaygroundProvider } from './embeddable';
 import {
   AppPluginStartDependencies,
   SearchPlaygroundConfigType,

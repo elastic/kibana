@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
 import { getSearchParams, getSearchParamsFromRequest } from './get_search_params';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 function getConfigStub(config: any = {}): GetConfigFn {
   return (key) => config[key];

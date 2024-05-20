@@ -6,17 +6,17 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiText,
   EuiListGroup,
+  EuiSpacer,
   EuiListGroupItem,
   EuiListGroupItemProps,
-  EuiSpacer,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { EuiListGroupProps } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
+import { EuiListGroupProps } from '@elastic/eui';
 
 export function SectionTitle({ children }: { children?: ReactNode }) {
   return (

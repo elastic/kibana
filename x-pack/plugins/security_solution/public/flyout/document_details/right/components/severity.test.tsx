@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
-import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import { DocumentSeverity } from './severity';
 import { SEVERITY_VALUE_TEST_ID } from './test_ids';
+import { DocumentSeverity } from './severity';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { TestProviders } from '../../../../common/mock';
 
 const renderDocumentSeverity = (contextValue: RightPanelContext) =>
   render(

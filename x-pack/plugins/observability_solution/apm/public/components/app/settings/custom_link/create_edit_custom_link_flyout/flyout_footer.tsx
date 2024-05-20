@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutFooter,
+  EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { DeleteButton } from './delete_button';
 
 export function FlyoutFooter({

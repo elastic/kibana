@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React from 'react';
-import { Ping } from '../../../../../../common/runtime_types';
 import { ReactRouterEuiLink } from '../../common/react_router_helpers';
+import { Ping } from '../../../../../../common/runtime_types';
 
 const LabelLink = euiStyled.div`
   margin-bottom: ${(props) => props.theme.eui.euiSizeXS};

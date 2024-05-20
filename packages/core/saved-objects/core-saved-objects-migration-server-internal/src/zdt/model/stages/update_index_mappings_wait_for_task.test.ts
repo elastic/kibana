@@ -7,13 +7,13 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import type { ResponseType } from '../../next';
-import type { UpdateIndexMappingsState } from '../../state';
 import {
-  type MockedMigratorContext,
   createContextMock,
   createPostInitState,
+  type MockedMigratorContext,
 } from '../../test_helpers';
+import type { ResponseType } from '../../next';
+import type { UpdateIndexMappingsState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { updateIndexMappings } from './update_index_mappings';
 

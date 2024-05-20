@@ -6,8 +6,8 @@
  */
 
 import {
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../es_fields/apm';

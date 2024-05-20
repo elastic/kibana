@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { PassThrough, Readable } from 'stream';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { KibanaRequest } from '@kbn/core-http-server';
-import { Logger } from '@kbn/core/server';
-import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { get } from 'lodash/fp';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { PassThrough, Readable } from 'stream';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { Logger } from '@kbn/core/server';
 import { handleStreamStorage } from './parse_stream';
 
 export interface Props {

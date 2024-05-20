@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { lazy } from 'react';
 import {
   SENTINELONE_CONNECTOR_ID,
   SENTINELONE_TITLE,
   SUB_ACTION,
 } from '../../../common/sentinelone/constants';
 import type {
-  SentinelOneActionParams,
   SentinelOneConfig,
   SentinelOneSecrets,
+  SentinelOneActionParams,
 } from '../../../common/sentinelone/types';
 
 interface ValidationErrors {

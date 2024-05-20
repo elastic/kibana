@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
+import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
-import { useReducer } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import deepEqual from 'fast-deep-equal';
+import { useReducer } from 'react';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { DEFAULT_PAGE_SIZE, LOCAL_STORAGE_PAGE_SIZE_KEY } from '../constants';
 

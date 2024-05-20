@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import os from 'os';
 import Path from 'path';
+import os from 'os';
 
-import { KibanaPackageJson, REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
+import { REPO_ROOT, kibanaPackageJson, KibanaPackageJson } from '@kbn/repo-info';
 import {
   Package,
-  PluginPackage,
-  PluginSelector,
   getPackages,
+  PluginSelector,
+  PluginPackage,
   getPluginPackagesFilter,
 } from '@kbn/repo-packages';
 
-import { ALL_PLATFORMS, PlatformArchitecture, PlatformName } from './platform';
-import { VersionInfo, getVersionInfo } from './version_info';
+import { getVersionInfo, VersionInfo } from './version_info';
+import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
 
 interface Options {
   isRelease: boolean;

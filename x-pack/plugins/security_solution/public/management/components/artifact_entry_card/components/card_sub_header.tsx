@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { memo } from 'react';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import type { EffectScopeProps } from './effect_scope';
-import { EffectScope } from './effect_scope';
 import type { TouchedByUsersProps } from './touched_by_users';
 import { TouchedByUsers } from './touched_by_users';
+import type { EffectScopeProps } from './effect_scope';
+import { EffectScope } from './effect_scope';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export type SubHeaderProps = TouchedByUsersProps &
   EffectScopeProps &

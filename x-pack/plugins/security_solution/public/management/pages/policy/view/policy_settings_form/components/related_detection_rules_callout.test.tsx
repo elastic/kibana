@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { exactMatchText } from '../mocks';
+import React from 'react';
 import { RelatedDetectionRulesCallout } from './related_detection_rules_callout';
+import { exactMatchText } from '../mocks';
 
 describe('Policy form RelatedDetectionRulesCallout component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

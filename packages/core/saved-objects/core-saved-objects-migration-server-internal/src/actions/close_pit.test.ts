@@ -1,5 +1,3 @@
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
  * Side Public License, v 1.
  */
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { closePit } from './close_pit';
 
 jest.mock('./catch_retryable_es_client_errors');

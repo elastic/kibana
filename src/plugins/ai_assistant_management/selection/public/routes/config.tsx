@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createRouter } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { createRouter } from '@kbn/typed-react-router-config';
 import { AiAssistantSelectionPage } from './components/ai_assistant_selection_page';
 
 /**

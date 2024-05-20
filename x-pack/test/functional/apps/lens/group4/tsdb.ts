@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
 import { partition } from 'lodash';
 import moment from 'moment';
+import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TEST_DOC_COUNT = 100;

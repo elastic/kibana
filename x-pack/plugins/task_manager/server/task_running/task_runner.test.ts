@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { executionContextServiceMock } from '@kbn/core/server/mocks';
-import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import apm from 'elastic-apm-node';
 import _ from 'lodash';
-import moment from 'moment';
 import sinon from 'sinon';
+import { secondsFromNow } from '../lib/intervals';
+import { asOk, asErr } from '../lib/result_type';
 import {
+  createTaskRunError,
   TaskErrorSource,
   TaskManagerRunner,
-  TaskRunResult,
   TaskRunningStage,
-  createTaskRunError,
+  TaskRunResult,
 } from '.';
-import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
-import { secondsFromNow } from '../lib/intervals';
-import { asErr, asOk } from '../lib/result_type';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
 import {
   TaskEvent,
-  TaskPersistence,
-  TaskRun,
-  asTaskManagerStatEvent,
-  asTaskMarkRunningEvent,
   asTaskRunEvent,
+  asTaskMarkRunningEvent,
+  TaskRun,
+  TaskPersistence,
+  asTaskManagerStatEvent,
 } from '../task_events';
+import { ConcreteTaskInstance, TaskStatus } from '../task';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwRetryableError, throwUnrecoverableError } from './errors';
+import apm from 'elastic-apm-node';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
+  calculateDelay,
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
-  calculateDelay,
 } from './task_runner';
+import { schema } from '@kbn/config-schema';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();

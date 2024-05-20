@@ -5,8 +5,8 @@
  * 2.0.
  */
 import {
-  SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG,
   getTemplateUrlFromAgentPolicy,
+  SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG,
 } from './get_template_url_from_agent_policy';
 
 describe('getTemplateUrlFromAgentPolicy', () => {

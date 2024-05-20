@@ -8,9 +8,9 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { deleteMigration } from './delete_migration';
+import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 import { deleteMigrationSavedObject } from './delete_migration_saved_object';
 import { applyMigrationCleanupPolicy } from './migration_cleanup';
-import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 
 jest.mock('./migration_cleanup');
 jest.mock('./delete_migration_saved_object');

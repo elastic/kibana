@@ -84,7 +84,9 @@
                 "tags": [],
                 "label": "fn",
                 "description": [],
-                "signature": ["(...args: any[]) => R"],
+                "signature": [
+                  "(...args: any[]) => R"
+                ],
                 "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -100,7 +102,10 @@
             "tags": [],
             "label": "getAsLabels",
             "description": [],
-            "signature": ["() => ", "Labels"],
+            "signature": [
+              "() => ",
+              "Labels"
+            ],
             "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -128,7 +133,9 @@
             "tags": [],
             "label": "toString",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,

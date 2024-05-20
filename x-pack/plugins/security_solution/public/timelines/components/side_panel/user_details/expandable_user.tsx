@@ -7,20 +7,20 @@
 
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { UserDetailsLink } from '../../../../common/components/links';
-import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
+import { UserOverview } from '../../../../overview/components/user_overview';
+import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { UsersType } from '../../../../explore/users/store/model';
-import { UserOverview } from '../../../../overview/components/user_overview';
 
 export const QUERY_ID = 'usersDetailsQuery';
 export interface ExpandableUserProps {

@@ -10,13 +10,13 @@ import React from 'react';
 
 import type { IconType } from '@elastic/eui';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
-  EuiLink,
-  EuiPanel,
   EuiText,
   EuiTitle,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiLink,
 } from '@elastic/eui';
 
 interface Props {

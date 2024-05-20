@@ -11,13 +11,13 @@ import { EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
-import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
 import { missingTransformStats } from '../../../../common/transform_list';
+import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
+import { useTransformCapabilities } from '../../../../hooks';
 import type { TransformListRow } from '../../../../common';
 import { isCompletedBatchTransform } from '../../../../common';
-import { useTransformCapabilities } from '../../../../hooks';
 
 export const scheduleNowActionNameText = i18n.translate(
   'xpack.transform.transformList.scheduleNowActionNameText',

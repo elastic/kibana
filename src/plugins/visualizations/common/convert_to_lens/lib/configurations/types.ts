@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { Range } from '@kbn/expressions-plugin/common';
+import { ColorSchemas } from '@kbn/charts-plugin/common';
 
 export interface PaletteParams {
   colorSchema: ColorSchemas;

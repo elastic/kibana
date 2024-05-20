@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PACKAGE_TEMPLATE_SUFFIX, USER_SETTINGS_TEMPLATE_SUFFIX } from '../constants';
+import type { USER_SETTINGS_TEMPLATE_SUFFIX, PACKAGE_TEMPLATE_SUFFIX } from '../constants';
 
 /**
  * Creates the base name for Elasticsearch assets in the form of

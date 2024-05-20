@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import { EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { useMlKibana } from '../../contexts/kibana';
+import { EuiIcon, EuiFlexItem } from '@elastic/eui';
 import { LinkCard } from '../link_card';
+import { useMlKibana } from '../../contexts/kibana';
 
 export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
   const {

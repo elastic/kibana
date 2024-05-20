@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { debounce } from 'lodash';
 import React, { useState, useMemo, useEffect } from 'react';
+import { debounce } from 'lodash';
 
 import type { monaco } from '@kbn/monaco';
 import usePrevious from 'react-use/lib/usePrevious';
 
 import { CodeEditor } from '@kbn/code-editor';
 
-import { EXPRESSIONS_LANGUAGE_ID } from '../../../common';
 import { ExpressionInputProps } from '../types';
+import { EXPRESSIONS_LANGUAGE_ID } from '../../../common';
 import { CODE_EDITOR_OPTIONS, LANGUAGE_CONFIGURATION } from './constants';
 import { getHoverProvider, getSuggestionProvider } from './providers';
 

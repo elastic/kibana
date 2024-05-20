@@ -7,9 +7,9 @@
 
 import Fs from 'fs';
 import { join } from 'path';
-import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { pageObjects } from './page_objects';
 
 // .server-log is specifically not enabled

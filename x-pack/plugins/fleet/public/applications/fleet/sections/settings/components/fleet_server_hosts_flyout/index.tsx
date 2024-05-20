@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiBetaBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiTitle,
+  EuiText,
+  EuiLink,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
   EuiForm,
   EuiFormRow,
-  EuiLink,
-  EuiSpacer,
   EuiSwitch,
-  EuiText,
-  EuiTitle,
+  EuiComboBox,
+  EuiCallOut,
+  EuiBetaBadge,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
 
-import { useStartServices } from '../../../../hooks';
-import type { FleetProxy, FleetServerHost } from '../../../../types';
-import { FLYOUT_MAX_WIDTH } from '../../constants';
-import { TextInput } from '../form';
 import { MultiRowInput } from '../multi_row_input';
+import { useStartServices } from '../../../../hooks';
+import { FLYOUT_MAX_WIDTH } from '../../constants';
+import type { FleetServerHost, FleetProxy } from '../../../../types';
+import { TextInput } from '../form';
 
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 

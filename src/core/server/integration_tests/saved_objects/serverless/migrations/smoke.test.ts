@@ -7,10 +7,10 @@
  */
 
 import {
+  request,
   TestServerlessESUtils,
   TestServerlessKibanaUtils,
   createTestServerlessInstances,
-  request,
 } from '@kbn/core-test-helpers-kbn-server';
 
 describe('Basic smoke test', () => {

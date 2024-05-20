@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BuildFlavor, DocLinksMeta } from './types';
+import { DocLinksMeta, BuildFlavor } from './types';
 
 export interface GetDocLinksMetaOptions {
   kibanaBranch: string;

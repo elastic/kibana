@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import {
-  ButtonGroupField,
-  HiddenField,
-  PasswordField,
-  TextField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
   UseField,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  TextField,
+  PasswordField,
+  HiddenField,
+  ButtonGroupField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { XmattersAuthenticationType } from '../types';
 import * as i18n from './translations';

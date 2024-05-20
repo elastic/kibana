@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiCheckbox, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { PropTypes } from 'prop-types';
 import React, { Fragment } from 'react';
+import { PropTypes } from 'prop-types';
+import { EuiCheckbox, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { EventsTable } from '../events_table';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function ImportedEvents({
   events,

@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue, TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
+import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
 import type { ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
-import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 
-import { EOL, hostname } from 'node:os';
+import { hostname, EOL } from 'node:os';
 import url, { URL } from 'node:url';
 
-import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
-import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { Duration } from 'moment';
-import { CdnConfig } from './cdn_config';
-import { CspConfig, CspConfigType } from './csp';
+import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
+import { CspConfigType, CspConfig } from './csp';
 import { ExternalUrlConfig } from './external_url';
 import {
-  parseRawSecurityResponseHeadersConfig,
   securityResponseHeadersSchema,
+  parseRawSecurityResponseHeadersConfig,
 } from './security_response_headers_config';
+import { CdnConfig } from './cdn_config';
 
 const SECOND = 1000;
 

@@ -9,10 +9,10 @@ import React, { useEffect, useState } from 'react';
 
 import {
   EuiAccordion,
-  type EuiAccordionProps,
   EuiFlexGroup,
   EuiFlexItem,
   useGeneratedHtmlId,
+  type EuiAccordionProps,
 } from '@elastic/eui';
 
 interface Props {

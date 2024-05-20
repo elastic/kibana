@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND } from '@kbn/elastic-assistant-common';
 import { getCurrentUserFindRequest, requestMock } from '../../__mocks__/request';
+import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND } from '@kbn/elastic-assistant-common';
+import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindConversationsResultWithSingleHit } from '../../__mocks__/response';
-import { serverMock } from '../../__mocks__/server';
 import { findUserConversationsRoute } from './find_route';
 
 describe('Find user conversations route', () => {

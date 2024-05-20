@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { MaintenanceWindowStatus } from '../../../../../common';
-import { UpdateMaintenanceWindowRequestBody } from '../../../../../common/routes/maintenance_window/apis/update';
-import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { maintenanceWindowClientMock } from '../../../../maintenance_window_client.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { rewritePartialMaintenanceBodyRes } from '../../../lib';
-import { transformUpdateBody } from './transforms';
+import { maintenanceWindowClientMock } from '../../../../maintenance_window_client.mock';
 import { updateMaintenanceWindowRoute } from './update_maintenance_window_route';
+import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
+import { MaintenanceWindowStatus } from '../../../../../common';
+import { transformUpdateBody } from './transforms';
+import { rewritePartialMaintenanceBodyRes } from '../../../lib';
+import { UpdateMaintenanceWindowRequestBody } from '../../../../../common/routes/maintenance_window/apis/update';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 

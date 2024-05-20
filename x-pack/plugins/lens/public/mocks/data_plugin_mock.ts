@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { Filter, isFilterPinned } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import moment from 'moment';
 import { Observable, Subject } from 'rxjs';
+import moment from 'moment';
+import { isFilterPinned, Filter } from '@kbn/es-query';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 function createMockTimefilter() {
   const unsubscribe = jest.fn();

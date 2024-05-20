@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getEndpointAuthzInitialState } from '../../../../../common/endpoint/service/authz';
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { getEndpointAuthzInitialState } from '../../../../../common/endpoint/service/authz';
 
 export const getEndpointPrivilegesInitialState = (): EndpointPrivileges => {
   return {

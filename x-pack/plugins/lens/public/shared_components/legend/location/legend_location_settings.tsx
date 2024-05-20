@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiButtonGroup, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { VerticalAlignment, HorizontalAlignment, Position } from '@elastic/charts';
 
 export interface LegendLocationSettingsProps {
   /**

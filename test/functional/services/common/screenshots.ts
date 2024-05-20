@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { mkdir, readFileSync, writeFile } from 'fs';
-import { dirname, resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
 
 import del from 'del';
 
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { comparePngs } from '../lib/compare_pngs';
+import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
 
 const mkdirAsync = promisify(mkdir);
 const writeFileAsync = promisify(writeFile);

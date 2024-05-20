@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities } from '@kbn/core/public';
 import { ReactNode } from 'react';
+import type { Capabilities } from '@kbn/core/public';
 import { SavedObjectsManagementRecord } from '.';
 
 interface ActionContext {

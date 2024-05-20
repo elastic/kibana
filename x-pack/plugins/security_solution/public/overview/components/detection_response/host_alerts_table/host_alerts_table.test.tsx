@@ -10,9 +10,9 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
-import { HostAlertsTable } from './host_alerts_table';
 import { parsedVulnerableHostsAlertsResult } from './mock_data';
 import type { UseHostAlertsItems } from './use_host_alerts_items';
+import { HostAlertsTable } from './host_alerts_table';
 
 const mockNavigateToAlertsPageWithFilters = jest.fn();
 jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {

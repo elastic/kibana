@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MAX_WIDTH, calculateWidthFromCharCount } from './calculate_width_from_char_count';
+import { calculateWidthFromCharCount, MAX_WIDTH } from './calculate_width_from_char_count';
 
 describe('calculateWidthFromCharCount', () => {
   it('should return minimum width if char count is smaller than minWidth', () => {

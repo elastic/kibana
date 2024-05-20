@@ -6,29 +6,29 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { TimelineType } from '../../../../../common/api/timeline';
-import type { KueryFilterQuery } from '../../../../../common/types/timeline';
-import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
-import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { KqlMode } from '../../../store/model';
+import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
+import { SuperDatePicker } from '../../../../common/components/super_date_picker';
+import type { KueryFilterQuery } from '../../../../../common/types/timeline';
 import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
-import { Sourcerer } from '../../../../common/components/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
-import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../tour/step_config';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { Sourcerer } from '../../../../common/components/sourcerer';
 import {
   DATA_PROVIDER_HIDDEN_EMPTY,
   DATA_PROVIDER_HIDDEN_POPULATED,
   DATA_PROVIDER_VISIBLE,
 } from './translations';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../tour/step_config';
 
 interface Props {
   dataProviders: DataProvider[];

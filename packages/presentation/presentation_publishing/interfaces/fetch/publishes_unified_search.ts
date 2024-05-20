@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { PublishingSubject } from '../../publishing_subject';
 
 export interface PublishesTimeRange {

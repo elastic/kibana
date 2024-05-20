@@ -9,15 +9,15 @@ import React, { memo, useEffect, useState, useMemo } from 'react';
 
 import type { INullableBaseStateContainer, PureTransition } from '@kbn/kibana-utils-plugin/public';
 import {
-  createKbnUrlStateStorage,
   createStateContainer,
-  getStateFromKbnUrl,
   syncState,
+  createKbnUrlStateStorage,
+  getStateFromKbnUrl,
 } from '@kbn/kibana-utils-plugin/public';
 
+import { DEFAULT_LOGS_STATE, STATE_STORAGE_KEY } from './constants';
 import type { AgentLogsProps, AgentLogsState } from './agent_logs';
 import { AgentLogsUI, AgentLogsUrlStateHelper } from './agent_logs';
-import { DEFAULT_LOGS_STATE, STATE_STORAGE_KEY } from './constants';
 
 export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent' | 'agentPolicy'>> =
   memo(({ agent, agentPolicy }) => {

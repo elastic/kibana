@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import {
-  BulkOperationType,
-  BulkRequest,
-  BulkResponse,
-  BulkResponseItem,
-} from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
@@ -20,6 +14,12 @@ import {
   ALERT_WORKFLOW_TAGS,
   EVENT_ACTION,
 } from '@kbn/rule-data-utils';
+import {
+  BulkRequest,
+  BulkResponse,
+  BulkResponseItem,
+  BulkOperationType,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { resolveAlertConflicts } from './alert_conflict_resolver';
 

@@ -7,7 +7,7 @@
  */
 
 import type { DataViewBase, Query } from '@kbn/es-query';
-import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
 
 export const validateQuery = (input: Query | undefined, dataView: DataViewBase) => {
   let isValid = true;

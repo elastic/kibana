@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { mapValues } from 'lodash';
 import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import { mapValues } from 'lodash';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { isDataLayer } from './visualization';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
-import {
-  DatatableWithFormatInfo,
-  DatatablesWithFormatInfo,
-  hasMultipleLayersWithSplits,
-} from './data_layers';
 import {
   LayerAccessorsTitles,
   LayerFieldFormats,
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from './layers';
-import { isDataLayer } from './visualization';
+import {
+  DatatablesWithFormatInfo,
+  DatatableWithFormatInfo,
+  hasMultipleLayersWithSplits,
+} from './data_layers';
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 

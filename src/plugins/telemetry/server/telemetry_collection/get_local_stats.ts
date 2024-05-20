@@ -8,14 +8,14 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  StatsCollectionContext,
   StatsGetter,
+  StatsCollectionContext,
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
-import { DATA_TELEMETRY_ID, DataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
-import { KibanaUsageStats, getKibana, handleKibanaStats } from './get_kibana';
+import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
 import { getNodesUsage } from './get_nodes_usage';
+import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get_data_telemetry';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the

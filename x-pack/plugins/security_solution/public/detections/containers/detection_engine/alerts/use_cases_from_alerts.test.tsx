@@ -6,11 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { useCasesFromAlerts } from './use_cases_from_alerts';
+import * as api from './api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
-import * as api from './api';
 import { mockCaseIdsFromAlertId } from './mock';
-import { useCasesFromAlerts } from './use_cases_from_alerts';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');

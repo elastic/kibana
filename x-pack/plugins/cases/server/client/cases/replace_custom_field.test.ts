@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { replaceCustomField } from './replace_custom_field';

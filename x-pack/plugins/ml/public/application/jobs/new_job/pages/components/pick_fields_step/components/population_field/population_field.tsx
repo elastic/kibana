@@ -9,13 +9,13 @@ import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 
 import type { Field } from '@kbn/ml-anomaly-utils';
+import { SplitFieldSelect } from '../split_field_select';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { Description } from './description';
 import type { PopulationJobCreator, RareJobCreator } from '../../../../../common/job_creator';
 import { isPopulationJobCreator } from '../../../../../common/job_creator';
-import { JobCreatorContext } from '../../../job_creator_context';
-import { SplitFieldSelect } from '../split_field_select';
-import { Description } from './description';
 
 export const PopulationFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);

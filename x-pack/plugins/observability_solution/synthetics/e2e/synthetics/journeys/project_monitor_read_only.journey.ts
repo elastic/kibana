@@ -6,12 +6,12 @@
  */
 
 import { after, before, expect, journey, step } from '@elastic/synthetics';
-import { SyntheticsMonitor } from '../../../common/runtime_types';
+import { SyntheticsServices } from './services/synthetics_services';
 import { recordVideo } from '../../helpers/record_video';
-import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { cleanTestMonitors, enableMonitorManagedViaApi } from './services/add_monitor';
 import { addTestMonitorProject } from './services/add_monitor_project';
-import { SyntheticsServices } from './services/synthetics_services';
+import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
+import { SyntheticsMonitor } from '../../../common/runtime_types';
 
 journey('ProjectMonitorReadOnly', async ({ page, params }) => {
   recordVideo(page);

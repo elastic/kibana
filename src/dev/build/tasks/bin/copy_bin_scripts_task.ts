@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Task, copyAll } from '../../lib';
+import { copyAll, Task } from '../../lib';
 
 export const CopyBinScripts: Task = {
   description: 'Copying bin scripts into platform-generic build directory',

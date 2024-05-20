@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
 
@@ -19,14 +19,14 @@ import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
 import { DataPanel } from '../data_panel';
 import { AppSearchPageTemplate } from '../layout';
 
-import { EmptyMetaEnginesState, EmptyState } from './components';
+import { EmptyState, EmptyMetaEnginesState } from './components';
 import { AuditLogsModal } from './components/audit_logs_modal/audit_logs_modal';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
+  ENGINES_OVERVIEW_TITLE,
   CREATE_AN_ENGINE_BUTTON_LABEL,
   CREATE_A_META_ENGINE_BUTTON_LABEL,
-  ENGINES_OVERVIEW_TITLE,
   ENGINES_TITLE,
   META_ENGINES_TITLE,
 } from './constants';

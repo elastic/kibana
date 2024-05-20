@@ -155,7 +155,9 @@
           "min": 240
         }
       },
-      "versions": ["7.0.0-alpha1"]
+      "versions": [
+        "7.0.0-alpha1"
+      ]
     },
     "status": "green",
     "timestamp": 1505759229660

@@ -19,7 +19,7 @@ import { useDarkMode, useKibana } from '@kbn/kibana-react-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
 
 import type { Rule } from '../../model';
-import { RuleBuilderError, generateRulesFromRaw } from '../../model';
+import { generateRulesFromRaw, RuleBuilderError } from '../../model';
 
 interface Props {
   rules: Rule | null;

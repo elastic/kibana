@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiCheckbox,
-  EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiCheckbox,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
-import {
-  useAuthz,
-  useBulkGetAgentPoliciesQuery,
-  useGetPackageInstallStatus,
-  useInstallPackage,
-  useLink,
-  useStartServices,
-  useUpgradePackagePoliciesMutation,
-} from '../../../../../hooks';
 import type {
   PackageInfo,
-  PackagePolicy,
   UpgradePackagePolicyDryRunResponse,
+  PackagePolicy,
 } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
+import {
+  useInstallPackage,
+  useGetPackageInstallStatus,
+  useStartServices,
+  useAuthz,
+  useLink,
+  useUpgradePackagePoliciesMutation,
+  useBulkGetAgentPoliciesQuery,
+} from '../../../../../hooks';
 
 interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;

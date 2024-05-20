@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { STACKED_OPTIONS } from '../../visualizations/constants';
+import _ from 'lodash';
 import { newMetricAggFn } from './new_metric_agg_fn';
+import { STACKED_OPTIONS } from '../../visualizations/constants';
 
 export const newSeriesFn = (obj = {}) => {
   return _.assign(

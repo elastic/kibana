@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
+import PropTypes from 'prop-types';
 import {
-  EuiCallOut,
-  EuiCode,
-  EuiFieldText,
   EuiFormRow,
-  EuiLink,
+  EuiFieldText,
+  EuiCallOut,
   EuiSpacer,
-  EuiText,
+  EuiCode,
   EuiTextArea,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React from 'react';
-import { CANVAS, DataSourceStrings, TIMELION, TIMELION_QUERY_URL } from '../../../i18n';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { DataSourceStrings, TIMELION_QUERY_URL, TIMELION, CANVAS } from '../../../i18n';
 
 const { Timelion: strings } = DataSourceStrings;
 
@@ -114,7 +114,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
         display="columnCompressed"
       >
         <EuiFieldText
-          compressed={true}
+          compressed
           value={getInterval()}
           onChange={(e) => setArg('interval', e.target.value)}
         />

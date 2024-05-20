@@ -7,15 +7,15 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import type { TimelineModel } from '../../../..';
-import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
+import { useRuleFromTimeline } from './use_rule_from_timeline';
+import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
+import { resolveTimeline } from '../../../../timelines/containers/api';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
-import { useGetInitialUrlParamValue } from '../../../../common/utils/global_query_string/helpers';
-import { resolveTimeline } from '../../../../timelines/containers/api';
-import { useRuleFromTimeline } from './use_rule_from_timeline';
+import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
+import type { TimelineModel } from '../../../..';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/utils/global_query_string/helpers');

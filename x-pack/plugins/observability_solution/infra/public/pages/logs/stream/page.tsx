@@ -6,9 +6,9 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { LogStreamPageStateProvider } from '../../../observability_logs/log_stream_page/state';

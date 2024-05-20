@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["DELETE"],
-    "patterns": ["_enrich/policy/{name}"],
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_enrich/policy/{name}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-enrich-policy-api.html",
     "availability": {
       "stack": true,

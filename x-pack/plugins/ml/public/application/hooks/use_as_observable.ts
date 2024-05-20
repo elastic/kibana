@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
 /**

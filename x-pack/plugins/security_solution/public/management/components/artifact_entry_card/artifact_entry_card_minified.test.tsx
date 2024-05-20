@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { act, fireEvent } from '@testing-library/react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type { ArtifactEntryCardMinifiedProps } from './artifact_entry_card_minified';
 import { ArtifactEntryCardMinified } from './artifact_entry_card_minified';
-import { getExceptionProviderMock, getTrustedAppProviderMock } from './test_utils';
+import { act, fireEvent } from '@testing-library/react';
 import type { AnyArtifact } from './types';
+import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],

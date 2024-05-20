@@ -6,9 +6,9 @@
  */
 
 import { difference } from 'lodash';
+import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { processCreatedBy } from '../../../../../../common/util/job_utils';
 import { ml } from '../../../../services/ml_api_service';
-import { getNewJobLimits } from '../../../../services/ml_server_info';
 
 export function saveJob(job, newJobData, finish) {
   return new Promise((resolve, reject) => {

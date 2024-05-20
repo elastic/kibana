@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import type { TimelineSavedObject } from '../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import { mockGetTemplateTimelineValue, mockGetTimelineValue } from '../__mocks__/import_timelines';
 import {
+  commonFailureChecker,
+  checkIsCreateFailureCases,
+  checkIsUpdateFailureCases,
+  checkIsCreateViaImportFailureCases,
+  EMPTY_TITLE_ERROR_MESSAGE,
+  UPDATE_STATUS_ERROR_MESSAGE,
+  CREATE_TIMELINE_ERROR_MESSAGE,
   CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
   CREATE_TEMPLATE_TIMELINE_WITHOUT_VERSION_ERROR_MESSAGE,
-  CREATE_TIMELINE_ERROR_MESSAGE,
-  CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE,
-  EMPTY_TITLE_ERROR_MESSAGE,
-  NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
-  NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
   NO_MATCH_ID_ERROR_MESSAGE,
-  NO_MATCH_TEMPLATE_VERSION_ERROR_MESSAGE,
   NO_MATCH_VERSION_ERROR_MESSAGE,
-  TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
-  UPDATE_STATUS_ERROR_MESSAGE,
+  NO_MATCH_TEMPLATE_VERSION_ERROR_MESSAGE,
+  NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
   UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
-  checkIsCreateFailureCases,
-  checkIsCreateViaImportFailureCases,
-  checkIsUpdateFailureCases,
-  checkIsUpdateViaImportFailureCases,
-  commonFailureChecker,
+  CREATE_WITH_INVALID_STATUS_ERROR_MESSAGE,
   getImportExistingTimelineError,
+  checkIsUpdateViaImportFailureCases,
+  NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
+  TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
 } from './failure_cases';
+import type { TimelineSavedObject } from '../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { mockGetTimelineValue, mockGetTemplateTimelineValue } from '../__mocks__/import_timelines';
 
 describe('failure cases', () => {
   describe('commonFailureChecker', () => {

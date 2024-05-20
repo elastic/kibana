@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import React from 'react';
 
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { PushedUserAction } from '../../../common/types/domain';
 import { UserActionActions } from '../../../common/types/domain';
-import type { CaseConnectors } from '../../containers/types';
+import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
-import type { UserActionBuilder } from './types';
+import type { CaseConnectors } from '../../containers/types';
 
 const getPushDates = (
   userActionPushedAt: string,

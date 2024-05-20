@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import { mount, shallow } from 'enzyme';
-import { keys } from 'lodash';
+import { shallow, mount } from 'enzyme';
 import React from 'react';
+import { keys } from 'lodash';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 
-import type { EuiSuperSelectProps } from '@elastic/eui';
 import { ConditionEntryInput } from '.';
+import type { EuiSuperSelectProps } from '@elastic/eui';
 
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;

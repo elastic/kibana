@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ServerlessRoleName } from '../../support/roles';
-import { cleanupSavedQuery, loadSavedQuery } from '../../tasks/api_fixtures';
-import { triggerLoadData } from '../../tasks/inventory';
-import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
+import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
+import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
+import { triggerLoadData } from '../../tasks/inventory';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Inventory', { tags: ['@ess'] }, () => {
   let savedQueryName: string;

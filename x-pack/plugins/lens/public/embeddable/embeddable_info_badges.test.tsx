@@ -1,4 +1,3 @@
-import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import { render, screen } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import { UserMessage } from '../types';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
+import { UserMessage } from '../types';
 
 describe('EmbeddableFeatureBadge', () => {
   function renderPopup(messages: UserMessage[], count: number = messages.length) {

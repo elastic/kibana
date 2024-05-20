@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { startsWith } from '../../../validators/string';
 import { ValidationFunc } from '../../hook_form_lib';
+import { startsWith } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
 export const startsWithField =

@@ -8,11 +8,11 @@
 
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  ISearchStartSearchSource,
   injectReferences,
+  ISearchStartSearchSource,
   parseSearchSourceJSON,
 } from '@kbn/data-plugin/common';
-import { SavedSearchAttributes, fromSavedSearchAttributes } from '../../../common';
+import { fromSavedSearchAttributes, SavedSearchAttributes } from '../../../common';
 
 interface GetSavedSearchDependencies {
   savedObjects: SavedObjectsClientContract;

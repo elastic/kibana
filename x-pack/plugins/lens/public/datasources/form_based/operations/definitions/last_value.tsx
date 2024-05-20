@@ -5,37 +5,37 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
+  EuiFormRow,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiFormRow,
   EuiSwitch,
-  EuiText,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LAST_VALUE_ID, LAST_VALUE_NAME } from '@kbn/lens-formula-docs';
-import React from 'react';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
-import type { IndexPattern, IndexPatternField } from '../../../../types';
-import { DataType } from '../../../../types';
-import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
-import { getGroupByKey } from './get_group_by_key';
+import type { IndexPatternField, IndexPattern } from '../../../../types';
+import { DataType } from '../../../../types';
 import {
-  comparePreviousColumnFilter,
-  getExistsFilter,
-  getFilter,
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
+  getFilter,
+  getExistsFilter,
+  comparePreviousColumnFilter,
 } from './helpers';
-import { FormRow } from './shared_components/form_row';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { isRuntimeField, isScriptedField } from './terms/helpers';
+import { FormRow } from './shared_components/form_row';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { getGroupByKey } from './get_group_by_key';
 
 function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(

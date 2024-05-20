@@ -7,9 +7,9 @@
  */
 
 import { keys, partition } from 'lodash';
-import { Filter, RangeFilter, isRangeFilter } from '../build_filters';
-import { convertRangeFilterToTimeRangeString } from './convert_range_filter';
+import { Filter, isRangeFilter, RangeFilter } from '../build_filters';
 import { TimeRange } from './types';
+import { convertRangeFilterToTimeRangeString } from './convert_range_filter';
 
 export function extractTimeFilter(timeFieldName: string, filters: Filter[]) {
   const [timeRangeFilter, restOfFilters] = partition(filters, (obj: Filter) => {

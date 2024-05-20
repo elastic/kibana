@@ -7,7 +7,9 @@
         "parentPluginId": "usageCollection",
         "id": "def-public.TrackApplicationView",
         "type": "Function",
-        "tags": ["constructor"],
+        "tags": [
+          "constructor"
+        ],
         "label": "TrackApplicationView",
         "description": [
           "\nReact component to track the number of clicks and minutes on screen of the children components."
@@ -33,7 +35,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": ["{@link TrackApplicationViewProps }"],
+            "description": [
+              "{@link TrackApplicationViewProps }"
+            ],
             "signature": [
               "React.PropsWithChildren<",
               {
@@ -62,7 +66,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TrackApplicationViewProps",
-        "description": ["\nProps to provide to the {@link TrackApplicationView} component."],
+        "description": [
+          "\nProps to provide to the {@link TrackApplicationView} component."
+        ],
         "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -86,7 +92,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "children",
-            "description": ["\nThe React component to be tracked."],
+            "description": [
+              "\nThe React component to be tracked."
+            ],
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
@@ -107,7 +115,9 @@
       "type": "Interface",
       "tags": [],
       "label": "UsageCollectionSetup",
-      "description": ["Public's setup APIs exposed by the UsageCollection Service"],
+      "description": [
+        "Public's setup APIs exposed by the UsageCollection Service"
+      ],
       "path": "src/plugins/usage_collection/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
@@ -118,7 +128,9 @@
           "type": "Object",
           "tags": [],
           "label": "components",
-          "description": ["Component helpers to track usage collection in the UI"],
+          "description": [
+            "Component helpers to track usage collection in the UI"
+          ],
           "signature": [
             "{ ApplicationUsageTrackingProvider: React.FC<{ children?: React.ReactNode; }>; }"
           ],
@@ -132,7 +144,9 @@
           "type": "Function",
           "tags": [],
           "label": "reportUiCounter",
-          "description": ["Report whenever a UI event occurs for UI counters to report it"],
+          "description": [
+            "Report whenever a UI event occurs for UI counters to report it"
+          ],
           "signature": [
             "(appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void"
           ],
@@ -147,7 +161,9 @@
               "tags": [],
               "label": "appName",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -160,7 +176,9 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -173,7 +191,9 @@
               "tags": [],
               "label": "eventNames",
               "description": [],
-              "signature": ["string | string[]"],
+              "signature": [
+                "string | string[]"
+              ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -186,7 +206,9 @@
               "tags": [],
               "label": "count",
               "description": [],
-              "signature": ["number | undefined"],
+              "signature": [
+                "number | undefined"
+              ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -205,7 +227,9 @@
       "type": "Interface",
       "tags": [],
       "label": "UsageCollectionStart",
-      "description": ["Public's start APIs exposed by the UsageCollection Service"],
+      "description": [
+        "Public's start APIs exposed by the UsageCollection Service"
+      ],
       "path": "src/plugins/usage_collection/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
@@ -216,7 +240,9 @@
           "type": "Function",
           "tags": [],
           "label": "reportUiCounter",
-          "description": ["Report whenever a UI event occurs for UI counters to report it"],
+          "description": [
+            "Report whenever a UI event occurs for UI counters to report it"
+          ],
           "signature": [
             "(appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void"
           ],
@@ -231,7 +257,9 @@
               "tags": [],
               "label": "appName",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -244,7 +272,9 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -257,7 +287,9 @@
               "tags": [],
               "label": "eventNames",
               "description": [],
-              "signature": ["string | string[]"],
+              "signature": [
+                "string | string[]"
+              ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -270,7 +302,9 @@
               "tags": [],
               "label": "count",
               "description": [],
-              "signature": ["number | undefined"],
+              "signature": [
+                "number | undefined"
+              ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -307,7 +341,9 @@
             "type": "Object",
             "tags": [],
             "label": "esClient",
-            "description": ["\nRequest-scoped Elasticsearch client"],
+            "description": [
+              "\nRequest-scoped Elasticsearch client"
+            ],
             "signature": [
               "{ create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
@@ -1543,7 +1579,9 @@
             "type": "Object",
             "tags": [],
             "label": "soClient",
-            "description": ["\nRequest-scoped Saved Objects client"],
+            "description": [
+              "\nRequest-scoped Saved Objects client"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -1566,7 +1604,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ICollector",
-        "description": ["\nCommon interface for Usage and Stats Collectors"],
+        "description": [
+          "\nCommon interface for Usage and Stats Collectors"
+        ],
         "signature": [
           {
             "pluginId": "usageCollection",
@@ -1587,7 +1627,9 @@
             "type": "Object",
             "tags": [],
             "label": "log",
-            "description": ["Logger"],
+            "description": [
+              "Logger"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/logging",
@@ -1607,7 +1649,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["The registered type (aka name) of the collector"],
+            "description": [
+              "The registered type (aka name) of the collector"
+            ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1673,8 +1717,12 @@
             "type": "Function",
             "tags": [],
             "label": "isReady",
-            "description": ["\nShould return `true` when it's safe to call the `fetch` method."],
-            "signature": ["() => boolean | Promise<boolean>"],
+            "description": [
+              "\nShould return `true` when it's safe to call the `fetch` method."
+            ],
+            "signature": [
+              "() => boolean | Promise<boolean>"
+            ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1706,7 +1754,11 @@
             "description": [
               "\nNotifies the counter about a new event happening so it can increase the count internally."
             ],
-            "signature": ["(params: ", "IncrementCounterParams", ") => void"],
+            "signature": [
+              "(params: ",
+              "IncrementCounterParams",
+              ") => void"
+            ],
             "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1717,8 +1769,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["{@link IncrementCounterParams }"],
-                "signature": ["IncrementCounterParams"],
+                "description": [
+                  "{@link IncrementCounterParams }"
+                ],
+                "signature": [
+                  "IncrementCounterParams"
+                ],
                 "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1736,7 +1792,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UsageCountersSavedObjectAttributes",
-        "description": ["\nThe attributes stored in the UsageCounters' SavedObjects"],
+        "description": [
+          "\nThe attributes stored in the UsageCounters' SavedObjects"
+        ],
         "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1747,7 +1805,9 @@
             "type": "string",
             "tags": [],
             "label": "domainId",
-            "description": ["The domain ID registered in the Usage Counter"],
+            "description": [
+              "The domain ID registered in the Usage Counter"
+            ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1758,7 +1818,9 @@
             "type": "string",
             "tags": [],
             "label": "counterName",
-            "description": ["The counter name"],
+            "description": [
+              "The counter name"
+            ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1769,7 +1831,9 @@
             "type": "string",
             "tags": [],
             "label": "counterType",
-            "description": ["The counter type"],
+            "description": [
+              "The counter type"
+            ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1780,7 +1844,9 @@
             "type": "number",
             "tags": [],
             "label": "count",
-            "description": ["Number of times the event has occurred"],
+            "description": [
+              "Number of times the event has occurred"
+            ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1797,7 +1863,9 @@
         "type": "Type",
         "tags": [],
         "label": "AllowedSchemaTypes",
-        "description": ["\nPossible type values in the schema"],
+        "description": [
+          "\nPossible type values in the schema"
+        ],
         "signature": [
           "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
@@ -1868,7 +1936,9 @@
         "type": "Type",
         "tags": [],
         "label": "CollectorOptions",
-        "description": ["\nOptions to instantiate a collector"],
+        "description": [
+          "\nOptions to instantiate a collector"
+        ],
         "signature": [
           "{ type: string; isReady: () => boolean | Promise<boolean>; schema?: ",
           {
@@ -1932,8 +2002,12 @@
         "type": "string",
         "tags": [],
         "label": "USAGE_COUNTERS_SAVED_OBJECT_TYPE",
-        "description": ["The Saved Objects type for Usage Counters"],
-        "signature": ["\"usage-counters\""],
+        "description": [
+          "The Saved Objects type for Usage Counters"
+        ],
+        "signature": [
+          "\"usage-counters\""
+        ],
         "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1994,7 +2068,9 @@
         "type": "Type",
         "tags": [],
         "label": "UsageCountersSavedObject",
-        "description": ["\nThe structure of the SavedObjects of type \"usage-counters\""],
+        "description": [
+          "\nThe structure of the SavedObjects of type \"usage-counters\""
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-saved-objects-common",
@@ -2026,7 +2102,9 @@
       "type": "Interface",
       "tags": [],
       "label": "UsageCollectionSetup",
-      "description": ["Server's setup APIs exposed by the UsageCollection Service"],
+      "description": [
+        "Server's setup APIs exposed by the UsageCollection Service"
+      ],
       "path": "src/plugins/usage_collection/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -2061,7 +2139,9 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -2076,7 +2156,9 @@
           "type": "Function",
           "tags": [],
           "label": "getUsageCounterByType",
-          "description": ["\nReturns a usage counter by type"],
+          "description": [
+            "\nReturns a usage counter by type"
+          ],
           "signature": [
             "(type: string) => ",
             {
@@ -2099,7 +2181,9 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -2220,7 +2304,9 @@
           "type": "Function",
           "tags": [],
           "label": "getCollectorByType",
-          "description": ["\nReturns a usage collector by type"],
+          "description": [
+            "\nReturns a usage collector by type"
+          ],
           "signature": [
             "<TFetchReturn, ExtraOptions extends object>(type: string) => ",
             {
@@ -2243,7 +2329,9 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,

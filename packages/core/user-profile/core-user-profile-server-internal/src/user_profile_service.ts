@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
-import type { Logger } from '@kbn/logging';
 import type {
   InternalUserProfileServiceSetup,
   InternalUserProfileServiceStart,
 } from './internal_contracts';
-import { convertUserProfileAPI, getDefaultUserProfileImplementation } from './utils';
+import { getDefaultUserProfileImplementation, convertUserProfileAPI } from './utils';
 
 export class UserProfileService
   implements CoreService<InternalUserProfileServiceSetup, InternalUserProfileServiceStart>

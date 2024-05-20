@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClient } from '@kbn/core/server';
 import {
-  getIndexPatternTelemetry,
   minMaxAvgLoC,
-  updateMax,
   updateMin,
+  updateMax,
+  getIndexPatternTelemetry,
 } from './register_index_pattern_usage_collection';
+import { SavedObjectsClient } from '@kbn/core/server';
 
 const scriptA = 'emit(0);';
 const scriptB = 'emit(1);\nemit(2);';

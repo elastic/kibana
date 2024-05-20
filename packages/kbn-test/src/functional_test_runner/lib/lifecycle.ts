@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { LifecyclePhase } from './lifecycle_phase';
 

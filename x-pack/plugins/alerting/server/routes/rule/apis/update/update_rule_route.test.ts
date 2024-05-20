@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/server/mocks';
 import { omit, pick } from 'lodash';
-import { RuleNotifyWhen, SanitizedRule } from '../../../../../common';
-import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { rulesClientMock } from '../../../../rules_client.mock';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { updateRuleRoute } from './update_rule_route';
+import { httpServiceMock } from '@kbn/core/server/mocks';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
+import { RuleNotifyWhen, SanitizedRule } from '../../../../../common';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({

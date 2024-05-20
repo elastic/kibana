@@ -6,7 +6,7 @@
  */
 
 import type { MlLicense } from '../../../common/license';
-import { InsufficientBasicLicenseError, InsufficientFullLicenseError } from './errors';
+import { InsufficientFullLicenseError, InsufficientBasicLicenseError } from './errors';
 
 export type LicenseCheck = () => void;
 

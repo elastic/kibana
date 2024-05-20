@@ -9,27 +9,27 @@ import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import { useFieldStatsFlyoutContext } from '../../../../../components/field_stats_flyout';
-import {
-  isAdvancedJobCreator,
-  isCategorizationJobCreator,
-  isGeoJobCreator,
-  isMultiMetricJobCreator,
-  isPopulationJobCreator,
-  isRareJobCreator,
-  isSingleMetricJobCreator,
-} from '../../../common/job_creator';
-import { EDITOR_MODE, JsonEditorFlyout } from '../common/json_editor_flyout';
 import { JobCreatorContext } from '../job_creator_context';
+import { WizardNav } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
-import { WizardNav } from '../wizard_nav';
-import { AdvancedView } from './components/advanced_view';
-import { CategorizationView } from './components/categorization_view';
-import { GeoView } from './components/geo_view';
+import { SingleMetricView } from './components/single_metric_view';
 import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
+import { AdvancedView } from './components/advanced_view';
+import { CategorizationView } from './components/categorization_view';
 import { RareView } from './components/rare_view';
-import { SingleMetricView } from './components/single_metric_view';
+import { GeoView } from './components/geo_view';
+import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import {
+  isSingleMetricJobCreator,
+  isMultiMetricJobCreator,
+  isPopulationJobCreator,
+  isCategorizationJobCreator,
+  isAdvancedJobCreator,
+  isRareJobCreator,
+  isGeoJobCreator,
+} from '../../../common/job_creator';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);

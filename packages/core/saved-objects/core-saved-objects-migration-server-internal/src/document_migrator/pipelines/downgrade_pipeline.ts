@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { cloneDeep } from 'lodash';
 import Semver from 'semver';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { Transform, TransformType, TypeTransforms } from '../types';
 import type { MigrationPipeline, MigrationPipelineResult } from './types';
 import { applyVersion, assertValidCoreVersion } from './utils';

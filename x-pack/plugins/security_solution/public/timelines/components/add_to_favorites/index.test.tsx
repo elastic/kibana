@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { AddToFavoritesButton } from '.';
 import { TimelineStatus } from '../../../../common/api/timeline';
-import { TestProviders, mockTimelineModel } from '../../../common/mock';
 
 const mockGetState = jest.fn();
 jest.mock('react-redux', () => {

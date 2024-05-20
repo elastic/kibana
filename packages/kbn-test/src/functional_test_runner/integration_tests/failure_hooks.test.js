@@ -9,8 +9,8 @@
 import { spawnSync } from 'child_process';
 import { resolve } from 'path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import stripAnsi from 'strip-ansi';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
 const FAILURE_HOOKS_CONFIG = require.resolve('./__fixtures__/failure_hooks/config.js');

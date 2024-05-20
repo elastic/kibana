@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import execa from 'execa';
 import fs from 'fs';
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import execa from 'execa';
 import { getBuildNumber } from './get_build_number';
 
 interface Options {

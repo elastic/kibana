@@ -1,5 +1,3 @@
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +5,14 @@ import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-
  * 2.0.
  */
 import { keyBy } from 'lodash';
+import { rangeQuery, kqlQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import { Coordinate } from '../../../../typings/timeseries';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
-import { Coordinate } from '../../../../typings/timeseries';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ErrorGroupDetailedStat {

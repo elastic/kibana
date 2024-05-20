@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiColorPickerSwatch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiColorPickerSwatch, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 export interface Props {

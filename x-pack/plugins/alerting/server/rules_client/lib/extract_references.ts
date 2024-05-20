@@ -6,16 +6,16 @@
  */
 
 import { SavedObjectReference } from '@kbn/core/server';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RuleTypeParams } from '../../types';
-import { extractedSavedObjectParamReferenceNamePrefix } from '../common/constants';
+import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
+import { extractedSavedObjectParamReferenceNamePrefix } from '../common/constants';
 import { RulesClientContext } from '../types';
 import { denormalizeActions } from './denormalize_actions';
 
 export async function extractReferences<
   Params extends RuleTypeParams,
-  ExtractedParams extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams
 >(
   context: RulesClientContext,
   ruleType: UntypedNormalizedRuleType,

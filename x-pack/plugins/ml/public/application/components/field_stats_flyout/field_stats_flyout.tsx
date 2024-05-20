@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiButton,
   EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
   EuiTitle,
+  EuiFlyoutBody,
   useGeneratedHtmlId,
+  EuiFlyoutFooter,
+  EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { type DataView } from '@kbn/data-plugin/common';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type {
   FieldStatsProps,
   FieldStatsServices,
 } from '@kbn/unified-field-list/src/components/field_stats';
-import { FieldStatsContent } from './field_stats_content';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
+import { FieldStatsContent } from './field_stats_content';
 
 export const FieldStatsFlyout: FC<{
   dataView: DataView;

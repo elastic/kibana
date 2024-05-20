@@ -9,11 +9,11 @@ import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
-import { LatencyChart } from '../../../shared/charts/latency_chart';
 import { ServiceOverviewThroughputChart } from '../../service_overview/service_overview_throughput_chart';
-import { HttpRequestsChart } from '../charts/http_requests_chart';
 import { SessionsChart } from '../charts/sessions_chart';
+import { HttpRequestsChart } from '../charts/http_requests_chart';
+import { LatencyChart } from '../../../shared/charts/latency_chart';
+import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 
 export function MobileTransactionCharts({
   serviceName,

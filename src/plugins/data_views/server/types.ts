@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import {
-  ElasticsearchClient,
-  KibanaRequest,
   Logger,
   SavedObjectsClientContract,
+  ElasticsearchClient,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { DataViewsService } from '../common';
 
 /**

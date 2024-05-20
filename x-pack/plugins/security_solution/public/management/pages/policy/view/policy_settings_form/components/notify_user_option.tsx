@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import {
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiSpacer,
-  EuiText,
-  EuiTextArea,
-} from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
-import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
-import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import {
+  EuiSpacer,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiCheckbox,
+  EuiIconTip,
+  EuiText,
+  EuiTextArea,
+} from '@elastic/eui';
+import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '../protection_notice_supported_endpoint_version';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
-import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import type { LinuxPolicyProtection, MacPolicyProtection, PolicyProtection } from '../../../types';
-import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '../protection_notice_supported_endpoint_version';
-import type { PolicyFormComponentCommonProps } from '../types';
 import { SettingCardHeader } from './setting_card';
+import type { PolicyFormComponentCommonProps } from '../types';
+import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 
 export const NOTIFY_USER_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policyDetailsConfig.userNotification',

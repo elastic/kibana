@@ -8,14 +8,14 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import { type Package, getPackages } from '@kbn/repo-packages';
 import Resolve from 'resolve';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages, type Package } from '@kbn/repo-packages';
 
-import { readFileSync, safeStat } from './helpers/fs';
+import { safeStat, readFileSync } from './helpers/fs';
+import { ResolveResult } from './resolve_result';
 import { getRelativeImportReq } from './helpers/import_req';
 import { memoize } from './helpers/memoize';
-import { ResolveResult } from './resolve_result';
 
 const NODE_MODULE_SEG = Path.sep + 'node_modules' + Path.sep;
 

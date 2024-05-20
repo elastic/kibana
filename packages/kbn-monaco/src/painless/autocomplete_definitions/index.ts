@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import * as booleanScriptFieldScriptFieldContext from './boolean_script_field_script_field.json';
-import * as commonContext from './common.json';
-import * as dateScriptFieldContext from './date_script_field.json';
-import * as doubleScriptFieldScriptFieldContext from './double_script_field_script_field.json';
-import * as filterContext from './filter.json';
-import * as ipScriptFieldScriptFieldContext from './ip_script_field_script_field.json';
-import * as longScriptFieldScriptFieldContext from './long_script_field_script_field.json';
-import * as processorConditionalContext from './processor_conditional.json';
-import * as scoreContext from './score.json';
 // DO NOT EDIT: THIS FILE CONTAINS GENERATED CODE. REFER TO THE PAINLESS README FOR MORE INFORMATION.
 import * as stringScriptFieldScriptFieldContext from './string_script_field_script_field.json';
+import * as scoreContext from './score.json';
+import * as processorConditionalContext from './processor_conditional.json';
+import * as commonContext from './common.json';
+import * as longScriptFieldScriptFieldContext from './long_script_field_script_field.json';
+import * as ipScriptFieldScriptFieldContext from './ip_script_field_script_field.json';
+import * as filterContext from './filter.json';
+import * as doubleScriptFieldScriptFieldContext from './double_script_field_script_field.json';
+import * as dateScriptFieldContext from './date_script_field.json';
+import * as booleanScriptFieldScriptFieldContext from './boolean_script_field_script_field.json';
 export { stringScriptFieldScriptFieldContext };
 export { scoreContext };
 export { processorConditionalContext };

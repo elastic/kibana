@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -16,7 +16,7 @@ import type {
   DroppableProvided,
   DroppableStateSnapshot,
 } from '@hello-pangea/dnd';
-import { mount, shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { EuiTextColor } from '@elastic/eui';
 

@@ -8,9 +8,9 @@
 import { EuiLink, EuiLoadingElastic } from '@elastic/eui';
 import { EuiBadge, EuiSpacer, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 
 type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
@@ -42,8 +42,8 @@ export function DiagnosticsIndexPatternSettings() {
           const text = priority
             ? `(Priority: ${priority})`
             : isNonStandard
-              ? `(legacy template)`
-              : '';
+            ? `(legacy template)`
+            : '';
           return (
             <EuiToolTip key={templateName} content={`${templateIndexPatterns.join(', ')} ${text}`}>
               <EuiBadge

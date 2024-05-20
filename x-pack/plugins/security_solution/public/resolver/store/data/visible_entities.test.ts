@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { AnyAction, Reducer, Store } from 'redux';
+import type { Store, AnyAction, Reducer } from 'redux';
 import { createStore } from 'redux';
+import { analyzerReducer } from '../reducer';
+import type { AnalyzerById } from '../../types';
 import type { ResolverNode } from '../../../../common/endpoint/types';
-import { mockResolverNode } from '../../mocks/resolver_node';
+import { visibleNodesAndEdgeLines } from '../selectors';
+import { mock as mockResolverTree } from '../../models/resolver_tree';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
 import { endpointSourceSchema } from '../../mocks/tree_schema';
-import { mock as mockResolverTree } from '../../models/resolver_tree';
-import type { AnalyzerById } from '../../types';
+import { mockResolverNode } from '../../mocks/resolver_node';
+import { serverReturnedResolverData } from './action';
 import { userSetRasterSize } from '../camera/action';
 import { EMPTY_RESOLVER } from '../helpers';
-import { analyzerReducer } from '../reducer';
-import { visibleNodesAndEdgeLines } from '../selectors';
-import { serverReturnedResolverData } from './action';
 
 describe('resolver visible entities', () => {
   const id = 'test-id';

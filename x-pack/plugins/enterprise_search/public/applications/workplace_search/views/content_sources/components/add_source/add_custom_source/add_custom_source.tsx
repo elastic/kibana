@@ -13,8 +13,8 @@ import { useValues } from 'kea';
 
 import { AppLogic } from '../../../../../app_logic';
 import {
-  PersonalDashboardLayout,
   WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
 } from '../../../../../components/layout';
 import { NAV } from '../../../../../constants';
 

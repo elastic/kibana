@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
-import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { ServerlessSecurityConfigSchema } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

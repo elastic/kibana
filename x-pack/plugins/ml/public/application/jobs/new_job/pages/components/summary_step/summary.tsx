@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { Fragment, useContext, useState, useEffect } from 'react';
 import type { Subscription } from 'rxjs';
-import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
-import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
-import { mlJobService } from '../../../../../services/job_service';
-import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
-import { isAdvancedJobCreator, isSingleMetricJobCreator } from '../../../common/job_creator';
 import {
-  advancedStartDatafeed,
-  convertToAdvancedJob,
-  resetJob,
-} from '../../../common/job_creator/util/general';
-import type { JobRunner } from '../../../common/job_runner';
-import { EDITOR_MODE, JsonEditorFlyout } from '../common/json_editor_flyout';
-import { JobCreatorContext } from '../job_creator_context';
+  EuiButton,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
+import { PreviousButton } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
-import { PreviousButton } from '../wizard_nav';
-import { DatafeedSectionTitle, JobSectionTitle } from './components/common';
+import { JobCreatorContext } from '../job_creator_context';
+import type { JobRunner } from '../../../common/job_runner';
+import { mlJobService } from '../../../../../services/job_service';
+import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
+import { JobDetails } from './components/job_details';
 import { DatafeedDetails } from './components/datafeed_details';
 import { DetectorChart } from './components/detector_chart';
-import { JobDetails } from './components/job_details';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
 import { StartDatafeedSwitch } from './components/start_datafeed_switch';
+import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
+import {
+  convertToAdvancedJob,
+  resetJob,
+  advancedStartDatafeed,
+} from '../../../common/job_creator/util/general';
+import { JobSectionTitle, DatafeedSectionTitle } from './components/common';
 
 export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const {

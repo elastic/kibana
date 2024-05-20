@@ -7,18 +7,18 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import { get } from 'lodash/fp';
-import { allHosts } from '.';
-import type { HostsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/search_strategy/security_solution';
+import * as buildQuery from './query.all_hosts.dsl';
 import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
+import { allHosts } from '.';
 import {
-  mockDeps as defaultMockDeps,
-  formattedSearchStrategyResponse,
   mockOptions,
   mockSearchStrategyResponse,
+  formattedSearchStrategyResponse,
+  mockDeps as defaultMockDeps,
 } from './__mocks__';
-import * as buildQuery from './query.all_hosts.dsl';
+import { get } from 'lodash/fp';
+import type { HostsRequestOptions } from '../../../../../../common/api/search_strategy';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };

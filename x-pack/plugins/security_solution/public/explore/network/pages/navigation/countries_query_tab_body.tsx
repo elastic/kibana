@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
+import { getOr } from 'lodash/fp';
 
-import { manageQuery } from '../../../../common/components/page/manage_query';
 import { NetworkTopCountriesTable } from '../../components/network_top_countries_table';
-import { ID, useNetworkTopCountries } from '../../containers/network_top_countries';
+import { useNetworkTopCountries, ID } from '../../containers/network_top_countries';
+import { manageQuery } from '../../../../common/components/page/manage_query';
 
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { IPsQueryTabBodyProps as CountriesQueryTabBodyProps } from './types';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 

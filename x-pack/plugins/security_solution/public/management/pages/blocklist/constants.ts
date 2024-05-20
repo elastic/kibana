@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type {
-  CreateExceptionListSchema,
   ExceptionListType,
+  CreateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {

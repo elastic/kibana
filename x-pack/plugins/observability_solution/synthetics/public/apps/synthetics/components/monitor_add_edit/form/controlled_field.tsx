@@ -1,4 +1,3 @@
-import { EuiFormRow, EuiFormRowProps } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +5,12 @@ import { EuiFormRow, EuiFormRowProps } from '@elastic/eui';
  * 2.0.
  */
 import React, { useCallback, useState } from 'react';
-import { ControllerFieldState, ControllerRenderProps, useFormContext } from 'react-hook-form';
+import { EuiFormRow, EuiFormRowProps } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { useDebounce } from 'react-use';
+import { ControllerRenderProps, ControllerFieldState, useFormContext } from 'react-hook-form';
+import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { selectServiceLocationsState } from '../../../state';
-import { useIsEditFlow, useKibanaSpace } from '../hooks';
 import { FieldMeta, FormConfig } from '../types';
 
 type Props<TFieldKey extends keyof FormConfig = any> = FieldMeta<TFieldKey> & {

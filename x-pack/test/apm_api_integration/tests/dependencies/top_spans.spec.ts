@@ -1,5 +1,3 @@
-import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { omit, uniq } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 

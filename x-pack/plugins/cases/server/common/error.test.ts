@@ -7,10 +7,10 @@
 
 import Boom from '@hapi/boom';
 import {
-  createCaseErrorFromSOError,
-  generateCaseErrorResponse,
-  isSODecoratedError,
   isSOError,
+  isSODecoratedError,
+  generateCaseErrorResponse,
+  createCaseErrorFromSOError,
 } from './error';
 
 describe('common utils', () => {

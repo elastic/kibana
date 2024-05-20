@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PRIMARY_PANEL_ID, getContextMenuPanels } from '.';
+import { getContextMenuPanels, PRIMARY_PANEL_ID } from '.';
 import * as i18n from '../translations';
 import { ContextEditorRow } from '../types';
 

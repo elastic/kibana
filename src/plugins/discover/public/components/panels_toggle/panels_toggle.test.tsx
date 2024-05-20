@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
+import { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
 import { DiscoverAppStateProvider } from '../../application/main/state_management/discover_app_state_container';
 import { SidebarToggleState } from '../../application/types';
-import { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
 
 describe('Panels toggle component', () => {
   const mountComponent = ({

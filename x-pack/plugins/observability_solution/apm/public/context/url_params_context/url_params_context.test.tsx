@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { MemoryRouter, Router } from '@kbn/shared-ux-router';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { History, Location } from 'history';
 import moment from 'moment-timezone';
 import * as React from 'react';
+import { MemoryRouter, Router } from '@kbn/shared-ux-router';
 import type { UrlParams } from './types';
 import { UrlParamsContext, UrlParamsProvider } from './url_params_context';
 

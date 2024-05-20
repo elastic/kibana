@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { AstProviderFn } from '@kbn/esql-ast';
 import {
-  type ESQLCallbacks,
   getAstContext,
-  getCommandDefinition,
   getFunctionDefinition,
   getFunctionSignatures,
-  getPolicyHelper,
-  isSettingItem,
   isSourceItem,
+  isSettingItem,
+  getCommandDefinition,
+  type ESQLCallbacks,
+  getPolicyHelper,
 } from '@kbn/esql-validation-autocomplete';
-import { i18n } from '@kbn/i18n';
 import type { monaco } from '../../../monaco_imports';
 import { monacoPositionToOffset } from '../shared/utils';
 

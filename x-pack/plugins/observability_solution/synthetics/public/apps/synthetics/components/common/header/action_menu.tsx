@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ActionMenuContent } from './action_menu_content';
 
 export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMountParameters }) => {

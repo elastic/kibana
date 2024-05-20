@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   METRIC_OTEL_JVM_PROCESS_CPU_PERCENT,
   METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,

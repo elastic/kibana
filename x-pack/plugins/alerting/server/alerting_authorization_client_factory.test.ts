@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
   AlertingAuthorizationClientFactory,
   AlertingAuthorizationClientFactoryOpts,
 } from './alerting_authorization_client_factory';
-import { ruleTypeRegistryMock } from './rule_type_registry.mock';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 jest.mock('./authorization/alerting_authorization');
 

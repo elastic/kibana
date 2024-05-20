@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiCode } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { EuiCode } from '@elastic/eui';
 
 import {
-  FIELD_TYPES,
-  FieldConfig,
   FormSchema,
+  FIELD_TYPES,
   VALIDATION_TYPES,
+  FieldConfig,
   fieldFormatters,
   fieldValidators,
 } from '../../../shared_imports';
 
 import {
+  allowAutoCreateRadioIds,
   INVALID_INDEX_PATTERN_CHARS,
   INVALID_TEMPLATE_NAME_CHARS,
-  allowAutoCreateRadioIds,
 } from '../../../../common/constants';
 
 const {

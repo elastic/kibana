@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiPanel } from '@elastic/eui';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { TimelionExpressionInput, TimelionInterval } from './components';
-import { TimelionVisDependencies } from './plugin';
 import { TimelionVisParams } from './timelion_vis_fn';
+import { TimelionInterval, TimelionExpressionInput } from './components';
+import { TimelionVisDependencies } from './plugin';
 
 import './timelion_options.scss';
 

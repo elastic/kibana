@@ -1,4 +1,3 @@
-import type { CoreStart } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,17 +5,18 @@ import type { CoreStart } from '@kbn/core/public';
  * 2.0.
  */
 import type { Observable } from 'rxjs';
-import type { LensEmbeddableOutput } from '../../../embeddable';
+import type { CoreStart } from '@kbn/core/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import type { LensInspector } from '../../../lens_inspector_service';
-import type { Document } from '../../../persistence';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type {
   DatasourceMap,
+  VisualizationMap,
   FramePublicAPI,
   UserMessagesGetter,
-  VisualizationMap,
 } from '../../../types';
+import type { LensEmbeddableOutput } from '../../../embeddable';
+import type { LensInspector } from '../../../lens_inspector_service';
+import type { Document } from '../../../persistence';
 
 export interface FlyoutWrapperProps {
   children: JSX.Element;

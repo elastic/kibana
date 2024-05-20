@@ -9,8 +9,8 @@ import React from 'react';
 
 import { Forms } from '../../../../../shared_imports';
 import { useLoadNodesPlugins } from '../../../../services';
-import { StepMappings } from './step_mappings';
 import { CommonWizardSteps } from './types';
+import { StepMappings } from './step_mappings';
 
 interface Props {
   esDocsBase: string;

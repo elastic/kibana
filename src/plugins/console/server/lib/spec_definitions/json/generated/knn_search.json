@@ -7,8 +7,13 @@
       "pretty": "__flag__",
       "routing": ""
     },
-    "methods": ["GET", "POST"],
-    "patterns": ["{index}/_knn_search"],
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_knn_search"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html",
     "availability": {
       "stack": true,

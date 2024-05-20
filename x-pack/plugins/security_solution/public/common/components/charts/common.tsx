@@ -6,16 +6,16 @@
  */
 
 import type {
-  AxisStyle,
-  BarSeriesStyle,
-  BrushEndListener,
   PartialTheme,
   Rendering,
   Rotation,
   ScaleType,
   SettingsProps,
-  Theme,
   TickFormatter,
+  BrushEndListener,
+  AxisStyle,
+  BarSeriesStyle,
+  Theme,
 } from '@elastic/charts';
 import { LEGACY_DARK_THEME, LEGACY_LIGHT_THEME, Position } from '@elastic/charts';
 import { EuiFlexGroup } from '@elastic/eui';

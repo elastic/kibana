@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionTypeRegistry } from '../action_type_registry';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionTypeConfig, ActionTypeSecrets } from '../types';
 import { buildExecutor } from './executor';
 import { ExecutorParams, SubActionConnectorType } from './types';

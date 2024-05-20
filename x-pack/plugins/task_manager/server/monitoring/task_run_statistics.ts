@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, startWith, map } from 'rxjs';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { isNumber, mapValues } from 'lodash';
-import { Observable, combineLatest } from 'rxjs';
-import { filter, map, startWith } from 'rxjs';
-import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
-import { ClaimAndFillPoolResult, FillPoolResult } from '../lib/fill_pool';
-import { Ok, isOk, unwrap } from '../lib/result_type';
-import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import { Logger } from '@kbn/core/server';
+import { AggregatedStatProvider, AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
-import { ConcreteTaskInstance } from '../task';
 import {
+  isTaskRunEvent,
+  isTaskPollingCycleEvent,
+  TaskRun,
   ErroredTask,
   RanTask,
-  TaskClaim,
+  TaskTiming,
+  isTaskManagerStatEvent,
   TaskManagerStat,
   TaskPersistence,
-  TaskRun,
-  TaskTiming,
+  TaskClaim,
   isTaskClaimEvent,
-  isTaskManagerStatEvent,
-  isTaskPollingCycleEvent,
-  isTaskRunEvent,
 } from '../task_events';
+import { isOk, Ok, unwrap } from '../lib/result_type';
+import { ConcreteTaskInstance } from '../task';
 import { TaskRunResult } from '../task_running';
-import { HealthStatus } from './monitoring_stats_stream';
+import { FillPoolResult, ClaimAndFillPoolResult } from '../lib/fill_pool';
 import {
   AveragedStat,
-  calculateFrequency,
   calculateRunningAverage,
-  createMapOfRunningAveragedStats,
+  calculateFrequency,
   createRunningAveragedStat,
+  createMapOfRunningAveragedStats,
 } from './task_run_calcultors';
+import { HealthStatus } from './monitoring_stats_stream';
+import { TaskPollingLifecycle } from '../polling_lifecycle';
+import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
 
 interface FillPoolStat extends JsonObject {
   duration: number[];
@@ -161,10 +161,9 @@ export function createTaskRunAggregator(
           isOk<ClaimAndFillPoolResult, unknown>(taskEvent.event)
       ),
       map((taskEvent: TaskLifecycleEvent) => {
-        const {
-          result,
-          stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {},
-        } = (taskEvent.event as unknown as Ok<ClaimAndFillPoolResult>).value;
+        const { result, stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {} } = (
+          taskEvent.event as unknown as Ok<ClaimAndFillPoolResult>
+        ).value;
         const duration = (taskEvent?.timing?.stop ?? 0) - (taskEvent?.timing?.start ?? 0);
         return {
           polling: {
@@ -268,7 +267,7 @@ export function createTaskRunAggregator(
       ([taskRun, load, polling]: [
         Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'>,
         Pick<TaskRunStat, 'load'>,
-        Pick<TaskRunStat, 'polling'>,
+        Pick<TaskRunStat, 'polling'>
       ]) => {
         return {
           key: 'runtime',

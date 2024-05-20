@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiTableHeaderCell, EuiTableRow } from '@elastic/eui';
+import { EuiTableRow, EuiTableHeaderCell } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const DisabledFieldsHeader: React.FC = () => {

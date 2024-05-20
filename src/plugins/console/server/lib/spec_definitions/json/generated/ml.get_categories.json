@@ -7,9 +7,14 @@
       "pretty": "__flag__",
       "from": "",
       "partition_field_value": "",
-      "size": ["100"]
+      "size": [
+        "100"
+      ]
     },
-    "methods": ["GET", "POST"],
+    "methods": [
+      "GET",
+      "POST"
+    ],
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/results/categories/{category_id}",
       "_ml/anomaly_detectors/{job_id}/results/categories"

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { formatProductName, getIdentifier } from './formatting';
 import {
-  APM_SYSTEM_ID,
-  BEATS_SYSTEM_ID,
   ELASTICSEARCH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
+  APM_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
 } from '../../../common/constants';
-import { formatProductName, getIdentifier } from './formatting';
 
 const PRODUCTS = [
   {

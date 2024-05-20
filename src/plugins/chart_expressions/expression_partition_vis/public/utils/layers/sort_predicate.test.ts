@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ArrayEntry } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { ChartTypes, PartitionVisParams } from '../../../common/types';
 import { extractUniqTermsMap, sortPredicateByType } from './sort_predicate';
+import { ChartTypes, PartitionVisParams } from '../../../common/types';
+import { ArrayEntry } from '@elastic/charts';
 
 describe('#extractUniqTermsMap', () => {
   it('should extract map', () => {

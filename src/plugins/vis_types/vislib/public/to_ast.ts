@@ -8,20 +8,20 @@
 
 import moment from 'moment';
 
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
 import {
   Vis,
-  VisParams,
   VisToExpressionAstParams,
   getVisSchemas,
+  VisParams,
 } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
 import type { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
 
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
+import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
 import { BasicVislibParams, VislibChartType } from './types';
-import { VisTypeVislibExpressionFunctionDefinition, vislibVisName } from './vis_type_vislib_vis_fn';
 
 export const toExpressionAst = async <TVisParams extends VisParams>(
   vis: Vis<TVisParams>,

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { Theme } from '@elastic/charts';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiPanel,
-  EuiTitle,
-  RecursivePartial,
-} from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { Theme } from '@elastic/charts';
+import { BoolQuery } from '@kbn/es-query';
+import {
+  RecursivePartial,
+  EuiFlexItem,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiTitle,
+  EuiIconTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
+import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
-import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
-import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { TransactionTypeSelect } from './transaction_type_select';
 
 const INITIAL_STATE = {

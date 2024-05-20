@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../../common/store/constants';
-import type { UserAssetTableType, UserFlyoutQueries, UsersModel, UsersQueries } from './model';
+import type { UserFlyoutQueries, UserAssetTableType, UsersModel, UsersQueries } from './model';
 import { UsersTableType } from './model';
+import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../../common/store/constants';
 
 export const setUsersPageQueriesActivePageToZero = (state: UsersModel): UsersQueries => ({
   ...state.page.queries,

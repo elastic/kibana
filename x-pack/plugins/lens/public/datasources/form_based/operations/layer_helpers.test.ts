@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_start.mock';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { TinymathAST } from '@kbn/tinymath';
-import { OperationType, operationDefinitionMap } from '.';
-import { generateId } from '../../../id_generator';
 import type { OperationMetadata } from '../../../types';
-import { IndexPattern } from '../../../types';
+import {
+  copyColumn,
+  insertNewColumn,
+  replaceColumn,
+  updateColumnParam,
+  getColumnOrder,
+  deleteColumn,
+  updateLayerIndexPattern,
+  getErrorMessages,
+  hasTermsWithManyBuckets,
+  isReferenced,
+  getReferenceRoot,
+} from './layer_helpers';
+import { operationDefinitionMap, OperationType } from '.';
+import { TermsIndexPatternColumn } from './definitions/terms';
+import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
+import { AvgIndexPatternColumn } from './definitions/metrics';
+import type { FormBasedLayer, FormBasedPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
-import type { FormBasedLayer, FormBasedPrivateState } from '../types';
+import { generateId } from '../../../id_generator';
+import { createMockedFullReference, createMockedManagedReference } from './mocks';
 import {
   CounterRateIndexPatternColumn,
   FiltersIndexPatternColumn,
@@ -25,23 +38,10 @@ import {
   MovingAverageIndexPatternColumn,
   OperationDefinition,
 } from './definitions';
-import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
-import { AvgIndexPatternColumn } from './definitions/metrics';
-import { TermsIndexPatternColumn } from './definitions/terms';
-import {
-  copyColumn,
-  deleteColumn,
-  getColumnOrder,
-  getErrorMessages,
-  getReferenceRoot,
-  hasTermsWithManyBuckets,
-  insertNewColumn,
-  isReferenced,
-  replaceColumn,
-  updateColumnParam,
-  updateLayerIndexPattern,
-} from './layer_helpers';
-import { createMockedFullReference, createMockedManagedReference } from './mocks';
+import { TinymathAST } from '@kbn/tinymath';
+import { IndexPattern } from '../../../types';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_start.mock';
 
 const dataMock = dataPluginMock.createStartContract();
 dataMock.query.timefilter.timefilter.getAbsoluteTime = jest

@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import path from 'path';
-import { promisify } from 'util';
 import {
-  isBinaryExpression,
   isCallExpression,
   isIdentifier,
   isMemberExpression,
@@ -19,10 +15,14 @@ import {
   isObjectProperty,
   isStringLiteral,
   isTemplateLiteral,
+  isBinaryExpression,
 } from '@babel/types';
+import fs from 'fs';
+import { promisify } from 'util';
+import normalize from 'normalize-path';
+import path from 'path';
 import chalk from 'chalk';
 import parser from 'intl-messageformat-parser';
-import normalize from 'normalize-path';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 

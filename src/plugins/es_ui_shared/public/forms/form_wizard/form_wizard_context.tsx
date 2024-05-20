@@ -8,7 +8,7 @@
 
 import React, { useState, createContext, useContext, useCallback } from 'react';
 
-import { HookProps, WithMultiContent, useMultiContentContext } from '../multi_content';
+import { WithMultiContent, useMultiContentContext, HookProps } from '../multi_content';
 
 export interface Props<T extends object> {
   onSave: (data: T) => void | Promise<void>;
@@ -48,7 +48,7 @@ export interface Context<Id extends string = any> extends State {
 const formWizardContext = createContext<Context>({} as Context);
 
 export const FormWizardProvider = WithMultiContent<Props<any>>(function FormWizardProvider<
-  T extends object = { [key: string]: any },
+  T extends object = { [key: string]: any }
 >({ children, defaultActiveStep = 0, isEditing, onSave, onStepChange }: Props<T>) {
   const { getData, validate, validation } = useMultiContentContext<T>();
 

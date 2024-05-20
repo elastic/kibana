@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
-import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
-import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
-import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
-import { useMlApiContext } from '../../../../contexts/kibana';
+import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useEnabledFeatures } from '../../../../contexts/ml';
+import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
+import { useMlApiContext } from '../../../../contexts/kibana';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { MLJobEditor } from '../ml_job_editor';
+import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 
 interface Props {
   job: CombinedJob;

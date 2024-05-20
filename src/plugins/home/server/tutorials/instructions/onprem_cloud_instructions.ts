@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export const createTrycloudOption1 = memoize(() => ({
   title: i18n.translate('home.tutorials.common.premCloudInstructions.option1.title', {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {

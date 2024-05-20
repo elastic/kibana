@@ -9,8 +9,8 @@
 import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
 import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
-import { PluginWrapper } from './plugin';
 import { createPluginInitializerContextMock } from './test_helpers';
+import { PluginWrapper } from './plugin';
 
 function createManifest(
   id: string,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
+import { screen } from '@testing-library/react';
 
-import { constructFileKindIdByOwner } from '../../../common/files';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
-import { basicFileMock } from '../../containers/mock';
 import { FileDownloadButton } from './file_download_button';
+import { basicFileMock } from '../../containers/mock';
+import { constructFileKindIdByOwner } from '../../../common/files';
 
 describe('FileDownloadButton', () => {
   let appMockRender: AppMockRenderer;

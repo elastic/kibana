@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { XScaleType, YScaleType } from '@kbn/expression-xy-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
 import type { DatasourcePublicAPI } from '../../../types';
 import type { UnifiedAxisExtentConfig } from './types';
 

@@ -10,17 +10,17 @@
 
 import { injectI18n } from '@kbn/i18n-react';
 
-import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 
 import {
-  EuiButton,
-  EuiCallOut,
+  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiButton,
+  EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 
 class SavedObjectsInstallerUi extends React.Component {

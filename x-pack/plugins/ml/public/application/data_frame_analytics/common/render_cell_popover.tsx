@@ -11,19 +11,19 @@ import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiCodeBlock } from '@elastic/eui';
 
 import {
+  type DataFrameAnalysisConfigType,
+  type FeatureImportanceBaseline,
+  type FeatureImportance,
+  type TopClasses,
   ANALYSIS_CONFIG_TYPE,
   DEFAULT_RESULTS_FIELD,
-  type DataFrameAnalysisConfigType,
-  type FeatureImportance,
-  type FeatureImportanceBaseline,
-  type TopClasses,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import {
-  type DataGridItem,
-  type IndexPagination,
   getFeatureImportance,
   getTopClasses,
+  type DataGridItem,
+  type IndexPagination,
 } from '@kbn/ml-data-grid';
 
 import { DecisionPathPopover } from '../pages/analytics_exploration/components/feature_importance/decision_path_popover';

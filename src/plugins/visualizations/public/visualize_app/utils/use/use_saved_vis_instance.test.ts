@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EventEmitter } from 'events';
 import { renderHook } from '@testing-library/react-hooks';
+import { EventEmitter } from 'events';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
-import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
-import { VisualizeConstants } from '../../../../common/constants';
 import { setTypes } from '../../../services';
-import { createVisEditorsRegistry } from '../../../vis_editors_registry';
-import type { TypesStart } from '../../../vis_types';
-import type { VisualizeServices } from '../../types';
-import { getCreateBreadcrumbs, getEditBreadcrumbs } from '../breadcrumbs';
+import { coreMock } from '@kbn/core/public/mocks';
 import { useSavedVisInstance } from './use_saved_vis_instance';
+import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
+import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
+import { VisualizeConstants } from '../../../../common/constants';
+import { createVisEditorsRegistry } from '../../../vis_editors_registry';
+import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
+import type { VisualizeServices } from '../../types';
+import type { TypesStart } from '../../../vis_types';
 
 const mockDefaultEditorControllerDestroy = jest.fn();
 const mockEmbeddableHandlerDestroy = jest.fn();

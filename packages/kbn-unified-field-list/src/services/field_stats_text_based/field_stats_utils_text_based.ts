@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESQLSearchReponse } from '@kbn/es-types';
 import { appendToESQLQuery } from '@kbn/esql-utils';
-import {
-  DEFAULT_SIMPLE_EXAMPLES_SIZE,
-  DEFAULT_TOP_VALUES_SIZE,
-  SIMPLE_EXAMPLES_FETCH_SIZE,
-} from '../../constants';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldStatsResponse } from '../../types';
 import {
-  canProvideExamplesForField,
+  DEFAULT_TOP_VALUES_SIZE,
+  DEFAULT_SIMPLE_EXAMPLES_SIZE,
+  SIMPLE_EXAMPLES_FETCH_SIZE,
+} from '../../constants';
+import {
   canProvideStatsForFieldTextBased,
   canProvideTopValuesForFieldTextBased,
+  canProvideExamplesForField,
 } from '../../utils/can_provide_stats';
 import { getFieldExampleBuckets } from '../field_examples_calculator';
 

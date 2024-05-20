@@ -7,11 +7,11 @@
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 
-import type { ProviderProps, State } from './edit_transform_flyout_state';
 import type { FormFields } from './form_field';
 import type { FormSections } from './form_section';
+import type { ProviderProps, State } from './edit_transform_flyout_state';
 import { getDefaultState } from './get_default_state';
-import { type ValidatorName, validators } from './validators';
+import { validators, type ValidatorName } from './validators';
 
 function isFormFieldOptional(state: State, field: FormFields) {
   const formField = state.formFields[field];

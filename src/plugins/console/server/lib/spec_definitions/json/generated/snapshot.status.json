@@ -6,9 +6,14 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "ignore_unavailable": "__flag__",
-      "master_timeout": ["-1", "0"]
+      "master_timeout": [
+        "-1",
+        "0"
+      ]
     },
-    "methods": ["GET"],
+    "methods": [
+      "GET"
+    ],
     "patterns": [
       "_snapshot/_status",
       "_snapshot/{repository}/_status",

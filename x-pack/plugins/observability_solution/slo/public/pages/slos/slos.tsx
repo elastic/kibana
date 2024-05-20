@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { SLOsOverview } from './components/slos_overview/slos_overview';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
@@ -20,7 +21,6 @@ import { CreateSloBtn } from './components/common/create_slo_btn';
 import { FeedbackButton } from './components/common/feedback_button';
 import { SloList } from './components/slo_list';
 import { SloListSearchBar } from './components/slo_list_search_bar';
-import { SLOsOverview } from './components/slos_overview/slos_overview';
 
 export const SLO_PAGE_ID = 'slo-page-container';
 

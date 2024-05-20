@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { FileLayer } from '@elastic/ems-client';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EMSFileSelect } from '../../components/ems_file_select';
+import { i18n } from '@kbn/i18n';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import type { FileLayer } from '@elastic/ems-client';
 import { ChoroplethChartState } from './types';
+import { EMSFileSelect } from '../../components/ems_file_select';
 
 interface Props {
   emsFileLayers: FileLayer[];

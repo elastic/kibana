@@ -7,11 +7,11 @@
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
-  CursorType,
-  GenericBuckets,
-  Inspect,
   Maybe,
+  CursorType,
+  Inspect,
   PageInfoPaginated,
+  GenericBuckets,
 } from '../../../common';
 
 export enum NetworkHttpFields {

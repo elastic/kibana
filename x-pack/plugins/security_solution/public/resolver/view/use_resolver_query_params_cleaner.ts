@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
+import { useLocation, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
 import { parameterName } from '../store/parameter_name';
 /**
  * Cleanup any query string keys that were added by this Resolver instance.

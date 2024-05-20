@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   SavedObject,
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { omit } from 'lodash';
 
 export type ISerializerHelper = PublicMethodsOf<SerializerHelper>;
 

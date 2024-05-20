@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
-import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { take } from 'rxjs';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   type MigrationResult,
   SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { take } from 'rxjs';
-import { lastValueFrom } from 'rxjs';
-import { DocumentMigrator } from './document_migrator';
 import { KibanaMigrator, type KibanaMigratorOptions } from './kibana_migrator';
+import { DocumentMigrator } from './document_migrator';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { lastValueFrom } from 'rxjs';
 import { runV2Migration } from './run_v2_migration';
 import { runZeroDowntimeMigration } from './zdt';
 

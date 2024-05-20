@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import { createAlert } from '../../lib/alert_api_actions';
 import { ObjectRemover } from '../../lib/object_remover';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');

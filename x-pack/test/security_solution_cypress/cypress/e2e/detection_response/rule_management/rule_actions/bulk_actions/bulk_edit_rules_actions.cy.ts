@@ -5,62 +5,62 @@
  * 2.0.
  */
 
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
-import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
   MISSING_PRIVILEGES_CALLOUT,
   waitForCallOutToBeShown,
 } from '../../../../../tasks/common/callouts';
+import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 
-import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 import {
-  BULK_ACTIONS_BTN,
   RULES_BULK_EDIT_ACTIONS_INFO,
   RULES_BULK_EDIT_ACTIONS_WARNING,
+  BULK_ACTIONS_BTN,
 } from '../../../../../screens/rules_bulk_actions';
+import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 
-import {
-  disableAutoRefresh,
-  expectManagementTableRules,
-  getRulesManagementTableRows,
-  goToEditRuleActionsSettingsOf,
-  selectAllRules,
-  selectRulesByName,
-} from '../../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import type { RuleActionCustomFrequency } from '../../../../../tasks/common/rule_actions';
 import {
-  addEmailConnectorAndRuleAction,
   addSlackRuleAction,
+  assertSlackRuleAction,
+  addEmailConnectorAndRuleAction,
   assertEmailRuleAction,
   assertSelectedCustomFrequencyOption,
   assertSelectedPerRuleRunFrequencyOption,
   assertSelectedSummaryOfAlertsOption,
-  assertSlackRuleAction,
   pickCustomFrequencyOption,
   pickPerRuleRunFrequencyOption,
   pickSummaryOfAlertsOption,
 } from '../../../../../tasks/common/rule_actions';
-import { login } from '../../../../../tasks/login';
 import {
+  goToEditRuleActionsSettingsOf,
+  expectManagementTableRules,
+  selectAllRules,
+  selectRulesByName,
+  getRulesManagementTableRows,
+  disableAutoRefresh,
+} from '../../../../../tasks/alerts_detection_rules';
+import {
+  waitForBulkEditActionToFinish,
+  submitBulkEditForm,
   checkOverwriteRuleActionsCheckbox,
   openBulkEditRuleActionsForm,
-  submitBulkEditForm,
-  waitForBulkEditActionToFinish,
 } from '../../../../../tasks/rules_bulk_actions';
+import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
-import { createSlackConnector } from '../../../../../tasks/api_calls/connectors';
 import { createRule } from '../../../../../tasks/api_calls/rules';
+import { createSlackConnector } from '../../../../../tasks/api_calls/connectors';
 
 import {
   getEqlRule,
-  getMachineLearningRule,
-  getNewRule,
-  getNewTermsRule,
   getNewThreatIndicatorRule,
+  getNewRule,
   getNewThresholdRule,
+  getMachineLearningRule,
+  getNewTermsRule,
 } from '../../../../../objects/rule';
 import {
   createAndInstallMockedPrebuiltRules,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { createMemoryHistory } from 'history';
 import React from 'react';
 import {
-  MountWithReduxProvider,
   mountWithRouter,
   renderWithRouter,
   shallowWithRouter,
+  MountWithReduxProvider,
 } from '../../../lib';
-import { FilterStatusButton } from './filter_status_button';
+import { createMemoryHistory } from 'history';
 import { StatusFilter } from './status_filter';
+import { FilterStatusButton } from './filter_status_button';
 
 describe('StatusFilterComponent', () => {
   beforeEach(() => {});

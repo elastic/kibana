@@ -1,6 +1,3 @@
-import type { AggregationsAutoDateHistogramAggregation } from '@elastic/elasticsearch/lib/api/types';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,14 +5,17 @@ import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plu
  * 2.0.
  */
 import { omit, orderBy } from 'lodash';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { AggregationsAutoDateHistogramAggregation } from '@elastic/elasticsearch/lib/api/types';
+import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
+import { createElasticsearchClient } from '../../clients/elasticsearch';
 import type { FunctionRegistrationParameters } from '..';
 import {
-  ChangesFunctionResponse,
   changesFunctionParameters,
+  ChangesFunctionResponse,
 } from '../../../common/functions/changes';
-import { createElasticsearchClient } from '../../clients/elasticsearch';
-import { getLogChanges } from './get_log_changes';
 import { getMetricChanges } from './get_metric_changes';
+import { getLogChanges } from './get_log_changes';
 
 export function registerChangesFunction({
   functions,

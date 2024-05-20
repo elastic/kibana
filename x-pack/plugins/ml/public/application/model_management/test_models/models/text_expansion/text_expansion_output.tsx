@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React, { type FC } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
-  EuiCallOut,
   EuiHorizontalRule,
   EuiIcon,
   EuiInMemoryTable,
   EuiSpacer,
   EuiStat,
   EuiTextColor,
+  EuiCallOut,
 } from '@elastic/eui';
-import React, { type FC } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { roundToDecimalPlace } from '@kbn/ml-number-utils';
-import type { FormattedTextExpansionResponse, TextExpansionInference } from '.';
 import { useCurrentThemeVars } from '../../../../contexts/kibana';
+import type { TextExpansionInference, FormattedTextExpansionResponse } from '.';
 
 const MAX_TOKENS = 5;
 

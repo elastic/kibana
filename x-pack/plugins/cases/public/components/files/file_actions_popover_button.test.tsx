@@ -10,17 +10,17 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { constructFileKindIdByOwner } from '../../../common/files';
 import type { AppMockRenderer } from '../../common/mock';
 import {
   buildCasesPermissions,
   createAppMockRenderer,
   mockedTestProvidersOwner,
 } from '../../common/mock';
+import { constructFileKindIdByOwner } from '../../../common/files';
 
 import { basicCaseId, basicFileMock } from '../../containers/mock';
-import { useDeleteFileAttachment } from '../../containers/use_delete_file_attachment';
 import { FileActionsPopoverButton } from './file_actions_popover_button';
+import { useDeleteFileAttachment } from '../../containers/use_delete_file_attachment';
 
 jest.mock('../../containers/use_delete_file_attachment');
 

@@ -39,19 +39,19 @@ export type ServerRouteCreateOptions = Record<string, any>;
 type ValidateEndpoint<TEndpoint extends string> = string extends TEndpoint
   ? true
   : TEndpoint extends `${string} ${string} ${string}`
+  ? true
+  : TEndpoint extends `${string} ${infer TPathname}`
+  ? TPathname extends `/internal/${string}`
     ? true
-    : TEndpoint extends `${string} ${infer TPathname}`
-      ? TPathname extends `/internal/${string}`
-        ? true
-        : false
-      : false;
+    : false
+  : false;
 
 export type ServerRoute<
   TEndpoint extends string,
   TRouteParamsRT extends RouteParamsRT | undefined,
   TRouteHandlerResources extends ServerRouteHandlerResources,
   TReturnType,
-  TRouteCreateOptions extends ServerRouteCreateOptions,
+  TRouteCreateOptions extends ServerRouteCreateOptions
 > = ValidateEndpoint<TEndpoint> extends true
   ? {
       endpoint: TEndpoint;
@@ -87,7 +87,7 @@ export type EndpointOf<TServerRouteRepository extends ServerRouteRepository> =
 
 export type ReturnOf<
   TServerRouteRepository extends ServerRouteRepository,
-  TEndpoint extends keyof TServerRouteRepository,
+  TEndpoint extends keyof TServerRouteRepository
 > = TServerRouteRepository[TEndpoint] extends ServerRoute<
   any,
   any,
@@ -102,7 +102,7 @@ export type ReturnOf<
 
 export type DecodedRequestParamsOf<
   TServerRouteRepository extends ServerRouteRepository,
-  TEndpoint extends keyof TServerRouteRepository,
+  TEndpoint extends keyof TServerRouteRepository
 > = TServerRouteRepository[TEndpoint] extends ServerRoute<
   any,
   infer TRouteParamsRT,
@@ -117,7 +117,7 @@ export type DecodedRequestParamsOf<
 
 export type ClientRequestParamsOf<
   TServerRouteRepository extends ServerRouteRepository,
-  TEndpoint extends keyof TServerRouteRepository,
+  TEndpoint extends keyof TServerRouteRepository
 > = TServerRouteRepository[TEndpoint] extends ServerRoute<
   any,
   infer TRouteParamsRT,
@@ -136,7 +136,7 @@ type MaybeOptionalArgs<T extends Record<string, any>> = RequiredKeys<T> extends 
 
 export type RouteRepositoryClient<
   TServerRouteRepository extends ServerRouteRepository,
-  TAdditionalClientOptions extends Record<string, any>,
+  TAdditionalClientOptions extends Record<string, any>
 > = <TEndpoint extends keyof TServerRouteRepository>(
   endpoint: TEndpoint,
   ...args: MaybeOptionalArgs<

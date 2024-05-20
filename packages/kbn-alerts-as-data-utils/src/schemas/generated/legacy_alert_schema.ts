@@ -1,4 +1,3 @@
-import { Either } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +9,7 @@ import { Either } from 'fp-ts/lib/Either';
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
 
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(
@@ -66,7 +66,8 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const LegacyAlertRequired = rt.type({});
+const LegacyAlertRequired = rt.type({
+});
 // prettier-ignore
 const LegacyAlertOptional = rt.partial({
   'ecs.version': schemaString,

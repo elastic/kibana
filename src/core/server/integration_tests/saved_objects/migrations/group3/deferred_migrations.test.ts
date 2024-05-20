@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type {
-  SavedObjectUnsanitizedDoc,
   SavedObjectsRawDocSource,
   SavedObjectsType,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { delay } from '../test_utils';
 
 import '../jest_matchers';
 import {
-  KibanaMigratorTestKit,
   clearLog,
   defaultKibanaIndex,
-  getKibanaMigratorTestKit,
   startElasticsearch,
+  KibanaMigratorTestKit,
+  getKibanaMigratorTestKit,
 } from '../kibana_migrator_test_kit';
 
 describe('deferred migrations', () => {

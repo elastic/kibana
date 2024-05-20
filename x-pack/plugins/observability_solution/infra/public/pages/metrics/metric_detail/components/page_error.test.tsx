@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { useDocumentTitle } from '../../../../hooks/use_document_title';
+import { PageError } from './page_error';
 import { errorTitle } from '../../../../translations';
 import { InfraHttpError } from '../../../../types';
-import { PageError } from './page_error';
+import { useDocumentTitle } from '../../../../hooks/use_document_title';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../../hooks/use_document_title', () => ({
   useDocumentTitle: jest.fn(),

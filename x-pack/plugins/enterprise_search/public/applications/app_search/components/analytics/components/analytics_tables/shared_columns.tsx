@@ -15,10 +15,10 @@ import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { ENGINE_ANALYTICS_QUERY_DETAIL_PATH, ENGINE_CURATION_PATH } from '../../../../routes';
-import { EngineLogic, generateEnginePath } from '../../../engine';
+import { generateEnginePath, EngineLogic } from '../../../engine';
 import { Query, RecentQuery } from '../../types';
 
-import { TagsCount, TagsList } from './tags';
+import { TagsList, TagsCount } from './tags';
 
 /**
  * Shared columns / column properties between separate analytics tables

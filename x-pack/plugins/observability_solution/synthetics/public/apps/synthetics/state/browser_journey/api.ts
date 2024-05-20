@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { apiService } from '../../../../utils/api_service';
 import {
   FailedStepsApiResponse,
   FailedStepsApiResponseType,
-  Ping,
-  PingType,
   ScreenshotBlockDoc,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
+  Ping,
+  PingType,
 } from '../../../../../common/runtime_types';
-import { apiService } from '../../../../utils/api_service';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;

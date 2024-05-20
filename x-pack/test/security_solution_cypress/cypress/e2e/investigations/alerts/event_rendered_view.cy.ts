@@ -5,23 +5,18 @@
  * 2.0.
  */
 
+import { FIELDS_BROWSER_BTN } from '../../../screens/rule_details';
 import { getNewRule } from '../../../objects/rule';
 import {
-  ALERT_RENDERER_HOST_NAME,
   EVENT_SUMMARY_ALERT_RENDERER_CONTENT,
   EVENT_SUMMARY_COLUMN,
+  ALERT_RENDERER_HOST_NAME,
   SHOW_TOP_N_HEADER,
 } from '../../../screens/alerts';
 import {
   DATA_GRID_COLUMN_ORDER_BTN,
   DATA_GRID_FIELD_SORT_BTN,
 } from '../../../screens/common/data_grid';
-import { FIELDS_BROWSER_BTN } from '../../../screens/rule_details';
-import {
-  TOP_N_ALERT_HISTOGRAM,
-  TOP_N_CONTAINER_CLOSE_BTN,
-  XY_CHART,
-} from '../../../screens/shared';
 import { HOVER_ACTIONS } from '../../../screens/timeline';
 import {
   showHoverActionsEventRenderedView,
@@ -32,6 +27,11 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
+import {
+  TOP_N_ALERT_HISTOGRAM,
+  TOP_N_CONTAINER_CLOSE_BTN,
+  XY_CHART,
+} from '../../../screens/shared';
 
 describe(`Event Rendered View`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

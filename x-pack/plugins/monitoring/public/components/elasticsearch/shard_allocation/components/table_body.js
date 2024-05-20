@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { Assigned } from './assigned';
 import { Unassigned } from './unassigned';
+import { Assigned } from './assigned';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 const ShardRow = (props) => {
   let unassigned;

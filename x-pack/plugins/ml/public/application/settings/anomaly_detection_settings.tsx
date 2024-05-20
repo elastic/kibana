@@ -22,11 +22,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ML_PAGES } from '../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
+import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
 import { ml } from '../services/ml_api_service';
 import { useToastNotificationService } from '../services/toast_notification_service';
-import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
+import { ML_PAGES } from '../../../common/constants/locator';
+import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 
 export const AnomalyDetectionSettings: FC = () => {
   const [calendarsCount, setCalendarsCount] = useState(0);

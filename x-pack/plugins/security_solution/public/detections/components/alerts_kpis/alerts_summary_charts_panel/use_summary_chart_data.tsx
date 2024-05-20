@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { buildEsQuery } from '@kbn/es-query';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { SummaryChartsAgg, SummaryChartsData } from './types';
+import type { EntityFilter } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import type { EntityFilter } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { useInspectButton } from '../common/hooks';
 import { parseData } from './helpers';
-import type { SummaryChartsAgg, SummaryChartsData } from './types';
 
 export type UseAlerts = (props: UseAlertsQueryProps) => {
   items: SummaryChartsData[];

@@ -9,10 +9,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { TimeRange } from '@kbn/data-plugin/common';
-import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
+import dateMath from '@kbn/datemath';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import type { UnifiedHistogramBucketInterval } from '../../types';
 
 export const useTimeRange = ({

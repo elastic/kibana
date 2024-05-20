@@ -17,8 +17,8 @@ jest.mock('../../../../../../kibana_services', () => ({
   },
 }));
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
 import { AbstractSource, ISource } from '../../../../../../classes/sources/source';
 

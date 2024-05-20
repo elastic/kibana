@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
 import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { jobIds, testSetupAnnotations, testSetupJobConfigs } from './common_jobs';
+import { testSetupJobConfigs, jobIds, testSetupAnnotations } from './common_jobs';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

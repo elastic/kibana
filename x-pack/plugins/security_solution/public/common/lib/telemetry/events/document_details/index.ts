@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TelemetryEventTypes } from '../../constants';
 import type { TelemetryEvent } from '../../types';
+import { TelemetryEventTypes } from '../../constants';
 
 export const DocumentDetailsFlyoutOpenedEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.DetailsFlyoutOpened,

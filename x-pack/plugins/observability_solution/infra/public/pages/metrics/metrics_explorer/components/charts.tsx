@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { first, last, sumBy } from 'lodash';
 import React from 'react';
-import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
+import { first, last, sumBy } from 'lodash';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
-import { NoData } from '../../../../components/empty_states/no_data';
-import { InfraLoadingPanel } from '../../../../components/loading';
+import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
 import {
-  MetricsExplorerChartOptions,
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
+  MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
+import { InfraLoadingPanel } from '../../../../components/loading';
+import { NoData } from '../../../../components/empty_states/no_data';
 import { MetricsExplorerChart } from './chart';
 
 interface Props {

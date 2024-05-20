@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiTitle } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
-import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
+import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { useRightPanelContext } from '../context';
 import { EVENT_RENDERER_TEST_ID } from './test_ids';
 

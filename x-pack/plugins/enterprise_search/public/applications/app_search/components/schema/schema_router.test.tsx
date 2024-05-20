@@ -12,12 +12,12 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { rerender } from '../../../test_helpers';
 
 import { ReindexJob } from './reindex_job';
-import { MetaEngineSchema, Schema } from './views';
+import { Schema, MetaEngineSchema } from './views';
 
 import { SchemaRouter } from '.';
 

@@ -22,15 +22,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import type { DragHandleProps, DropResult } from '../../../types';
+import type { DropResult, DragHandleProps } from '../../../types';
 import {
   FieldLogColumnConfiguration,
-  LogColumnConfiguration,
-  MessageLogColumnConfiguration,
-  TimestampLogColumnConfiguration,
   getLogColumnConfigurationId,
   isMessageLogColumnConfiguration,
   isTimestampLogColumnConfiguration,
+  LogColumnConfiguration,
+  MessageLogColumnConfiguration,
+  TimestampLogColumnConfiguration,
 } from '../../../utils/source_configuration';
 import { AddLogColumnButtonAndPopover } from './add_log_column_popover';
 import { FormElement } from './form_elements';

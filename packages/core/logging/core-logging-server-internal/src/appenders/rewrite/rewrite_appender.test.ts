@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { RewriteAppenderConfig } from '@kbn/core-logging-server';
-import { DisposableAppender, LogLevel, LogMeta, LogRecord } from '@kbn/logging';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { rewriteAppenderMocks } from './mocks';
-import { RewriteAppender } from './rewrite_appender';
 import { createRewritePolicyMock, resetAllMocks } from './rewrite_appender.test.mocks';
+import { rewriteAppenderMocks } from './mocks';
+import { LogLevel, LogRecord, LogMeta, DisposableAppender } from '@kbn/logging';
+import type { RewriteAppenderConfig } from '@kbn/core-logging-server';
+import { RewriteAppender } from './rewrite_appender';
 
 // Helper to ensure tuple is typed [A, B] instead of Array<A | B>
 const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];

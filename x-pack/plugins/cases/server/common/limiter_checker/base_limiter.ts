@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AttachmentRequest } from '../../../common/types/api';
 import type { AttachmentType } from '../../../common/types/domain';
+import type { AttachmentRequest } from '../../../common/types/api';
 import type { Limiter } from './types';
 
 interface LimiterParams {

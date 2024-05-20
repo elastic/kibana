@@ -6,13 +6,13 @@
  */
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { getRedirectToTransactionDetailPageUrl } from '../trace_link/get_redirect_to_transaction_detail_page_url';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
 const CentralizedContainer = euiStyled.div`
   height: 100%;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { FC, PropsWithChildren } from 'react';
+import { i18n } from '@kbn/i18n';
 import { TextWithIcon } from '../text_with_icon';
 
 export const txtIncompatibleTooltip = i18n.translate(

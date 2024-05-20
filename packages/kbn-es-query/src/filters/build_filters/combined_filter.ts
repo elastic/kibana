@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
 import { DataViewBase } from '../../es_query';
-import { FILTERS, Filter, FilterMeta, FilterStateStore } from './types';
 
 /**
  * @public

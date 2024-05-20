@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { promises as fs, mkdir, readFileSync, writeFile } from 'fs';
 import { dirname } from 'path';
-import path from 'path';
 import { promisify } from 'util';
+import { promises as fs, writeFile, readFileSync, mkdir } from 'fs';
+import path from 'path';
+import { comparePngs, PngDescriptor } from '../lib/compare_pngs';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
-import { PngDescriptor, comparePngs } from '../lib/compare_pngs';
 
 const mkdirAsync = promisify(mkdir);
 const writeFileAsync = promisify(writeFile);

@@ -7,20 +7,20 @@
 
 import { Subject } from 'rxjs';
 
-import { executionContextServiceMock } from '@kbn/core/server/mocks';
-import { v4 as uuidv4 } from 'uuid';
-import { EphemeralTaskLifecycle, EphemeralTaskLifecycleOpts } from './ephemeral_task_lifecycle';
-import { FillPoolResult } from './lib/fill_pool';
-import { createInitialMiddleware } from './lib/middleware';
-import { asErr, asOk } from './lib/result_type';
-import { taskManagerMock } from './mocks';
 import { TaskLifecycleEvent } from './polling_lifecycle';
-import { TaskPersistence, asTaskPollingCycleEvent, asTaskRunEvent } from './task_events';
-import { TaskPoolRunResult } from './task_pool';
-import { TaskPoolMock } from './task_pool.mock';
-import { TaskRunResult } from './task_running';
+import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
+import { asErr, asOk } from './lib/result_type';
+import { FillPoolResult } from './lib/fill_pool';
+import { EphemeralTaskLifecycle, EphemeralTaskLifecycleOpts } from './ephemeral_task_lifecycle';
+import { v4 as uuidv4 } from 'uuid';
+import { asTaskPollingCycleEvent, asTaskRunEvent, TaskPersistence } from './task_events';
+import { TaskRunResult } from './task_running';
+import { TaskPoolRunResult } from './task_pool';
+import { TaskPoolMock } from './task_pool.mock';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from './mocks';
 
 jest.mock('./constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report'],

@@ -6,8 +6,8 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
-import { BulkEditResponse } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { BulkEditResponse } from '../../../types';
 
 export async function unsnoozeRule({
   id,

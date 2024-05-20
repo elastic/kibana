@@ -12,11 +12,11 @@ import moment from 'moment';
 import { TextScale } from '../../../../common/log_text_scale';
 import {
   LogColumnRenderConfiguration,
-  columnWidthToCSS,
-  isMessageColumnRenderConfiguration,
   isTimestampColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  columnWidthToCSS,
 } from '../../../utils/log_column_render_configuration';
-import { TimeFormat, useFormattedTime } from '../../formatted_time';
+import { useFormattedTime, TimeFormat } from '../../formatted_time';
 import { useMeasuredCharacterDimensions } from './text_styles';
 
 const DATE_COLUMN_SLACK_FACTOR = 1.1;

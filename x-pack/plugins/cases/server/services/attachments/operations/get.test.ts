@@ -7,14 +7,14 @@
 
 import { unset } from 'lodash';
 
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../../attachment_framework/mocks';
-import { createErrorSO, createSOFindResponse, mockPointInTimeFinder } from '../../test_utils';
-import { createAlertAttachment, createFileAttachment, createUserAttachment } from '../test_utils';
 import { AttachmentGetter } from './get';
+import { createAlertAttachment, createFileAttachment, createUserAttachment } from '../test_utils';
+import { mockPointInTimeFinder, createSOFindResponse, createErrorSO } from '../../test_utils';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common';
 
 describe('AttachmentService getter', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();

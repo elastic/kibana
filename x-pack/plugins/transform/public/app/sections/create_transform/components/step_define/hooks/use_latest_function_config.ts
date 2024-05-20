@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { AggConfigs, FieldParamType } from '@kbn/data-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { isCounterTimeSeriesMetric } from '@kbn/ml-agg-utils';
-import { useCallback, useMemo, useState } from 'react';
-import type { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 import type { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
-import { useAppDependencies } from '../../../../../app_dependencies';
-import type { StepDefineExposedState } from '../common';
 import type { StepDefineFormProps } from '../step_define_form';
+import type { StepDefineExposedState } from '../common';
+import type { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
+import { useAppDependencies } from '../../../../../app_dependencies';
 
 /**
  * Latest function config mapper between API and UI

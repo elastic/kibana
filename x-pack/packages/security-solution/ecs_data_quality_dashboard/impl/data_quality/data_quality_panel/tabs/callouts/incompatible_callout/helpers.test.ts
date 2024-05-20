@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getIncompatiableFieldsInSameFamilyCount } from './helpers';
 import {
   eventCategory,
   eventCategoryWithUnallowedValues,
@@ -13,7 +14,6 @@ import {
   sourceIpWithTextMapping,
 } from '../../../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { EnrichedFieldMetadata } from '../../../../types';
-import { getIncompatiableFieldsInSameFamilyCount } from './helpers';
 
 const sameFamily: EnrichedFieldMetadata = {
   ...eventCategory, // `event.category` is a `keyword` per the ECS spec

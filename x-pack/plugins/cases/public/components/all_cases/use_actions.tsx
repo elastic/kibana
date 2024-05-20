@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
@@ -12,22 +13,21 @@ import type {
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
 import type { CaseUI } from '../../containers/types';
-import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
-import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
-import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
-import { useSeverityAction } from '../actions/severity/use_severity_action';
-import { useStatusAction } from '../actions/status/use_status_action';
-import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
-import { useTagsAction } from '../actions/tags/use_tags_action';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import { severities } from '../severity/config';
-import { statuses } from '../status';
-import * as i18n from './translations';
+import { useStatusAction } from '../actions/status/use_status_action';
 import { useRefreshCases } from './use_on_refresh_cases';
+import * as i18n from './translations';
+import { statuses } from '../status';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useSeverityAction } from '../actions/severity/use_severity_action';
+import { severities } from '../severity/config';
+import { useTagsAction } from '../actions/tags/use_tags_action';
+import { EditTagsFlyout } from '../actions/tags/edit_tags_flyout';
+import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
+import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
+import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
 
 const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean }> = ({
   theCase,

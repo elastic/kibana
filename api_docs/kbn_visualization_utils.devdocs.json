@@ -158,7 +158,10 @@
                 "tags": [],
                 "label": "suggestion",
                 "description": [],
-                "signature": ["Suggestion", "<unknown, unknown> | undefined"],
+                "signature": [
+                  "Suggestion",
+                  "<unknown, unknown> | undefined"
+                ],
                 "path": "packages/kbn-visualization-utils/src/get_lens_attributes.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -196,7 +199,9 @@
         "type": "Function",
         "tags": [],
         "label": "getTimeZone",
-        "description": ["\nGet timeZone from uiSettings"],
+        "description": [
+          "\nGet timeZone from uiSettings"
+        ],
         "signature": [
           "(uiSettings: ",
           {
@@ -258,7 +263,9 @@
             "tags": [],
             "label": "{\n  children,\n  condition,\n  tooltipContent,\n  ...tooltipProps\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<TooltipWrapperProps>"],
+            "signature": [
+              "React.PropsWithChildren<TooltipWrapperProps>"
+            ],
             "path": "packages/kbn-visualization-utils/src/tooltip_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiTab, EuiTabs } from '@elastic/eui';
 
 export type TabType = 'summary' | 'mappings' | 'aliases' | 'settings';
 

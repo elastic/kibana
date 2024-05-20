@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useRef, Suspense, useEffect } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
-import { useCustomMargin } from '../shared/use_custom_margin';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
-import { CustomCard } from './types';
 import { useIntegrationCardList } from './use_integration_card_list';
+import { useCustomMargin } from '../shared/use_custom_margin';
+import { CustomCard } from './types';
 
 interface Props {
   /**

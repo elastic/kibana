@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { noop, map, omitBy, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { isNull, map, noop, omitBy } from 'lodash';
 import { cidrToAst, ipRangeToAst } from '../../expressions';
 
-import { KBN_FIELD_TYPES } from '../../..';
-import { BaseAggParams } from '../types';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterIpRange } from './create_filter/ip_range';
+import { IpRangeKey, RangeIpRangeAggKey, CidrMaskIpRangeAggKey } from './lib/ip_range';
 import { aggIpRangeFnName } from './ip_range_fn';
-import { CidrMaskIpRangeAggKey, IpRangeKey, RangeIpRangeAggKey } from './lib/ip_range';
+import { KBN_FIELD_TYPES } from '../../..';
+import { BaseAggParams } from '../types';
 
 const ipRangeTitle = i18n.translate('data.search.aggs.buckets.ipRangeTitle', {
   defaultMessage: 'IP Range',

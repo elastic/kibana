@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { NoSelectedAssignees } from './no_selected_assignees';
+import { render, screen } from '@testing-library/react';
 
 describe('NoSelectedAssignees', () => {
   it('renders the no matches messages with one selected case correctly', () => {

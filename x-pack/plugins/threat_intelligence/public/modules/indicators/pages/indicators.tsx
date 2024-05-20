@@ -6,23 +6,23 @@
  */
 
 import React, { FC, VFC, PropsWithChildren } from 'react';
-import { DefaultPageLayout } from '../../../components/layout';
-import { UpdateStatus } from '../../../components/update_status';
-import { FieldTypesProvider } from '../../../containers/field_types_provider';
-import { FiltersGlobal } from '../../../containers/filters_global';
-import { InspectorProvider } from '../../../containers/inspector';
+import { useBlockListContext } from '../hooks/use_block_list_context';
+import { BlockListProvider } from '../containers/block_list_provider';
 import { BlockListFlyout } from '../../block_list/containers/flyout';
-import { QueryBar } from '../../query_bar/components/query_bar';
-import { useFilters } from '../../query_bar/hooks/use_filters';
 import { IndicatorsBarChartWrapper } from '../components/barchart/wrapper';
 import { IndicatorsTable } from '../components/table/table';
-import { BlockListProvider } from '../containers/block_list_provider';
-import { IndicatorsFilters } from '../containers/filters';
 import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
-import { useBlockListContext } from '../hooks/use_block_list_context';
-import { useColumnSettings } from '../hooks/use_column_settings';
 import { useIndicators } from '../hooks/use_indicators';
 import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
+import { DefaultPageLayout } from '../../../components/layout';
+import { useFilters } from '../../query_bar/hooks/use_filters';
+import { FiltersGlobal } from '../../../containers/filters_global';
+import { FieldTypesProvider } from '../../../containers/field_types_provider';
+import { InspectorProvider } from '../../../containers/inspector';
+import { useColumnSettings } from '../hooks/use_column_settings';
+import { IndicatorsFilters } from '../containers/filters';
+import { UpdateStatus } from '../../../components/update_status';
+import { QueryBar } from '../../query_bar/components/query_bar';
 
 const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <IndicatorsFilters>

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { AppMountParameters } from '@kbn/core-application-browser';
-import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
-import type { NotificationsSetup } from '@kbn/core-notifications-browser';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
+import type { NotificationsSetup } from '@kbn/core-notifications-browser';
+import type { AppMountParameters } from '@kbn/core-application-browser';
 import { StatusApp } from './status_app';
 
 interface Deps {

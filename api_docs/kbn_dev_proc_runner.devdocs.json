@@ -22,7 +22,9 @@
         "parentPluginId": "@kbn/dev-proc-runner",
         "id": "def-common.ProcRunner",
         "type": "Class",
-        "tags": ["class"],
+        "tags": [
+          "class"
+        ],
         "label": "ProcRunner",
         "description": [
           "\n Helper for starting and managing processes. In many ways it resembles the\n API from `grunt_run`, processes are named and can be started, waited for,\n backgrounded once they log something matching a RegExp...\n"
@@ -38,7 +40,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -73,8 +77,12 @@
             "type": "Function",
             "tags": [],
             "label": "run",
-            "description": ["\n Start a process, tracking it by `name`"],
-            "signature": ["(name: string, options: RunOptions) => Promise<void>"],
+            "description": [
+              "\n Start a process, tracking it by `name`"
+            ],
+            "signature": [
+              "(name: string, options: RunOptions) => Promise<void>"
+            ],
             "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -86,7 +94,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -99,7 +109,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["RunOptions"],
+                "signature": [
+                  "RunOptions"
+                ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -114,8 +126,12 @@
             "type": "Function",
             "tags": [],
             "label": "stop",
-            "description": ["\n Stop a named proc"],
-            "signature": ["(name: string, signal?: NodeJS.Signals) => Promise<void>"],
+            "description": [
+              "\n Stop a named proc"
+            ],
+            "signature": [
+              "(name: string, signal?: NodeJS.Signals) => Promise<void>"
+            ],
             "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -127,7 +143,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -140,7 +158,9 @@
                 "tags": [],
                 "label": "signal",
                 "description": [],
-                "signature": ["NodeJS.Signals"],
+                "signature": [
+                  "NodeJS.Signals"
+                ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -153,10 +173,16 @@
             "parentPluginId": "@kbn/dev-proc-runner",
             "id": "def-common.ProcRunner.waitForAllToStop",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "waitForAllToStop",
-            "description": ["\n Wait for all running processes to stop naturally"],
-            "signature": ["() => Promise<void>"],
+            "description": [
+              "\n Wait for all running processes to stop naturally"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -167,12 +193,16 @@
             "parentPluginId": "@kbn/dev-proc-runner",
             "id": "def-common.ProcRunner.teardown",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "teardown",
             "description": [
               "\n Close the ProcRunner and stop all running\n processes with `signal`\n"
             ],
-            "signature": ["(signal?: \"exit\" | NodeJS.Signals) => Promise<void>"],
+            "signature": [
+              "(signal?: \"exit\" | NodeJS.Signals) => Promise<void>"
+            ],
             "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -184,7 +214,9 @@
                 "tags": [],
                 "label": "signal",
                 "description": [],
-                "signature": ["\"exit\" | NodeJS.Signals"],
+                "signature": [
+                  "\"exit\" | NodeJS.Signals"
+                ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -202,7 +234,9 @@
         "parentPluginId": "@kbn/dev-proc-runner",
         "id": "def-common.withProcRunner",
         "type": "Function",
-        "tags": ["return"],
+        "tags": [
+          "return"
+        ],
         "label": "withProcRunner",
         "description": [
           "\n Create a ProcRunner and pass it to an async function. When\n the async function finishes the ProcRunner is torn-down\n automatically\n"

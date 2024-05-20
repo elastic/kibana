@@ -6,10 +6,10 @@
  */
 
 import type { ImmutableReducer } from '../../../../../../common/store';
-import type { AppAction } from '../../../../../../common/store/actions';
 import type { PolicyDetailsState } from '../../../types';
-import { initialPolicyDetailsState } from './initial_policy_details_state';
+import type { AppAction } from '../../../../../../common/store/actions';
 import { policySettingsReducer } from './policy_settings_reducer';
+import { initialPolicyDetailsState } from './initial_policy_details_state';
 
 export * from './initial_policy_details_state';
 

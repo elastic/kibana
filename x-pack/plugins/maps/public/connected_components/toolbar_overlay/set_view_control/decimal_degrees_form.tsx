@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { ChangeEvent, Component } from 'react';
 import {
-  EuiButton,
-  EuiFieldNumber,
   EuiForm,
   EuiFormRow,
-  EuiSpacer,
+  EuiButton,
+  EuiFieldNumber,
   EuiTextAlign,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ChangeEvent, Component } from 'react';
 import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { withinRange } from './utils';
 

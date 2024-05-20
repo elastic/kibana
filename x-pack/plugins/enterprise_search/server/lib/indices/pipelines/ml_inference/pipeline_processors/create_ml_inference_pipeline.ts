@@ -11,8 +11,8 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { FieldMapping } from '../../../../../../common/ml_inference_pipeline';
 import { ErrorCode } from '../../../../../../common/types/error_codes';
 import type {
-  CreatePipelineResult,
   PreparePipelineAndIndexForMlInferenceResult,
+  CreatePipelineResult,
 } from '../../../../../../common/types/pipelines';
 import { addSubPipelineToIndexSpecificMlPipeline } from '../../../../../utils/create_ml_inference_pipeline';
 import { getPrefixedInferencePipelineProcessorName } from '../../../../../utils/ml_inference_pipeline_utils';

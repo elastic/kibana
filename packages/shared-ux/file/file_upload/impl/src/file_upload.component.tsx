@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import {
-  EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
   EuiText,
+  EuiSpacer,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiFilePicker,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React from 'react';
+import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
+import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
-import { ClearButton, ControlButton } from './components';
-import { useUploadState } from './context';
 import { i18nTexts } from './i18n_texts';
+import { ControlButton, ClearButton } from './components';
+import { useUploadState } from './context';
 
 export interface Props {
   meta?: unknown;

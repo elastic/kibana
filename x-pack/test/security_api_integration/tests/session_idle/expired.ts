@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
-import { adminTestUser } from '@kbn/test';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { parse as parseCookie } from 'tough-cookie';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import expect from '@kbn/expect';
+import { adminTestUser } from '@kbn/test';
+import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

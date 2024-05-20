@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { HostMetrics } from './host_metrics';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 
 export const Metrics = () => {
   const { asset } = useAssetDetailsRenderPropsContext();

@@ -7,12 +7,12 @@
  */
 
 import {
-  PublishesViewMode,
-  PublishingSubject,
   apiHasParentApi,
   apiHasUniqueId,
+  PublishesViewMode,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { CanAddNewPanel, apiCanAddNewPanel } from './can_add_new_panel';
+import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 import { PublishesSettings } from './publishes_settings';
 
 export interface PanelPackage<SerializedState extends object = object> {

@@ -25,10 +25,10 @@ import {
 } from '../app/translations';
 import { SecurityPageName } from '../app/types';
 import { benchmarksLink } from '../cloud_security_posture/links';
-import { IconConsoleCloud } from '../common/icons/console_cloud';
-import { IconDashboards } from '../common/icons/dashboards';
-import { IconRollup } from '../common/icons/rollup';
 import type { LinkItem } from '../common/links';
+import { IconConsoleCloud } from '../common/icons/console_cloud';
+import { IconRollup } from '../common/icons/rollup';
+import { IconDashboards } from '../common/icons/dashboards';
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,

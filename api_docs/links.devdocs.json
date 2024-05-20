@@ -60,7 +60,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"links\""],
+            "signature": [
+              "\"links\""
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -83,7 +85,10 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": ["LinksAttributes", " | undefined"],
+            "signature": [
+              "LinksAttributes",
+              " | undefined"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -95,7 +100,12 @@
             "tags": [],
             "label": "attributes$",
             "description": [],
-            "signature": ["Subject", "<", "LinksAttributes", ">"],
+            "signature": [
+              "Subject",
+              "<",
+              "LinksAttributes",
+              ">"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -107,7 +117,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -119,7 +131,9 @@
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "signature": ["LinksConfig"],
+                "signature": [
+                  "LinksConfig"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -132,7 +146,9 @@
                 "tags": [],
                 "label": "initialInput",
                 "description": [],
-                "signature": ["LinksInput"],
+                "signature": [
+                  "LinksInput"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -187,7 +203,10 @@
                 "tags": [],
                 "label": "parent",
                 "description": [],
-                "signature": ["DashboardContainer", " | undefined"],
+                "signature": [
+                  "DashboardContainer",
+                  " | undefined"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -203,7 +222,9 @@
             "tags": [],
             "label": "onRender",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -217,7 +238,9 @@
             "tags": [],
             "label": "onLoading",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -312,7 +335,11 @@
             "tags": [],
             "label": "getInputAsValueType",
             "description": [],
-            "signature": ["() => Promise<", "LinksByValueInput", ">"],
+            "signature": [
+              "() => Promise<",
+              "LinksByValueInput",
+              ">"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -326,7 +353,9 @@
             "tags": [],
             "label": "reload",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -340,7 +369,9 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -354,7 +385,9 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": ["(domNode: HTMLElement) => JSX.Element | undefined"],
+            "signature": [
+              "(domNode: HTMLElement) => JSX.Element | undefined"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -366,7 +399,9 @@
                 "tags": [],
                 "label": "domNode",
                 "description": [],
-                "signature": ["HTMLElement"],
+                "signature": [
+                  "HTMLElement"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -460,7 +495,9 @@
             "tags": [],
             "label": "latestVersion",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -544,7 +581,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"links\""],
+            "signature": [
+              "\"links\""
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -556,7 +595,9 @@
             "tags": [],
             "label": "isContainerType",
             "description": [],
-            "signature": ["false"],
+            "signature": [
+              "false"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -601,7 +642,9 @@
                 "tags": [],
                 "label": "getIconForSavedObject",
                 "description": [],
-                "signature": ["() => string"],
+                "signature": [
+                  "() => string"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -641,7 +684,9 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": ["LinksInput"],
+                "signature": [
+                  "LinksInput"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -654,7 +699,9 @@
                 "tags": [],
                 "label": "attributes",
                 "description": [],
-                "signature": ["unknown"],
+                "signature": [
+                  "unknown"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -670,7 +717,9 @@
             "tags": [],
             "label": "isEditable",
             "description": [],
-            "signature": ["() => Promise<boolean>"],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -684,7 +733,9 @@
             "tags": [],
             "label": "canCreateNew",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -698,7 +749,11 @@
             "tags": [],
             "label": "getDefaultInput",
             "description": [],
-            "signature": ["() => Partial<", "LinksInput", ">"],
+            "signature": [
+              "() => Partial<",
+              "LinksInput",
+              ">"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -746,7 +801,9 @@
                 "tags": [],
                 "label": "savedObjectId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -759,7 +816,9 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": ["LinksInput"],
+                "signature": [
+                  "LinksInput"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -772,7 +831,9 @@
                 "tags": [],
                 "label": "parent",
                 "description": [],
-                "signature": ["DashboardContainer"],
+                "signature": [
+                  "DashboardContainer"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -814,7 +875,9 @@
                 "tags": [],
                 "label": "initialInput",
                 "description": [],
-                "signature": ["LinksInput"],
+                "signature": [
+                  "LinksInput"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -827,7 +890,9 @@
                 "tags": [],
                 "label": "parent",
                 "description": [],
-                "signature": ["DashboardContainer"],
+                "signature": [
+                  "DashboardContainer"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -863,7 +928,9 @@
                 "tags": [],
                 "label": "initialInput",
                 "description": [],
-                "signature": ["LinksInput"],
+                "signature": [
+                  "LinksInput"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -876,7 +943,10 @@
                 "tags": [],
                 "label": "parent",
                 "description": [],
-                "signature": ["DashboardContainer", " | undefined"],
+                "signature": [
+                  "DashboardContainer",
+                  " | undefined"
+                ],
                 "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -892,7 +962,9 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -906,7 +978,9 @@
             "tags": [],
             "label": "getIconType",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -920,7 +994,9 @@
             "tags": [],
             "label": "getDescription",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1105,7 +1181,9 @@
         "tags": [],
         "label": "APP_ICON",
         "description": [],
-        "signature": ["\"link\""],
+        "signature": [
+          "\"link\""
+        ],
         "path": "src/plugins/links/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1130,7 +1208,9 @@
         "tags": [],
         "label": "CONTENT_ID",
         "description": [],
-        "signature": ["\"links\""],
+        "signature": [
+          "\"links\""
+        ],
         "path": "src/plugins/links/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1143,7 +1223,9 @@
         "tags": [],
         "label": "LATEST_VERSION",
         "description": [],
-        "signature": ["1"],
+        "signature": [
+          "1"
+        ],
         "path": "src/plugins/links/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

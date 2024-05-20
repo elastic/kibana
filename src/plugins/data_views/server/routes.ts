@@ -12,9 +12,9 @@ import { routes } from './rest_api_routes/public';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';
 
 import { registerExistingIndicesPath } from './rest_api_routes/internal/existing_indices';
-import { registerFields } from './rest_api_routes/internal/fields';
 import { registerFieldForWildcard } from './rest_api_routes/internal/fields_for';
 import { registerHasDataViewsRoute } from './rest_api_routes/internal/has_data_views';
+import { registerFields } from './rest_api_routes/internal/fields';
 
 interface RegisterRoutesArgs {
   http: HttpServiceSetup;

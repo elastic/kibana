@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { ESQLSource } from './esql_source';
 import { UpdateSourceEditor } from './update_source_editor';
+import { ESQLSource } from './esql_source';
 
 jest.mock('../../../kibana_services', () => {
   return {

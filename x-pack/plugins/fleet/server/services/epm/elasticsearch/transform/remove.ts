@@ -7,10 +7,10 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference } from '../../../../types';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { appContextService } from '../../../app_context';
 
 import { retryTransientEsErrors } from '../retry';

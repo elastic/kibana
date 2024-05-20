@@ -1,4 +1,3 @@
-import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import userEvent from '@testing-library/user-event';
  * 2.0.
  */
 import React from 'react';
-import { TTYTextSizer, TTYTextSizerDeps } from '.';
-import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
+import userEvent from '@testing-library/user-event';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
+import { TTYTextSizer, TTYTextSizerDeps } from '.';
 
 const FULL_SCREEN_FONT_SIZE = 12;
 

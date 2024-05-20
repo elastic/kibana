@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { parsedExternallyDefinedCollector } from './__fixture__/parsed_externally_defined_collector';
-import { parsedImportedInterfaceFromExport } from './__fixture__/parsed_imported_interface_from_export';
-import { parsedImportedSchemaCollector } from './__fixture__/parsed_imported_schema';
-import { parsedImportedUsageInterface } from './__fixture__/parsed_imported_usage_interface';
+import { parseUsageCollection } from './ts_parser';
+import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
 import { parsedNestedCollector } from './__fixture__/parsed_nested_collector';
+import { parsedExternallyDefinedCollector } from './__fixture__/parsed_externally_defined_collector';
+import { parsedImportedUsageInterface } from './__fixture__/parsed_imported_usage_interface';
+import { parsedImportedSchemaCollector } from './__fixture__/parsed_imported_schema';
 import { parsedSchemaDefinedWithSpreadsCollector } from './__fixture__/parsed_schema_defined_with_spreads_collector';
 import { parsedStatsCollector } from './__fixture__/parsed_stats_collector';
-import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
+import { parsedImportedInterfaceFromExport } from './__fixture__/parsed_imported_interface_from_export';
 import { loadFixtureProgram } from './test_utils';
-import { parseUsageCollection } from './ts_parser';
 
 describe('parseUsageCollection', () => {
   it.todo('throws when a function is returned from fetch');

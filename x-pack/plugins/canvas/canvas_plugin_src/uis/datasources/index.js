@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { demodata } from './demodata';
-import { esdocs } from './esdocs';
 import { essql } from './essql';
+import { esdocs } from './esdocs';
+import { demodata } from './demodata';
 import { timelion } from './timelion';
 
 export const datasourceSpecs = [essql, esdocs, demodata, timelion];

@@ -5,37 +5,37 @@
  * 2.0.
  */
 
+import React, { memo, useMemo, useState } from 'react';
+import styled from 'styled-components';
+import { pick } from 'lodash';
 import {
   EuiBottomBar,
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { pick } from 'lodash';
-import React, { memo, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
-import { DevtoolsRequestFlyoutButton } from '../../../../../components';
-import {
-  sendGetAgentStatus,
-  sendUpdateAgentPolicy,
-  useAgentPolicyRefresh,
-  useAuthz,
-  useBreadcrumbs,
-  useConfig,
-  useStartServices,
-} from '../../../../../hooks';
-import { ExperimentalFeaturesService } from '../../../../../services';
 import type { AgentPolicy } from '../../../../../types';
 import {
+  useStartServices,
+  useAuthz,
+  sendUpdateAgentPolicy,
+  useConfig,
+  sendGetAgentStatus,
+  useAgentPolicyRefresh,
+  useBreadcrumbs,
+} from '../../../../../hooks';
+import {
   AgentPolicyForm,
-  ConfirmDeployAgentPolicyModal,
   agentPolicyFormValidation,
+  ConfirmDeployAgentPolicyModal,
 } from '../../../components';
+import { DevtoolsRequestFlyoutButton } from '../../../../../components';
+import { ExperimentalFeaturesService } from '../../../../../services';
 import { generateUpdateAgentPolicyDevToolsRequest } from '../../../services';
 
 const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>

@@ -7,9 +7,9 @@
 
 import type { DeepPartial } from '@kbn/utility-types';
 import { mergeWith } from 'lodash';
+import { BaseDataGenerator } from './base_data_generator';
 import type { HostPolicyResponse, HostPolicyResponseAppliedAction } from '../types';
 import { HostPolicyResponseActionStatus } from '../types';
-import { BaseDataGenerator } from './base_data_generator';
 
 const mergeAndReplaceArrays = <T, S>(destinationObj: T, srcObj: S): T => {
   const customizer = (objValue: T[keyof T], srcValue: S[keyof S]) => {

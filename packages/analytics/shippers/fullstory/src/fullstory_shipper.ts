@@ -8,18 +8,18 @@
 
 import type {
   AnalyticsClientInitContext,
-  Event,
   EventContext,
+  Event,
   IShipper,
 } from '@kbn/analytics-client';
-import { set } from '@kbn/safer-lodash-set';
+import { Subject, distinct, debounceTime, map, filter, Subscription } from 'rxjs';
 import { get, has } from 'lodash';
-import { Subject, Subscription, debounceTime, distinct, filter, map } from 'rxjs';
-import { formatPayload } from './format_payload';
-import { getParsedVersion } from './get_parsed_version';
-import type { FullStorySnippetConfig } from './load_snippet';
-import { loadSnippet } from './load_snippet';
+import { set } from '@kbn/safer-lodash-set';
 import type { FullStoryApi } from './types';
+import type { FullStorySnippetConfig } from './load_snippet';
+import { formatPayload } from './format_payload';
+import { loadSnippet } from './load_snippet';
+import { getParsedVersion } from './get_parsed_version';
 
 const PAGE_VARS_KEYS = [
   // Page-specific keys
@@ -66,7 +66,7 @@ interface FullStoryUserVars {
   cloudTrialEndDate?: string;
 }
 
-type FullStoryPageContext = Pick<EventContext, (typeof PAGE_VARS_KEYS)[number]>;
+type FullStoryPageContext = Pick<EventContext, typeof PAGE_VARS_KEYS[number]>;
 
 /**
  * FullStory shipper.
@@ -113,15 +113,12 @@ export class FullStoryShipper implements IShipper {
             // > Note: You can capture up to 20 unique page properties (exclusive of pageName) for any given page
             // > and up to 500 unique page properties across all pages.
             // https://help.fullstory.com/hc/en-us/articles/1500004101581-FS-setVars-API-Sending-custom-page-data-to-FullStory
-            return PAGE_VARS_KEYS.reduce(
-              (acc, key) => {
-                if (has(newContext, key)) {
-                  set(acc, key, get(newContext, key));
-                }
-                return acc;
-              },
-              {} as Partial<FullStoryPageContext> & Record<string, unknown>
-            );
+            return PAGE_VARS_KEYS.reduce((acc, key) => {
+              if (has(newContext, key)) {
+                set(acc, key, get(newContext, key));
+              }
+              return acc;
+            }, {} as Partial<FullStoryPageContext> & Record<string, unknown>);
           }),
           filter((pageVars) => Object.keys(pageVars).length > 0),
           // Wait for anything to actually change.

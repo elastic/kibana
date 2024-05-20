@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiCheckbox, EuiConfirmModal } from '@elastic/eui';
+import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Component } from 'react';
+import { EuiCallOut, EuiCheckbox, EuiConfirmModal } from '@elastic/eui';
 
 import { PolicyFromES } from '../../../../../common/types';
-import { deletePolicy } from '../../../services/api';
-import { showApiError } from '../../../services/api_errors';
 import { toasts } from '../../../services/notification';
+import { showApiError } from '../../../services/api_errors';
+import { deletePolicy } from '../../../services/api';
 
 interface Props {
   policyToDelete: PolicyFromES;

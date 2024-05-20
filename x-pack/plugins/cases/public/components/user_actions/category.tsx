@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { CategoryUserAction } from '../../../common/types/domain';

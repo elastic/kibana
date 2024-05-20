@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import { SERVICE_NAME } from '../../common/es_fields/apm';
-import { environmentQuery } from '../../common/utils/environment_query';
 import { termQuery } from '../../common/utils/term_query';
+import { environmentQuery } from '../../common/utils/environment_query';
 
 export function useFiltersForEmbeddableCharts({
   serviceName,

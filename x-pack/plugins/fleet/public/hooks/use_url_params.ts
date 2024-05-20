@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 
 /**
  * Parses `search` params and returns an object with them along with a `toUrlParams` function

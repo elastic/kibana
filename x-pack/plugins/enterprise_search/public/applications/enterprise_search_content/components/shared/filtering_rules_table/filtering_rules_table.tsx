@@ -12,11 +12,11 @@ import { EuiBasicTable, EuiBasicTableColumn, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
-  FilteringPolicy,
-  FilteringRule,
-  FilteringRuleRule,
   filteringPolicyToText,
   filteringRuleToText,
+  FilteringRule,
+  FilteringPolicy,
+  FilteringRuleRule,
 } from '@kbn/search-connectors';
 
 interface FilteringRulesTableProps {

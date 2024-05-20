@@ -6,7 +6,7 @@
  */
 
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
-import { emptyTable, testTable } from './__fixtures__/test_tables';
+import { testTable, emptyTable } from './__fixtures__/test_tables';
 import { context } from './context';
 
 describe('context', () => {

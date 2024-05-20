@@ -6,12 +6,12 @@
  */
 import React, { useRef, memo, useEffect } from 'react';
 
-import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
+import type { EuiDataGridSetCellProps, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import type { RowRenderer } from '../../../../../../common/types';
-import { StatefulRowRenderer } from '../../body/events/stateful_row_renderer';
 import { EventsTrSupplement } from '../../styles';
+import { StatefulRowRenderer } from '../../body/events/stateful_row_renderer';
+import type { RowRenderer } from '../../../../../../common/types';
 import { useTimelineUnifiedDataTableContext } from './use_timeline_unified_data_table_context';
 
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */

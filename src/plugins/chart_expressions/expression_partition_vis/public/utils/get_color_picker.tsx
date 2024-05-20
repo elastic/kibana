@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, createContext, useContext } from 'react';
+import chroma from 'chroma-js';
 import { LegendColorPicker, Position } from '@elastic/charts';
-import { EuiOutsideClickDetector, EuiWrappingPopover, PopoverAnchorPosition } from '@elastic/eui';
-import { ColorPicker } from '@kbn/charts-plugin/public';
+import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import type { DatatableRow } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import chroma from 'chroma-js';
-import React, { useCallback, createContext, useContext } from 'react';
+import { ColorPicker } from '@kbn/charts-plugin/public';
 import { BucketColumns } from '../../common/types';
 
 const KEY_CODE_ENTER = 13;

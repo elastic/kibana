@@ -7,11 +7,11 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
-  CaseMetricsFeature,
-  CasesMetricsRequestRt,
-  CasesMetricsResponseRt,
   SingleCaseMetricsRequestRt,
+  CasesMetricsRequestRt,
   SingleCaseMetricsResponseRt,
+  CasesMetricsResponseRt,
+  CaseMetricsFeature,
 } from './v1';
 
 describe('Metrics case', () => {

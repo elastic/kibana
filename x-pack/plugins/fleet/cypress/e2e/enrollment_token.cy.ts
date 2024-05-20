@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ENROLLMENT_TOKENS } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
+import { ENROLLMENT_TOKENS } from '../screens/fleet';
 
 import { API_VERSIONS } from '../../common/constants';
 import { request } from '../tasks/common';

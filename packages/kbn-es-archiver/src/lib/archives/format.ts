@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { createGzip, Z_BEST_COMPRESSION } from 'zlib';
 import { PassThrough } from 'stream';
-import { Z_BEST_COMPRESSION, createGzip } from 'zlib';
 import stringify from 'json-stable-stringify';
 
-import { createIntersperseStream, createMapStream } from '@kbn/utils';
+import { createMapStream, createIntersperseStream } from '@kbn/utils';
 import { RECORD_SEPARATOR } from './constants';
 
 export function createFormatArchiveStreams({ gzip = false }: { gzip?: boolean } = {}) {

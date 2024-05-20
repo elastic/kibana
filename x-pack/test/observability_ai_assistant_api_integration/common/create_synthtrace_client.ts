@@ -7,8 +7,8 @@
 import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
-  LogLevel,
   createLogger,
+  LogLevel,
 } from '@kbn/apm-synthtrace';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 

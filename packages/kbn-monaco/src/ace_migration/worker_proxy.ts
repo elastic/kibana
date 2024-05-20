@@ -7,7 +7,7 @@
  */
 
 import { monaco } from '../monaco_imports';
-import { ParseResult, ParserWorker } from './types';
+import { ParserWorker, ParseResult } from './types';
 
 export class WorkerProxyService<IWorker extends ParserWorker> {
   private worker: monaco.editor.MonacoWebWorker<IWorker> | undefined;

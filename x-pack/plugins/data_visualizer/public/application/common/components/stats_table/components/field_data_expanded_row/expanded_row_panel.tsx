@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
-import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { EuiPanel } from '@elastic/eui';
+import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
 
 interface Props {
   dataTestSubj?: string;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Vis } from '@kbn/visualizations-plugin/public';
 import { toExpressionAst } from './to_ast';
+import { Vis } from '@kbn/visualizations-plugin/public';
 
 describe('markdown vis toExpressionAst function', () => {
   let vis: Vis;

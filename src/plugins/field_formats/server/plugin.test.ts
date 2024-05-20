@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { DateFormat } from './lib/converters/date_server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { FieldFormatsPlugin } from './plugin';
 
 describe('FieldFormats registry server plugin', () => {

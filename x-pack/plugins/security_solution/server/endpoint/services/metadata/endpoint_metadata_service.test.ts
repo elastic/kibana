@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { EndpointMetadataServiceTestContextMock } from './mocks';
+import { createEndpointMetadataServiceTestContextMock } from './mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server/services';
-import { EndpointError } from '../../../../common/endpoint/errors';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import type { HostMetadata } from '../../../../common/endpoint/types';
-import {
-  buildUnitedIndexQuery,
-  getESQueryHostMetadataByFleetAgentIds,
-} from '../../routes/metadata/query_builders';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   legacyMetadataSearchResponseMock,
   unitedMetadataSearchResponseMock,
 } from '../../routes/metadata/support/test_support';
-import type { EndpointMetadataServiceTestContextMock } from './mocks';
-import { createEndpointMetadataServiceTestContextMock } from './mocks';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import {
+  buildUnitedIndexQuery,
+  getESQueryHostMetadataByFleetAgentIds,
+} from '../../routes/metadata/query_builders';
+import type { HostMetadata } from '../../../../common/endpoint/types';
+import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server/services';
+import { EndpointError } from '../../../../common/endpoint/errors';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('EndpointMetadataService', () => {
   let testMockedContext: EndpointMetadataServiceTestContextMock;

@@ -6,59 +6,59 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiBadge,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiOutsideClickDetector,
-  EuiResizeObserver,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
-import type { CoreStart } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
-import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { IndexManagementPluginSetup } from '@kbn/index-management';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  LanguageDocumentationPopover,
-  type LanguageDocumentationSections,
-} from '@kbn/language-documentation-popover';
-import { type ESQLCallbacks, ESQLLang, ESQL_LANG_ID, ESQL_THEME_ID, monaco } from '@kbn/monaco';
-import { TooltipWrapper } from '@kbn/visualization-utils';
+import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
-import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
+import { monaco, ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang, type ESQLCallbacks } from '@kbn/monaco';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management';
+import { TooltipWrapper } from '@kbn/visualization-utils';
+import {
+  type LanguageDocumentationSections,
+  LanguageDocumentationPopover,
+} from '@kbn/language-documentation-popover';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiBadge,
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiResizeObserver,
+  EuiOutsideClickDetector,
+  EuiToolTip,
+} from '@elastic/eui';
+import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
-import { EditorFooter } from './editor_footer';
-import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
-import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
-  type MonacoMessage,
-  clearCacheWhenOld,
-  getDocumentationSections,
-  getIndicesList,
-  getInlineEditorText,
-  getRemoteIndicesList,
-  getWrappedInPipesCode,
-  parseErrors,
-  parseWarning,
-  useDebounceWithOptions,
-} from './helpers';
-import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
-import { ResizableButton } from './resizable_button';
-import {
+  textBasedLanguageEditorStyles,
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_EXPANDED,
   EDITOR_MAX_HEIGHT,
   EDITOR_MIN_HEIGHT,
-  textBasedLanguageEditorStyles,
 } from './text_based_languages_editor.styles';
+import {
+  useDebounceWithOptions,
+  parseWarning,
+  getInlineEditorText,
+  getDocumentationSections,
+  type MonacoMessage,
+  getWrappedInPipesCode,
+  parseErrors,
+  getIndicesList,
+  getRemoteIndicesList,
+  clearCacheWhenOld,
+} from './helpers';
+import { EditorFooter } from './editor_footer';
+import { ResizableButton } from './resizable_button';
+import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
+import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
+import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
 
 import './overwrite.scss';
 
@@ -443,8 +443,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         status: clientParserMessages.errors?.length
           ? 'error'
           : clientParserMessages.warnings.length
-            ? 'warning'
-            : 'success',
+          ? 'warning'
+          : 'success',
       });
 
       setRefetchHistoryItems(true);

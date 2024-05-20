@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { FillOpacityOption } from './fill_opacity_option';
+import { render, screen } from '@testing-library/react';
 
 describe('Line curve option', () => {
   it('should show currently selected opacity value', () => {

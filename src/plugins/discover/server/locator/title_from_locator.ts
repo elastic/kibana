@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { SavedObject } from '@kbn/core/server';
 import { LocatorServicesDeps } from '.';
 import { DiscoverAppLocatorParams } from '../../common';
 

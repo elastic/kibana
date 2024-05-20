@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import { get } from 'lodash';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import React, { Fragment } from 'react';
 import { formatProductName, getIdentifier } from './formatting';
 import type { SetupModeData } from './types';
 

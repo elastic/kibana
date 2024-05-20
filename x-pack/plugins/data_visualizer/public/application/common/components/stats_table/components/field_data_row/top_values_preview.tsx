@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
-import type { ChartData, OrdinalDataItem } from '@kbn/ml-data-grid';
 import type { FC } from 'react';
 import React from 'react';
-import type { FieldDataRowProps } from '../../types/field_data_row';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import type { ChartData, OrdinalDataItem } from '@kbn/ml-data-grid';
 import { ColumnChart } from './column_chart';
+import type { FieldDataRowProps } from '../../types/field_data_row';
 
 export interface TopValuesPreviewProps extends FieldDataRowProps {
   isNumeric?: boolean;

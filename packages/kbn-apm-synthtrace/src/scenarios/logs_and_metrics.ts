@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 import {
-  Instance,
   LogDocument,
-  apm,
-  generateLongId,
-  generateShortId,
   log,
+  generateShortId,
+  generateLongId,
+  apm,
+  Instance,
 } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 

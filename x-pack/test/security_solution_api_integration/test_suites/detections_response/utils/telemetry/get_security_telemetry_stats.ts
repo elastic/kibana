@@ -8,11 +8,11 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
+import { SECURITY_TELEMETRY_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { SECURITY_TELEMETRY_URL } from '@kbn/security-solution-plugin/common/constants';
 
 /**
  * Gets the stats from the stats endpoint within specifically the security_solutions application.

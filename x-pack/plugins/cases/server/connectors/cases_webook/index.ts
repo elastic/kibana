@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { format } from './format';
 import { getMapping } from './mapping';
+import { format } from './format';
 import type { CasesWebhookCaseConnector } from './types';
 
 export const getCaseConnector = (): CasesWebhookCaseConnector => ({

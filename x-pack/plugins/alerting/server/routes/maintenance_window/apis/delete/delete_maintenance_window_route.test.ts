@@ -6,13 +6,13 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { MaintenanceWindowStatus } from '../../../../../common';
-import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { maintenanceWindowClientMock } from '../../../../maintenance_window_client.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { maintenanceWindowClientMock } from '../../../../maintenance_window_client.mock';
 import { deleteMaintenanceWindowRoute } from './delete_maintenance_window_route';
+import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
+import { MaintenanceWindowStatus } from '../../../../../common';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 

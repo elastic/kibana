@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { useTrackedPromise } from '@kbn/use-tracked-promise';
 import { useCallback } from 'react';
+import { useTrackedPromise } from '@kbn/use-tracked-promise';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';
 
 // Errors

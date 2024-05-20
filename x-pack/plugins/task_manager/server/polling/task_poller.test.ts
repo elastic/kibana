@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { none } from 'fp-ts/lib/Option';
-import { BehaviorSubject, of } from 'rxjs';
 import sinon from 'sinon';
-import { asErr, asOk } from '../lib/result_type';
-import { PollingError, PollingErrorType, createTaskPoller } from './task_poller';
+import { of, BehaviorSubject } from 'rxjs';
+import { none } from 'fp-ts/lib/Option';
+import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { asOk, asErr } from '../lib/result_type';
 
 describe('TaskPoller', () => {
   let clock: sinon.SinonFakeTimers;

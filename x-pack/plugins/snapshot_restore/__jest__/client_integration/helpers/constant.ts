@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPolicy, getRepository } from '../../../test/fixtures';
+import { getRepository, getPolicy } from '../../../test/fixtures';
 
 export const REPOSITORY_NAME = 'my-test-repository';
 

@@ -9,11 +9,11 @@ import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
 import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '../../common/environment_filter_values';
 import { useDataView } from '../components/app/rum_dashboard/local_uifilters/use_data_view';
-import { callDateMath } from '../services/data/call_date_math';
 import {
   getEnvironments,
   transformEnvironmentsResponse,
 } from '../services/data/environments_query';
+import { callDateMath } from '../services/data/call_date_math';
 import { useKibanaServices } from './use_kibana_services';
 
 function getEnvironmentOptions(environments: string[]) {

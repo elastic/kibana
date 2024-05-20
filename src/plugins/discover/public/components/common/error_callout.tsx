@@ -8,8 +8,8 @@
 
 import { EuiButton, EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { renderSearchError } from '@kbn/search-errors';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 

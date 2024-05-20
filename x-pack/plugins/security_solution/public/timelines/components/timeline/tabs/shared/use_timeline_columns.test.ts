@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { TestProviders } from '../../../../../common/mock';
-import { defaultHeaders } from '../../body/column_headers/default_headers';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { renderHook } from '@testing-library/react-hooks';
 import { useTimelineColumns } from './use_timeline_columns';
+import { defaultUdtHeaders } from '../../unified_components/default_headers';
+import { defaultHeaders } from '../../body/column_headers/default_headers';
+import type { ColumnHeaderOptions } from '../../../../../../common/types/timeline/columns';
 
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),

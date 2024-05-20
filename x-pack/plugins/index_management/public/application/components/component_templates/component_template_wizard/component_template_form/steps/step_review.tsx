@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiCode,
-  EuiCodeBlock,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGroup,
+  EuiTitle,
   EuiFlexItem,
   EuiSpacer,
   EuiTabbedContent,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
   EuiText,
-  EuiTitle,
+  EuiCodeBlock,
+  EuiCode,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
-import { getLifecycleValue } from '../../../../../lib/data_streams';
-import { MANAGED_BY_FLEET } from '../../../constants';
 import {
   ComponentTemplateDeserialized,
-  serializeComponentTemplate,
   serializers,
+  serializeComponentTemplate,
 } from '../../../shared_imports';
+import { MANAGED_BY_FLEET } from '../../../constants';
+import { getLifecycleValue } from '../../../../../lib/data_streams';
 
 const INFINITE_AS_ICON = true;
 const { stripEmptyFields } = serializers;

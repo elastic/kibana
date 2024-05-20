@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { mergeProjection } from '../../../common/utils/merge_projection';
+import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
@@ -13,8 +15,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
-import { mergeProjection } from '../../../common/utils/merge_projection';
-import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { getRumErrorsProjection } from './projections';
 
 export function jsErrorsQuery(

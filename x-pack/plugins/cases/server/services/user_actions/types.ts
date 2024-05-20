@@ -6,40 +6,40 @@
  */
 
 import type {
-  ISavedObjectsSerializer,
-  Logger,
   SavedObjectReference,
   SavedObjectsClientContract,
+  Logger,
+  ISavedObjectsSerializer,
   SavedObjectsRawDoc,
 } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type {
-  AttachmentRequest,
-  CasePostRequest,
-  UserActionFindRequest,
-} from '../../../common/types/api';
-import type {
-  CaseAssignees,
-  CaseCustomFields,
-  CaseSettings,
-  CaseSeverity,
-  CaseStatuses,
+  UserActionAction,
   CaseUserActionWithoutReferenceIds,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
-  User,
-  UserActionAction,
   UserActionType,
+  CaseSettings,
+  CaseSeverity,
+  CaseStatuses,
+  User,
+  CaseAssignees,
+  CaseCustomFields,
 } from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
 } from '../../common/types/user_actions';
-import type { PatchCasesArgs } from '../cases/types';
 import type { IndexRefresh } from '../types';
+import type { PatchCasesArgs } from '../cases/types';
+import type {
+  AttachmentRequest,
+  CasePostRequest,
+  UserActionFindRequest,
+} from '../../../common/types/api';
 
 export interface BuilderParameters {
   title: {

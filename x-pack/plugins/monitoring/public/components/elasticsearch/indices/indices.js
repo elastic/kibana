@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React from 'react';
+import { capitalize } from 'lodash';
+import { LARGE_FLOAT, LARGE_BYTES, LARGE_ABBREVIATED } from '../../../../common/formatting';
+import { formatMetric } from '../../../lib/format_number';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { ElasticsearchStatusIcon } from '../status_icon';
+import { ClusterStatus } from '../cluster_status';
+import { EuiMonitoringTable } from '../../table';
 import {
   EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiScreenReaderOnly,
-  EuiSpacer,
   EuiSwitch,
+  EuiSpacer,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { capitalize } from 'lodash';
-import React from 'react';
-import { LARGE_ABBREVIATED, LARGE_BYTES, LARGE_FLOAT } from '../../../../common/formatting';
 import { AlertsStatus } from '../../../alerts/status';
-import { formatMetric } from '../../../lib/format_number';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { EuiMonitoringTable } from '../../table';
-import { ClusterStatus } from '../cluster_status';
-import { ElasticsearchStatusIcon } from '../status_icon';
 import './indices.scss';
 
 const getColumns = (alerts) => {

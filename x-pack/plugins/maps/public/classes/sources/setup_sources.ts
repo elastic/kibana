@@ -6,6 +6,7 @@
  */
 
 import { SOURCE_TYPES } from '../../../common/constants';
+import { registerSource } from './source_registry';
 import { EMSFileSource } from './ems_file_source';
 import { EMSTMSSource } from './ems_tms_source';
 import { ESGeoGridSource } from './es_geo_grid_source';
@@ -16,7 +17,6 @@ import { ESQLSource } from './esql_source';
 import { GeoJsonFileSource } from './geojson_file_source';
 import { KibanaTilemapSource } from './kibana_tilemap_source';
 import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
-import { registerSource } from './source_registry';
 import { WMSSource } from './wms_source';
 import { XYZTMSSource } from './xyz_tms_source';
 

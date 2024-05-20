@@ -6,8 +6,8 @@
  */
 
 import { getImportExceptionsListItemSchemaDecodedMock } from '../../../../../common/schemas/request/import_exceptions_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getExceptionListSchemaMock } from '../../../../../common/schemas/response/exception_list_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../../../../common/schemas/response/exception_list_item_schema.mock';
 
 import { sortExceptionItemsToUpdateOrCreate } from './sort_exception_items_to_create_update';
 

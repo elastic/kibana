@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { SortDirection } from '@kbn/data-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
-import { Query } from '@kbn/es-query';
-import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
-import { get, last } from 'lodash';
 import moment from 'moment';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { get, last } from 'lodash';
+import { SortDirection } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
-import { SurrDocType, fetchSurroundingDocs } from './context';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Query } from '@kbn/es-query';
+import { fetchSurroundingDocs, SurrDocType } from './context';
+import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
+import { discoverServiceMock } from '../../../__mocks__/services';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();

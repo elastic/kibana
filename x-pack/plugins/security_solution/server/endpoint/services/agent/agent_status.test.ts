@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { responseActionsClientMock } from '../actions/clients/mocks';
-import { sentinelOneMock } from '../actions/clients/sentinelone/mocks';
 import type { GetAgentStatusOptions } from './agent_status';
-import { SENTINEL_ONE_NETWORK_STATUS, getAgentStatus } from './agent_status';
+import { getAgentStatus, SENTINEL_ONE_NETWORK_STATUS } from './agent_status';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { sentinelOneMock } from '../actions/clients/sentinelone/mocks';
+import { responseActionsClientMock } from '../actions/clients/mocks';
 
 describe('Endpoint Get Agent Status service', () => {
   let agentStatusOptions: GetAgentStatusOptions;

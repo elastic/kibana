@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import buckets from './bucket_list';
 import getSeries from '../test_helpers/get_series';
 import getSeriesList from '../test_helpers/get_series_list';
-import buckets from './bucket_list';
 
 export default function () {
   return getSeriesList([

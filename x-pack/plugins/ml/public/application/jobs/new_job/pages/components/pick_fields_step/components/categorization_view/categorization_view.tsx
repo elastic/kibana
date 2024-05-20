@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 import { CategorizationDetectors } from './metric_selection';
 import { CategorizationDetectorsSummary } from './metric_selection_summary';

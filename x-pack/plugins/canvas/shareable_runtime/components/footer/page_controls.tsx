@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty, EuiText } from '@elastic/eui';
 
 import {
-  setAutoplayAction,
-  setPageAction,
-  setScrubberVisibleAction,
   useCanvasShareableState,
+  setScrubberVisibleAction,
+  setPageAction,
+  setAutoplayAction,
 } from '../../context';
 
 type OnSetPageNumberFn = (page: number) => void;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React, { ReactNode } from 'react';
 import {
-  EuiModalBody,
-  EuiModalFooter,
+  EuiPanelProps,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiPanelProps,
+  EuiModalBody,
+  EuiModalFooter,
 } from '@elastic/eui';
-import React, { ReactNode } from 'react';
 
 interface StepModalProps {
   title?: string;

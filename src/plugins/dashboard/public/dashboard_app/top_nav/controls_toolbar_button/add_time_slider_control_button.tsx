@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ControlGroupContainer, TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/public';
-import React, { useEffect, useState } from 'react';
 import {
   getAddTimeSliderControlButtonTitle,
   getOnlyOneTimeSliderControlMsg,

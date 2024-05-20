@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectAttributes } from '@kbn/core/public';
 import { RefObject } from 'react';
+import { SavedObject, SavedObjectAttributes } from '@kbn/core/public';
 
-import { CanvasPage, CanvasWorkpad, ElementPosition, RendererSpec } from '../types';
+import { ElementPosition, CanvasPage, CanvasWorkpad, RendererSpec } from '../types';
 
 /**
  * Represents a Canvas Element whose expression has been evaluated and now

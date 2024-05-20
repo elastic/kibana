@@ -8,9 +8,9 @@
 
 import { filterFieldToList } from '.';
 
+import { getListResponseMock } from '../list_schema/index.mock';
 import { DataViewFieldBase } from '@kbn/es-query';
 import { AutocompleteListsData } from '../field_value_lists';
-import { getListResponseMock } from '../list_schema/index.mock';
 
 const emptyListData: AutocompleteListsData = { smallLists: [], largeLists: [] };
 

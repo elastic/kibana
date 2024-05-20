@@ -7,8 +7,8 @@
 
 // utility functions for handling dates
 
-import { formatDate } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
+import { formatDate } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { TIME_FORMAT } from './time_format';
 

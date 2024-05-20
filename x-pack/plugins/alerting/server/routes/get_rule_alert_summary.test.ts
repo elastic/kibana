@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { rulesClientMock } from '../rules_client.mock';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { AlertSummary } from '../types';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { rulesClientMock } from '../rules_client.mock';
+import { AlertSummary } from '../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({

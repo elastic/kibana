@@ -7,7 +7,7 @@
  */
 
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { BehaviorSubject, Subject, skip } from 'rxjs';
+import { BehaviorSubject, skip, Subject } from 'rxjs';
 import { fetch$ } from './fetch';
 
 describe('onFetchContextChanged', () => {

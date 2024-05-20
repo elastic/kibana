@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { CoreStart } from '@kbn/core/public';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
@@ -16,6 +15,7 @@ import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
 import { merge, noop } from 'lodash';
 import React, { ReactNode } from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable, of } from 'rxjs';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
@@ -53,7 +53,7 @@ const urlService = new UrlService({
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
-  shortUrls: () => ({ get: () => {} }) as any,
+  shortUrls: () => ({ get: () => {} } as any),
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
 

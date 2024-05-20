@@ -1,6 +1,3 @@
-import Path from 'path';
-import dedent from 'dedent';
-import Fsp from 'fs/promises';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,18 +6,21 @@ import Fsp from 'fs/promises';
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
+import Fsp from 'fs/promises';
+import Path from 'path';
+import dedent from 'dedent';
 import { PluginApi, ScopeApi } from '../types';
 import {
   countScopeApi,
-  getFileName,
   getPluginApiDocId,
-  getSlug,
-  groupPluginApi,
   snakeToCamel,
+  groupPluginApi,
+  getFileName,
+  getSlug,
 } from '../utils';
-import { WritePluginDocsOpts } from './types';
 import { writePluginDocSplitByFolder } from './write_plugin_split_by_folder';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
+import { WritePluginDocsOpts } from './types';
 
 /**
  * Converts the plugin doc to mdx and writes it into the file system. If the plugin,
@@ -93,8 +93,8 @@ ${
   plugin.manifest.owner.githubTeam && name
     ? `Contact [${name}](https://github.com/orgs/elastic/teams/${plugin.manifest.owner.githubTeam}) for questions regarding this plugin.`
     : name
-      ? `Contact ${name} for questions regarding this plugin.`
-      : ''
+    ? `Contact ${name} for questions regarding this plugin.`
+    : ''
 }
 
 **Code health stats**

@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { IfVertex } from './if_vertex';
-import { PluginVertex } from './plugin_vertex';
-import { QueueVertex } from './queue_vertex';
 import { vertexFactory } from './vertex_factory';
+import { PluginVertex } from './plugin_vertex';
+import { IfVertex } from './if_vertex';
+import { QueueVertex } from './queue_vertex';
 
 describe('vertexFactory', () => {
   let graph;

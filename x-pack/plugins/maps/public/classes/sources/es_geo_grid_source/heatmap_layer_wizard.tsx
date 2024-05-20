@@ -7,19 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+// @ts-ignore
+import { CreateSourceEditor } from './create_source_editor';
+import { ESGeoGridSource, heatmapTitle } from './es_geo_grid_source';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { HeatmapLayer } from '../../layers/heatmap_layer';
+import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 import {
   GRID_RESOLUTION,
   LAYER_WIZARD_CATEGORY,
   RENDER_AS,
   WIZARD_ID,
 } from '../../../../common/constants';
-import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
-import { HeatmapLayer } from '../../layers/heatmap_layer';
 import { HeatmapLayerIcon } from '../../layers/wizards/icons/heatmap_layer_icon';
-// @ts-ignore
-import { CreateSourceEditor } from './create_source_editor';
-import { ESGeoGridSource, heatmapTitle } from './es_geo_grid_source';
 
 export const heatmapLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.HEATMAP,

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiBadge, EuiBadgeGroup, EuiToolTip } from '@elastic/eui';
+import { EuiBadgeGroup, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Query } from '../../types';

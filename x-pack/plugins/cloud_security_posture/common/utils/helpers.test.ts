@@ -7,10 +7,10 @@
 
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import {
-  cleanupCredentials,
-  getBenchmarkFilter,
-  getBenchmarkFilterQueryV2,
   getBenchmarkFromPackagePolicy,
+  getBenchmarkFilter,
+  cleanupCredentials,
+  getBenchmarkFilterQueryV2,
 } from './helpers';
 
 describe('test helper methods', () => {

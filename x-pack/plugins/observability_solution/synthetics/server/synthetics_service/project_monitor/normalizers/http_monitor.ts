@@ -9,21 +9,21 @@ import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   CodeEditorMode,
   ConfigKey,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPFields,
-  MonitorTypeEnum,
   TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
 import {
   NormalizedProjectProps,
   NormalizerResult,
-  getHasTLSFields,
-  getInvalidUrlsOrHostsError,
   getNormalizeCommonFields,
-  getOptionalArrayField,
-  getOptionalListField,
-  getUnsupportedKeysError,
   normalizeYamlConfig,
+  getOptionalListField,
+  getOptionalArrayField,
+  getUnsupportedKeysError,
+  getInvalidUrlsOrHostsError,
+  getHasTLSFields,
 } from './common_fields';
 
 export const getNormalizeHTTPFields = ({

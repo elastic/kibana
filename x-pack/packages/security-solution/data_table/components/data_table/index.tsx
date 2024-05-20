@@ -8,15 +8,15 @@
 /* eslint-disable @kbn/eslint/module_migration */
 
 import type {
-  EuiDataGridCellValueElementProps,
-  EuiDataGridColumn,
-  EuiDataGridControlColumn,
-  EuiDataGridPaginationProps,
-  EuiDataGridProps,
   EuiDataGridRefProps,
-  EuiDataGridRowHeightsOptions,
+  EuiDataGridColumn,
+  EuiDataGridCellValueElementProps,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
+  EuiDataGridControlColumn,
+  EuiDataGridPaginationProps,
+  EuiDataGridRowHeightsOptions,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import { EuiDataGrid, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
@@ -24,37 +24,37 @@ import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo, useContext, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
-import {
-  UseDataGridColumnsCellActionsProps,
-  useDataGridColumnsCellActions,
-} from '@kbn/cell-actions';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
+import styled, { ThemeContext } from 'styled-components';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import {
-  BrowserFields,
-  ColumnHeaderOptions,
-  DeprecatedCellValueElementProps,
-  DeprecatedRowRenderer,
-  TimelineItem,
-} from '@kbn/timelines-plugin/common';
 import type {
   FieldBrowserOptions,
   FieldBrowserProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import styled, { ThemeContext } from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import {
+  BrowserFields,
+  DeprecatedCellValueElementProps,
+  ColumnHeaderOptions,
+  DeprecatedRowRenderer,
+  TimelineItem,
+} from '@kbn/timelines-plugin/common';
+import {
+  useDataGridColumnsCellActions,
+  UseDataGridColumnsCellActionsProps,
+} from '@kbn/cell-actions';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataTableModel, DataTableState } from '../../store/data_table/types';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
 import { addBuildingBlockStyle, mapSortDirectionToDirection, mapSortingColumns } from './helpers';
 
-import { useShallowEqualSelector } from '../../hooks/use_selector';
-import { dataTableActions, dataTableSelectors } from '../../store/data_table';
-import { tableDefaults } from '../../store/data_table/defaults';
-import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
-import { UnitCount } from '../toolbar/unit';
 import { REMOVE_COLUMN } from './column_headers/translations';
+import { dataTableActions, dataTableSelectors } from '../../store/data_table';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { getPageRowIndex } from './pagination';
+import { UnitCount } from '../toolbar/unit';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
+import { tableDefaults } from '../../store/data_table/defaults';
 
 const DATA_TABLE_ARIA_LABEL = i18n.translate('securitySolutionPackages.dataTable.ariaLabel', {
   defaultMessage: 'Alerts',

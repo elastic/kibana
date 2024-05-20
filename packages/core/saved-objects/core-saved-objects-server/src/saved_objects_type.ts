@@ -7,17 +7,17 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MaybePromise } from '@kbn/utility-types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
-import type { MaybePromise } from '@kbn/utility-types';
-import type { SavedObjectsTypeMappingDefinition } from './mapping_definition';
+import type { SavedObjectsTypeManagementDefinition } from './saved_objects_management';
+import type { SavedObjectsValidationMap } from './validation';
 import type { SavedObjectMigrationMap } from './migration';
+import type { SavedObjectsTypeMappingDefinition } from './mapping_definition';
 import type {
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
 } from './model_version';
-import type { SavedObjectsTypeManagementDefinition } from './saved_objects_management';
-import type { SavedObjectsValidationMap } from './validation';
 
 /**
  * Definition of a type of savedObject.

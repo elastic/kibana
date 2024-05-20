@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { EuiCodeBlock, EuiDescriptionList, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { getFlattenedObject } from '@kbn/std';
 import React from 'react';
+import { estypes } from '@elastic/elasticsearch';
+import { i18n } from '@kbn/i18n';
+import { EuiDescriptionList, EuiCodeBlock, EuiText } from '@elastic/eui';
+import { getFlattenedObject } from '@kbn/std';
 
 /**
  * Provides pretty formatting of a given key string

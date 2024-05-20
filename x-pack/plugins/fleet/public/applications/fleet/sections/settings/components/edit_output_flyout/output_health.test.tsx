@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 
-import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { Output } from '../../../../types';
+import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { sendGetOutputHealth, useStartServices } from '../../../../hooks';
 

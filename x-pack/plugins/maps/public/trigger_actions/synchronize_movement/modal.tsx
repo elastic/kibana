@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
-  EuiModalBody,
   EuiModalHeader,
+  EuiModalBody,
   EuiModalHeaderTitle,
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
-import React, { Component, Fragment } from 'react';
 import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_singleton';
 import { getCore } from '../../kibana_services';
 

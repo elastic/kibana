@@ -8,9 +8,9 @@
 
 import type { Dimension, Dimensions } from '@kbn/vis-type-xy-plugin/public';
 
-import { Row, Table } from '../../types';
 import { getAspects } from './_get_aspects';
 import { Aspect } from './point_series';
+import { Table, Row } from '../../types';
 
 describe('getAspects', function () {
   let table: Table;

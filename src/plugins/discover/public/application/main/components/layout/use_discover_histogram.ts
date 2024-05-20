@@ -6,45 +6,45 @@
  * Side Public License, v 1.
  */
 
-import type { Filter } from '@kbn/es-query';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
+  canImportVisContext,
   UnifiedHistogramApi,
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
-  canImportVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import {
-  Observable,
   debounceTime,
   distinctUntilChanged,
   filter,
   map,
   merge,
+  Observable,
   pairwise,
   startWith,
 } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import { addLog } from '../../../../utils/add_log';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
 import {
   DataDocumentsMsg,
   RecordRawType,
 } from '../../state_management/discover_data_state_container';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 
 const EMPTY_TEXT_BASED_COLUMNS: DatatableColumn[] = [];

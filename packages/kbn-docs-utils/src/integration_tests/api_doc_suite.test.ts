@@ -9,12 +9,10 @@
 import fs from 'fs';
 import Path from 'path';
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { Project } from 'ts-morph';
+import { ToolingLog } from '@kbn/tooling-log';
 
-import { getPluginApiMap } from '../get_plugin_api_map';
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
-import { collectApiStatsForPlugin } from '../stats';
 import {
   ApiDeclaration,
   ApiStats,
@@ -24,8 +22,10 @@ import {
   TextWithLinks,
   TypeKind,
 } from '../types';
-import { groupPluginApi } from '../utils';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
+import { groupPluginApi } from '../utils';
+import { getPluginApiMap } from '../get_plugin_api_map';
+import { collectApiStatsForPlugin } from '../stats';
 
 const log = new ToolingLog({
   level: 'debug',

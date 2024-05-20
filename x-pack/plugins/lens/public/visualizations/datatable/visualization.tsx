@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import { IconChartDatatable } from '@kbn/chart-icons';
-import { CUSTOM_PALETTE, PaletteRegistry } from '@kbn/coloring';
+import React from 'react';
+import { Ast } from '@kbn/interpreter';
+import { i18n } from '@kbn/i18n';
+import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { IconChartDatatable } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { Ast } from '@kbn/interpreter';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import React from 'react';
-import type {
-  CollapseExpressionFunction,
-  ColumnState,
-  DatatableColumnFunction,
-  DatatableExpressionFunction,
-  PagingState,
-  SortingState,
-} from '../../../common/expressions';
-import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
-import type { LayerType } from '../../../common/types';
-import { RowHeightMode } from '../../../common/types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
-  DatasourceLayers,
-  Suggestion,
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
+  DatasourceLayers,
+  Suggestion,
 } from '../../types';
+import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
+import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
+import type { LayerType } from '../../../common/types';
+import { RowHeightMode } from '../../../common/types';
+import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
+import type {
+  ColumnState,
+  SortingState,
+  PagingState,
+  CollapseExpressionFunction,
+  DatatableColumnFunction,
+  DatatableExpressionFunction,
+} from '../../../common/expressions';
+import { DataTableToolbar } from './components/toolbar';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
   DEFAULT_ROW_HEIGHT,
 } from './components/constants';
-import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
-import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
-import { DataTableToolbar } from './components/toolbar';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -168,8 +168,8 @@ export const getDatatableVisualization = ({
       changeType === 'reduced' || changeType === 'layers'
         ? 0.3
         : changeType === 'unchanged'
-          ? 0.5
-          : 1;
+        ? 0.5
+        : 1;
 
     // forcing datatable as a suggestion when there are no metrics (number fields)
     const forceSuggestion = Boolean(table?.notAssignedMetrics);
@@ -250,8 +250,8 @@ export const getDatatableVisualization = ({
               triggerIconType: columnMap[accessor].hidden
                 ? 'invisible'
                 : columnMap[accessor].collapseFn
-                  ? 'aggregate'
-                  : undefined,
+                ? 'aggregate'
+                : undefined,
             })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
@@ -331,8 +331,8 @@ export const getDatatableVisualization = ({
                 triggerIconType: columnConfig?.hidden
                   ? 'invisible'
                   : hasColoring && isNumeric
-                    ? 'colorBy'
-                    : undefined,
+                  ? 'colorBy'
+                  : undefined,
                 palette:
                   hasColoring && isNumeric && stops ? stops.map(({ color }) => color) : undefined,
               };

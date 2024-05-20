@@ -7,9 +7,9 @@
  */
 
 import { unlinkSync as unlink } from 'fs';
-import type { Logger } from '@kbn/logging';
 import once from 'lodash/once';
-import { exists, writeFile } from './fs';
+import type { Logger } from '@kbn/logging';
+import { writeFile, exists } from './fs';
 import { PidConfigType } from './pid_config';
 
 export const writePidFile = async ({

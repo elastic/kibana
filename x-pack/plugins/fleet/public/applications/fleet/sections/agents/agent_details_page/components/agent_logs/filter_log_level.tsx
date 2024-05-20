@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useState, useCallback } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { AGENT_LOG_LEVELS } from '../../../../../../../../common/constants';
 

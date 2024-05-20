@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { useMemo, useState, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState, useCallback } from 'react';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
-import type { EndpointIsolatedFormProps } from '../../../common/components/endpoint/host_isolation';
-import {
-  ActionCompletionReturnButton,
-  EndpointIsolateForm,
-} from '../../../common/components/endpoint/host_isolation';
-import type { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
+import type { EndpointIsolatedFormProps } from '../../../common/components/endpoint/host_isolation';
+import {
+  EndpointIsolateForm,
+  ActionCompletionReturnButton,
+} from '../../../common/components/endpoint/host_isolation';
+import type { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 
 export const IsolateHost = React.memo(
   ({

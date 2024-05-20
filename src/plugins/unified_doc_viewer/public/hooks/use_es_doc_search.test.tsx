@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  buildDataTableRecord,
-  SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource,
-} from '@kbn/discover-utils';
-import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
+import { type EsDocSearchProps, buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Subject } from 'rxjs';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { ElasticRequestState } from '@kbn/unified-doc-viewer';
+import {
+  SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource,
+  buildDataTableRecord,
+} from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../plugin';
 import { UnifiedDocViewerServices } from '../types';
-import { type EsDocSearchProps, buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 
 const index = 'test-index';
 const mockSearchResult = new Subject();

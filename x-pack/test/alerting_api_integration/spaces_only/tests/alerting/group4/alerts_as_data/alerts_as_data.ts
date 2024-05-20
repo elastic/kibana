@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Alert } from '@kbn/alerts-as-data-utils';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import expect from '@kbn/expect';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import { omit } from 'lodash';
 import {
   ALERT_ACTION_GROUP,
   ALERT_DURATION,
@@ -35,16 +36,15 @@ import {
   EVENT_KIND,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
-import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { Spaces } from '../../../../scenarios';
 import {
-  ObjectRemover,
-  TaskManagerDoc,
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
+  ObjectRemover,
+  TaskManagerDoc,
 } from '../../../../../common/lib';
-import { Spaces } from '../../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataInstallResourcesTest({ getService }: FtrProviderContext) {

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import {
-  IndicesDataStream,
-  IndicesDataStreamIndex,
-  IndicesGetDataStreamResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type Subject, ReplaySubject } from 'rxjs';
+import { ResourceInstaller } from './resource_installer';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { ReplaySubject, type Subject } from 'rxjs';
-import { ResourceInstaller } from './resource_installer';
+import {
+  IndicesGetDataStreamResponse,
+  IndicesDataStreamIndex,
+  IndicesDataStream,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { Dataset } from './index_options';
+import { IndexInfo } from './index_info';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { DataStreamAdapter } from '@kbn/alerting-plugin/server';
 import { getDataStreamAdapter } from '@kbn/alerting-plugin/server/alerts_service/lib/data_stream_adapter';
-import { IndexInfo } from './index_info';
-import { Dataset } from './index_options';
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 
 const frameworkAlertsService = {

@@ -7,9 +7,9 @@
 
 import React, { useMemo } from 'react';
 import { PROFILE_VALUES_ENUM } from '../../../../../../../common/constants/monitor_defaults';
-import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
 import { ConnectionProfile } from './connection_profile';
 import { PROFILE_OPTIONS } from './throttling_config_field';
+import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
 
 export const useConnectionProfiles = (initialValue?: ThrottlingConfig) => {
   return useMemo(() => {

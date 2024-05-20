@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
-import { DiscoverServices } from '../../../../build_services';
-import type { TopNavCustomization } from '../../../../customizations';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { i18n } from '@kbn/i18n';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { TopNavCustomization } from '../../../../customizations';
 import { onSaveSearch } from './on_save_search';
+import { DiscoverServices } from '../../../../build_services';
 
 /**
  * Helper function to build the top nav badges

@@ -8,32 +8,32 @@
 import { getAgentIcon } from '@kbn/custom-icons';
 import { maybe } from '../../../../common/utils/maybe';
 import awsIcon from './icons/aws.svg';
-import blobStorageIcon from './icons/blob_storage.svg';
 import cassandraIcon from './icons/cassandra.svg';
-import cosmosDbIcon from './icons/cosmos_db.svg';
 import databaseIcon from './icons/database.svg';
 import defaultIcon from './icons/default.svg';
 import documentsIcon from './icons/documents.svg';
-import dynamodbIcon from './icons/dynamo_db.svg';
 import elasticsearchIcon from './icons/elasticsearch.svg';
-import fileShareStorageIcon from './icons/file_share_storage.svg';
 import globeIcon from './icons/globe.svg';
 import graphqlIcon from './icons/graphql.svg';
 import grpcIcon from './icons/grpc.svg';
 import handlebarsIcon from './icons/handlebars.svg';
 import kafkaIcon from './icons/kafka.svg';
-import ldapIcon from './icons/ldap.svg';
 import mongodbIcon from './icons/mongodb.svg';
 import mysqlIcon from './icons/mysql.svg';
 import postgresqlIcon from './icons/postgresql.svg';
 import redisIcon from './icons/redis.svg';
+import websocketIcon from './icons/websocket.svg';
+import dynamodbIcon from './icons/dynamo_db.svg';
 import sThreeIcon from './icons/s3.svg';
-import serviceBusIcon from './icons/service_bus.svg';
 import snsIcon from './icons/sns.svg';
 import sqsIcon from './icons/sqs.svg';
+import cosmosDbIcon from './icons/cosmos_db.svg';
+import blobStorageIcon from './icons/blob_storage.svg';
+import fileShareStorageIcon from './icons/file_share_storage.svg';
+import serviceBusIcon from './icons/service_bus.svg';
 import storageQueueIcon from './icons/storage_queue.svg';
 import tableStorageIcon from './icons/table_storage.svg';
-import websocketIcon from './icons/websocket.svg';
+import ldapIcon from './icons/ldap.svg';
 
 const defaultSpanTypeIcons: { [key: string]: string } = {
   cache: databaseIcon,

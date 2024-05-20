@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { Client } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import expect from '@kbn/expect';
+import { SPACES, ALL_SPACES_ID } from './spaces';
 import { AUTHENTICATION } from './authentication';
-import { ALL_SPACES_ID, SPACES } from './spaces';
-import { ExpectResponseBody, TestCase, TestUser } from './types';
+import { TestCase, TestUser, ExpectResponseBody } from './types';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -140,7 +140,7 @@ export const expectResponses = {
   permitted: async (object: Record<string, any>, testCase: TestCase) => {
     const { type, id, failure } = testCase;
     if (failure) {
-      let error: ReturnType<(typeof SavedObjectsErrorHelpers)['decorateGeneralError']>;
+      let error: ReturnType<typeof SavedObjectsErrorHelpers['decorateGeneralError']>;
       if (failure === 400) {
         error = SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
       } else if (failure === 404) {

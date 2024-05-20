@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import React, { useMemo } from 'react';
+import type { Interpolation, Theme } from '@emotion/react';
 import { EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlyout } from '@elastic/eui';
-import type { Interpolation, Theme } from '@emotion/react';
-import React, { useMemo } from 'react';
-import { LeftSection } from './components/left_section';
-import { PreviewSection } from './components/preview_section';
-import { isPreviewBanner } from './components/preview_section';
-import { RightSection } from './components/right_section';
-import { useExpandableFlyoutApi } from './hooks/use_expandable_flyout_api';
-import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
 import { useSectionSizes } from './hooks/use_sections_sizes';
 import { useWindowSize } from './hooks/use_window_size';
+import { useExpandableFlyoutState } from './hooks/use_expandable_flyout_state';
+import { useExpandableFlyoutApi } from './hooks/use_expandable_flyout_api';
+import { PreviewSection } from './components/preview_section';
+import { RightSection } from './components/right_section';
 import type { FlyoutPanelProps, Panel } from './types';
+import { LeftSection } from './components/left_section';
+import { isPreviewBanner } from './components/preview_section';
 
 const flyoutInnerStyles = { height: '100%' };
 

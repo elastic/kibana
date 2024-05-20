@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { cloneDeep, memoize, uniqueId } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
-import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { cloneDeep, memoize, uniqueId } from 'lodash';
-import { convertBucketToSwitcher, pathsIntersect, splitIntoBuckets } from './resolve_helpers';
-import type { SwitcherWithId, SwitcherWithOptions } from './types';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { SwitcherWithOptions, SwitcherWithId } from './types';
+import { pathsIntersect, splitIntoBuckets, convertBucketToSwitcher } from './resolve_helpers';
 
 export type CapabilitiesResolver = ({
   request,
@@ -111,7 +111,7 @@ const resolveCapabilities = async ({
 
 function recursiveApplyChanges<
   TDestination extends Record<string, any>,
-  TSource extends Record<string, any>,
+  TSource extends Record<string, any>
 >(destination: TDestination, source: TSource): TDestination {
   return Object.keys(destination)
     .map((key) => {

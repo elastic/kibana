@@ -9,6 +9,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
 
 import {
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
+} from '@kbn/security-solution-plugin/common/constants';
+import { ThreatEcs } from '@kbn/securitysolution-ecs';
+import {
   EqlRuleCreateProps,
   QueryRuleCreateProps,
   SavedQueryRuleCreateProps,
@@ -16,31 +21,26 @@ import {
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
-  DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
-} from '@kbn/security-solution-plugin/common/constants';
-import { ThreatEcs } from '@kbn/securitysolution-ecs';
-import {
-  createAlertsIndex,
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-  getAlertsByIds,
-  getRuleForAlertTesting,
-  waitFor,
-  waitForAlertsToBePresent,
-  waitForRuleSuccess,
-} from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import {
   finalizeAlertsMigration,
   getEqlRuleForAlertTesting,
   getSavedQueryRuleForAlertTesting,
   getThreatMatchRuleForAlertTesting,
   getThresholdRuleForAlertTesting,
-  removeRandomValuedPropertiesFromAlert,
   startAlertsMigration,
+  removeRandomValuedPropertiesFromAlert,
 } from '../../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getAlertsByIds,
+  waitFor,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  getRuleForAlertTesting,
+} from '../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

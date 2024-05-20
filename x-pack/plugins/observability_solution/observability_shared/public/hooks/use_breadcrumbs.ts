@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
-import { ApplicationStart, ChromeBreadcrumb, ChromeStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ApplicationStart, ChromeBreadcrumb, ChromeStart } from '@kbn/core/public';
 import { MouseEvent, useEffect } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { useQueryParams } from './use_query_params';
 
 function addClickHandlers(

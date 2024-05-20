@@ -11,12 +11,12 @@ import React, { Fragment, FC, PropsWithChildren } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiPanelProps,
   EuiSpacer,
   EuiText,
+  EuiPanel,
   EuiTitle,
+  EuiLink,
+  EuiPanelProps,
 } from '@elastic/eui';
 import { LEARN_MORE_LABEL } from '../constants';
 

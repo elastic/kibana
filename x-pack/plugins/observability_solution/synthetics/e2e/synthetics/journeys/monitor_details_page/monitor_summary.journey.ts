@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { after, before, expect, journey, step } from '@elastic/synthetics';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import moment from 'moment';
 import { recordVideo } from '../../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';

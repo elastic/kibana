@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
-import React, { useState } from 'react';
 
-import { ToolbarButton, ToolbarButtonProps } from '../buttons';
+import { ToolbarButtonProps, ToolbarButton } from '../buttons';
 
 type AllowedButtonProps = Omit<
   ToolbarButtonProps<'standard'>,

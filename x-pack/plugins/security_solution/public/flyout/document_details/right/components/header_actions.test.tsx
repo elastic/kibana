@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { RightPanelContext } from '../context';
+import { SHARE_BUTTON_TEST_ID, CHAT_BUTTON_TEST_ID } from './test_ids';
+import { HeaderActions } from './header_actions';
+import { useAssistant } from '../hooks/use_assistant';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProvidersComponent } from '../../../../common/mock';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import { RightPanelContext } from '../context';
-import { useAssistant } from '../hooks/use_assistant';
-import { HeaderActions } from './header_actions';
-import { CHAT_BUTTON_TEST_ID, SHARE_BUTTON_TEST_ID } from './test_ids';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');

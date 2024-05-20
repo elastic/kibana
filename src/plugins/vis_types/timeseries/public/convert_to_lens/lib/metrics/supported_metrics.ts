@@ -8,8 +8,8 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { Operation, Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { MetricType } from '../../../../common/types';
+import { TSVB_METRIC_TYPES, PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 
 interface Agg {
   isFormula?: false;
@@ -265,7 +265,7 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
 
 type SupportedMetricsKeys = keyof LocalSupportedMetrics;
 
-export type SupportedMetric = (typeof SUPPORTED_METRICS)[SupportedMetricsKeys];
+export type SupportedMetric = typeof SUPPORTED_METRICS[SupportedMetricsKeys];
 
 export const getFormulaFromMetric = (metric: SupportedMetric) => {
   if (metric.isFormula) {

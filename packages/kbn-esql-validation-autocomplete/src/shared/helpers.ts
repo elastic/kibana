@@ -25,12 +25,12 @@ import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import {
-  appendSeparatorOption,
-  asOption,
   byOption,
   metadataOption,
+  asOption,
   onOption,
   withOption,
+  appendSeparatorOption,
 } from '../definitions/options';
 import type {
   CommandDefinition,

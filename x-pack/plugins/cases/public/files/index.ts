@@ -16,8 +16,8 @@ import {
 } from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
 import { constructFileKindIdByOwner } from '../../common/files';
-import * as i18n from './translations';
 import type { CaseFileKinds, FilesConfig } from './types';
+import * as i18n from './translations';
 
 const getOwnerUIName = (owner: Owner) => {
   switch (owner) {

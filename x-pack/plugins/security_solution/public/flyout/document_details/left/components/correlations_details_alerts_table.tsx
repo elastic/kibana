@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { isRight } from 'fp-ts/lib/Either';
 import type { ReactElement, ReactNode } from 'react';
 import React, { type FC, useMemo, useCallback } from 'react';
-import type { DataProvider } from '../../../../../common/types';
-import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
-import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
-import { SeverityBadge } from '../../../../common/components/severity_badge';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
+import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Filter } from '@kbn/es-query';
+import { isRight } from 'fp-ts/lib/Either';
+import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
+import type { DataProvider } from '../../../../../common/types';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+import { getDataProvider } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const dataProviderLimit = 5;
@@ -168,13 +168,10 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     return data
       .map((hit) => hit.fields)
       .map((fields = {}) =>
-        Object.keys(fields).reduce(
-          (result, fieldName) => {
-            result[fieldName] = fields?.[fieldName]?.[0] || fields?.[fieldName];
-            return result;
-          },
-          {} as Record<string, unknown>
-        )
+        Object.keys(fields).reduce((result, fieldName) => {
+          result[fieldName] = fields?.[fieldName]?.[0] || fields?.[fieldName];
+          return result;
+        }, {} as Record<string, unknown>)
       );
   }, [data]);
 

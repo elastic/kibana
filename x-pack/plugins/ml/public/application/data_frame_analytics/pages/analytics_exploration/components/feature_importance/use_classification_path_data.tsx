@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   type ClassificationFeatureImportanceBaseline,
@@ -14,7 +15,6 @@ import {
   isClassificationFeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { useMemo } from 'react';
 import type { ExtendedFeatureImportance } from './decision_path_popover';
 
 export type DecisionPathPlotData = Array<[string, number, number]>;

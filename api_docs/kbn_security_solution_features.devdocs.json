@@ -88,7 +88,9 @@
             "tags": [],
             "label": "baseKibanaSubFeatureIds",
             "description": [],
-            "signature": ["T[]"],
+            "signature": [
+              "T[]"
+            ],
             "path": "x-pack/packages/security-solution/features/src/types.ts",
             "deprecated": false,
             "trackAdoption": false

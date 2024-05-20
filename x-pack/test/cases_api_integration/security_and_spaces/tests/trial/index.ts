@@ -7,9 +7,9 @@
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
-  activateUserProfiles,
   createSpacesAndUsers,
   deleteSpacesAndUsers,
+  activateUserProfiles,
 } from '../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export

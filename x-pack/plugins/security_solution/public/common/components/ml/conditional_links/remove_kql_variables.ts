@@ -7,7 +7,7 @@
 
 import type { RisonValue } from '@kbn/rison';
 import { encode } from '@kbn/rison';
-import { decodeRison, isRegularString, isRisonObject } from './rison_helpers';
+import { decodeRison, isRisonObject, isRegularString } from './rison_helpers';
 
 export const operators = ['and', 'or', 'not'];
 

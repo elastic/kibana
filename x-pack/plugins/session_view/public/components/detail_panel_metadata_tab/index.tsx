@@ -1,5 +1,3 @@
-import { EuiPanel, EuiTextColor } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,18 +5,20 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import { EuiTextColor, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type {
-  ProcessEventCloud,
-  ProcessEventContainer,
   ProcessEventHost,
+  ProcessEventContainer,
   ProcessEventOrchestrator,
+  ProcessEventCloud,
 } from '../../../common';
 import { DetailPanelAccordion } from '../detail_panel_accordion';
 import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelListItem } from '../detail_panel_list_item';
 import { useStyles } from '../detail_panel_process_tab/styles';
-import { getCloudData, getContainerData, getHostData, getOrchestratorData } from './helpers';
 import { useStyles as useStylesChild } from './styles';
+import { getHostData, getContainerData, getOrchestratorData, getCloudData } from './helpers';
 
 interface DetailPanelMetadataTabDeps {
   processHost?: ProcessEventHost;

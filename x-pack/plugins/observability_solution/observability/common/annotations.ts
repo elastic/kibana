@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { either } from 'fp-ts/lib/Either';
 
 /**
  * Checks whether a string is a valid ISO timestamp,

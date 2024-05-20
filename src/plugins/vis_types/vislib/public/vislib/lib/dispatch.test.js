@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
+import d3 from 'd3';
+import $ from 'jquery';
 import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
 } from '@kbn/test-jest-helpers';
-import d3 from 'd3';
-import $ from 'jquery';
-import _ from 'lodash';
 
 // Data
 import data from '../../fixtures/mock_data/date_histogram/_series';

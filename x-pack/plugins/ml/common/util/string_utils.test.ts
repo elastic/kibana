@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getGroupQueryText, getMedianStringLength, renderTemplate } from './string_utils';
+import { renderTemplate, getMedianStringLength, getGroupQueryText } from './string_utils';
 
 const strings: string[] = [
   'foo',

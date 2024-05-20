@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import {
-  DefaultNamespaceArray,
   exceptionListSchema,
   listArray,
   list_id,
+  DefaultNamespaceArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { NonEmptyStringArray } from '@kbn/securitysolution-io-ts-types';
-import * as t from 'io-ts';
 // TODO https://github.com/elastic/security-team/issues/7491
 // eslint-disable-next-line no-restricted-imports
 import { RuleName, RuleObjectId, RuleSignatureId } from '../../model/rule_schema_legacy';

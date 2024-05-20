@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
-import type { ComponentMeta, Story } from '@storybook/react';
 import React from 'react';
+import type { ComponentMeta, Story } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { FieldCategories as Component } from '../categories';
-import { FieldCategoryProvider } from '../services';
 import { Params, useCategoryStory } from './use_category_story';
+import { FieldCategoryProvider } from '../services';
 
 export default {
   title: 'Settings/Field Category/Categories',

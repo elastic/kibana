@@ -1,4 +1,3 @@
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +6,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
  */
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
-import type {
-  BulkActionBenchmarkRulesResponse,
-  RulesToUpdate,
-} from '../../../../common/types/rules/v4';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { buildRuleKey } from '../../../../common/utils/rules_states';
 import {
   getBenchmarkRules,
@@ -18,6 +14,10 @@ import {
   setRulesStates,
   updateBenchmarkRulesStates,
 } from './utils';
+import type {
+  BulkActionBenchmarkRulesResponse,
+  RulesToUpdate,
+} from '../../../../common/types/rules/v4';
 
 const muteStatesMap = {
   mute: true,

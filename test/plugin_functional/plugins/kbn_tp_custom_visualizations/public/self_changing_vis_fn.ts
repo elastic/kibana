@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { KibanaContext } from '@kbn/data-plugin/public';
 import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
+import { KibanaContext } from '@kbn/data-plugin/public';
 
 export interface SelfChangingVisParams {
   counter: number;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { each, map, some, uniq } from 'lodash';
 import { containsDynamicQuery } from '@kbn/osquery-plugin/common/utils/replace_params_query';
 import { requiredOptional } from '@kbn/zod-helpers';
-import { each, map, some, uniq } from 'lodash';
-import type { RuleResponseOsqueryAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
-import type { SetupPlugins } from '../../../plugin_contract';
 import type { ResponseActionAlerts } from './types';
+import type { SetupPlugins } from '../../../plugin_contract';
+import type { RuleResponseOsqueryAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
 export const osqueryResponseAction = (
   responseAction: RuleResponseOsqueryAction,

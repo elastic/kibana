@@ -9,6 +9,7 @@ import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
+import { CoverageOverviewFiltersPanel } from './filters_panel';
 import {
   ruleActivityFilterDefaultOptions,
   ruleActivityFilterLabelMap,
@@ -19,7 +20,6 @@ import {
   initialState,
   useCoverageOverviewDashboardContext,
 } from './coverage_overview_dashboard_context';
-import { CoverageOverviewFiltersPanel } from './filters_panel';
 
 jest.mock('./coverage_overview_dashboard_context');
 

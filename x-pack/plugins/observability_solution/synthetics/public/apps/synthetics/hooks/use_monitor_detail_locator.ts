@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 import { useEffect, useState } from 'react';
+import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 import { useSyntheticsStartPlugins } from '../contexts';
 
 export function useMonitorDetailLocator({

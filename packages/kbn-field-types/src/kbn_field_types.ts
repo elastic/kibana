@@ -1,4 +1,3 @@
-import { KbnFieldType } from './kbn_field_type';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { KbnFieldType } from './kbn_field_type';
  * Side Public License, v 1.
  */
 import { createKbnFieldTypes, kbnFieldTypeUnknown } from './kbn_field_types_factory';
+import { KbnFieldType } from './kbn_field_type';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 
 /** @private */

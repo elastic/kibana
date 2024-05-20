@@ -13,10 +13,10 @@ import { act } from 'react-dom/test-utils';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 
+import { SecurityNavControl } from './nav_control_component';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
 import * as UseCurrentUserImports from '../components/use_current_user';
-import { SecurityNavControl } from './nav_control_component';
 
 jest.mock('../components/use_current_user');
 jest.mock('react-use/lib/useObservable');

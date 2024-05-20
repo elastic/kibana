@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CreateIn } from '../../../common';
 import { rpcSchemas } from '../../../common/schemas';
+import type { CreateIn } from '../../../common';
 import { getContentClientFactory } from '../../content_client';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';

@@ -6,14 +6,14 @@
  */
 
 import _ from 'lodash';
-import { Observable, from } from 'rxjs';
 import sinon from 'sinon';
-import { ClaimOwnershipResult } from '../queries/task_claiming';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
+import { fillPool, FillPoolResult } from './fill_pool';
 import { TaskPoolRunResult } from '../task_pool';
+import { asOk, Result } from './result_type';
+import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { TaskManagerRunner } from '../task_running/task_runner';
-import { FillPoolResult, fillPool } from './fill_pool';
-import { Result, asOk } from './result_type';
+import { from, Observable } from 'rxjs';
+import { ClaimOwnershipResult } from '../queries/task_claiming';
 
 jest.mock('../task_running/task_runner');
 

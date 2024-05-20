@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_BASE_PATH } from './constants';
-import { componentTemplateHelpers } from './lib/component_template.helpers';
 import { componentTemplatesApi } from './lib/component_templates.api';
+import { componentTemplateHelpers } from './lib/component_template.helpers';
+import { API_BASE_PATH } from './constants';
 
 const CACHE_TEMPLATES = true;
 

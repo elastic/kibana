@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
 import { asPercent } from '../../../../../common/utils/formatters';
 
 interface PercentOfParentProps {

@@ -9,11 +9,11 @@ import expect from '@kbn/expect';
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
-import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { STACK_AAD_INDEX_NAME } from '@kbn/stack-alerts-plugin/server/rule_types';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
-import { ObjectRemover, getEventLog, getUrlPrefix } from '../../../../../../common/lib';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
+import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
 import { createEsDocumentsWithGroups } from '../../../create_test_data';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 

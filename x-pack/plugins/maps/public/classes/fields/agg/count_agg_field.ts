@@ -11,14 +11,14 @@ import type {
   AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView } from '@kbn/data-plugin/common';
-import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
-import { AggDescriptor, TileMetaFeature } from '../../../../common/descriptor_types';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { IVectorSource } from '../../sources/vector_source';
-import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
+import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
+import { AggDescriptor, TileMetaFeature } from '../../../../common/descriptor_types';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
+import { IESAggField, CountAggFieldParams } from './agg_field_types';
 import { getAggRange } from '../../util/tile_meta_feature_utils';
-import { CountAggFieldParams, IESAggField } from './agg_field_types';
 
 // Agg without field. Essentially a count-aggregation.
 export class CountAggField implements IESAggField {

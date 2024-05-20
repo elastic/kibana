@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
 
 import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
-import type { ISearchGeneric } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
+import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { ISearchGeneric } from '@kbn/search-types';
 import {
+  KibanaContext,
+  EqlSearchStrategyResponse,
   EQL_SEARCH_STRATEGY,
   EqlSearchStrategyRequest,
-  EqlSearchStrategyResponse,
-  KibanaContext,
 } from '..';
-import { DataViewsContract, UiSettingsCommon } from '../..';
 import { getEsQueryConfig } from '../../es_query';
+import { DataViewsContract, UiSettingsCommon } from '../..';
 import { EqlRawResponse } from './eql_raw_response';
 
 const name = 'eql';

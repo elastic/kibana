@@ -10,21 +10,21 @@ import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
 } from '../../../../../../../common/endpoint/models/policy_config';
-import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
-import type { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
-import {
-  sendGetFleetAgentStatusForPolicy,
-  sendGetPackagePolicy,
-  sendPutPackagePolicy,
-} from '../../../../../services/policies/ingest';
 import type { MiddlewareRunner, UpdatePolicyResponse } from '../../../types';
 import {
+  policyIdFromParams,
   isOnPolicyDetailsPage,
-  needsToRefresh,
   policyDetails,
   policyDetailsForUpdate,
-  policyIdFromParams,
+  needsToRefresh,
 } from '../selectors/policy_settings_selectors';
+import {
+  sendGetPackagePolicy,
+  sendGetFleetAgentStatusForPolicy,
+  sendPutPackagePolicy,
+} from '../../../../../services/policies/ingest';
+import type { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
+import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 
 export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
   { coreStart },

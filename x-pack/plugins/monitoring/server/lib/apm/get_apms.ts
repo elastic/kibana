@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { upperFirst } from 'lodash';
 import moment from 'moment';
-import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
-import { calculateRate } from '../calculate_rate';
+import { upperFirst } from 'lodash';
 import { checkParam } from '../error_missing_required';
-import { getDiffCalculation } from './_apm_stats';
 import { createApmQuery } from './create_apm_query';
+import { calculateRate } from '../calculate_rate';
+import { getDiffCalculation } from './_apm_stats';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
 
 export function handleResponse(response: ElasticsearchResponse, start: number, end: number) {
   const initial = { ids: new Set(), beats: [] };

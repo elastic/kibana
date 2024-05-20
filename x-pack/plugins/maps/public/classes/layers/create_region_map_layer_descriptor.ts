@@ -7,6 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
+  AggDescriptor,
+  ColorDynamicOptions,
+  ESTermSourceDescriptor,
+  LayerDescriptor,
+} from '../../../common/descriptor_types';
+import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
@@ -14,18 +20,12 @@ import {
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../common/constants';
-import {
-  AggDescriptor,
-  ColorDynamicOptions,
-  ESTermSourceDescriptor,
-  LayerDescriptor,
-} from '../../../common/descriptor_types';
-import { getJoinAggKey } from '../../../common/get_agg_key';
-import { EMSFileSource } from '../sources/ems_file_source';
-import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
 import { VectorStyle } from '../styles/vector/vector_style';
-import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
+import { EMSFileSource } from '../sources/ems_file_source';
 import { GeoJsonVectorLayer } from './vector_layer';
+import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
+import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
+import { getJoinAggKey } from '../../../common/get_agg_key';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/alerting-plugin/common';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { Rule } from '@kbn/alerting-plugin/common';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { Dependency } from '../../../../../common/types';
-import { SLODefinition } from '../../../../domain/models';
 import { KibanaSavedObjectsSLORepository } from '../../../../services';
 import { BurnRateRuleParams } from '../types';
+import { SLODefinition } from '../../../../domain/models';
 import { evaluate } from './evaluate';
 
 export interface ActiveRule {

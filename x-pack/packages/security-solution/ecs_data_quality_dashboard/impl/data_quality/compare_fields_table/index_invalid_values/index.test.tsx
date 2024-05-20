@@ -8,10 +8,10 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { IndexInvalidValues } from '.';
+import { EMPTY_PLACEHOLDER } from '../helpers';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { UnallowedValueCount } from '../../types';
-import { EMPTY_PLACEHOLDER } from '../helpers';
+import { IndexInvalidValues } from '.';
 
 describe('IndexInvalidValues', () => {
   test('it renders a placeholder with the expected content when `indexInvalidValues` is empty', () => {

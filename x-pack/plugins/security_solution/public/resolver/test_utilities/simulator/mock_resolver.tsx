@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Router } from '@kbn/shared-ux-router';
-import { enableMapSet } from 'immer';
 import React, { useEffect, useState, useCallback } from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
-import type { AnyAction, Store } from 'redux';
-import { TestProviders } from '../../../common/mock';
-import type { State } from '../../../common/store/types';
-import type { ResolverProps, SideEffectSimulator } from '../../types';
+import type { Store, AnyAction } from 'redux';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { enableMapSet } from 'immer';
+import type { SideEffectSimulator, ResolverProps } from '../../types';
 import { ResolverWithoutProviders } from '../../view/resolver_without_providers';
 import { SideEffectContext } from '../../view/side_effect_context';
+import type { State } from '../../../common/store/types';
+import { TestProviders } from '../../../common/mock';
 
 enableMapSet();
 

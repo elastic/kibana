@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SPACE_IDS } from '@kbn/rule-data-utils';
 import { merge } from 'lodash';
+import { SPACE_IDS } from '@kbn/rule-data-utils';
+import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 import otherMapping from './other_mappings.json';
 import aadFieldConversion from './signal_aad_mapping.json';
 import signalExtraFields from './signal_extra_fields.json';
-import signalsMapping from './signals_mapping.json';
 
 /**
   @constant

@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities } from '@kbn/core/public';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Suggestion } from '@kbn/lens-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { ReactWrapper } from 'enzyme';
 import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
-import { of } from 'rxjs';
-import { dataViewMock } from '../__mocks__/data_view';
-import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
-import { getLensVisMock } from '../__mocks__/lens_vis';
-import { unifiedHistogramServicesMock } from '../__mocks__/services';
-import { allSuggestionsMock } from '../__mocks__/suggestions';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { Capabilities } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { UnifiedHistogramFetchStatus } from '../types';
-import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { Chart, type ChartProps } from './chart';
+import type { ReactWrapper } from 'enzyme';
+import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { getLensVisMock } from '../__mocks__/lens_vis';
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { of } from 'rxjs';
+import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { dataViewMock } from '../__mocks__/data_view';
+import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { checkChartAvailability } from './check_chart_availability';
+import { allSuggestionsMock } from '../__mocks__/suggestions';
 
 let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
 

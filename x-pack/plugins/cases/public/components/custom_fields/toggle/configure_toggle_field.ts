@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import type { CustomFieldFactory } from '../types';
+import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import * as i18n from '../translations';
+import { getEuiTableColumn } from './get_eui_table_column';
+import { Edit } from './edit';
+import { View } from './view';
 import { Configure } from './configure';
 import { Create } from './create';
-import { Edit } from './edit';
-import { getEuiTableColumn } from './get_eui_table_column';
-import { View } from './view';
 
 export const configureToggleCustomFieldFactory: CustomFieldFactory<CaseCustomFieldToggle> = () => ({
   id: CustomFieldTypes.TOGGLE,

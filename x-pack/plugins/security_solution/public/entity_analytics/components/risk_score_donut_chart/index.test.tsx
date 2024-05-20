@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { RiskSeverity } from '../../../../common/search_strategy';
+import type { SeverityCount } from '../severity/types';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { RiskScoreDonutChart } from '.';
-import { RiskSeverity } from '../../../../common/search_strategy';
 import { TestProviders } from '../../../common/mock';
-import type { SeverityCount } from '../severity/types';
 
 const severityCount: SeverityCount = {
   [RiskSeverity.Low]: 1,

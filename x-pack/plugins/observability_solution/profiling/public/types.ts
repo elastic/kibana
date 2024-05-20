@@ -1,4 +1,3 @@
-import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,12 +9,6 @@ import {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import {
-  ObservabilityAIAssistantPublicSetup,
-  ObservabilityAIAssistantPublicStart,
-} from '@kbn/observability-ai-assistant-plugin/public';
 import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -24,10 +17,17 @@ import {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public/plugin';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type {
-  UnifiedSearchPluginSetup,
   UnifiedSearchPublicPluginStart,
+  UnifiedSearchPluginSetup,
 } from '@kbn/unified-search-plugin/public';
 
 export interface ProfilingPluginPublicSetupDeps {

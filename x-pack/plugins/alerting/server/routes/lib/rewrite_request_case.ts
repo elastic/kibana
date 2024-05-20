@@ -9,21 +9,21 @@ import { JsonValue } from '@kbn/utility-types';
 type RenameAlertToRule<K extends string> = K extends `alertTypeId`
   ? `ruleTypeId`
   : K extends `alertId`
-    ? `ruleId`
-    : K extends `actionTypeId`
-      ? `connectorTypeId`
-      : K extends `alertInstanceId`
-        ? `alertId`
-        : K extends `mutedInstanceIds`
-          ? `mutedAlertIds`
-          : K extends `instances`
-            ? `alerts`
-            : K;
+  ? `ruleId`
+  : K extends `actionTypeId`
+  ? `connectorTypeId`
+  : K extends `alertInstanceId`
+  ? `alertId`
+  : K extends `mutedInstanceIds`
+  ? `mutedAlertIds`
+  : K extends `instances`
+  ? `alerts`
+  : K;
 
 export type AsApiContract<
   T,
   ComplexPropertyKeys = 'actions' | 'executionStatus' | 'lastRun' | 'frequency',
-  OpaquePropertyKeys = `params`,
+  OpaquePropertyKeys = `params`
 > = T extends Array<infer I>
   ? Array<AsApiContract<I>>
   : {
@@ -33,18 +33,18 @@ export type AsApiContract<
         ? // don't convert explcitly opaque types which we treat as a black box
           T[K]
         : T[K] extends undefined
-          ? AsApiContract<Exclude<T[K], undefined>> | undefined
-          : // don't convert built in types
-            T[K] extends Date | JsonValue
-            ? T[K]
-            : T[K] extends Array<infer I>
-              ? Array<AsApiContract<I>>
-              : K extends ComplexPropertyKeys
-                ? AsApiContract<T[K]>
-                : T[K] extends object
-                  ? AsApiContract<T[K]>
-                  : // don't convert anything else
-                    T[K];
+        ? AsApiContract<Exclude<T[K], undefined>> | undefined
+        : // don't convert built in types
+        T[K] extends Date | JsonValue
+        ? T[K]
+        : T[K] extends Array<infer I>
+        ? Array<AsApiContract<I>>
+        : K extends ComplexPropertyKeys
+        ? AsApiContract<T[K]>
+        : T[K] extends object
+        ? AsApiContract<T[K]>
+        : // don't convert anything else
+          T[K];
     };
 
 export type RewriteRequestCase<T> = (requested: AsApiContract<T>) => T;
@@ -72,9 +72,9 @@ export type RewriteResponseCase<T> = (
 export type CamelToSnake<T extends string> = string extends T
   ? string
   : T extends `${infer C0}${infer C1}${infer R}`
-    ? `${C0 extends Uppercase<C0> ? '_' : ''}${Lowercase<C0>}${C1 extends Uppercase<C1>
-        ? '_'
-        : ''}${Lowercase<C1>}${CamelToSnake<R>}`
-    : T extends `${infer C0}${infer R}`
-      ? `${C0 extends Uppercase<C0> ? '_' : ''}${Lowercase<C0>}${CamelToSnake<R>}`
-      : '';
+  ? `${C0 extends Uppercase<C0> ? '_' : ''}${Lowercase<C0>}${C1 extends Uppercase<C1>
+      ? '_'
+      : ''}${Lowercase<C1>}${CamelToSnake<R>}`
+  : T extends `${infer C0}${infer R}`
+  ? `${C0 extends Uppercase<C0> ? '_' : ''}${Lowercase<C0>}${CamelToSnake<R>}`
+  : '';

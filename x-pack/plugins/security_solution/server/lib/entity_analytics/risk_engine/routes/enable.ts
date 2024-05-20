@@ -8,12 +8,12 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { RiskEngineEnableResponse } from '../../../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
-import { APP_ID, RISK_ENGINE_ENABLE_URL } from '../../../../../common/constants';
-import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import { RISK_ENGINE_ENABLE_URL, APP_ID } from '../../../../../common/constants';
+import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
+import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
-import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
-import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
 export const riskEngineEnableRoute = (
   router: EntityAnalyticsRoutesDeps['router'],

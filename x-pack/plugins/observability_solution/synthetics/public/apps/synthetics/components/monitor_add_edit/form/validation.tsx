@@ -6,11 +6,11 @@
  */
 import {
   ConfigKey,
-  MonitorFields,
   MonitorTypeEnum,
   ScheduleUnit,
-  Validation,
+  MonitorFields,
   Validator,
+  Validation,
 } from '../types';
 
 export const DIGITS_ONLY = /^[0-9]*$/g;

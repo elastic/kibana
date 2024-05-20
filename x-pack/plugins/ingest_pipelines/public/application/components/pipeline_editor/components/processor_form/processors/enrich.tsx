@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent } from 'react';
+import { EuiLink } from '@elastic/eui';
 import {
   FIELD_TYPES,
+  fieldValidators,
+  UseField,
   Field,
+  ToggleField,
   NumericField,
   SelectField,
-  ToggleField,
-  UseField,
   ValidationConfig,
-  fieldValidators,
   useKibana,
 } from '../../../../../../shared_imports';
 

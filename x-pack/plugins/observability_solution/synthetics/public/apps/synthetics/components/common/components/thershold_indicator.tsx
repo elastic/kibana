@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,8 +17,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 export const getDeltaPercent = (current: number, previous?: number | null) => {
   if (previous === 0 || previous === null || previous === undefined) {
     return 0;
@@ -58,14 +58,14 @@ export const ThresholdIndicator = ({
                 defaultMessage: 'same',
               })
             : delta > 0
-              ? i18n.translate('xpack.synthetics.stepDetails.palette.increased', {
-                  defaultMessage: '{delta}% higher',
-                  values: { delta },
-                })
-              : i18n.translate('xpack.synthetics.stepDetails.palette.decreased', {
-                  defaultMessage: '{delta}% lower',
-                  values: { delta: Math.abs(delta) },
-                }),
+            ? i18n.translate('xpack.synthetics.stepDetails.palette.increased', {
+                defaultMessage: '{delta}% higher',
+                values: { delta },
+              })
+            : i18n.translate('xpack.synthetics.stepDetails.palette.decreased', {
+                defaultMessage: '{delta}% lower',
+                values: { delta: Math.abs(delta) },
+              }),
       },
     });
   };

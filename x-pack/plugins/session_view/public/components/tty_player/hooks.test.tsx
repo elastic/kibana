@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
+import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
+import { useIOLines, useXtermPlayer, XtermPlayerDeps } from './hooks';
 import type { ProcessEventsPage } from '../../../common';
 import { DEFAULT_TTY_FONT_SIZE, DEFAULT_TTY_PLAYSPEED_MS } from '../../../common/constants';
-import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
-import { XtermPlayerDeps, useIOLines, useXtermPlayer } from './hooks';
 
 const VIM_LINE_START = 22;
 

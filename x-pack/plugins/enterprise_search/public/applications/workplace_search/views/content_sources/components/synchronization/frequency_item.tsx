@@ -11,8 +11,8 @@ import { useActions, useValues } from 'kea';
 import moment from 'moment';
 
 import {
-  EuiFieldNumber,
   EuiFlexGroup,
+  EuiFieldNumber,
   EuiFlexItem,
   EuiIconTip,
   EuiSpacer,
@@ -21,9 +21,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  DAYS_UNIT_LABEL,
-  HOURS_UNIT_LABEL,
   MINUTES_UNIT_LABEL,
+  HOURS_UNIT_LABEL,
+  DAYS_UNIT_LABEL,
 } from '../../../../../shared/constants';
 import { SyncEstimate, SyncJobType } from '../../../../types';
 

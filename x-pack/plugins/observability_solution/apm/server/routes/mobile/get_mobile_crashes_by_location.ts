@@ -6,13 +6,13 @@
  */
 
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ApmDocumentType } from '../../../common/document_type';
 import { ERROR_TYPE, SERVICE_NAME } from '../../../common/es_fields/apm';
-import { RollupInterval } from '../../../common/rollup';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { getBucketSize } from '../../../common/utils/get_bucket_size';
-import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { getBucketSize } from '../../../common/utils/get_bucket_size';
+import { environmentQuery } from '../../../common/utils/environment_query';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 interface Props {
   kuery: string;

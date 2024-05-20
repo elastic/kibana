@@ -7,6 +7,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { REDUX_ID_FOR_MEMORY_STORAGE } from '../constants';
+import { useExpandableFlyoutContext } from '../context';
 import {
   closeLeftPanelAction,
   closePanelsAction,
@@ -18,10 +20,8 @@ import {
   openRightPanelAction,
   previousPreviewPanelAction,
 } from '../actions';
-import { REDUX_ID_FOR_MEMORY_STORAGE } from '../constants';
-import { useExpandableFlyoutContext } from '../context';
 import { useDispatch } from '../redux';
-import { type ExpandableFlyoutApi, FlyoutPanelProps } from '../types';
+import { FlyoutPanelProps, type ExpandableFlyoutApi } from '../types';
 
 export type { ExpandableFlyoutApi };
 

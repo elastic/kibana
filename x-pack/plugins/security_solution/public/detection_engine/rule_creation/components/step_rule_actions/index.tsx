@@ -6,35 +6,35 @@
  */
 
 import { EuiForm, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   ActionTypeRegistryContract,
   ActionVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
+import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
 import type {
-  ActionsStepRule,
   RuleStepProps,
+  ActionsStepRule,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
-import { useFetchConnectorTypesQuery } from '../../../rule_management/api/hooks/use_fetch_connector_types_query';
-import { useFetchConnectorsQuery } from '../../../rule_management/api/hooks/use_fetch_connectors_query';
-import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
-import { RuleActionsField } from '../rule_actions_field';
 import { StepContentWrapper } from '../step_content_wrapper';
+import { RuleActionsField } from '../rule_actions_field';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useFetchConnectorsQuery } from '../../../rule_management/api/hooks/use_fetch_connectors_query';
+import { useFetchConnectorTypesQuery } from '../../../rule_management/api/hooks/use_fetch_connector_types_query';
+import * as i18n from './translations';
+import { RuleSnoozeSection } from './rule_snooze_section';
 import { NotificationAction } from './notification_action';
 import { ResponseAction } from './response_action';
-import { RuleSnoozeSection } from './rule_snooze_section';
-import * as i18n from './translations';
 
 interface StepRuleActionsProps extends RuleStepProps {
   ruleId?: RuleObjectId; // Rule SO's id (not ruleId)

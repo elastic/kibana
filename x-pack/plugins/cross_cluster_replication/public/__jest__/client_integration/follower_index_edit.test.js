@@ -9,8 +9,8 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../../common/constants';
 import { FollowerIndexForm } from '../../app/components/follower_index_form/follower_index_form';
 import './mocks';
-import { nextTick, pageHelpers, setupEnvironment } from './helpers';
 import { FOLLOWER_INDEX_EDIT, FOLLOWER_INDEX_EDIT_NAME } from './helpers/constants';
+import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 
 const { setup } = pageHelpers.followerIndexEdit;
 const { setup: setupFollowerIndexAdd } = pageHelpers.followerIndexAdd;

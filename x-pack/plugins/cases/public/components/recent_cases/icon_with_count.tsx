@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
+import { css } from '@emotion/react';
 
 export const IconWithCount = React.memo<{
   count: number;

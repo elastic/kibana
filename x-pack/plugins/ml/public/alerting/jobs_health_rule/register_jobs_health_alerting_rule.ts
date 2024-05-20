@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import { lazy } from 'react';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';

@@ -1,4 +1,3 @@
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
  * 2.0.
  */
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import {
   ConfigKey,
   SyntheticsMonitorWithSecretsAttributes,

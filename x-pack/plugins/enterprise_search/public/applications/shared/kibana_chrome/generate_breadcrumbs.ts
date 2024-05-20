@@ -11,12 +11,12 @@ import { EuiBreadcrumb } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
-  AI_SEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ENTERPRISE_SEARCH_PRODUCT_NAME,
+  AI_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
@@ -26,7 +26,7 @@ import {
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
-import { createHref, letBrowserHandleEvent } from '../react_router_helpers';
+import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
 
 /**
  * Types

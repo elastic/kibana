@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import { TableId, dataTableActions, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { TimelineType } from '../../../../../common/api/timeline';
-import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
-import type { Direction } from '../../../../../common/search_strategy';
+import type { Filter } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { dataTableActions, TableId, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { CustomBulkAction } from '../../../../../common/types';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useKibana } from '../../../../common/lib/kibana';
 import { combineQueries } from '../../../../common/lib/kuery';
-import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import type { State } from '../../../../common/store/types';
-import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
+import { useKibana } from '../../../../common/lib/kibana';
+import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
-import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
+import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
+import type { State } from '../../../../common/store/types';
+import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
 import { timelineActions } from '../../../../timelines/store';
-import { sendBulkEventsToTimelineAction } from '../actions';
+import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
+import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
+import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import type { Direction } from '../../../../../common/search_strategy';
 
 const { setEventsLoading, setSelected } = dataTableActions;
 
@@ -75,10 +75,8 @@ export const useAddBulkToTimelineAction = ({
   const dispatch = useDispatch();
   const { uiSettings } = useKibana().services;
 
-  const {
-    filters,
-    dataTable: { selectAll, totalCount, sort, selectedEventIds } = tableDefaults,
-  } = useSelector((state: State) => eventsViewerSelector(state, tableId));
+  const { filters, dataTable: { selectAll, totalCount, sort, selectedEventIds } = tableDefaults } =
+    useSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
 

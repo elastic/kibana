@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PhrasesFilter, buildPhrasesFilter } from '@kbn/es-query';
 import { encode } from '@kbn/rison';
 import React, { FunctionComponent, useState, useEffect } from 'react';
+import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 
 import {
   APPS_WITH_DEPRECATION_LOGS,
@@ -20,9 +20,9 @@ import {
 import { DataPublicPluginStart } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import {
-  UIM_DISCOVER_CLICK,
-  UIM_OBSERVABILITY_CLICK,
   uiMetricService,
+  UIM_OBSERVABILITY_CLICK,
+  UIM_DISCOVER_CLICK,
 } from '../../../lib/ui_metric';
 
 import {
@@ -54,14 +54,10 @@ export const getDeprecationDataView = async (dataService: DataPublicPluginStart)
     const override = false;
     const skipFetchFields = true;
     // prettier-ignore
-    const newDataView = await dataService.dataViews.createAndSave(
-      {
-        title: DEPRECATION_LOGS_INDEX_PATTERN,
-        allowNoIndex: true,
-      },
-      override,
-      skipFetchFields
-    );
+    const newDataView = await dataService.dataViews.createAndSave({
+      title: DEPRECATION_LOGS_INDEX_PATTERN,
+      allowNoIndex: true,
+    }, override, skipFetchFields);
 
     return newDataView;
   }

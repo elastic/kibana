@@ -7,7 +7,7 @@
 
 import '../__mocks__/shallow_useeffect.mock';
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-import { mockKibanaValues, setMockActions, setMockValues } from '../__mocks__/kea_logic';
+import { setMockValues, setMockActions, mockKibanaValues } from '../__mocks__/kea_logic';
 import { mockUseRouteMatch } from '../__mocks__/react_router';
 
 import React from 'react';
@@ -28,9 +28,9 @@ import { SetupGuide } from './views/setup_guide';
 
 import {
   WorkplaceSearch,
+  WorkplaceSearchUnconfigured,
   WorkplaceSearchConfigured,
   WorkplaceSearchConfiguredRoutes,
-  WorkplaceSearchUnconfigured,
 } from '.';
 
 describe('WorkplaceSearch', () => {

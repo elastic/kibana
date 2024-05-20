@@ -6,11 +6,11 @@
  */
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registerConnectorTypes } from '..';
+import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { SUB_ACTION } from '../../../common/openai/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 
 const ACTION_TYPE_ID = '.gen-ai';
 let actionTypeModel: ActionTypeModel;

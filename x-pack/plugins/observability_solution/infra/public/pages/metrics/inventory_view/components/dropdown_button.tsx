@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import React, { ReactNode } from 'react';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { KubernetesTour } from './kubernetes_tour';
 
 interface Props {

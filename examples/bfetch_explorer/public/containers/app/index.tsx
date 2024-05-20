@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiPage } from '@elastic/eui';
-import { Route, BrowserRouter as Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from '@kbn/shared-ux-router';
+import { EuiPage } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
 import { routes } from '../../routes';
 

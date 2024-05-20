@@ -6,7 +6,7 @@
  */
 
 import { set } from 'lodash';
-import { CaseAssigneesRt, CaseUserProfileRt, UserRt, UserWithProfileInfoRt, UsersRt } from './v1';
+import { UserRt, UserWithProfileInfoRt, UsersRt, CaseUserProfileRt, CaseAssigneesRt } from './v1';
 
 describe('User', () => {
   describe('UserRt', () => {

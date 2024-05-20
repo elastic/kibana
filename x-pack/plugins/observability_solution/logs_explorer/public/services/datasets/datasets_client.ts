@@ -10,19 +10,19 @@ import { HttpStart } from '@kbn/core/public';
 import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { Dataset, Integration } from '../../../common/datasets';
-import { FindDatasetsError, FindIntegrationsError } from '../../../common/datasets/errors';
 import {
   DATASETS_URL,
-  FindDatasetValue,
   FindDatasetsRequestQuery,
-  FindIntegrationsRequestQuery,
-  FindIntegrationsValue,
-  INTEGRATIONS_URL,
   findDatasetsRequestQueryRT,
   findDatasetsResponseRT,
+  FindDatasetValue,
+  FindIntegrationsRequestQuery,
   findIntegrationsRequestQueryRT,
   findIntegrationsResponseRT,
+  FindIntegrationsValue,
+  INTEGRATIONS_URL,
 } from '../../../common/latest';
+import { FindDatasetsError, FindIntegrationsError } from '../../../common/datasets/errors';
 import { IDatasetsClient } from './types';
 
 const defaultIntegrationsParams: Pick<FindIntegrationsRequestQuery, 'dataStreamType'> = {

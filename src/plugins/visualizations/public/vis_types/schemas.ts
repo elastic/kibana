@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AggGroupNames, AggParam } from '@kbn/data-plugin/public';
 import _, { defaults } from 'lodash';
+import { AggGroupNames, AggParam } from '@kbn/data-plugin/public';
 import type { ISchemas, Schema } from './types';
 
 /** @private **/

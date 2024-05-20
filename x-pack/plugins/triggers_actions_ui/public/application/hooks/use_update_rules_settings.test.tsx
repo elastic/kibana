@@ -1,6 +1,3 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks/dom';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import { act, renderHook } from '@testing-library/react-hooks/dom';
  * 2.0.
  */
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook } from '@testing-library/react-hooks/dom';
+import { waitFor } from '@testing-library/react';
 import { useUpdateRuleSettings } from './use_update_rules_settings';
 
 const mockAddDanger = jest.fn();

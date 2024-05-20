@@ -6,20 +6,20 @@
  */
 
 import { EuiButton, EuiFlexItem } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
+import React from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { EdgeDataDefinition } from 'cytoscape';
-import React from 'react';
 import { ContentsProps } from '.';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { TraceSearchType } from '../../../../../common/trace_explorer';
+import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../../common/es_fields/apm';
-import { TraceSearchType } from '../../../../../common/trace_explorer';
-import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
 
 export function EdgeContents({ elementData }: ContentsProps) {
   const edgeData = elementData as EdgeDataDefinition;

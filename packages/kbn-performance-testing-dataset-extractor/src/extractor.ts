@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { existsSync } from 'fs';
-import path from 'path';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs/promises';
 import moment from 'moment';
-import { DATE_FORMAT } from './constants';
-import { Document, ESClient, TransactionDocument } from './es_client';
+import { existsSync } from 'fs';
+import path from 'path';
+import { ToolingLog } from '@kbn/tooling-log';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { ESClient, Document, TransactionDocument } from './es_client';
 import { getESRequests, getKibanaRequests } from './request';
 import { requestsToStreams } from './stream';
 import { CLIParams, Request } from './types';
+import { DATE_FORMAT } from './constants';
 
 const calculateTransactionTimeRage = (hit: SearchHit<Document>) => {
   const trSource = hit._source as Document;

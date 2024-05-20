@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import {
+  EuiTitle,
+  EuiSpacer,
   EuiAccordion,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
-import type { ESFilter } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
+import type { ESFilter } from '@kbn/es-types';
 import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
-import React, { useMemo } from 'react';
 import { useLocalUIFilters } from '../hooks/use_local_uifilters';
 
-import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { URLFilter } from '../url_filter';
-import { environmentQuery } from './queries';
 import { SelectedFilters } from './selected_filters';
 import { useDataView } from './use_data_view';
+import { environmentQuery } from './queries';
+import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
 
-import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import {
-  UxLocalUIFilterName,
   uxFiltersByName,
+  UxLocalUIFilterName,
   uxLocalUIFilterNames,
 } from '../../../../../common/ux_ui_filter';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 
 const filterNames: UxLocalUIFilterName[] = ['location', 'device', 'os', 'browser'];
 

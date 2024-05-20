@@ -7,13 +7,13 @@
  */
 
 import type {
-  GuideConfig,
   GuideId,
+  GuideStepIds,
   GuideState,
   GuideStep,
-  GuideStepIds,
-  StepConfig,
   StepStatus,
+  GuideConfig,
+  StepConfig,
 } from '@kbn/guided-onboarding';
 import type { GuidesConfig, PluginState } from '../../common';
 

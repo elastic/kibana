@@ -7,21 +7,21 @@
 
 import {
   ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_WORKFLOW_STATUS,
   ALERT_RULE_RULE_ID,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
-  ALERT_WORKFLOW_STATUS,
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
 import { tableDefaults } from '@kbn/securitysolution-data-table';
 import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
-import type { Status } from '../../../../common/api/detection_engine';
-import type { LicenseService } from '../../../../common/license';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
+import type { Status } from '../../../../common/api/detection_engine';
 import {
   getColumns,
   getRulePreviewColumns,
 } from '../../configurations/security_solution_detections/columns';
+import type { LicenseService } from '../../../../common/license';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => {
   const combinedQuery =

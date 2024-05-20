@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../../../../action_type_registry';
-import { ActionsClient } from '../../../../actions_client/actions_client';
 import { actionsConfigMock } from '../../../../actions_config.mock';
+import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../../../../action_type_registry';
 import { ActionsAuthorization } from '../../../../authorization/actions_authorization';
 import { ActionExecutor, ILicenseState, TaskRunnerFactory } from '../../../../lib';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
@@ -24,6 +14,16 @@ import { connectorTokenClientMock } from '../../../../lib/connector_token_client
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { actionsAuthorizationMock } from '../../../../mocks';
 import { inMemoryMetricsMock } from '../../../../monitoring/in_memory_metrics.mock';
+import { schema } from '@kbn/config-schema';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ActionsClient } from '../../../../actions_client/actions_client';
 import { ExecutorType } from '../../../../types';
 
 let mockedLicenseState: jest.Mocked<ILicenseState>;

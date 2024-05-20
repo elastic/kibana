@@ -7,8 +7,8 @@
  */
 
 import Url from 'url';
-import { AppStatus, AppUpdatableFields } from '@kbn/core-application-browser';
 import expect from '@kbn/expect';
+import { AppStatus, AppUpdatableFields } from '@kbn/core-application-browser';
 import { PluginFunctionalProviderContext } from '../../services';
 import '@kbn/core-app-status-plugin/public/types';
 

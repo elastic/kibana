@@ -6,41 +6,41 @@
  * Side Public License, v 1.
  */
 
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  CoreStatus,
-  ElasticsearchClient,
-  IClusterClient,
-  Logger,
   Plugin,
-  PluginInitializerContext,
-  SavedObjectsClientContract,
+  Logger,
+  IClusterClient,
   SavedObjectsServiceStart,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  CoreStatus,
 } from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
+import { firstValueFrom, ReplaySubject } from 'rxjs';
 import apm from 'elastic-apm-node';
-import { ReplaySubject, firstValueFrom } from 'rxjs';
-import { CACHE_DURATION_MS } from '../common';
-import { CacheManager } from './cache';
-import { encryptTelemetry } from './encryption';
-import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 import type {
-  BasicStatsPayload,
-  ClusterDetails,
-  CollectionStrategy,
-  CollectionStrategyConfig,
-  EncryptedStatsGetterConfig,
-  OptInStatsPayload,
-  StatsCollectionConfig,
-  StatsCollectionContext,
-  StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
-  UnencryptedStatsGetterConfig,
+  BasicStatsPayload,
+  CollectionStrategyConfig,
+  CollectionStrategy,
+  StatsGetterConfig,
+  StatsCollectionConfig,
   UsageStatsPayload,
+  OptInStatsPayload,
+  StatsCollectionContext,
+  UnencryptedStatsGetterConfig,
+  EncryptedStatsGetterConfig,
+  ClusterDetails,
 } from './types';
+import { encryptTelemetry } from './encryption';
+import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
+import { CacheManager } from './cache';
+import { CACHE_DURATION_MS } from '../common';
 
 interface TelemetryCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;

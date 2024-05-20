@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
 
 export interface SetupDependencies {

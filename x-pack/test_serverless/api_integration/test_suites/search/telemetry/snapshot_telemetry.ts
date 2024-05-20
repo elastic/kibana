@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
-import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
-import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
-import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
-import { assertTelemetryPayload } from '@kbn/telemetry-tools';
-import deepmerge from 'deepmerge';
 import expect from 'expect';
-import type { UsageStatsPayloadTestFriendly } from '../../../../../test/api_integration/services/usage_api';
+import deepmerge from 'deepmerge';
+import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
+import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
+import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { UsageStatsPayloadTestFriendly } from '../../../../../test/api_integration/services/usage_api';
 
 export default function ({ getService }: FtrProviderContext) {
   const usageApi = getService('usageAPI');

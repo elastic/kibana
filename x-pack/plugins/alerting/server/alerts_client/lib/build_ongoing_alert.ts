@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
@@ -23,20 +24,19 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
-import deepmerge from 'deepmerge';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
-import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
-import { nanosToMicros } from './nanos_to_micros';
 import { stripFrameworkFields } from './strip_framework_fields';
+import { nanosToMicros } from './nanos_to_micros';
+import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string,
+  RecoveryActionGroupId extends string
 > {
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
@@ -57,7 +57,7 @@ export const buildOngoingAlert = <
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string,
+  RecoveryActionGroupId extends string
 >({
   alert,
   legacyAlert,

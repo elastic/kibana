@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { Locations, ServiceLocationErrors } from '../../monitor_add_edit/types';
 
 export function useRunOnceErrors({

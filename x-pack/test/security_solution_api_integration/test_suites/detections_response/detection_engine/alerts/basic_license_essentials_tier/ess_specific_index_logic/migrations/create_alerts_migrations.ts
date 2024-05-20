@@ -17,19 +17,19 @@ import { SIGNALS_TEMPLATE_VERSION } from '@kbn/security-solution-plugin/server/l
 import { Signal } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 
 import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../../../../common/services/security_solution';
-import {
-  createAlertsIndex,
-  deleteAllAlerts,
-} from '../../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
-import {
   deleteMigrations,
   getIndexNameFromLoad,
   waitForIndexToPopulate,
 } from '../../../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+} from '../../../../../../../../common/utils/security_solution';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+} from '../../../../../../../../common/services/security_solution';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 interface CreateResponse {
   index: string;

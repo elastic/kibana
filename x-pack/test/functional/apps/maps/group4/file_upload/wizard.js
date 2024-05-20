@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import path from 'path';
 import expect from '@kbn/expect';
+import path from 'path';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['geoFileUpload', 'maps']);

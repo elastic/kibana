@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AlertDef, GetService } from '../../types';
-import { getSpaceUrlPrefix } from '../authentication/spaces';
 import { User } from '../authentication/types';
+import { GetService, AlertDef } from '../../types';
+import { getSpaceUrlPrefix } from '../authentication/spaces';
 
 export const createAlert = async (
   getService: GetService,

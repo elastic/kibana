@@ -6,14 +6,14 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
+import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import React, { memo, useCallback, useMemo } from 'react';
-import type { AlertActionsProps } from '../../../../types';
-import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
 import { useMuteAlert } from '../hooks/alert_mute/use_mute_alert';
-import { useUnmuteAlert } from '../hooks/alert_mute/use_unmute_alert';
+import type { AlertActionsProps } from '../../../../types';
 import { MUTE, UNMUTE } from '../hooks/translations';
+import { useUnmuteAlert } from '../hooks/alert_mute/use_unmute_alert';
+import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
 
 /**
  * Alerts table row action to mute/unmute the selected alert
@@ -53,8 +53,8 @@ export const MuteAlertAction = memo(({ alert, refresh, onActionExecuted }: Alert
             defaultMessage: 'Loading muted state',
           })
         : isMuted
-          ? UNMUTE
-          : MUTE}
+        ? UNMUTE
+        : MUTE}
     </EuiContextMenuItem>
   );
 });

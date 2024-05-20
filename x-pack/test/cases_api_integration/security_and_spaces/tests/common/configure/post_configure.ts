@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '@kbn/cases-plugin/common/constants';
-import { ConnectorTypes, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import { ConnectorTypes, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
 import {
-  createConfiguration,
-  deleteConfiguration,
-  ensureSavedObjectIsAuthorized,
-  getConfiguration,
-  getConfigurationOutput,
   getConfigurationRequest,
   removeServerGeneratedPropertiesFromSavedObject,
+  getConfigurationOutput,
+  deleteConfiguration,
+  createConfiguration,
+  getConfiguration,
+  ensureSavedObjectIsAuthorized,
 } from '../../../../common/lib/api';
 
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsOnlyRead,
-  obsSecRead,
   secOnly,
+  obsOnlyRead,
   secOnlyRead,
+  noKibanaPrivileges,
+  globalRead,
+  obsSecRead,
   superUser,
   testDisabled,
 } from '../../../../common/lib/authentication/users';

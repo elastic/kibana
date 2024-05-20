@@ -5,51 +5,51 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
 import { curry } from 'lodash';
+import { TypeOf } from '@kbn/config-schema';
 
-import {
-  AlertingConnectorFeatureId,
-  CasesConnectorFeatureId,
-  SecurityConnectorFeatureId,
-  UptimeConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import {
-  ServiceNowITSMConnectorTypeId,
-  serviceNowITSMTable,
-  snExternalServiceConfig,
-} from '../lib/servicenow/config';
-import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
+import { validate } from '../lib/servicenow/validators';
 import {
   ExecutorParamsSchemaITSM,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
 } from '../lib/servicenow/schema';
+import { createExternalService } from './service';
+import { api as apiITSM } from './api';
 import * as i18n from '../lib/servicenow/translations';
 import {
   ExecutorParams,
-  ExecutorSubActionCloseIncidentParams,
+  ExecutorSubActionPushParams,
+  ServiceFactory,
+  ExternalServiceAPI,
+  ServiceNowPublicConfigurationBaseType,
+  ExternalService,
   ExecutorSubActionCommonFieldsParams,
   ExecutorSubActionGetChoicesParams,
-  ExecutorSubActionPushParams,
-  ExternalService,
-  ExternalServiceAPI,
   PushToServiceResponse,
-  ServiceFactory,
   ServiceNowExecutorResultData,
-  ServiceNowPublicConfigurationBaseType,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
+  ExecutorSubActionCloseIncidentParams,
 } from '../lib/servicenow/types';
+import {
+  ServiceNowITSMConnectorTypeId,
+  serviceNowITSMTable,
+  snExternalServiceConfig,
+} from '../lib/servicenow/config';
 import { throwIfSubActionIsNotSupported } from '../lib/servicenow/utils';
-import { validate } from '../lib/servicenow/validators';
-import { api as apiITSM } from './api';
-import { createExternalService } from './service';
+import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
 
 export { ServiceNowITSMConnectorTypeId, serviceNowITSMTable };
 
@@ -57,12 +57,12 @@ export type ActionParamsType = TypeOf<typeof ExecutorParamsSchemaITSM>;
 
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParams,
+  T extends Record<string, unknown> = ExecutorParams
 > = ConnectorType<C, ServiceNowSecretConfigurationType, T, PushToServiceResponse | {}>;
 
 export type ServiceNowConnectorTypeExecutorOptions<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParams,
+  T extends Record<string, unknown> = ExecutorParams
 > = ConnectorTypeExecutorOptions<C, ServiceNowSecretConfigurationType, T>;
 
 // connector type definition

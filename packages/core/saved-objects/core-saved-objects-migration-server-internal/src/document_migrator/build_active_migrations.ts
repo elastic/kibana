@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type { Logger } from '@kbn/logging';
 import _ from 'lodash';
+import type { Logger } from '@kbn/logging';
+import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { type ActiveMigrations, type Transform, type TypeTransforms, TransformType } from './types';
 import {
-  getConversionTransforms,
   getCoreTransforms,
   getReferenceTransforms,
+  getConversionTransforms,
 } from './internal_transforms';
-import { getModelVersionSchemas, getModelVersionTransforms } from './model_version';
-import { type ActiveMigrations, type Transform, TransformType, type TypeTransforms } from './types';
-import { convertMigrationFunction, transformComparator } from './utils';
 import { validateTypeMigrations } from './validate_migrations';
+import { transformComparator, convertMigrationFunction } from './utils';
+import { getModelVersionTransforms, getModelVersionSchemas } from './model_version';
 
 /**
  * Converts migrations from a format that is convenient for callers to a format that

@@ -1,7 +1,3 @@
-import { EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
-import { css, cx } from '@emotion/css';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,14 +5,18 @@ import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
  * 2.0.
  */
 import React from 'react';
+import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { css, cx } from '@emotion/css';
 import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations';
-import { ChartsGrid } from '../charts_grid/charts_grid';
-import { Section } from '../components/section';
-import { TitleWithTooltip } from '../components/section_title';
-import { useHostCharts } from '../hooks/use_host_metrics_charts';
 import { HOST_METRIC_GROUP_TITLES } from '../translations';
+import { Section } from '../components/section';
+import { ChartsGrid } from '../charts_grid/charts_grid';
 import { Chart } from './chart';
-import { HostMetricTypes, MetricsChartsFields } from './types';
+import { useHostCharts } from '../hooks/use_host_metrics_charts';
+import { TitleWithTooltip } from '../components/section_title';
+import { MetricsChartsFields, HostMetricTypes } from './types';
 
 interface Props extends MetricsChartsFields {
   metric: Exclude<HostMetricTypes, 'kpi'>;

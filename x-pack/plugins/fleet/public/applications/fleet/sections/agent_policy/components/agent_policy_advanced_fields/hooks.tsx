@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 
+import {
+  useGetOutputs,
+  useLicense,
+  useGetDownloadSources,
+  useGetFleetServerHosts,
+} from '../../../../hooks';
 import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
 import {
   getAllowedOutputTypeForPolicy,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
 } from '../../../../../../../common/services';
-import {
-  useGetDownloadSources,
-  useGetFleetServerHosts,
-  useGetOutputs,
-  useLicense,
-} from '../../../../hooks';
-import type { AgentPolicy, NewAgentPolicy } from '../../../../types';
+import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 
 // The super select component do not support null or '' as a value
 export const DEFAULT_SELECT_VALUE = '@@##DEFAULT_SELECT##@@';

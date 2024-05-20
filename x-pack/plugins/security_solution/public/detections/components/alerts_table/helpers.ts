@@ -10,8 +10,8 @@ import { isEmpty } from 'lodash/fp';
 import type { Filter, KueryNode } from '@kbn/es-query';
 import { FilterStateStore, fromKueryExpression } from '@kbn/es-query';
 
-import { TimelineType } from '../../../../common/api/timeline';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { TimelineType } from '../../../../common/api/timeline';
 import type {
   DataProvider,
   DataProvidersAnd,

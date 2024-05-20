@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ActionDefinition, ActionInternal } from '../actions';
+import { ActionInternal, ActionDefinition } from '../actions';
 import { uiActionsPluginMock } from '../mocks';
 
 const action1: ActionDefinition = {

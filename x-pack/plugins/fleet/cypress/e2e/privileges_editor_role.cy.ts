@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import { FLEET, INTEGRATIONS, navigateTo } from '../tasks/navigation';
-import { BuiltInEditorUser, createUsers, deleteUsers } from '../tasks/privileges';
+import { createUsers, BuiltInEditorUser, deleteUsers } from '../tasks/privileges';
+import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
 import { getIntegrationCard } from '../screens/integrations';
 

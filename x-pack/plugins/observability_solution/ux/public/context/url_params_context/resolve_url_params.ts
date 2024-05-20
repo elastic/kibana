@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { toQuery } from '@kbn/observability-plugin/public';
 import { Location } from 'history';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { pickKeys } from '../../../common/utils/pick_keys';
+import { toQuery } from '@kbn/observability-plugin/public';
 import { uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
+import { pickKeys } from '../../../common/utils/pick_keys';
 import { getDateRange, removeUndefinedProps, toBoolean, toNumber, toString } from './helpers';
 import { UrlParams, UxUrlParams } from './types';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 type TimeUrlParams = Pick<
   UrlParams,

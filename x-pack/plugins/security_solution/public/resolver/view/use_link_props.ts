@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { MouseEventHandler } from 'react';
 import { useSelector } from 'react-redux';
+import type { MouseEventHandler } from 'react';
 import { useNavigateOrReplace } from './use_navigate_or_replace';
 
-import type { State } from '../../common/store/types';
 import * as selectors from '../store/selectors';
 import type { PanelViewAndParameters } from '../types';
+import type { State } from '../../common/store/types';
 
 type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
 

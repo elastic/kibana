@@ -8,15 +8,15 @@
 import React, { useCallback } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
+import { useTestFlyoutOpen } from './hooks/use_test_flyout_open';
+import { TestNowModeFlyout } from './test_now_mode_flyout';
+import { ManualTestRunMode } from './manual_test_run_mode/manual_test_run_mode';
 import { useSyntheticsRefreshContext } from '../../contexts';
 import {
-  TestRunStatus,
   manualTestRunUpdateAction,
   testNowRunsSelector,
+  TestRunStatus,
 } from '../../state/manual_test_runs';
-import { useTestFlyoutOpen } from './hooks/use_test_flyout_open';
-import { ManualTestRunMode } from './manual_test_run_mode/manual_test_run_mode';
-import { TestNowModeFlyout } from './test_now_mode_flyout';
 
 export function TestNowModeFlyoutContainer() {
   const dispatch = useDispatch();

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
-import { Context, useFormDataContext } from '../form_data_context';
-import { unflattenObject } from '../lib';
 import { FormData, FormHook } from '../types';
+import { unflattenObject } from '../lib';
+import { useFormDataContext, Context } from '../form_data_context';
 
 interface Options<I> {
   watch?: string | string[];

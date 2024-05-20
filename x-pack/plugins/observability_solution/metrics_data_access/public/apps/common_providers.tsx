@@ -6,8 +6,8 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
 
 export interface CoreProvidersProps {

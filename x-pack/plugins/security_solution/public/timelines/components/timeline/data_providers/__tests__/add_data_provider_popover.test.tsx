@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import { TestProvidersComponent } from '../../../../../common/mock/test_providers';
+import { waitForEuiPopoverOpen, waitForEuiPopoverClose } from '@elastic/eui/lib/test/rtl';
 import { AddDataProviderPopover } from '../add_data_provider_popover';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { TestProvidersComponent } from '../../../../../common/mock/test_providers';
+import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 
 const TEST_ID = {
   ADD_FIELD: 'addField',

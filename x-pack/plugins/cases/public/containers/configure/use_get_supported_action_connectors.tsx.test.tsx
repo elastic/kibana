@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
-import { TestProviders, noConnectorsCasePermission } from '../../common/mock';
+import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
+import { noConnectorsCasePermission, TestProviders } from '../../common/mock';
+import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
 import { useGetSupportedActionConnectors } from './use_get_supported_action_connectors';
 
 const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import axios from 'axios';
 import { configValidator, getConnectorType } from '.';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import { Config, Secrets } from '../../../common/openai/types';
+import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {

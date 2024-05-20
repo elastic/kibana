@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subject, of, throwError } from 'rxjs';
+import { Observable, throwError, of, Subject } from 'rxjs';
 import { toArray } from 'rxjs';
 
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';

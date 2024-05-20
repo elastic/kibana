@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ImportResolver } from '@kbn/import-resolver';
-import { makeMatcher } from '@kbn/picomatcher';
+import * as Rx from 'rxjs';
+import Pw from '@parcel/watcher';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { RepoSourceClassifier } from '@kbn/repo-source-classifier';
-import Pw from '@parcel/watcher';
-import * as Rx from 'rxjs';
+import { ImportResolver } from '@kbn/import-resolver';
+import { makeMatcher } from '@kbn/picomatcher';
 
 import { Log } from './log';
 

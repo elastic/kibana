@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
-import { XJsonMode, expandLiteralStrings } from '../../../shared_imports';
+import { expandLiteralStrings, XJsonMode } from '../../../shared_imports';
 
 export const EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };
 
@@ -17,7 +17,7 @@ interface JobEditorProps {
   value: string;
   height?: string;
   width?: string;
-  mode?: (typeof EDITOR_MODE)[keyof typeof EDITOR_MODE];
+  mode?: typeof EDITOR_MODE[keyof typeof EDITOR_MODE];
   readOnly?: boolean;
   onChange?: CodeEditorProps['onChange'];
 }

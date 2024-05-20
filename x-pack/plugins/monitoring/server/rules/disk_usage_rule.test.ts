@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { DiskUsageRule } from './disk_usage_rule';
+import { RULE_DISK_USAGE } from '../../common/constants';
+import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { RULE_DISK_USAGE } from '../../common/constants';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
-import { DiskUsageRule } from './disk_usage_rule';
 
 type IDiskUsageAlertMock = DiskUsageRule & {
   defaultParams: {

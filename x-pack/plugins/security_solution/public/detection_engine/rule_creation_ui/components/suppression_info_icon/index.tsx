@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 

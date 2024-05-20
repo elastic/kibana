@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { AggregateQuery } from '@kbn/es-query';
-import { currentSuggestionMock } from '../__mocks__/suggestions_mock';
 import { getLensAttributesFromSuggestion } from './get_lens_attributes';
+import { AggregateQuery } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { currentSuggestionMock } from '../__mocks__/suggestions_mock';
 
 describe('getLensAttributesFromSuggestion', () => {
   const dataView = {

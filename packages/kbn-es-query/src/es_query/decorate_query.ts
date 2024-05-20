@@ -8,7 +8,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SerializableRecord } from '@kbn/utility-types';
-import { defaults, extend } from 'lodash';
+import { extend, defaults } from 'lodash';
 import { getTimeZoneFromSettings } from '../utils';
 import { isEsQueryString } from './es_query_dsl';
 

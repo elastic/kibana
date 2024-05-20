@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { getTimeline } from '../../../../objects/timeline';
-import {
-  DISCOVER_CONTAINER,
-  DISCOVER_DATA_VIEW_SWITCHER,
-  GET_DISCOVER_DATA_GRID_CELL_HEADER,
-} from '../../../../screens/discover';
-import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
-import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import {
   addDiscoverEsqlQuery,
   addFieldToTable,
   submitDiscoverSearchBar,
   verifyDiscoverEsqlQuery,
 } from '../../../../tasks/discover';
-import { login } from '../../../../tasks/login';
-import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { navigateFromHeaderTo } from '../../../../tasks/security_header';
 import {
-  addNameAndDescriptionToTimeline,
+  DISCOVER_CONTAINER,
+  DISCOVER_DATA_VIEW_SWITCHER,
+  GET_DISCOVER_DATA_GRID_CELL_HEADER,
+} from '../../../../screens/discover';
+import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
+import { login } from '../../../../tasks/login';
+import { visitWithTimeRange } from '../../../../tasks/navigation';
+import {
   closeTimeline,
   goToEsqlTab,
   openActiveTimeline,
+  addNameAndDescriptionToTimeline,
   saveTimeline,
 } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
+import { getTimeline } from '../../../../objects/timeline';
+import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination, EuiText } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
+import { useKibana } from '../../utils/kibana_react';
+import { useLicense } from '../../hooks/use_license';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useCapabilities } from '../../hooks/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/use_fetch_global_diagnosis';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
-import { useLicense } from '../../hooks/use_license';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useKibana } from '../../utils/kibana_react';
+import { paths } from '../../../common/locators/paths';
 import { SloListEmpty } from '../slos/components/slo_list_empty';
 import { OutdatedSlo } from './outdated_slo';
 import { OutdatedSloSearchBar } from './outdated_slo_search_bar';

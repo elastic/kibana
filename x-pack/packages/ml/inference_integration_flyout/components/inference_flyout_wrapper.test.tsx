@@ -1,4 +1,3 @@
-import { fireEvent, render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +7,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { InferenceFlyoutProps } from './inference_flyout_wrapper';
 import { InferenceFlyoutWrapper } from './inference_flyout_wrapper';
+import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 export const DEFAULT_VALUES: InferenceFlyoutProps = {
   errorCallout: undefined,

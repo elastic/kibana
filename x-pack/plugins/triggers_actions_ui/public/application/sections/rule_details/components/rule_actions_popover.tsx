@@ -1,4 +1,3 @@
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import './rule_actions_popopver.scss';
 import { Rule } from '../../../..';
 

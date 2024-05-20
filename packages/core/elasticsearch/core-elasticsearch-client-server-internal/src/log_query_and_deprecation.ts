@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Buffer } from 'buffer';
 import type { IncomingHttpHeaders } from 'http';
+import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { Client, DiagnosticResult, RequestBody, errors } from '@elastic/elasticsearch';
+import { errors, DiagnosticResult, RequestBody, Client } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
-import type { ElasticsearchApiToRedactInLogs } from '@kbn/core-elasticsearch-server';
-import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import type { ElasticsearchApiToRedactInLogs } from '@kbn/core-elasticsearch-server';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
 /**

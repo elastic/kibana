@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 
 const MAX_ATTEMPTS = 3;
 

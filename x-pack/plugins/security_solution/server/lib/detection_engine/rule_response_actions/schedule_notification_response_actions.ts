@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SetupPlugins } from '../../../plugin_contract';
-import type { ScheduleNotificationActions } from '../rule_types/types';
-import { endpointResponseAction } from './endpoint_response_action';
+import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import { osqueryResponseAction } from './osquery_response_action';
-import type { Alert, AlertWithAgent } from './types';
+import { endpointResponseAction } from './endpoint_response_action';
+import type { ScheduleNotificationActions } from '../rule_types/types';
+import type { AlertWithAgent, Alert } from './types';
 
 interface ScheduleNotificationResponseActionsService {
   endpointAppContextService: EndpointAppContextService;

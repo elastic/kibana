@@ -8,9 +8,9 @@
 
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
+import { DashboardContentManagementService, LoadDashboardReturn } from './types';
 import { DashboardAttributes } from '../../../common/content_management';
 import { SearchDashboardsResponse } from './lib/find_dashboards';
-import { DashboardContentManagementService, LoadDashboardReturn } from './types';
 
 export type DashboardContentManagementServiceFactory =
   PluginServiceFactory<DashboardContentManagementService>;

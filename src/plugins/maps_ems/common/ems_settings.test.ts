@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { EMSSettings } from './ems_settings';
 import {
   DEFAULT_EMS_FILE_API_URL,
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
 } from './ems_defaults';
-import { EMSSettings } from './ems_settings';
 import type { EMSConfig } from './ems_settings';
 
 const IS_ENTERPRISE_PLUS = () => true;

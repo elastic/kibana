@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { omit } from 'lodash';
-import { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
+import { useCallback, useMemo } from 'react';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { getExcludedName } from '../local_uifilters';
 
+import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import {
+  uxFiltersByName,
   UxLocalUIFilter,
   UxLocalUIFilterName,
-  uxFiltersByName,
 } from '../../../../../common/ux_ui_filter';
-import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 
 export type FiltersUIHook = ReturnType<typeof useLocalUIFilters>;
 

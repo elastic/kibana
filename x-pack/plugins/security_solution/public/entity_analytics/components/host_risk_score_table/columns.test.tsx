@@ -1,4 +1,3 @@
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import type { HostRiskScoreColumns } from '.';
-import { TestProviders } from '../../../common/mock';
+import { render } from '@testing-library/react';
 import { getHostRiskScoreColumns } from './columns';
+import { TestProviders } from '../../../common/mock';
+import type { HostRiskScoreColumns } from '.';
 
 describe('getHostRiskScoreColumns', () => {
   test('should render host score rounded', () => {

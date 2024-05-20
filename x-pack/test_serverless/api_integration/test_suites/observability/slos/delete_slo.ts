@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import expect from '@kbn/expect';
+import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 import { cleanup, generate } from '@kbn/infra-forge';
+import expect from '@kbn/expect';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import {
-  getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getSLOSummaryPipelineId,
 } from '@kbn/slo-plugin/common/constants';
 import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '@kbn/slo-plugin/common/constants';
-import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {

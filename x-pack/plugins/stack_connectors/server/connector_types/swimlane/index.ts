@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import {
-  AlertingConnectorFeatureId,
-  CasesConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
+import { i18n } from '@kbn/i18n';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import { i18n } from '@kbn/i18n';
-import { api } from './api';
+import {
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
+import {
+  SwimlaneExecutorResultData,
+  SwimlanePublicConfigurationType,
+  SwimlaneSecretConfigurationType,
+  ExecutorParams,
+  ExecutorSubActionPushParams,
+} from './types';
+import { validate } from './validators';
 import {
   ExecutorParamsSchema,
   SwimlaneSecretsConfigurationSchema,
   SwimlaneServiceConfigurationSchema,
 } from './schema';
 import { createExternalService } from './service';
-import {
-  ExecutorParams,
-  ExecutorSubActionPushParams,
-  SwimlaneExecutorResultData,
-  SwimlanePublicConfigurationType,
-  SwimlaneSecretConfigurationType,
-} from './types';
-import { validate } from './validators';
+import { api } from './api';
 
 const supportedSubActions: string[] = ['pushToService'];
 

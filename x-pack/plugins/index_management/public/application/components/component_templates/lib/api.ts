@@ -7,18 +7,18 @@
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import {
-  UIM_COMPONENT_TEMPLATE_CREATE,
-  UIM_COMPONENT_TEMPLATE_DELETE,
+  ComponentTemplateListItem,
+  ComponentTemplateDeserialized,
+  ComponentTemplateSerialized,
+  ComponentTemplateDatastreams,
+} from '../shared_imports';
+import {
   UIM_COMPONENT_TEMPLATE_DELETE_MANY,
+  UIM_COMPONENT_TEMPLATE_DELETE,
+  UIM_COMPONENT_TEMPLATE_CREATE,
   UIM_COMPONENT_TEMPLATE_UPDATE,
 } from '../constants';
-import {
-  ComponentTemplateDatastreams,
-  ComponentTemplateDeserialized,
-  ComponentTemplateListItem,
-  ComponentTemplateSerialized,
-} from '../shared_imports';
-import { SendRequestHook, UseRequestHook } from './request';
+import { UseRequestHook, SendRequestHook } from './request';
 
 export const getApi = (
   useRequest: UseRequestHook,

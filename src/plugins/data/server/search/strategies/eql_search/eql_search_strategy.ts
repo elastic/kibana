@@ -7,22 +7,22 @@
  */
 
 import type { TransportResult } from '@elastic/elasticsearch';
+import { tap } from 'rxjs';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { tap } from 'rxjs';
+import { SearchConfigSchema } from '../../../../config';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
   IAsyncSearchOptions,
   pollSearch,
 } from '../../../../common';
-import { SearchConfigSchema } from '../../../../config';
-import { ISearchStrategy } from '../../types';
-import { getCommonDefaultAsyncGetParams } from '../common/async_utils';
-import { getDefaultSearchParams } from '../es_search';
-import { getIgnoreThrottled } from '../ese_search/request_utils';
 import { toEqlKibanaSearchResponse } from './response_utils';
 import { EqlSearchResponse } from './types';
+import { ISearchStrategy } from '../../types';
+import { getDefaultSearchParams } from '../es_search';
+import { getIgnoreThrottled } from '../ese_search/request_utils';
+import { getCommonDefaultAsyncGetParams } from '../common/async_utils';
 
 export const eqlSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
@@ -49,8 +49,9 @@ export const eqlSearchStrategyProvider = (
       const client = esClient.asCurrentUser.eql;
 
       const search = async () => {
-        const { track_total_hits: _, ...defaultParams } =
-          await getDefaultSearchParams(uiSettingsClient);
+        const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(
+          uiSettingsClient
+        );
         const params = id
           ? getCommonDefaultAsyncGetParams(searchConfig, options, {
               /* disable until full eql support */ disableSearchSessions: true,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiSelect } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { EuiSelect } from '@elastic/eui';
 import { ArgumentStrings } from '../../../../i18n';
 
 const { DataColumn: strings } = ArgumentStrings;
@@ -29,7 +29,7 @@ export const SimpleMathFunction = ({ onChange, value, onlymath }) => {
     options.unshift({ text: strings.getOptionValue(), value: '' });
   }
 
-  return <EuiSelect compressed={true} options={options} value={value} onChange={onChange} />;
+  return <EuiSelect compressed options={options} value={value} onChange={onChange} />;
 };
 
 SimpleMathFunction.propTypes = {

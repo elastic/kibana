@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { EcsVersion } from '@elastic/ecs';
 import numeral from '@elastic/numeral';
+import { EcsVersion } from '@elastic/ecs';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { EMPTY_STAT } from '../../../helpers';
-import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
-import { PartitionedFieldMetadata } from '../../../types';
-import {
-  DETECTION_ENGINE_RULES_MAY_NOT_MATCH,
-  MAPPINGS_THAT_CONFLICT_WITH_ECS,
-  PAGES_MAY_NOT_DISPLAY_EVENTS,
-} from '../../index_properties/translations';
 import {
   getAllIncompatibleMarkdownComments,
   getIncompatibleColor,
@@ -29,6 +21,14 @@ import {
   getSameFamilyColor,
   showInvalidCallout,
 } from './helpers';
+import { EMPTY_STAT } from '../../../helpers';
+import {
+  DETECTION_ENGINE_RULES_MAY_NOT_MATCH,
+  MAPPINGS_THAT_CONFLICT_WITH_ECS,
+  PAGES_MAY_NOT_DISPLAY_EVENTS,
+} from '../../index_properties/translations';
+import { mockPartitionedFieldMetadata } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
+import { PartitionedFieldMetadata } from '../../../types';
 
 describe('helpers', () => {
   describe('getIncompatibleFieldsMarkdownComment', () => {

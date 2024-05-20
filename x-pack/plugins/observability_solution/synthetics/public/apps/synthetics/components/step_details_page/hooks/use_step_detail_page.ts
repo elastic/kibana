@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
-import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 
 export const useStepDetailPage = () => {
   const {

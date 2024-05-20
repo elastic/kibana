@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from '@kbn/core-http-browser';
 import { HttpSetup } from '@kbn/core/public';
+import { IHttpFetchError } from '@kbn/core-http-browser';
 import { API_VERSIONS, ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
-import { getOptionalRequestParams } from '../helpers';
 import { API_ERROR } from '../translations';
+import { getOptionalRequestParams } from '../helpers';
 import { TraceOptions } from '../types';
 export * from './conversations';
 

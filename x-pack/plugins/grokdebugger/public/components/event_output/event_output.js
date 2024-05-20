@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiFormRow, EuiCodeBlock } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function EventOutput({ value }) {
   return (

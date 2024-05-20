@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 import {
-  RULE_LAST_RUN_OUTCOME_FAILED_DESCRIPTION,
-  RULE_LAST_RUN_OUTCOME_SUCCEEDED_DESCRIPTION,
-  RULE_LAST_RUN_OUTCOME_WARNING_DESCRIPTION,
   RULE_STATUS_ACTIVE,
   RULE_STATUS_ERROR,
+  RULE_STATUS_WARNING,
   RULE_STATUS_OK,
   RULE_STATUS_PENDING,
   RULE_STATUS_UNKNOWN,
-  RULE_STATUS_WARNING,
+  RULE_LAST_RUN_OUTCOME_SUCCEEDED_DESCRIPTION,
+  RULE_LAST_RUN_OUTCOME_WARNING_DESCRIPTION,
+  RULE_LAST_RUN_OUTCOME_FAILED_DESCRIPTION,
 } from '../translations';
 
 interface RulesListStatusesProps {

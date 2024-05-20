@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TIMELINE_ID_REF_NAME } from '../../constants';
 import { timelineSavedObjectType } from '../timelines';
+import { TIMELINE_ID_REF_NAME } from '../../constants';
 import type { TimelineId } from './types';
 import { createMigratedDoc, createReference, migrateTimelineIdToReferences } from './utils';
 

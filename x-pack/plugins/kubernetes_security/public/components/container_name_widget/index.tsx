@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiProgress, EuiTableSortingType } from '@elastic/eui';
 import React, { ReactNode, useMemo, useState, useRef, useCallback } from 'react';
+import { EuiBasicTable, EuiTableSortingType, EuiProgress, EuiBasicTableColumn } from '@elastic/eui';
+import { useStyles } from './styles';
+import { ContainerNameRow } from './container_name_row';
+import type { IndexPattern, GlobalFilter } from '../../types';
+import { useSetFilter, useScroll } from '../../hooks';
+import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
+import { useFetchContainerNameData } from './hooks';
 import { CONTAINER_IMAGE_NAME } from '../../../common/constants';
 import {
   CONTAINER_NAME_SESSION,
-  CONTAINER_NAME_SESSION_ARIA_LABEL,
   CONTAINER_NAME_SESSION_COUNT_COLUMN,
+  CONTAINER_NAME_SESSION_ARIA_LABEL,
 } from '../../../common/translations';
-import { useScroll, useSetFilter } from '../../hooks';
-import type { GlobalFilter, IndexPattern } from '../../types';
 import { addCommasToNumber } from '../../utils/add_commas_to_number';
-import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
-import { ContainerNameRow } from './container_name_row';
-import { useFetchContainerNameData } from './hooks';
-import { useStyles } from './styles';
 
 export const LOADING_TEST_ID = 'kubernetesSecurity:containerNameWidgetLoading';
 export const NAME_COLUMN_TEST_ID = 'kubernetesSecurity:containerImageNameSessionNameColumn';

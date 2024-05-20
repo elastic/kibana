@@ -6,11 +6,11 @@
  */
 
 import type {
+  ResolverRelatedEvents,
+  SafeResolverEvent,
   ResolverEntityIndex,
   ResolverNode,
-  ResolverRelatedEvents,
   ResolverSchema,
-  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
 import type { DataAccessLayer, TimeRange } from '../../types';

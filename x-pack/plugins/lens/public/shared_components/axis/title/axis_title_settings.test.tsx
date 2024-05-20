@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { AxisTitleSettings, AxisTitleSettingsProps } from './axis_title_settings';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 const renderAxisTicksSettings = (propsOverrides?: Partial<AxisTitleSettingsProps>) => {
   const rtlRender = render(

@@ -8,9 +8,9 @@
 
 import { inspect } from 'util';
 
-import { isFailError } from '@kbn/dev-cli-errors';
-import { ToolingLog } from '@kbn/tooling-log';
 import exitHook from 'exit-hook';
+import { ToolingLog } from '@kbn/tooling-log';
+import { isFailError } from '@kbn/dev-cli-errors';
 
 /**
  * A function which will be called when the CLI is torn-down which should

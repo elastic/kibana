@@ -8,16 +8,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { DataRequestHandlerContext, PluginStart } from '@kbn/data-plugin/server';
+import type { PluginStart, DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { PluginStart as DataViewPluginStart } from '@kbn/data-views-plugin/server';
+import { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
-import { TIMELION_VIS_NAME } from '../common/constants';
 import type { TimelionConfig } from '../config';
-import { ConfigManager } from './lib/config_manager';
+import { TIMELION_VIS_NAME } from '../common/constants';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';
 import { runRoute } from './routes/run';
+import { ConfigManager } from './lib/config_manager';
 import { getUiSettings } from './ui_settings';
 
 interface PluginSetupDependencies {

@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { act, fireEvent, render } from '@testing-library/react';
+import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { createMemoryHistory } from 'history';
 import { License } from '@kbn/licensing-plugin/common/license';
 import {
   LOGS_LOCATOR_ID,
   NODE_LOGS_LOCATOR_ID,
   TRACE_LOGS_LOCATOR_ID,
 } from '@kbn/logs-shared-plugin/common';
-import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { act, fireEvent, render } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
-import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
+  mockApmPluginContextValue,
   MockApmPluginContextWrapper,
   logsLocatorsMock,
-  mockApmPluginContextValue,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
-import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
 import * as hooks from '../../../hooks/use_fetcher';
-import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../../utils/test_helpers';
-import * as Transactions from './__fixtures__/mock_data';
 import { TransactionActionMenu } from './transaction_action_menu';
+import * as Transactions from './__fixtures__/mock_data';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
+import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
+import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 const apmContextMock = {
   ...mockApmPluginContextValue,

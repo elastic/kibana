@@ -9,10 +9,10 @@ import { EuiModalBody, EuiModalHeader, EuiSpacer } from '@elastic/eui';
 import React, { Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
 
+import type { OpenTimelineProps, ActionTimelineToShow } from '../types';
 import { SearchRow } from '../search_row';
 import { TimelinesTable } from '../timelines_table';
 import { TitleRow } from '../title_row';
-import type { ActionTimelineToShow, OpenTimelineProps } from '../types';
 
 export const HeaderContainer = styled.div`
   width: 100%;

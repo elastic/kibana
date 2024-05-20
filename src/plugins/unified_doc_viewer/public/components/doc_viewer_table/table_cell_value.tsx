@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { IgnoredReason } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { IgnoredReason } from '@kbn/discover-utils';
 import { FieldRecord } from './table';
 
 interface IgnoreWarningProps {

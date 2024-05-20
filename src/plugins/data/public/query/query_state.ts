@@ -7,9 +7,9 @@
  */
 
 import type { QueryState } from '../../common';
+import type { TimefilterSetup } from './timefilter';
 import type { FilterManager } from './filter_manager';
 import type { QueryStringContract } from './query_string';
-import type { TimefilterSetup } from './timefilter';
 
 export type { QueryState };
 

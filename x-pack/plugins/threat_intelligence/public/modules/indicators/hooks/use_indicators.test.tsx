@@ -6,10 +6,10 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
+import { useIndicators, UseIndicatorsParams, UseIndicatorsValue } from './use_indicators';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchIndicators } from '../services/fetch_indicators';
-import { UseIndicatorsParams, UseIndicatorsValue, useIndicators } from './use_indicators';
+import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
 
 jest.mock('../services/fetch_indicators');
 

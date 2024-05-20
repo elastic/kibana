@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { ThrottlingUploadField } from './throttling_upload_field';
+import { ThrottlingExceededCallout } from './throttling_exceeded_callout';
 import {
   BandwidthLimitKey,
   DEFAULT_BANDWIDTH_LIMIT,
   ThrottlingConfig,
   ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
-import { CUSTOM_LABEL, PROFILE_VALUES_ENUM } from '../../constants';
 import { Validation } from '../../types';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
 import { ThrottlingDownloadField } from './throttling_download_field';
-import { ThrottlingExceededCallout } from './throttling_exceeded_callout';
 import { ThrottlingLatencyField } from './throttling_latency_field';
-import { ThrottlingUploadField } from './throttling_upload_field';
+import { CUSTOM_LABEL, PROFILE_VALUES_ENUM } from '../../constants';
 
 interface Props {
   validate?: Validation;

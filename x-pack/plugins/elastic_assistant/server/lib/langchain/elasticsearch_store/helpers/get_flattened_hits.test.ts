@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mockMsearchResponse } from '../../../../__mocks__/msearch_response';
 import { getFlattenedHits } from './get_flattened_hits';
+import { mockMsearchResponse } from '../../../../__mocks__/msearch_response';
 import type { MsearchResponse } from './types';
 
 describe('getFlattenedHits', () => {

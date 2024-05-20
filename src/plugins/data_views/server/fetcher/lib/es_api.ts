@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 

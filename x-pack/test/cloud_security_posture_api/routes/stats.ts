@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -9,21 +16,14 @@ import {
   ComplianceDashboardDataV2,
   PostureTrend,
 } from '@kbn/cloud-security-posture-plugin/common/types_old';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
-  cspmComplianceDashboardDataMockV1,
-  cspmComplianceDashboardDataMockV2,
   getBenchmarkScoreMockData,
   kspmComplianceDashboardDataMockV1,
   kspmComplianceDashboardDataMockV2,
+  cspmComplianceDashboardDataMockV1,
+  cspmComplianceDashboardDataMockV2,
 } from './mocks/benchmark_score_mock';
 import { findingsMockData } from './mocks/findings_mock';
 

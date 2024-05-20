@@ -7,9 +7,9 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
-import { SLOWithSummaryResponse, syntheticsAvailabilityIndicatorSchema } from '@kbn/slo-schema';
+import { syntheticsAvailabilityIndicatorSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../../utils/kibana_react';
 import { OverviewItem } from './overview_item';
 

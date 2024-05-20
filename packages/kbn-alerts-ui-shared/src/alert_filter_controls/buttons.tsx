@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { EuiButtonIconProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiCallOut, EuiPopover, EuiToolTip } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { TEST_IDS } from './constants';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
 import {
   ADD_CONTROLS,
@@ -18,6 +17,7 @@ import {
   PENDING_CHANGES_REMINDER,
   SAVE_CHANGES,
 } from './translations';
+import { TEST_IDS } from './constants';
 
 interface AddControlProps extends Partial<EuiButtonIconProps> {
   onClick: () => void;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CasesPermissions } from '@kbn/cases-plugin/common';
 import React, { Suspense, useState } from 'react';
-import { LazyAlertsFlyout } from '../../..';
+import { CasesPermissions } from '@kbn/cases-plugin/common';
 import { observabilityFeatureId } from '../../../../common';
-import { CASES_PATH, paths } from '../../../../common/locators/paths';
-import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
-import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useKibana } from '../../../utils/kibana_react';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
+import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
+import { LazyAlertsFlyout } from '../../..';
+import { CASES_PATH, paths } from '../../../../common/locators/paths';
 
 export interface CasesProps {
   permissions: CasesPermissions;

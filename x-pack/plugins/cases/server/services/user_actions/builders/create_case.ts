@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { UserActionActions, UserActionTypes, CaseStatuses } from '../../../../common/types/domain';
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import { CaseStatuses, UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
-import type { EventDetails, UserActionEvent, UserActionParameters } from '../types';
+import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class CreateCaseUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'create_case'>): UserActionEvent {

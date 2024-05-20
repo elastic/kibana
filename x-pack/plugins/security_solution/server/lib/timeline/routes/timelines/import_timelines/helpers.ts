@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import { has, chunk, omit } from 'lodash/fp';
 import type { Readable } from 'stream';
-import { createPromiseFromStreams } from '@kbn/utils';
-import { chunk, has, omit } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
+import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
-import { TimelineStatus, importTimelineResultSchema } from '../../../../../../common/api/timeline';
+import { importTimelineResultSchema, TimelineStatus } from '../../../../../../common/api/timeline';
 
 import type { BulkError } from '../../../../detection_engine/routes/utils';
 import { createBulkErrorObject } from '../../../../detection_engine/routes/utils';
 
-import type { FrameworkRequest } from '../../../../framework';
 import { createTimelines } from '../create_timelines';
+import type { FrameworkRequest } from '../../../../framework';
 
-import { TimelineStatusActions } from '../../../utils/common';
 import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';
+import { TimelineStatusActions } from '../../../utils/common';
 import { DEFAULT_ERROR } from '../../../utils/failure_cases';
 import { createTimelinesStreamFromNdJson } from './create_timelines_stream_from_ndjson';
 import { getTupleDuplicateErrorsAndUniqueTimeline } from './get_timelines_from_stream';
 import type {
+  ImportedTimeline,
   ImportRegular,
   ImportTimelineResponse,
-  ImportedTimeline,
   PromiseFromStreams,
 } from './types';
 

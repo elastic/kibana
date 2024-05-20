@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import {
+  mockedTriggersActionsUiService,
+  TestProvidersComponent,
+} from '../../../../mocks/test_providers';
 import { render } from '@testing-library/react';
 import React from 'react';
-import {
-  TestProvidersComponent,
-  mockedTriggersActionsUiService,
-} from '../../../../mocks/test_providers';
 import { IndicatorsFieldBrowser } from './field_browser';
 
 const stub = jest.fn();

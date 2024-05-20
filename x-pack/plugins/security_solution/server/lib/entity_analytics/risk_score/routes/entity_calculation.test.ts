@@ -8,17 +8,17 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
 import {
+  serverMock,
   requestContextMock,
   requestMock,
-  serverMock,
 } from '../../../detection_engine/routes/__mocks__';
-import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
-import { calculateAndPersistRiskScoresMock } from '../calculate_and_persist_risk_scores.mock';
-import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { RiskEngineConfigurationWithDefaults } from '../risk_score_service';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
+import { getRiskInputsIndex } from '../get_risk_inputs_index';
+import { calculateAndPersistRiskScoresMock } from '../calculate_and_persist_risk_scores.mock';
 import { riskScoreEntityCalculationRoute } from './entity_calculation';
+import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
 
 jest.mock('../get_risk_inputs_index');
 jest.mock('../risk_score_service');

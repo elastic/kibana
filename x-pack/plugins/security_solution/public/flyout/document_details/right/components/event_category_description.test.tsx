@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProvidersComponent } from '../../../../common/mock';
+import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
-import { EventCategoryDescription } from './event_category_description';
 import { EVENT_CATEGORY_DESCRIPTION_TEST_ID } from './test_ids';
+import { EventCategoryDescription } from './event_category_description';
+import { mockContextValue } from '../mocks/mock_context';
+import { TestProvidersComponent } from '../../../../common/mock';
 
 const renderDescription = (contextValue: RightPanelContext) =>
   render(

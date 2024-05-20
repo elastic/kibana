@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../../../../common/__mocks__';
-import { setMockActions, setMockValues as setMockKeaValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues as setMockKeaValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 const { workplaceSearch: mockAppValues } = DEFAULT_INITIAL_APP_DATA;
 

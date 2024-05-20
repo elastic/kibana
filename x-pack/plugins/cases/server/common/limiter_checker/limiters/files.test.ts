@@ -6,8 +6,8 @@
  */
 
 import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
-import { createFileRequests, createUserRequests } from '../test_utils';
 import { FileLimiter } from './files';
+import { createFileRequests, createUserRequests } from '../test_utils';
 
 describe('FileLimiter', () => {
   const mockFileService = createFileServiceMock();

@@ -8,11 +8,11 @@
 
 import { ClassDeclaration } from 'ts-morph';
 import { ApiDeclaration, TypeKind } from '../types';
-import { isInternal } from '../utils';
 import { buildApiDeclaration } from './build_api_declaration';
+import { getOptsForChild, isPrivate } from './utils';
+import { isInternal } from '../utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import { BuildApiDecOpts } from './types';
-import { getOptsForChild, isPrivate } from './utils';
 
 export function buildClassDec(node: ClassDeclaration, opts: BuildApiDecOpts): ApiDeclaration {
   return {

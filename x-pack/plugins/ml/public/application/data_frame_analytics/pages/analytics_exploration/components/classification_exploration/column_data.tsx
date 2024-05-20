@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { ConfusionMatrix } from '@kbn/ml-data-frame-analytics-utils';
-import React, { useState } from 'react';
 
 const COL_INITIAL_WIDTH = 165; // in pixels
 

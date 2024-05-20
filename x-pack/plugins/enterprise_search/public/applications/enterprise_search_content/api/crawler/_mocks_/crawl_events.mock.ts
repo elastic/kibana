@@ -8,6 +8,7 @@
 import {
   CrawlConfig,
   CrawlConfigFromServer,
+  CrawlerStatus,
   CrawlEvent,
   CrawlEventFromServer,
   CrawlRequest,
@@ -17,7 +18,6 @@ import {
   CrawlRequestWithDetails,
   CrawlRequestWithDetailsFromServer,
   CrawlType,
-  CrawlerStatus,
 } from '../types';
 
 // Server

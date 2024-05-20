@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { useKibanaSpace, useTheme } from '@kbn/observability-shared-plugin/public';
-import { isEmpty } from 'lodash';
 import { useMemo } from 'react';
-import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
-import { ALL_VALUES_SELECTED } from '../configurations/constants/url_constants';
-import { getDefaultConfigs } from '../configurations/default_configs';
-import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
+import { isEmpty } from 'lodash';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useTheme, useKibanaSpace } from '@kbn/observability-shared-plugin/public';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
-import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
-import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
-import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
-import { DataViewState, useAppDataViewContext } from './use_app_data_view';
 import { useLensFormulaHelper } from './use_lens_formula_helper';
+import { ALL_VALUES_SELECTED } from '../configurations/constants/url_constants';
+import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import {
   AllSeries,
   allSeriesKey,
@@ -27,6 +21,12 @@ import {
   reportTypeKey,
   useSeriesStorage,
 } from './use_series_storage';
+import { getDefaultConfigs } from '../configurations/default_configs';
+import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
+import { DataViewState, useAppDataViewContext } from './use_app_data_view';
+import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
+import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
+import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 
 export const getFiltersFromDefs = (
   reportDefinitions: SeriesUrl['reportDefinitions'] | SeriesUrl['textReportDefinitions']

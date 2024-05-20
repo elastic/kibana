@@ -6,16 +6,16 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
-import * as alertRuleMock from '../alerts_by_type_panel/mock_rule_data';
-import * as alertTypeMock from '../alerts_by_type_panel/mock_type_data';
-import * as alertsGroupingMock from '../alerts_progress_bar_panel/mock_data';
-import * as severityMock from '../severity_level_panel/mock_data';
-import * as aggregations from './aggregations';
 import type { UseAlerts, UseAlertsQueryProps } from './use_summary_chart_data';
-import { getAlertsQuery, useSummaryChartData } from './use_summary_chart_data';
+import { useSummaryChartData, getAlertsQuery } from './use_summary_chart_data';
+import * as aggregations from './aggregations';
+import * as severityMock from '../severity_level_panel/mock_data';
+import * as alertTypeMock from '../alerts_by_type_panel/mock_type_data';
+import * as alertRuleMock from '../alerts_by_type_panel/mock_rule_data';
+import * as alertsGroupingMock from '../alerts_progress_bar_panel/mock_data';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';

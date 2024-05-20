@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { AuthHeaders, KibanaRequest } from '@kbn/core-http-server';
-import type { UnauthorizedError } from '@kbn/es-errors';
 import { MaybePromise } from '@kbn/utility-types';
+import type { UnauthorizedError } from '@kbn/es-errors';
+import type { AuthHeaders, KibanaRequest } from '@kbn/core-http-server';
 
 /**
  * @public

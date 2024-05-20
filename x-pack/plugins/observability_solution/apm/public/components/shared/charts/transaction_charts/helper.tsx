@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TimeFormatter } from '../../../../../common/utils/formatters';
 import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
 import { Coordinate } from '../../../../../typings/timeseries';
+import { TimeFormatter } from '../../../../../common/utils/formatters';
 
 export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
   return (t: number) => formatter(t).formatted;

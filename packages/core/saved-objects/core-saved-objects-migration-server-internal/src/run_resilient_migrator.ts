@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type {
-  ElasticsearchCapabilities,
   ElasticsearchClient,
+  ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import type {
-  IndexMapping,
-  IndexTypesMap,
-  MigrationResult,
-  SavedObjectsMigrationConfigType,
-} from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type { Logger } from '@kbn/logging';
-import type { AliasAction } from './actions';
-import { createInitialState } from './initial_state';
+import type {
+  IndexMapping,
+  SavedObjectsMigrationConfigType,
+  MigrationResult,
+  IndexTypesMap,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { WaitGroup } from './kibana_migrator_utils';
+import type { TransformRawDocs } from './types';
+import { next } from './next';
+import { model } from './model';
+import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
-import { model } from './model';
-import { next } from './next';
 import type { State } from './state';
-import type { TransformRawDocs } from './types';
+import type { AliasAction } from './actions';
 
 /**
  * To avoid the Elasticsearch-js client aborting our requests before we

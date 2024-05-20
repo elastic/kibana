@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { closeSync, openSync, statSync, unlinkSync, writeSync } from 'fs';
+import { openSync, writeSync, unlinkSync, closeSync, statSync } from 'fs';
 import { dirname } from 'path';
 import { setTimeout } from 'timers/promises';
 
+import chalk from 'chalk';
 import { createHash } from 'crypto';
+import Axios from 'axios';
 import { isAxiosResponseError } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
-import Axios from 'axios';
-import chalk from 'chalk';
 
 import { mkdirp } from './fs';
 

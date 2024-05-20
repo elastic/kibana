@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { Story, addDecorator } from '@storybook/react';
 import React from 'react';
+import { HttpStart } from '@kbn/core/public';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
 
-import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
-import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
-import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
+import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
+import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
 import { getEntryNestedMock } from '../../../../common/schemas/types/entry_nested.mock';
+import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 
 import {
   ExceptionBuilderComponent,

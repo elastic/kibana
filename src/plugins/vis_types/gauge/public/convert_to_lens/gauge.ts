@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { PercentageModeConfigWithMinMax } from '@kbn/visualizations-plugin/common';
-import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
-import { v4 as uuidv4 } from 'uuid';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
-import { getConfiguration } from './configurations/gauge';
 import { ConvertGaugeVisToLensVisualization } from './types';
+import { getConfiguration } from './configurations/gauge';
 
 export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {

@@ -8,8 +8,8 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 
 export const DefaultPageTitle: FunctionComponent = () => {
   return (

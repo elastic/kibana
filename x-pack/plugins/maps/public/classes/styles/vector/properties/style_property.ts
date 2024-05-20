@@ -8,9 +8,9 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 
 export type LegendProps = {
   isPointsOnly: boolean;

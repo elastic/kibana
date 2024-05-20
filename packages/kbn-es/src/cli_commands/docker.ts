@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { getTimeReporter } from '@kbn/ci-stats-reporter';
-import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import getopts from 'getopts';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
-import { DEFAULT_PORT, DOCKER_IMG, DOCKER_REPO, DOCKER_TAG } from '../utils';
+import { DOCKER_IMG, DOCKER_REPO, DOCKER_TAG, DEFAULT_PORT } from '../utils';
 import { Command } from './types';
 
 export const docker: Command = {

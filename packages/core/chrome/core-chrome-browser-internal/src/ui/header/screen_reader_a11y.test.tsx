@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { mount, render } from 'enzyme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_reader_a11y';
+import { mount, render } from 'enzyme';
 
 describe('ScreenReaderRouteAnnouncements', () => {
   it('renders', () => {

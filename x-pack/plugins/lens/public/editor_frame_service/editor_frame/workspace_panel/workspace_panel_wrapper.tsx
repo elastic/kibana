@@ -7,33 +7,33 @@
 
 import './workspace_panel_wrapper.scss';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
-import { Interpolation, Theme, css } from '@emotion/react';
+import React, { useCallback } from 'react';
+import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import classNames from 'classnames';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { ChartSizeUnit } from '@kbn/chart-expressions-common/types';
-import { FormattedMessage } from '@kbn/i18n-react';
-import classNames from 'classnames';
-import React, { useCallback } from 'react';
-import { LensInspector } from '../../../lens_inspector_service';
-import {
-  DatasourceStates,
-  applyChanges,
-  selectAutoApplyEnabled,
-  selectChangesApplied,
-  selectVisualizationState,
-  updateVisualizationState,
-  useLensDispatch,
-  useLensSelector,
-} from '../../../state_management';
+import { Interpolation, Theme, css } from '@emotion/react';
 import {
   DatasourceMap,
   FramePublicAPI,
   UserMessagesGetter,
-  Visualization,
   VisualizationMap,
+  Visualization,
 } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
+import {
+  useLensDispatch,
+  updateVisualizationState,
+  DatasourceStates,
+  useLensSelector,
+  selectChangesApplied,
+  applyChanges,
+  selectAutoApplyEnabled,
+  selectVisualizationState,
+} from '../../../state_management';
+import { LensInspector } from '../../../lens_inspector_service';
 import { WorkspaceTitle } from './title';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';

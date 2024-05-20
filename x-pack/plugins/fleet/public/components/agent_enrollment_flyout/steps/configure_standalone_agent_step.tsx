@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
+  EuiText,
   EuiButton,
+  EuiSpacer,
   EuiCode,
-  EuiCodeBlock,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCopy,
+  EuiCodeBlock,
   EuiLink,
-  EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import { useStartServices } from '../../../hooks';
 import type { K8sMode } from '../types';
+import { useStartServices } from '../../../hooks';
 
 export const ConfigureStandaloneAgentStep = ({
   isK8s,

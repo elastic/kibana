@@ -7,8 +7,14 @@
     "id": "searchNotebooks",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "search", "notebooks"],
-    "requiredPlugins": ["console"],
+    "configPath": [
+      "xpack",
+      "search",
+      "notebooks"
+    ],
+    "requiredPlugins": [
+      "console"
+    ],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"]
   }

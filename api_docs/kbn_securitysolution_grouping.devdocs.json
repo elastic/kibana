@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "getGroupingQuery",
-        "description": ["\nComposes grouping query and aggregations"],
+        "description": [
+          "\nComposes grouping query and aggregations"
+        ],
         "signature": [
           "({ additionalFilters, from, groupByField, pageNumber, rootAggregations, runtimeMappings, size, sort, statsAggregations, to, uniqueValue, }: ",
           "GroupingQueryArgs",
@@ -43,14 +45,18 @@
             "tags": [],
             "label": "{\n  additionalFilters = [],\n  from,\n  groupByField,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  statsAggregations,\n  to,\n  uniqueValue,\n}",
             "description": [],
-            "signature": ["GroupingQueryArgs"],
+            "signature": [
+              "GroupingQueryArgs"
+            ],
             "path": "packages/kbn-securitysolution-grouping/src/containers/query/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["query dsl {@link GroupingQuery }"],
+        "returnComment": [
+          "query dsl {@link GroupingQuery }"
+        ],
         "initialIsOpen": false
       },
       {
@@ -59,8 +65,12 @@
         "type": "Function",
         "tags": [],
         "label": "isNoneGroup",
-        "description": ["\nChecks if no group is selected"],
-        "signature": ["(groupKeys: string[]) => boolean"],
+        "description": [
+          "\nChecks if no group is selected"
+        ],
+        "signature": [
+          "(groupKeys: string[]) => boolean"
+        ],
         "path": "packages/kbn-securitysolution-grouping/src/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -71,15 +81,21 @@
             "type": "Array",
             "tags": [],
             "label": "groupKeys",
-            "description": ["selected group field values"],
-            "signature": ["string[]"],
+            "description": [
+              "selected group field values"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/kbn-securitysolution-grouping/src/components/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["True if no group is selected"],
+        "returnComment": [
+          "True if no group is selected"
+        ],
         "initialIsOpen": false
       },
       {
@@ -88,7 +104,9 @@
         "type": "Function",
         "tags": [],
         "label": "useGrouping",
-        "description": ["\nHook to configure grouping component"],
+        "description": [
+          "\nHook to configure grouping component"
+        ],
         "signature": [
           "<T>({ componentProps, defaultGroupingOptions, fields, groupingId, maxGroupingLevels, onGroupChange, onOptionsChange, tracker, title, }: GroupingArgs<T>) => ",
           "UseGrouping",
@@ -105,7 +123,9 @@
             "tags": [],
             "label": "{\n  componentProps,\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n  maxGroupingLevels,\n  onGroupChange,\n  onOptionsChange,\n  tracker,\n  title,\n}",
             "description": [],
-            "signature": ["GroupingArgs<T>"],
+            "signature": [
+              "GroupingArgs<T>"
+            ],
             "path": "packages/kbn-securitysolution-grouping/src/hooks/use_grouping.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -182,7 +202,9 @@
             "tags": [],
             "label": "renderer",
             "description": [],
-            "signature": ["JSX.Element | undefined"],
+            "signature": [
+              "JSX.Element | undefined"
+            ],
             "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -194,7 +216,10 @@
             "tags": [],
             "label": "badge",
             "description": [],
-            "signature": ["BadgeMetric", " | undefined"],
+            "signature": [
+              "BadgeMetric",
+              " | undefined"
+            ],
             "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -209,7 +234,9 @@
         "parentPluginId": "@kbn/securitysolution-grouping",
         "id": "def-common.DynamicGroupingProps",
         "type": "Type",
-        "tags": ["interface"],
+        "tags": [
+          "interface"
+        ],
         "label": "DynamicGroupingProps",
         "description": [
           "Type for dynamic grouping component props where T is the consumer `GroupingAggregation`"
@@ -247,7 +274,12 @@
         "tags": [],
         "label": "GroupingAggregation",
         "description": [],
-        "signature": ["RootAggregation", "<T> & ", "GroupingFieldTotalAggregation", "<T>"],
+        "signature": [
+          "RootAggregation",
+          "<T> & ",
+          "GroupingFieldTotalAggregation",
+          "<T>"
+        ],
         "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -260,7 +292,11 @@
         "tags": [],
         "label": "NamedAggregation",
         "description": [],
-        "signature": ["{ [x: string]: ", "AggregationsAggregationContainer", "; }"],
+        "signature": [
+          "{ [x: string]: ",
+          "AggregationsAggregationContainer",
+          "; }"
+        ],
         "path": "packages/kbn-securitysolution-grouping/src/containers/query/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -273,7 +309,10 @@
         "tags": [],
         "label": "RawBucket",
         "description": [],
-        "signature": ["GenericBuckets", " & T"],
+        "signature": [
+          "GenericBuckets",
+          " & T"
+        ],
         "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,

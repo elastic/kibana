@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
+import type { ConnectorFieldsPreviewProps } from '../types';
 import type { ServiceNowITSMFieldsType } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorCard } from '../card';
-import { DeprecatedCallout } from '../deprecated_callout';
-import type { ConnectorFieldsPreviewProps } from '../types';
-import { choicesToEuiOptions } from './helpers';
-import type { Fields } from './types';
 import { useGetChoices } from './use_get_choices';
+import type { Fields } from './types';
+import { choicesToEuiOptions } from './helpers';
+import { DeprecatedCallout } from '../deprecated_callout';
 
 const choicesToGet = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {

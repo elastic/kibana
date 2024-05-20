@@ -5,35 +5,35 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
-  MonitorFields,
-  MonitorLocations,
-  SyntheticsMonitor,
-  SyntheticsMonitorWithSecretsAttributes,
-} from '../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
-import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
-import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
-import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
-import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import {
-  formatTelemetryUpdateEvent,
-  sendTelemetryEvents,
-} from '../telemetry/monitor_upgrade_sender';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { invalidOriginError } from './add_monitor';
+import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
+import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
+import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './helper';
-import { mapSavedObjectToMonitor } from './helper';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import {
+  MonitorFields,
+  EncryptedSyntheticsMonitorAttributes,
+  SyntheticsMonitorWithSecretsAttributes,
+  SyntheticsMonitor,
+  ConfigKey,
+  MonitorLocations,
+} from '../../../common/runtime_types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { MonitorValidationError, normalizeAPIConfig, validateMonitor } from './monitor_validation';
+import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
+import {
+  sendTelemetryEvents,
+  formatTelemetryUpdateEvent,
+} from '../telemetry/monitor_upgrade_sender';
+import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
+import { mapSavedObjectToMonitor } from './helper';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({

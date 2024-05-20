@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type { IBrowserLoggingSystem } from '@kbn/core-logging-browser-internal';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 
 const createLoggingSystemMock = () => {
   const mockLog: MockedLogger = loggerMock.create();

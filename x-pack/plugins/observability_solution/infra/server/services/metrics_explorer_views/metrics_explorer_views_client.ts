@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import {
   Logger,
   SavedObject,
@@ -13,6 +12,12 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsUtils,
 } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+import {
+  metricsExplorerViewAttributesRT,
+  staticMetricsExplorerViewAttributes,
+  staticMetricsExplorerViewId,
+} from '../../../common/metrics_explorer_views';
 import type {
   CreateMetricsExplorerViewAttributesRequestPayload,
   FindMetricsExplorerViewResponsePayload,
@@ -20,11 +25,6 @@ import type {
   MetricsExplorerViewRequestQuery,
   UpdateMetricsExplorerViewResponsePayload,
 } from '../../../common/http_api/latest';
-import {
-  metricsExplorerViewAttributesRT,
-  staticMetricsExplorerViewAttributes,
-  staticMetricsExplorerViewId,
-} from '../../../common/metrics_explorer_views';
 import type {
   MetricsExplorerView,
   MetricsExplorerViewAttributes,

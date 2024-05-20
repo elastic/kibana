@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, useGeneratedHtmlId } from '@elastic/eui';
-import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
-import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field';
 import React, { useCallback, useContext, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { FieldIcon } from '@kbn/react-field';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
+import { useGeneratedHtmlId, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
+import { FiltersBuilderContextType } from '../context';
 import {
   MIDDLE_TRUNCATION_PROPS,
   SINGLE_SELECTION_AS_TEXT_PROPS,
 } from '../../filter_bar/filter_editor/lib/helpers';
-import { FiltersBuilderContextType } from '../context';
 
 export const strings = {
   getFieldSelectPlaceholderLabel: () =>

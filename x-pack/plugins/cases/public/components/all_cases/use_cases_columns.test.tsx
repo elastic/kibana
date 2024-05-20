@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
-import { renderHook } from '@testing-library/react-hooks';
-import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
-import type { AppMockRenderer } from '../../common/mock';
-import { TestProviders, createAppMockRenderer, readCasesPermissions } from '../../common/mock';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { useGetCasesMockState } from '../../containers/mock';
-import { userProfilesMap } from '../../containers/user_profiles/api.mock';
-import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
 import type { GetCasesColumn } from './use_cases_columns';
 import { ExternalServiceColumn, useCasesColumns } from './use_cases_columns';
+import { useGetCasesMockState } from '../../containers/mock';
+import { connectors, useCaseConfigureResponse } from '../configure_cases/__mock__';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
+import { renderHook } from '@testing-library/react-hooks';
+import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
+import { userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 

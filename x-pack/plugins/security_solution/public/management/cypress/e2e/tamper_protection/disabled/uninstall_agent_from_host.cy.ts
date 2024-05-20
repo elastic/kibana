@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../../scripts/endpoint/common/endpoint_host_services';
+import { waitForEndpointListPageToBeLoaded } from '../../../tasks/response_console';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
-  createAgentPolicyTask,
   getEndpointIntegrationVersion,
+  createAgentPolicyTask,
   isAgentAndEndpointUninstalledFromHost,
   uninstallAgentFromHost,
 } from '../../../tasks/fleet';
-import { waitForEndpointListPageToBeLoaded } from '../../../tasks/response_console';
 
+import { login } from '../../../tasks/login';
+import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
-import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
-import { login } from '../../../tasks/login';
 
 describe(
   'Uninstall agent from host when agent tamper protection is disabled',

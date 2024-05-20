@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
 import { of } from 'rxjs';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 const settings: Record<string, any> = {
   'theme:darkMode': false,

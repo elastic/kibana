@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getRows } from '.';
 import { SelectedPromptContext } from '../../../assistant/prompt_context/types';
 import { ContextEditorRow } from '../types';
+import { getRows } from '.';
 
 describe('getRows', () => {
   const defaultArgs: {

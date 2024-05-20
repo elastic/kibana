@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Simulator } from '../test_utilities/simulator';
+import { pausifyMock } from '../data_access_layer/mocks/pausify_mock';
 import { emptifyMock } from '../data_access_layer/mocks/emptify_mock';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
-import { pausifyMock } from '../data_access_layer/mocks/pausify_mock';
-import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
 
 describe('Resolver: data loading and resolution states', () => {

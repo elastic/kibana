@@ -1,10 +1,3 @@
-import { EsQuerySortValue, ISearchSource } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { i18n } from '@kbn/i18n';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,6 +6,13 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
  * Side Public License, v 1.
  */
 import { lastValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DiscoverServices } from '../../../build_services';
 
 export async function fetchAnchor(

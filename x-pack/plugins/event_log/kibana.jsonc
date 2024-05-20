@@ -6,7 +6,13 @@
     "id": "eventLog",
     "server": true,
     "browser": false,
-    "configPath": ["xpack", "eventLog"],
-    "optionalPlugins": ["spaces", "serverless"]
+    "configPath": [
+      "xpack",
+      "eventLog"
+    ],
+    "optionalPlugins": [
+      "spaces",
+      "serverless"
+    ]
   }
 }

@@ -65,7 +65,9 @@
             "tags": [],
             "label": "fn",
             "description": [],
-            "signature": ["() => Promise<T>"],
+            "signature": [
+              "() => Promise<T>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/helpers/retry_async.ts",
             "deprecated": false,
             "trackAdoption": false,

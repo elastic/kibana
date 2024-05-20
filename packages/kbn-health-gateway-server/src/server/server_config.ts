@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue, TypeOf, schema } from '@kbn/config-schema';
-import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import type { ICorsConfig, IHttpConfig, ISslConfig } from '@kbn/server-http-tools';
-import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
+import { schema, TypeOf, ByteSizeValue } from '@kbn/config-schema';
+import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import type { ISslConfig, ICorsConfig, IHttpConfig } from '@kbn/server-http-tools';
+import { sslSchema, SslConfig } from '@kbn/server-http-tools';
 
 const configSchema = schema.object(
   {

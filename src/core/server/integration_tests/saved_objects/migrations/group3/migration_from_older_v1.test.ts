@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 import Util from 'util';
+import Semver from 'semver';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { Root } from '@kbn/core-root-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
-  type TestElasticsearchUtils,
-  createRootWithCorePlugins,
   createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { REPO_ROOT } from '@kbn/repo-info';
-import Semver from 'semver';
+import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import { Root } from '@kbn/core-root-server-internal';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
@@ -124,30 +124,27 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
     coreStart.savedObjects
       .getTypeRegistry()
       .getAllTypes()
-      .reduce(
-        (versionMap, type) => {
-          const { name, migrations, convertToMultiNamespaceTypeVersion } = type;
-          if (migrations || convertToMultiNamespaceTypeVersion) {
-            const migrationsMap = typeof migrations === 'function' ? migrations() : migrations;
-            const migrationsKeys = migrationsMap ? Object.keys(migrationsMap) : [];
-            if (convertToMultiNamespaceTypeVersion) {
-              // Setting this option registers a conversion migration that is reflected in the object's `typeMigrationVersions` field
-              migrationsKeys.push(convertToMultiNamespaceTypeVersion);
-            }
-            const highestVersion = migrationsKeys.sort(Semver.compare).reverse()[0];
-            return {
-              ...versionMap,
-              [name]: highestVersion,
-            };
-          } else {
-            return {
-              ...versionMap,
-              [name]: undefined,
-            };
+      .reduce((versionMap, type) => {
+        const { name, migrations, convertToMultiNamespaceTypeVersion } = type;
+        if (migrations || convertToMultiNamespaceTypeVersion) {
+          const migrationsMap = typeof migrations === 'function' ? migrations() : migrations;
+          const migrationsKeys = migrationsMap ? Object.keys(migrationsMap) : [];
+          if (convertToMultiNamespaceTypeVersion) {
+            // Setting this option registers a conversion migration that is reflected in the object's `typeMigrationVersions` field
+            migrationsKeys.push(convertToMultiNamespaceTypeVersion);
           }
-        },
-        {} as Record<string, string | undefined>
-      );
+          const highestVersion = migrationsKeys.sort(Semver.compare).reverse()[0];
+          return {
+            ...versionMap,
+            [name]: highestVersion,
+          };
+        } else {
+          return {
+            ...versionMap,
+            [name]: undefined,
+          };
+        }
+      }, {} as Record<string, string | undefined>);
 
   const assertMigrationVersion = (
     doc: SavedObjectsRawDoc,

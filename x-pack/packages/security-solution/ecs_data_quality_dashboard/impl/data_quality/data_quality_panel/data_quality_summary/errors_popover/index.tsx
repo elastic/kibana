@@ -6,25 +6,25 @@
  */
 
 import {
+  copyToClipboard,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCode,
   EuiPopover,
   EuiSpacer,
-  copyToClipboard,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import type { ErrorSummary } from '../../../types';
+import { ErrorsViewer } from '../errors_viewer';
+import { ERRORS_CONTAINER_MAX_WIDTH } from '../errors_viewer/helpers';
 import {
   getErrorsMarkdownTable,
   getErrorsMarkdownTableRows,
 } from '../../index_properties/markdown/helpers';
-import { ErrorsViewer } from '../errors_viewer';
-import { ERRORS_CONTAINER_MAX_WIDTH } from '../errors_viewer/helpers';
-import { ERROR, INDEX, PATTERN } from '../errors_viewer/translations';
 import * as i18n from './translations';
+import type { ErrorSummary } from '../../../types';
+import { ERROR, INDEX, PATTERN } from '../errors_viewer/translations';
 
 const CallOut = styled(EuiCallOut)`
   max-width: ${ERRORS_CONTAINER_MAX_WIDTH}px;

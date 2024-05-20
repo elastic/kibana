@@ -11,8 +11,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
 import type { InstallablePackage, RegistryDataStream } from '../../../../types';
+import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
 const LEGACY_TEMPLATE_SUFFIXES = ['@mappings', '@settings'];
 
 const getComponentTemplateWithSuffix = (dataStream: RegistryDataStream, suffix: string) => {

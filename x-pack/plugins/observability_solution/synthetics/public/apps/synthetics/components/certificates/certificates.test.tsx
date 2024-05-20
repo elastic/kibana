@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render } from '../../utils/testing';
 import { CertificatesPage } from './certificates';
+import { render } from '../../utils/testing';
 
 describe('CertificatesPage', () => {
   it('renders expected elements for valid props', async () => {

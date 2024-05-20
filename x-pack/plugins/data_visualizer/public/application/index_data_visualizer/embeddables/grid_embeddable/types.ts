@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
-import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
-import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
+import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
+import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 
 export interface FieldStatisticTableEmbeddableProps {
   /**

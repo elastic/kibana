@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useCallback, useMemo } from 'react';
 import type { Status } from '../../../../../common/api/detection_engine';
-import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
+import type { inputsModel } from '../../../../common/store';
+import { inputsSelectors } from '../../../../common/store';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import type { AlertWorkflowStatus } from '../../../../common/types';
+import { APM_USER_INTERACTIONS } from '../../../../common/lib/apm/constants';
+import { updateAlertStatus } from '../../../../common/components/toolbar/bulk_actions/update_alerts';
 import {
   BULK_ACTION_ACKNOWLEDGED_SELECTED,
   BULK_ACTION_CLOSE_SELECTED,
   BULK_ACTION_OPEN_SELECTED,
 } from '../../../../common/components/toolbar/bulk_actions/translations';
-import { updateAlertStatus } from '../../../../common/components/toolbar/bulk_actions/update_alerts';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { APM_USER_INTERACTIONS } from '../../../../common/lib/apm/constants';
-import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { METRIC_TYPE, getTelemetryEvent, track } from '../../../../common/lib/telemetry';
-import type { inputsModel } from '../../../../common/store';
-import { inputsSelectors } from '../../../../common/store';
 import {
   UPDATE_ALERT_STATUS_FAILED,
   UPDATE_ALERT_STATUS_FAILED_DETAILED,
 } from '../../../../common/translations';
-import type { AlertWorkflowStatus } from '../../../../common/types';
-import type { StartServices } from '../../../../types';
+import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import * as i18n from '../translations';
+import { getTelemetryEvent, METRIC_TYPE, track } from '../../../../common/lib/telemetry';
+import type { StartServices } from '../../../../types';
 
 export interface TakeActionsProps {
   currentStatus?: Status[];

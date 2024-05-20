@@ -6,40 +6,40 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useMemo } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { History } from 'history';
 import {
   EuiButton,
   EuiCheckbox,
   EuiFieldText,
   EuiPageBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSection,
-  EuiPageTemplate,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import {
-  TodoActions,
-  TodoState,
-  defaultState,
-  pureTransitions,
-} from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
-import {
   BaseState,
   BaseStateContainer,
-  INullableBaseStateContainer,
-  StateContainer,
   createKbnUrlStateStorage,
   createStateContainer,
   getStateFromKbnUrl,
+  INullableBaseStateContainer,
+  StateContainer,
   syncState,
   useContainerSelector,
 } from '@kbn/kibana-utils-plugin/public';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { History } from 'history';
-import React, { useEffect, useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import {
+  defaultState,
+  pureTransitions,
+  TodoActions,
+  TodoState,
+} from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
 
 interface TodoAppProps {
   filter: 'completed' | 'not-completed' | null;

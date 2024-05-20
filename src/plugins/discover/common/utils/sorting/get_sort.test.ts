@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { getSort, getSortArray } from './get_sort';
 import {
   stubDataView,
   stubDataViewWithoutTimeField,
 } from '@kbn/data-views-plugin/common/data_view.stub';
-import { getSort, getSortArray } from './get_sort';
 
 describe('getSort and getSortArray', function () {
   describe('getSort function', function () {

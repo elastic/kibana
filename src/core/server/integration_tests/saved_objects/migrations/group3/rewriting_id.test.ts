@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 import Util from 'util';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
 import { deterministicallyRegenerateObjectId } from '@kbn/core-saved-objects-migration-server-internal';
-import {
-  type TestElasticsearchUtils,
-  createRootWithCorePlugins,
-  createTestServers,
-} from '@kbn/core-test-helpers-kbn-server';
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 const logFilePath = Path.join(__dirname, 'rewriting_id.log');
 

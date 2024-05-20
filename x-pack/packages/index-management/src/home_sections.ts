@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiBreadcrumb } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core-application-browser';
 import { FunctionComponent, ReactNode } from 'react';
+import { ApplicationStart } from '@kbn/core-application-browser';
+import { EuiBreadcrumb } from '@elastic/eui';
 import { Index } from './types';
 
 export enum Section {

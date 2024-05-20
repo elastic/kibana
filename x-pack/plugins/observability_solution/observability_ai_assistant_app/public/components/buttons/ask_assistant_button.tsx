@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonEmptySizes,
-  EuiButtonIcon,
   EuiButtonSize,
+  EuiButtonEmptySizes,
   EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 export type AskAssistantButtonProps = (
   | {

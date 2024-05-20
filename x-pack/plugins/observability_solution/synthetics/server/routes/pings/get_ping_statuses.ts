@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { PingError, PingStatus } from '../../../common/runtime_types';
 import { queryPings } from '../../common/pings/query_pings';
-import { SyntheticsRestApiRouteFactory } from '../types';
 
 import { getPingsRouteQuerySchema } from './get_pings';
 

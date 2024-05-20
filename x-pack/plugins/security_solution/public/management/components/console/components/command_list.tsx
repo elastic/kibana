@@ -5,33 +5,33 @@
  * 2.0.
  */
 
+import React, { memo, useMemo, useCallback } from 'react';
+import styled from 'styled-components';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
-  EuiCallOut,
   EuiDescriptionList,
-  EuiFlexGrid,
   EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
-  EuiLink,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
+  EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { sortBy } from 'lodash';
-import React, { memo, useMemo, useCallback } from 'react';
-import styled from 'styled-components';
-import { useKibana } from '../../../../common/lib/kibana';
+import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { COMMON_ARGS, HELP_GROUPS } from '../service/builtin_commands';
 import { getCommandNameWithArgs } from '../service/utils';
-import type { CommandDefinition } from '../types';
 import { ConsoleCodeBlock } from './console_code_block';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const otherCommandsGroupLabel = i18n.translate(
   'xpack.securitySolution.console.commandList.otherCommandsGroup.label',

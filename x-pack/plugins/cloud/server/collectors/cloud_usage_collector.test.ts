@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import {
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CloudUsageCollectorConfig, createCloudUsageCollector } from './cloud_usage_collector';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 
 describe('createCloudUsageCollector', () => {
   let usageCollection: UsageCollectionSetup;

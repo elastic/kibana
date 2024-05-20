@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
-  DataTableModel,
   DataTableState,
+  DataTableModel,
   TableIdLiteral,
 } from '@kbn/securitysolution-data-table';
-import { TableEntityType, TableId, tableEntity } from '@kbn/securitysolution-data-table';
+import { tableEntity, TableEntityType, TableId } from '@kbn/securitysolution-data-table';
 import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
-import { isEmpty } from 'lodash/fp';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, VIEW_SELECTION } from '../../../../common/constants';
-import { useKibana } from '../../../common/lib/kibana';
 import { assigneesColumn } from '../../../detections/configurations/security_solution_detections/columns';
-import { migrateEntityRiskLevelColumnTitle } from './migrates_risk_level_title';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, VIEW_SELECTION } from '../../../../common/constants';
 import type { DataTablesStorage } from './types';
+import { useKibana } from '../../../common/lib/kibana';
+import { migrateEntityRiskLevelColumnTitle } from './migrates_risk_level_title';
 
 export const LOCAL_STORAGE_TABLE_KEY = 'securityDataTable';
 const LOCAL_STORAGE_TIMELINE_KEY_LEGACY = 'timelines';
@@ -35,51 +35,48 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
     return EMPTY_TABLE;
   }
 
-  return Object.keys(legacyTimelineTables).reduce(
-    (acc, timelineTableId) => {
-      const timelineModel = legacyTimelineTables[timelineTableId];
-      return {
-        ...acc,
-        [timelineTableId]: {
-          defaultColumns: timelineModel.defaultColumns,
-          dataViewId: timelineModel.dataViewId,
-          excludedRowRendererIds: timelineModel.excludedRowRendererIds,
-          filters: timelineModel.filters,
-          indexNames: timelineModel.indexNames,
-          loadingEventIds: timelineModel.loadingEventIds,
-          isSelectAllChecked: timelineModel.isSelectAllChecked,
-          itemsPerPage: timelineModel.itemsPerPage,
-          itemsPerPageOptions: timelineModel.itemsPerPageOptions,
-          showCheckboxes: timelineModel.showCheckboxes,
-          graphEventId: timelineModel.graphEventId,
-          sessionViewConfig: timelineModel.sessionViewConfig,
-          selectAll: timelineModel.selectAll,
-          id: timelineModel.id,
-          title: timelineModel.title,
-          initialized: timelineModel.initialized,
-          updated: timelineModel.updated,
-          sort: timelineModel.sort,
-          selectedEventIds: timelineModel.selectedEventIds,
-          deletedEventIds: timelineModel.deletedEventIds,
-          expandedDetail: timelineModel.expandedDetail,
-          totalCount: timelineModel.totalCount || 0,
-          viewMode: VIEW_SELECTION.gridView,
-          additionalFilters: {
-            showBuildingBlockAlerts: false,
-            showOnlyThreatIndicatorAlerts: false,
-          },
-          ...(Array.isArray(timelineModel.columns)
-            ? {
-                columns: timelineModel.columns
-                  .map(migrateColumnWidthToInitialWidth)
-                  .map(migrateColumnLabelToDisplayAsText),
-              }
-            : {}),
+  return Object.keys(legacyTimelineTables).reduce((acc, timelineTableId) => {
+    const timelineModel = legacyTimelineTables[timelineTableId];
+    return {
+      ...acc,
+      [timelineTableId]: {
+        defaultColumns: timelineModel.defaultColumns,
+        dataViewId: timelineModel.dataViewId,
+        excludedRowRendererIds: timelineModel.excludedRowRendererIds,
+        filters: timelineModel.filters,
+        indexNames: timelineModel.indexNames,
+        loadingEventIds: timelineModel.loadingEventIds,
+        isSelectAllChecked: timelineModel.isSelectAllChecked,
+        itemsPerPage: timelineModel.itemsPerPage,
+        itemsPerPageOptions: timelineModel.itemsPerPageOptions,
+        showCheckboxes: timelineModel.showCheckboxes,
+        graphEventId: timelineModel.graphEventId,
+        sessionViewConfig: timelineModel.sessionViewConfig,
+        selectAll: timelineModel.selectAll,
+        id: timelineModel.id,
+        title: timelineModel.title,
+        initialized: timelineModel.initialized,
+        updated: timelineModel.updated,
+        sort: timelineModel.sort,
+        selectedEventIds: timelineModel.selectedEventIds,
+        deletedEventIds: timelineModel.deletedEventIds,
+        expandedDetail: timelineModel.expandedDetail,
+        totalCount: timelineModel.totalCount || 0,
+        viewMode: VIEW_SELECTION.gridView,
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
         },
-      };
-    },
-    {} as { [K in TableIdLiteral]: DataTableModel }
-  );
+        ...(Array.isArray(timelineModel.columns)
+          ? {
+              columns: timelineModel.columns
+                .map(migrateColumnWidthToInitialWidth)
+                .map(migrateColumnLabelToDisplayAsText),
+            }
+          : {}),
+      },
+    };
+  }, {} as { [K in TableIdLiteral]: DataTableModel });
 };
 
 /*
@@ -181,8 +178,8 @@ export const migrateColumnWidthToInitialWidth = (
   ...(Number.isInteger(column.width) && !Number.isInteger(column.initialWidth)
     ? { initialWidth: column.width }
     : column.initialWidth
-      ? { initialWidth: column.initialWidth }
-      : {}),
+    ? { initialWidth: column.initialWidth }
+    : {}),
 });
 
 /**
@@ -196,8 +193,8 @@ export const migrateColumnLabelToDisplayAsText = (
   ...(!isEmpty(column.label) && column.displayAsText == null
     ? { displayAsText: column.label }
     : column.displayAsText
-      ? { displayAsText: column.displayAsText }
-      : {}),
+    ? { displayAsText: column.displayAsText }
+    : {}),
 });
 
 /**
@@ -301,27 +298,24 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
   addAssigneesSpecsToSecurityDataTableIfNeeded(storage, allDataTables);
   migrateEntityRiskLevelColumnTitle(storage, allDataTables);
 
-  return tableIds.reduce(
-    (acc, tableId) => {
-      const tableModel = allDataTables[tableId];
-      if (!tableModel) {
-        return {
-          ...acc,
-        };
-      }
-
+  return tableIds.reduce((acc, tableId) => {
+    const tableModel = allDataTables[tableId];
+    if (!tableModel) {
       return {
         ...acc,
-        [tableId]: {
-          ...tableModel,
-          ...(tableModel.sort != null && !Array.isArray(tableModel.sort)
-            ? { sort: [tableModel.sort] }
-            : {}),
-        },
       };
-    },
-    {} as { [K in TableIdLiteral]: DataTableModel }
-  );
+    }
+
+    return {
+      ...acc,
+      [tableId]: {
+        ...tableModel,
+        ...(tableModel.sort != null && !Array.isArray(tableModel.sort)
+          ? { sort: [tableModel.sort] }
+          : {}),
+      },
+    };
+  }, {} as { [K in TableIdLiteral]: DataTableModel });
 };
 
 export const getAllDataTablesInStorage = (storage: Storage) => {

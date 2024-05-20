@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { generateUniqueKey } from '../../../lib/get_test_data';
 import { ObjectRemover } from '../../../lib/object_remover';
+import { generateUniqueKey } from '../../../lib/get_test_data';
 import { createMaintenanceWindow, createObjectRemover } from './utils';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

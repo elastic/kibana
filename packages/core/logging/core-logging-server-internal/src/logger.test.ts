@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Appender, LogLevel } from '@kbn/logging';
-import { BaseLogger } from './logger';
+import { LogLevel, Appender } from '@kbn/logging';
 import { LoggingConfig } from './logging_config';
+import { BaseLogger } from './logger';
 
 const context = LoggingConfig.getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];

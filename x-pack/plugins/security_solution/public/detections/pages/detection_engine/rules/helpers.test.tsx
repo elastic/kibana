@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
 import moment from 'moment';
-import type { RuleAction } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import {
-  mockRule,
-  mockRuleWithEverything,
-} from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import type { GetStepsData } from './helpers';
 import {
-  determineDetailsValue,
-  fillEmptySeverityMappings,
+  getDefineStepsData,
+  getScheduleStepsData,
+  getStepsData,
   getAboutStepsData,
   getActionsStepsData,
-  getDefineStepsData,
   getHumanizedDuration,
   getModifiedAboutDetailsData,
   getPrePackagedTimelineInstallationStatus,
-  getScheduleStepsData,
-  getStepsData,
+  determineDetailsValue,
+  fillEmptySeverityMappings,
 } from './helpers';
+import {
+  mockRuleWithEverything,
+  mockRule,
+} from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
+import { FilterStateStore } from '@kbn/es-query';
+import type { RuleAction } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 
-import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
-  ActionsStepRule,
   DefineStepRule,
   ScheduleStepRule,
+  ActionsStepRule,
 } from './types';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('rule helpers', () => {
   moment.suppressDeprecationWarnings = true;

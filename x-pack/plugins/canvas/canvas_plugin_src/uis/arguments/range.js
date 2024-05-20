@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiRange } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { useState, useCallback } from 'react';
-import { ArgumentStrings } from '../../../i18n';
-import { withDebounceArg } from '../../../public/components/with_debounce_arg';
+import PropTypes from 'prop-types';
+import { EuiRange } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { withDebounceArg } from '../../../public/components/with_debounce_arg';
+import { ArgumentStrings } from '../../../i18n';
 
 const { Range: strings } = ArgumentStrings;
 
@@ -30,12 +30,12 @@ const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
 
   return (
     <EuiRange
-      compressed={true}
+      compressed
       min={min}
       max={max}
       step={step}
-      showLabels={true}
-      showInput={true}
+      showLabels
+      showInput
       value={value}
       onChange={handleChange}
     />

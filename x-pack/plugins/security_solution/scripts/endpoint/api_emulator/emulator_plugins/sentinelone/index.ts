@@ -6,8 +6,8 @@
  */
 
 import type { ExternalEdrServerEmulatorCoreServices } from '../..';
-import type { EmulatorServerPlugin } from '../../lib/emulator_server.types';
 import { getSentinelOneRouteDefinitions } from './routes';
+import type { EmulatorServerPlugin } from '../../lib/emulator_server.types';
 
 export const getSentinelOneEmulator =
   (): EmulatorServerPlugin<ExternalEdrServerEmulatorCoreServices> => {

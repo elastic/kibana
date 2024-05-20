@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { isNotOperator, isOperator } from '@kbn/securitysolution-list-utils';
-import { mount } from 'enzyme';
-import React from 'react';
 
 import { OperatorComponent } from '.';
 import { getField } from '../fields/index.mock';

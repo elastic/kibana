@@ -15,7 +15,6 @@ import {
   CurrencyFormat,
   DurationFormat,
   GeoPointFormat,
-  HistogramFormat,
   IpFormat,
   NumberFormat,
   PercentFormat,
@@ -25,6 +24,7 @@ import {
   StringFormat,
   TruncateFormat,
   UrlFormat,
+  HistogramFormat,
 } from '../converters';
 
 export const baseFormatters: FieldFormatInstanceType[] = [

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { isEmpty } from 'lodash/fp';
-import type { SavedTimelineWithSavedObjectId } from '../../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
+import type { SavedTimelineWithSavedObjectId } from '../../../../../common/api/timeline';
+import { TimelineType, TimelineStatus } from '../../../../../common/api/timeline';
 
 export const pickSavedTimeline = (
   timelineId: string | null,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
 import { EuiAccordion, EuiLink, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
 import { DataFilters } from '../../../../common/descriptor_types';
-import { ISource, ImmutableSourceProperty } from '../../../classes/sources/source';
+import { ImmutableSourceProperty, ISource } from '../../../classes/sources/source';
 
 export interface Props {
   source: ISource;

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { HttpStart, ToastsStart } from '@kbn/core/public';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import { useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
+import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
 import { useQuery } from '@tanstack/react-query';
-import { fetchAlertFields } from '../apis/fetch_alert_fields';
 import { fetchAlertIndexNames } from '../apis/fetch_alert_index_names';
+import { fetchAlertFields } from '../apis/fetch_alert_fields';
 
 export interface UseAlertDataViewResult {
   dataViews?: DataView[];
@@ -147,11 +147,11 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
         featureIds.length === 0 || hasSecurityAndO11yFeatureIds
           ? false
           : isOnlySecurity
-            ? isIndexNameInitialLoading || isIndexNameLoading || dataViews.length === 0
-            : isIndexNameInitialLoading ||
-              isIndexNameLoading ||
-              isAlertFieldsInitialLoading ||
-              isAlertFieldsLoading,
+          ? isIndexNameInitialLoading || isIndexNameLoading || dataViews.length === 0
+          : isIndexNameInitialLoading ||
+            isIndexNameLoading ||
+            isAlertFieldsInitialLoading ||
+            isAlertFieldsLoading,
     }),
     [
       dataViews,

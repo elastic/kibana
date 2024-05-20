@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EuiTitle,
+  EuiSpacer,
+  EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
   EuiSwitch,
-  EuiTitle,
 } from '@elastic/eui';
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
+import { i18n } from '@kbn/i18n';
 import { EDITOR_MODE, JsonEditor } from '../json_editor';
-import { LINE_LIMIT } from './grok_highlighter';
 import { useGrokHighlighter } from './use_text_parser';
+import { LINE_LIMIT } from './grok_highlighter';
 
 interface Props {
   data: string;

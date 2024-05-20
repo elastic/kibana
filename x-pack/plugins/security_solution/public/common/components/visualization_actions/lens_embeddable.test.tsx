@@ -7,11 +7,11 @@
 import { render } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import React from 'react';
-import { useKibana } from '../../lib/kibana';
-import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import type { State } from '../../store';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { LensEmbeddable } from './lens_embeddable';
+import { useKibana } from '../../lib/kibana';
 import { useActions } from './use_actions';
 
 const mockActions = [

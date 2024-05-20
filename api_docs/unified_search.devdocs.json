@@ -128,7 +128,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -141,7 +143,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -206,7 +210,9 @@
             "tags": [],
             "label": "{\n  core,\n  storage,\n  data,\n  usageCollection,\n  isScreenshotMode = false,\n  unifiedSearch,\n}",
             "description": [],
-            "signature": ["StatefulSearchBarDeps"],
+            "signature": [
+              "StatefulSearchBarDeps"
+            ],
             "path": "src/plugins/unified_search/public/search_bar/create_search_bar.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -250,7 +256,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -292,7 +300,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -334,7 +344,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -376,7 +388,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -390,7 +404,9 @@
         "type": "Function",
         "tags": [],
         "label": "FilterItem",
-        "description": ["\nRenders a single filter pill"],
+        "description": [
+          "\nRenders a single filter pill"
+        ],
         "signature": [
           "(props: Omit<",
           "FilterItemProps",
@@ -431,7 +447,9 @@
         "type": "Function",
         "tags": [],
         "label": "FilterItems",
-        "description": ["\nRenders a group of filter pills"],
+        "description": [
+          "\nRenders a group of filter pills"
+        ],
         "signature": [
           "(props: Pick<",
           {
@@ -782,7 +800,9 @@
             "tags": [],
             "label": "timeFieldName",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -794,7 +814,9 @@
             "tags": [],
             "label": "embeddable",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -806,7 +828,9 @@
             "tags": [],
             "label": "controlledBy",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -831,8 +855,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "trigger",
-            "description": ["\nThe properties of the button that triggers the dataview picker."],
-            "signature": ["EuiButtonProps", " & { label: string; title?: string | undefined; }"],
+            "description": [
+              "\nThe properties of the button that triggers the dataview picker."
+            ],
+            "signature": [
+              "EuiButtonProps",
+              " & { label: string; title?: string | undefined; }"
+            ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -843,8 +872,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isMissingCurrent",
-            "description": ["\nFlag that should be enabled when the current dataview is missing."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nFlag that should be enabled when the current dataview is missing."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -858,7 +891,9 @@
             "description": [
               "\nCallback that is called when the user changes the currently selected dataview."
             ],
-            "signature": ["(newId: string) => void"],
+            "signature": [
+              "(newId: string) => void"
+            ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -870,7 +905,9 @@
                 "tags": [],
                 "label": "newId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -933,8 +970,12 @@
             "type": "string",
             "tags": [],
             "label": "currentDataViewId",
-            "description": ["\nThe id of the selected dataview."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe id of the selected dataview."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -945,7 +986,9 @@
             "type": "Array",
             "tags": [],
             "label": "adHocDataViews",
-            "description": ["\nThe adHocDataviews."],
+            "description": [
+              "\nThe adHocDataviews."
+            ],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -966,7 +1009,9 @@
             "type": "Array",
             "tags": [],
             "label": "savedDataViews",
-            "description": ["\nSaved data views"],
+            "description": [
+              "\nSaved data views"
+            ],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -987,8 +1032,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "selectableProps",
-            "description": ["\nEuiSelectable properties."],
-            "signature": ["EuiSelectableProps", "<{}> | undefined"],
+            "description": [
+              "\nEuiSelectable properties."
+            ],
+            "signature": [
+              "EuiSelectableProps",
+              "<{}> | undefined"
+            ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1002,7 +1052,9 @@
             "description": [
               "\nCallback that is called when the user clicks the add runtime field option.\nAlso works as a flag to show the add runtime field button."
             ],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1018,7 +1070,9 @@
             "description": [
               "\nCallback that is called when the user clicks the create dataview option.\nAlso works as a flag to show the create dataview button."
             ],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1119,7 +1173,9 @@
                 "tags": [],
                 "label": "{ onSave, onCancel }",
                 "description": [],
-                "signature": ["OnSaveTextLanguageQueryProps"],
+                "signature": [
+                  "OnSaveTextLanguageQueryProps"
+                ],
                 "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1137,7 +1193,9 @@
             "description": [
               "\nDetermines if the text based language transition\nmodal should be shown when switching data views"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1148,8 +1206,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isDisabled",
-            "description": ["\nMakes the picker disabled by disabling the popover trigger"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nMakes the picker disabled by disabling the popover trigger"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1176,7 +1238,9 @@
             "type": "Array",
             "tags": [],
             "label": "filters",
-            "description": ["Array of filters that will be rendered as filter pills"],
+            "description": [
+              "Array of filters that will be rendered as filter pills"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -1200,7 +1264,9 @@
             "description": [
               "Optional property that controls whether or not clicking the filter pill opens a popover *and* whether\nor not the `x` button to remove the filter is rendered."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1260,7 +1326,9 @@
             "type": "Array",
             "tags": [],
             "label": "indexPatterns",
-            "description": ["A list of all dataviews that are used for the filters"],
+            "description": [
+              "A list of all dataviews that are used for the filters"
+            ],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -1281,8 +1349,12 @@
             "type": "Object",
             "tags": [],
             "label": "intl",
-            "description": ["This is injected by the lazer loader"],
-            "signature": ["ReactIntl.InjectedIntl"],
+            "description": [
+              "This is injected by the lazer loader"
+            ],
+            "signature": [
+              "ReactIntl.InjectedIntl"
+            ],
             "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1296,7 +1368,9 @@
             "description": [
               "Controls whether or not filter suggestions are influenced by the global time"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1307,7 +1381,9 @@
             "type": "Array",
             "tags": [],
             "label": "filtersForSuggestions",
-            "description": ["adds additional filters to be used for suggestions"],
+            "description": [
+              "adds additional filters to be used for suggestions"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -1328,8 +1404,13 @@
             "type": "Array",
             "tags": [],
             "label": "hiddenPanelOptions",
-            "description": ["Array of panel options that controls the styling of each filter pill"],
-            "signature": ["FilterPanelOption", "[] | undefined"],
+            "description": [
+              "Array of panel options that controls the styling of each filter pill"
+            ],
+            "signature": [
+              "FilterPanelOption",
+              "[] | undefined"
+            ],
             "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1343,7 +1424,10 @@
             "description": [
               "Array of suggestion abstraction that controls the render of the field"
             ],
-            "signature": ["SuggestionsAbstraction", " | undefined"],
+            "signature": [
+              "SuggestionsAbstraction",
+              " | undefined"
+            ],
             "path": "src/plugins/unified_search/public/filter_bar/filter_item/filter_items.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1774,7 +1858,9 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": ["{ query: string | { [key: string]: any; }; language: string; }"],
+            "signature": [
+              "{ query: string | { [key: string]: any; }; language: string; }"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1786,7 +1872,9 @@
             "tags": [],
             "label": "disableAutoFocus",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1798,7 +1886,9 @@
             "tags": [],
             "label": "screenTitle",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1810,7 +1900,9 @@
             "tags": [],
             "label": "prepend",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1843,7 +1935,9 @@
             "tags": [],
             "label": "bubbleSubmitEvent",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1855,7 +1949,9 @@
             "tags": [],
             "label": "placeholder",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1867,7 +1963,9 @@
             "tags": [],
             "label": "disableLanguageSwitcher",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1893,7 +1991,9 @@
             "tags": [],
             "label": "onBlur",
             "description": [],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1953,7 +2053,9 @@
             "tags": [],
             "label": "onChangeQueryInputFocus",
             "description": [],
-            "signature": ["((isFocused: boolean) => void) | undefined"],
+            "signature": [
+              "((isFocused: boolean) => void) | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1965,7 +2067,9 @@
                 "tags": [],
                 "label": "isFocused",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2027,7 +2131,9 @@
             "tags": [],
             "label": "submitOnBlur",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2039,7 +2145,9 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2051,7 +2159,10 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": ["SuggestionsListSize", " | undefined"],
+            "signature": [
+              "SuggestionsListSize",
+              " | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2063,7 +2174,10 @@
             "tags": [],
             "label": "suggestionsAbstraction",
             "description": [],
-            "signature": ["SuggestionsAbstraction", " | undefined"],
+            "signature": [
+              "SuggestionsAbstraction",
+              " | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2075,7 +2189,9 @@
             "tags": [],
             "label": "className",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2087,7 +2203,9 @@
             "tags": [],
             "label": "isInvalid",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2099,7 +2217,9 @@
             "tags": [],
             "label": "isClearable",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2111,7 +2231,10 @@
             "tags": [],
             "label": "iconType",
             "description": [],
-            "signature": ["IconType", " | undefined"],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2123,7 +2246,9 @@
             "tags": [],
             "label": "isDisabled",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2146,7 +2271,9 @@
             "tags": [],
             "label": "deps",
             "description": [],
-            "signature": ["QueryStringInputDependencies"],
+            "signature": [
+              "QueryStringInputDependencies"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2158,7 +2285,9 @@
             "tags": [],
             "label": "nonKqlMode",
             "description": [],
-            "signature": ["\"text\" | \"lucene\" | undefined"],
+            "signature": [
+              "\"text\" | \"lucene\" | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2170,7 +2299,9 @@
             "tags": [],
             "label": "autoSubmit",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2182,7 +2313,9 @@
             "tags": [],
             "label": "storageKey",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2196,7 +2329,9 @@
             "description": [
               "\nOverride whether autocomplete suggestions are restricted by time range."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2207,7 +2342,9 @@
             "type": "Array",
             "tags": [],
             "label": "filtersForSuggestions",
-            "description": ["\nAdd additional filters used for suggestions"],
+            "description": [
+              "\nAdd additional filters used for suggestions"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -2235,7 +2372,9 @@
         "tags": [],
         "label": "ACTION_GLOBAL_APPLY_FILTER",
         "description": [],
-        "signature": ["\"ACTION_GLOBAL_APPLY_FILTER\""],
+        "signature": [
+          "\"ACTION_GLOBAL_APPLY_FILTER\""
+        ],
         "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2268,7 +2407,11 @@
         "tags": [],
         "label": "SearchBarProps",
         "description": [],
-        "signature": ["SearchBarOwnProps", "<QT> & ", "SearchBarInjectedDeps"],
+        "signature": [
+          "SearchBarOwnProps",
+          "<QT> & ",
+          "SearchBarInjectedDeps"
+        ],
         "path": "src/plugins/unified_search/public/search_bar/search_bar.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -2308,7 +2451,9 @@
         "tags": [],
         "label": "UPDATE_FILTER_REFERENCES_ACTION",
         "description": [],
-        "signature": ["\"UPDATE_FILTER_REFERENCES_ACTION\""],
+        "signature": [
+          "\"UPDATE_FILTER_REFERENCES_ACTION\""
+        ],
         "path": "src/plugins/unified_search/public/actions/update_filter_references_action.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2321,7 +2466,9 @@
         "tags": [],
         "label": "UPDATE_FILTER_REFERENCES_TRIGGER",
         "description": [],
-        "signature": ["\"UPDATE_FILTER_REFERENCES_TRIGGER\""],
+        "signature": [
+          "\"UPDATE_FILTER_REFERENCES_TRIGGER\""
+        ],
         "path": "src/plugins/unified_search/public/triggers/update_filter_references_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2335,7 +2482,9 @@
       "type": "Interface",
       "tags": [],
       "label": "UnifiedSearchPublicPluginStart",
-      "description": ["\nUnified search plugin public Start contract"],
+      "description": [
+        "\nUnified search plugin public Start contract"
+      ],
       "path": "src/plugins/unified_search/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -2346,7 +2495,9 @@
           "type": "Object",
           "tags": [],
           "label": "autocomplete",
-          "description": ["\nautocomplete service\n{@link AutocompleteStart}"],
+          "description": [
+            "\nautocomplete service\n{@link AutocompleteStart}"
+          ],
           "signature": [
             "{ getQuerySuggestions: ",
             {
@@ -2370,8 +2521,12 @@
           "type": "Object",
           "tags": [],
           "label": "ui",
-          "description": ["\nprewired UI components\n{@link UnifiedSearchPublicPluginStartUi}"],
-          "signature": ["UnifiedSearchPublicPluginStartUi"],
+          "description": [
+            "\nprewired UI components\n{@link UnifiedSearchPublicPluginStartUi}"
+          ],
+          "signature": [
+            "UnifiedSearchPublicPluginStartUi"
+          ],
           "path": "src/plugins/unified_search/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -2464,7 +2619,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/unified_search/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2623,7 +2780,9 @@
                 "tags": [],
                 "label": "{}",
                 "description": [],
-                "signature": ["UnifiedSearchServerPluginSetupDependencies"],
+                "signature": [
+                  "UnifiedSearchServerPluginSetupDependencies"
+                ],
                 "path": "src/plugins/unified_search/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2684,7 +2843,9 @@
                 "tags": [],
                 "label": "{}",
                 "description": [],
-                "signature": ["UnifiedSearchServerPluginStartDependencies"],
+                "signature": [
+                  "UnifiedSearchServerPluginStartDependencies"
+                ],
                 "path": "src/plugins/unified_search/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2700,7 +2861,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/unified_search/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,

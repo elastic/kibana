@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { memo, useMemo } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogColumn, LogMessagePart } from '../../../../common/log_entry';
 import {
   isConstantSegment,
@@ -18,10 +18,10 @@ import {
 import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
 import {
-  WrapMode,
   longWrappedContentStyle,
   preWrappedContentStyle,
   unwrappedContentStyle,
+  WrapMode,
 } from './text_styles';
 
 export interface LogEntryMessageColumnProps {
@@ -65,8 +65,8 @@ const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnConte
     props.wrapMode === 'long'
       ? longWrappedContentStyle
       : props.wrapMode === 'pre-wrapped'
-        ? preWrappedContentStyle
-        : unwrappedContentStyle};
+      ? preWrappedContentStyle
+      : unwrappedContentStyle};
 `;
 
 const formatMessageSegments = (

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
-import { COPY_TO_CLIPBOARD, SUCCESS_TOAST_TITLE } from './translations';
 import { HoverActionComponentProps } from './types';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { COPY_TO_CLIPBOARD, SUCCESS_TOAST_TITLE } from './translations';
+import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
 
 export const FIELD = i18n.translate('xpack.timelines.hoverActions.fieldLabel', {
   defaultMessage: 'Field',

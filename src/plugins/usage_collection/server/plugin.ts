@@ -7,18 +7,18 @@
  */
 
 import type {
+  PluginInitializerContext,
+  Logger,
   CoreSetup,
   CoreStart,
-  ElasticsearchClient,
   ISavedObjectsRepository,
-  Logger,
   Plugin,
-  PluginInitializerContext,
+  ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { ConfigType } from './config';
 import { CollectorSet } from './collector';
 import type { Collector, CollectorOptions, UsageCollectorOptions } from './collector';
-import type { ConfigType } from './config';
 import { setupRoutes } from './routes';
 
 import { UsageCountersService } from './usage_counters';

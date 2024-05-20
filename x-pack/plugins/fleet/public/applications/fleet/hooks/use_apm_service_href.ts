@@ -1,4 +1,3 @@
-import useAsync from 'react-use/lib/useAsync';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import useAsync from 'react-use/lib/useAsync';
  * 2.0.
  */
 import type { Overwrite } from 'utility-types';
+import useAsync from 'react-use/lib/useAsync';
 
 import { useLocator } from '../../../hooks/use_locator';
-import { LOCATORS_IDS } from '../constants';
 import type { DataStream } from '../types';
+import { LOCATORS_IDS } from '../constants';
 
 type APMDataStream = Overwrite<DataStream, { package: 'apm' }>;
 

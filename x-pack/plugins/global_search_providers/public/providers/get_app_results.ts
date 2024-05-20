@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AppCategory, PublicAppDeepLinkInfo, PublicAppInfo } from '@kbn/core/public';
-import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
 import levenshtein from 'js-levenshtein';
+import { PublicAppInfo, PublicAppDeepLinkInfo, AppCategory } from '@kbn/core/public';
+import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/public';
 
 /** Type used internally to represent an application unrolled into its separate deepLinks */
 export interface AppLink {
@@ -34,16 +34,16 @@ export const getAppResults = (
         term.length > 0
           ? flattenDeepLinks(app)
           : app.visibleIn.includes('globalSearch')
-            ? [
-                {
-                  id: app.id,
-                  app,
-                  path: app.appRoute,
-                  subLinkTitles: [],
-                  keywords: app.keywords ?? [],
-                },
-              ]
-            : []
+          ? [
+              {
+                id: app.id,
+                app,
+                path: app.appRoute,
+                subLinkTitles: [],
+                keywords: app.keywords ?? [],
+              },
+            ]
+          : []
       )
       .map((appLink) => ({
         appLink,

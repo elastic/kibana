@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiCallOut, EuiCode, EuiCodeBlock, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiCode, EuiLink, EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

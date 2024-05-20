@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { ColorMode, ColorSchemas } from '@kbn/charts-plugin/public';
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
-import { getGaugeOptions } from '../editor/components';
-import { toExpressionAst } from '../to_ast';
 import { Alignment, GaugeType, GaugeTypeProps } from '../types';
+import { toExpressionAst } from '../to_ast';
+import { getGaugeOptions } from '../editor/components';
 import { GaugeVisParams } from '../types';
 import { SplitTooltip } from './split_tooltip';
 

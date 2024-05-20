@@ -6,15 +6,15 @@
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { UptimeRefreshContext } from '../../../contexts';
-import { useUrlParams } from '../../../hooks';
-import { useMappingCheck } from '../../../hooks/use_mapping_check';
-import { useOverviewFilterCheck } from '../../../hooks/use_overview_filter_check';
+import { useSelector, useDispatch } from 'react-redux';
 import { getMonitorList } from '../../../state/actions';
-import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/alerts/alerts';
 import { esKuerySelector, monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
+import { useUrlParams } from '../../../hooks';
+import { UptimeRefreshContext } from '../../../contexts';
+import { getConnectorsAction, getMonitorAlertsAction } from '../../../state/alerts/alerts';
+import { useMappingCheck } from '../../../hooks/use_mapping_check';
+import { useOverviewFilterCheck } from '../../../hooks/use_overview_filter_check';
 
 export interface MonitorListProps {
   filters?: string;

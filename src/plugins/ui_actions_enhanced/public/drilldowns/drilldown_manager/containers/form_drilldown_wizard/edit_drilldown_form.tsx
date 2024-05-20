@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { DrilldownForm } from '../../components/drilldown_form';
-import { TriggerPickerProps } from '../../components/trigger_picker';
-import { DrilldownState } from '../../state';
 import { useDrilldownManager } from '../context';
+import { DrilldownForm } from '../../components/drilldown_form';
+import { DrilldownState } from '../../state';
+import { TriggerPickerProps } from '../../components/trigger_picker';
 
 export const txtDeleteDrilldownButtonLabel = i18n.translate(
   'uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.deleteDrilldownButtonLabel',

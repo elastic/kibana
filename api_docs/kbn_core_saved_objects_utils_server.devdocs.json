@@ -38,7 +38,9 @@
             "description": [
               "\nConverts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with\nthe exception of the `undefined` namespace ID (which has a namespace string of `'default'`).\n"
             ],
-            "signature": ["(namespace?: string | undefined) => string"],
+            "signature": [
+              "(namespace?: string | undefined) => string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -52,7 +54,9 @@
                 "description": [
                   "The namespace ID, which must be either a non-empty string or `undefined`."
                 ],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -70,7 +74,9 @@
             "description": [
               "\nConverts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with\nthe exception of the `'default'` namespace string (which has a namespace ID of `undefined`).\n"
             ],
-            "signature": ["(namespace: string) => string | undefined"],
+            "signature": [
+              "(namespace: string) => string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -81,8 +87,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": ["The namespace string, which must be non-empty."],
-                "signature": ["string"],
+                "description": [
+                  "The namespace string, which must be non-empty."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -97,7 +107,9 @@
             "type": "Function",
             "tags": [],
             "label": "createEmptyFindResponse",
-            "description": ["\nCreates an empty response for a find operation."],
+            "description": [
+              "\nCreates an empty response for a find operation."
+            ],
             "signature": [
               "<T, A>({ page, perPage, }: ",
               {
@@ -151,8 +163,12 @@
             "type": "Function",
             "tags": [],
             "label": "generateId",
-            "description": ["\nGenerates a random ID for a saved objects."],
-            "signature": ["() => string"],
+            "description": [
+              "\nGenerates a random ID for a saved objects."
+            ],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -163,10 +179,16 @@
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
             "id": "def-common.SavedObjectsUtils.isRandomId",
             "type": "Function",
-            "tags": ["todo"],
+            "tags": [
+              "todo"
+            ],
             "label": "isRandomId",
-            "description": ["\nValidates that a saved object ID has been randomly generated.\n"],
-            "signature": ["(id: string | undefined) => boolean"],
+            "description": [
+              "\nValidates that a saved object ID has been randomly generated.\n"
+            ],
+            "signature": [
+              "(id: string | undefined) => boolean"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -177,8 +199,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["The ID of a saved object."],
-                "signature": ["string | undefined"],
+                "description": [
+                  "The ID of a saved object."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -196,7 +222,9 @@
             "description": [
               "\nUses a single-namespace object's \"legacy ID\" to determine what its new ID will be after it is converted to a multi-namespace type.\n"
             ],
-            "signature": ["(namespace: string | undefined, type: string, id: string) => string"],
+            "signature": [
+              "(namespace: string | undefined, type: string, id: string) => string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -207,8 +235,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "namespace",
-                "description": ["The namespace of the saved object before it is converted."],
-                "signature": ["string | undefined"],
+                "description": [
+                  "The namespace of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -220,8 +252,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "type",
-                "description": ["The type of the saved object before it is converted."],
-                "signature": ["string"],
+                "description": [
+                  "The type of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -233,15 +269,21 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["The ID of the saved object before it is converted."],
-                "signature": ["string"],
+                "description": [
+                  "The ID of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["The ID of the saved object after it is converted."]
+            "returnComment": [
+              "The ID of the saved object after it is converted."
+            ]
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-utils-server",
@@ -249,7 +291,9 @@
             "type": "Function",
             "tags": [],
             "label": "getMigrationFunction",
-            "description": ["\nGets the transform function from a migration object."],
+            "description": [
+              "\nGets the transform function from a migration object."
+            ],
             "signature": [
               "<InputAttributes, MigratedAttributes>(migration: ",
               {
@@ -279,7 +323,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "migration",
-                "description": ["Migration object or a migration function."],
+                "description": [
+                  "Migration object or a migration function."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
@@ -296,7 +342,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["A migration function."]
+            "returnComment": [
+              "A migration function."
+            ]
           }
         ],
         "initialIsOpen": false
@@ -312,7 +360,9 @@
         "description": [
           "\nDetermines if a given map of arrays is equal to another given map of arrays.\nUsed for comparing namespace maps in saved object repo/security extension tests.\n"
         ],
-        "signature": ["(mapA: Map<T, T[] | undefined>, mapB: Map<T, T[] | undefined>) => boolean"],
+        "signature": [
+          "(mapA: Map<T, T[] | undefined>, mapB: Map<T, T[] | undefined>) => boolean"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -323,8 +373,12 @@
             "type": "Object",
             "tags": [],
             "label": "mapA",
-            "description": ["The first map to compare"],
-            "signature": ["Map<T, T[] | undefined>"],
+            "description": [
+              "The first map to compare"
+            ],
+            "signature": [
+              "Map<T, T[] | undefined>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -336,15 +390,21 @@
             "type": "Object",
             "tags": [],
             "label": "mapB",
-            "description": ["The second map to compare"],
-            "signature": ["Map<T, T[] | undefined>"],
+            "description": [
+              "The second map to compare"
+            ],
+            "signature": [
+              "Map<T, T[] | undefined>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["True if map A is equal to map B"],
+        "returnComment": [
+          "True if map A is equal to map B"
+        ],
         "initialIsOpen": false
       },
       {
@@ -392,7 +452,9 @@
             "type": "Object",
             "tags": [],
             "label": "map1",
-            "description": ["- The first map to merge"],
+            "description": [
+              "- The first map to merge"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -413,7 +475,9 @@
             "type": "Object",
             "tags": [],
             "label": "map2",
-            "description": ["- The second map to merge"],
+            "description": [
+              "- The second map to merge"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -429,7 +493,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["The merged map {@link SavedObjectMigrationMap }"],
+        "returnComment": [
+          "The merged map {@link SavedObjectMigrationMap }"
+        ],
         "initialIsOpen": false
       },
       {
@@ -486,7 +552,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "outer",
-            "description": ["Wrapping migration."],
+            "description": [
+              "Wrapping migration."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -508,7 +576,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "inner",
-            "description": ["Wrapped migration."],
+            "description": [
+              "Wrapped migration."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -530,7 +600,9 @@
             "type": "Array",
             "tags": [],
             "label": "rest",
-            "description": ["Additional wrapped migrations to compose."],
+            "description": [
+              "Additional wrapped migrations to compose."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -574,8 +646,12 @@
             "type": "Object",
             "tags": [],
             "label": "mapA",
-            "description": ["The first map to compare"],
-            "signature": ["Map<T, Set<T>> | undefined"],
+            "description": [
+              "The first map to compare"
+            ],
+            "signature": [
+              "Map<T, Set<T>> | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -587,15 +663,21 @@
             "type": "Object",
             "tags": [],
             "label": "mapB",
-            "description": ["The second map to compare"],
-            "signature": ["Map<T, Set<T>> | undefined"],
+            "description": [
+              "The second map to compare"
+            ],
+            "signature": [
+              "Map<T, Set<T>> | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": ["True if map A is equal to map B"],
+        "returnComment": [
+          "True if map A is equal to map B"
+        ],
         "initialIsOpen": false
       },
       {
@@ -607,7 +689,9 @@
         "description": [
           "\nDetermines if a given Set is equal to another given Set. Set types must be the same, and comparable.\n"
         ],
-        "signature": ["(setA: Set<T>, setB: Set<T>) => boolean"],
+        "signature": [
+          "(setA: Set<T>, setB: Set<T>) => boolean"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -618,8 +702,12 @@
             "type": "Object",
             "tags": [],
             "label": "setA",
-            "description": ["The first Set to compare"],
-            "signature": ["Set<T>"],
+            "description": [
+              "The first Set to compare"
+            ],
+            "signature": [
+              "Set<T>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -631,15 +719,21 @@
             "type": "Object",
             "tags": [],
             "label": "setB",
-            "description": ["The second Set to compare"],
-            "signature": ["Set<T>"],
+            "description": [
+              "The second Set to compare"
+            ],
+            "signature": [
+              "Set<T>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["True if Set A is equal to Set B"],
+        "returnComment": [
+          "True if Set A is equal to Set B"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -653,7 +747,9 @@
         "tags": [],
         "label": "ALL_NAMESPACES_STRING",
         "description": [],
-        "signature": ["\"*\""],
+        "signature": [
+          "\"*\""
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -666,7 +762,9 @@
         "tags": [],
         "label": "DEFAULT_NAMESPACE_STRING",
         "description": [],
-        "signature": ["\"default\""],
+        "signature": [
+          "\"default\""
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -679,7 +777,9 @@
         "tags": [],
         "label": "FIND_DEFAULT_PAGE",
         "description": [],
-        "signature": ["1"],
+        "signature": [
+          "1"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -692,7 +792,9 @@
         "tags": [],
         "label": "FIND_DEFAULT_PER_PAGE",
         "description": [],
-        "signature": ["20"],
+        "signature": [
+          "20"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
         "deprecated": false,
         "trackAdoption": false,

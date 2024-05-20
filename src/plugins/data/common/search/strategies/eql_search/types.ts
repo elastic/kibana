@@ -1,6 +1,3 @@
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { EqlSearchRequest as EqlSearchRequestWithBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,7 +5,10 @@ import type { EqlSearchRequest as EqlSearchRequestWithBody } from '@elastic/elas
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
+import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { EqlSearchRequest as EqlSearchRequestWithBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
 export const EQL_SEARCH_STRATEGY = 'eql';
 

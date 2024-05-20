@@ -7,6 +7,8 @@
     "id": "fieldFormats",
     "server": true,
     "browser": true,
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { MapTypes } from '../../../../../../common/mobile/constants';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLayerList } from './map_layers/get_layer_list';
+import { MapTypes } from '../../../../../../common/mobile/constants';
 
 function EmbeddedMapComponent({
   selectedMap,

@@ -8,8 +8,8 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
-import { RollupInterval } from '../../../common/rollup';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { RollupInterval } from '../../../common/rollup';
 
 export interface ServiceTransactionTypesResponse {
   transactionTypes: string[];

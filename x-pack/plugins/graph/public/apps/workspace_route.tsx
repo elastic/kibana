@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo, useRef, useState } from 'react';
 import { Provider } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { GraphServices } from '../application';
-import { WorkspaceLayout } from '../components/workspace_layout';
-import { useGraphLoader } from '../helpers/use_graph_loader';
-import { useWorkspaceLoader } from '../helpers/use_workspace_loader';
-import { createCachedIndexPatternProvider } from '../services/index_pattern_cache';
-import { createWorkspace } from '../services/workspace/graph_client_workspace';
-import { createGraphStore } from '../state_management';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Workspace } from '../types';
+import { createGraphStore } from '../state_management';
+import { createWorkspace } from '../services/workspace/graph_client_workspace';
+import { WorkspaceLayout } from '../components/workspace_layout';
+import { GraphServices } from '../application';
+import { useWorkspaceLoader } from '../helpers/use_workspace_loader';
+import { useGraphLoader } from '../helpers/use_graph_loader';
+import { createCachedIndexPatternProvider } from '../services/index_pattern_cache';
 
 export interface WorkspaceRouteProps {
   deps: GraphServices;

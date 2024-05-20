@@ -8,12 +8,12 @@
 
 import { importFileMock, resolveImportErrorsMock } from './flyout.test.mocks';
 
-import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
-import { ShallowWrapper } from 'enzyme';
 import React from 'react';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
+import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
+import { ShallowWrapper } from 'enzyme';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const mockFile = {
   name: 'foo.ndjson',

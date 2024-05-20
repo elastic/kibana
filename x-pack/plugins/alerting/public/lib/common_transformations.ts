@@ -6,11 +6,11 @@
  */
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import {
-  Rule,
-  RuleAction,
   RuleExecutionStatus,
-  RuleLastRun,
   RuleMonitoring,
+  Rule,
+  RuleLastRun,
+  RuleAction,
   RuleType,
 } from '../../common';
 

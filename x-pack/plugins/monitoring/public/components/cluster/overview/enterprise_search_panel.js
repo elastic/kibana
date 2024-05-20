@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { get } from 'lodash';
 import React from 'react';
+import { get } from 'lodash';
 import { formatNumber } from '../../../lib/format_number';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import {
   BytesPercentageUsage,
   ClusterItemContainer,
   DisabledIfNoDataAndInSetupModeLink,
 } from './helpers';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiTitle,
+  EuiPanel,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+} from '@elastic/eui';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export function EnterpriseSearchPanel(props) {
   const { setupMode } = props;

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiCard, EuiImage, EuiScreenReaderOnly, EuiTextColor } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
 import { useKibana } from '../../../context';
-import { NO_DATA_RECOMMENDED, NoDataPageActions } from '../no_data_page';
+import { NoDataPageActions, NO_DATA_RECOMMENDED } from '../no_data_page';
 
 export type ElasticAgentCardProps = NoDataPageActions & {
   solution: string;

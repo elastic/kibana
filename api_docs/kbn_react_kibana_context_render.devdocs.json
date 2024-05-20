@@ -80,7 +80,9 @@
         "type": "Type",
         "tags": [],
         "label": "KibanaRenderContextProviderProps",
-        "description": ["Props for the KibanaContextProvider"],
+        "description": [
+          "Props for the KibanaContextProvider"
+        ],
         "signature": [
           "{ i18n: ",
           {

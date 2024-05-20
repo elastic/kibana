@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Metricset } from '../apm/metricset';
 import { AgentConfigFields } from './agent_config_fields';
+import { Metricset } from '../apm/metricset';
 
 export class AgentConfig extends Metricset<AgentConfigFields> {
   constructor() {

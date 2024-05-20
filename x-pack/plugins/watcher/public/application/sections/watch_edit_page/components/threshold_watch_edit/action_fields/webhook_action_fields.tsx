@@ -11,17 +11,17 @@ import {
   EuiFieldNumber,
   EuiFieldPassword,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { CodeEditor } from '@kbn/code-editor';
 
-import { WebhookAction } from '../../../../../../../common/types/action_types';
 import { ErrableFormRow } from '../../../../../components/form_errors';
+import { WebhookAction } from '../../../../../../../common/types/action_types';
 
 interface Props {
   action: WebhookAction;

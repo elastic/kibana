@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { FC } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
 
 export interface AssignFlyoutFooterProps {
   isSaving: boolean;

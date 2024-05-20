@@ -22,8 +22,8 @@ export type {
   SampleObject,
   ScopedTutorialContextFactory,
 } from './services';
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema, configSchema } from '../config';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {

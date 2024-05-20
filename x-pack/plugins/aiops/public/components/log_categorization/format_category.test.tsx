@@ -6,8 +6,8 @@
  */
 
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
-import { renderHook } from '@testing-library/react-hooks';
 import { useCreateFormattedExample } from './format_category';
+import { renderHook } from '@testing-library/react-hooks';
 
 jest.mock('../../hooks/use_eui_theme', () => ({
   useIsDarkTheme: () => false,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { has } from 'lodash';
 import {
-  ESBasicMetricAggRT,
-  ESDerivativeAggRT,
-  ESSumBucketAggRT,
-  ESTermsWithAggregationRT,
   MetricsUIAggregation,
   MetricsUIAggregationRT,
+  ESSumBucketAggRT,
+  ESTermsWithAggregationRT,
+  ESDerivativeAggRT,
+  ESBasicMetricAggRT,
 } from '@kbn/metrics-data-access-plugin/common';
-import { has } from 'lodash';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
 export const isMetricRate = (metric: MetricsUIAggregation | undefined): boolean => {

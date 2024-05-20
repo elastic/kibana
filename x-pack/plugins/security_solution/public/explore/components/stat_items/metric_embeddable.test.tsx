@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { MetricEmbeddableProps } from './metric_embeddable';
+import { MetricEmbeddable } from './metric_embeddable';
 import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import React from 'react';
-import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 import { TestProviders } from '../../../common/mock';
-import type { MetricEmbeddableProps } from './metric_embeddable';
-import { MetricEmbeddable } from './metric_embeddable';
+import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 
 jest.mock('../../../common/components/visualization_actions/actions');
 

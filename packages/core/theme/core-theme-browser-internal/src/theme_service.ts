@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
-import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
-import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
-import { _setDarkMode } from '@kbn/ui-theme';
 import { of } from 'rxjs';
-import { browsersSupportsSystemTheme, systemThemeIsDark } from './system_theme';
+import { _setDarkMode } from '@kbn/ui-theme';
+import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import { systemThemeIsDark, browsersSupportsSystemTheme } from './system_theme';
 import { createStyleSheet } from './utils';
 
 /** @internal */

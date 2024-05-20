@@ -7,9 +7,9 @@
 
 import { IClusterClient } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { MonitoringConfig } from '../../config';
 import { getSettingsCollector } from './get_settings_collector';
 import { getMonitoringUsageCollector } from './get_usage_collector';
+import { MonitoringConfig } from '../../config';
 
 export type { KibanaSettingsCollector } from './get_settings_collector';
 export { getKibanaSettings } from './get_settings_collector';

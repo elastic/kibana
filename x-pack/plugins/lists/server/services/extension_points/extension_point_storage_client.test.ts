@@ -7,12 +7,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { getCreateExceptionListItemOptionsMock } from '../exception_lists/exception_list_client.mock';
 import { CreateExceptionListItemOptions } from '../exception_lists/exception_list_client_types';
+import { getCreateExceptionListItemOptionsMock } from '../exception_lists/exception_list_client.mock';
 import { DataValidationError } from '../exception_lists/utils/errors';
 
 import { ExtensionPointError } from './errors';
-import { createExtensionPointStorageMock } from './extension_point_storage.mock';
 import {
   ExceptionsListPreCreateItemServerExtension,
   ExceptionsListPreUpdateItemServerExtension,
@@ -21,6 +20,7 @@ import {
   ExtensionPointStorageInterface,
   ServerExtensionCallbackContext,
 } from './types';
+import { createExtensionPointStorageMock } from './extension_point_storage.mock';
 
 describe('When using the ExtensionPointStorageClient', () => {
   let storageClient: ExtensionPointStorageClientInterface;
@@ -47,7 +47,7 @@ describe('When using the ExtensionPointStorageClient', () => {
     // flowing to the next.
     const callbackFn = async <
       T extends ExtensionPoint = ExtensionPoint,
-      A extends Parameters<T['callback']>[0] = Parameters<T['callback']>[0],
+      A extends Parameters<T['callback']>[0] = Parameters<T['callback']>[0]
     >(
       id: number,
       { data }: A

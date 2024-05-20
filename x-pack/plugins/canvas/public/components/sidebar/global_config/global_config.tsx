@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTabbedContent, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Fragment, FC } from 'react';
-import { FilterConfig } from './filter_config';
+import { EuiTabbedContent, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { GeneralConfig } from './general_config';
+import { FilterConfig } from './filter_config';
 
 const strings = {
   getTitle: () =>

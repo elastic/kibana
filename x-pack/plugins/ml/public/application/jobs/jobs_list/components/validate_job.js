@@ -9,9 +9,9 @@ import { getNewJobLimits } from '../../../services/ml_server_info';
 import { populateValidationMessages } from '../../new_job/common/job_validator/util';
 
 import {
+  validateModelMemoryLimit as validateModelMemoryLimitUtils,
   validateGroupNames as validateGroupNamesUtils,
   validateModelMemoryLimitUnits as validateModelMemoryLimitUnitsUtils,
-  validateModelMemoryLimit as validateModelMemoryLimitUtils,
 } from '../../../../../common/util/job_utils';
 
 export function validateModelMemoryLimit(mml) {

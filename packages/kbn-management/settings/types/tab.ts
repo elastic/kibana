@@ -7,8 +7,8 @@
  */
 
 import { RegistryEntry } from '@kbn/management-settings-section-registry';
-import { FieldDefinition } from '.';
 import { CategoryCounts } from './category';
+import { FieldDefinition } from '.';
 
 export interface SettingsTabs {
   [id: string]: {

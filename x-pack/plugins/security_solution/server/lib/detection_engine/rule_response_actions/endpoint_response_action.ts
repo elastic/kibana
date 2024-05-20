@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { each } from 'lodash';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { stringify } from '../../../endpoint/utils/stringify';
 import type {
-  ProcessesParams,
   RuleResponseEndpointAction,
+  ProcessesParams,
 } from '../../../../common/api/detection_engine';
 import type { KillOrSuspendProcessRequestBody } from '../../../../common/endpoint/types';
-import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { stringify } from '../../../endpoint/utils/stringify';
-import type { AlertsAction, ResponseActionAlerts } from './types';
 import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
+import type { AlertsAction, ResponseActionAlerts } from './types';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 
 export const endpointResponseAction = async (
   responseAction: RuleResponseEndpointAction,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CoreScopedHistory } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { encode } from '@kbn/rison';
-import { Router } from '@kbn/shared-ux-router';
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import React, { PropsWithChildren } from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { encode } from '@kbn/rison';
+import { coreMock } from '@kbn/core/public/mocks';
+import { CoreScopedHistory } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { LinkDescriptor, useLinkProps } from './use_link_props';
 
 const PREFIX = '/test-basepath/s/test-space/app/';

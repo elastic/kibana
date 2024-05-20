@@ -11,8 +11,8 @@ import { Boost, BoostType } from './types';
 import {
   filterIfTerm,
   normalizeBoostValues,
-  parseBoostCenter,
   removeBoostStateProps,
+  parseBoostCenter,
   removeEmptyValueBoosts,
 } from './utils';
 

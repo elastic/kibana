@@ -7,17 +7,17 @@
  */
 
 import Path from 'path';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Root } from '@kbn/core-root-server-internal';
+import del from 'del';
+import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
-  type TestElasticsearchUtils,
   createTestServers,
   createRoot as createkbnTestServerRoot,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
-import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
-import del from 'del';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Root } from '@kbn/core-root-server-internal';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_kibana_nodes';
 

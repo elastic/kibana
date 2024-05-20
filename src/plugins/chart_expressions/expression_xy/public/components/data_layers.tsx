@@ -13,11 +13,11 @@ import {
   LabelOverflowConstraint,
   LineSeries,
 } from '@elastic/charts';
+import React, { FC } from 'react';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import React, { FC } from 'react';
 import {
   CommonXYDataLayerConfig,
   EndValue,
@@ -25,15 +25,15 @@ import {
   ValueLabelMode,
   XScaleType,
 } from '../../common';
-import { AxisModes, SeriesTypes, ValueLabelModes } from '../../common/constants';
+import { SeriesTypes, ValueLabelModes, AxisModes } from '../../common/constants';
 import {
-  DatatablesWithFormatInfo,
-  GroupsConfiguration,
-  LayersAccessorsTitles,
-  LayersFieldFormats,
   getColorAssignments,
   getFitOptions,
+  GroupsConfiguration,
   getSeriesProps,
+  DatatablesWithFormatInfo,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
   hasMultipleLayersWithSplits,
 } from '../helpers';
 

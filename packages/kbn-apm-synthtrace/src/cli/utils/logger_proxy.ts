@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import util from 'util';
-import { isMainThread, parentPort, workerData } from 'worker_threads';
-import { LogLevel, Logger, createLogger } from '../../lib/utils/create_logger';
+import { parentPort, isMainThread, workerData } from 'worker_threads';
+import { createLogger, Logger, LogLevel } from '../../lib/utils/create_logger';
 import { logPerf } from '../../lib/utils/log_perf';
 import { WorkerData } from './synthtrace_worker';
 

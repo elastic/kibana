@@ -7,8 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { appContextService } from '../../..';
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
+import { appContextService } from '../../..';
 import { getPackageSavedObjects } from '../../packages/get';
 const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 

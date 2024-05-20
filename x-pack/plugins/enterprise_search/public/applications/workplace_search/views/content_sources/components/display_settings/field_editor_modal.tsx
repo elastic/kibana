@@ -24,11 +24,11 @@ import {
 } from '@elastic/eui';
 
 import {
-  ADD_LABEL,
   CANCEL_BUTTON,
   FIELD_LABEL,
   LABEL_LABEL,
   UPDATE_LABEL,
+  ADD_LABEL,
 } from '../../../../constants';
 
 import { DisplaySettingsLogic } from './display_settings_logic';

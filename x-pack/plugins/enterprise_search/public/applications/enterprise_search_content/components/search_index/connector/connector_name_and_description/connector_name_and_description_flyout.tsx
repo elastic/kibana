@@ -7,21 +7,21 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
-  EuiButton,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFormRow,
+  EuiText,
+  EuiSpacer,
+  EuiFlyoutFooter,
   EuiButtonEmpty,
+  EuiButton,
+  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

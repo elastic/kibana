@@ -7,9 +7,9 @@
  */
 
 import {
+  createTestServers,
   type TestElasticsearchUtils,
   type TestKibanaUtils,
-  createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
 import { unsafeConsole } from '@kbn/security-hardening';
 

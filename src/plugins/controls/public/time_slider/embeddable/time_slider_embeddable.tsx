@@ -10,7 +10,7 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { Subscription, debounceTime, first, map } from 'rxjs';
+import { debounceTime, first, map, Subscription } from 'rxjs';
 
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -32,12 +32,12 @@ import { timeSliderReducers } from '../time_slider_reducers';
 import { getIsAnchored, getRoundedTimeRangeBounds } from '../time_slider_selectors';
 import {
   FROM_INDEX,
-  TO_INDEX,
   getMomentTimezone,
   getStepSize,
   getTicks,
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
+  TO_INDEX,
 } from '../time_utils';
 import { TimeSliderReduxState } from '../types';
 

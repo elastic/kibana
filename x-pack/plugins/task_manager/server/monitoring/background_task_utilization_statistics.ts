@@ -7,22 +7,22 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { get, pick } from 'lodash';
-import { Observable, combineLatest, filter, map, startWith } from 'rxjs';
 import stats from 'stats-lite';
-import { DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW } from '../config';
+import { combineLatest, filter, map, Observable, startWith } from 'rxjs';
 import { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 import { mapOk, unwrap } from '../lib/result_type';
-import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { ConcreteTaskInstance } from '../task';
 import {
-  TaskRun,
-  TaskTiming,
   isTaskManagerWorkerUtilizationStatEvent,
   isTaskRunEvent,
+  TaskRun,
+  TaskTiming,
 } from '../task_events';
 import { MonitoredStat } from './monitoring_stats_stream';
+import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { createRunningAveragedStat } from './task_run_calcultors';
+import { DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW } from '../config';
 
 export interface PublicBackgroundTaskUtilizationStat extends JsonObject {
   load: number;
@@ -135,7 +135,7 @@ export function createBackgroundTaskUtilizationAggregator(
       ([adhoc, recurring, load]: [
         Pick<BackgroundTaskUtilizationStat, 'adhoc'>,
         Pick<BackgroundTaskUtilizationStat, 'recurring'>,
-        Pick<BackgroundTaskUtilizationStat, 'load'>,
+        Pick<BackgroundTaskUtilizationStat, 'load'>
       ]) => {
         return {
           key: 'utilization',

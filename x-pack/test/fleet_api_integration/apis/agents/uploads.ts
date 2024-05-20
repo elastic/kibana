@@ -12,8 +12,8 @@ import {
   FILE_STORAGE_METADATA_AGENT_INDEX,
 } from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from './services';
+import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

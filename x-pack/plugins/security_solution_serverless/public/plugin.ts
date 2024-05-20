@@ -7,23 +7,23 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import {
-  type ExperimentalFeatures,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
-import { createServices } from './common/services/create_services';
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
-import { startNavigation } from './navigation';
-import { getCloudUrl, getProjectFeaturesUrl } from './navigation/util';
-import { setOnboardingSettings } from './onboarding';
 import type {
   SecuritySolutionServerlessPluginSetup,
-  SecuritySolutionServerlessPluginSetupDeps,
   SecuritySolutionServerlessPluginStart,
+  SecuritySolutionServerlessPluginSetupDeps,
   SecuritySolutionServerlessPluginStartDeps,
   ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './upselling';
+import { createServices } from './common/services/create_services';
+import { startNavigation } from './navigation';
+import {
+  parseExperimentalConfigValue,
+  type ExperimentalFeatures,
+} from '../common/experimental_features';
+import { getCloudUrl, getProjectFeaturesUrl } from './navigation/util';
+import { setOnboardingSettings } from './onboarding';
 
 export class SecuritySolutionServerlessPlugin
   implements

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 
 import { docLinks } from '../../../../shared/doc_links';
 

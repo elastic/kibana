@@ -8,7 +8,7 @@
 
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getFormatByAccessor, getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 
 export const getFormat = (
   columns: DatatableColumn[],

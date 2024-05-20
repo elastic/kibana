@@ -6,12 +6,12 @@
  */
 
 import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { LoadUserAndRoleCyTaskOptions } from '../cypress';
 import {
   LoadedRoleAndUser,
   SecurityRoleAndUserLoader,
   YamlRoleDefinitions,
 } from '../../../../../shared/lib';
-import { LoadUserAndRoleCyTaskOptions } from '../cypress';
 
 interface AdditionalDefinitions {
   roleDefinitions?: YamlRoleDefinitions;

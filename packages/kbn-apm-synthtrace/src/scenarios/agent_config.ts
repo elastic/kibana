@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AgentConfigFields, observer } from '@kbn/apm-synthtrace-client';
+import { observer, AgentConfigFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 

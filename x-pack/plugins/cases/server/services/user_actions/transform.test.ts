@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import type { ConnectorUserAction } from '../../../common/types/domain';
-import { UserActionActions } from '../../../common/types/domain';
-import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
-import { createSOFindResponse } from '../test_utils';
-import {
-  createCaseUserAction,
-  createConnectorUserAction,
-  createExternalReferenceUserAction,
-  createPersistableStateUserAction,
-  createUserActionFindSO,
-  createUserActionSO,
-  pushConnectorUserAction,
-  testConnectorId,
-  updateConnectorUserAction,
-} from './test_utils';
 import {
   legacyTransformFindResponseToExternalModel,
   transformFindResponseToExternalModel,
 } from './transform';
+import { createSOFindResponse } from '../test_utils';
+import {
+  createUserActionFindSO,
+  createConnectorUserAction,
+  createUserActionSO,
+  updateConnectorUserAction,
+  pushConnectorUserAction,
+  createCaseUserAction,
+  createPersistableStateUserAction,
+  createExternalReferenceUserAction,
+  testConnectorId,
+} from './test_utils';
+import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
+import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
+import type { ConnectorUserAction } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 
 describe('transform', () => {
   const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
@@ -117,9 +117,8 @@ describe('transform', () => {
     [legacyTransformFindResponseToExternalModel.name, legacyTransformFindResponseToExternalModel],
   ])('%s', (functionName, transformer) => {
     it('does not populate the ids when the response is an empty array', () => {
-      expect(
-        transformer(createSOFindResponse([]), persistableStateAttachmentTypeRegistry)
-      ).toMatchInlineSnapshot(`
+      expect(transformer(createSOFindResponse([]), persistableStateAttachmentTypeRegistry))
+        .toMatchInlineSnapshot(`
         Object {
           "page": 1,
           "per_page": 0,

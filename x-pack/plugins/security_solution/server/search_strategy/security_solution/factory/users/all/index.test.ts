@@ -7,14 +7,14 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
-import { allUsers } from '.';
-import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
-import { mockDeps, mockOptions, mockSearchStrategyResponse } from './__mocks__';
 import * as buildQuery from './query.all_users.dsl';
+import { allUsers } from '.';
+import { mockDeps, mockOptions, mockSearchStrategyResponse } from './__mocks__';
+import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
 
 import { get } from 'lodash/fp';
-import type { UsersRequestOptions } from '../../../../../../common/api/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/search_strategy';
+import type { UsersRequestOptions } from '../../../../../../common/api/search_strategy';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };

@@ -8,15 +8,15 @@
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
-import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer, Query } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { SearchFilterConfig } from '@elastic/eui/src/components/search_bar/search_filters';
 import { SchemaType } from '@elastic/eui/src/components/search_bar/search_bar';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui/src/components/search_bar/search_bar';
-import { SearchFilterConfig } from '@elastic/eui/src/components/search_bar/search_filters';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { SnapshotDetails } from '../../../../../../common/types';
+import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer, Query } from '@elastic/eui';
 import { SnapshotDeleteProvider } from '../../../../components';
-import { SnapshotListParams, getListParams, getQueryFromListParams } from '../../../../lib';
+import { SnapshotDetails } from '../../../../../../common/types';
+import { getQueryFromListParams, SnapshotListParams, getListParams } from '../../../../lib';
 
 const SEARCH_DEBOUNCE_VALUE_MS = 200;
 

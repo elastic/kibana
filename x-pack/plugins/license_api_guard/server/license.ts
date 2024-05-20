@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
+  Logger,
   KibanaRequest,
   KibanaResponseFactory,
-  Logger,
   RequestHandler,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 
-import { ILicense, LicenseCheckState, LicenseType, LicensingPluginStart } from './shared_imports';
+import { ILicense, LicenseType, LicenseCheckState, LicensingPluginStart } from './shared_imports';
 
 type LicenseLogger = Pick<Logger, 'warn'>;
 type LicenseDependency = Pick<LicensingPluginStart, 'license$'>;

@@ -6,15 +6,15 @@
  */
 
 import { EuiFlyoutBody } from '@elastic/eui';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import React from 'react';
 import styled from 'styled-components';
+import React from 'react';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { EndpointIsolateSuccess } from '../../../../../common/components/endpoint/host_isolation';
+import { HostIsolationPanel } from '../../../../../detections/components/host_isolation';
 import type {
   BrowserFields,
   TimelineEventsDetailsItem,
 } from '../../../../../../common/search_strategy';
-import { EndpointIsolateSuccess } from '../../../../../common/components/endpoint/host_isolation';
-import { HostIsolationPanel } from '../../../../../detections/components/host_isolation';
 import type { HandleOnEventClosed } from '../expandable_event';
 import { ExpandableEvent } from '../expandable_event';
 

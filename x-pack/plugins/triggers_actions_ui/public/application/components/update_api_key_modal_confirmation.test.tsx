@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core/public';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import * as React from 'react';
-import { useKibana } from '../../common/lib/kibana';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { IToasts } from '@kbn/core/public';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { UpdateApiKeyModalConfirmation } from './update_api_key_modal_confirmation';
+import { useKibana } from '../../common/lib/kibana';
 
 const Providers = ({ children }: { children: any }) => (
   <IntlProvider locale="en">{children}</IntlProvider>

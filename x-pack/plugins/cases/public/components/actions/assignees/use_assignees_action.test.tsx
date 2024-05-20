@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useAssigneesAction } from './use_assignees_action';
 
 import * as api from '../../../containers/api';

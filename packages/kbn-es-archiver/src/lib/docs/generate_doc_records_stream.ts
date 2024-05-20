@@ -9,9 +9,9 @@
 import { Transform } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { ES_CLIENT_HEADERS } from '../../client_headers';
-import { Progress } from '../progress';
 import { Stats } from '../stats';
+import { Progress } from '../progress';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 const SCROLL_SIZE = 1000;
 const SCROLL_TIMEOUT = '1m';

@@ -1,4 +1,3 @@
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +5,7 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import { ProductLine, ProductTier } from './configs';
+import { render } from '@testing-library/react';
 import { OnboardingComponent } from './onboarding';
 import {
   AddIntegrationsSteps,
@@ -15,6 +14,7 @@ import {
   ViewAlertsSteps,
   ViewDashboardSteps,
 } from './types';
+import { ProductLine, ProductTier } from './configs';
 jest.mock('./toggle_panel');
 jest.mock('./hooks/use_project_features_url');
 jest.mock('./hooks/use_projects_url');

@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import React, { Reducer, useReducer } from 'react';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Reducer, useReducer } from 'react';
+import {
+  DropIdentifier,
+  DragDropIdentifier,
+  RegisteredDropTargets,
+  DragContextValue,
+  DragContextState,
+  CustomMiddleware,
+  DraggingIdentifier,
+} from './types';
 import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
 import { announce } from './announcements';
-import {
-  CustomMiddleware,
-  DragContextState,
-  DragContextValue,
-  DragDropIdentifier,
-  DraggingIdentifier,
-  DropIdentifier,
-  RegisteredDropTargets,
-} from './types';
 
 const defaultState = {
   dragging: undefined,

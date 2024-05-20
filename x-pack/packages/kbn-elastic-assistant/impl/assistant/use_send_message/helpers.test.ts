@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { OptionalRequestParams, getOptionalRequestParams } from './helpers';
+import { getOptionalRequestParams, OptionalRequestParams } from './helpers';
 
 describe('getOptionalRequestParams', () => {
   it('returns the correct optional request params', () => {

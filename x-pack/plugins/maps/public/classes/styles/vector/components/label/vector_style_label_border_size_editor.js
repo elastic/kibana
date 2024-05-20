@@ -8,9 +8,9 @@
 import React from 'react';
 
 import { EuiFormRow, EuiSelect, EuiToolTip } from '@elastic/eui';
+import { getVectorStyleLabel, getDisabledByMessage } from '../get_vector_style_label';
 import { i18n } from '@kbn/i18n';
 import { LABEL_BORDER_SIZES, VECTOR_STYLES } from '../../../../../../common/constants';
-import { getDisabledByMessage, getVectorStyleLabel } from '../get_vector_style_label';
 
 const options = [
   {

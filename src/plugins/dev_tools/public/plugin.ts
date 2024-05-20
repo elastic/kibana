@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { AppDeepLink, AppMountParameters, AppStatus, CoreSetup, Plugin } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
+import { Plugin, CoreSetup, AppMountParameters, AppDeepLink, AppStatus } from '@kbn/core/public';
 import { AppUpdater } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
 import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
+import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
-import { BreadcrumbService, DocTitleService } from './services';
+import { DocTitleService, BreadcrumbService } from './services';
 
 import './index.scss';
 

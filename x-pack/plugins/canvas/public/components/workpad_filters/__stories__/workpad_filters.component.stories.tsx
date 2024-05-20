@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
-import moment from 'moment';
+import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { Filter } from '../../../../types';
-import { FiltersGroup as FiltersGroupType } from '../types';
+import moment from 'moment';
 import { WorkpadFilters } from '../workpad_filters.component';
+import { FiltersGroup as FiltersGroupType } from '../types';
+import { Filter } from '../../../../types';
 
 const timeFormat = 'MM.dd.YYYY HH:mm';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { createReadStream, Stats } from 'fs';
 import { createHash } from 'crypto';
-import { Stats, createReadStream } from 'fs';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs';
 

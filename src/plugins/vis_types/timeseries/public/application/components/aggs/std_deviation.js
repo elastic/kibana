@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiComboBox,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiSpacer,
-  htmlIdGenerator,
-} from '@elastic/eui';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { AggSelect } from './agg_select';
+import { FieldSelect } from './field_select';
+import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
-import { AggRow } from './agg_row';
-import { AggSelect } from './agg_select';
-import { FieldSelect } from './field_select';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiComboBox,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 const RESTRICT_FIELDS = KBN_FIELD_TYPES.NUMBER;
 

@@ -14,9 +14,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
-import { DropOverlayWrapper, DropType, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import React, { useMemo } from 'react';
+import { DropOverlayWrapper, DropType, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
+import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
 const DROP_PROPS = {
   value: {

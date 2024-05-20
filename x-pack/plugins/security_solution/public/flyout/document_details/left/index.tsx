@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { useKibana } from '../../../common/lib/kibana';
-import { EventKind } from '../shared/constants/event_kinds';
+import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
-import { getField } from '../shared/utils';
-import { LeftPanelTour } from './components/tour';
-import { PanelContent } from './content';
-import { useLeftPanelContext } from './context';
+import { useKibana } from '../../../common/lib/kibana';
 import { PanelHeader } from './header';
+import { PanelContent } from './content';
 import type { LeftPanelTabType } from './tabs';
 import * as tabs from './tabs';
+import { getField } from '../shared/utils';
+import { EventKind } from '../shared/constants/event_kinds';
+import { useLeftPanelContext } from './context';
+import { LeftPanelTour } from './components/tour';
 
 export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response';
 export const LeftPanelVisualizeTab: LeftPanelPaths = 'visualize';

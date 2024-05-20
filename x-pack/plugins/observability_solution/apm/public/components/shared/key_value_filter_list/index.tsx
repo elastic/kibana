@@ -17,9 +17,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 
 interface KeyValue {
   key: string;

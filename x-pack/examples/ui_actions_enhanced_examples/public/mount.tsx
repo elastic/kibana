@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreSetup } from '@kbn/core/public';
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { UiActionsExampleAppContextValue, context } from './context';
+import { CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { StartDependencies, UiActionsEnhancedExamplesStart } from './plugin';
+import { UiActionsExampleAppContextValue, context } from './context';
 
 export const mount =
   (coreSetup: CoreSetup<StartDependencies, UiActionsEnhancedExamplesStart>) =>

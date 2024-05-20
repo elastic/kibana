@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
 import { useMemo } from 'react';
+import classNames from 'classnames';
 
 /**
  * Returns the css classnames that should be applied when the collapsible card is NOT expanded

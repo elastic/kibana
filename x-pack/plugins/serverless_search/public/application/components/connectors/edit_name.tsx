@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import React, { useEffect, useState } from 'react';
 import {
-  EuiButton,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiTitle,
   EuiButtonIcon,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
+  EuiButton,
   EuiFormLabel,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { Connector } from '@kbn/search-connectors';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
+import { Connector } from '@kbn/search-connectors';
 import { CANCEL_LABEL, CONNECTOR_LABEL, SAVE_LABEL } from '../../../../common/i18n_string';
-import { useConnector } from '../../hooks/api/use_connector';
 import { useKibanaServices } from '../../hooks/use_kibana';
+import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditNameProps {
   connector: Connector;

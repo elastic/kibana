@@ -13,9 +13,9 @@ import {
   RiskWeightTypes,
 } from '../../../../../common/entity_analytics/risk_engine';
 import {
+  serverMock,
   requestContextMock,
   requestMock,
-  serverMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreServiceFactory } from '../risk_score_service';

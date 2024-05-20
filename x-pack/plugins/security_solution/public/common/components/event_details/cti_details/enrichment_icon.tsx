@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
-import { isInvestigationTimeEnrichment } from './helpers';
 import * as i18n from './translations';
+import { isInvestigationTimeEnrichment } from './helpers';
 
 export const getTooltipTitle = (type: string | undefined) =>
   isInvestigationTimeEnrichment(type)

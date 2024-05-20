@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UPDATE_JOB_FAILURE, UPDATE_JOB_START, UPDATE_JOB_SUCCESS } from '../action_types';
+import { UPDATE_JOB_START, UPDATE_JOB_SUCCESS, UPDATE_JOB_FAILURE } from '../action_types';
 
 const initialState = {
   isUpdating: false,

@@ -6,9 +6,9 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
 import { forEach, keys, sortBy } from 'lodash';
 import { normalizedFieldTypes } from '../../lib/normalized_field_types';
+import { i18n } from '@kbn/i18n';
 
 function buildFieldList(fields) {
   const result = [];

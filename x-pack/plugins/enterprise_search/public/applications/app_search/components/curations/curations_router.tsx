@@ -7,17 +7,17 @@
 
 import React from 'react';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
-  ENGINE_CURATIONS_NEW_PATH,
   ENGINE_CURATIONS_PATH,
+  ENGINE_CURATIONS_NEW_PATH,
   ENGINE_CURATION_PATH,
   ENGINE_CURATION_SUGGESTION_PATH,
 } from '../../routes';
 
 import { Curation } from './curation';
-import { CurationCreation, CurationSuggestion, Curations } from './views';
+import { Curations, CurationCreation, CurationSuggestion } from './views';
 
 export const CurationsRouter: React.FC = () => {
   return (

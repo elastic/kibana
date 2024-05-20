@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { createHash } from 'crypto';
 import fs from 'fs';
-import path from 'path';
-import { Transform, pipeline } from 'stream';
 import { promisify } from 'util';
+import path from 'path';
+import { createHash } from 'crypto';
+import { pipeline, Transform } from 'stream';
 import { setTimeout } from 'timers/promises';
 
-import { ToolingLog } from '@kbn/tooling-log';
-import chalk from 'chalk';
 import fetch, { Headers } from 'node-fetch';
+import chalk from 'chalk';
+import { ToolingLog } from '@kbn/tooling-log';
 
+import { cache } from './utils/cache';
 import { resolveCustomSnapshotUrl } from './custom_snapshots';
 import { createCliError, isCliError } from './errors';
-import { cache } from './utils/cache';
 
 const asyncPipeline = promisify(pipeline);
 const DAILY_SNAPSHOTS_BASE_URL = 'https://storage.googleapis.com/kibana-ci-es-snapshots-daily';
@@ -208,10 +208,7 @@ export class Artifact {
     });
   }
 
-  constructor(
-    private readonly log: ToolingLog,
-    public readonly spec: ArtifactSpec
-  ) {}
+  constructor(private readonly log: ToolingLog, public readonly spec: ArtifactSpec) {}
 
   /**
    * Download the artifact to disk, skips the download if the cache is

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
-  EuiLink,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiThemeProvider,
   EuiTitle,
+  EuiPanel,
+  EuiLink,
+  EuiFlexGrid,
+  EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';

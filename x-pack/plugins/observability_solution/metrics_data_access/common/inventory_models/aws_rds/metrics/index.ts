@@ -8,16 +8,16 @@
 import { InventoryMetrics } from '../../types';
 
 import { cpu } from './snapshot/cpu';
-import { rdsActiveTransactions } from './snapshot/rds_active_transactions';
-import { rdsConnections } from './snapshot/rds_connections';
 import { rdsLatency } from './snapshot/rds_latency';
+import { rdsConnections } from './snapshot/rds_connections';
 import { rdsQueriesExecuted } from './snapshot/rds_queries_executed';
+import { rdsActiveTransactions } from './snapshot/rds_active_transactions';
 
-import { awsRDSActiveTransactions } from './tsvb/aws_rds_active_transactions';
+import { awsRDSLatency } from './tsvb/aws_rds_latency';
 import { awsRDSConnections } from './tsvb/aws_rds_connections';
 import { awsRDSCpuTotal } from './tsvb/aws_rds_cpu_total';
-import { awsRDSLatency } from './tsvb/aws_rds_latency';
 import { awsRDSQueriesExecuted } from './tsvb/aws_rds_queries_executed';
+import { awsRDSActiveTransactions } from './tsvb/aws_rds_active_transactions';
 
 const awsRDSSnapshotMetrics = {
   cpu,

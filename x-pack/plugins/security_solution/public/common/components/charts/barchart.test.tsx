@@ -6,13 +6,13 @@
  */
 
 import type { AxisStyle } from '@elastic/charts';
-import { Axis, BarSeries, Chart, ScaleType } from '@elastic/charts';
+import { Chart, BarSeries, Axis, ScaleType } from '@elastic/charts';
 import type { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../mock';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { TestProviders } from '../../mock';
 import '../../mock/react_beautiful_dnd';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';

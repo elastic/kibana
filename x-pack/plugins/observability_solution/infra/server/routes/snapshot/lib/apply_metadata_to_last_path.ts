@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { get, last, first, isArray } from 'lodash';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { first, get, isArray, last } from 'lodash';
 import {
-  MetricsAPIRow,
-  MetricsAPISeries,
-  SnapshotNode,
-  SnapshotNodePath,
   SnapshotRequest,
+  SnapshotNodePath,
+  SnapshotNode,
+  MetricsAPISeries,
+  MetricsAPIRow,
 } from '../../../../common/http_api';
 import { META_KEY } from './constants';
 

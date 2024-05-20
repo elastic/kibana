@@ -6,13 +6,13 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
+import { CspBenchmarkRule } from '../../../../common/types/latest';
 import {
   FINDINGS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../../common/constants';
-import { CspBenchmarkRule } from '../../../../common/types/latest';
-import { generateBenchmarkRuleTags } from '../../../../common/utils/detection_rules';
 import { createDetectionRule } from '../../../common/api/create_detection_rule';
+import { generateBenchmarkRuleTags } from '../../../../common/utils/detection_rules';
 
 const DEFAULT_RULE_RISK_SCORE = 0;
 const DEFAULT_RULE_SEVERITY = 'low';

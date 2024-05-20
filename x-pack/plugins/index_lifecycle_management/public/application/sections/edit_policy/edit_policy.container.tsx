@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { EuiButton, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';
-import { attemptToURIDecode, useKibana } from '../../../shared_imports';
+import { useKibana, attemptToURIDecode } from '../../../shared_imports';
 
-import { defaultPolicy } from '../../constants';
-import { getPolicyByName } from '../../lib/policies';
 import { useLoadPoliciesList } from '../../services/api';
+import { getPolicyByName } from '../../lib/policies';
+import { defaultPolicy } from '../../constants';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
 import { EditPolicyContextProvider } from './edit_policy_context';

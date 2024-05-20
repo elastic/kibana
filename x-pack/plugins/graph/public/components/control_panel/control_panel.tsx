@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { urlTemplateRegex } from '../../helpers/url_template';
-import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
 import {
   ControlType,
   TermIntersect,
@@ -18,14 +16,16 @@ import {
   WorkspaceField,
   WorkspaceNode,
 } from '../../types';
+import { urlTemplateRegex } from '../../helpers/url_template';
+import { SelectionToolBar } from './selection_tool_bar';
 import { ControlPanelToolBar } from './control_panel_tool_bar';
-import { DrillDownIconLinks } from './drill_down_icon_links';
-import { DrillDowns } from './drill_downs';
-import { MergeCandidates } from './merge_candidates';
 import { SelectStyle } from './select_style';
 import { SelectedNodeEditor } from './selected_node_editor';
+import { MergeCandidates } from './merge_candidates';
+import { DrillDowns } from './drill_downs';
+import { DrillDownIconLinks } from './drill_down_icon_links';
+import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
 import { SelectedNodeItem } from './selected_node_item';
-import { SelectionToolBar } from './selection_tool_bar';
 
 export interface TargetOptions {
   toFields: WorkspaceField[];

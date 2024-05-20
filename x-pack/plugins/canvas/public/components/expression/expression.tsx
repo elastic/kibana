@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { FC, useRef } from 'react';
+import PropTypes from 'prop-types';
 import {
+  EuiPanel,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiPortal,
   EuiToolTip,
+  EuiLink,
+  EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import PropTypes from 'prop-types';
-import React, { FC, useRef } from 'react';
 
 // @ts-expect-error
 import { Shortcuts } from 'react-shortcuts';
@@ -27,10 +27,10 @@ import {
   ExpressionInputEditorRef,
   OnExpressionInputEditorDidMount,
 } from '@kbn/presentation-util-plugin/public';
-import { FormState } from '.';
-import { ExpressionFunction } from '../../../types';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
+import { ExpressionFunction } from '../../../types';
+import { FormState } from '.';
 
 const strings = {
   getCancelButtonLabel: () =>

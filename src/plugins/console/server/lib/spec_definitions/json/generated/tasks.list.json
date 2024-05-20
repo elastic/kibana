@@ -7,15 +7,31 @@
       "pretty": "__flag__",
       "actions": [],
       "detailed": "__flag__",
-      "group_by": ["nodes", "parents", "none"],
+      "group_by": [
+        "nodes",
+        "parents",
+        "none"
+      ],
       "node_id": "",
       "parent_task_id": "",
-      "master_timeout": ["30s", "-1", "0"],
-      "timeout": ["30s", "-1", "0"],
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
       "wait_for_completion": "__flag__"
     },
-    "methods": ["GET"],
-    "patterns": ["_tasks"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_tasks"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/tasks.html",
     "availability": {
       "stack": true,

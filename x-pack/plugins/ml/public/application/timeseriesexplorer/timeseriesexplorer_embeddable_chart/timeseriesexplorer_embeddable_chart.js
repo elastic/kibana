@@ -14,9 +14,9 @@ import moment from 'moment-timezone';
 import {
   Subject,
   Subscription,
-  debounceTime,
   forkJoin,
   map,
+  debounceTime,
   switchMap,
   tap,
   withLatestFrom,
@@ -35,35 +35,35 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTextColor,
   EuiTitle,
+  EuiTextColor,
 } from '@elastic/eui';
 import { TimeSeriesExplorerHelpPopover } from '../timeseriesexplorer_help_popover';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import {
-  isModelPlotChartableForDetector,
   isModelPlotEnabled,
+  isModelPlotChartableForDetector,
   isSourceDataChartableForDetector,
 } from '../../../../common/util/job_utils';
 
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { TimeseriesexplorerNoChartData } from '../components/timeseriesexplorer_no_chart_data';
 
-import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
-import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
-import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
-import { TimeSeriesChartWithTooltips } from '../components/timeseries_chart/timeseries_chart_with_tooltip';
-import { TimeseriesexplorerChartDataError } from '../components/timeseriesexplorer_chart_data_error';
-import { getControlsForDetector } from '../get_controls_for_detector';
-import { isMetricDetector } from '../get_function_description';
 import {
   APP_STATE_ACTION,
   CHARTS_POINT_TARGET,
   TIME_FIELD_NAME,
 } from '../timeseriesexplorer_constants';
-import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
+import { getControlsForDetector } from '../get_controls_for_detector';
+import { TimeSeriesChartWithTooltips } from '../components/timeseries_chart/timeseries_chart_with_tooltip';
+import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
+import { isMetricDetector } from '../get_function_description';
+import { TimeseriesexplorerChartDataError } from '../components/timeseriesexplorer_chart_data_error';
 import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
+import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
+import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
+import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be

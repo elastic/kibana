@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActorRef, EventObject, actions } from 'xstate';
+import { actions, ActorRef, EventObject } from 'xstate';
 import { sendIfDefined } from './send_actions';
 
 describe('function sendIfDefined', () => {

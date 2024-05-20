@@ -6,8 +6,8 @@
  */
 
 import { getAlertsTelemetryData } from './queries/alerts';
-import { getCasesSystemActionData } from './queries/case_system_action';
 import { getCasesTelemetryData } from './queries/cases';
+import { getCasesSystemActionData } from './queries/case_system_action';
 import { getUserCommentsTelemetryData } from './queries/comments';
 import { getConfigurationTelemetryData } from './queries/configuration';
 import { getConnectorsTelemetryData } from './queries/connectors';

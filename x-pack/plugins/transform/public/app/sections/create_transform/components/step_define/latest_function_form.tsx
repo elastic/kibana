@@ -7,9 +7,9 @@
 
 import React, { type FC } from 'react';
 
-import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
 import { useAppDependencies } from '../../../../app_dependencies';
 import type { LatestFunctionService } from './hooks/use_latest_function_config';
 

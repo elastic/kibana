@@ -1,4 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +5,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { ServerlessMetrics } from '../../metrics/serverless_metrics';
 import { getServerlessFunctionNameFromId } from '../../../../../common/serverless';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
-import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { ServerlessMetrics } from '../../metrics/serverless_metrics';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
   serverlessId: string;

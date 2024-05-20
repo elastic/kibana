@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonIcon, EuiCard, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import { css } from '@emotion/react';
-import { FileImage as Image } from '@kbn/shared-ux-file-image';
-import { FileJSON } from '@kbn/shared-ux-file-types';
-import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
-import { isImage } from '@kbn/shared-ux-file-util';
 import React, { useMemo } from 'react';
 import type { FunctionComponent } from 'react';
+import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
+import { EuiCard, EuiText, EuiIcon, useEuiTheme, EuiButtonIcon } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FileJSON } from '@kbn/shared-ux-file-types';
+import { isImage } from '@kbn/shared-ux-file-util';
+import { FileImage as Image } from '@kbn/shared-ux-file-image';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import { useFilePickerContext } from '../context';
 import { i18nTexts } from '../i18n_texts';
 

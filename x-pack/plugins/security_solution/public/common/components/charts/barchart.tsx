@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import type { SettingsProps } from '@elastic/charts';
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import deepmerge from 'deepmerge';
-import deepEqual from 'fast-deep-equal';
-import { get, getOr, isNumber } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import type { SettingsProps } from '@elastic/charts';
+import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
+import { getOr, get, isNumber } from 'lodash/fp';
+import deepmerge from 'deepmerge';
 import { v4 as uuidv4 } from 'uuid';
+import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
-import { useTimeZone } from '../../lib/kibana';
-import { hasValueToDisplay } from '../../utils/validators';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
+import { useTimeZone } from '../../lib/kibana';
 import { defaultLegendColors } from '../matrix_histogram/utils';
 import { useThrottledResizeObserver } from '../utils';
+import { hasValueToDisplay } from '../../utils/validators';
 import { EMPTY_VALUE_LABEL } from './translation';
 
-import { HoverVisibilityContainer } from '../hover_visibility_container';
-import { VisualizationActions } from '../visualization_actions/actions';
-import type { VisualizationActionsProps } from '../visualization_actions/types';
-import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
-  BarChartWrapper,
-  WrappedByAutoSizer,
-  Wrapper,
   chartDefaultSettings,
   checkIfAllValuesAreZero,
   getChartHeight,
   getChartWidth,
+  WrappedByAutoSizer,
   useThemes,
+  Wrapper,
+  BarChartWrapper,
 } from './common';
-import type { ChartData, ChartSeriesConfigs, ChartSeriesData } from './common';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
+import type { ChartData, ChartSeriesConfigs, ChartSeriesData } from './common';
+import { VisualizationActions } from '../visualization_actions/actions';
+import type { VisualizationActionsProps } from '../visualization_actions/types';
+import { HoverVisibilityContainer } from '../hover_visibility_container';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 
 const LegendFlexItem = styled(EuiFlexItem)`
   overview: hidden;

@@ -7,15 +7,15 @@
 
 import { useMemo } from 'react';
 
-import { isQuery } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { isQuery } from '@kbn/data-plugin/public';
 
-import {
-  type AiOpsIndexBasedAppState,
-  isDefaultSearchQuery,
-} from '../application/url_state/common';
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
+import {
+  isDefaultSearchQuery,
+  type AiOpsIndexBasedAppState,
+} from '../application/url_state/common';
 import { createMergedEsQuery } from '../application/utils/search_utils';
 
 import { useAiopsAppContext } from './use_aiops_app_context';

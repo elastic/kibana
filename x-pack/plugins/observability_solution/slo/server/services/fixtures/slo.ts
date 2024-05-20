@@ -10,9 +10,9 @@ import {
   ALL_VALUE,
   CreateSLOParams,
   HistogramIndicator,
+  sloDefinitionSchema,
   SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
-  sloDefinitionSchema,
 } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';

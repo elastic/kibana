@@ -7,15 +7,15 @@
 
 import React from 'react';
 
+import type { EditCategoryProps } from './edit_category';
+import { EditCategory } from './edit_category';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer, readCasesPermissions } from '../../../common/mock';
-import type { EditCategoryProps } from './edit_category';
-import { EditCategory } from './edit_category';
 
-import { screen, waitFor } from '@testing-library/react';
-import { categories } from '../../../containers/mock';
+import { waitFor, screen } from '@testing-library/react';
 import { useGetCategories } from '../../../containers/use_get_categories';
+import { categories } from '../../../containers/mock';
 
 jest.mock('../../../containers/use_get_categories');
 

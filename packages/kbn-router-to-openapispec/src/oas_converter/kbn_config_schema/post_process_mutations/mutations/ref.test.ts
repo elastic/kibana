@@ -7,8 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { joi2JsonInternal } from '../../parse';
 import { createCtx } from '../context';
+import { joi2JsonInternal } from '../../parse';
 import { processRef } from './ref';
 
 test('create a new ref entry', () => {

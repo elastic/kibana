@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { fromKueryExpression } from '@kbn/es-query';
-import { pick, times } from 'lodash';
-import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
-import { delay } from '../lib/delay';
 import {
+  ClusterClientAdapter,
+  IClusterClientAdapter,
+  EVENT_BUFFER_LENGTH,
+  getQueryBody,
+  FindEventsOptionsBySavedObjectFilter,
   AggregateEventsOptionsBySavedObjectFilter,
   AggregateEventsWithAuthFilter,
-  ClusterClientAdapter,
-  EVENT_BUFFER_LENGTH,
-  FindEventsOptionsBySavedObjectFilter,
-  IClusterClientAdapter,
-  getQueryBody,
   getQueryBodyWithAuthFilter,
 } from './cluster_client_adapter';
+import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
+import { delay } from '../lib/delay';
+import { pick, times } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import { fromKueryExpression } from '@kbn/es-query';
 import { getEsNames } from './names';
 
-type MockedLogger = ReturnType<(typeof loggingSystemMock)['createLogger']>;
+type MockedLogger = ReturnType<typeof loggingSystemMock['createLogger']>;
 
 let logger: MockedLogger;
 let clusterClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

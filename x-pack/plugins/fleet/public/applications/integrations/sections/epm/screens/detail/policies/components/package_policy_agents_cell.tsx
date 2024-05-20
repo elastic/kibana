@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AddAgentHelpPopover, LinkedAgentCount } from '../../../../../../components';
+import { LinkedAgentCount, AddAgentHelpPopover } from '../../../../../../components';
 import type { AgentPolicy } from '../../../../../../types';
 
 const AddAgentButton = ({

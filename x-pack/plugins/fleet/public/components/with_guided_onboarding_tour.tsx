@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+import type { FunctionComponent, ReactElement } from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
-import type { FunctionComponent, ReactElement } from 'react';
 
 type TourType = 'addIntegrationButton' | 'integrationCard' | 'agentModalButton';
 const getTourConfig = (packageKey: string, tourType: TourType) => {

@@ -6,14 +6,14 @@
  */
 
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
-import { mlJob, mlModule, mlTrainedModel } from './mappings';
+import { mlJob, mlTrainedModel, mlModule } from './mappings';
 
+import { migrations } from './migrations';
 import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_MODULE_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
 } from '../../common/types/saved_objects';
-import { migrations } from './migrations';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({

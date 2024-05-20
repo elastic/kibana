@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import { AppUpdater, CoreSetup, ScopedHistory } from '@kbn/core/public';
-import { isFilterPinned } from '@kbn/es-query';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
-import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs';
+import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import { isFilterPinned } from '@kbn/es-query';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../constants';
 import type { DiscoverSetupPlugins } from '../plugin';
 

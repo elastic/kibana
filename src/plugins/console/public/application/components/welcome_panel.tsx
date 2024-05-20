@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiButton,
-  EuiCode,
   EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiText,
+  EuiFlyoutBody,
   EuiTitle,
+  EuiButton,
+  EuiText,
+  EuiFlyoutFooter,
+  EuiCode,
 } from '@elastic/eui';
-import * as examples from '../../../common/constants/welcome_panel';
 import EditorExample from './editor_example';
+import * as examples from '../../../common/constants/welcome_panel';
 
 interface Props {
   onDismiss: () => void;

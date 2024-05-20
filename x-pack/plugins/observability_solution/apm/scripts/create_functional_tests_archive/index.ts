@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { argv } from 'yargs';
 import { execSync } from 'child_process';
-import fs from 'fs';
+import moment from 'moment';
 import path from 'path';
+import fs from 'fs';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { REPO_ROOT } from '@kbn/repo-info';
-import moment from 'moment';
-import { argv } from 'yargs';
 import { getEsClient } from '../shared/get_es_client';
 import { parseIndexUrl } from '../shared/parse_index_url';
 

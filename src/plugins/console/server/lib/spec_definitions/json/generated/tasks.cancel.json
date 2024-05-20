@@ -10,8 +10,13 @@
       "parent_task_id": "",
       "wait_for_completion": "__flag__"
     },
-    "methods": ["POST"],
-    "patterns": ["_tasks/_cancel", "_tasks/{task_id}/_cancel"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_tasks/_cancel",
+      "_tasks/{task_id}/_cancel"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/tasks.html",
     "availability": {
       "stack": true,

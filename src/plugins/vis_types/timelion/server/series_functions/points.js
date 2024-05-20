@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
 import alter from '../lib/alter';
+import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 
 const validSymbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];

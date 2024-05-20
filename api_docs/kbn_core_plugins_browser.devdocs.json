@@ -26,7 +26,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Plugin",
-        "description": ["\nThe interface that should be returned by a `PluginInitializer`.\n"],
+        "description": [
+          "\nThe interface that should be returned by a `PluginInitializer`.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-browser",
@@ -92,7 +94,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["TPluginsSetup"],
+                "signature": [
+                  "TPluginsSetup"
+                ],
                 "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -151,7 +155,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["TPluginsStart"],
+                "signature": [
+                  "TPluginsStart"
+                ],
                 "path": "packages/core/plugins/core-plugins-browser/src/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -193,7 +199,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PluginInitializerContext",
-        "description": ["\nThe available core services passed to a `PluginInitializer`\n"],
+        "description": [
+          "\nThe available core services passed to a `PluginInitializer`\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-browser",
@@ -217,7 +225,9 @@
             "description": [
               "\nA symbol used to identify this plugin in the system. Needed when registering handlers or context providers."
             ],
-            "signature": ["symbol"],
+            "signature": [
+              "symbol"
+            ],
             "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -279,7 +289,9 @@
             "tags": [],
             "label": "config",
             "description": [],
-            "signature": ["{ get: <T extends object = ConfigSchema>() => T; }"],
+            "signature": [
+              "{ get: <T extends object = ConfigSchema>() => T; }"
+            ],
             "path": "packages/core/plugins/core-plugins-browser/src/plugin_initializer.ts",
             "deprecated": false,
             "trackAdoption": false

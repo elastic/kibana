@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { isEmpty, isArray } from 'lodash';
 import Boom from '@hapi/boom';
-import { isArray, isEmpty } from 'lodash';
 
-import type { CasesFindResponse, CasesSearchRequest } from '../../../common/types/api';
-import { CasesFindResponseRt, CasesSearchRequestRt } from '../../../common/types/api';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import type { CasesSearchRequest, CasesFindResponse } from '../../../common/types/api';
+import { CasesSearchRequestRt, CasesFindResponseRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
-import type { CasesClient, CasesClientArgs } from '..';
-import { Operations } from '../../authorization';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
-import type { CasesSearchParams } from '../types';
 import { constructQueryOptions, constructSearch } from '../utils';
+import { Operations } from '../../authorization';
+import type { CasesClient, CasesClientArgs } from '..';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
 
 /**

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiCallOut, EuiText, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   troubleshootLink: string;

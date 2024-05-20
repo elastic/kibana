@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
 import { useQuery } from '@tanstack/react-query';
+import { useKibana } from '@kbn/observability-plugin/public/utils/kibana_react';
 
 export type Index = string;
 

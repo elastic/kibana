@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type {
+  SavedObjectsClientContract,
   ElasticsearchClient,
   SavedObject,
-  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -17,8 +17,8 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common/constants';
 import { ElasticsearchAssetType } from '../../../../../types';
 
 import type { EsAssetReference, Installation } from '../../../../../../common';
-import { createAppContextStartContractMock } from '../../../../../mocks';
 import { appContextService } from '../../../../app_context';
+import { createAppContextStartContractMock } from '../../../../../mocks';
 import { installTransforms } from '../../../elasticsearch/transform/install';
 
 import { stepInstallTransforms } from './step_install_transforms';

@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
-import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
-import {
-  type InternalSavedObjectsRequestHandlerContext,
-  registerExportRoute,
-} from '@kbn/core-saved-objects-server-internal';
-import { createExportableType, setupServer } from '@kbn/core-test-helpers-test-utils';
+import supertest from 'supertest';
+import { createListStream } from '@kbn/utils';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
-  coreUsageDataServiceMock,
   coreUsageStatsClientMock,
+  coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { createListStream } from '@kbn/utils';
-import supertest from 'supertest';
+import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
+import {
+  registerExportRoute,
+  type InternalSavedObjectsRequestHandlerContext,
+} from '@kbn/core-saved-objects-server-internal';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const allowedTypes = ['index-pattern', 'search'];

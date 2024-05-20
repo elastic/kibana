@@ -9,11 +9,11 @@ import { setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { BoostOperation, BoostType, FunctionalBoost, FunctionalBoostFunction } from '../../types';
+import { FunctionalBoost, BoostOperation, BoostType, FunctionalBoostFunction } from '../../types';
 
 import { FunctionalBoostForm } from './functional_boost_form';
 

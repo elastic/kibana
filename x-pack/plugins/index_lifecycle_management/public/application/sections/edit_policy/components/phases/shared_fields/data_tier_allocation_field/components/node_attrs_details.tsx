@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyout,
+  EuiTitle,
   EuiInMemoryTable,
+  EuiSpacer,
   EuiPortal,
   EuiSkeletonText,
-  EuiSpacer,
-  EuiTitle,
+  EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
 
 import { useLoadNodeDetails } from '../../../../../../../services/api';

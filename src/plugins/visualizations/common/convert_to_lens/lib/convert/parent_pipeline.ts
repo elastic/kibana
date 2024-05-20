@@ -10,24 +10,24 @@ import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
 import { MovingAverageParams } from '../../types';
 import { convertMetricToColumns, getFormulaForPipelineAgg } from '../metrics';
-import { getMetricFromParentPipelineAgg } from '../utils';
 import { createColumn } from './column';
-import { PIPELINE_AGGS, SIBLING_PIPELINE_AGGS } from './constants';
 import { createFormulaColumn } from './formula';
 import {
-  MetricAggregationColumnWithoutSpecialParams,
   convertMetricAggregationColumnWithoutSpecialParams,
+  MetricAggregationColumnWithoutSpecialParams,
 } from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import {
-  AggBasedColumn,
-  CumulativeSumColumn,
-  DerivativeColumn,
-  ExtendedColumnConverterArgs,
-  FormulaColumn,
   MovingAverageColumn,
+  DerivativeColumn,
+  CumulativeSumColumn,
+  FormulaColumn,
+  ExtendedColumnConverterArgs,
   OtherParentPipelineAggs,
+  AggBasedColumn,
 } from './types';
+import { PIPELINE_AGGS, SIBLING_PIPELINE_AGGS } from './constants';
+import { getMetricFromParentPipelineAgg } from '../utils';
 
 export type ParentPipelineAggColumn = MovingAverageColumn | DerivativeColumn | CumulativeSumColumn;
 

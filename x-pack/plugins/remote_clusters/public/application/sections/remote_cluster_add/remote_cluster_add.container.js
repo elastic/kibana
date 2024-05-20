@@ -8,7 +8,7 @@
 import { connect } from 'react-redux';
 import { RemoteClusterAdd as RemoteClusterAddView } from './remote_cluster_add';
 
-import { getAddClusterError, isAddingCluster } from '../../store/selectors';
+import { isAddingCluster, getAddClusterError } from '../../store/selectors';
 
 import { addCluster, clearAddClusterErrors } from '../../store/actions';
 

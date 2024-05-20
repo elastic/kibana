@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiTitle } from '@elastic/eui';
 import React, { type ReactNode, memo } from 'react';
+import { EuiTitle } from '@elastic/eui';
 
 interface ActionBarStatusItemProps {
   title: string | ReactNode;

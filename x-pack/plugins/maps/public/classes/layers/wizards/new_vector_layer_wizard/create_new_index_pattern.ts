@@ -6,9 +6,9 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { INDEX_SOURCE_API_PATH } from '../../../../../common/constants';
-import { CreateDocSourceResp } from '../../../../../common/types';
 import { getHttp } from '../../../../kibana_services';
+import { CreateDocSourceResp } from '../../../../../common/types';
+import { INDEX_SOURCE_API_PATH } from '../../../../../common/constants';
 
 export const createNewIndexAndPattern = async ({
   indexName,

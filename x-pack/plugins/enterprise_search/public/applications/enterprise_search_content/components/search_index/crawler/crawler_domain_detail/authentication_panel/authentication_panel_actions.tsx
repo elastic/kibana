@@ -9,14 +9,14 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import {
+  SAVE_BUTTON_LABEL,
   CANCEL_BUTTON_LABEL,
   DELETE_BUTTON_LABEL,
-  SAVE_BUTTON_LABEL,
 } from '../../../../../../shared/constants';
 import { CrawlerAuth } from '../../../../../api/crawler/types';
 import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';

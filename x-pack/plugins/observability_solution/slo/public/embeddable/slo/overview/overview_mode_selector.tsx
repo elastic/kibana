@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, type EuiButtonGroupOptionProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonGroup, type EuiButtonGroupOptionProps } from '@elastic/eui';
 import { OverviewMode } from './types';
 
 const overviewModeOptions: EuiButtonGroupOptionProps[] = [

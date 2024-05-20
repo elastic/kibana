@@ -7,8 +7,8 @@
 
 import { EuiProgress, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { imageLoadingSpinnerAriaLabel } from './translations';
 
 const BorderedText = euiStyled(EuiText)`

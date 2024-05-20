@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { buildEsQuery } from './build_es_query';
+import { fromKueryExpression, toElasticsearchQuery } from '../kuery';
+import { luceneStringToDsl } from './lucene_string_to_dsl';
+import { decorateQuery } from './decorate_query';
 import { MatchAllFilter, Query } from '../filters';
 import { fields } from '../filters/stubs';
-import { fromKueryExpression, toElasticsearchQuery } from '../kuery';
-import { buildEsQuery } from './build_es_query';
-import { decorateQuery } from './decorate_query';
-import { luceneStringToDsl } from './lucene_string_to_dsl';
 import { DataViewBase } from './types';
 
 describe('build query', () => {

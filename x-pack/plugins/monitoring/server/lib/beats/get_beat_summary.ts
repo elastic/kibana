@@ -6,11 +6,11 @@
  */
 
 import { upperFirst } from 'lodash';
-import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
 import { checkParam } from '../error_missing_required';
-import { getDiffCalculation } from './_beats_stats';
 import { createBeatsQuery } from './create_beats_query';
+import { getDiffCalculation } from './_beats_stats';
 
 export function handleResponse(response: ElasticsearchResponse, beatUuid: string) {
   if (!response.hits || response.hits.hits.length === 0) {

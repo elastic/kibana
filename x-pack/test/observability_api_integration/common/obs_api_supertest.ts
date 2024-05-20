@@ -6,13 +6,13 @@
  */
 
 import { format } from 'url';
-import type {
-  APIEndpoint,
-  ObservabilityServerRouteRepository,
-} from '@kbn/observability-plugin/server';
-import { ClientRequestParamsOf, ReturnOf, formatRequest } from '@kbn/server-route-repository';
-import request from 'superagent';
 import supertest from 'supertest';
+import request from 'superagent';
+import { formatRequest, ClientRequestParamsOf, ReturnOf } from '@kbn/server-route-repository';
+import type {
+  ObservabilityServerRouteRepository,
+  APIEndpoint,
+} from '@kbn/observability-plugin/server';
 
 export type APIReturnType<TEndpoint extends APIEndpoint> = ReturnOf<
   ObservabilityServerRouteRepository,

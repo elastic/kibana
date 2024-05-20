@@ -6,25 +6,25 @@
  */
 
 import {
+  SubActionConnectorType,
+  ValidatorType,
+} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
 
+import { ResilientConfig, ResilientSecrets } from './types';
 import { RESILIENT_CONNECTOR_ID } from './constants';
-import { ResilientConnector } from './resilient';
+import * as i18n from './translations';
 import {
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
   PushToServiceIncidentSchema,
 } from './schema';
-import * as i18n from './translations';
-import { ResilientConfig, ResilientSecrets } from './types';
+import { ResilientConnector } from './resilient';
 
 export const getResilientConnectorType = (): SubActionConnectorType<
   ResilientConfig,

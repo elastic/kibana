@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 
-import userEvent from '@testing-library/user-event';
 import { FormTestComponent } from '../../../common/test_utils';
-import { customFieldsConfigurationMock } from '../../../containers/mock';
 import { Create } from './create';
+import { customFieldsConfigurationMock } from '../../../containers/mock';
+import userEvent from '@testing-library/user-event';
 
 describe('Create ', () => {
   const onSubmit = jest.fn();

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { HttpStart, ToastsStart } from '@kbn/core/public';
+import moment from 'moment';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import dateMath from '@kbn/datemath';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import type { ToastsStart, HttpStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
-import moment from 'moment';
 import { getTimeFieldRange } from './time_field_range';
 import type { GetTimeFieldRangeResponse } from './types';
 

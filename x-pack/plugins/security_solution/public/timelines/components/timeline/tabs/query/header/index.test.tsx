@@ -8,15 +8,15 @@
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { FilterManager } from '@kbn/data-plugin/public';
 import { mockIndexPattern } from '../../../../../../common/mock';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../../../data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
-import { waitFor } from '@testing-library/react';
 import { QueryTabHeader } from '.';
 import { TimelineStatus, TimelineType } from '../../../../../../../common/api/timeline';
+import { waitFor } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../../../../common/types';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;

@@ -7,7 +7,7 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { DateRange, ExpressionFunctionDateRange } from './date_range';
+import { ExpressionFunctionDateRange, DateRange } from './date_range';
 
 export const dateRangeToAst = (dateRange: DateRange) => {
   return buildExpression([

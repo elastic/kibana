@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CMDLINE_FIELD, TIMESTAMP_FIELD } from '../../../common/constants';
-import { ProcessListAPIQueryAggregation, ProcessListAPIRequest } from '../../../common/http_api';
+import { TIMESTAMP_FIELD, CMDLINE_FIELD } from '../../../common/constants';
+import { ProcessListAPIRequest, ProcessListAPIQueryAggregation } from '../../../common/http_api';
 import { ESSearchClient } from '../metrics/types';
 
 const TOP_N = 10;

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { omit } from 'lodash';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { omit } from 'lodash';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
   getBulkOperationError,
   getCurrentTime,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common/types/rest_spec';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common/types/rest_spec';
 import type { PolicyData, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../../../../common/types';
 import type { PolicyDetailsState } from '../../../types';

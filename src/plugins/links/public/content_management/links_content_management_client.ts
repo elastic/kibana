@@ -8,7 +8,7 @@
 
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import { SerializableAttributes, VisualizationClient } from '@kbn/visualizations-plugin/public';
-import { CONTENT_ID, CONTENT_ID as contentTypeId } from '../../common';
+import { CONTENT_ID as contentTypeId, CONTENT_ID } from '../../common';
 import type { LinksCrudTypes } from '../../common/content_management';
 import { contentManagement } from '../services/kibana_services';
 
@@ -68,7 +68,7 @@ export const linksClient = {
 };
 
 export function getLinksClient<
-  Attr extends SerializableAttributes = SerializableAttributes,
+  Attr extends SerializableAttributes = SerializableAttributes
 >(): VisualizationClient<typeof CONTENT_ID, Attr> {
   return linksClient as unknown as VisualizationClient<typeof CONTENT_ID, Attr>;
 }

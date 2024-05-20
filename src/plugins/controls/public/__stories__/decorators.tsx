@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Story } from '@storybook/react';
-import React from 'react';
 
 const bar = '#c5ced8';
 const panel = '#ffff';

@@ -7,24 +7,24 @@
 
 import { EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 
-import { useCaseViewParams } from '../../common/navigation';
 import { AddComment } from '../add_comment';
+import { useCaseViewParams } from '../../common/navigation';
+import { getManualAlertIdsWithNoRuleId } from './helpers';
+import type { UserActionTreeProps } from './types';
+import { useUserActionsHandler } from './use_user_actions_handler';
+import { NEW_COMMENT_ID } from './constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { Username } from '../user_profiles/username';
-import { NEW_COMMENT_ID } from './constants';
-import { getManualAlertIdsWithNoRuleId } from './helpers';
-import { ShowMoreButton } from './show_more_button';
-import type { UserActionTreeProps } from './types';
-import { useLastPage } from './use_last_page';
-import { useUserActionsHandler } from './use_user_actions_handler';
-import { useLastPageUserActions } from './use_user_actions_last_page';
-import { useUserActionsPagination } from './use_user_actions_pagination';
+import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
 import { UserActionsList } from './user_actions_list';
+import { useUserActionsPagination } from './use_user_actions_pagination';
+import { useLastPageUserActions } from './use_user_actions_last_page';
+import { ShowMoreButton } from './show_more_button';
+import { useLastPage } from './use_last_page';
 
 const getIconsCss = (hasNextPage: boolean | undefined, euiTheme: EuiThemeComputed<{}>): string => {
   const customSize = hasNextPage

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
+import { type LogRateAnalysisType, LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
 import type { TestData } from '../../types';
 
 import type { LogRateAnalysisDataGenerator } from '../../../../services/aiops/log_rate_analysis_data_generator';
 
-import { analysisGroupsTable } from './__mocks__/analysis_groups_table';
-import { analysisGroupsTableTextfield } from './__mocks__/analysis_groups_table_textfield';
 import { analysisGroupsTableTextfieldZerodocsfallback } from './__mocks__/analysis_groups_table_textfield_zerodocsfallback';
 import { analysisGroupsTableZerodocsfallback } from './__mocks__/analysis_groups_table_zerodocsfallback';
-import { analysisTable } from './__mocks__/analysis_table';
-import { analysisTableTextfield } from './__mocks__/analysis_table_textfield';
-import { analysisTableTextfieldZerodocsfallback } from './__mocks__/analysis_table_textfield_zerodocsfallback';
-import { analysisTableZerodocsfallback } from './__mocks__/analysis_table_zerodocsfallback';
-import { filteredAnalysisGroupsTable } from './__mocks__/filtered_analysis_groups_table';
-import { filteredAnalysisGroupsTableTextfield } from './__mocks__/filtered_analysis_groups_table_textfield';
+import { analysisGroupsTableTextfield } from './__mocks__/analysis_groups_table_textfield';
+import { analysisGroupsTable } from './__mocks__/analysis_groups_table';
 import { filteredAnalysisGroupsTableTextfieldZerodocsfallback } from './__mocks__/filtered_analysis_groups_table_textfield_zerodocsfallback';
 import { filteredAnalysisGroupsTableZerodocsfallback } from './__mocks__/filtered_analysis_groups_table_zerodocsfallback';
+import { filteredAnalysisGroupsTableTextfield } from './__mocks__/filtered_analysis_groups_table_textfield';
+import { filteredAnalysisGroupsTable } from './__mocks__/filtered_analysis_groups_table';
+import { analysisTableTextfieldZerodocsfallback } from './__mocks__/analysis_table_textfield_zerodocsfallback';
+import { analysisTableZerodocsfallback } from './__mocks__/analysis_table_zerodocsfallback';
+import { analysisTableTextfield } from './__mocks__/analysis_table_textfield';
+import { analysisTable } from './__mocks__/analysis_table';
 
 const REFERENCE_TS = 1669018354793;
 const DAY_MS = 86400000;

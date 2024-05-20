@@ -8,10 +8,10 @@
 
 import { Readable } from 'stream';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { FileMetadata } from '../../../common';
 import { TestEnvironmentUtils, setupIntegrationEnvironment } from '../../test_utils';
 import { createEsFileClient } from '../create_es_file_client';
 import { FileClient } from '../types';
+import { FileMetadata } from '../../../common';
 
 describe('ES-index-backed file client', () => {
   let esClient: TestEnvironmentUtils['esClient'];

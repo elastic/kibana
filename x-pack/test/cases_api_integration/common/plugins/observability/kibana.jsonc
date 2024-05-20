@@ -6,7 +6,13 @@
     "id": "observabilityFixtures",
     "server": true,
     "browser": false,
-    "requiredPlugins": ["features", "cases"],
-    "optionalPlugins": ["security", "spaces"]
+    "requiredPlugins": [
+      "features",
+      "cases"
+    ],
+    "optionalPlugins": [
+      "security",
+      "spaces"
+    ]
   }
 }

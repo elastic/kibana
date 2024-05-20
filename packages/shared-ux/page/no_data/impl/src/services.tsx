@@ -11,8 +11,8 @@ import React, { FC, PropsWithChildren } from 'react';
 import { NoDataCardKibanaProvider, NoDataCardProvider } from '@kbn/shared-ux-card-no-data';
 
 import type {
-  NoDataPageKibanaDependencies,
   NoDataPageServices,
+  NoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-no-data-types';
 
 /**

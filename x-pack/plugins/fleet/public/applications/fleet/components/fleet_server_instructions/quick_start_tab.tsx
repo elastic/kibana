@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiSteps } from '@elastic/eui';
 import React from 'react';
+import { EuiSteps } from '@elastic/eui';
 
 import { useQuickStartCreateForm, useWaitForFleetServer } from './hooks';
 
-import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
 import {
-  getConfirmFleetServerConnectionStep,
   getGettingStartedStep,
+  getConfirmFleetServerConnectionStep,
   getInstallFleetServerStep,
 } from './steps';
+import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
 
 interface Props {
   onClose: () => void;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { createContext, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 
+import { CoreStart, ScopedHistory, IUiSettingsClient } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { CoreStart, IUiSettingsClient, ScopedHistory } from '@kbn/core/public';
 import { ClientConfigType } from '../types';
 import { HttpService, UiMetricService } from './services';
 

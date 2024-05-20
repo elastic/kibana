@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import { DatasetQualityLocatorParams } from '@kbn/deeplinks-observability/locators';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,

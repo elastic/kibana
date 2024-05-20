@@ -12,28 +12,28 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
   EuiIconTip,
   EuiLink,
   EuiSpacer,
-  EuiText,
   EuiTextArea,
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
-import {
-  Callbacks,
-  ConnectedCustomIntegrationsButton,
-  ConnectedCustomIntegrationsForm,
-  CustomIntegrationsProvider,
-  useConsumerCustomIntegrations,
-} from '@kbn/custom-integrations';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useState } from 'react';
+import {
+  ConnectedCustomIntegrationsButton,
+  ConnectedCustomIntegrationsForm,
+  useConsumerCustomIntegrations,
+  CustomIntegrationsProvider,
+  Callbacks,
+} from '@kbn/custom-integrations';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWizard } from '.';
 import { OptionalFormRow } from '../shared/optional_form_row';
 import { StepModal } from '../shared/step_panel';

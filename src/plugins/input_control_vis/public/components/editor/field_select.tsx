@@ -9,8 +9,8 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage, InjectedIntlProps, injectI18n } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n-react';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import {
   EuiBadge,
-  EuiBetaBadge,
+  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutHeader,
   EuiIcon,
-  EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiFlyoutHeader,
   IconType,
+  EuiSpacer,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 
 interface Props {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
-import type { DragDropOperation, IndexPattern, IndexPatternField } from '../../types';
-import type { GenericIndexPatternColumn, IncompleteColumn } from './operations';
+import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
+import type { IndexPattern, IndexPatternField, DragDropOperation } from '../../types';
 
 export type {
   GenericIndexPatternColumn,

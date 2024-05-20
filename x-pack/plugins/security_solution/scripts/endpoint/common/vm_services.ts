@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { userInfo } from 'os';
-import { dirname, join as pathJoin } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
-import chalk from 'chalk';
 import execa from 'execa';
+import chalk from 'chalk';
+import { userInfo } from 'os';
+import { join as pathJoin, dirname } from 'path';
+import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
-import type { DownloadedAgentInfo } from './agent_downloads_service';
 import type { HostVm, HostVmExecResponse, SupportedVmManager } from './types';
 
 const baseGenerator = new BaseDataGenerator();

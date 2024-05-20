@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from '@kbn/core-chrome-browser';
-import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
-import { createLogKey } from './create_log_key';
 import { PersistedLog } from './persisted_log';
+import { createLogKey } from './create_log_key';
 
 interface StartDeps {
   http: InternalHttpStart;

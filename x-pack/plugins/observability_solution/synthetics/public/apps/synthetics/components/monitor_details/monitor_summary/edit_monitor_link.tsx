@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { EuiButton } from '@elastic/eui';
 
 import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
 import { useSyntheticsSettingsContext } from '../../../contexts';

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import { useMutation as _useMutation } from '@tanstack/react-query';
-import type { RenderHookResult } from '@testing-library/react-hooks/src/types';
-import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
-import type { PolicyData } from '../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { allFleetHttpMocks } from '../../mocks';
@@ -18,7 +13,12 @@ import type {
   UseUpdateEndpointPolicyOptions,
   UseUpdateEndpointPolicyResult,
 } from './use_update_endpoint_policy';
+import type { RenderHookResult } from '@testing-library/react-hooks/src/types';
 import { useUpdateEndpointPolicy } from './use_update_endpoint_policy';
+import type { PolicyData } from '../../../../common/endpoint/types';
+import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
 
 const useMutationMock = _useMutation as jest.Mock;
 

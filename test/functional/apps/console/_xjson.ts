@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { rgbToHex } from '@elastic/eui';
 import expect from '@kbn/expect';
+import { rgbToHex } from '@elastic/eui';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {

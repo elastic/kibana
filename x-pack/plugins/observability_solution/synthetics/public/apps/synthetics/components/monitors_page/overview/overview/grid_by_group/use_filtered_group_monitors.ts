@@ -6,10 +6,10 @@
  */
 
 import { useSelector } from 'react-redux';
-import { MonitorOverviewItem } from '../../../../../../../../common/runtime_types';
-import { getConfigStatusByLocation, useGetUrlParams } from '../../../../../hooks';
 import { selectServiceLocationsState } from '../../../../../state';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
+import { getConfigStatusByLocation, useGetUrlParams } from '../../../../../hooks';
+import { MonitorOverviewItem } from '../../../../../../../../common/runtime_types';
 
 export const useFilteredGroupMonitors = ({
   groupMonitors,

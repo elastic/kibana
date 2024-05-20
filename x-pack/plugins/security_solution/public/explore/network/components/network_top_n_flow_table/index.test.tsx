@@ -9,12 +9,12 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { NetworkTopNFlowTable } from '.';
-import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
-import { mockCount, mockData } from './mock';
+import { NetworkTopNFlowTable } from '.';
+import { mockData, mockCount } from './mock';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/components/link_to');

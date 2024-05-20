@@ -8,8 +8,8 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { Config } from './config';
 import { Plugin } from './load_kibana_platform_plugin';
+import { Config } from './config';
 
 export interface TaskContext {
   log: ToolingLog;

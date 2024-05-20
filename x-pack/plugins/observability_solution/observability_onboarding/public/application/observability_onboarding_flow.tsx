@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { Route, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { Footer } from './footer/footer';
+import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
 import backgroundImageUrl from './header/background.svg';
-import { Header } from './header/header';
+import { Footer } from './footer/footer';
 import { OnboardingFlowForm } from './onboarding_flow_form/onboarding_flow_form';
-import { CustomLogsPanel } from './quickstart_flows/custom_logs';
+import { Header } from './header/header';
 import { SystemLogsPanel } from './quickstart_flows/system_logs';
+import { CustomLogsPanel } from './quickstart_flows/custom_logs';
 import { BackButton } from './shared/back_button';
 
 const queryClient = new QueryClient();

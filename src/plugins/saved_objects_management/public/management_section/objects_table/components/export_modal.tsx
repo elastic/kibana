@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React, { FC } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCheckboxGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
   EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
   EuiSpacer,
+  EuiFormRow,
+  EuiCheckboxGroup,
   EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
 
 export interface ExportModalProps {
   onExport: () => void;

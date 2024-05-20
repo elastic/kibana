@@ -11,15 +11,15 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { intersection } from 'lodash';
+import { SyntheticsServerSetup } from '../../types';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { periodToMs } from '../../routes/overview_status/overview_status';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
   SourceType,
 } from '../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { periodToMs } from '../../routes/overview_status/overview_status';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { SyntheticsServerSetup } from '../../types';
 
 export const getAllMonitors = async ({
   soClient,

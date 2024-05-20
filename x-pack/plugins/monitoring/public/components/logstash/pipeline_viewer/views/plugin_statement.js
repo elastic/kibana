@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { formatMetric } from '../../../../lib/format_number';
 import { Metric } from './metric';
+import { i18n } from '@kbn/i18n';
 import './plugin_statement.scss';
 
 function getInputStatementMetrics({ latestEventsPerSecond }) {

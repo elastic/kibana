@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import * as i18n from './translations';
 
 import type { ConnectorFieldsProps } from '../types';

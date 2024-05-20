@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { useQuery as _useQuery } from '@tanstack/react-query';
-import { set } from 'lodash';
+import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { allFleetHttpMocks } from '../../mocks';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { useFetchEndpointPolicy } from './use_fetch_endpoint_policy';
+import type { PolicyData } from '../../../../common/endpoint/types';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
 } from '../../../../common/endpoint/models/policy_config';
-import type { PolicyData } from '../../../../common/endpoint/types';
-import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { allFleetHttpMocks } from '../../mocks';
-import { useFetchEndpointPolicy } from './use_fetch_endpoint_policy';
+import { set } from 'lodash';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 
 const useQueryMock = _useQuery as jest.Mock;
 

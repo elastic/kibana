@@ -8,11 +8,11 @@
 import { CoreStart } from '@kbn/core/public';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { ClientPluginsStart } from '../../../plugin';
-import { initDurationAnomalyAlertType } from './duration_anomaly';
 import { initMonitorStatusAlertType } from './monitor_status';
 import { initTlsAlertType } from './tls';
 import { initTlsLegacyAlertType } from './tls_legacy';
+import { ClientPluginsStart } from '../../../plugin';
+import { initDurationAnomalyAlertType } from './duration_anomaly';
 
 export type AlertTypeInitializer<TAlertTypeModel = ObservabilityRuleTypeModel> = (dependencies: {
   isHidden: boolean;

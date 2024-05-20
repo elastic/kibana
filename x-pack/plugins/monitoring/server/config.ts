@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { config as ElasticsearchBaseConfig, ElasticsearchConfig } from '@kbn/core/server';
 import { MonitoringConfigSchema } from './types';
 

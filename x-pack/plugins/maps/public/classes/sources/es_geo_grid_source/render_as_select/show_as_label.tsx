@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { CLUSTER_LABEL, GRID_LABEL, HEX_LABEL } from './i18n_constants';
 
 interface Props {

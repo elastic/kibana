@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import type { IBasePath } from '@kbn/core-http-browser';
-import { BasePath } from '@kbn/core-http-browser-internal';
-import { type History, createMemoryHistory } from 'history';
 import { act } from 'react-dom/test-utils';
+import { type History, createMemoryHistory } from 'history';
+import { BasePath } from '@kbn/core-http-browser-internal';
+import type { IBasePath } from '@kbn/core-http-browser';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 
 import { renderApp } from './error_application';
 

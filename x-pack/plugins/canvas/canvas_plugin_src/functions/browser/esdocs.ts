@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import {
-  SQL_SEARCH_STRATEGY,
-  SqlRequestParams,
-  SqlSearchStrategyRequest,
-  SqlSearchStrategyResponse,
-} from '@kbn/data-plugin/common';
+import { zipObject } from 'lodash';
 import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
 } from '@kbn/expressions-plugin/common';
-import { zipObject } from 'lodash';
 import { Observable, catchError, from, map, switchMap, throwError } from 'rxjs';
+import {
+  SqlRequestParams,
+  SqlSearchStrategyRequest,
+  SqlSearchStrategyResponse,
+  SQL_SEARCH_STRATEGY,
+} from '@kbn/data-plugin/common';
 
+import { searchService } from '../../../public/services';
+import { getFunctionHelp } from '../../../i18n';
 import { buildBoolArray } from '../../../common/lib/request/build_bool_array';
 import { normalizeType } from '../../../common/lib/request/normalize_type';
-import { getFunctionHelp } from '../../../i18n';
-import { searchService } from '../../../public/services';
 
 interface Arguments {
   index: string;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiCodeBlock, EuiIcon, EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { EuiLink, EuiBadge, EuiCodeBlock, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { msToPretty } from '../../../lib';
-import { useHighlightTreeNode } from '../use_highlight_tree_node';
 import { hasVisibleChild } from '../utils';
+import { useHighlightTreeNode } from '../use_highlight_tree_node';
+import { msToPretty } from '../../../lib';
 
 import { PercentageBadge } from '../../percentage_badge';
 

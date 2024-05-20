@@ -17,22 +17,22 @@ import {
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSkeletonText,
   EuiText,
+  EuiSkeletonText,
   formatDate,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import {
-  MINIMUM_DIAGNOSTICS_AGENT_VERSION,
   isAgentRequestDiagnosticsSupported,
+  MINIMUM_DIAGNOSTICS_AGENT_VERSION,
 } from '../../../../../../../../common/services';
 
-import type { Agent, AgentDiagnostics } from '../../../../../../../../common/types/models';
 import { sendGetAgentUploads, useAuthz, useLink, useStartServices } from '../../../../../hooks';
+import type { AgentDiagnostics, Agent } from '../../../../../../../../common/types/models';
 import { AgentRequestDiagnosticsModal } from '../../../components/agent_request_diagnostics_modal';
 
 const FlexStartEuiFlexItem = styled(EuiFlexItem)`

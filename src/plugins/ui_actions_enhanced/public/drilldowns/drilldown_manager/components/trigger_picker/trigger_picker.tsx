@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormFieldset, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { TriggerPickerItem, TriggerPickerItemDescription } from './trigger_picker_item';
+import { EuiText, EuiToolTip, EuiFormFieldset, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { TriggerPickerItemDescription, TriggerPickerItem } from './trigger_picker_item';
 
 const txtTriggerPickerLabel = i18n.translate(
   'uiActionsEnhanced.components.actionWizard.triggerPickerLabel',

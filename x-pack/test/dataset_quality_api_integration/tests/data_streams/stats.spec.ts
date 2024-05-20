@@ -11,7 +11,7 @@ import { DatasetQualityApiClientKey } from '../../common/config';
 import { DatasetQualityApiError } from '../../common/dataset_quality_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { expectToReject } from '../../utils';
-import { addIntegrationToLogIndexTemplate, cleanLogIndexTemplate } from './es_utils';
+import { cleanLogIndexTemplate, addIntegrationToLogIndexTemplate } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

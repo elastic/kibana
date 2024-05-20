@@ -7,11 +7,11 @@
 
 import { RouteDependencies } from '../../../types';
 
-import { registerCreateRoute } from './register_create_route';
-import { registerDeleteRoute } from './register_delete_route';
 import { registerGetAllRoute, registerGetOneRoute } from './register_get_routes';
-import { registerSimulateRoute } from './register_simulate_route';
+import { registerDeleteRoute } from './register_delete_route';
+import { registerCreateRoute } from './register_create_route';
 import { registerUpdateRoute } from './register_update_route';
+import { registerSimulateRoute } from './register_simulate_route';
 
 export function registerTemplateRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);

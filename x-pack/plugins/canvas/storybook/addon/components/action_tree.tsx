@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiTreeView } from '@elastic/eui';
-import { isDate, isObject } from 'lodash';
 import React, { FC } from 'react';
+import { isObject, isDate } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { EuiTreeView } from '@elastic/eui';
 
 import { Node } from '@elastic/eui/src/components/tree_view/tree_view';
 

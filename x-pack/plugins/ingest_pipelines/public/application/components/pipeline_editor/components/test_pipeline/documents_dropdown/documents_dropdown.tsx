@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiPopover,
   EuiPopoverFooter,
+  EuiButtonEmpty,
   EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useState } from 'react';
 
 import { Document } from '../../../types';
 

@@ -7,15 +7,26 @@
       "pretty": "__flag__",
       "anomaly_score": "",
       "desc": "__flag__",
-      "end": ["-1"],
+      "end": [
+        "-1"
+      ],
       "exclude_interim": "__flag__",
       "expand": "__flag__",
       "from": "",
-      "size": ["100"],
-      "sort": ["timestamp"],
-      "start": ["-1"]
+      "size": [
+        "100"
+      ],
+      "sort": [
+        "timestamp"
+      ],
+      "start": [
+        "-1"
+      ]
     },
-    "methods": ["GET", "POST"],
+    "methods": [
+      "GET",
+      "POST"
+    ],
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/results/buckets/{timestamp}",
       "_ml/anomaly_detectors/{job_id}/results/buckets"

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { CoreStart, IBasePath, SavedObjectAttributes } from '@kbn/core/public';
+import { cloneDeep, assign, defaults, forOwn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { assign, cloneDeep, defaults, forOwn } from 'lodash';
+import { CoreStart, IBasePath, SavedObjectAttributes } from '@kbn/core/public';
 
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { SavedObjectSaveOpts, isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import {
-  CONTENT_ID,
-  GraphCreateIn,
-  GraphCreateOut,
-  GraphDeleteIn,
-  GraphDeleteOut,
   GraphGetIn,
   GraphGetOut,
-  GraphSavedObjectAttributes,
   GraphSearchIn,
   GraphSearchOut,
-  GraphUpdateIn,
+  GraphDeleteIn,
+  GraphDeleteOut,
+  GraphCreateIn,
+  GraphCreateOut,
+  GraphSavedObjectAttributes,
   GraphUpdateOut,
+  GraphUpdateIn,
+  CONTENT_ID,
 } from '../../common/content_management';
 import {
-  extractReferences,
   injectReferences,
+  extractReferences,
 } from '../services/persistence/saved_workspace_references';
 import { GraphWorkspaceSavedObject } from '../types';
 import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
@@ -222,24 +222,24 @@ export async function saveSavedWorkspace(
           services
         )
       : savedObject.id
-        ? await services.contentClient.update<GraphUpdateIn, GraphUpdateOut>({
-            contentTypeId: CONTENT_ID,
-            id: savedObject.id,
-            data: {
-              ...(extractedRefs.attributes as GraphSavedObjectAttributes),
-            },
-            options: {
-              references: extractedRefs.references,
-            },
-          })
-        : await services.contentClient.create<GraphCreateIn, GraphCreateOut>({
-            contentTypeId: CONTENT_ID,
-            data: attributes as GraphSavedObjectAttributes,
-            options: {
-              references: createOpt.references,
-              overwrite: true,
-            },
-          });
+      ? await services.contentClient.update<GraphUpdateIn, GraphUpdateOut>({
+          contentTypeId: CONTENT_ID,
+          id: savedObject.id,
+          data: {
+            ...(extractedRefs.attributes as GraphSavedObjectAttributes),
+          },
+          options: {
+            references: extractedRefs.references,
+          },
+        })
+      : await services.contentClient.create<GraphCreateIn, GraphCreateOut>({
+          contentTypeId: CONTENT_ID,
+          data: attributes as GraphSavedObjectAttributes,
+          options: {
+            references: createOpt.references,
+            overwrite: true,
+          },
+        });
 
     savedObject.id = resp.item.id;
     savedObject.isSaving = false;

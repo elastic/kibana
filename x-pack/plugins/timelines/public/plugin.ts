@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Store, Unsubscribe } from 'redux';
-import { LastUpdatedAtProps, LoadingPanelProps } from './components';
-import { HoverActionsConfig, getHoverActions } from './components/hover_actions';
-import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
+import type { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
 import { getLastUpdatedLazy, getLoadingPanelLazy } from './methods';
+import type { TimelinesUIStart, TimelinesStartPlugins } from './types';
+import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
+import { getHoverActions, HoverActionsConfig } from './components/hover_actions';
 import { timelineReducer } from './store/timeline/reducer';
-import type { TimelinesStartPlugins, TimelinesUIStart } from './types';
+import { LastUpdatedAtProps, LoadingPanelProps } from './components';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   private _store: Store | undefined;

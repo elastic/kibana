@@ -9,32 +9,31 @@
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
+import { css } from '@emotion/css';
 
-import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import type { BrowserField } from '../../../../../common/containers/source';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
 } from '../../../../../../common/field_maps/field_names';
+import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
 import {
   AgentStatus,
   EndpointAgentStatusById,
 } from '../../../../../common/components/agents/agent_status';
+import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
+import { Bytes, BYTES_FORMAT } from './bytes';
+import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
-import { TruncatableText } from '../../../../../common/components/truncatable_text';
-import type { BrowserField } from '../../../../../common/containers/source';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
+import { FormattedIp } from '../../../formatted_ip';
 import { Port } from '../../../../../explore/network/components/port';
 import { PORT_NAMES } from '../../../../../explore/network/components/port/helpers';
-import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
-import { FormattedIp } from '../../../formatted_ip';
-import { AssetCriticalityLevel } from './asset_criticality_level';
-import { BYTES_FORMAT, Bytes } from './bytes';
+import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import {
   AGENT_STATUS_FIELD_NAME,
   DATE_FIELD_TYPE,
@@ -50,10 +49,11 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from './constants';
-import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
-import { HostName } from './host_name';
+import { renderEventModule, RenderRuleName, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
+import { HostName } from './host_name';
 import { UserName } from './user_name';
+import { AssetCriticalityLevel } from './asset_criticality_level';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];

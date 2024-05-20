@@ -6,10 +6,10 @@
  */
 
 import type {
-  EndpointAction,
-  EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  EndpointAction,
+  EndpointActionResponse,
 } from '../../../../common/endpoint/types';
 
 export interface Results {

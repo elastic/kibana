@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
 import { buildMockDashboard } from '@kbn/dashboard-plugin/public/mocks';
-import { LinksFactoryDefinition } from '../public';
+import { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
 import { LinksByValueInput } from '../public/embeddable/types';
+import { LinksFactoryDefinition } from '../public';
 import { LinksAttributes } from './content_management';
 
 jest.mock('../public/services/attribute_service', () => {

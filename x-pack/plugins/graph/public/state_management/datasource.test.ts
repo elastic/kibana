@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { createMockGraphStore, MockedGraphEnvironment } from './mocks';
 import { AdvancedSettings, WorkspaceField } from '../types';
-import { updateSettings } from './advanced_settings';
 import { datasourceSelector, requestDatasource } from './datasource';
 import { datasourceSaga } from './datasource.sagas';
 import { fieldsSelector } from './fields';
-import { MockedGraphEnvironment, createMockGraphStore } from './mocks';
+import { updateSettings } from './advanced_settings';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 

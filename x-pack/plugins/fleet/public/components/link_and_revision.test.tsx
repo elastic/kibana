@@ -10,7 +10,7 @@ import React from 'react';
 import type { TestRenderer } from '../mock';
 import { createFleetTestRendererMock } from '../mock';
 
-import type { Agent, AgentPolicy } from '../types';
+import type { AgentPolicy, Agent } from '../types';
 
 import { AgentPolicySummaryLine } from './link_and_revision';
 

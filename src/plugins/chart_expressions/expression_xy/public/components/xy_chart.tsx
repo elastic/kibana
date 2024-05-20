@@ -6,99 +6,89 @@
  * Side Public License, v 1.
  */
 
-import {
-  Axis,
-  AxisStyle,
-  BrushEndListener,
-  Chart,
-  Direction,
-  DisplayValueStyle,
-  ElementClickListener,
-  HorizontalAlignment,
-  LEGACY_LIGHT_THEME,
-  LayoutDirection,
-  LegendPositionConfig,
-  Placement,
-  Position,
-  RecursivePartial,
-  Settings,
-  SettingsProps,
-  Tooltip,
-  TooltipType,
-  VerticalAlignment,
-  XYBrushEvent,
-  XYChartElementEvent,
-  XYChartSeriesIdentifier,
-} from '@elastic/charts';
-import { IconType } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { ChartSizeSpec, getOverridesFor } from '@kbn/chart-expressions-common';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
-import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
-import { PaletteRegistry } from '@kbn/coloring';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { RenderMode } from '@kbn/expressions-plugin/common';
+import {
+  Chart,
+  Settings,
+  Axis,
+  Position,
+  VerticalAlignment,
+  HorizontalAlignment,
+  LayoutDirection,
+  ElementClickListener,
+  BrushEndListener,
+  XYBrushEvent,
+  LegendPositionConfig,
+  DisplayValueStyle,
+  RecursivePartial,
+  AxisStyle,
+  TooltipType,
+  Placement,
+  Direction,
+  XYChartElementEvent,
+  Tooltip,
+  XYChartSeriesIdentifier,
+  SettingsProps,
+  LEGACY_LIGHT_THEME,
+} from '@elastic/charts';
+import { partition } from 'lodash';
+import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { PaletteRegistry } from '@kbn/coloring';
+import { RenderMode } from '@kbn/expressions-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
+import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import {
+  getAccessorByDimension,
+  getColumnByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
   XYLegendValue,
 } from '@kbn/visualizations-plugin/common/constants';
-import {
-  getAccessorByDimension,
-  getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { partition } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
-import { isTimeChart } from '../../common/helpers';
+import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type {
-  AxisExtentConfigResult,
-  CommonXYDataLayerConfig,
-  ExtendedReferenceLineDecorationConfig,
-  ReferenceLineDecorationConfig,
-  XYChartProps,
-} from '../../common/types';
-import { CommonXYLayerConfig } from '../../common/types';
-import { visualizationDefinitions } from '../definitions';
-import {
-  AxisConfiguration,
-  GroupsConfiguration,
-  Series,
-  getAxesConfiguration,
-  getAxisPosition,
-  getDataLayers,
-  getFilteredLayers,
-  getFormattedTablesByLayers,
-  getLayersFormats,
-  getLayersTitles,
-  getLinesCausedPaddings,
-  getOriginalAxisPosition,
-  getReferenceLayers,
-  isDataLayer,
-  isHorizontalChart,
-  isReferenceLineDecorationConfig,
-  validateExtent,
-} from '../helpers';
-import type {
-  BrushEvent,
   FilterEvent,
+  BrushEvent,
   FormatFactory,
   LayerCellValueActions,
   MultiFilterEvent,
 } from '../types';
+import { isTimeChart } from '../../common/helpers';
+import type {
+  CommonXYDataLayerConfig,
+  ReferenceLineDecorationConfig,
+  ExtendedReferenceLineDecorationConfig,
+  XYChartProps,
+  AxisExtentConfigResult,
+} from '../../common/types';
 import {
-  Annotations,
-  OUTSIDE_RECT_ANNOTATION_WIDTH,
-  OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
-  getAnnotationsGroupedByInterval,
-  isRangeAnnotation,
-} from './annotations';
-import { DataLayers } from './data_layers';
+  isHorizontalChart,
+  getDataLayers,
+  AxisConfiguration,
+  getAxisPosition,
+  getFormattedTablesByLayers,
+  getLayersFormats,
+  getLayersTitles,
+  isReferenceLineDecorationConfig,
+  getFilteredLayers,
+  getReferenceLayers,
+  isDataLayer,
+  getAxesConfiguration,
+  GroupsConfiguration,
+  getLinesCausedPaddings,
+  validateExtent,
+  Series,
+  getOriginalAxisPosition,
+} from '../helpers';
+import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
 import {
   ReferenceLines,
@@ -106,14 +96,24 @@ import {
   getAxisGroupForReferenceLine,
   getReferenceLinesFormattersMap,
 } from './reference_lines';
+import { visualizationDefinitions } from '../definitions';
+import { CommonXYLayerConfig } from '../../common/types';
 import { SplitChart } from './split_chart';
+import {
+  Annotations,
+  getAnnotationsGroupedByInterval,
+  isRangeAnnotation,
+  OUTSIDE_RECT_ANNOTATION_WIDTH,
+  OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
+} from './annotations';
+import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
+import { DataLayers } from './data_layers';
 import { Tooltip as CustomTooltip } from './tooltip';
-import { XyEndzones, getXDomain } from './x_domain';
 import { XYCurrentTime } from './xy_current_time';
 
 import './xy_chart.scss';
-import { LegendColorPickerWrapper, LegendColorPickerWrapperContext } from './legend_color_picker';
 import { TooltipHeader } from './tooltip';
+import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
 
 declare global {
@@ -1022,9 +1022,9 @@ export function XYChart({
                 rangeAnnotations.length && shouldHideDetails
                   ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
                   : shouldUseNewTimeAxis
-                    ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding ?? 0) +
-                      chartBaseTheme.axes.tickLabel.fontSize
-                    : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
+                  ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding ?? 0) +
+                    chartBaseTheme.axes.tickLabel.fontSize
+                  : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
               }
             />
           ) : null}

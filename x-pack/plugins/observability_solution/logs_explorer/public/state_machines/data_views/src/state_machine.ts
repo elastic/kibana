@@ -9,13 +9,13 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { isError } from 'lodash';
 import { assign, createMachine } from 'xstate';
 import { createDefaultContext } from './defaults';
-import { loadDataViews, searchDataViews } from './services/data_views_service';
 import type {
   DataViewsContext,
   DataViewsEvent,
   DataViewsTypestate,
   DefaultDataViewsContext,
 } from './types';
+import { loadDataViews, searchDataViews } from './services/data_views_service';
 
 export function getSearchCacheKey(context: DataViewsContext) {
   return { search: context.search, filter: context.filter };

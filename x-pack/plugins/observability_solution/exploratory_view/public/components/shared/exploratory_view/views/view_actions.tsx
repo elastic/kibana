@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual, pickBy } from 'lodash';
-import React from 'react';
 import {
   allSeriesKey,
   convertAllShortSeries,

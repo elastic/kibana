@@ -6,8 +6,8 @@
  */
 
 import { shallow } from 'enzyme';
-import moment from 'moment-timezone';
 import React from 'react';
+import moment from 'moment-timezone';
 import { TimestampTooltip } from '.';
 import { mockNow } from '../../../utils/test_helpers';
 

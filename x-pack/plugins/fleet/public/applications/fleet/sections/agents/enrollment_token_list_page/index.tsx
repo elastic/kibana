@@ -5,44 +5,44 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import {
+  EuiSpacer,
   EuiBasicTable,
-  EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
+  EuiButton,
+  EuiButtonIcon,
   EuiToolTip,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public/request/send_request';
-import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 
 import { ApiKeyField } from '../../../../../components/api_key_field';
 
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../../../common/types';
-import { NewEnrollmentTokenModal } from '../../../components';
-import { SearchBar } from '../../../components/search_bar';
 import {
   ENROLLMENT_API_KEYS_INDEX,
-  FLEET_ENROLLMENT_API_PREFIX,
   SO_SEARCH_LIMIT,
+  FLEET_ENROLLMENT_API_PREFIX,
 } from '../../../constants';
+import { NewEnrollmentTokenModal } from '../../../components';
 import {
-  sendDeleteOneEnrollmentAPIKey,
-  sendGetOneEnrollmentAPIKey,
   useBreadcrumbs,
-  useGetAgentPolicies,
-  useGetEnrollmentAPIKeys,
   usePagination,
+  useGetEnrollmentAPIKeys,
+  useGetAgentPolicies,
+  sendGetOneEnrollmentAPIKey,
   useStartServices,
+  sendDeleteOneEnrollmentAPIKey,
 } from '../../../hooks';
-import { DefaultLayout } from '../../../layouts';
 import type { EnrollmentAPIKey, GetAgentPoliciesResponseItem } from '../../../types';
+import { SearchBar } from '../../../components/search_bar';
+import { DefaultLayout } from '../../../layouts';
 
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 

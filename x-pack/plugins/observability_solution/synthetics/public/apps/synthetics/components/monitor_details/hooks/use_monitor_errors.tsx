@@ -5,18 +5,18 @@
  * 2.0.
  */
 import { useTimeZone } from '@kbn/observability-shared-plugin/public';
-import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { useMemo } from 'react';
+import { useSelectedLocation } from './use_selected_location';
+import { Ping, PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../../../common/constants/client_defaults';
-import { Ping, PingState } from '../../../../../../common/runtime_types';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
-import { useSelectedLocation } from './use_selected_location';
 
 export function useMonitorErrors(monitorIdArg?: string) {
   const { lastRefresh } = useSyntheticsRefreshContext();

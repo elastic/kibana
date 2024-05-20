@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { connect } from 'react-redux';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import { FieldPicker } from './field_picker';
+import { FieldEditor } from './field_editor';
 import {
+  selectedFieldsSelector,
+  fieldsSelector,
+  fieldMapSelector,
+  updateFieldProperties,
+  selectField,
+  deselectField,
   GraphState,
   GraphStore,
-  deselectField,
-  fieldMapSelector,
-  fieldsSelector,
-  selectField,
-  selectedFieldsSelector,
-  updateFieldProperties,
 } from '../../state_management';
 import { WorkspaceField } from '../../types';
-import { FieldEditor } from './field_editor';
-import { FieldPicker } from './field_picker';
 
 export type UpdateableFieldProperties = 'hopSize' | 'lastValidHopSize' | 'color' | 'icon';
 

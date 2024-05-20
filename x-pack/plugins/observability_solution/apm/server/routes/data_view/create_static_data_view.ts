@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { TRACE_ID, TRANSACTION_DURATION, TRANSACTION_ID } from '../../../common/es_fields/apm';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { withApmSpan } from '../../utils/with_apm_span';
-import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
+import { TRACE_ID, TRANSACTION_ID, TRANSACTION_DURATION } from '../../../common/es_fields/apm';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
+import { withApmSpan } from '../../utils/with_apm_span';
 import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 
 export type CreateDataViewResponse = Promise<
   { created: boolean; dataView: DataView } | { created: boolean; reason?: string }

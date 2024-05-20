@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryMetric, TSVBMetricModel, TSVBMetricModelCreator, TSVBSeries } from './types';
+import { TSVBMetricModelCreator, TSVBMetricModel, TSVBSeries, InventoryMetric } from './types';
 
 export const createTSVBModel =
   (

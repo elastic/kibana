@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { getAggConfigFromEsAgg, isSpecialSortField } from './pivot_aggs';
 import {
   FilterAggForm,
   FilterTermForm,
 } from '../sections/create_transform/components/step_define/common/filter_agg/components';
-import { getAggConfigFromEsAgg, isSpecialSortField } from './pivot_aggs';
 
 describe('getAggConfigFromEsAgg', () => {
   test('should return a common config if the agg does not have a custom config defined', () => {

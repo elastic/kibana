@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiFieldText, EuiFlyout, EuiForm, EuiFormRow } from '@elastic/eui';
+import { EuiFlyout, EuiForm, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { ApiKeyFlyout } from './api_key_flyout';
 

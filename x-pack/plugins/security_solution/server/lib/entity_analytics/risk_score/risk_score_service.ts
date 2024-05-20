@@ -8,19 +8,19 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
-import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
-import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
 import type {
   CalculateAndPersistScoresParams,
   CalculateScoresParams,
   EntityAnalyticsConfig,
   RiskEngineConfiguration,
 } from '../types';
-import { scheduleLatestTransformNow } from '../utils/transforms';
-import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import { calculateRiskScores } from './calculate_risk_scores';
-import type { RiskInputsIndexResponse } from './get_risk_inputs_index';
+import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
+import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
+import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import type { RiskScoreDataClient } from './risk_score_data_client';
+import type { RiskInputsIndexResponse } from './get_risk_inputs_index';
+import { scheduleLatestTransformNow } from '../utils/transforms';
 
 export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;

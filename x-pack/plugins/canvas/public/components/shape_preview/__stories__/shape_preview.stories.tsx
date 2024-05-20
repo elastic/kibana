@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Shape } from '@kbn/expression-shape-plugin/public';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { Shape } from '@kbn/expression-shape-plugin/public';
 import { ShapePreview } from '../shape_preview';
 
 storiesOf('components/Shapes/ShapePreview', module)

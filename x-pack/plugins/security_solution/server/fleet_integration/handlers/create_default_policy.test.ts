@@ -1,8 +1,3 @@
-import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,18 +5,23 @@ import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
  * 2.0.
  */
 import { Subject } from 'rxjs';
-import { policyFactory } from '../../../common/endpoint/models/policy_config';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import { LicenseService } from '../../../common/license';
+import { createDefaultPolicy } from './create_default_policy';
 import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
-import { LicenseService } from '../../../common/license';
-import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
-import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
+import { policyFactory } from '../../../common/endpoint/models/policy_config';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type {
   AnyPolicyCreateConfig,
   PolicyCreateCloudConfig,
   PolicyCreateEndpointConfig,
 } from '../types';
-import { createDefaultPolicy } from './create_default_policy';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
+import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();

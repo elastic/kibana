@@ -6,10 +6,10 @@
  */
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreSetup } from '@kbn/core/server';
-import { Metric } from '@kbn/monitoring-collection-plugin/server';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import { ActionsPluginsStart } from '../plugin';
+import { Metric } from '@kbn/monitoring-collection-plugin/server';
 import { registerClusterCollector } from './register_cluster_collector';
+import { ActionsPluginsStart } from '../plugin';
 import { ClusterActionsMetric } from './types';
 
 jest.useFakeTimers();

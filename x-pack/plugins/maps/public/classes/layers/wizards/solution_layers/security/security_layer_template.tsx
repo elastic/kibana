@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React, { Component } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
-import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 import { IndexPatternSelect } from './index_pattern_select';
+import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 import { IndexPatternMeta } from './security_index_pattern_utils';
 
 interface State {

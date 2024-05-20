@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 import { getScopeFromPath, useInitSourcerer, useSourcererDataView } from '.';
+import { mockPatterns } from './mocks';
+import type { RouteSpyState } from '../../utils/route/types';
 import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_PATTERN,
@@ -20,15 +22,13 @@ import {
   useUserInfo,
   initialState as userInfoState,
 } from '../../../detections/components/user_info';
-import { TestProviders, createMockStore, mockGlobalState, mockSourcererState } from '../../mock';
-import { sourcererActions } from '../../store/sourcerer';
+import { mockGlobalState, mockSourcererState, TestProviders, createMockStore } from '../../mock';
 import type { SelectedDataView } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
-import type { RouteSpyState } from '../../utils/route/types';
 import * as source from '../source/use_data_view';
+import { sourcererActions } from '../../store/sourcerer';
+import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 import { createSourcererDataView } from './create_sourcerer_data_view';
-import { mockPatterns } from './mocks';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,

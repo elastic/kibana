@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import { CertificateList, CertSort } from './certificates_list';
 import { render } from '../../utils/testing';
-import { CertSort, CertificateList } from './certificates_list';
 
 describe('CertificateList', () => {
   it('render empty state', () => {

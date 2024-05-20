@@ -12,7 +12,7 @@ import { useValues } from 'kea';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsCards, AnalyticsChart, AnalyticsLogic, convertToChartData } from '..';
+import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '..';
 import { useDecodedParams } from '../../../utils/encode_path_params';
 
 import { AnalyticsLayout } from '../analytics_layout';

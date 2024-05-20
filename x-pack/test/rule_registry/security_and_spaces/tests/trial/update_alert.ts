@@ -7,16 +7,16 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash/fp';
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
-import type { User } from '../../../common/lib/authentication/types';
 import {
-  obsMinAll,
-  obsMinAllSpacesAll,
+  superUser,
   obsMinReadAlertsAll,
   obsMinReadAlertsAllSpacesAll,
-  superUser,
+  obsMinAll,
+  obsMinAllSpacesAll,
 } from '../../../common/lib/authentication/users';
+import type { User } from '../../../common/lib/authentication/types';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

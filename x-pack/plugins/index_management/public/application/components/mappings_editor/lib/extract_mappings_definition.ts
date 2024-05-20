@@ -9,8 +9,8 @@ import { isPlainObject } from 'lodash';
 
 import { GenericObject } from '../types';
 import {
-  mappingsConfigurationSchemaKeys,
   validateMappingsConfiguration,
+  mappingsConfigurationSchemaKeys,
 } from './mappings_validator';
 
 const isMappingDefinition = (obj: GenericObject): boolean => {

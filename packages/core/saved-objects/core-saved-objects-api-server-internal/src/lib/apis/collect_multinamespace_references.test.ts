@@ -7,28 +7,28 @@
  */
 
 import {
+  pointInTimeFinderMock,
   mockCollectMultiNamespaceReferences,
   mockGetCurrentTime,
   mockGetSearchDsl,
-  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { loggerMock } from '@kbn/logging-mocks';
-import { kibanaMigratorMock } from '../../mocks';
 import { SavedObjectsRepository } from '../repository';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { kibanaMigratorMock } from '../../mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
-  createDocumentMigrator,
-  createRegistry,
-  createSpySerializer,
-  mappings,
   mockTimestamp,
+  mappings,
+  createRegistry,
+  createDocumentMigrator,
+  createSpySerializer,
 } from '../../test_helpers/repository.test.common';
 
 describe('#collectMultiNamespaceReferences', () => {

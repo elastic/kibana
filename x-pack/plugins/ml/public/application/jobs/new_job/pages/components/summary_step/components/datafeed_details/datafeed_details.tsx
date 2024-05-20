@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useContext } from 'react';
-import { DEFAULT_QUERY_DELAY } from '../../../../../../../../../common/constants/new_job';
-import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../../common/util/job_utils';
-import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
-import { MLJobEditor } from '../../../../../../jobs_list/components/ml_job_editor';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList, EuiFormRow } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
+import { MLJobEditor } from '../../../../../../jobs_list/components/ml_job_editor';
+import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../../common/util/job_utils';
+import { DEFAULT_QUERY_DELAY } from '../../../../../../../../../common/constants/new_job';
+import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 import type { ListItems } from '../common';
-import { Italic, defaultLabel } from '../common';
+import { defaultLabel, Italic } from '../common';
 
 const EDITOR_HEIGHT = '200px';
 

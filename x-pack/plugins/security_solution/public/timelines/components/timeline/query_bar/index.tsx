@@ -9,23 +9,23 @@ import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import styled from '@emotion/styled';
-import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import styled from '@emotion/styled';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
-import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
-import { QueryBar } from '../../../../common/components/query_bar';
-import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
-import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
-import { timelineActions } from '../../../store';
 import type { KqlMode } from '../../../store/model';
+import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
+import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
+import { QueryBar } from '../../../../common/components/query_bar';
 import type { DataProvider } from '../data_providers/data_provider';
 import { TIMELINE_FILTER_DROP_AREA, buildGlobalQuery, getNonDropAreaFilters } from '../helpers';
+import { timelineActions } from '../../../store';
+import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 
 export interface QueryBarTimelineComponentProps {
   dataProviders: DataProvider[];

@@ -11,8 +11,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { DefaultDraggable } from '../../../../common/components/draggables';
-import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EVENT_DURATION_FIELD_NAME } from '../../duration';
+import { FormattedDate } from '../../../../common/components/formatted_date';
 import { FormattedDuration } from '../../formatted_duration';
 
 export const EVENT_START_FIELD_NAME = 'event.start';

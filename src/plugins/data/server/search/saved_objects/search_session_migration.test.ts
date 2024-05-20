@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type { SavedObject } from '@kbn/core/server';
-import { SavedObjectMigrationContext } from '@kbn/core/server';
-import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
 import {
+  searchSessionSavedObjectMigrations,
   SearchSessionSavedObjectAttributesPre$7$13$0,
   SearchSessionSavedObjectAttributesPre$7$14$0,
   SearchSessionSavedObjectAttributesPre$8$0$0,
   SearchSessionSavedObjectAttributesPre$8$6$0,
-  searchSessionSavedObjectMigrations,
 } from './search_session_migration';
+import type { SavedObject } from '@kbn/core/server';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
+import { SavedObjectMigrationContext } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 describe('7.12.0 -> 7.13.0', () => {
   const mockCompletedSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> =

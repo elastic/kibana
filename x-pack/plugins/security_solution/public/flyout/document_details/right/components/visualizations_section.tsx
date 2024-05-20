@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
-import { ExpandableSection } from './expandable_section';
 import { SessionPreviewContainer } from './session_preview_container';
+import { ExpandableSection } from './expandable_section';
 import { VISUALIZATIONS_TEST_ID } from './test_ids';
 
 const KEY = 'visualizations';

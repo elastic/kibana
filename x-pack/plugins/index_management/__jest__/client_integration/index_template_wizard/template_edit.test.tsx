@@ -8,11 +8,11 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH } from '../../../common/constants';
 import * as fixtures from '../../../test/fixtures';
-import { kibanaVersion, setupEnvironment } from '../helpers';
+import { API_BASE_PATH } from '../../../common/constants';
+import { setupEnvironment, kibanaVersion } from '../helpers';
 
-import { ALIASES, MAPPINGS as DEFAULT_MAPPING, SETTINGS, TEMPLATE_NAME } from './constants';
+import { TEMPLATE_NAME, SETTINGS, ALIASES, MAPPINGS as DEFAULT_MAPPING } from './constants';
 import { setup } from './template_edit.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
 

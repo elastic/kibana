@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { MonitoringConfig } from '../..';
 import { DS_INDEX_PATTERN_TYPES } from '../../../common/constants';
+import { MonitoringConfig } from '../..';
 import {
   getElasticsearchDataset,
-  getIndexPatterns,
   getKibanaDataset,
   getLogstashDataset,
+  getIndexPatterns,
 } from './get_index_patterns';
 
 const getConfigWithCcs = (ccsEnabled: boolean) => {

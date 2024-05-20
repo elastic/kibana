@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import React, { ReactNode } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { RenderHookResult, renderHook } from '@testing-library/react-hooks';
-import React, { ReactNode } from 'react';
 import { delay } from '../utils/test_helpers';
-import { FETCH_STATUS, FetcherResult, isPending, useFetcher } from './use_fetcher';
+import { FetcherResult, useFetcher, isPending, FETCH_STATUS } from './use_fetcher';
 
 // Wrap the hook with a provider so it can useKibana
 const KibanaReactContext = createKibanaReactContext({

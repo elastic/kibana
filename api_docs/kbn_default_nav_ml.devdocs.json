@@ -135,7 +135,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"rootNav:ml\""],
+            "signature": [
+              "\"rootNav:ml\""
+            ],
             "path": "packages/default-nav/ml/default_navigation.ts",
             "deprecated": false,
             "trackAdoption": false

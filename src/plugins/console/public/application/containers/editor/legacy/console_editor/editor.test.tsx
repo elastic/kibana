@@ -10,9 +10,9 @@ jest.mock('../../../../../lib/utils', () => ({ replaceVariables: jest.fn() }));
 
 import './editor.test.mock';
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import * as sinon from 'sinon';
 
@@ -20,19 +20,19 @@ import { serviceContextMock } from '../../../../contexts/services_context.mock';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 import {
-  ContextValue,
+  ServicesContextProvider,
   EditorContextProvider,
   RequestContextProvider,
-  ServicesContextProvider,
+  ContextValue,
 } from '../../../../contexts';
 
-import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
-import * as utils from '../../../../../lib/utils';
-import type { DevToolsSettings } from '../../../../../services';
 // Mocked functions
 import { sendRequest } from '../../../../hooks/use_send_current_request/send_request';
+import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
+import type { DevToolsSettings } from '../../../../../services';
 import * as consoleMenuActions from '../console_menu_actions';
 import { Editor } from './editor';
+import * as utils from '../../../../../lib/utils';
 
 describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
   let mockedAppContextValue: ContextValue;

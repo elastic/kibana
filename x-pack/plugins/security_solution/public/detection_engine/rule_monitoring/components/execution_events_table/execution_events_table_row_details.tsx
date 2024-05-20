@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiDescriptionList } from '@elastic/eui';
 import React from 'react';
+import { EuiDescriptionList } from '@elastic/eui';
 import type { RuleExecutionEvent } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { TextBlock } from '../basic/text/text_block';
 

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
-import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
-import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { ML_PAGES } from '../constants/locator';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
+import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { JobId } from './anomaly_detection_jobs/job';
 import type { ListingPageUrlState } from './common';
+import type { ML_PAGES } from '../constants/locator';
 
 type OptionalPageState = object | undefined;
 
 export type MLPageState<PageType, PageState> = PageState extends OptionalPageState
   ? { page: PageType; pageState?: PageState }
   : PageState extends object
-    ? { page: PageType; pageState: PageState }
-    : { page: PageType };
+  ? { page: PageType; pageState: PageState }
+  : { page: PageType };
 
 export interface MlCommonGlobalState {
   time?: TimeRange;

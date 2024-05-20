@@ -19,7 +19,7 @@ import {
   buildQueryForFieldsFromSource,
   buildQueryForFieldsInPolicies,
 } from './helpers';
-import type { ESQLPolicy, ESQLRealField } from './types';
+import type { ESQLRealField, ESQLPolicy } from './types';
 
 export async function retrieveFields(
   queryString: string,

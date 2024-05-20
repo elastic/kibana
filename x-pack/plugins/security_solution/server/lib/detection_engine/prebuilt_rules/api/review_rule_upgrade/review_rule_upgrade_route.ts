@@ -7,7 +7,6 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { REVIEW_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   ReviewRuleUpgradeResponseBody,
@@ -16,16 +15,17 @@ import type {
   ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { invariant } from '../../../../../../common/utils/invariant';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/normalization/rule_converters';
-import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 import type { CalculateRuleDiffResult } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
+import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/normalization/rule_converters';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 
 export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

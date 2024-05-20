@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useState, useCallback } from 'react';
 
 export const LOCAL_STORAGE_DISMISS_OBSERVABILITY_ONBOARDING_KEY =
   'DISMISS_OBSERVABILITY_ONBOARDING';

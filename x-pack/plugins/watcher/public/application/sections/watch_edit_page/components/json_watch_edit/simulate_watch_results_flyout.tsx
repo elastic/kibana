@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { Fragment, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBasicTable,
   EuiCodeBlock,
@@ -16,17 +19,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useContext } from 'react';
 
 import {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
 import { ActionStateBadge, SectionError } from '../../../../components';
-import { WatchContext } from '../../watch_context';
 import { getTypeFromAction } from '../../watch_edit_actions';
+import { WatchContext } from '../../watch_context';
 
 export const SimulateWatchResultsFlyout = ({
   executeResults,
@@ -141,7 +141,7 @@ export const SimulateWatchResultsFlyout = ({
         }
       ),
       dataType: 'string' as const,
-      render: (actionState: string, _item: (typeof actionsTableData)[number]) => (
+      render: (actionState: string, _item: typeof actionsTableData[number]) => (
         <ActionStateBadge state={actionState} />
       ),
     },

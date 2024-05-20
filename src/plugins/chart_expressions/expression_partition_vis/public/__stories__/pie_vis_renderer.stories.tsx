@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { ComponentStory } from '@storybook/react';
 import React, { FC, PropsWithChildren } from 'react';
+import { ComponentStory } from '@storybook/react';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { getPartitionVisRenderer } from '../expression_renderers';
 import { ChartTypes, PartitionChartProps } from '../../common/types';
 import { getStartDeps } from '../__mocks__';
-import { getPartitionVisRenderer } from '../expression_renderers';
-import { data, pieConfig, pieDonutArgTypes } from './shared';
+import { pieDonutArgTypes, pieConfig, data } from './shared';
 
 const containerSize = {
   width: '700px',

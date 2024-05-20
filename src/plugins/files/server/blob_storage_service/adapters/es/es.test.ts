@@ -7,13 +7,13 @@
  */
 
 import { Readable } from 'stream';
+import { encode } from 'cbor-x';
 import { promisify } from 'util';
-import { errors } from '@elastic/elasticsearch';
-import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { Semaphore } from '@kbn/std';
-import { encode } from 'cbor-x';
+import { errors } from '@elastic/elasticsearch';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchBlobStorageClient } from './es';
 

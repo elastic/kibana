@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { TableBody } from './table_body';
 import { TableHead } from './table_head';
+import { TableBody } from './table_body';
 
 export const ClusterView = (props) => {
   return (

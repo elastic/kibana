@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import numeral from '@elastic/numeral';
 import React, { FunctionComponent, CSSProperties } from 'react';
+import numeral from '@elastic/numeral';
 interface Props {
   /** The text to display under the metric */
   label?: string;

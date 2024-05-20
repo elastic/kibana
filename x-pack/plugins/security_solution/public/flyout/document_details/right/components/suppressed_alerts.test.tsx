@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import React from 'react';
-import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
-import { SuppressedAlerts } from './suppressed_alerts';
 import {
-  CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
-  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   SUMMARY_ROW_ICON_TEST_ID,
   SUMMARY_ROW_VALUE_TEST_ID,
+  CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
+  CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
 } from './test_ids';
+import { SuppressedAlerts } from './suppressed_alerts';
+import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
 const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);
 const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID);

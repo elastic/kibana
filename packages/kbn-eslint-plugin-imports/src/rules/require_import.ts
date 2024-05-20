@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { load } from 'cheerio';
 import type { Rule } from 'eslint';
+import { load } from 'cheerio';
 
 type StringModuleConfig = string;
 

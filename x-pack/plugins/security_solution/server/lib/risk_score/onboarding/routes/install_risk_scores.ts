@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { Logger } from '@kbn/core/server';
 
 import { APP_ID, INTERNAL_RISK_SCORE_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -15,8 +15,8 @@ import type { SetupPlugins } from '../../../../plugin';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
-import { onboardingRiskScoreRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 import { installRiskScoreModule } from '../helpers/install_risk_score_module';
+import { onboardingRiskScoreRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const installRiskScoresRoute = (
   router: SecuritySolutionPluginRouter,

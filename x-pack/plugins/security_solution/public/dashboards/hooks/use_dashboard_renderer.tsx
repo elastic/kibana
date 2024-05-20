@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { useCallback, useMemo, useState } from 'react';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
 export const useDashboardRenderer = () => {
   const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();

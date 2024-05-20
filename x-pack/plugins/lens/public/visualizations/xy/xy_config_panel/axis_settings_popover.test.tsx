@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import React, { ComponentProps } from 'react';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
+import { AxisSettingsPopover } from './axis_settings_popover';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React, { ComponentProps } from 'react';
-import { AxisSettingsPopover } from './axis_settings_popover';
 
 type Props = ComponentProps<typeof AxisSettingsPopover>;
 

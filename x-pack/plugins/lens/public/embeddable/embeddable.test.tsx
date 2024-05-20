@@ -1,15 +1,3 @@
-import { IBasePath, IUiSettingsClient } from '@kbn/core/public';
-import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { AttributeService, ViewMode } from '@kbn/embeddable-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
-import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
-import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -17,21 +5,33 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddab
  * 2.0.
  */
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { LensAttributeService } from '../lens_attribute_service';
-import { createMockDatasource, createMockVisualization } from '../mocks';
-import { Document } from '../persistence';
-import { Visualization } from '../types';
 import {
   Embeddable,
-  LensByReferenceInput,
   LensByValueInput,
-  LensEmbeddableDeps,
-  LensEmbeddableInput,
-  LensSavedObjectAttributes,
   LensUnwrapMetaInfo,
+  LensEmbeddableInput,
+  LensByReferenceInput,
+  LensSavedObjectAttributes,
   LensUnwrapResult,
+  LensEmbeddableDeps,
 } from './embeddable';
+import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { Document } from '../persistence';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
+import { coreMock, httpServiceMock } from '@kbn/core/public/mocks';
+import { IBasePath, IUiSettingsClient } from '@kbn/core/public';
+import { AttributeService, ViewMode } from '@kbn/embeddable-plugin/public';
+import { LensAttributeService } from '../lens_attribute_service';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public/save_modal';
+import { act } from 'react-dom/test-utils';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { Visualization } from '../types';
+import { createMockDatasource, createMockVisualization } from '../mocks';
 
 jest.mock('@kbn/inspector-plugin/public', () => ({
   isAvailable: false,

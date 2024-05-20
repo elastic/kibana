@@ -1,9 +1,3 @@
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
-import type { UseQueryResult } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,11 +5,17 @@ import type { UseQueryResult } from '@tanstack/react-query';
  * 2.0.
  */
 import React from 'react';
-import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
-import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
-import { CspLoadingState } from './csp_loading_state';
-import { FullSizeCenteredPage } from './full_size_centered_page';
+import { i18n } from '@kbn/i18n';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
+import { css } from '@emotion/react';
 import { SubscriptionNotAllowed } from './subscription_not_allowed';
+import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
+import { FullSizeCenteredPage } from './full_size_centered_page';
+import { CspLoadingState } from './csp_loading_state';
+import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';

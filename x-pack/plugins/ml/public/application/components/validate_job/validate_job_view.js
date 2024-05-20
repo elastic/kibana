@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 
 import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
-  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getDocLinks } from '../../util/dependency_cache';
 
-import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { parseMessages } from '../../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../../common/constants/validation';
+import { Callout, statusToEuiIconType } from '../callout';
 import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
 import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
-import { Callout, statusToEuiIconType } from '../callout';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 const defaultIconType = 'questionInCircle';
 const getDefaultState = () => ({

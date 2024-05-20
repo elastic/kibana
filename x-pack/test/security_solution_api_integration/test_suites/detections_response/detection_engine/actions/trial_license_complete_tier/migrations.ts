@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
-  getLegacyActionNotificationSOById,
   getLegacyActionSOById,
+  getLegacyActionNotificationSOById,
   getRuleSOById,
 } from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 /**
  * @deprecated Once the legacy notification system is removed, remove this test too.

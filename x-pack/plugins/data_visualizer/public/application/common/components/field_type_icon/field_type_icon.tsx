@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { getFieldTypeName } from '@kbn/field-utils';
-import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field';
 import type { FC } from 'react';
 import React from 'react';
+import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field';
+import { getFieldTypeName } from '@kbn/field-utils';
 import './_index.scss';
 
 interface FieldTypeIconProps {

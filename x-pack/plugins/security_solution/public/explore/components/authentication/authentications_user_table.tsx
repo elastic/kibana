@@ -12,17 +12,17 @@ import { useDispatch } from 'react-redux';
 import { AuthStackByField } from '../../../../common/search_strategy/security_solution/users/authentications';
 import { PaginatedTable } from '../paginated_table';
 
-import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { useAuthentications } from '../../containers/authentications';
-import { usersActions, usersModel, usersSelectors } from '../../users/store';
+import * as i18n from './translations';
 import {
   getUserDetailsAuthenticationColumns,
   getUsersPageAuthenticationColumns,
   rowItems,
 } from './helpers';
-import * as i18n from './translations';
+import { useAuthentications } from '../../containers/authentications';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { usersActions, usersModel, usersSelectors } from '../../users/store';
 import type { AuthenticationsUserTableProps } from './types';
 
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';

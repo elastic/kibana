@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { ReactNode } from 'react';
 import {
   EuiCallOut,
   EuiFormRow,
@@ -8,32 +15,25 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { i18n } from '@kbn/i18n';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { ReactNode } from 'react';
-import { AwsCredentialsType } from '../../../../common/types_old';
-import {
-  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
-} from '../../test_subjects';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
-import { NewPackagePolicyPostureInput, getPosturePolicy } from '../utils';
-import { AwsInputVarFields } from './aws_input_var_fields';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import {
   AwsCredentialsTypeOptions,
   getAwsCredentialsFormManualOptions,
 } from './get_aws_credentials_form_options';
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { useAwsCredentialsForm } from './hooks';
+import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
+import { AwsCredentialsType } from '../../../../common/types_old';
+import { AwsInputVarFields } from './aws_input_var_fields';
+import {
+  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
+  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+} from '../../test_subjects';
 
 interface AWSSetupInfoContentProps {
   info: ReactNode;

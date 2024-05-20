@@ -10,12 +10,12 @@ import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import {
   counterRate,
   formatColumn,
+  mapToColumns,
+  getTimeScale,
+  getDatatable,
   formulaIntervalFn,
   formulaNowFn,
   formulaTimeRangeFn,
-  getDatatable,
-  getTimeScale,
-  mapToColumns,
 } from '../../common/expressions';
 import { getDatatableUtilitiesFactory, getFormatFactory, getTimeZoneFactory } from './utils';
 

@@ -6,13 +6,13 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiConfirmModal, EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiConfirmModal } from '@elastic/eui';
 
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { getPageHeaderActions } from '../../../test_helpers';

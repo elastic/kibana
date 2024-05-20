@@ -6,14 +6,14 @@
  */
 
 import { has } from 'lodash';
-import { severityLabels } from '../../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import type {
-  SummaryChartsAgg,
-  SummaryChartsData,
-} from '../../../../components/alerts_kpis/alerts_summary_charts_panel/types';
-import { UNKNOWN_SEVERITY } from '../../../../components/alerts_kpis/severity_level_panel/translations';
-import type { AlertSearchResponse } from '../../../../containers/detection_engine/alerts/types';
 import type { ChartCollapseAgg, ChartCollapseData } from './types';
+import type { AlertSearchResponse } from '../../../../containers/detection_engine/alerts/types';
+import type {
+  SummaryChartsData,
+  SummaryChartsAgg,
+} from '../../../../components/alerts_kpis/alerts_summary_charts_panel/types';
+import { severityLabels } from '../../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { UNKNOWN_SEVERITY } from '../../../../components/alerts_kpis/severity_level_panel/translations';
 
 export const parseChartCollapseData = (
   response: AlertSearchResponse<{}, ChartCollapseAgg>

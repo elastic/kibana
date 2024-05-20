@@ -14,22 +14,22 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { Container, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { Container, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
-import { getDefaultControlGroupInput } from '../../../common';
+import {
+  ControlGroupComponentState,
+  ControlGroupInput,
+  CONTROL_GROUP_TYPE,
+  FieldFilterPredicate,
+} from '../types';
 import {
   createControlGroupExtract,
   createControlGroupInject,
 } from '../../../common/control_group/control_group_persistable_state';
-import {
-  CONTROL_GROUP_TYPE,
-  ControlGroupComponentState,
-  ControlGroupInput,
-  FieldFilterPredicate,
-} from '../types';
+import { getDefaultControlGroupInput } from '../../../common';
 
 export class ControlGroupContainerFactory implements EmbeddableFactoryDefinition {
   public readonly isContainerType = true;

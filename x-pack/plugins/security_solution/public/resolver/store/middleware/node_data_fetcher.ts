@@ -7,14 +7,14 @@
 
 import type { Dispatch, MiddlewareAPI } from 'redux';
 import type { SafeResolverEvent } from '../../../../common/endpoint/types';
-import type { State } from '../../../common/store/types';
 import type { DataAccessLayer } from '../../types';
+import type { State } from '../../../common/store/types';
+import * as selectors from '../selectors';
 import {
   appRequestingNodeData,
   serverFailedToReturnNodeData,
   serverReturnedNodeData,
 } from '../data/action';
-import * as selectors from '../selectors';
 
 /**
  * Max number of nodes to request from the server

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
 
 import { Results } from '@elastic/react-search-ui';
 import type { SearchResult } from '@elastic/search-ui';

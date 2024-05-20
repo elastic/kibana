@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { isEmpty, merge } from 'lodash';
 import type {
-  AggregationsBuckets,
-  AggregationsStringTermsBucketKeys,
   AggregationsTermsAggregateBase,
+  AggregationsStringTermsBucketKeys,
+  AggregationsBuckets,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isEmpty, merge } from 'lodash';
-import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
+import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 
 interface Opts {
   esClient: ElasticsearchClient;

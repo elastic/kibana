@@ -7,8 +7,8 @@
  */
 
 import { EsQueryConfig } from '@kbn/es-query';
-import { UI_SETTINGS } from '../constants';
 import { GetConfigFn } from '../types';
+import { UI_SETTINGS } from '../constants';
 
 interface KibanaConfig {
   get: GetConfigFn;

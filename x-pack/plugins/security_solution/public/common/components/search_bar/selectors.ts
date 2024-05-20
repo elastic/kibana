@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SavedQuery } from '@kbn/data-plugin/public';
-import type { Query } from '@kbn/es-query';
 import { createSelector } from 'reselect';
+import type { Query } from '@kbn/es-query';
+import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InputsRange } from '../../store/inputs/model';
 
 export {

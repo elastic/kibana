@@ -8,40 +8,40 @@
 
 import './index.scss';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
-  IStorageWrapper,
   Storage,
+  IStorageWrapper,
   createStartServicesGetter,
 } from '@kbn/kibana-utils-plugin/public';
-import { DatatableUtilitiesService, getAggsFormats } from '../common';
 import { ConfigSchema } from '../config';
-import {
-  createFiltersFromMultiValueClickAction,
-  createFiltersFromRangeSelectAction,
-  createFiltersFromValueClickAction,
-  createMultiValueClickActionDefinition,
-  createSelectRangeActionDefinition,
-  createValueClickActionDefinition,
-} from './actions';
-import { NowProvider, NowProviderInternalContract } from './now_provider';
-import { QueryService } from './query';
-import { SearchService } from './search/search_service';
-import {
-  setIndexPatterns,
-  setOverlays,
-  setSearchService,
-  setTheme,
-  setUiSettings,
-} from './services';
-import { applyFilterTrigger } from './triggers';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
 } from './types';
+import { SearchService } from './search/search_service';
+import { QueryService } from './query';
+import {
+  setIndexPatterns,
+  setOverlays,
+  setSearchService,
+  setUiSettings,
+  setTheme,
+} from './services';
+import {
+  createFiltersFromValueClickAction,
+  createFiltersFromRangeSelectAction,
+  createFiltersFromMultiValueClickAction,
+  createMultiValueClickActionDefinition,
+  createValueClickActionDefinition,
+  createSelectRangeActionDefinition,
+} from './actions';
+import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
+import { NowProvider, NowProviderInternalContract } from './now_provider';
+import { getAggsFormats, DatatableUtilitiesService } from '../common';
 
 export class DataPublicPlugin
   implements

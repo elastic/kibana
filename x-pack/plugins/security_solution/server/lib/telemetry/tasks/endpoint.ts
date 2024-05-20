@@ -7,9 +7,20 @@
 
 import type { Logger } from '@kbn/core/server';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
-import type { PolicyData } from '../../../../common/endpoint/types';
-import { telemetryConfiguration } from '../configuration';
-import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
+import type { ITelemetryEventsSender } from '../sender';
+import {
+  TelemetryChannel,
+  TelemetryCounter,
+  type EndpointMetadataDocument,
+  type EndpointMetricDocument,
+  type EndpointPolicyResponseDocument,
+  type ESClusterInfo,
+  type ESLicense,
+  type Nullable,
+} from '../types';
+import type { ITelemetryReceiver } from '../receiver';
+import type { TaskExecutionPeriod } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
 import {
   addDefaultAdvancedPolicyConfigSettings,
   batchTelemetryRecords,
@@ -20,21 +31,10 @@ import {
   newTelemetryLogger,
   safeValue,
 } from '../helpers';
-import type { ITelemetryReceiver } from '../receiver';
-import type { ITelemetryEventsSender } from '../sender';
-import type { TaskExecutionPeriod } from '../task';
-import type { ITaskMetricsService } from '../task_metrics.types';
 import type { TelemetryLogger } from '../telemetry_logger';
-import {
-  type ESClusterInfo,
-  type ESLicense,
-  type EndpointMetadataDocument,
-  type EndpointMetricDocument,
-  type EndpointPolicyResponseDocument,
-  type Nullable,
-  TelemetryChannel,
-  TelemetryCounter,
-} from '../types';
+import type { PolicyData } from '../../../../common/endpoint/types';
+import { telemetryConfiguration } from '../configuration';
+import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
 
 /**
  * Endpoint agent uses this Policy ID while it's installing.
@@ -111,10 +111,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 class EndpointMetadataProcessor {
   private readonly logger: TelemetryLogger;
 
-  constructor(
-    logger: Logger,
-    private readonly receiver: ITelemetryReceiver
-  ) {
+  constructor(logger: Logger, private readonly receiver: ITelemetryReceiver) {
     this.logger = newTelemetryLogger(logger.get('processor'));
   }
 

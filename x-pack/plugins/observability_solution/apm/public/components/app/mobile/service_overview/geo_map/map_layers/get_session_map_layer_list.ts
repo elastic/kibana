@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
-  AGG_TYPE,
+  EMSFileSourceDescriptor,
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
-  EMSFileSourceDescriptor,
+  AGG_TYPE,
   LAYER_TYPE,
   SOURCE_TYPES,
 } from '@kbn/maps-plugin/common';
-import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   CLIENT_GEO_REGION_ISO_CODE,
   SESSION_ID,
 } from '../../../../../../../common/es_fields/apm';
-import { PalleteColors, getLayerStyle } from './get_map_layer_style';
+import { getLayerStyle, PalleteColors } from './get_map_layer_style';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;

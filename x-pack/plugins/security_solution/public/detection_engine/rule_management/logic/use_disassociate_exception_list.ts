@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
-import type { HttpStart } from '@kbn/core/public';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
+import type { HttpStart } from '@kbn/core/public';
 import { patchRule } from '../api/api';
 
 type Func = (lists: List[]) => void;

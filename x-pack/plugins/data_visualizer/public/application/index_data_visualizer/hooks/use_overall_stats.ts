@@ -5,38 +5,22 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { getProcessedFields } from '@kbn/ml-data-grid';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '@kbn/search-types';
-import { chunk } from 'lodash';
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
+import { chunk } from 'lodash';
 import type {
-  DataStatsFetchProgress,
-  OverallStatsSearchStrategyParams,
-} from '../../../../common/types/field_stats';
-import { isRandomSamplingOption } from '../../../../common/types/field_stats';
-import { displayError } from '../../common/util/display_error';
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  ISearchOptions,
+} from '@kbn/search-types';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { getProcessedFields } from '@kbn/ml-data-grid';
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useDataVisualizerKibana } from '../../kibana_context';
-import {
-  MAX_CONCURRENT_REQUESTS,
-  getDefaultPageState,
-} from '../constants/index_data_visualizer_viewer';
-import { getInitialProgress, getReducer } from '../progress_utils';
-import {
-  fetchDataWithTimeout,
-  rateLimitingForkJoin,
-} from '../search_strategy/requests/fetch_utils';
-import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import type {
   AggregatableFieldOverallStats,
   NonAggregatableFieldOverallStats,
@@ -52,6 +36,22 @@ import {
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
 import type { OverallStats } from '../types/overall_stats';
+import type {
+  DataStatsFetchProgress,
+  OverallStatsSearchStrategyParams,
+} from '../../../../common/types/field_stats';
+import { isRandomSamplingOption } from '../../../../common/types/field_stats';
+import { getDocumentCountStats } from '../search_strategy/requests/get_document_stats';
+import { getInitialProgress, getReducer } from '../progress_utils';
+import {
+  getDefaultPageState,
+  MAX_CONCURRENT_REQUESTS,
+} from '../constants/index_data_visualizer_viewer';
+import { displayError } from '../../common/util/display_error';
+import {
+  fetchDataWithTimeout,
+  rateLimitingForkJoin,
+} from '../search_strategy/requests/fetch_utils';
 
 const getPopulatedFieldsInIndex = (
   populatedFieldsInIndexWithoutRuntimeFields: Set<string> | undefined | null,

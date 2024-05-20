@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useEffect, useState } from 'react';
 import { ServerLogActionParams } from '../types';
 
 export const ServerLogParamsFields: React.FunctionComponent<

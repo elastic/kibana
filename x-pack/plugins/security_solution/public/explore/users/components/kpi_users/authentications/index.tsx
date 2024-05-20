@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentication_metric_failure';
+import type { StatItems } from '../../../../components/stat_items';
 import { kpiUserAuthenticationsAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_area';
 import { kpiUserAuthenticationsBarLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_bar';
 import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_metric_success';
+import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentication_metric_failure';
 import { KpiBaseComponent } from '../../../../components/kpi';
-import type { StatItems } from '../../../../components/stat_items';
-import type { UsersKpiProps } from '../types';
 import * as i18n from './translations';
+import type { UsersKpiProps } from '../types';
 
 const ID = 'usersKpiAuthentications';
 

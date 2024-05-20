@@ -7,13 +7,13 @@
  */
 
 import {
-  CANVAS_APP_ID,
   DASHBOARD_APP_ID,
   DISCOVER_APP_ID,
   DISCOVER_ESQL_LOCATOR,
-  GRAPH_APP_ID,
-  MAPS_APP_ID,
   VISUALIZE_APP_ID,
+  MAPS_APP_ID,
+  CANVAS_APP_ID,
+  GRAPH_APP_ID,
 } from './constants';
 
 export type AppId =

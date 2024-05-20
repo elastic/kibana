@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBottomBar,
   EuiButton,
@@ -19,42 +24,37 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
-import styled from 'styled-components';
 
 import { SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../../../../../../common/constants';
 
 import {
-  TransformInstallWithCurrentUserPermissionCallout,
   getNumTransformAssets,
+  TransformInstallWithCurrentUserPermissionCallout,
 } from '../../../../../../components/transform_install_as_current_user_callout';
 
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
+import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
+import { SetupTechnology } from '../../../../types';
+import {
+  sendGetAgentStatus,
+  useConfig,
+  useFleetStatus,
+  useGetPackageInfoByKeyQuery,
+  useStartServices,
+  useUIExtension,
+  useAuthz,
+} from '../../../../hooks';
 import {
   DevtoolsRequestFlyoutButton,
   Error as ErrorComponent,
   ExtensionWrapper,
   Loading,
 } from '../../../../components';
-import {
-  sendGetAgentStatus,
-  useAuthz,
-  useConfig,
-  useFleetStatus,
-  useGetPackageInfoByKeyQuery,
-  useStartServices,
-  useUIExtension,
-} from '../../../../hooks';
-import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
-import { SetupTechnology } from '../../../../types';
 
+import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
 import { pkgKeyFromPackageInfo } from '../../../../services';
-import { ConfirmDeployAgentPolicyModal, agentPolicyFormValidation } from '../../components';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 
@@ -71,10 +71,10 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 import { packageHasAtLeastOneSecret } from '../utils';
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
-import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
+import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
-import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
+import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {

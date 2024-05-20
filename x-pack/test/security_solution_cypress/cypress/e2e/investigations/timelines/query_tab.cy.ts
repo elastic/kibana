@@ -8,14 +8,14 @@
 import { getTimeline } from '../../../objects/timeline';
 
 import {
-  NOTE_CARD_CONTENT,
+  UNLOCKED_ICON,
   PIN_EVENT,
   TIMELINE_FILTER,
   TIMELINE_QUERY,
-  UNLOCKED_ICON,
+  NOTE_CARD_CONTENT,
 } from '../../../screens/timeline';
-import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 import { deleteTimelines } from '../../../tasks/api_calls/timelines';
+import { addNoteToTimeline } from '../../../tasks/api_calls/notes';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';

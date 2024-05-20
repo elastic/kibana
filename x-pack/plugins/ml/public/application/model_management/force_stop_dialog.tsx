@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { type FC, useState, useMemo, useCallback } from 'react';
 import type { EuiCheckboxGroupOption } from '@elastic/eui';
 import { EuiCallOut, EuiCheckboxGroup, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
-import type { CoreStart, OverlayStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isDefined } from '@kbn/ml-is-defined';
+import { i18n } from '@kbn/i18n';
+import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React, { type FC, useState, useMemo, useCallback } from 'react';
 import type { ModelItem } from './models_list';
 
 interface ForceStopModelConfirmDialogProps {
@@ -76,22 +76,19 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
 
   const deploymentPipelinesMap = useMemo(() => {
     if (!isPopulatedObject(model.pipelines)) return {};
-    return Object.entries(model.pipelines).reduce(
-      (acc, [pipelineId, pipelineDef]) => {
-        const deploymentIds: string[] = (pipelineDef?.processors ?? [])
-          .map((v) => v?.inference?.model_id)
-          .filter(isDefined);
-        deploymentIds.forEach((dId) => {
-          if (acc[dId]) {
-            acc[dId].push(pipelineId);
-          } else {
-            acc[dId] = [pipelineId];
-          }
-        });
-        return acc;
-      },
-      {} as Record<string, string[]>
-    );
+    return Object.entries(model.pipelines).reduce((acc, [pipelineId, pipelineDef]) => {
+      const deploymentIds: string[] = (pipelineDef?.processors ?? [])
+        .map((v) => v?.inference?.model_id)
+        .filter(isDefined);
+      deploymentIds.forEach((dId) => {
+        if (acc[dId]) {
+          acc[dId].push(pipelineId);
+        } else {
+          acc[dId] = [pipelineId];
+        }
+      });
+      return acc;
+    }, {} as Record<string, string[]>);
   }, [model.pipelines]);
 
   const pipelineWarning = useMemo<string[]>(() => {

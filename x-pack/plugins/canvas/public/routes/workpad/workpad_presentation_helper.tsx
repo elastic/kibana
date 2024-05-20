@@ -10,11 +10,11 @@ import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb } from '../../lib/breadcrumbs';
 import { getUntitledWorkpadLabel, setDocTitle } from '../../lib/doc_title';
-import { usePlatformService } from '../../services';
 import { getWorkpad } from '../../state/selectors/workpad';
-import { useAutoplayHelper } from './hooks/use_autoplay_helper';
 import { useFullscreenPresentationHelper } from './hooks/use_fullscreen_presentation_helper';
+import { useAutoplayHelper } from './hooks/use_autoplay_helper';
 import { useRefreshHelper } from './hooks/use_refresh_helper';
+import { usePlatformService } from '../../services';
 
 const getWorkpadLabel = () =>
   i18n.translate('xpack.canvas.workpadConflict.redirectLabel', {

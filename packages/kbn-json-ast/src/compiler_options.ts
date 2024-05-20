@@ -8,12 +8,12 @@
 
 import { Jsonc } from '@kbn/repo-packages';
 
-import { getAst } from './ast';
 import { T } from './babel';
+import { getAst } from './ast';
 import { getEnds, getExpandedEnds } from './ends';
-import { redentJson, stringify } from './json';
-import { getEndOfLastProp, getProp } from './props';
+import { getProp, getEndOfLastProp } from './props';
 import { snip } from './snip';
+import { redentJson, stringify } from './json';
 
 export function getCompilerOptions(ast: T.ObjectExpression) {
   const compilerOptions = getProp(ast, 'compilerOptions');

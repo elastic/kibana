@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../hooks/use_theme';
 
 export enum Shape {

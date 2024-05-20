@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { CanDuplicatePanels, apiCanDuplicatePanels } from '@kbn/presentation-containers';
+import { apiCanDuplicatePanels, CanDuplicatePanels } from '@kbn/presentation-containers';
 import {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasParentApi,
-  HasUniqueId,
-  PublishesBlockingError,
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasUniqueId,
+  CanAccessViewMode,
+  EmbeddableApiContext,
   getInheritedViewMode,
+  HasParentApi,
+  PublishesBlockingError,
+  HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';

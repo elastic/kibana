@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as deserializersImport from './de_serializers';
-import * as fieldFormattersImport from './field_formatters';
 import * as fieldValidatorsImport from './field_validators';
+import * as fieldFormattersImport from './field_formatters';
 import * as serializersImport from './serializers';
+import * as deserializersImport from './de_serializers';
 
 export const fieldValidators = fieldValidatorsImport;
 export const fieldFormatters = fieldFormattersImport;

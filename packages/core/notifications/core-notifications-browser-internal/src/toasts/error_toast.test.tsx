@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { shallow } from 'enzyme';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { ErrorToast } from './error_toast';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 
 interface ErrorToastProps {
   error?: Error;

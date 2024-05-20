@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { functionWrapper } from './utils';
+import { movingAverage, MovingAverageArgs } from '../moving_average';
 import { ExecutionContext } from '../../../execution/types';
 import { Datatable } from '../../../expression_types/specs/datatable';
-import { MovingAverageArgs, movingAverage } from '../moving_average';
-import { functionWrapper } from './utils';
 
 const defaultArgs = { window: 5, inputColumnId: 'val', outputColumnId: 'output' };
 

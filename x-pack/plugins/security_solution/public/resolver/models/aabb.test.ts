@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AABB } from '../types';
 import { isEqual } from './aabb';
+import type { AABB } from '../types';
 
 describe('AABB', () => {
   const minimumX = 0;

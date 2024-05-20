@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import * as eventModel from '../../../common/endpoint/models/event';
-import * as nodeModel from '../../../common/endpoint/models/node';
+import { mockEndpointEvent } from './endpoint_event';
 import type {
+  SafeResolverEvent,
   NewResolverTree,
   ResolverNode,
   ResolverRelatedEvents,
-  SafeResolverEvent,
 } from '../../../common/endpoint/types';
-import { mockEndpointEvent } from './endpoint_event';
+import * as eventModel from '../../../common/endpoint/models/event';
+import * as nodeModel from '../../../common/endpoint/models/node';
 import { mockResolverNode } from './resolver_node';
 
 export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({ originID }: { originID: string }): {

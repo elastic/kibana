@@ -10,18 +10,18 @@ import SemVer from 'semver/classes/semver';
 
 import { i18n } from '@kbn/i18n';
 
+import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { SelectField, UseField } from '../../../../shared_imports';
-import { Field as FieldType, NormalizedField } from '../../../../types';
+import { UseField, SelectField } from '../../../../shared_imports';
 import {
-  BoostParameter,
-  DocValuesParameter,
-  IndexParameter,
-  MetaParameter,
-  NullValueParameter,
   StoreParameter,
+  IndexParameter,
+  DocValuesParameter,
+  BoostParameter,
+  NullValueParameter,
+  MetaParameter,
 } from '../../field_parameters';
-import { AdvancedParametersSection, BasicParametersSection } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import React, { useState } from 'react';
+import { EuiPanel, EuiEmptyPrompt } from '@elastic/eui';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
-import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { JobsList } from './jobs_list';
+import { AddEnvironments } from './add_environments';
+import { LicensePrompt } from '../../../shared/license_prompt';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { LicensePrompt } from '../../../shared/license_prompt';
-import { AddEnvironments } from './add_environments';
-import { JobsList } from './jobs_list';
+import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 
 export type AnomalyDetectionApiResponse =
   APIReturnType<'GET /internal/apm/settings/anomaly-detection/jobs'>;

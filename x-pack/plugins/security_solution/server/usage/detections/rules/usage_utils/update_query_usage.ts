@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FeatureTypeUsage, RuleMetric, RulesTypeUsage } from '../types';
+import type { RulesTypeUsage, RuleMetric, FeatureTypeUsage } from '../types';
 import { getNotificationsEnabledDisabled } from './get_notifications_enabled_disabled';
 
 export interface UpdateQueryUsageOptions {

@@ -6,6 +6,9 @@
     "id": "securityTestEndpoints",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["security", "taskManager"]
+    "requiredPlugins": [
+      "security",
+      "taskManager"
+    ]
   }
 }

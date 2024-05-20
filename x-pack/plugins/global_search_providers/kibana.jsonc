@@ -6,7 +6,12 @@
     "id": "globalSearchProviders",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "global_search_providers"],
-    "requiredPlugins": ["globalSearch"]
+    "configPath": [
+      "xpack",
+      "global_search_providers"
+    ],
+    "requiredPlugins": [
+      "globalSearch"
+    ]
   }
 }

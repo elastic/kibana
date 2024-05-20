@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import expect from 'expect';
 
+import { removeServerGeneratedProperties, getSimpleMlRule, updateUsername } from '../../../utils';
 import {
   createAlertsIndex,
-  deleteAllAlerts,
   deleteAllRules,
+  deleteAllAlerts,
 } from '../../../../../../common/utils/security_solution';
-import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { getSimpleMlRule, removeServerGeneratedProperties, updateUsername } from '../../../utils';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

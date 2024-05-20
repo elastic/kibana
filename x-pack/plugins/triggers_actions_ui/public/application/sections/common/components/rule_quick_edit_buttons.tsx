@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { KueryNode } from '@kbn/es-query';
 import React, { useMemo, useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { BulkEditActions, RuleTableItem, UpdateRulesToBulkEditProps } from '../../../../types';
+import { RuleTableItem, BulkEditActions, UpdateRulesToBulkEditProps } from '../../../../types';
 import {
-  ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
+  ComponentOpts as BulkOperationsComponentOpts,
 } from './with_bulk_rule_api_operations';
 import './rule_quick_edit_buttons.scss';
 import { useKibana } from '../../../../common/lib/kibana';

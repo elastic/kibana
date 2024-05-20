@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IngestInferenceProcessor, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
+import { IngestInferenceProcessor, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ProvidedType } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';

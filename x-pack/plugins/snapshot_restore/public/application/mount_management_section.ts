@@ -6,15 +6,15 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { i18n } from '@kbn/i18n';
 
-import { renderApp } from '.';
 import { ClientConfigType } from '../types';
-import { AppDependencies } from './app_context';
-import { UiMetricService } from './services';
 import { httpService } from './services/http';
+import { UiMetricService } from './services';
 import { breadcrumbService, docTitleService } from './services/navigation';
+import { AppDependencies } from './app_context';
+import { renderApp } from '.';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,

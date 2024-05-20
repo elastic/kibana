@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EuiCommentProps, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React, { FC, ElementType } from 'react';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiCommentProps } from '@elastic/eui';
 import type {
   CommentsArray,
   ExceptionListItemSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-import React, { FC, ElementType } from 'react';
 
 import {
-  ExceptionItemCardComments,
-  ExceptionItemCardConditions,
   ExceptionItemCardHeader,
+  ExceptionItemCardConditions,
   ExceptionItemCardMetaInfo,
+  ExceptionItemCardComments,
 } from '.';
 
 import type { ExceptionListItemIdentifiers, Rule } from '../types';

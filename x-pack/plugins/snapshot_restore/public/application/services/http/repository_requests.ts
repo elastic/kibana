@@ -6,14 +6,14 @@
  */
 
 import { API_BASE_PATH } from '../../../../common/constants';
-import { EmptyRepository, Repository } from '../../../../common/types';
+import { Repository, EmptyRepository } from '../../../../common/types';
 import {
   UIM_REPOSITORY_CREATE,
+  UIM_REPOSITORY_UPDATE,
   UIM_REPOSITORY_DELETE,
   UIM_REPOSITORY_DELETE_MANY,
-  UIM_REPOSITORY_DETAIL_PANEL_CLEANUP,
   UIM_REPOSITORY_DETAIL_PANEL_VERIFY,
-  UIM_REPOSITORY_UPDATE,
+  UIM_REPOSITORY_DETAIL_PANEL_CLEANUP,
 } from '../../constants';
 import { UiMetricService } from '../ui_metric';
 import { sendRequest, useRequest } from './use_request';

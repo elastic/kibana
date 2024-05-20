@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { IUiSettingsClient } from '@kbn/core/public';
+import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   defaultApmServiceEnvironment,
   enableComparisonByDefault,
 } from '@kbn/observability-plugin/common';
-import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import type { APMLocatorPayload } from './helpers';

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { RiskSeverity } from '../../../../../common/search_strategy';
+import { render } from '@testing-library/react';
+import type { Anomalies } from '../../../../common/components/ml/types';
+import { TestProviders } from '../../../../common/mock';
+import { LeftPanelContext } from '../context';
+import { UserDetails } from './user_details';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
-import type { Anomalies } from '../../../../common/components/ml/types';
-import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
-import { TestProviders } from '../../../../common/mock';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
-import { LeftPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 import {
+  USER_DETAILS_TEST_ID,
   USER_DETAILS_INFO_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID,
-  USER_DETAILS_TEST_ID,
 } from './test_ids';
-import { UserDetails } from './user_details';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { mockContextValue } from '../mocks/mock_context';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

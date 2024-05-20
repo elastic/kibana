@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 const withSuspenseUpsell = <T extends object = {}>(
   Component: React.ComponentType<T>

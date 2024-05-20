@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EndpointMetrics, UniqueEndpointCountResponse } from './types';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { tlog } from '../../lib/telemetry/helpers';
-import type { EndpointMetrics, UniqueEndpointCountResponse } from './types';
 
 export interface GetEndpointMetricsOptions {
   esClient: ElasticsearchClient;

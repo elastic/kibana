@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ApplicationStart, CoreSetup, CoreStart, IBasePath } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, ApplicationStart, IBasePath } from '@kbn/core/public';
 
 import type { Observable } from 'rxjs';
-import { combineLatest, from, of } from 'rxjs';
+import { from, of, combineLatest } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs';
 
 import type {
-  GlobalSearchProviderResult,
   GlobalSearchResultProvider,
+  GlobalSearchProviderResult,
 } from '@kbn/global-search-plugin/public';
 
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 
-import { pagePathGetters } from './constants';
 import { sendGetPackages } from './hooks';
-import { getEuiIconType } from './services/icons';
 import type { GetPackagesResponse, PackageListItem } from './types';
+import { pagePathGetters } from './constants';
+import { getEuiIconType } from './services/icons';
 
 const packageType = 'integration';
 

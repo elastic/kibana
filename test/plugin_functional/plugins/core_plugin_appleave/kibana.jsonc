@@ -6,6 +6,8 @@
     "id": "corePluginAppleave",
     "server": false,
     "browser": true,
-    "configPath": ["core_plugin_appleave"]
+    "configPath": [
+      "core_plugin_appleave"
+    ]
   }
 }

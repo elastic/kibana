@@ -10,16 +10,16 @@ import React, { useMemo } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiButton,
-  EuiCallOut,
-  EuiCodeBlock,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSteps,
-  EuiText,
+  EuiCodeBlock,
+  EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

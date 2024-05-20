@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { nullableType } from '../lib/nullable';
 import { CasesWebhookMethods } from './types';
+import { nullableType } from '../lib/nullable';
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import ReactDOM from 'react-dom';
+import React from 'react';
 
 const renderers = [
   'debug',

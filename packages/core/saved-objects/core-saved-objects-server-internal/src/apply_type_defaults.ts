@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { globalSwitchToModelVersionAt } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import Semver from 'semver';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { globalSwitchToModelVersionAt } from '@kbn/core-saved-objects-base-server-internal';
 
 /**
  * Apply global defaults to the provided SO type.

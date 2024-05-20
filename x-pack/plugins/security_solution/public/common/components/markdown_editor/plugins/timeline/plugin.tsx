@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { EuiMarkdownEditorUiPlugin, EuiSelectableOption } from '@elastic/eui';
-import { EuiCodeBlock, EuiModalBody, EuiModalHeader } from '@elastic/eui';
 import React, { useCallback, memo } from 'react';
+import type { EuiSelectableOption, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import { EuiModalBody, EuiModalHeader, EuiCodeBlock } from '@elastic/eui';
 
 import { TimelineType } from '../../../../../../common/api/timeline';
-import type { OpenTimelineResult } from '../../../../../timelines/components/open_timeline/types';
 import { SelectableTimeline } from '../../../../../timelines/components/timeline/selectable_timeline';
+import type { OpenTimelineResult } from '../../../../../timelines/components/open_timeline/types';
 import { getTimelineUrl, useFormatUrl } from '../../../link_to';
 
-import { SecurityPageName } from '../../../../../app/types';
 import { ID } from './constants';
 import * as i18n from './translations';
+import { SecurityPageName } from '../../../../../app/types';
 
 interface TimelineEditorProps {
   onClosePopover: () => void;
@@ -38,7 +38,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
             key: `${t.title}-${index}`,
             title: t.title,
             checked: undefined,
-          }) as EuiSelectableOption
+          } as EuiSelectableOption)
       ),
     ],
     []

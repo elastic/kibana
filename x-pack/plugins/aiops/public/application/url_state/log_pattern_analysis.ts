@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type AiOpsFullIndexBasedAppState, getDefaultAiOpsListState } from './common';
+import { getDefaultAiOpsListState, type AiOpsFullIndexBasedAppState } from './common';
 
 export interface LogCategorizationPageUrlState {
   pageKey: 'logCategorization';

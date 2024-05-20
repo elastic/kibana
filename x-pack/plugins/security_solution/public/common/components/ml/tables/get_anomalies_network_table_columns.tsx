@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import type { FlowTarget } from '../../../../../common/search_strategy';
 import type { Columns } from '../../../../explore/components/paginated_table';
-import { NetworkType } from '../../../../explore/network/store/model';
-import { NetworkDetailsLink } from '../../links';
+import type { Anomaly, AnomaliesByNetwork } from '../types';
 import { getRowItemsWithActions } from '../../tables/helpers';
-import type { AnomaliesByNetwork, Anomaly } from '../types';
 import { createCompoundAnomalyKey } from './create_compound_key';
-import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
+import { NetworkDetailsLink } from '../../links';
 import * as i18n from './translations';
+import { NetworkType } from '../../../../explore/network/store/model';
+import type { FlowTarget } from '../../../../../common/search_strategy';
+import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
 
 export const getAnomaliesNetworkTableColumns = (
   startDate: string,
@@ -27,7 +27,7 @@ export const getAnomaliesNetworkTableColumns = (
   Columns<Anomaly['jobId'], AnomaliesByNetwork>,
   Columns<Anomaly['entityValue'], AnomaliesByNetwork>,
   Columns<Anomaly['influencers'], AnomaliesByNetwork>,
-  Columns<Anomaly['time'], AnomaliesByNetwork>,
+  Columns<Anomaly['time'], AnomaliesByNetwork>
 ] => [
   {
     name: i18n.NETWORK_NAME,

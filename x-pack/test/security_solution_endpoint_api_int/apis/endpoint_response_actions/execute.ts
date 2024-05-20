@@ -1,5 +1,3 @@
-import expect from '@kbn/expect';
-import { EXECUTE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { EXECUTE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/con
  * 2.0.
  */
 import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
+import expect from '@kbn/expect';
+import { EXECUTE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';

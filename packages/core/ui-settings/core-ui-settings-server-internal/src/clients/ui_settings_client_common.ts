@@ -7,10 +7,10 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { Cache } from '../cache';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
-import { UiSettingsServiceOptions } from '../types';
 import { CannotOverrideError } from '../ui_settings_errors';
+import { Cache } from '../cache';
+import { UiSettingsServiceOptions } from '../types';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 interface ReadOptions {
@@ -159,9 +159,9 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     }
   }
 
-  private async read({
-    autoCreateOrUpgradeIfMissing = true,
-  }: ReadOptions = {}): Promise<Record<string, any>> {
+  private async read({ autoCreateOrUpgradeIfMissing = true }: ReadOptions = {}): Promise<
+    Record<string, any>
+  > {
     try {
       const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
       return resp.attributes;

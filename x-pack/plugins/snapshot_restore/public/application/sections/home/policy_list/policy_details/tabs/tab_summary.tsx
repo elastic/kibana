@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCallOut,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiStat,
   EuiTitle,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiPanel,
+  EuiStat,
+  EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment } from 'react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SlmPolicy } from '../../../../../../../common/types';
 import { useServices } from '../../../../../app_context';
-import { CollapsibleIndicesList, FormattedDateTime } from '../../../../../components';
+import { FormattedDateTime, CollapsibleIndicesList } from '../../../../../components';
+import { linkToSnapshots, linkToRepository } from '../../../../../services/navigation';
 import { PolicyFeatureStatesSummary } from '../../../../../components/summaries';
-import { linkToRepository, linkToSnapshots } from '../../../../../services/navigation';
 
 interface Props {
   policy: SlmPolicy;

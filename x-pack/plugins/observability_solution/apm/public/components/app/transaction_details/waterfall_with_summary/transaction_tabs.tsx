@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSkeletonText, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';

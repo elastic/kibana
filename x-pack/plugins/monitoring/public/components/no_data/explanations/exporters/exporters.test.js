@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithIntl } from '@kbn/test-jest-helpers';
 import { ExplainExporters, ExplainExportersCloud } from './exporters';
 
 jest.mock('../../../../legacy_shims', () => ({

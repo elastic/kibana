@@ -7,8 +7,8 @@
 
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { LIST_INDEX, LIST_ITEM_ID, TYPE, VALUE } from '../../../common/constants.mock';
 import { getSearchListItemResponseMock } from '../../../common/schemas/response/search_list_item_schema.mock';
+import { LIST_INDEX, LIST_ITEM_ID, TYPE, VALUE } from '../../../common/constants.mock';
 import {
   getSearchEsListItemMock,
   getSearchListItemMock,

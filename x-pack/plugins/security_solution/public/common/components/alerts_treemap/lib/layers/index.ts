@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ArrayNode, Datum, Key } from '@elastic/charts';
+import type { Datum, Key, ArrayNode } from '@elastic/charts';
 
 import { getFillColor } from '../chart_palette';
 import { getLabel } from '../labels';

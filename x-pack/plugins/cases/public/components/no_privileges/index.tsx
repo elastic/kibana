@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { useAllCasesNavigation } from '../../common/navigation';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
+import { useAllCasesNavigation } from '../../common/navigation';
 
 interface NoPrivilegesPageProps {
   pageName: string;

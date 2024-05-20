@@ -10,9 +10,9 @@ import {
   SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { incrementCounterInternal } from './internals/increment_counter_internal';
-import { internalBulkResolve, isBulkResolveError } from './internals/internal_bulk_resolve';
 import { ApiExecutionContext } from './types';
+import { internalBulkResolve, isBulkResolveError } from './internals/internal_bulk_resolve';
+import { incrementCounterInternal } from './internals/increment_counter_internal';
 
 export interface PerformCreateParams<T = unknown> {
   type: string;

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { StatsCollectionContext } from '@kbn/telemetry-collection-manager-plugin/server';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { omit } from 'lodash';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { StatsCollectionContext } from '@kbn/telemetry-collection-manager-plugin/server';
 
 export interface KibanaUsageStats {
   kibana: {
@@ -42,16 +42,13 @@ export function handleKibanaStats(
   const os = {
     ...kibanaStats.os,
   };
-  const formattedOsStats = Object.entries(os).reduce(
-    (acc, [key, value]) => {
-      // There are new fields reported now from the "os" property like "load", "memory", etc. They are objects.
-      if (typeof value === 'string') {
-        acc[`${key}s`] = [{ [key]: value, count: 1 }];
-      }
-      return acc;
-    },
-    {} as Record<string, unknown[]>
-  );
+  const formattedOsStats = Object.entries(os).reduce((acc, [key, value]) => {
+    // There are new fields reported now from the "os" property like "load", "memory", etc. They are objects.
+    if (typeof value === 'string') {
+      acc[`${key}s`] = [{ [key]: value, count: 1 }];
+    }
+    return acc;
+  }, {} as Record<string, unknown[]>);
 
   const version = serverVersion.replace(/-snapshot/i, ''); // Shouldn't we better maintain the -snapshot so we can differentiate between actual final releases and snapshots?
 

@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import sqliteParser from '@appland/sql-parser';
-import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import {
+  last,
+  castArray,
+  each,
+  isEmpty,
+  find,
+  orderBy,
+  sortedUniqBy,
+  isArray,
+  map,
+  reduce,
+  trim,
+  get,
+} from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
+  EuiComboBox,
   EuiSpacer,
-  EuiSuperSelect,
-  EuiText,
   EuiTitle,
+  EuiText,
+  EuiIcon,
+  EuiSuperSelect,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import sqliteParser from '@appland/sql-parser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import deepEqual from 'fast-deep-equal';
-import {
-  castArray,
-  each,
-  find,
-  get,
-  isArray,
-  isEmpty,
-  last,
-  map,
-  orderBy,
-  reduce,
-  sortedUniqBy,
-  trim,
-} from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { FieldErrors, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
-import { useController, useFieldArray, useForm, useFormContext } from 'react-hook-form';
+import { useForm, useController, useFieldArray, useFormContext } from 'react-hook-form';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
 import type { ECSMappingArray } from '../../../common/utils/converters';
 import {
@@ -50,19 +50,19 @@ import {
 import ECSSchema from '../../common/schemas/ecs/v8.11.0.json';
 import osquerySchema from '../../common/schemas/osquery/v5.10.2.json';
 
-import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
+import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { overflowCss } from '../utils';
 import {
-  ECSFieldWrapperCss,
+  resultComboBoxCss,
+  fieldSpanCss,
+  fieldIconCss,
   buttonWrapperCss,
   descriptionWrapperCss,
-  euiSuperSelectCss,
-  fieldIconCss,
-  fieldSpanCss,
-  resultComboBoxCss,
   semicolonWrapperCss,
+  ECSFieldWrapperCss,
+  euiSuperSelectCss,
 } from './ecs_field_css';
 
 export type ECSMappingFormReturn = UseFormReturn<{ ecsMappingArray: ECSMappingArray }>;
@@ -93,7 +93,7 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
   value: ecs,
 }));
 
-type ECSSchemaOption = (typeof ECSSchemaOptions)[0];
+type ECSSchemaOption = typeof ECSSchemaOptions[0];
 
 interface ECSComboboxFieldProps {
   euiFieldProps: EuiComboBoxProps<ECSSchemaOption>;

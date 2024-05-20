@@ -5,43 +5,43 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
-  EuiAccordion,
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiHorizontalRule,
   EuiLink,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
   EuiLoadingSpinner,
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiButton,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSpacer,
-  EuiSwitch,
   EuiText,
-  EuiTitle,
+  EuiCallOut,
+  EuiAccordion,
 } from '@elastic/eui';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
-import React, { useState } from 'react';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { RiskEngineStatus } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import * as i18n from '../translations';
+import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
+import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
+import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
+import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
 import { MAX_SPACES_COUNT } from '../../../common/entity_analytics/risk_engine';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import { useOnOpenCloseHandler } from '../../helper_hooks';
-import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
-import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
-import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
-import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
-import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
-import * as i18n from '../translations';
 import { RiskInformationFlyout } from './risk_information';
+import { useOnOpenCloseHandler } from '../../helper_hooks';
+import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 const toastOptions = {

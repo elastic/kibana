@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { getRenderCustomToolbarWithElements, renderCustomToolbar } from './render_custom_toolbar';
+import { renderCustomToolbar, getRenderCustomToolbarWithElements } from './render_custom_toolbar';
 
 describe('renderCustomToolbar', () => {
   it('should render successfully', () => {

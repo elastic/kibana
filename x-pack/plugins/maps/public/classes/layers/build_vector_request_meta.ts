@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/data-plugin/common';
 import _ from 'lodash';
+import type { Query } from '@kbn/data-plugin/common';
 import { DataFilters, VectorSourceRequestMeta } from '../../../common/descriptor_types';
-import { IJoinSource } from '../sources/join_sources';
 import { IVectorSource } from '../sources/vector_source';
+import { IJoinSource } from '../sources/join_sources';
 
 export function buildVectorRequestMeta(
   source: IVectorSource | IJoinSource,

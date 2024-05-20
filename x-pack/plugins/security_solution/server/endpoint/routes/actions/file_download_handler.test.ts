@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
+import {
+  getActionFileDownloadRouteHandler,
+  registerActionFileDownloadRoutes,
+} from './file_download_handler';
+import type { HttpApiTestSetupMock } from '../../mocks';
+import { createHttpApiTestSetupMock } from '../../mocks';
+import { EndpointAuthorizationError } from '../../errors';
 import {
   ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { EndpointAuthorizationError } from '../../errors';
-import type { HttpApiTestSetupMock } from '../../mocks';
-import { createHttpApiTestSetupMock } from '../../mocks';
-import { applyEsClientSearchMock } from '../../mocks/utils.mock';
+import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
+import { Readable } from 'stream';
 import { createActionRequestsEsSearchResultsMock } from '../../services/actions/mocks';
-import {
-  getActionFileDownloadRouteHandler,
-  registerActionFileDownloadRoutes,
-} from './file_download_handler';
+import { applyEsClientSearchMock } from '../../mocks/utils.mock';
 
 jest.mock('../../services', () => {
   const actual = jest.requireActual('../../services');

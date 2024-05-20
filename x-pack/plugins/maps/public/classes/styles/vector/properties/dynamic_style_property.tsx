@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
-import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import React from 'react';
+import { FeatureCollection } from 'geojson';
+import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
+import { AbstractStyleProperty, IStyleProperty } from './style_property';
+import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
-  DATA_MAPPING_FUNCTION,
   DEFAULT_PERCENTILES,
   FIELD_ORIGIN,
-  FieldFormatter,
   MB_LOOKUP_FUNCTION,
-  RawValue,
   SOURCE_META_DATA_REQUEST_ID,
+  DATA_MAPPING_FUNCTION,
   STYLE_TYPE,
   VECTOR_STYLES,
+  RawValue,
+  FieldFormatter,
 } from '../../../../../common/constants';
+import {
+  CategoricalDataMappingPopover,
+  OrdinalDataMappingPopover,
+} from '../components/data_mapping';
 import {
   Category,
   FieldMetaOptions,
@@ -28,16 +34,10 @@ import {
   StyleMetaData,
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
-import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorLayer } from '../../../layers/vector_layer';
-import {
-  CategoricalDataMappingPopover,
-  OrdinalDataMappingPopover,
-} from '../components/data_mapping';
-import { getComputedFieldName } from '../style_util';
+import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
-import { DEFAULT_SIGMA } from '../vector_style_defaults';
-import { AbstractStyleProperty, IStyleProperty } from './style_property';
+import { getComputedFieldName } from '../style_util';
 
 export const OTHER_CATEGORY_KEY = '__other_bucket__';
 

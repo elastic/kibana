@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-import { INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../../constants';
 import { useAuthz, useStartServices } from '../../../../../hooks';
+import { pagePathGetters, INTEGRATIONS_PLUGIN_ID } from '../../../../../constants';
 
 export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
   const { application } = useStartServices();

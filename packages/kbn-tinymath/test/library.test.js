@@ -199,12 +199,12 @@ describe('Parser', () => {
       expect(parse("'foo bar'")).toEqual(variableEqual('foo bar'));
       expect(parse("'foo bar fizz buzz'")).toEqual(variableEqual('foo bar fizz buzz'));
       expect(parse("'foo   bar   baby'")).toEqual(variableEqual('foo   bar   baby'));
-      expect(parse("' foo bar'")).toEqual(variableEqual(' foo bar'));
-      expect(parse("'foo bar '")).toEqual(variableEqual('foo bar '));
-      expect(parse("'0foo'")).toEqual(variableEqual('0foo'));
-      expect(parse("' foo bar'")).toEqual(variableEqual(' foo bar'));
-      expect(parse("'foo bar '")).toEqual(variableEqual('foo bar '));
-      expect(parse("'0foo'")).toEqual(variableEqual('0foo'));
+      expect(parse("' foo bar'")).toEqual(variableEqual(" foo bar"));
+      expect(parse("'foo bar '")).toEqual(variableEqual("foo bar "));
+      expect(parse("'0foo'")).toEqual(variableEqual("0foo"));
+      expect(parse("' foo bar'")).toEqual(variableEqual(" foo bar"));
+      expect(parse("'foo bar '")).toEqual(variableEqual("foo bar "));
+      expect(parse("'0foo'")).toEqual(variableEqual("0foo"));
       expect(parse(`'f"oo'`)).toEqual(variableEqual(`f"oo`));
       expect(parse(`'foo😀\t'`)).toEqual(variableEqual(`foo😀\t`));
       /* eslint-enable prettier/prettier */

@@ -5,33 +5,33 @@
  * 2.0.
  */
 
+import React, { useMemo, useState, useCallback, useRef } from 'react';
+import { debounce } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSearchBar,
+  EuiEmptyPrompt,
+  EuiButton,
   EuiTitle,
   Query,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { getFieldByType } from '@kbn/metrics-data-access-plugin/common';
-import { debounce } from 'lodash';
-import React, { useMemo, useState, useCallback, useRef } from 'react';
-import { ProcessesExplanationMessage } from '../../components/processes_explanation';
-import { TopProcessesTooltip } from '../../components/top_processes_tooltip';
-import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
-import { useDatePickerContext } from '../../hooks/use_date_picker';
-import { useIntersectingState } from '../../hooks/use_intersecting_state';
-import { ProcessListContextProvider, SortBy, useProcessList } from '../../hooks/use_process_list';
-import { useRequestObservable } from '../../hooks/use_request_observable';
 import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
 import { SummaryTable } from './summary_table';
+import { SortBy, useProcessList, ProcessListContextProvider } from '../../hooks/use_process_list';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { ProcessesExplanationMessage } from '../../components/processes_explanation';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
+import { TopProcessesTooltip } from '../../components/top_processes_tooltip';
+import { useIntersectingState } from '../../hooks/use_intersecting_state';
+import { useRequestObservable } from '../../hooks/use_request_observable';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,

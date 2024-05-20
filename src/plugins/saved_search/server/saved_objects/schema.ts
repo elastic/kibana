@@ -8,8 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  MAX_SAVED_SEARCH_SAMPLE_SIZE,
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
+  MAX_SAVED_SEARCH_SAMPLE_SIZE,
   VIEW_MODE,
 } from '../../common';
 

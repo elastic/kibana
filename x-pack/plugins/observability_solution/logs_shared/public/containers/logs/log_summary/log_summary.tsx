@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { HttpHandler } from '@kbn/core-http-browser';
 import { useEffect } from 'react';
-import { Observable, exhaustMap, map } from 'rxjs';
+import { exhaustMap, map, Observable } from 'rxjs';
+import { HttpHandler } from '@kbn/core-http-browser';
 import { LogViewReference } from '../../../../common';
-import { LogEntriesSummaryRequest, LogEntriesSummaryResponse } from '../../../../common/http_api';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useObservableState, useReplaySubject } from '../../../utils/use_observable';
 import { fetchLogSummary } from './api/fetch_log_summary';
+import { LogEntriesSummaryRequest, LogEntriesSummaryResponse } from '../../../../common/http_api';
 import { useBucketSize } from './bucket_size';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export type LogSummaryBuckets = LogEntriesSummaryResponse['data']['buckets'];
 

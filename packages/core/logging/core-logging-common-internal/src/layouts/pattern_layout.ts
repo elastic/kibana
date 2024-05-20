@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { Layout, LogRecord } from '@kbn/logging';
+import type { LogRecord, Layout } from '@kbn/logging';
 import {
   Conversion,
-  DateConversion,
-  LevelConversion,
   LoggerConversion,
-  MessageConversion,
+  LevelConversion,
   MetaConversion,
+  MessageConversion,
+  DateConversion,
 } from './conversions';
 
 /**

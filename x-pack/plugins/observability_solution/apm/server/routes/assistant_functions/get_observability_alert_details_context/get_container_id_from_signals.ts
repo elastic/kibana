@@ -7,18 +7,18 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { ESSearchRequest } from '@kbn/es-types';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/common';
-import { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import { rangeQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
 import * as t from 'io-ts';
 import moment from 'moment';
+import { ESSearchRequest } from '@kbn/es-types';
+import { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { RollupInterval } from '../../../../common/rollup';
 import {
   APMEventClient,
   APMEventESSearchRequest,
 } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { RollupInterval } from '../../../../common/rollup';
 
 export async function getContainerIdFromSignals({
   query,

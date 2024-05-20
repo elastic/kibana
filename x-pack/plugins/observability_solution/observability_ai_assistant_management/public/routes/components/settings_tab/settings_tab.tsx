@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButton, EuiDescribedFormGroup, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { UISettings } from './ui_settings';
 

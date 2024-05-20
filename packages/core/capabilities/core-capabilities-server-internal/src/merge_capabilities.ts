@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities } from '@kbn/core-capabilities-common';
 import { mergeWith } from 'lodash';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 
 export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>): Capabilities =>
   mergeWith({}, ...sources, (a: unknown, b: unknown) => {

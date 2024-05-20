@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { useMutation } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { BASE_ALERTING_API_PATH, RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { v4 } from 'uuid';
 import {
   CreateRuleRequestBody,
   CreateRuleResponse,
 } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
-import { i18n } from '@kbn/i18n';
-import { useMutation } from '@tanstack/react-query';
-import { v4 } from 'uuid';
 import { useKibana } from '../utils/kibana_react';
 
 export function useCreateRule<Params extends RuleTypeParams = never>() {

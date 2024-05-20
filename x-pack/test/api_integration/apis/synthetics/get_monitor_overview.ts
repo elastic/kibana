@@ -1,11 +1,3 @@
-import expect from '@kbn/expect';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import {
-  ConfigKey,
-  EncryptedSyntheticsSavedMonitor,
-  MonitorFields,
-  MonitorOverviewItem,
-} from '@kbn/synthetics-plugin/common/runtime_types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,9 +5,17 @@ import {
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
+import {
+  ConfigKey,
+  MonitorFields,
+  MonitorOverviewItem,
+  EncryptedSyntheticsSavedMonitor,
+} from '@kbn/synthetics-plugin/common/runtime_types';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { LOCAL_LOCATION } from './get_filters';
 import { getFixtureJson } from './helper/get_fixture_json';
+import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('GetMonitorsOverview', function () {

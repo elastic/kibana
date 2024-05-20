@@ -8,9 +8,9 @@ import type {
   AggregationsKeyedPercentiles,
   AggregationsPercentilesAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CoreSetup } from '@kbn/core/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { aggregateTaskOverduePercentilesForType } from '@kbn/task-manager-plugin/server';
+import { CoreSetup } from '@kbn/core/server';
 import { ActionsPluginsStart } from '../plugin';
 import { ClusterActionsMetric, EMPTY_CLUSTER_ACTIONS_METRICS } from './types';
 

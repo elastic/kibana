@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchResponse } from '../../../common/types/es';
-import { Globals } from '../../static_globals';
-import { Cluster, LegacyRequest } from '../../types';
-import { getIndexPatterns } from '../cluster/get_index_patterns';
 import { BeatsClusterMetric } from '../metrics';
-import { beatsAggFilterPath, beatsAggResponseHandler, beatsUuidsAgg } from './_beats_stats';
 import { createBeatsQuery } from './create_beats_query';
+import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
+import type { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest, Cluster } from '../../types';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 export function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
   const { beatTotal, beatTypes, totalEvents, bytesSent } = beatsAggResponseHandler(response);

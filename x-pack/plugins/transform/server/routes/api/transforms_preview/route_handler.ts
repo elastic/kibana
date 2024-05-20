@@ -44,18 +44,15 @@ export const routeHandler: RequestHandler<
 
       const fields = Object.entries(
         fieldCapsResponse.fields as Record<string, Record<string, { type: string }>>
-      ).reduce(
-        (acc, [fieldName, fieldCaps]) => {
-          const fieldDefinition = Object.values(fieldCaps)[0];
-          const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
-          if (isMetaField || isKeywordDuplicate(fieldName, fieldNamesSet)) {
-            return acc;
-          }
-          acc[fieldName] = { ...fieldDefinition };
+      ).reduce((acc, [fieldName, fieldCaps]) => {
+        const fieldDefinition = Object.values(fieldCaps)[0];
+        const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
+        if (isMetaField || isKeywordDuplicate(fieldName, fieldNamesSet)) {
           return acc;
-        },
-        {} as Record<string, { type: string }>
-      );
+        }
+        acc[fieldName] = { ...fieldDefinition };
+        return acc;
+      }, {} as Record<string, { type: string }>);
 
       body.generated_dest_index.mappings!.properties = fields as Record<
         string,

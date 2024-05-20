@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { memoize, random } from 'lodash';
+import { random, memoize } from 'lodash';
 const bytes: Record<string, number> = {};
 export const generateBytesProcessed = memoize(
   (_timestamp: string, host: string, start = 1000, end = 100000) => {

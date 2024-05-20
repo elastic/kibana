@@ -1,4 +1,3 @@
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render } from '@testing-library/react';
 import type { UserRiskScoreColumns } from '.';
-import { RiskScoreFields } from '../../../../common/search_strategy';
-import { TestProviders } from '../../../common/mock';
 import { getUserRiskScoreColumns } from './columns';
+import { TestProviders } from '../../../common/mock';
+import { RiskScoreFields } from '../../../../common/search_strategy';
 
 describe('getUserRiskScoreColumns', () => {
   const defaultProps = {

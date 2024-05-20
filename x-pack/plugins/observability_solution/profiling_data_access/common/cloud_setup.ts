@@ -7,10 +7,10 @@
 import type { RecursivePartial } from '@elastic/eui';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import {
-  ProfilingSetupOptions,
-  SetupState,
   areResourcesSetup,
   createDefaultSetupState,
+  ProfilingSetupOptions,
+  SetupState,
 } from './setup';
 
 export interface ProfilingCloudSetupOptions extends ProfilingSetupOptions {

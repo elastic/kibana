@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectAttributes } from '@kbn/core/server';
 import { RouteInitializerDeps } from '..';
-import { API_ROUTE_WORKPAD, CANVAS_TYPE } from '../../../common/lib/constants';
+import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 
 export function initializeFindWorkpadsRoute(deps: RouteInitializerDeps) {
   const { router } = deps;

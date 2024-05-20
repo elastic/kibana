@@ -1,4 +1,3 @@
-import { LensPublicStart } from '@kbn/lens-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
  * 2.0.
  */
 import React from 'react';
-import { AddToCaseAction } from '../header/add_to_case_action';
+import Embeddable from './embeddable';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { DataViewState } from '../hooks/use_app_data_view';
 import { render } from '../rtl_helpers';
-import Embeddable from './embeddable';
+import { AddToCaseAction } from '../header/add_to_case_action';
 import { ActionTypes } from './use_actions';
 import * as lensHook from './use_embeddable_attributes';
 

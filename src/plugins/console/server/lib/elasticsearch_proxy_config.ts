@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import http from 'http';
 import https from 'https';
 import url from 'url';
-import _ from 'lodash';
 
 import { ESConfigForProxy } from '../types';
 

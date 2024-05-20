@@ -8,23 +8,23 @@
 
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { PresentationContainer } from '@kbn/presentation-containers';
 import {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasLibraryTransforms,
-  HasParentApi,
-  HasType,
-  HasUniqueId,
-  PublishesPanelTitle,
   apiCanAccessViewMode,
   apiHasLibraryTransforms,
-  apiHasParentApi,
-  apiHasType,
-  apiHasUniqueId,
+  CanAccessViewMode,
+  EmbeddableApiContext,
   getInheritedViewMode,
   getPanelTitle,
+  PublishesPanelTitle,
+  HasLibraryTransforms,
+  HasParentApi,
+  apiHasParentApi,
+  HasUniqueId,
+  apiHasUniqueId,
+  HasType,
+  apiHasType,
 } from '@kbn/presentation-publishing';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
 

@@ -6,43 +6,43 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiFlyout,
+  EuiTitle,
+  EuiSpacer,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiTitle,
+  EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 
 import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
-import { useKibana } from '../../common/lib/kibana';
 import {
-  IntervalField,
   QueryIdField,
+  IntervalField,
+  VersionField,
   ResultsTypeField,
   TimeoutField,
-  VersionField,
 } from '../../form';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
-import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
-import { overflowCss } from '../utils';
-import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
-import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
+import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
 import type {
+  UsePackQueryFormProps,
   PackQueryFormData,
   PackSOQueryFormData,
-  UsePackQueryFormProps,
 } from './use_pack_query_form';
 import { usePackQueryForm } from './use_pack_query_form';
+import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
+import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
+import { useKibana } from '../../common/lib/kibana';
+import { overflowCss } from '../utils';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];

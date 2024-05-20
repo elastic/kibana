@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { CalendarForm } from './calendar_form';
 

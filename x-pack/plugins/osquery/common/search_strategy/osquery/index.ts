@@ -7,16 +7,16 @@
 
 import type { IEsSearchRequest } from '@kbn/search-types';
 import type {
-  ActionDetailsRequestOptions,
-  ActionDetailsStrategyResponse,
-  ActionResultsRequestOptions,
-  ActionResultsStrategyResponse,
-  ActionsRequestOptions,
   ActionsStrategyResponse,
+  ActionsRequestOptions,
+  ActionDetailsStrategyResponse,
+  ActionDetailsRequestOptions,
+  ActionResultsStrategyResponse,
+  ActionResultsRequestOptions,
 } from './actions';
-import type { ResultsRequestOptions, ResultsStrategyResponse } from './results';
+import type { ResultsStrategyResponse, ResultsRequestOptions } from './results';
 
-import type { PaginationInputPaginated, SortField } from '../common';
+import type { SortField, PaginationInputPaginated } from '../common';
 
 export * from './actions';
 export * from './results';
@@ -48,19 +48,19 @@ export interface RequestOptionsPaginated<Field = string> extends RequestBasicOpt
 export type StrategyResponseType<T extends FactoryQueryTypes> = T extends OsqueryQueries.actions
   ? ActionsStrategyResponse
   : T extends OsqueryQueries.actionDetails
-    ? ActionDetailsStrategyResponse
-    : T extends OsqueryQueries.actionResults
-      ? ActionResultsStrategyResponse
-      : T extends OsqueryQueries.results
-        ? ResultsStrategyResponse
-        : never;
+  ? ActionDetailsStrategyResponse
+  : T extends OsqueryQueries.actionResults
+  ? ActionResultsStrategyResponse
+  : T extends OsqueryQueries.results
+  ? ResultsStrategyResponse
+  : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends OsqueryQueries.actions
   ? ActionsRequestOptions
   : T extends OsqueryQueries.actionDetails
-    ? ActionDetailsRequestOptions
-    : T extends OsqueryQueries.actionResults
-      ? ActionResultsRequestOptions
-      : T extends OsqueryQueries.results
-        ? ResultsRequestOptions
-        : never;
+  ? ActionDetailsRequestOptions
+  : T extends OsqueryQueries.actionResults
+  ? ActionResultsRequestOptions
+  : T extends OsqueryQueries.results
+  ? ResultsRequestOptions
+  : never;

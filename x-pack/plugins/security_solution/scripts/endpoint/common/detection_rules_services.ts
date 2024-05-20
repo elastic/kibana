@@ -6,17 +6,17 @@
  */
 
 import type { KbnClient } from '@kbn/test';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_RULES_URL_FIND,
+} from '../../../common/constants';
 import type {
   CreateRuleRequestBody,
   FindRulesRequestQuery,
   FindRulesResponse,
   RuleResponse,
 } from '../../../common/api/detection_engine';
-import {
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_RULES_URL_FIND,
-} from '../../../common/constants';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 
 /**
  * Creates a detection engine rule

@@ -41,7 +41,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<FatalErrorsServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<FatalErrorsServiceContract>"
+            ],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

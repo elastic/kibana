@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import { render } from '@testing-library/react';
 import React from 'react';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, of } from 'rxjs';
-import type { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '..';
-import { createCoreStartMock } from '../../__mocks__/core_start';
-import { createMlStartDepsMock } from '../../__mocks__/ml_start_deps';
-import type { MlDependencies } from '../../application/app';
-import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
-import { createAnomalyDetectorServiceMock } from '../../application/services/__mocks__/anomaly_detector_service';
-import { createAnomalyExplorerChartsServiceMock } from '../../application/services/__mocks__/anomaly_explorer_charts_service';
-import { createMlResultsServiceMock } from '../../application/services/ml_results_service';
-import type { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
+import { render } from '@testing-library/react';
 import type { EmbeddableAnomalyChartsContainerProps } from './embeddable_anomaly_charts_container';
 import { EmbeddableAnomalyChartsContainer } from './embeddable_anomaly_charts_container';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
+import type { CoreStart } from '@kbn/core/public';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
+import type { MlDependencies } from '../../application/app';
+import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
+import type { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '..';
+import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
+import { createMlResultsServiceMock } from '../../application/services/ml_results_service';
+import { createCoreStartMock } from '../../__mocks__/core_start';
+import { createMlStartDepsMock } from '../../__mocks__/ml_start_deps';
+import { createAnomalyExplorerChartsServiceMock } from '../../application/services/__mocks__/anomaly_explorer_charts_service';
+import { createAnomalyDetectorServiceMock } from '../../application/services/__mocks__/anomaly_detector_service';
 
 jest.mock('./use_anomaly_charts_input_resolver', () => ({
   useAnomalyChartsInputResolver: jest.fn(() => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,20 +13,19 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
-import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import type { BoolQuery, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { AlertConsumers } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useRef } from 'react';
+import type { Query, BoolQuery } from '@kbn/es-query';
+import { useKibana } from '../../../utils/kibana_react';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { RULE_DETAILS_ALERTS_TABLE_CONFIG_ID } from '../../../constants';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { useKibana } from '../../../utils/kibana_react';
 import {
-  RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_EXECUTION_TAB,
+  RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
   RULE_DETAILS_PAGE_ID,
   RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY,
 } from '../constants';

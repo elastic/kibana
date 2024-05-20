@@ -8,25 +8,25 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { ClusterUpgradeState } from '../../common/types';
 import {
   APP_WRAPPER_CLASS,
-  AuthorizationProvider,
   GlobalFlyout,
+  AuthorizationProvider,
+  RedirectAppLinks,
   KibanaRenderContextProvider,
   NotAuthorizedSection,
-  RedirectAppLinks,
 } from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
-import { EsDeprecationLogs, EsDeprecations, KibanaDeprecations, Overview } from './components';
+import { EsDeprecations, EsDeprecationLogs, KibanaDeprecations, Overview } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 

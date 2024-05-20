@@ -1,4 +1,3 @@
-import { EuiButtonEmpty } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +5,8 @@ import { EuiButtonEmpty } from '@elastic/eui';
  * 2.0.
  */
 import React from 'react';
-import { CHART_TOGGLE_HIDE, CHART_TOGGLE_SHOW } from '../../../common/translations';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { CHART_TOGGLE_SHOW, CHART_TOGGLE_HIDE } from '../../../common/translations';
 
 export const TOGGLE_TEST_ID = 'kubernetesSecurity:chartToggle';
 

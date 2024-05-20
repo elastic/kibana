@@ -16,8 +16,8 @@ import type { AggName } from '../../../../../../common/types/aggregations';
 import type { PivotAggsConfig, PivotAggsConfigWithUiSupportDict } from '../../../../common';
 import { isPivotAggsConfigWithUiBase } from '../../../../common';
 
-import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { PopoverForm } from './popover_form';
+import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { SubAggsSection } from './sub_aggs_section';
 
 interface Props {

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { memo, ReactNode, useMemo } from 'react';
+import { createMemoryHistory, MemoryHistory } from 'history';
+import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Router } from '@kbn/shared-ux-router';
+import { History } from 'history';
+import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RenderOptions, RenderResult, render as reactRender } from '@testing-library/react';
-import { MemoryHistory, createMemoryHistory } from 'history';
-import { History } from 'history';
-import React, { memo, ReactNode, useMemo } from 'react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { SECURITY_APP_ID, SESSION_VIEW_APP_ID } from '../../common/constants';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;

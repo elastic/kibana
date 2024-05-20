@@ -6,8 +6,8 @@
  */
 
 import {
-  ENDPOINT_SECURITY_ROLE_NAMES,
   EndpointSecurityRoleNames,
+  ENDPOINT_SECURITY_ROLE_NAMES,
   getAllEndpointSecurityRoles,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 

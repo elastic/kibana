@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Observable, defaultIfEmpty, defer, of, switchMap } from 'rxjs';
-import { getFunctionHelp } from '../../../i18n';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Case } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   case: Array<() => Observable<Case>>;

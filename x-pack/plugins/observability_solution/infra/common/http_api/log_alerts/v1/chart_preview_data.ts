@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import * as rt from 'io-ts';
+import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import {
   ThresholdRT,
   countCriteriaRT,
-  groupByRT,
-  timeSizeRT,
   timeUnitRT,
+  timeSizeRT,
+  groupByRT,
 } from '../../../alerting/logs/log_threshold/types';
 
 export const LOG_ALERTS_CHART_PREVIEW_DATA_PATH = '/api/infra/log_alerts/chart_preview_data';

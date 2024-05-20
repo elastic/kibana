@@ -11,7 +11,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { Installation } from '../../../types';
 import { pkgToPkgKey } from '../registry';
 
-import { PackageAlreadyInstalledError, PackageNotFoundError } from '../../../errors';
+import { PackageNotFoundError, PackageAlreadyInstalledError } from '../../../errors';
 
 import { getBundledPackageForInstallation } from './bundled_packages';
 

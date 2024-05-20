@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
   value: string;

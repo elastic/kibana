@@ -1,6 +1,8 @@
 {
   "description": "Metricbeat outages: Detect unusual decreases in metricbeat documents (ECS)",
-  "groups": ["metricbeat"],
+  "groups": [
+    "metricbeat"
+  ],
   "analysis_config": {
     "bucket_span": "10m",
     "detectors": [
@@ -10,7 +12,9 @@
         "partition_field_name": "event.dataset"
       }
     ],
-    "influencers": ["event.dataset"]
+    "influencers": [
+      "event.dataset"
+    ]
   },
   "analysis_limits": {
     "model_memory_limit": "15mb"

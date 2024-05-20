@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ESBasicMetricAggRT, MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import { uniq } from 'lodash';
+import { MetricsUIAggregation, ESBasicMetricAggRT } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAPITimerange } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
+import { getMetricsAggregations, InfraSnapshotRequestOptions } from './get_metrics_aggregations';
 import { getDatasetForField } from '../../metrics_explorer/lib/get_dataset_for_field';
-import { InfraSnapshotRequestOptions, getMetricsAggregations } from './get_metrics_aggregations';
 
 const DEFAULT_LOOKBACK_SIZE = 5;
 const createInterval = async (client: ESSearchClient, options: InfraSnapshotRequestOptions) => {

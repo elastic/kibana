@@ -6,8 +6,8 @@
  */
 
 import { get } from 'lodash';
-import { TransformStrings } from '../../../i18n';
 import { getState, getValue } from '../../../public/lib/resolved_arg';
+import { TransformStrings } from '../../../i18n';
 
 const { Sort: strings } = TransformStrings;
 

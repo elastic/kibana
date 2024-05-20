@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import React, { useEffect, useState, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
+  EuiTitle,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiSwitch,
-  EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  useForm,
+  Form,
+  getUseField,
+  getFormRow,
+  Field,
+  Forms,
+  NumericField,
+  JsonEditorField,
+  useFormData,
+} from '../../../shared_imports';
 import { DataRetention } from '../../../../../../../common';
 import { UnitField, timeUnits } from '../../../../shared';
 import { useComponentTemplatesContext } from '../../../component_templates_context';
-import {
-  Field,
-  Form,
-  Forms,
-  JsonEditorField,
-  NumericField,
-  getFormRow,
-  getUseField,
-  useForm,
-  useFormData,
-} from '../../../shared_imports';
 import { logisticsFormSchema } from './step_logistics_schema';
 
 const UseField = getUseField({ component: Field });

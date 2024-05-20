@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText } from '@elastic/eui';
 import React from 'react';
+import { EuiButton, EuiText } from '@elastic/eui';
 
-import { canUseMappingsEditor, normalize } from '../../lib';
 import { useDispatch, useMappingsState } from '../../mappings_state_context';
 import { FieldsEditor } from '../../types';
+import { canUseMappingsEditor, normalize } from '../../lib';
 
 interface Props {
   editor: FieldsEditor;

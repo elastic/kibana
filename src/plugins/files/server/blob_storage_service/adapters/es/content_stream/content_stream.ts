@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Duplex, Readable, Writable } from 'stream';
-import { errors as esErrors } from '@elastic/elasticsearch';
-import { ByteSizeValue } from '@kbn/config-schema';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createId } from '@paralleldrive/cuid2';
 import * as cborx from 'cbor-x';
+import { errors as esErrors } from '@elastic/elasticsearch';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults } from 'lodash';
+import { Duplex, Writable, Readable } from 'stream';
 
-import { inspect } from 'util';
 import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { inspect } from 'util';
 import { wrapErrorAndReThrow } from '../../../../file_client/utils';
 import type { FileChunkDocument } from '../mappings';
 

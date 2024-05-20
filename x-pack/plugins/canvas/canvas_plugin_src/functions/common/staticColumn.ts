@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { getType } from '@kbn/interpreter';
 import {
+  ExpressionFunctionDefinition,
   Datatable,
   DatatableColumnType,
-  ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import { getType } from '@kbn/interpreter';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

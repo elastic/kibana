@@ -10,8 +10,8 @@ import {
   ConfiguredLimits as AppSearchConfiguredLimits,
 } from './app_search';
 import {
-  ConfiguredLimits as WorkplaceSearchConfiguredLimits,
   WorkplaceSearchInitialData,
+  ConfiguredLimits as WorkplaceSearchConfiguredLimits,
 } from './workplace_search';
 
 export interface InitialAppData {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { AreaSeries, ScaleType } from '@elastic/charts';
 import React from 'react';
-import { X_ACCESSOR_INDEX, Y0_ACCESSOR_INDEXES, Y_ACCESSOR_INDEXES } from '../../../constants';
-import { ChartsEntities } from '../model/charts';
+import { ScaleType, AreaSeries } from '@elastic/charts';
 import { getAreaStyles } from '../utils/series_styles';
+import { ChartsEntities } from '../model/charts';
+import { X_ACCESSOR_INDEX, Y_ACCESSOR_INDEXES, Y0_ACCESSOR_INDEXES } from '../../../constants';
 
 export function AreaSeriesDecorator({
   seriesId,

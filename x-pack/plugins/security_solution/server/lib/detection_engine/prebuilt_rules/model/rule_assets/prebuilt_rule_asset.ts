@@ -7,10 +7,10 @@
 
 import * as z from 'zod';
 import {
-  BaseCreateProps,
   RequiredFieldArray,
   RuleSignatureId,
   RuleVersion,
+  BaseCreateProps,
   TypeSpecificCreateProps,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 

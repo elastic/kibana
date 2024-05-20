@@ -12,7 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import type { GetInputIndex } from './get_input_output_index';
-import { DataViewError, getInputIndex } from './get_input_output_index';
+import { getInputIndex, DataViewError } from './get_input_output_index';
 
 describe('get_input_output_index', () => {
   let servicesMock: RuleExecutorServicesMock;

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
@@ -18,18 +21,15 @@ import type {
   IRuleTypeAlerts,
   RuleType,
 } from '@kbn/alerting-plugin/server';
-import type { TransformHealthAlert } from '@kbn/alerts-as-data-utils';
-import type { Logger } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { i18n } from '@kbn/i18n';
+import type { TransformHealthAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   PLUGIN,
-  TRANSFORM_HEALTH_RESULTS,
-  TRANSFORM_RULE_TYPE,
   type TransformHealthStatus,
+  TRANSFORM_RULE_TYPE,
+  TRANSFORM_HEALTH_RESULTS,
 } from '../../../../common/constants';
 import type { TransformHealthRuleParams } from './schema';
 import { transformHealthRuleParams } from './schema';
@@ -172,8 +172,9 @@ export function getTransformHealthRuleType(
         throw new AlertsClientError();
       }
 
-      const fieldFormatsRegistry =
-        await getFieldFormatsStart().fieldFormatServiceFactory(uiSettingsClient);
+      const fieldFormatsRegistry = await getFieldFormatsStart().fieldFormatServiceFactory(
+        uiSettingsClient
+      );
 
       const transformHealthService = transformHealthServiceProvider({
         esClient: scopedClusterClient.asCurrentUser,

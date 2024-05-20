@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { ComponentStory } from '@storybook/react';
+import { EuiFlexGroup } from '@elastic/eui';
 
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { SloActiveAlertsBadge as Component, Props } from './slo_active_alerts_badge';

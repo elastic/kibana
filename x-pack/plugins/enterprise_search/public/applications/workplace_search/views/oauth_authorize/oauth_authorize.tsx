@@ -14,17 +14,17 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
+  EuiHeaderLogo,
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiSpacer,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiTitle,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';

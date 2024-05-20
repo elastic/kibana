@@ -8,12 +8,9 @@
 import * as t from 'io-ts';
 
 import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
 
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   CreateExceptionListSchema,
@@ -22,11 +19,14 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ExceptionListTypeEnum,
   createExceptionListSchema,
   exceptionListItemSchema,
+  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type {
   CreateRuleExceptionsRequestBodyDecoded,
@@ -38,13 +38,13 @@ import {
   CreateRuleExceptionsRequestParams,
 } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import { buildSiemResponse } from '../../../routes/utils';
-import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
 import { readRules } from '../../../rule_management/logic/crud/read_rules';
+import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../rule_management/logic/exceptions/check_for_default_rule_exception_list';
 import type { RuleParams } from '../../../rule_schema';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { buildSiemResponse } from '../../../routes/utils';
+import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

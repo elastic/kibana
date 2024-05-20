@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent } from '@testing-library/react';
+import { fireEvent, act } from '@testing-library/react';
 
 import type { Agent } from '../../../../types';
 

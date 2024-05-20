@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { chance, getServices } from './lib';
+import { getServices, chance } from './lib';
 
 export const docExistsSuite = (savedObjectsIndex: string) => () => {
   async function setup(

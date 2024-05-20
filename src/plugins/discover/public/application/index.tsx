@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React from 'react';
 import type { Observable } from 'rxjs';
 import { ExperimentalFeatures } from '../../common/config';
+import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverCustomizationContext } from '../customizations';
-import { DiscoverRouter } from './discover_router';
 
 export interface RenderAppProps {
   element: HTMLElement;

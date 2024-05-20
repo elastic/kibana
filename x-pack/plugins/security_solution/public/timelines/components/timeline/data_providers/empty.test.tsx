@@ -8,8 +8,8 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../../../common/mock/test_providers';
 import { Empty } from './empty';
+import { TestProviders } from '../../../../common/mock/test_providers';
 
 describe('Empty', () => {
   describe('rendering', () => {

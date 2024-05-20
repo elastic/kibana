@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { Filter, Query } from '@kbn/es-query';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { MapApi } from '@kbn/maps-plugin/public';
+import type { MlApiServices } from '../../../services/ml_api_service';
 import {
   CREATED_BY_LABEL,
-  DEFAULT_BUCKET_SPAN,
   JOB_TYPE,
+  DEFAULT_BUCKET_SPAN,
 } from '../../../../../common/constants/new_job';
-import type { MlApiServices } from '../../../services/ml_api_service';
+import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import type { JobCreatorType } from '../common/job_creator';
-import { createEmptyDatafeed, createEmptyJob } from '../common/job_creator/util/default_configs';
 import { stashJobForCloning } from '../common/job_creator/util/general';
+import { getJobsItemsFromEmbeddable } from './utils';
 import type { CreateState } from '../job_from_dashboard';
 import { QuickJobCreatorBase } from '../job_from_dashboard';
 import { getDefaultQuery } from '../utils/new_job_utils';
-import { getJobsItemsFromEmbeddable } from './utils';
 
 interface VisDescriptor {
   dashboard: { query: Query; filters: Filter[] };

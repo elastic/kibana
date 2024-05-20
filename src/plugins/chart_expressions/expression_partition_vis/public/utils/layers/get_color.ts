@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import { ArrayNode } from '@elastic/charts';
-import { lightenColor } from '@kbn/charts-plugin/public';
-import type { PaletteDefinition, PaletteOutput, PaletteRegistry, SeriesLayer } from '@kbn/coloring';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { isEqual } from 'lodash';
+import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { lightenColor } from '@kbn/charts-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { DistinctSeries } from '../get_distinct_series';
 import { getNodeLabel } from './get_node_labels';
@@ -98,8 +98,8 @@ const getDistinctColor = (
         rankAtDepth: isSplitParentLayer
           ? parentSeries.findIndex((d) => d === categoricalKey)
           : index > -1
-            ? index
-            : 0,
+          ? index
+          : 0,
         totalSeriesAtDepth: isSplitParentLayer ? parentSeries.length : allSeries.length || 1,
       },
     ],
@@ -145,7 +145,7 @@ const createSeriesLayers = (
   column: Partial<BucketColumns>
 ): SeriesLayer[] => {
   const seriesLayers: SeriesLayer[] = [];
-  let tempParent: typeof arrayNode | (typeof arrayNode)['parent'] = arrayNode;
+  let tempParent: typeof arrayNode | typeof arrayNode['parent'] = arrayNode;
   while (tempParent.parent && tempParent.depth > 0) {
     const nodeKey = tempParent.parent.children[tempParent.sortIndex][0];
     const seriesName = String(nodeKey);

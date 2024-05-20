@@ -8,10 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 export class FetchInventoryViewError extends Error {
-  constructor(
-    message: string,
-    public cause?: Error
-  ) {
+  constructor(message: string, public cause?: Error) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'FetchInventoryViewError';
@@ -19,10 +16,7 @@ export class FetchInventoryViewError extends Error {
 }
 
 export class UpsertInventoryViewError extends Error {
-  constructor(
-    message: string,
-    public cause?: Error
-  ) {
+  constructor(message: string, public cause?: Error) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'UpsertInventoryViewError';
@@ -30,10 +24,7 @@ export class UpsertInventoryViewError extends Error {
 }
 
 export class DeleteInventoryViewError extends Error {
-  constructor(
-    message: string,
-    public cause?: Error
-  ) {
+  constructor(message: string, public cause?: Error) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'DeleteInventoryViewError';

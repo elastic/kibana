@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { coreStart, render } from '../../helpers/test_helper';
 import { useAppContext } from '../../hooks/use_app_context';
+import { coreStart, render } from '../../helpers/test_helper';
 import { SettingsPage } from './settings_page';
 
 jest.mock('../../hooks/use_app_context');

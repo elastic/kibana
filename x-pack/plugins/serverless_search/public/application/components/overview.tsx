@@ -7,7 +7,6 @@
 
 import {
   EuiAvatar,
-  EuiBadge,
   EuiButtonEmpty,
   EuiCard,
   EuiFlexGroup,
@@ -16,47 +15,48 @@ import {
   EuiPageTemplate,
   EuiPanel,
   EuiText,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  CodeBox,
-  IngestData,
-  InstallClientPanel,
-  OverviewPanel,
-  PreprocessDataPanel,
-  SelectClientPanel,
   WelcomeBanner,
-  getConsoleRequest,
+  IngestData,
+  SelectClientPanel,
+  OverviewPanel,
+  CodeBox,
+  InstallClientPanel,
   getLanguageDefinitionCodeSnippet,
+  getConsoleRequest,
+  PreprocessDataPanel,
 } from '@kbn/search-api-panels';
 
+import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
 import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
-import { CloudDetailsPanel } from '@kbn/search-api-panels';
-import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
 import { useLocation } from 'react-router-dom';
+import { CloudDetailsPanel } from '@kbn/search-api-panels';
 import { docLinks } from '../../../common/doc_links';
+import { useKibanaServices } from '../hooks/use_kibana';
+import { useAssetBasePath } from '../hooks/use_asset_base_path';
 import {
   API_KEY_PLACEHOLDER,
   CLOUD_ID_PLACEHOLDER,
-  DEFAULT_INGESTION_PIPELINE,
   ELASTICSEARCH_URL_PLACEHOLDER,
+  DEFAULT_INGESTION_PIPELINE,
 } from '../constants';
-import { useAssetBasePath } from '../hooks/use_asset_base_path';
-import { useKibanaServices } from '../hooks/use_kibana';
 import { javaDefinition } from './languages/java';
-import { LanguageGrid } from './languages/language_grid';
 import { languageDefinitions } from './languages/languages';
+import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
-import { OPTIONAL_LABEL } from '../../../common/i18n_string';
-import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
 import { ApiKeyPanel } from './api_key/api_key';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
-import { PipelineManageButton } from './pipeline_manage_button';
 import { PipelineOverviewButton } from './pipeline_overview_button';
 import { SelectClientCallouts } from './select_client_callouts';
+import { PipelineManageButton } from './pipeline_manage_button';
+import { OPTIONAL_LABEL } from '../../../common/i18n_string';
+import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);

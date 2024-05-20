@@ -73,8 +73,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isLinked =
-        await PageObjects.timeToVisualize.libraryNotificationExists('My Saved New Vis 1');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'My Saved New Vis 1'
+      );
       expect(isLinked).to.be(true);
 
       await PageObjects.timeToVisualize.resetNewDashboard();
@@ -110,8 +111,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isLinked =
-        await PageObjects.timeToVisualize.libraryNotificationExists('My New Vis 1 Copy');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'My New Vis 1 Copy'
+      );
       expect(isLinked).to.be(false);
 
       await PageObjects.timeToVisualize.resetNewDashboard();
@@ -147,8 +149,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
 
-      const isLinked =
-        await PageObjects.timeToVisualize.libraryNotificationExists('Another New Vis 1 Copy');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'Another New Vis 1 Copy'
+      );
       expect(isLinked).to.be(true);
 
       await PageObjects.timeToVisualize.resetNewDashboard();
@@ -210,8 +213,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
 
-      const isLinked =
-        await PageObjects.timeToVisualize.libraryNotificationExists('My Saved New Vis 2');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'My Saved New Vis 2'
+      );
       expect(isLinked).to.be(true);
     });
 
@@ -254,8 +258,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
 
-      const isLinked =
-        await PageObjects.timeToVisualize.libraryNotificationExists('My New Vis 2 Copy');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'My New Vis 2 Copy'
+      );
       expect(isLinked).to.be(false);
     });
 
@@ -298,8 +303,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.eql(2);
 
-      const isLinked =
-        await PageObjects.timeToVisualize.libraryNotificationExists('Neat Saved Vis 2 Copy');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'Neat Saved Vis 2 Copy'
+      );
       expect(isLinked).to.be(true);
     });
   });

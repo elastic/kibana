@@ -51,7 +51,9 @@
                 "tags": [],
                 "label": "currentReplacements",
                 "description": [],
-                "signature": ["Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"],
+                "signature": [
+                  "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
+                ],
                 "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/get_anonymized_value/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -80,7 +82,9 @@
         "tags": [],
         "label": "getIsDataAnonymizable",
         "description": [],
-        "signature": ["(rawData: string | Record<string, string[]>) => boolean"],
+        "signature": [
+          "(rawData: string | Record<string, string[]>) => boolean"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -92,7 +96,9 @@
             "tags": [],
             "label": "rawData",
             "description": [],
-            "signature": ["string | Record<string, string[]>"],
+            "signature": [
+              "string | Record<string, string[]>"
+            ],
             "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -108,7 +114,9 @@
         "type": "Function",
         "tags": [],
         "label": "handleBedrockChunk",
-        "description": ["\nHandle a chunk of data from the bedrock API."],
+        "description": [
+          "\nHandle a chunk of data from the bedrock API."
+        ],
         "signature": [
           "({ chunk, bedrockBuffer, chunkHandler, logger, }: { chunk: Uint8Array; bedrockBuffer: Uint8Array; chunkHandler?: ((chunk: string) => void) | undefined; logger?: ",
           {
@@ -142,7 +150,9 @@
                 "tags": [],
                 "label": "chunk",
                 "description": [],
-                "signature": ["Uint8Array"],
+                "signature": [
+                  "Uint8Array"
+                ],
                 "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -154,7 +164,9 @@
                 "tags": [],
                 "label": "bedrockBuffer",
                 "description": [],
-                "signature": ["Uint8Array"],
+                "signature": [
+                  "Uint8Array"
+                ],
                 "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -166,7 +178,9 @@
                 "tags": [],
                 "label": "chunkHandler",
                 "description": [],
-                "signature": ["((chunk: string) => void) | undefined"],
+                "signature": [
+                  "((chunk: string) => void) | undefined"
+                ],
                 "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -178,7 +192,9 @@
                     "tags": [],
                     "label": "chunk",
                     "description": [],
-                    "signature": ["string"],
+                    "signature": [
+                      "string"
+                    ],
                     "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -211,7 +227,9 @@
             ]
           }
         ],
-        "returnComment": [", bedrockBuffer } - The decoded chunk and the updated buffer."],
+        "returnComment": [
+          ", bedrockBuffer } - The decoded chunk and the updated buffer."
+        ],
         "initialIsOpen": false
       },
       {
@@ -425,7 +443,9 @@
                 "tags": [],
                 "label": "replacements",
                 "description": [],
-                "signature": ["{} & { [k: string]: string; }"],
+                "signature": [
+                  "{} & { [k: string]: string; }"
+                ],
                 "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -479,7 +499,9 @@
                 "tags": [],
                 "label": "replacements",
                 "description": [],
-                "signature": ["{} & { [k: string]: string; }"],
+                "signature": [
+                  "{} & { [k: string]: string; }"
+                ],
                 "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/helpers/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -536,7 +558,9 @@
                 "tags": [],
                 "label": "currentReplacements",
                 "description": [],
-                "signature": ["Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"],
+                "signature": [
+                  "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
+                ],
                 "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -617,7 +641,9 @@
                     "tags": [],
                     "label": "replacements",
                     "description": [],
-                    "signature": ["Zod.objectOutputType<{}, Zod.ZodString, \"strip\">"],
+                    "signature": [
+                      "Zod.objectOutputType<{}, Zod.ZodString, \"strip\">"
+                    ],
                     "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -633,7 +659,9 @@
                 "tags": [],
                 "label": "rawData",
                 "description": [],
-                "signature": ["string | Record<string, unknown[]>"],
+                "signature": [
+                  "string | Record<string, unknown[]>"
+                ],
                 "path": "x-pack/packages/kbn-elastic-assistant-common/impl/data_anonymization/transform_raw_data/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -700,7 +728,9 @@
         "tags": [],
         "label": "AppendConversationMessageRequestParams",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -713,7 +743,9 @@
         "tags": [],
         "label": "AppendConversationMessageRequestParamsInput",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -740,8 +772,12 @@
         "type": "Type",
         "tags": [],
         "label": "AssistantFeatures",
-        "description": ["\nInterface for features available to the elastic assistant"],
-        "signature": ["{ readonly assistantModelEvaluation: boolean; }"],
+        "description": [
+          "\nInterface for features available to the elastic assistant"
+        ],
+        "signature": [
+          "{ readonly assistantModelEvaluation: boolean; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -753,7 +789,9 @@
         "type": "Type",
         "tags": [],
         "label": "AttackDiscovery",
-        "description": ["\nAn attack discovery generated from one or more alerts"],
+        "description": [
+          "\nAn attack discovery generated from one or more alerts"
+        ],
         "signature": [
           "{ title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }"
         ],
@@ -814,7 +852,9 @@
         "tags": [],
         "label": "BulkActionBase",
         "description": [],
-        "signature": ["{ query?: string | undefined; ids?: string[] | undefined; }"],
+        "signature": [
+          "{ query?: string | undefined; ids?: string[] | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -827,7 +867,9 @@
         "tags": [],
         "label": "BulkActionSkipReason",
         "description": [],
-        "signature": ["\"CONVERSATION_NOT_MODIFIED\""],
+        "signature": [
+          "\"CONVERSATION_NOT_MODIFIED\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -885,7 +927,9 @@
         "tags": [],
         "label": "BulkCrudActionSummary",
         "description": [],
-        "signature": ["{ total: number; succeeded: number; failed: number; skipped: number; }"],
+        "signature": [
+          "{ total: number; succeeded: number; failed: number; skipped: number; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -897,8 +941,12 @@
         "type": "Type",
         "tags": [],
         "label": "ConversationCategory",
-        "description": ["\nThe conversation category."],
-        "signature": ["\"assistant\" | \"insights\""],
+        "description": [
+          "\nThe conversation category."
+        ],
+        "signature": [
+          "\"assistant\" | \"insights\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -911,7 +959,9 @@
         "tags": [],
         "label": "ConversationCategoryEnum",
         "description": [],
-        "signature": ["{ assistant: \"assistant\"; insights: \"insights\"; }"],
+        "signature": [
+          "{ assistant: \"assistant\"; insights: \"insights\"; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -923,8 +973,12 @@
         "type": "Type",
         "tags": [],
         "label": "ConversationConfidence",
-        "description": ["\nThe conversation confidence."],
-        "signature": ["\"medium\" | \"low\" | \"high\""],
+        "description": [
+          "\nThe conversation confidence."
+        ],
+        "signature": [
+          "\"medium\" | \"low\" | \"high\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -937,7 +991,9 @@
         "tags": [],
         "label": "ConversationConfidenceEnum",
         "description": [],
-        "signature": ["{ medium: \"medium\"; low: \"low\"; high: \"high\"; }"],
+        "signature": [
+          "{ medium: \"medium\"; low: \"low\"; high: \"high\"; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -965,7 +1021,9 @@
         "tags": [],
         "label": "ConversationDetailsInError",
         "description": [],
-        "signature": ["{ id: string; name?: string | undefined; }"],
+        "signature": [
+          "{ id: string; name?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1083,7 +1141,9 @@
         "tags": [],
         "label": "CreateKnowledgeBaseRequestParams",
         "description": [],
-        "signature": ["{ resource?: string | undefined; }"],
+        "signature": [
+          "{ resource?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1096,7 +1156,9 @@
         "tags": [],
         "label": "CreateKnowledgeBaseRequestParamsInput",
         "description": [],
-        "signature": ["{ resource?: string | undefined; }"],
+        "signature": [
+          "{ resource?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1109,7 +1171,9 @@
         "tags": [],
         "label": "CreateKnowledgeBaseResponse",
         "description": [],
-        "signature": ["{ success?: boolean | undefined; }"],
+        "signature": [
+          "{ success?: boolean | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1152,7 +1216,9 @@
         "tags": [],
         "label": "DeleteConversationRequestParams",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1165,7 +1231,9 @@
         "tags": [],
         "label": "DeleteConversationRequestParamsInput",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1193,7 +1261,9 @@
         "tags": [],
         "label": "DeleteKnowledgeBaseRequestParams",
         "description": [],
-        "signature": ["{ resource?: string | undefined; }"],
+        "signature": [
+          "{ resource?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1206,7 +1276,9 @@
         "tags": [],
         "label": "DeleteKnowledgeBaseRequestParamsInput",
         "description": [],
-        "signature": ["{ resource?: string | undefined; }"],
+        "signature": [
+          "{ resource?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1219,7 +1291,9 @@
         "tags": [],
         "label": "DeleteKnowledgeBaseResponse",
         "description": [],
-        "signature": ["{ success?: boolean | undefined; }"],
+        "signature": [
+          "{ success?: boolean | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1328,7 +1402,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION",
         "description": [],
-        "signature": ["\"1\""],
+        "signature": [
+          "\"1\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1377,7 +1453,9 @@
         "tags": [],
         "label": "ELASTIC_AI_ASSISTANT_URL",
         "description": [],
-        "signature": ["\"/api/elastic_assistant\""],
+        "signature": [
+          "\"/api/elastic_assistant\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1435,7 +1513,9 @@
         "tags": [],
         "label": "ExecuteConnectorRequestParams",
         "description": [],
-        "signature": ["{ connectorId: string; }"],
+        "signature": [
+          "{ connectorId: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1448,7 +1528,9 @@
         "tags": [],
         "label": "ExecuteConnectorRequestParamsInput",
         "description": [],
-        "signature": ["{ connectorId: string; }"],
+        "signature": [
+          "{ connectorId: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1521,7 +1603,9 @@
         "tags": [],
         "label": "FindConversationsSortField",
         "description": [],
-        "signature": ["\"title\" | \"updated_at\" | \"created_at\" | \"is_default\""],
+        "signature": [
+          "\"title\" | \"updated_at\" | \"created_at\" | \"is_default\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1594,7 +1678,9 @@
         "tags": [],
         "label": "GetCapabilitiesResponse",
         "description": [],
-        "signature": ["{ assistantModelEvaluation: boolean; }"],
+        "signature": [
+          "{ assistantModelEvaluation: boolean; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1607,7 +1693,9 @@
         "tags": [],
         "label": "GetEvaluateResponse",
         "description": [],
-        "signature": ["{ agentExecutors: string[]; }"],
+        "signature": [
+          "{ agentExecutors: string[]; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/get_evaluate_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1620,7 +1708,9 @@
         "tags": [],
         "label": "INTERNAL_API_ACCESS",
         "description": [],
-        "signature": ["\"internal\""],
+        "signature": [
+          "\"internal\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1632,8 +1722,12 @@
         "type": "Type",
         "tags": [],
         "label": "KnowledgeBaseResponse",
-        "description": ["\nAI assistant KnowledgeBase."],
-        "signature": ["{ success?: boolean | undefined; }"],
+        "description": [
+          "\nAI assistant KnowledgeBase."
+        ],
+        "signature": [
+          "{ success?: boolean | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1645,7 +1739,9 @@
         "type": "Type",
         "tags": [],
         "label": "Message",
-        "description": ["\nAI assistant conversation message."],
+        "description": [
+          "\nAI assistant conversation message."
+        ],
         "signature": [
           "{ timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; isError?: boolean | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }"
         ],
@@ -1660,8 +1756,12 @@
         "type": "Type",
         "tags": [],
         "label": "MessageRole",
-        "description": ["\nMessage role."],
-        "signature": ["\"user\" | \"system\" | \"assistant\""],
+        "description": [
+          "\nMessage role."
+        ],
+        "signature": [
+          "\"user\" | \"system\" | \"assistant\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1674,7 +1774,9 @@
         "tags": [],
         "label": "MessageRoleEnum",
         "description": [],
-        "signature": ["{ user: \"user\"; system: \"system\"; assistant: \"assistant\"; }"],
+        "signature": [
+          "{ user: \"user\"; system: \"system\"; assistant: \"assistant\"; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1686,8 +1788,12 @@
         "type": "Type",
         "tags": [],
         "label": "NonEmptyString",
-        "description": ["\nA string that is not empty and does not contain only whitespace"],
-        "signature": ["string"],
+        "description": [
+          "\nA string that is not empty and does not contain only whitespace"
+        ],
+        "signature": [
+          "string"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1715,7 +1821,9 @@
         "tags": [],
         "label": "OutputIndex",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1848,7 +1956,9 @@
         "tags": [],
         "label": "PostEvaluateResponse",
         "description": [],
-        "signature": ["{ success: boolean; evaluationId: string; }"],
+        "signature": [
+          "{ success: boolean; evaluationId: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1860,8 +1970,12 @@
         "type": "Type",
         "tags": [],
         "label": "Provider",
-        "description": ["\nProvider"],
-        "signature": ["\"OpenAI\" | \"Azure OpenAI\""],
+        "description": [
+          "\nProvider"
+        ],
+        "signature": [
+          "\"OpenAI\" | \"Azure OpenAI\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1874,7 +1988,9 @@
         "tags": [],
         "label": "ProviderEnum",
         "description": [],
-        "signature": ["{ OpenAI: \"OpenAI\"; \"Azure OpenAI\": \"Azure OpenAI\"; }"],
+        "signature": [
+          "{ OpenAI: \"OpenAI\"; \"Azure OpenAI\": \"Azure OpenAI\"; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1887,7 +2003,9 @@
         "tags": [],
         "label": "PUBLIC_API_ACCESS",
         "description": [],
-        "signature": ["\"public\""],
+        "signature": [
+          "\"public\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1900,7 +2018,9 @@
         "tags": [],
         "label": "ReadConversationRequestParams",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1913,7 +2033,9 @@
         "tags": [],
         "label": "ReadConversationRequestParamsInput",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1941,7 +2063,9 @@
         "tags": [],
         "label": "Reader",
         "description": [],
-        "signature": ["{} & { [k: string]: unknown; }"],
+        "signature": [
+          "{} & { [k: string]: unknown; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1954,7 +2078,9 @@
         "tags": [],
         "label": "ReadKnowledgeBaseRequestParams",
         "description": [],
-        "signature": ["{ resource?: string | undefined; }"],
+        "signature": [
+          "{ resource?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1967,7 +2093,9 @@
         "tags": [],
         "label": "ReadKnowledgeBaseRequestParamsInput",
         "description": [],
-        "signature": ["{ resource?: string | undefined; }"],
+        "signature": [
+          "{ resource?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1994,8 +2122,12 @@
         "type": "Type",
         "tags": [],
         "label": "Replacements",
-        "description": ["\nReplacements object used to anonymize/deanomymize messsages"],
-        "signature": ["{} & { [k: string]: string; }"],
+        "description": [
+          "\nReplacements object used to anonymize/deanomymize messsages"
+        ],
+        "signature": [
+          "{} & { [k: string]: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2008,7 +2140,9 @@
         "tags": [],
         "label": "SortOrder",
         "description": [],
-        "signature": ["\"asc\" | \"desc\""],
+        "signature": [
+          "\"asc\" | \"desc\""
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2021,7 +2155,9 @@
         "tags": [],
         "label": "SortOrderEnum",
         "description": [],
-        "signature": ["{ asc: \"asc\"; desc: \"desc\"; }"],
+        "signature": [
+          "{ asc: \"asc\"; desc: \"desc\"; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2033,8 +2169,12 @@
         "type": "Type",
         "tags": [],
         "label": "TraceData",
-        "description": ["\ntrace Data"],
-        "signature": ["{ transactionId?: string | undefined; traceId?: string | undefined; }"],
+        "description": [
+          "\ntrace Data"
+        ],
+        "signature": [
+          "{ transactionId?: string | undefined; traceId?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2077,7 +2217,9 @@
         "tags": [],
         "label": "UpdateConversationRequestParams",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2090,7 +2232,9 @@
         "tags": [],
         "label": "UpdateConversationRequestParamsInput",
         "description": [],
-        "signature": ["{ id: string; }"],
+        "signature": [
+          "{ id: string; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2117,8 +2261,12 @@
         "type": "Type",
         "tags": [],
         "label": "User",
-        "description": ["\nCould be any string, not necessarily a UUID"],
-        "signature": ["{ id?: string | undefined; name?: string | undefined; }"],
+        "description": [
+          "\nCould be any string, not necessarily a UUID"
+        ],
+        "signature": [
+          "{ id?: string | undefined; name?: string | undefined; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2130,8 +2278,12 @@
         "type": "Type",
         "tags": [],
         "label": "UUID",
-        "description": ["\nA universally unique identifier"],
-        "signature": ["string"],
+        "description": [
+          "\nA universally unique identifier"
+        ],
+        "signature": [
+          "string"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2328,7 +2480,9 @@
         "tags": [],
         "label": "BulkActionSkipReason",
         "description": [],
-        "signature": ["Zod.ZodLiteral<\"CONVERSATION_NOT_MODIFIED\">"],
+        "signature": [
+          "Zod.ZodLiteral<\"CONVERSATION_NOT_MODIFIED\">"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2401,7 +2555,9 @@
         "tags": [],
         "label": "ConversationCategory",
         "description": [],
-        "signature": ["Zod.ZodEnum<[\"assistant\", \"insights\"]>"],
+        "signature": [
+          "Zod.ZodEnum<[\"assistant\", \"insights\"]>"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2414,7 +2570,9 @@
         "tags": [],
         "label": "ConversationCategoryEnum",
         "description": [],
-        "signature": ["{ assistant: \"assistant\"; insights: \"insights\"; }"],
+        "signature": [
+          "{ assistant: \"assistant\"; insights: \"insights\"; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2427,7 +2585,9 @@
         "tags": [],
         "label": "ConversationConfidence",
         "description": [],
-        "signature": ["Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>"],
+        "signature": [
+          "Zod.ZodEnum<[\"low\", \"medium\", \"high\"]>"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2440,7 +2600,9 @@
         "tags": [],
         "label": "ConversationConfidenceEnum",
         "description": [],
-        "signature": ["{ medium: \"medium\"; low: \"low\"; high: \"high\"; }"],
+        "signature": [
+          "{ medium: \"medium\"; low: \"low\"; high: \"high\"; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2632,8 +2794,12 @@
         "type": "Object",
         "tags": [],
         "label": "defaultAssistantFeatures",
-        "description": ["\nDefault features available to the elastic assistant"],
-        "signature": ["{ readonly assistantModelEvaluation: false; }"],
+        "description": [
+          "\nDefault features available to the elastic assistant"
+        ],
+        "signature": [
+          "{ readonly assistantModelEvaluation: false; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2796,7 +2962,9 @@
         "tags": [],
         "label": "FindConversationsSortField",
         "description": [],
-        "signature": ["Zod.ZodEnum<[\"created_at\", \"is_default\", \"title\", \"updated_at\"]>"],
+        "signature": [
+          "Zod.ZodEnum<[\"created_at\", \"is_default\", \"title\", \"updated_at\"]>"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2914,7 +3082,9 @@
         "tags": [],
         "label": "MessageRole",
         "description": [],
-        "signature": ["Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>"],
+        "signature": [
+          "Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2927,7 +3097,9 @@
         "tags": [],
         "label": "MessageRoleEnum",
         "description": [],
-        "signature": ["{ user: \"user\"; system: \"system\"; assistant: \"assistant\"; }"],
+        "signature": [
+          "{ user: \"user\"; system: \"system\"; assistant: \"assistant\"; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2940,7 +3112,9 @@
         "tags": [],
         "label": "NonEmptyString",
         "description": [],
-        "signature": ["Zod.ZodString"],
+        "signature": [
+          "Zod.ZodString"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2968,7 +3142,9 @@
         "tags": [],
         "label": "OutputIndex",
         "description": [],
-        "signature": ["Zod.ZodString"],
+        "signature": [
+          "Zod.ZodString"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3071,7 +3247,9 @@
         "tags": [],
         "label": "Provider",
         "description": [],
-        "signature": ["Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>"],
+        "signature": [
+          "Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3084,7 +3262,9 @@
         "tags": [],
         "label": "ProviderEnum",
         "description": [],
-        "signature": ["{ OpenAI: \"OpenAI\"; \"Azure OpenAI\": \"Azure OpenAI\"; }"],
+        "signature": [
+          "{ OpenAI: \"OpenAI\"; \"Azure OpenAI\": \"Azure OpenAI\"; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3187,7 +3367,9 @@
         "tags": [],
         "label": "SortOrder",
         "description": [],
-        "signature": ["Zod.ZodEnum<[\"asc\", \"desc\"]>"],
+        "signature": [
+          "Zod.ZodEnum<[\"asc\", \"desc\"]>"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3200,7 +3382,9 @@
         "tags": [],
         "label": "SortOrderEnum",
         "description": [],
-        "signature": ["{ asc: \"asc\"; desc: \"desc\"; }"],
+        "signature": [
+          "{ asc: \"asc\"; desc: \"desc\"; }"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3288,7 +3472,9 @@
         "tags": [],
         "label": "UUID",
         "description": [],
-        "signature": ["Zod.ZodString"],
+        "signature": [
+          "Zod.ZodString"
+        ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,

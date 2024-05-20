@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { expectTextsInDocument, renderWithTheme } from '../../../utils/test_helpers';
 import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
+import { expectTextsInDocument, renderWithTheme } from '../../../utils/test_helpers';
 
 describe('ErrorCountSummaryItemBadge', () => {
   it('shows singular error message', () => {

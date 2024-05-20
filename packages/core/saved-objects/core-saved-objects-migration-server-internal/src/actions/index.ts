@@ -8,8 +8,8 @@
 
 import type { Either } from 'fp-ts/lib/Either';
 import { right } from 'fp-ts/lib/Either';
-import type { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
+import type { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
 export {
   DEFAULT_TIMEOUT,
@@ -45,7 +45,7 @@ import type { IndexNotGreenTimeout, IndexNotYellowTimeout } from './wait_for_ind
 import { waitForIndexStatus } from './wait_for_index_status';
 
 export type { WaitForTaskResponse, WaitForTaskCompletionTimeout } from './wait_for_task';
-import { WaitForTaskCompletionTimeout, waitForTask } from './wait_for_task';
+import { waitForTask, WaitForTaskCompletionTimeout } from './wait_for_task';
 
 export type { UpdateByQueryResponse } from './pickup_updated_mappings';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
@@ -105,10 +105,10 @@ export {
 } from './update_source_mappings_properties';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
-import type { IndexMappingsIncomplete, TypesChanged } from './check_target_mappings';
-import type { ClusterShardLimitExceeded } from './create_index';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
+import type { ClusterShardLimitExceeded } from './create_index';
 import type { SynchronizationFailed } from './synchronize_migrators';
+import type { IndexMappingsIncomplete, TypesChanged } from './check_target_mappings';
 
 export type {
   CheckForUnknownDocsParams,

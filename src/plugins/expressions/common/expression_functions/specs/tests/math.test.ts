@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MathArguments, MathInput, math } from '../math';
+import { math, MathArguments, MathInput } from '../math';
 import { errors } from '../math_fn';
 import { emptyTable, functionWrapper, testTable } from './utils';
 

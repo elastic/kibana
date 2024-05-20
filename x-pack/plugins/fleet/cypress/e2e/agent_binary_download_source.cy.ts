@@ -5,15 +5,15 @@
  * 2.0.
  */
 import {
-  AGENT_BINARY_SOURCES_FLYOUT,
+  SETTINGS_TAB,
   AGENT_BINARY_SOURCES_TABLE,
   AGENT_BINARY_SOURCES_TABLE_ACTIONS,
+  AGENT_BINARY_SOURCES_FLYOUT,
   AGENT_POLICY_FORM,
-  SETTINGS_TAB,
 } from '../screens/fleet';
-import { CONFIRM_MODAL } from '../screens/navigation';
 import { cleanupAgentPolicies, cleanupDownloadSources } from '../tasks/cleanup';
 import { FLEET, navigateTo } from '../tasks/navigation';
+import { CONFIRM_MODAL } from '../screens/navigation';
 
 import { request } from '../tasks/common';
 import { login } from '../tasks/login';

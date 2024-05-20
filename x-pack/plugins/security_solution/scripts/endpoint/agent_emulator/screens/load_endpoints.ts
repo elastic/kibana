@@ -9,13 +9,13 @@
 
 import { blue, green } from 'chalk';
 import type { DistinctQuestion } from 'inquirer';
+import type { LoadEndpointsConfig } from '../types';
+import { loadEndpoints } from '../services/endpoint_loader';
+import type { EmulatorRunContext } from '../services/emulator_run_context';
+import { ProgressFormatter } from '../../common/screen/progress_formatter';
 import type { DataFormatter } from '../../common/screen';
 import { ChoiceMenuFormatter, ScreenBaseClass } from '../../common/screen';
-import { ProgressFormatter } from '../../common/screen/progress_formatter';
 import { TOOL_TITLE } from '../constants';
-import type { EmulatorRunContext } from '../services/emulator_run_context';
-import { loadEndpoints } from '../services/endpoint_loader';
-import type { LoadEndpointsConfig } from '../types';
 
 interface LoadOptions {
   count: number;

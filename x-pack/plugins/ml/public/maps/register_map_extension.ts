@@ -7,8 +7,8 @@
 
 import type { MapsSetupApi } from '@kbn/maps-plugin/public';
 import type { MlCoreSetup } from '../plugin';
-import { AnomalyLayerWizardFactory } from './anomaly_layer_wizard_factory';
 import { AnomalySourceFactory } from './anomaly_source_factory';
+import { AnomalyLayerWizardFactory } from './anomaly_layer_wizard_factory';
 
 export async function registerMapExtension(
   mapsSetupApi: MapsSetupApi,

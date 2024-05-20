@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiConfirmModal,
   EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
-  EuiPageSection,
-  EuiPanel,
   EuiSpacer,
+  EuiConfirmModal,
   EuiText,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageSection,
+  EuiPanel,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -56,10 +56,7 @@ export class UploadLicense extends React.PureComponent {
   };
 
   acknowledgeModal() {
-    const {
-      needsAcknowledgement,
-      messages: [firstLine, ...messages] = [],
-    } = this.props;
+    const { needsAcknowledgement, messages: [firstLine, ...messages] = [] } = this.props;
     if (!needsAcknowledgement) {
       return null;
     }

@@ -8,10 +8,10 @@
 import { EuiBadge, EuiBadgeProps, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  SLODefinitionResponse,
-  SLOWithSummaryResponse,
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  SLODefinitionResponse,
+  SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import React, { MouseEvent } from 'react';

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiButton, EuiIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ScopedHistory } from '@kbn/core/public';
+import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, Fragment } from 'react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
 
 import { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
@@ -19,7 +19,7 @@ import { useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
 import { getComponentTemplatesLink, getTemplateDetailsLink } from '../../../../services/routing';
-import { TemplateDeprecatedBadge, TemplateTypeIndicator } from '../components';
+import { TemplateTypeIndicator, TemplateDeprecatedBadge } from '../components';
 
 interface Props {
   templates: TemplateListItem[];

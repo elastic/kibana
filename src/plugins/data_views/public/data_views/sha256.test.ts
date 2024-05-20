@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createHash } from 'crypto';
 import { sha256 } from './sha256';
+import { createHash } from 'crypto';
 
 describe('@kbn/crypto-browser', () => {
   test('sha256 equals built in sha256', async function () {

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { ElementType } from 'react';
+import { css } from '@emotion/react';
 import type { FC } from 'react';
+import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type {
   CommentsArray,
@@ -21,10 +21,10 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { EmptyViewerState, ExceptionItemCard, Pagination, PaginationProps } from '../..';
 
 import type {
-  ExceptionListItemIdentifiers,
-  GetExceptionItemProps,
   RuleReferences,
+  ExceptionListItemIdentifiers,
   ViewerStatus,
+  GetExceptionItemProps,
 } from '../types';
 
 const exceptionItemCss = css`

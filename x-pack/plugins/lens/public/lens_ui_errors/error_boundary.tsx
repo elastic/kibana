@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
+import { EuiErrorBoundary } from '@elastic/eui';
 
 interface ErrorBoundaryProps {
   children: JSX.Element;

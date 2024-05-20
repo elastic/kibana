@@ -8,11 +8,11 @@
 /* eslint-disable no-console */
 
 import { argv } from 'yargs';
-import { createApmUsers } from '../../server/test_helpers/create_apm_users/create_apm_users';
 import {
   AbortError,
   isAxiosError,
 } from '../../server/test_helpers/create_apm_users/helpers/call_kibana';
+import { createApmUsers } from '../../server/test_helpers/create_apm_users/create_apm_users';
 import { getKibanaVersion } from '../../server/test_helpers/create_apm_users/helpers/get_version';
 
 async function init() {

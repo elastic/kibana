@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiIconProps } from '@elastic/eui';
 import React from 'react';
+import { EuiIconProps } from '@elastic/eui';
 
 export const ValueMinIcon = (props: Omit<EuiIconProps, 'type'>) => (
   <svg width="16" height="14" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>

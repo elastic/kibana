@@ -5,33 +5,41 @@
  * 2.0.
  */
 
-import { buildPhrasesFilter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 import type {
   FeatureIdentifier,
   FilterSpecification,
-  LayerSpecification,
   Map as MbMap,
+  LayerSpecification,
   VectorTileSource,
 } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
-import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { buildPhrasesFilter } from '@kbn/es-query';
+import { VectorStyle } from '../../../styles/vector/vector_style';
+import type { DynamicSizeProperty } from '../../../styles/vector/properties/dynamic_size_property';
+import type { StaticSizeProperty } from '../../../styles/vector/properties/static_size_property';
+import { getField } from '../../../../../common/elasticsearch_util';
 import { LAYER_TYPE, SOURCE_TYPES, VECTOR_STYLES } from '../../../../../common/constants';
+import {
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
+  AbstractVectorLayer,
+  VectorLayerArguments,
+} from '../vector_layer';
+import { IMvtVectorSource } from '../../../sources/vector_source';
+import { DataRequestContext } from '../../../../actions';
 import {
   DataRequestMeta,
   StyleMetaDescriptor,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
-import { getField } from '../../../../../common/elasticsearch_util';
-import { PropertiesMap } from '../../../../../common/elasticsearch_util';
-import { DataRequestContext } from '../../../../actions';
-import { InnerJoin } from '../../../joins/inner_join';
 import { ESSearchSource } from '../../../sources/es_search_source';
 import { hasESSourceMethod, isESVectorTileSource } from '../../../sources/es_source';
-import { IMvtVectorSource } from '../../../sources/vector_source';
-import type { DynamicSizeProperty } from '../../../styles/vector/properties/dynamic_size_property';
-import type { StaticSizeProperty } from '../../../styles/vector/properties/static_size_property';
-import { VectorStyle } from '../../../styles/vector/vector_style';
+import { InnerJoin } from '../../../joins/inner_join';
+import { LayerIcon } from '../../layer';
+import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
+import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { pluckStyleMeta } from './pluck_style_meta';
 import {
   ES_MVT_HITS_TOTAL_RELATION,
   ES_MVT_HITS_TOTAL_VALUE,
@@ -39,15 +47,7 @@ import {
   getAggsMeta,
   getHitsMeta,
 } from '../../../util/tile_meta_feature_utils';
-import { LayerIcon } from '../../layer';
 import { syncBoundsData } from '../bounds_data';
-import {
-  AbstractVectorLayer,
-  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
-  VectorLayerArguments,
-} from '../vector_layer';
-import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
-import { pluckStyleMeta } from './pluck_style_meta';
 
 const MAX_RESULT_WINDOW_DATA_REQUEST_ID = 'maxResultWindow';
 

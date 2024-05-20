@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
+import { EuiLoadingSpinner, EuiFlexGroup } from '@elastic/eui';
 import { getEmptyTagValue } from '../../empty_value';
 import type { Anomalies, Anomaly, NarrowDateRange } from '../types';
-import { AnomalyScore } from './anomaly_score';
 import { getTopSeverityJobs } from './get_top_severity';
+import { AnomalyScore } from './anomaly_score';
 
 interface Args {
   startDate: string;

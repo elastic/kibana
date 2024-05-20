@@ -7,42 +7,42 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } from 'react';
+import { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
   LensSuggestionsApi,
 } from '@kbn/lens-plugin/public';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
-import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } from 'react';
-import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
-import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
 import { Chart, checkChartAvailability } from '../chart';
-import { useRequestParams } from '../hooks/use_request_params';
-import { LensVisService } from '../services/lens_vis_service';
 import {
+  UnifiedHistogramVisContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
-  UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramInput$,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
-  UnifiedHistogramVisContext,
+  UnifiedHistogramExternalVisContextStatus,
 } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
+import { LensVisService } from '../services/lens_vis_service';
+import { useRequestParams } from '../hooks/use_request_params';
 
 const ChartMemoized = React.memo(Chart);
 
@@ -244,13 +244,10 @@ export const UnifiedHistogramLayout = ({
       return undefined;
     }
 
-    return columns.reduce(
-      (acc, column) => {
-        acc[column.id] = column;
-        return acc;
-      },
-      {} as Record<string, DatatableColumn>
-    );
+    return columns.reduce((acc, column) => {
+      acc[column.id] = column;
+      return acc;
+    }, {} as Record<string, DatatableColumn>);
   }, [columns]);
 
   const requestParams = useRequestParams({

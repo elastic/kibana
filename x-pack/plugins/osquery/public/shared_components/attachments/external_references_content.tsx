@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { IExternalReferenceMetaDataProps } from './lazy_external_reference_content';
 import { PackQueriesAttachmentWrapper } from './pack_queries_attachment_wrapper';

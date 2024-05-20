@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { Fragment, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCode,
   EuiDescribedFormGroup,
@@ -14,14 +17,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useState } from 'react';
 
 import { CodeEditor } from '@kbn/code-editor';
 import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
-import { ChunkSizeField, MaxRestoreField, MaxSnapshotsField } from './common';
+import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {
   repository: HDFSRepository | SourceRepository<HDFSRepository>;

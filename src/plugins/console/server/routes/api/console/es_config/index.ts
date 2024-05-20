@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RouteDependencies } from '../../..';
 import { EsConfigApiResponse } from '../../../../../common/types/api_responses';
+import { RouteDependencies } from '../../..';
 
 export const registerEsConfigRoute = ({ router, services }: RouteDependencies): void => {
   router.get({ path: '/api/console/es_config', validate: false }, async (ctx, req, res) => {

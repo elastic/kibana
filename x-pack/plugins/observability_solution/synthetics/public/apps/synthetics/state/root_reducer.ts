@@ -7,30 +7,30 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
-import { DefaultAlertingState, defaultAlertingReducer } from './alert_rules';
+import { certsListReducer, CertsListState } from './certs';
+import { certificatesReducer, CertificatesState } from './certificates/certificates';
+import { globalParamsReducer, GlobalParamsState } from './global_params';
+import { overviewStatusReducer, OverviewStatusStateReducer } from './overview_status';
 import { browserJourneyReducer } from './browser_journey';
-import { BrowserJourneyState } from './browser_journey/models';
-import { CertificatesState, certificatesReducer } from './certificates/certificates';
-import { CertsListState, certsListReducer } from './certs';
-import { QueriesState, elasticsearchReducer } from './elasticsearch';
-import { GlobalParamsState, globalParamsReducer } from './global_params';
-import { ManualTestRunsState, manualTestRunsReducer } from './manual_test_runs';
-import { MonitorDetailsState, monitorDetailsReducer } from './monitor_details';
-import { MonitorListState, monitorListReducer } from './monitor_list';
-import { NetworkEventsState, networkEventsReducer } from './network_events';
-import { MonitorOverviewState, monitorOverviewReducer } from './overview';
-import { OverviewStatusStateReducer, overviewStatusReducer } from './overview_status';
-import { PingStatusState, pingStatusReducer } from './ping_status';
-import { AgentPoliciesState, agentPoliciesReducer } from './private_locations';
-import { ServiceLocationsState, serviceLocationsReducer } from './service_locations';
+import { defaultAlertingReducer, DefaultAlertingState } from './alert_rules';
+import { manualTestRunsReducer, ManualTestRunsState } from './manual_test_runs';
 import {
-  DynamicSettingsState,
-  SettingsState,
   dynamicSettingsReducer,
+  DynamicSettingsState,
   settingsReducer,
+  SettingsState,
 } from './settings';
-import { SyntheticsEnablementState, syntheticsEnablementReducer } from './synthetics_enablement';
-import { UiState, uiReducer } from './ui';
+import { elasticsearchReducer, QueriesState } from './elasticsearch';
+import { agentPoliciesReducer, AgentPoliciesState } from './private_locations';
+import { networkEventsReducer, NetworkEventsState } from './network_events';
+import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
+import { uiReducer, UiState } from './ui';
+import { syntheticsEnablementReducer, SyntheticsEnablementState } from './synthetics_enablement';
+import { monitorListReducer, MonitorListState } from './monitor_list';
+import { serviceLocationsReducer, ServiceLocationsState } from './service_locations';
+import { monitorOverviewReducer, MonitorOverviewState } from './overview';
+import { BrowserJourneyState } from './browser_journey/models';
+import { pingStatusReducer, PingStatusState } from './ping_status';
 
 export interface SyntheticsAppState {
   ui: UiState;

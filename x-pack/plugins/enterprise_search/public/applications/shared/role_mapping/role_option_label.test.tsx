@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiText, EuiSpacer } from '@elastic/eui';
 
 import { RoleOptionLabel } from './role_option_label';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createVersionedRouterMock } from '@kbn/core-http-router-server-mocks';
 import type { IRouter } from '@kbn/core/server';
+import { createVersionedRouterMock } from '@kbn/core-http-router-server-mocks';
 import { get } from 'lodash';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';

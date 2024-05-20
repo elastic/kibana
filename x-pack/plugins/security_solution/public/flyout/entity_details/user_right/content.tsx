@@ -11,18 +11,18 @@ import React from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
-import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
-import type { RiskScoreEntity, UserItem } from '../../../../common/search_strategy';
-import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
+import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
+import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUser } from '../../../timelines/components/side_panel/new_user_detail/managed_user';
 import type { ManagedUserData } from '../../../timelines/components/side_panel/new_user_detail/types';
+import type { RiskScoreEntity, UserItem } from '../../../../common/search_strategy';
+import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedUserItems } from './hooks/use_observed_user_items';
+import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 interface UserPanelContentProps {
   userName: string;

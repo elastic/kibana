@@ -6,7 +6,6 @@
  */
 
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
@@ -19,6 +18,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SlosWelcomePage } from './slos_welcome';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

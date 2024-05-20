@@ -10,8 +10,8 @@ import createContainer from 'constate';
 import useMount from 'react-use/lib/useMount';
 import { isDevMode } from '../../../../utils/dev_mode';
 import {
-  type LogStreamPageStateMachineDependencies,
   createLogStreamPageStateMachine,
+  type LogStreamPageStateMachineDependencies,
 } from './state_machine';
 
 export const useLogStreamPageState = ({

@@ -7,10 +7,10 @@
  */
 
 import type {
-  CustomPaletteParams,
-  DataBounds,
   PaletteOutput,
   PaletteRegistry,
+  DataBounds,
+  CustomPaletteParams,
 } from '../../palettes';
 import type { ColorRange, ColorRangesActions } from './color_ranges';
 

@@ -11,13 +11,13 @@ import type {
   CheckSavedObjectsPrivileges,
 } from '@kbn/security-plugin-types-server';
 
-import { Actions } from '../authorization';
 import type { EnsureAuthorizedResult } from './ensure_authorized';
 import {
   ensureAuthorized,
   getEnsureAuthorizedActionResult,
   isAuthorizedForObjectInAllSpaces,
 } from './ensure_authorized';
+import { Actions } from '../authorization';
 
 describe('ensureAuthorized', () => {
   function setupDependencies() {

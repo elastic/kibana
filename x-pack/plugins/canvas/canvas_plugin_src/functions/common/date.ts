@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
-import { getFunctionErrors, getFunctionHelp } from '../../../i18n';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   value: string;
@@ -41,8 +41,8 @@ export function date(): ExpressionFunctionDefinition<'date', null, Arguments, nu
         argDate && format
           ? moment.utc(argDate, format).toDate()
           : argDate
-            ? new Date(argDate)
-            : new Date();
+          ? new Date(argDate)
+          : new Date();
 
       if (isNaN(outputDate.getTime())) {
         throw errors.invalidDateInput(argDate);

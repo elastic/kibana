@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClient, RootSchema } from '@kbn/analytics-client';
 import { debounceTime, fromEvent, map, merge, of, shareReplay } from 'rxjs';
+import type { AnalyticsClient, RootSchema } from '@kbn/analytics-client';
 
 export interface ViewportSize {
   viewport_width: number;

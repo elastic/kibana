@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { parse } from '@kbn/tinymath';
+import { monaco } from '@kbn/monaco';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
-import { monaco } from '@kbn/monaco';
-import { parse } from '@kbn/tinymath';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { GenericOperationDefinition } from '../..';
-import type { IndexPatternField, OperationMetadata } from '../../../../../../types';
 import { createMockedIndexPattern } from '../../../../mocks';
-import { createOperationDefinitionMock } from '../mocks/operation_mocks';
+import { GenericOperationDefinition } from '../..';
+import type { OperationMetadata, IndexPatternField } from '../../../../../../types';
 import {
-  getHover,
-  getInfoAtZeroIndexedPosition,
   getSignatureHelp,
+  getHover,
+  suggest,
   monacoPositionToOffset,
   offsetToRowColumn,
-  suggest,
+  getInfoAtZeroIndexedPosition,
 } from './math_completion';
+import { createOperationDefinitionMock } from '../mocks/operation_mocks';
 
 const buildGenericColumn = <T extends 'field' | 'fullReference' = 'field'>(type: string) => {
   return (({ field }: { field?: IndexPatternField }) => {
@@ -59,7 +59,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       ({
         dataType: field.type,
         isBucketed: false,
-      }) as OperationMetadata,
+      } as OperationMetadata),
   }),
   moving_average: createOperationDefinitionMock('moving_average', {
     input: 'fullReference',

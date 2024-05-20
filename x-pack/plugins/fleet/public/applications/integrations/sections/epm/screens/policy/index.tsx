@@ -8,9 +8,9 @@
 import React, { memo } from 'react';
 import { useLocation, useRouteMatch } from 'react-router-dom';
 
-import type { EditPackagePolicyFrom } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/types';
 // TODO: Needs to be moved
 import { EditPackagePolicyForm } from '../../../../../fleet/sections/agent_policy/edit_package_policy_page';
+import type { EditPackagePolicyFrom } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/types';
 import { useGetOnePackagePolicyQuery, useUIExtension } from '../../../../hooks';
 
 export const Policy = memo(() => {

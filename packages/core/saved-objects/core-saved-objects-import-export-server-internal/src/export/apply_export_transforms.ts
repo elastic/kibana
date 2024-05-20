@@ -13,7 +13,7 @@ import type {
   SavedObjectsExportTransformContext,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsExportError } from './errors';
-import { type SavedObjectComparator, getObjKey } from './utils';
+import { getObjKey, type SavedObjectComparator } from './utils';
 
 interface ApplyExportTransformsOptions {
   objects: SavedObject[];
@@ -74,13 +74,10 @@ const createContext = (request: KibanaRequest): SavedObjectsExportTransformConte
 };
 
 const splitByType = (objects: SavedObject[]): Record<string, SavedObject[]> => {
-  return objects.reduce(
-    (memo, obj) => {
-      memo[obj.type] = [...(memo[obj.type] ?? []), obj];
-      return memo;
-    },
-    {} as Record<string, SavedObject[]>
-  );
+  return objects.reduce((memo, obj) => {
+    memo[obj.type] = [...(memo[obj.type] ?? []), obj];
+    return memo;
+  }, {} as Record<string, SavedObject[]>);
 };
 
 const assertValidTransform = (transformedObjects: SavedObject[], initialKeys: string[]) => {

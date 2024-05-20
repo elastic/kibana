@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import { useDispatch } from 'react-redux';
-import { getGradientColorScale } from '../../color/color_handling';
 import { changeAlpha } from '../../color/color_math';
 import { ColorMapping } from '../../config';
 import { getPalette } from '../../palettes';
-import { updateGradientColorStep } from '../../state/color_mapping';
-import { ColorSwatch } from '../color_picker/color_swatch';
+import { getGradientColorScale } from '../../color/color_handling';
 import { AddStop } from './gradient_add_stop';
+import { ColorSwatch } from '../color_picker/color_swatch';
+import { updateGradientColorStep } from '../../state/color_mapping';
 
 export function Gradient({
   paletteId,
@@ -54,8 +54,8 @@ export function Gradient({
     colorMode.sort === 'asc'
       ? colorMode.steps.at(0)
       : colorMode.steps.length === 1
-        ? undefined
-        : colorMode.steps.at(-1);
+      ? undefined
+      : colorMode.steps.at(-1);
   const endStepIndex =
     colorMode.sort === 'asc' ? 0 : colorMode.steps.length === 1 ? NaN : colorMode.steps.length - 1;
 

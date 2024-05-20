@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { Filter, Query } from '@kbn/es-query';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { Query, Filter } from '@kbn/es-query';
+import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 
 export interface DataViewAndSavedSearch {
   savedSearch: SavedSearch | null;

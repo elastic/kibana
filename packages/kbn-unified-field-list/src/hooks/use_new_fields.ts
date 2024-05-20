@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { useMemo } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { useMemo } from 'react';
 import type { FieldListItem } from '../types';
 import type { ExistingFieldsReader } from './use_existing_fields';
 

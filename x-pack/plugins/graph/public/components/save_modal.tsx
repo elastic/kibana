@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFormRow, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { OnSaveProps, SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import React, { useState } from 'react';
+import { EuiFormRow, EuiTextArea, EuiCallOut, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { SavedObjectSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 
 import { GraphSavePolicy } from '../types/config';
 

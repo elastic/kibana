@@ -1,4 +1,3 @@
-import { TypeOf, schema } from '@kbn/config-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { TypeOf, schema } from '@kbn/config-schema';
  * Side Public License, v 1.
  */
 import type { Writable } from '@kbn/utility-types';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 const idRegExp = /^[a-zA-Z0-9-]+$/;
 const dataIndexSchema = schema.object({

@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { asErr, asOk, unwrapPromise } from './result_type';
+import { unwrapPromise, asOk, asErr } from './result_type';
 
 describe(`Result`, () => {
   describe(`unwrapPromise`, () => {

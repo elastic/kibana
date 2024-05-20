@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { SemVer } from 'semver';
+import { CoreStart, CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
-import { INDEX_NAMES, PLUGIN } from '../common/constants';
+import { PLUGIN, INDEX_NAMES } from '../common/constants';
 
-import type { RouteDependencies, SetupDependencies, StartDependencies } from './types';
+import type { SetupDependencies, StartDependencies, RouteDependencies } from './types';
 
+import { registerSettingsRoutes } from './routes/api/settings';
 import { registerIndicesRoutes } from './routes/api/indices';
 import { registerLicenseRoutes } from './routes/api/license';
+import { registerWatchesRoutes } from './routes/api/watches';
+import { registerWatchRoutes } from './routes/api/watch';
 import { registerListFieldsRoute } from './routes/api/register_list_fields_route';
 import { registerLoadHistoryRoute } from './routes/api/register_load_history_route';
-import { registerSettingsRoutes } from './routes/api/settings';
-import { registerWatchRoutes } from './routes/api/watch';
-import { registerWatchesRoutes } from './routes/api/watches';
 
 import { License, handleEsError } from './shared_imports';
 

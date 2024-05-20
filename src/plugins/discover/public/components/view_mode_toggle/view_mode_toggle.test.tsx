@@ -7,17 +7,17 @@
  */
 
 import { EuiTab } from '@elastic/eui';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { VIEW_MODE } from '../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { DocumentViewModeToggle } from './view_mode_toggle';
 import { BehaviorSubject } from 'rxjs';
-import { VIEW_MODE } from '../../../common/constants';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
-import { discoverServiceMock } from '../../__mocks__/services';
 import { DataTotalHits$ } from '../../application/main/state_management/discover_data_state_container';
 import { FetchStatus } from '../../application/types';
-import { DocumentViewModeToggle } from './view_mode_toggle';
+import { discoverServiceMock } from '../../__mocks__/services';
 
 describe('Document view mode toggle component', () => {
   const mountComponent = ({

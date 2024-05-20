@@ -1,4 +1,3 @@
-import { Markdown } from '@kbn/shared-ux-markdown';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { Markdown } from '@kbn/shared-ux-markdown';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { elementToString } from './element_to_string';
 
 describe('elementToString', () => {

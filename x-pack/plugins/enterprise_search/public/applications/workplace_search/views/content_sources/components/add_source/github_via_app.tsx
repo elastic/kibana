@@ -8,24 +8,24 @@
 import React, { useEffect } from 'react';
 import type { FormEvent } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
-  EuiButton,
-  EuiFieldText,
-  EuiFilePicker,
-  EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  EuiFieldText,
+  EuiFormRow,
+  EuiFilePicker,
+  EuiButton,
 } from '@elastic/eui';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
 
 import {
-  PersonalDashboardLayout,
   WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV, SOURCE_NAMES } from '../../../../constants';
 import { handlePrivateKeyUpload } from '../../../../utils';

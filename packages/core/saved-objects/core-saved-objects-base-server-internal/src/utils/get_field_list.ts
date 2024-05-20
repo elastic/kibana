@@ -8,8 +8,8 @@
 
 import { MappingProperty as EsMappingProperty } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
-  SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
+  SavedObjectsFieldMapping,
 } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsTypeMappingDefinitions } from '../mappings';
 

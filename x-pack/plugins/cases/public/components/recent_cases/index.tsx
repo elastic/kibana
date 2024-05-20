@@ -9,16 +9,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from 
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useCurrentUser } from '../../common/lib/kibana';
-import { useAllCasesNavigation } from '../../common/navigation';
-import type { FilterOptions } from '../../containers/types';
-import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import * as i18n from './translations';
 import { LinkAnchor } from '../links';
 import { RecentCasesFilters } from './filters';
-import { getAssigneeFilter, getReporterFilter } from './get_filter_options';
 import { RecentCasesComp } from './recent_cases';
-import * as i18n from './translations';
 import type { FilterMode as RecentCasesFilterMode } from './types';
+import type { FilterOptions } from '../../containers/types';
+import { useCurrentUser } from '../../common/lib/kibana';
+import { useAllCasesNavigation } from '../../common/navigation';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { getReporterFilter, getAssigneeFilter } from './get_filter_options';
 
 export interface RecentCasesProps {
   maxCasesToShow: number;

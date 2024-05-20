@@ -11,10 +11,10 @@ import type {
   EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
-import type { SortColumnTable } from '@kbn/securitysolution-data-table';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ComponentType, JSXElementConstructor } from 'react';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { SortColumnTable } from '@kbn/securitysolution-data-table';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
 import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
 

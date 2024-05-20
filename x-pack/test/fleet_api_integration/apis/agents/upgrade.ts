@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import moment from 'moment';
 import semver from 'semver';
+import moment from 'moment';
+import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { generateAgent, makeSnapshotVersion, skipIfNoDockerRegistry } from '../../helpers';
-import { testUsers } from '../test_users';
 import { setupFleetAndAgents } from './services';
+import { skipIfNoDockerRegistry, generateAgent, makeSnapshotVersion } from '../../helpers';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

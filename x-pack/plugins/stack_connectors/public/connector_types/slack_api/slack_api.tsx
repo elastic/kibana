@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { lazy } from 'react';
-import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
-import type {
-  PostBlockkitParams,
-  PostMessageParams,
-  SlackApiActionParams,
-  SlackApiConfig,
-  SlackApiSecrets,
-} from '../../../common/slack_api/types';
-import { subtype } from '../slack/slack';
-import { SlackActionParams } from '../types';
 import {
   ACTION_TYPE_TITLE,
-  BLOCKS_REQUIRED,
   CHANNEL_REQUIRED,
-  JSON_REQUIRED,
   MESSAGE_REQUIRED,
   SELECT_MESSAGE,
+  JSON_REQUIRED,
+  BLOCKS_REQUIRED,
 } from './translations';
+import type {
+  SlackApiActionParams,
+  SlackApiSecrets,
+  PostMessageParams,
+  SlackApiConfig,
+  PostBlockkitParams,
+} from '../../../common/slack_api/types';
+import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
+import { SlackActionParams } from '../types';
+import { subtype } from '../slack/slack';
 
 const isChannelValid = (channels?: string[], channelIds?: string[]) => {
   if (

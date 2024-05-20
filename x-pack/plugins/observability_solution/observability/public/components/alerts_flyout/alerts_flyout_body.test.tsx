@@ -1,5 +1,3 @@
-import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
-import { fireEvent } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,13 +5,15 @@ import { fireEvent } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render } from '../../utils/test_helper';
+import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { AlertsFlyoutBody } from './alerts_flyout_body';
+import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
-import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
-import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { fireEvent } from '@testing-library/react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import { render } from '../../utils/test_helper';
-import { AlertsFlyoutBody } from './alerts_flyout_body';
 
 const tabsData = [
   { name: 'Overview', subj: 'overviewTab' },

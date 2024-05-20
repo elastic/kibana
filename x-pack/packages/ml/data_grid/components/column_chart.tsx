@@ -7,8 +7,8 @@
 
 import React, { type FC } from 'react';
 
-import { BarSeries, Chart, LEGACY_LIGHT_THEME, ScaleType, Settings } from '@elastic/charts';
-import { type EuiDataGridColumn, type UseEuiTheme, mathWithUnits } from '@elastic/eui';
+import { BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
+import { mathWithUnits, type UseEuiTheme, type EuiDataGridColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { ChartData } from '../lib/field_histograms';
@@ -27,7 +27,7 @@ const cssHistogramLegend = ({ euiTheme }: UseEuiTheme) =>
     marginTop: euiTheme.size.xs,
     fontStyle: 'italic',
     fontWeight: 'normal',
-  }) as const;
+  } as const);
 
 interface Props {
   chartData: ChartData;

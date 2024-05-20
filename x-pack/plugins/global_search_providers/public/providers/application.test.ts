@@ -7,14 +7,14 @@
 
 import { getAppResultsMock } from './application.test.mocks';
 
-import { AppStatus, ApplicationStart, PublicAppInfo } from '@kbn/core/public';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { EMPTY, of } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
+import { ApplicationStart, AppStatus, PublicAppInfo } from '@kbn/core/public';
 import {
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
 } from '@kbn/global-search-plugin/public';
-import { EMPTY, of } from 'rxjs';
-import { TestScheduler } from 'rxjs/testing';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { createApplicationResultProvider } from './application';
 
 const getTestScheduler = () =>

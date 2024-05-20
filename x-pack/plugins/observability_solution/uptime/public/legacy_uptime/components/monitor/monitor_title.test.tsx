@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
-import moment from 'moment';
 import React from 'react';
+import moment from 'moment';
+import { screen } from '@testing-library/react';
+import { render } from '../../lib/helper/rtl_helpers';
 // eslint-disable-next-line no-restricted-imports
 import * as reactRouterDom from 'react-router-dom';
-import { render } from '../../lib/helper/rtl_helpers';
 
 import { Ping } from '../../../../common/runtime_types';
 import { MonitorPageTitle } from './monitor_title';

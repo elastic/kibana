@@ -7,9 +7,9 @@
 
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import { EditContextAction } from './edit_context/edit_context_action';
 import { ViewCodeAction } from './view_code/view_code_action';
 import { ViewQueryAction } from './view_query/view_query_action';
+import { EditContextAction } from './edit_context/edit_context_action';
 
 export const Toolbar: React.FC = () => {
   return (

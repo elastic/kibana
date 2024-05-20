@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldText } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { type IModalTabDeclaration, TabbedModal } from './tabbed_modal';
+import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
+import { EuiFieldText } from '@elastic/eui';
+import { TabbedModal, type IModalTabDeclaration } from './tabbed_modal';
 
 describe('TabbedModal', () => {
   const modalOnCloseHandler = jest.fn();

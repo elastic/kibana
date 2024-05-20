@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "dynamic",
-        "description": ["\nLazy load and wrap with Suspense any component.\n"],
+        "description": [
+          "\nLazy load and wrap with Suspense any component.\n"
+        ],
         "signature": [
           "(loader: Loader<TElement>, options: ",
           {
@@ -48,7 +50,9 @@
             "tags": [],
             "label": "loader",
             "description": [],
-            "signature": ["Loader<TElement>"],
+            "signature": [
+              "Loader<TElement>"
+            ],
             "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -88,7 +92,9 @@
         "description": [
           "\nA simple implementation of `React.Suspense.fallback` that renders a loading spinner."
         ],
-        "signature": ["() => JSX.Element"],
+        "signature": [
+          "() => JSX.Element"
+        ],
         "path": "packages/kbn-shared-ux-utility/src/fallback.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -119,7 +125,9 @@
             "tags": [],
             "label": "element",
             "description": [],
-            "signature": ["HTMLElement | null | undefined"],
+            "signature": [
+              "HTMLElement | null | undefined"
+            ],
             "path": "packages/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -132,7 +140,9 @@
             "tags": [],
             "label": "container",
             "description": [],
-            "signature": ["HTMLElement | undefined"],
+            "signature": [
+              "HTMLElement | undefined"
+            ],
             "path": "packages/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -151,7 +161,9 @@
         "description": [
           "\nReturns true if any modifier key is active on the event, false otherwise."
         ],
-        "signature": ["(event: React.MouseEvent<Element, MouseEvent>) => boolean"],
+        "signature": [
+          "(event: React.MouseEvent<Element, MouseEvent>) => boolean"
+        ],
         "path": "packages/kbn-shared-ux-utility/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -163,7 +175,9 @@
             "tags": [],
             "label": "event",
             "description": [],
-            "signature": ["React.MouseEvent<Element, MouseEvent>"],
+            "signature": [
+              "React.MouseEvent<Element, MouseEvent>"
+            ],
             "path": "packages/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -203,8 +217,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "Component",
-            "description": ["A component deferred by `React.lazy`"],
-            "signature": ["React.ComponentType<P>"],
+            "description": [
+              "A component deferred by `React.lazy`"
+            ],
+            "signature": [
+              "React.ComponentType<P>"
+            ],
             "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -239,7 +257,9 @@
         "type": "Interface",
         "tags": [],
         "label": "DynamicOptions",
-        "description": ["\nOptions for the lazy loaded component"],
+        "description": [
+          "\nOptions for the lazy loaded component"
+        ],
         "path": "packages/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -267,7 +287,9 @@
         "type": "Interface",
         "tags": [],
         "label": "WithSuspenseExtendedDeps",
-        "description": ["\nOptional services that the Suspense wrapper can use"],
+        "description": [
+          "\nOptional services that the Suspense wrapper can use"
+        ],
         "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -278,7 +300,9 @@
             "type": "Object",
             "tags": [],
             "label": "analytics",
-            "description": ["\nThe `AnalyticsServiceStart` object from `CoreStart`"],
+            "description": [
+              "\nThe `AnalyticsServiceStart` object from `CoreStart`"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-analytics-browser",

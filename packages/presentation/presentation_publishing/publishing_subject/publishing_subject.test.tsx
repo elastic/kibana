@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
 import React, { useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import {
-  useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
+  useBatchedOptionalPublishingSubjects,
 } from './publishing_batcher';
 import { useStateFromPublishingSubject } from './publishing_subject';
 import { PublishingSubject } from './types';

@@ -1,6 +1,3 @@
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,26 +5,29 @@ import { pipe } from 'fp-ts/lib/pipeable';
  * 2.0.
  */
 import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
 
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
-import {
-  CreateMetricsExplorerViewAttributesRequestPayload,
-  UpdateMetricsExplorerViewAttributesRequestPayload,
-} from '../../common/http_api/latest';
-import { MetricsExplorerView } from '../../common/metrics_explorer_views';
-import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
 import {
   MutationContext,
   SavedViewResult,
   ServerError,
   UpdateViewParams,
 } from '../../common/saved_views';
-import { useSourceContext } from '../containers/metrics_source';
+import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
+import {
+  CreateMetricsExplorerViewAttributesRequestPayload,
+  UpdateMetricsExplorerViewAttributesRequestPayload,
+} from '../../common/http_api/latest';
+import { MetricsExplorerView } from '../../common/metrics_explorer_views';
 import { useUrlState } from '../utils/use_url_state';
-import { useKibanaContextForPlugin } from './use_kibana';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
+import { useSourceContext } from '../containers/metrics_source';
+import { useKibanaContextForPlugin } from './use_kibana';
 
 export type UseMetricsExplorerViewsResult = SavedViewResult<
   MetricsExplorerView,

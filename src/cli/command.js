@@ -7,11 +7,11 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import Chalk from 'chalk';
 import _ from 'lodash';
+import Chalk from 'chalk';
 
-import { Command } from 'commander';
 import help from './help';
+import { Command } from 'commander';
 
 Command.prototype.error = function (err) {
   if (err && err.message) err = err.message;

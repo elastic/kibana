@@ -7,11 +7,11 @@
  */
 
 import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
-import type { NodeRoles } from '@kbn/core-node-server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 import { TelemetryPlugin } from './plugin';
+import type { NodeRoles } from '@kbn/core-node-server';
 
 describe('TelemetryPlugin', () => {
   describe('setup', () => {

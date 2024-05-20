@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-server';
 import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
+import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-server';
 
 /**
  * Request handler context used by core's deprecations routes.

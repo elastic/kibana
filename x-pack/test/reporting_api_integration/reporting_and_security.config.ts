@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { resolve } from 'path';
 import { ReportingAPIProvider } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

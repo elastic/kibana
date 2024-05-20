@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
-import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { mapValues } from 'lodash';
-import { Alert } from '../../alert';
-import { RuleAttributes } from '../../data/rule/types';
-import { createAlertEventLogRecordObject } from '../../lib/create_alert_event_log_record_object';
-import { EVENT_LOG_ACTIONS } from '../../plugin';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { withSpan } from '@kbn/apm-utils';
+import { SanitizedRule, RawAlertInstance as RawAlert } from '../../types';
 import { taskInstanceToAlertTaskInstance } from '../../task_runner/alert_task_instance';
-import { RawAlertInstance as RawAlert, SanitizedRule } from '../../types';
+import { Alert } from '../../alert';
+import { EVENT_LOG_ACTIONS } from '../../plugin';
+import { createAlertEventLogRecordObject } from '../../lib/create_alert_event_log_record_object';
 import { RulesClientContext } from '../types';
+import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const untrackRuleAlerts = async (
   context: RulesClientContext,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
-import { SERVERLESS_ROLES_ROOT_PATH, ServerlessProjectType } from '@kbn/es';
+import { ServerlessProjectType, SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
+import { SamlSessionManager } from '@kbn/test';
 import { readRolesFromResource } from '@kbn/es';
+import { resolve } from 'path';
+import { Role } from '@kbn/test/src/auth/types';
 import { isServerlessProjectType } from '@kbn/es/src/utils';
 import expect from '@kbn/expect';
-import { SamlSessionManager } from '@kbn/test';
-import { Role } from '@kbn/test/src/auth/types';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export interface RoleCredentials {

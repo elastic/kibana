@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { DiscoveredPlugin, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
-import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
 import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { createPluginInitializerContext } from './plugin_context';
 
 const createPluginManifest = (pluginName: string): DiscoveredPlugin => {

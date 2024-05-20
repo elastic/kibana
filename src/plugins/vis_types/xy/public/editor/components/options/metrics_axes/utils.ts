@@ -10,7 +10,7 @@ import { upperFirst } from 'lodash';
 
 import { Position } from '@elastic/charts';
 
-import { ValueAxis, VisParams } from '../../../../types';
+import { VisParams, ValueAxis } from '../../../../types';
 
 export const isAxisHorizontal = (position: Position) =>
   [Position.Top, Position.Bottom].includes(position as any);

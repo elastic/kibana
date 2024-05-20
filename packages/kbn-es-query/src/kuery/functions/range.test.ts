@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { DataViewBase } from '../../..';
-import { fields } from '../../filters/stubs';
 import { nodeTypes } from '../node_types';
+import { fields } from '../../filters/stubs';
+import { DataViewBase } from '../../..';
 
+import * as range from './range';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
-import * as range from './range';
 import { KqlRangeFunctionNode } from './range';
 
 describe('kuery functions', () => {

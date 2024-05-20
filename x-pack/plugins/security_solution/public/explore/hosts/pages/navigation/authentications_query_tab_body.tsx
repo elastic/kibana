@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import type { HostsComponentsQueryProps } from './types';
 import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
 import { AuthenticationsHostTable } from '../../../components/authentication/authentications_host_table';
 import { histogramConfigs } from '../../../components/authentication/helpers';
-import type { HostsComponentsQueryProps } from './types';
 
 const HISTOGRAM_QUERY_ID = 'authenticationsHistogramQuery';
 

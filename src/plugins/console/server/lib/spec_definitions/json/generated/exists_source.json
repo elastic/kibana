@@ -13,10 +13,19 @@
       "_source_excludes": [],
       "_source_includes": [],
       "version": "",
-      "version_type": ["internal", "external", "external_gte", "force"]
+      "version_type": [
+        "internal",
+        "external",
+        "external_gte",
+        "force"
+      ]
     },
-    "methods": ["HEAD"],
-    "patterns": ["{index}/_source/{id}"],
+    "methods": [
+      "HEAD"
+    ],
+    "patterns": [
+      "{index}/_source/{id}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html",
     "availability": {
       "stack": true,

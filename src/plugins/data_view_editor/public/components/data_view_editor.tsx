@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
-import { createKibanaReactContext } from '../shared_imports';
-import { DataViewEditorContext, DataViewEditorProps } from '../types';
+import { EuiFlyout } from '@elastic/eui';
 import { DataViewEditorLazy } from './data_view_editor_lazy';
+import { DataViewEditorContext, DataViewEditorProps } from '../types';
+import { createKibanaReactContext } from '../shared_imports';
 import './data_view_editor.scss';
 
 export interface DataViewEditorPropsWithServices extends DataViewEditorProps {

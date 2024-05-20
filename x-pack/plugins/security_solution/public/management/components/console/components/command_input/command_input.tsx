@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import type { CommonProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiResizeObserver } from '@elastic/eui';
-import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
-import classNames from 'classnames';
 import type { MouseEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
-import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
-import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
+import classNames from 'classnames';
+import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
+import { InputDisplay } from './components/input_display';
+import type { ExecuteCommandPayload, ConsoleDataState } from '../console_state/types';
 import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
-import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
-import { useWithInputVisibleState } from '../../hooks/state_selectors/use_with_input_visible_state';
-import type { ConsoleDataState, ExecuteCommandPayload } from '../console_state/types';
-import { InputAreaPopover } from './components/input_area_popover';
+import { EnteredInput } from './lib/entered_input';
 import type { InputCaptureProps } from './components/input_capture';
 import { InputCapture } from './components/input_capture';
-import { InputDisplay } from './components/input_display';
-import { InputPlaceholder } from './components/input_placeholder';
+import { useWithInputVisibleState } from '../../hooks/state_selectors/use_with_input_visible_state';
 import { useInputHints } from './hooks/use_input_hints';
-import { EnteredInput } from './lib/entered_input';
+import { InputPlaceholder } from './components/input_placeholder';
+import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
+import { InputAreaPopover } from './components/input_area_popover';
+import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
 
 const CommandInputContainer = styled.div`
   background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};

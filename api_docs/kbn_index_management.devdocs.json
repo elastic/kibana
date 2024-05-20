@@ -63,7 +63,9 @@
                     "tags": [],
                     "label": "createIndexButton",
                     "description": [],
-                    "signature": ["React.ReactElement<any, any> | null"],
+                    "signature": [
+                      "React.ReactElement<any, any> | null"
+                    ],
                     "path": "x-pack/packages/index-management/src/services/extensions_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -94,7 +96,9 @@
             "tags": [],
             "label": "addAction",
             "description": [],
-            "signature": ["(action: any) => void"],
+            "signature": [
+              "(action: any) => void"
+            ],
             "path": "x-pack/packages/index-management/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -106,7 +110,9 @@
                 "tags": [],
                 "label": "action",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/packages/index-management/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -122,7 +128,9 @@
             "tags": [],
             "label": "addBanner",
             "description": [],
-            "signature": ["(banner: any) => void"],
+            "signature": [
+              "(banner: any) => void"
+            ],
             "path": "x-pack/packages/index-management/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -134,7 +142,9 @@
                 "tags": [],
                 "label": "banner",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/packages/index-management/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -150,7 +160,9 @@
             "tags": [],
             "label": "addFilter",
             "description": [],
-            "signature": ["(filter: any) => void"],
+            "signature": [
+              "(filter: any) => void"
+            ],
             "path": "x-pack/packages/index-management/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -162,7 +174,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/packages/index-management/src/services/extensions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -525,7 +539,9 @@
             "tags": [],
             "label": "primary",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -537,7 +553,9 @@
             "tags": [],
             "label": "replica",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -571,7 +589,9 @@
             "tags": [],
             "label": "aliases",
             "description": [],
-            "signature": ["string | string[]"],
+            "signature": [
+              "string | string[]"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -583,7 +603,9 @@
             "tags": [],
             "label": "data_stream",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -595,7 +617,9 @@
             "tags": [],
             "label": "isRollupIndex",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -607,7 +631,10 @@
             "tags": [],
             "label": "ilm",
             "description": [],
-            "signature": ["IlmExplainLifecycleLifecycleExplain", " | undefined"],
+            "signature": [
+              "IlmExplainLifecycleLifecycleExplain",
+              " | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -619,7 +646,9 @@
             "tags": [],
             "label": "isFollowerIndex",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -631,7 +660,10 @@
             "tags": [],
             "label": "health",
             "description": [],
-            "signature": ["HealthStatus", " | undefined"],
+            "signature": [
+              "HealthStatus",
+              " | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -643,7 +675,10 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": ["IndicesStatsIndexMetadataState", " | undefined"],
+            "signature": [
+              "IndicesStatsIndexMetadataState",
+              " | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -655,7 +690,9 @@
             "tags": [],
             "label": "uuid",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -667,7 +704,9 @@
             "tags": [],
             "label": "documents",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -679,7 +718,9 @@
             "tags": [],
             "label": "size",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -691,7 +732,9 @@
             "tags": [],
             "label": "primary_size",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -703,7 +746,9 @@
             "tags": [],
             "label": "documents_deleted",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -786,7 +831,9 @@
             "tags": [],
             "label": "filterExpression",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -798,7 +845,9 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/services/extensions_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1132,7 +1181,10 @@
             "tags": [],
             "label": "breadcrumb",
             "description": [],
-            "signature": ["EuiBreadcrumbProps", " | undefined"],
+            "signature": [
+              "EuiBreadcrumbProps",
+              " | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/home_sections.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1334,7 +1386,9 @@
             "tags": [],
             "label": "showAboutMappings",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1637,7 +1691,9 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": ["D | null"],
+            "signature": [
+              "D | null"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1649,7 +1705,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["E | null"],
+            "signature": [
+              "E | null"
+            ],
             "path": "x-pack/packages/index-management/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1675,7 +1733,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"match\" | \"range\" | \"geo_match\""],
+            "signature": [
+              "\"match\" | \"range\" | \"geo_match\""
+            ],
             "path": "x-pack/packages/index-management/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1698,7 +1758,9 @@
             "tags": [],
             "label": "sourceIndices",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/packages/index-management/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1721,7 +1783,9 @@
             "tags": [],
             "label": "enrichFields",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/packages/index-management/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1733,7 +1797,9 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": ["Record<string, any> | undefined"],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
             "path": "x-pack/packages/index-management/src/services/public_api_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1776,7 +1842,9 @@
         "tags": [],
         "label": "IndexDetailsTabId",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "x-pack/packages/index-management/src/home_sections.ts",
         "deprecated": false,
         "trackAdoption": false,

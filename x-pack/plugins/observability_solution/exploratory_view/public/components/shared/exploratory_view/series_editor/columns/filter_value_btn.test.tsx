@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { FilterValueButton } from './filter_value_btn';
+import { mockUxSeries, mockUseSeriesFilter, mockUseValuesList, render } from '../../rtl_helpers';
 import {
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
 } from '../../configurations/constants/elasticsearch_fieldnames';
-import { mockUseSeriesFilter, mockUseValuesList, mockUxSeries, render } from '../../rtl_helpers';
-import { FilterValueButton } from './filter_value_btn';
 
 describe('FilterValueButton', function () {
   it('renders', async () => {

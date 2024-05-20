@@ -16,13 +16,13 @@ import { buildRouteValidationWithExcess } from '../../../../../utils/build_valid
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { getTimelineQuerySchema } from '../../../../../../common/api/timeline';
-import type {
-  ResolvedTimelineWithOutcomeSavedObject,
-  SavedTimeline,
-} from '../../../../../../common/api/timeline';
-import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
+import { getTimelineQuerySchema } from '../../../../../../common/api/timeline';
+import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
+import type {
+  SavedTimeline,
+  ResolvedTimelineWithOutcomeSavedObject,
+} from '../../../../../../common/api/timeline';
 
 export const resolveTimelineRoute = (
   router: SecuritySolutionPluginRouter,

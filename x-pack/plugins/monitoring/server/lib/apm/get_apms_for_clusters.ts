@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchResponse } from '../../../common/types/es';
-import { Globals } from '../../static_globals';
-import { Cluster, LegacyRequest } from '../../types';
-import { getIndexPatterns } from '../cluster/get_index_patterns';
-import { ApmMetric } from '../metrics';
-import { apmAggFilterPath, apmAggResponseHandler, apmUuidsAgg } from './_apm_stats';
-import { getTimeOfLastEvent } from './_get_time_of_last_event';
+import { LegacyRequest, Cluster } from '../../types';
 import { createApmQuery } from './create_apm_query';
+import { ApmMetric } from '../metrics';
+import { apmAggResponseHandler, apmUuidsAgg, apmAggFilterPath } from './_apm_stats';
+import { getTimeOfLastEvent } from './_get_time_of_last_event';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 export function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
   const { apmTotal, totalEvents, memRss, versions } = apmAggResponseHandler(response);

@@ -8,8 +8,8 @@
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { isDataViewSelection } from '@kbn/logs-explorer-plugin/common';
 import {
-  LogsExplorerCustomizationEvents,
   getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
+  LogsExplorerCustomizationEvents,
 } from '@kbn/logs-explorer-plugin/public';
 
 export const createOnUknownDataViewSelectionHandler = (

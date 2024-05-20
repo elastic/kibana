@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
-import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Capabilities } from '@kbn/core/types';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { IconType } from '@elastic/eui';
 import type {
-  ExternalPageName,
-  LinkCategories as GenericLinkCategories,
-  LinkCategory as GenericLinkCategory,
   NavigationLink as GenericNavigationLink,
+  LinkCategory as GenericLinkCategory,
+  LinkCategories as GenericLinkCategories,
+  ExternalPageName,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
-import type { SolutionSideNavItem as ClassicSolutionSideNavItem } from '@kbn/security-solution-side-nav';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
 import type { Observable } from 'rxjs';
+import type { SolutionSideNavItem as ClassicSolutionSideNavItem } from '@kbn/security-solution-side-nav';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { RequiredCapabilities } from '../lib/capabilities';
 

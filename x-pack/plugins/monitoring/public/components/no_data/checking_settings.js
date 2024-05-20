@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { LookingFor } from './blurbs';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function CheckingSettings({ checkMessage }) {
   const message = checkMessage || (

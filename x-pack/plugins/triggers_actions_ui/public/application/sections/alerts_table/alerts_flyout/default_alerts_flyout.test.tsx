@@ -10,8 +10,8 @@ import { mount } from 'enzyme';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { AlertsTableFlyoutBaseProps } from '../../../..';
 import { getDefaultAlertFlyout } from './default_alerts_flyout';
+import { AlertsTableFlyoutBaseProps } from '../../../..';
 
 const columns = [
   {

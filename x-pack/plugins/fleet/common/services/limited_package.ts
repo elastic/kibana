@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentPolicy, PackageInfo } from '../types';
+import type { PackageInfo, AgentPolicy } from '../types';
 
 export const isPackageLimited = (packageInfo: PackageInfo): boolean => {
   return (packageInfo.policy_templates || []).some(

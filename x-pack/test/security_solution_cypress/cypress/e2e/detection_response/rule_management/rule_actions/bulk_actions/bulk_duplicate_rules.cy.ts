@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import {
-  disableAutoRefresh,
-  expectManagementTableRules,
-  goToRuleDetailsOf,
-  selectAllRules,
-} from '../../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
-import { login } from '../../../../../tasks/login';
-import { goToExceptionsTab, viewExpiredExceptionItems } from '../../../../../tasks/rule_details';
 import {
+  goToRuleDetailsOf,
+  expectManagementTableRules,
+  selectAllRules,
+  disableAutoRefresh,
+} from '../../../../../tasks/alerts_detection_rules';
+import {
+  duplicateSelectedRulesWithoutExceptions,
   duplicateSelectedRulesWithExceptions,
   duplicateSelectedRulesWithNonExpiredExceptions,
-  duplicateSelectedRulesWithoutExceptions,
 } from '../../../../../tasks/rules_bulk_actions';
+import { goToExceptionsTab, viewExpiredExceptionItems } from '../../../../../tasks/rule_details';
+import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
@@ -26,8 +26,8 @@ import { resetRulesTableState } from '../../../../../tasks/common';
 
 import { getNewRule } from '../../../../../objects/rule';
 
-import { EXCEPTION_CARD_ITEM_NAME } from '../../../../../screens/exceptions';
 import { createRuleExceptionItem } from '../../../../../tasks/api_calls/exceptions';
+import { EXCEPTION_CARD_ITEM_NAME } from '../../../../../screens/exceptions';
 import {
   assertExceptionItemsExists,
   assertNumberOfExceptionItemsExists,

@@ -6,13 +6,13 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { QUERY, UNNAMED_LOCATION } from '../../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { LocationDurationLine, MonitorDurationResult } from '../../../../common/types';
 import { UMElasticsearchQueryFn } from '../adapters';
+import { LocationDurationLine, MonitorDurationResult } from '../../../../common/types';
+import { QUERY, UNNAMED_LOCATION } from '../../../../common/constants';
 
 export interface GetMonitorChartsParams {
   /** @member monitorId ID value for the selected monitor */

@@ -7,32 +7,32 @@
  */
 
 import { Readable } from 'stream';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
+  SavedObjectsImportRetry,
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
   SavedObjectsImportSuccess,
 } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
-  SavedObject,
   SavedObjectsImportHook,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import {
-  type ImportStateMap,
-  checkConflicts,
-  checkOriginConflicts,
-  checkReferenceOrigins,
   collectSavedObjects,
   createObjectsFilter,
-  createSavedObjects,
-  executeImportHooks,
-  getImportStateMapForRetries,
-  regenerateIds,
   splitOverwrites,
+  regenerateIds,
+  checkReferenceOrigins,
   validateReferences,
   validateRetries,
+  createSavedObjects,
+  getImportStateMapForRetries,
+  checkConflicts,
+  executeImportHooks,
+  checkOriginConflicts,
+  type ImportStateMap,
 } from './lib';
 
 /**
@@ -221,8 +221,9 @@ export async function resolveSavedObjectsImportErrors({
       compatibilityMode,
       managed,
     };
-    const { createdObjects, errors: bulkCreateErrors } =
-      await createSavedObjects(createSavedObjectsParams);
+    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
+      createSavedObjectsParams
+    );
     successObjects = [...successObjects, ...createdObjects];
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
     successCount += createdObjects.length;

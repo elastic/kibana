@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { createContext, useContext } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
-import React, { createContext, useContext } from 'react';
 import type { StartDependencies } from './plugin';
 
 interface ContextValue extends StartDependencies {

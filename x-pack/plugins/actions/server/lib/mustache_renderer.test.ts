@@ -7,10 +7,10 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  Escape,
-  renderMustacheObject,
   renderMustacheString,
   renderMustacheStringNoEscape,
+  renderMustacheObject,
+  Escape,
 } from './mustache_renderer';
 
 const logger = loggingSystemMock.create().get();
@@ -365,9 +365,8 @@ describe('mustache_renderer', () => {
       b: { c: 2, d: [3, 4] },
       e: [5, { f: 6, g: 7 }],
     };
-    expect(
-      renderMustacheObject(logger, { x: '{{a}} - {{b}} -- {{e}} ' }, deepVariables)
-    ).toMatchInlineSnapshot(`
+    expect(renderMustacheObject(logger, { x: '{{a}} - {{b}} -- {{e}} ' }, deepVariables))
+      .toMatchInlineSnapshot(`
       Object {
         "x": "1 - {\\"c\\":2,\\"d\\":[3,4]} -- 5,{\\"f\\":6,\\"g\\":7} ",
       }
@@ -448,9 +447,8 @@ describe('mustache_renderer', () => {
     });
 
     it('should replace single value with the object', () => {
-      expect(
-        renderMustacheObject(logger, { x: '{{a}}' }, { a: 1, 'a.b': 2 })
-      ).toMatchInlineSnapshot(`
+      expect(renderMustacheObject(logger, { x: '{{a}}' }, { a: 1, 'a.b': 2 }))
+        .toMatchInlineSnapshot(`
         Object {
           "x": "{\\"b\\":2}",
         }

@@ -42,7 +42,9 @@
             "description": [
               "\nIndicates whether Kibana is currently on hold and cannot proceed to `setup` yet."
             ],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -74,7 +76,9 @@
                 "description": [
                   "A string that explains the reason why this promise should hold `setup`. It's supposed to be a human\nreadable string that will be recorded in the logs or standard output."
                 ],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -89,7 +93,9 @@
                 "description": [
                   "A `Promise` that should resolved before Kibana can proceed to `setup`."
                 ],
-                "signature": ["Promise<{ shouldReloadConfig: boolean; } | undefined>"],
+                "signature": [
+                  "Promise<{ shouldReloadConfig: boolean; } | undefined>"
+                ],
                 "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,

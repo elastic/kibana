@@ -41,7 +41,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<NodeServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<NodeServiceContract>"
+            ],
             "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,7 +57,11 @@
             "tags": [],
             "label": "createInternalPrebootContract",
             "description": [],
-            "signature": ["() => jest.Mocked<", "InternalNodeServicePreboot", ">"],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalNodeServicePreboot",
+              ">"
+            ],
             "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -92,7 +98,9 @@
                 "tags": [],
                 "label": "__0",
                 "description": [],
-                "signature": ["{ ui: boolean; backgroundTasks: boolean; migrator: boolean; }"],
+                "signature": [
+                  "{ ui: boolean; backgroundTasks: boolean; migrator: boolean; }"
+                ],
                 "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

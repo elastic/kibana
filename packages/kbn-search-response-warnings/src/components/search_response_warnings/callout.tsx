@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import type { SearchResponseWarning } from '../../types';
-import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ViewDetailsPopover } from './view_details_popover';
+import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
+import type { SearchResponseWarning } from '../../types';
 
 interface Props {
   warnings: SearchResponseWarning[];

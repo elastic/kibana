@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { StateContainer, createStateContainer } from '@kbn/kibana-utils-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
 import deepEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
+import { createStateContainer, StateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { SearchSessionSavedObject } from './sessions_client';
 
 /**
@@ -150,7 +150,7 @@ export interface SessionStateInternal<SearchDescriptor = unknown, SearchMeta ext
 
 const createSessionDefaultState: <
   SearchDescriptor = unknown,
-  SearchMeta extends {} = {},
+  SearchMeta extends {} = {}
 >() => SessionStateInternal<SearchDescriptor, SearchMeta> = () => ({
   sessionId: undefined,
   appName: undefined,
@@ -165,7 +165,7 @@ const createSessionDefaultState: <
 export interface SessionPureTransitions<
   SearchDescriptor = unknown,
   SearchMeta extends {} = {},
-  S = SessionStateInternal<SearchDescriptor, SearchMeta>,
+  S = SessionStateInternal<SearchDescriptor, SearchMeta>
 > {
   start: (state: S) => ({ appName }: { appName: string }) => S;
   restore: (state: S) => (sessionId: string) => S;
@@ -331,7 +331,7 @@ export interface SessionMeta {
 export interface SessionPureSelectors<
   SearchDescriptor = unknown,
   SearchMeta extends {} = {},
-  S = SessionStateInternal<SearchDescriptor, SearchMeta>,
+  S = SessionStateInternal<SearchDescriptor, SearchMeta>
 > {
   getState: (state: S) => () => SearchSessionState;
   getMeta: (state: S) => () => SessionMeta;
@@ -389,7 +389,7 @@ export const sessionPureSelectors: SessionPureSelectors = {
 
 export type SessionStateContainer<
   SearchDescriptor = unknown,
-  SearchMeta extends {} = {},
+  SearchMeta extends {} = {}
 > = StateContainer<
   SessionStateInternal<SearchDescriptor, SearchMeta>,
   SessionPureTransitions<SearchDescriptor, SearchMeta>,

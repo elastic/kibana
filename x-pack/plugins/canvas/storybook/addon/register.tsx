@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { PANEL_ID } from '@storybook/addon-actions';
+import React from 'react';
 import { addons, types } from '@storybook/addons';
 import { AddonPanel } from '@storybook/components';
 import { STORY_CHANGED } from '@storybook/core-events';
 import { create } from '@storybook/theming';
-import React from 'react';
+import { PANEL_ID } from '@storybook/addon-actions';
 
-import { ACTIONS_PANEL_ID, ADDON_ID, EVENTS } from './constants';
+import { ADDON_ID, EVENTS, ACTIONS_PANEL_ID } from './constants';
 import { Panel } from './panel';
 
 addons.register(ADDON_ID, (api) => {

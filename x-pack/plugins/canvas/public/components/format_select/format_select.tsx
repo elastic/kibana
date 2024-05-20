@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiSelect, EuiSpacer } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { Fragment, PureComponent, ChangeEvent } from 'react';
+import PropTypes from 'prop-types';
+import { EuiSelect, EuiSpacer, EuiFieldText } from '@elastic/eui';
 
 interface Props {
   /** The ID of the argument form */

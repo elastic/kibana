@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { TestProviders } from '../../../common/mock';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { RiskDetailsTabBody } from '.';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
-import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { TestProviders } from '../../../common/mock';
 import { HostsType } from '../../../explore/hosts/store/model';
 import { UsersType } from '../../../explore/users/store/model';
 import { useRiskScore } from '../../api/hooks/use_risk_score';

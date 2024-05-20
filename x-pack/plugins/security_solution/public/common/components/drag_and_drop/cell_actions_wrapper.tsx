@@ -7,16 +7,16 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { useContext, useMemo } from 'react';
-import { type DataProvider, TimelineId } from '../../../../common/types';
-import { getSourcererScopeId } from '../../../helpers';
-import { TimelineContext } from '../../../timelines/components/timeline';
+import { TimelineId, type DataProvider } from '../../../../common/types';
 import type { SecurityCellActionsData } from '../cell_actions';
 import {
   CellActionsMode,
-  SecurityCellActionType,
   SecurityCellActions,
   SecurityCellActionsTrigger,
+  SecurityCellActionType,
 } from '../cell_actions';
+import { getSourcererScopeId } from '../../../helpers';
+import { TimelineContext } from '../../../timelines/components/timeline';
 
 import { TableContext } from '../events_viewer/shared';
 

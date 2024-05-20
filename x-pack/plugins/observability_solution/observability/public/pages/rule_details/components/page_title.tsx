@@ -1,7 +1,3 @@
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import moment from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +5,10 @@ import moment from 'moment';
  * 2.0.
  */
 import React from 'react';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiSpacer } from '@elastic/eui';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
 import { getHealthColor } from '../helpers/get_health_color';
 

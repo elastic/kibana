@@ -1,6 +1,3 @@
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { ExceptionListQueryInfo } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
-import { getAllListTypes } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import { getAllListTypes } from '@kbn/lists-plugin/server/services/exception_lis
  * 2.0.
  */
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ExceptionListQueryInfo } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
+import { getAllListTypes } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 
 /**

@@ -69,7 +69,9 @@
         "memory": 1,
         "persisted": 0
       },
-      "versions": ["7.0.0-alpha1"]
+      "versions": [
+        "7.0.0-alpha1"
+      ]
     },
     "kibana": {
       "status": "green",

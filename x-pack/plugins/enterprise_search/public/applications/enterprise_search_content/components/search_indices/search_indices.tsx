@@ -7,19 +7,19 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
   EuiButton,
   EuiCallOut,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSearchBar,
   EuiSpacer,
-  EuiSwitch,
   EuiTitle,
+  EuiSwitch,
+  EuiSearchBar,
   EuiToolTip,
+  EuiCode,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

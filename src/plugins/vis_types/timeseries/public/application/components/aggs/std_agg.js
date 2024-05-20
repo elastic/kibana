@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { createChangeHandler } from '../lib/create_change_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
-import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
-import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
 
 export function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;

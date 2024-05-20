@@ -18,10 +18,10 @@ import {
 } from '@elastic/eui';
 
 import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { RULE_TAGS_TEMPLATE } from '../../../../common/opsgenie';
 import type { OpsgenieActionParams } from '../../../../server/connector_types';
-import { EditActionCallback } from '../types';
+import { RULE_TAGS_TEMPLATE } from '../../../../common/opsgenie';
 import * as i18n from './translations';
+import { EditActionCallback } from '../types';
 
 interface TagsProps {
   onChange: EditActionCallback;

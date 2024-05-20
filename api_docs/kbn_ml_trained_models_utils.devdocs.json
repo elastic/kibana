@@ -72,8 +72,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "modelName",
-            "description": ["\nModel name, e.g. elser"],
-            "signature": ["\"elser\" | \"e5\""],
+            "description": [
+              "\nModel name, e.g. elser"
+            ],
+            "signature": [
+              "\"elser\" | \"e5\""
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -95,8 +99,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "config",
-            "description": ["\nDefault PUT model configuration"],
-            "signature": ["object"],
+            "description": [
+              "\nDefault PUT model configuration"
+            ],
+            "signature": [
+              "object"
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -119,7 +127,9 @@
             "tags": [],
             "label": "os",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -131,7 +141,9 @@
             "tags": [],
             "label": "arch",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -143,7 +155,9 @@
             "tags": [],
             "label": "default",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -157,7 +171,9 @@
             "description": [
               "Indicates if model version is recommended for deployment based on the cluster configuration"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -169,7 +185,9 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -180,8 +198,12 @@
             "type": "string",
             "tags": [],
             "label": "license",
-            "description": ["Software license of a model, e.g. MIT"],
-            "signature": ["string | undefined"],
+            "description": [
+              "Software license of a model, e.g. MIT"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -192,8 +214,12 @@
             "type": "string",
             "tags": [],
             "label": "licenseUrl",
-            "description": ["Link to the external license/documentation page"],
-            "signature": ["string | undefined"],
+            "description": [
+              "Link to the external license/documentation page"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -205,7 +231,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["readonly string[] | undefined"],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
             "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -223,7 +251,9 @@
         "tags": [],
         "label": "BUILT_IN_MODEL_TAG",
         "description": [],
-        "signature": ["\"prepackaged\""],
+        "signature": [
+          "\"prepackaged\""
+        ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -248,7 +278,9 @@
         "tags": [],
         "label": "DeploymentState",
         "description": [],
-        "signature": ["\"started\" | \"starting\" | \"stopping\""],
+        "signature": [
+          "\"started\" | \"starting\" | \"stopping\""
+        ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -261,7 +293,9 @@
         "tags": [],
         "label": "ELASTIC_MODEL_TAG",
         "description": [],
-        "signature": ["\"elastic\""],
+        "signature": [
+          "\"elastic\""
+        ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -274,7 +308,9 @@
         "tags": [],
         "label": "ELASTIC_MODEL_TYPE",
         "description": [],
-        "signature": ["\"elastic\""],
+        "signature": [
+          "\"elastic\""
+        ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -287,7 +323,9 @@
         "tags": [],
         "label": "ElasticCuratedModelName",
         "description": [],
-        "signature": ["\"elser\" | \"e5\""],
+        "signature": [
+          "\"elser\" | \"e5\""
+        ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -300,7 +338,9 @@
         "tags": [],
         "label": "ElasticModelId",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -313,7 +353,9 @@
         "tags": [],
         "label": "ELSER_ID_V1",
         "description": [],
-        "signature": ["\".elser_model_1\""],
+        "signature": [
+          "\".elser_model_1\""
+        ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -326,7 +368,9 @@
         "tags": [],
         "label": "ElserVersion",
         "description": [],
-        "signature": ["2 | 1"],
+        "signature": [
+          "2 | 1"
+        ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -407,7 +451,9 @@
         "tags": [],
         "label": "TrainedModelType",
         "description": [],
-        "signature": ["\"tree_ensemble\" | \"lang_ident\" | \"pytorch\""],
+        "signature": [
+          "\"tree_ensemble\" | \"lang_ident\" | \"pytorch\""
+        ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -10,18 +10,18 @@ import type { SavedObjectsServiceSetup, SavedObjectsType } from '@kbn/core/serve
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import {
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  ASSETS_SAVED_OBJECT_TYPE,
-  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
-  FLEET_PROXY_SAVED_OBJECT_TYPE,
-  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
-  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-  INGEST_SAVED_OBJECT_INDEX,
-  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   OUTPUT_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  ASSETS_SAVED_OBJECT_TYPE,
+  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  FLEET_PROXY_SAVED_OBJECT_TYPE,
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  INGEST_SAVED_OBJECT_INDEX,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
@@ -48,42 +48,42 @@ import {
 
 import { migratePackagePolicyToV7110 } from './migrations/to_v7_11_0';
 
-import {
-  migratePackagePolicyAddAntivirusRegistrationModeToV8140,
-  migratePackagePolicyEnableCapsToV8140,
-  migratePackagePolicyToV870,
-  migratePackagePolicyToV8100,
-  migratePackagePolicyToV8140,
-} from './migrations/security_solution';
-import {
-  migratePackagePolicyEvictionsFromV81102,
-  migratePackagePolicyToV81102,
-} from './migrations/security_solution/to_v8_11_0_2';
 import { migrateAgentPolicyToV7120, migratePackagePolicyToV7120 } from './migrations/to_v7_12_0';
 import {
-  migrateOutputToV7130,
   migratePackagePolicyToV7130,
   migrateSettingsToV7130,
+  migrateOutputToV7130,
 } from './migrations/to_v7_13_0';
-import { migrateInstallationToV7140, migratePackagePolicyToV7140 } from './migrations/to_v7_14_0';
+import { migratePackagePolicyToV7140, migrateInstallationToV7140 } from './migrations/to_v7_14_0';
 import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
 import { migrateInstallationToV7160, migratePackagePolicyToV7160 } from './migrations/to_v7_16_0';
 import { migrateInstallationToV800, migrateOutputToV800 } from './migrations/to_v8_0_0';
 import { migratePackagePolicyToV820 } from './migrations/to_v8_2_0';
 import { migrateInstallationToV830, migratePackagePolicyToV830 } from './migrations/to_v8_3_0';
 import {
-  migrateAgentPolicyToV840,
   migrateInstallationToV840,
+  migrateAgentPolicyToV840,
   migratePackagePolicyToV840,
 } from './migrations/to_v8_4_0';
-import { migrateAgentPolicyToV850, migratePackagePolicyToV850 } from './migrations/to_v8_5_0';
+import { migratePackagePolicyToV850, migrateAgentPolicyToV850 } from './migrations/to_v8_5_0';
 import {
+  migrateSettingsToV860,
   migrateInstallationToV860,
   migratePackagePolicyToV860,
-  migrateSettingsToV860,
 } from './migrations/to_v8_6_0';
+import {
+  migratePackagePolicyAddAntivirusRegistrationModeToV8140,
+  migratePackagePolicyToV8100,
+  migratePackagePolicyToV8140,
+  migratePackagePolicyEnableCapsToV8140,
+  migratePackagePolicyToV870,
+} from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
 import { migrateAgentPolicyToV890 } from './migrations/to_v8_9_0';
+import {
+  migratePackagePolicyToV81102,
+  migratePackagePolicyEvictionsFromV81102,
+} from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
 
 /*

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { useLinkProps } from '../use_link_props';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiSpacer } from '@elastic/eui';
 import { Breadcrumbs } from './breadcrumbs';
+import { useLinkProps } from '../use_link_props';
 
 const StyledSpinnerFlexItem = styled.span`
   margin-right: 5px;

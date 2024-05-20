@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FILE_FORMATS } from '../../common/constants';
 import { MessageImporter } from './message_importer';
 import { NdjsonImporter } from './ndjson_importer';
 import { ImportFactoryOptions } from './types';
+import { FILE_FORMATS } from '../../common/constants';
 
 export function importerFactory(format: string, options: ImportFactoryOptions) {
   switch (format) {

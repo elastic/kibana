@@ -8,8 +8,8 @@
 import { EuiStat, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import { TITLE_SIZE } from '../constants';
 import * as i18n from './translations';
 

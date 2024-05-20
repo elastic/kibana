@@ -9,7 +9,7 @@ import { setMockActions, setMockValues } from '../../../../../../__mocks__/kea_l
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButton, EuiFieldText, EuiForm } from '@elastic/eui';
 

@@ -7,18 +7,18 @@
 
 import './filter_popover.scss';
 
+import React from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 // Need to keep it separate to make it work Jest mocks in dimension_panel tests
 // import { QueryInput } from '../../../../shared_components/query_input';
-import { QueryInput, isQueryValid } from '@kbn/visualization-ui-components';
-import React from 'react';
-import { FilterValue, defaultLabel } from '.';
+import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { LENS_APP_NAME } from '../../../../../../common/constants';
-import { LensAppServices } from '../../../../../app_plugin/types';
 import { IndexPattern } from '../../../../../types';
+import { FilterValue, defaultLabel } from '.';
 import { LabelInput } from '../shared_components';
+import { LensAppServices } from '../../../../../app_plugin/types';
 
 export const FilterPopover = ({
   filter,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@kbn/safer-lodash-set';
 import d3 from 'd3';
+import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 
 const defaults = {

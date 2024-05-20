@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BfetchServerSetup, BfetchServerStart } from '@kbn/bfetch-plugin/server';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { Subject } from 'rxjs';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { BfetchServerSetup, BfetchServerStart } from '@kbn/bfetch-plugin/server';
 
 export interface BfetchExplorerSetupPlugins {
   bfetch: BfetchServerSetup;

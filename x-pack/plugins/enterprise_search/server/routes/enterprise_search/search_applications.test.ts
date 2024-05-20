@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MockRouter, mockDependencies } from '../../__mocks__';
+import { mockDependencies, MockRouter } from '../../__mocks__';
 
 jest.mock('../../lib/search_applications/field_capabilities', () => ({
   fetchSearchApplicationFieldCapabilities: jest.fn(),

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../and_or_badge';

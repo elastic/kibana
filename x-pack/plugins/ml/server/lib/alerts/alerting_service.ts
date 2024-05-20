@@ -5,29 +5,36 @@
  * 2.0.
  */
 
-import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
+import rison from '@kbn/rison';
+import type { Duration } from 'moment/moment';
+import { capitalize, get, memoize, pick } from 'lodash';
 import {
   FIELD_FORMAT_IDS,
   type IFieldFormat,
   type SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import {
-  ML_ANOMALY_RESULT_TYPE,
-  type MlAnomalyRecordDoc,
-  type MlAnomalyResultType,
   getEntityFieldName,
   getEntityFieldValue,
+  type MlAnomalyRecordDoc,
+  type MlAnomalyResultType,
+  ML_ANOMALY_RESULT_TYPE,
 } from '@kbn/ml-anomaly-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import rison from '@kbn/rison';
-import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { capitalize, get, memoize, pick } from 'lodash';
-import type { Duration } from 'moment/moment';
+import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { getAnomalyDescription } from '../../../common/util/anomaly_description';
+import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
+import type { MlClient } from '../ml_client';
+import type {
+  MlAnomalyDetectionAlertParams,
+  MlAnomalyDetectionAlertPreviewRequest,
+} from '../../routes/schemas/alerting_schema';
 import type {
   AlertExecutionResult,
   InfluencerAnomalyAlertDoc,
@@ -38,23 +45,16 @@ import type {
   TopInfluencerAADDoc,
   TopRecordAADDoc,
 } from '../../../common/types/alerts';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
-import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
-import { getAnomalyDescription } from '../../../common/util/anomaly_description';
-import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
-import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
-import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import { getTypicalAndActualValues } from '../../models/results_service/results_service';
-import type {
-  MlAnomalyDetectionAlertParams,
-  MlAnomalyDetectionAlertPreviewRequest,
-} from '../../routes/schemas/alerting_schema';
-import type { GetDataViewsService } from '../data_views_utils';
-import type { MlClient } from '../ml_client';
 import type {
   AnomalyDetectionAlertContext,
   AnomalyDetectionAlertPayload,
 } from './register_anomaly_detection_alert_type';
+import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
+import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
+import type { DatafeedsService } from '../../models/job_service/datafeeds';
+import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import { getTypicalAndActualValues } from '../../models/results_service/results_service';
+import type { GetDataViewsService } from '../data_views_utils';
 
 type AggResultsResponse = { key?: number } & {
   [key in PreviewResultsKeys]: {
@@ -210,14 +210,11 @@ export function alertingServiceProvider(
     const fieldFormatMap = await getFieldsFormatMap(indexPattern);
 
     const fieldFormatters = fieldFormatMap
-      ? Object.entries(fieldFormatMap).reduce(
-          (acc, [fieldName, config]) => {
-            const formatter = fieldFormatsRegistry.deserialize(config);
-            acc[fieldName] = formatter.convert.bind(formatter);
-            return acc;
-          },
-          {} as Record<string, IFieldFormat['convert']>
-        )
+      ? Object.entries(fieldFormatMap).reduce((acc, [fieldName, config]) => {
+          const formatter = fieldFormatsRegistry.deserialize(config);
+          acc[fieldName] = formatter.convert.bind(formatter);
+          return acc;
+        }, {} as Record<string, IFieldFormat['convert']>)
       : {};
 
     // store formatters to pass to the executor state update
@@ -430,19 +427,13 @@ export function alertingServiceProvider(
     if (resultType === ML_ANOMALY_RESULT_TYPE.RECORD) {
       const recordSource = source as MlAnomalyRecordDoc;
 
-      const detectorsByJob = jobs.reduce(
-        (acc, job) => {
-          acc[job.job_id] = job.analysis_config.detectors.reduce(
-            (innterAcc, detector) => {
-              innterAcc[detector.detector_index!] = detector.detector_description;
-              return innterAcc;
-            },
-            {} as Record<number, string | undefined>
-          );
-          return acc;
-        },
-        {} as Record<string, Record<number, string | undefined>>
-      );
+      const detectorsByJob = jobs.reduce((acc, job) => {
+        acc[job.job_id] = job.analysis_config.detectors.reduce((innterAcc, detector) => {
+          innterAcc[detector.detector_index!] = detector.detector_description;
+          return innterAcc;
+        }, {} as Record<number, string | undefined>);
+        return acc;
+      }, {} as Record<string, Record<number, string | undefined>>);
 
       const detectorDescription = get(detectorsByJob, [
         recordSource.job_id,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
 import type { FC } from 'react';
 import React from 'react';
+import classNames from 'classnames';
 
 import {
   Axis,
@@ -20,7 +20,7 @@ import {
 } from '@elastic/charts';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
-import { type ChartData, isUnsupportedChartData } from '@kbn/ml-data-grid';
+import { isUnsupportedChartData, type ChartData } from '@kbn/ml-data-grid';
 
 import './column_chart.scss';
 

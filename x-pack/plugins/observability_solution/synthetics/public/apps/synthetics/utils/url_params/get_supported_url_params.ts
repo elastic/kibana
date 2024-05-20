@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CLIENT_DEFAULTS } from '../../../../../common/constants';
-import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import { MonitorOverviewState } from '../../state';
-import { parseAbsoluteDate } from './parse_absolute_date';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import { parseIsPaused } from './parse_is_paused';
 import { parseUrlInt } from './parse_url_int';
+import { CLIENT_DEFAULTS } from '../../../../../common/constants';
+import { parseAbsoluteDate } from './parse_absolute_date';
 
 // TODO: Change for Synthetics App if needed (Copied from legacy_uptime)
 export interface SyntheticsUrlParams {

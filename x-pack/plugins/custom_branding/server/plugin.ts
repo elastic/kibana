@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CustomBranding } from '@kbn/core-custom-branding-common';
 import {
   CoreSetup,
   CoreStart,
@@ -18,13 +17,14 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { License } from '@kbn/license-api-guard-plugin/server';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
 import { Subscription } from 'rxjs';
 import { PLUGIN } from '../common/constants';
 import type {
   CustomBrandingServerSetup,
-  CustomBrandingServerSetupDependencies,
   CustomBrandingServerStart,
   CustomBrandingServerStartDependencies,
+  CustomBrandingServerSetupDependencies,
 } from './types';
 import { registerUiSettings } from './ui_settings';
 

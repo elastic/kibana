@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { act, render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
+import { render, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { SelectInterval } from './select_interval';
 

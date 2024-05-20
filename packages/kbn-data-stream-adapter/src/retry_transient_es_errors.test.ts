@@ -1,4 +1,3 @@
-import { type DiagnosticResult, errors as EsErrors } from '@elastic/elasticsearch';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { type DiagnosticResult, errors as EsErrors } from '@elastic/elasticsearc
  * Side Public License, v 1.
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { errors as EsErrors, type DiagnosticResult } from '@elastic/elasticsearch';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 const mockLogger = loggingSystemMock.createLogger();

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { differenceWith, intersectionWith, isEmpty } from 'lodash';
-import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
-import type { CaseRequestCustomFields, CasesSearchRequest } from '../../../common/types/api';
+import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { CaseRequestCustomFields, CasesSearchRequest } from '../../../common/types/api';
+import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
 import type { ICasesCustomField } from '../../custom_fields';
 import { casesCustomFields } from '../../custom_fields';
-import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;

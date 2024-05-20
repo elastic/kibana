@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ContactCardEmbeddable } from '@kbn/embeddable-plugin/public/lib/test_samples';
-import { discoverServiceMock } from '../__mocks__/services';
-import { createStartContractMock } from '../__mocks__/start_contract';
-import { getDiscoverLocatorParams } from './get_discover_locator_params';
-import { SavedSearchEmbeddable } from './saved_search_embeddable';
 import { ViewSavedSearchAction } from './view_saved_search_action';
+import { SavedSearchEmbeddable } from './saved_search_embeddable';
+import { createStartContractMock } from '../__mocks__/start_contract';
+import { discoverServiceMock } from '../__mocks__/services';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { getDiscoverLocatorParams } from './get_discover_locator_params';
 
 const applicationMock = createStartContractMock();
 const services = discoverServiceMock;

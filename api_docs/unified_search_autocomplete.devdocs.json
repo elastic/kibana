@@ -87,7 +87,9 @@
             "tags": [],
             "label": "signal",
             "description": [],
-            "signature": ["AbortSignal | undefined"],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -99,7 +101,9 @@
             "tags": [],
             "label": "useTimeRange",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -111,7 +115,9 @@
             "tags": [],
             "label": "boolFilter",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -144,7 +150,10 @@
             "tags": [],
             "label": "suggestionsAbstraction",
             "description": [],
-            "signature": ["SuggestionsAbstraction", " | undefined"],
+            "signature": [
+              "SuggestionsAbstraction",
+              " | undefined"
+            ],
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -200,7 +209,11 @@
         "tags": [],
         "label": "QuerySuggestion",
         "description": [],
-        "signature": ["QuerySuggestionBasic", " | ", "QuerySuggestionField"],
+        "signature": [
+          "QuerySuggestionBasic",
+          " | ",
+          "QuerySuggestionField"
+        ],
         "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -8,8 +8,8 @@
 
 import { resolve } from 'path';
 
-import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Config } from './config';
 

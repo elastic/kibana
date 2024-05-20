@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import * as i18n from './translations';
 
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 
-import { MlAuditIcon } from '../ml_audit_icon';
 import { MlJobLink } from '../ml_job_link/ml_job_link';
+import { MlAuditIcon } from '../ml_audit_icon';
 import { MlJobStatusBadge } from '../ml_job_status_badge';
 
 const Wrapper = styled.div`

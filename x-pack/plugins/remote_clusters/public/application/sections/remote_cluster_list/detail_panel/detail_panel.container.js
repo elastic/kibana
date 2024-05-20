@@ -9,9 +9,9 @@ import { connect } from 'react-redux';
 import { DetailPanel as DetailPanelView } from './detail_panel';
 
 import {
+  isDetailPanelOpen,
   getDetailPanelCluster,
   getDetailPanelClusterName,
-  isDetailPanelOpen,
   isLoading,
 } from '../../../store/selectors';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { FlyoutLoading } from './flyout_loading';
+import { render } from '@testing-library/react';
 import { FLYOUT_LOADING_TEST_ID } from './test_ids';
+import { FlyoutLoading } from './flyout_loading';
 
 describe('<FlyoutLoading />', () => {
   it('should render loading', () => {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { CustomFieldTypes } from '../../../common/types/domain';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import { FormFields } from './form_fields';
 
 describe('FormFields ', () => {

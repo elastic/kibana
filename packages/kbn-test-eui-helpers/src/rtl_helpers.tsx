@@ -8,9 +8,9 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { fireEvent, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import moment from 'moment';
+import userEvent from '@testing-library/user-event';
+import { screen, within, fireEvent } from '@testing-library/react';
 
 export const getSelectedButtonInGroup = (testId: string) => () => {
   const buttonGroup = screen.getByTestId(testId);

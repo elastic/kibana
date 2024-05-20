@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { IRouter } from '@kbn/core/server';
-import {
-  RuleTagsRequestQueryV1,
-  ruleTagsRequestQuerySchemaV1,
-} from '../../../../../common/routes/rule/apis/tags';
-import { ILicenseState } from '../../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import { verifyAccessAndContext } from '../../../lib';
 import { transformRuleTagsBodyResponseV1 } from './transforms';
 import { transformRuleTagsQueryRequestV1 } from './transforms';
+import {
+  ruleTagsRequestQuerySchemaV1,
+  RuleTagsRequestQueryV1,
+} from '../../../../../common/routes/rule/apis/tags';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { ILicenseState } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
 
 export const getRuleTagsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

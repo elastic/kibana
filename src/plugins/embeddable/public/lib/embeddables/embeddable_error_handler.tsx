@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ErrorLike } from '@kbn/expressions-plugin/common';
-import { isPromise } from '@kbn/std';
-import type { MaybePromise } from '@kbn/utility-types';
 import { isFunction } from 'lodash';
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import { isPromise } from '@kbn/std';
+import type { MaybePromise } from '@kbn/utility-types';
+import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 
 type IReactEmbeddable = IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;

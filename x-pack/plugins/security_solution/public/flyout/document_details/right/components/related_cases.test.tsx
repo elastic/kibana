@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import React from 'react';
-import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
-import { RelatedCases } from './related_cases';
 import {
   CORRELATIONS_RELATED_CASES_TEST_ID,
   SUMMARY_ROW_ICON_TEST_ID,
   SUMMARY_ROW_LOADING_TEST_ID,
   SUMMARY_ROW_VALUE_TEST_ID,
 } from './test_ids';
+import { RelatedCases } from './related_cases';
+import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 
 jest.mock('../../shared/hooks/use_fetch_related_cases');
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { SeriesDatePicker } from '.';
 import { render } from '../../rtl_helpers';
+import { fireEvent, waitFor } from '@testing-library/react';
+import { SeriesDatePicker } from '.';
 
 describe('SeriesDatePicker', function () {
   it('should render properly', function () {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiLink } from '@elastic/eui';
+import React, { PureComponent, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiConfirmModal, EuiLink } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import PropTypes from 'prop-types';
-import React, { PureComponent, Fragment } from 'react';
-import { connect } from 'react-redux';
-import { arrify } from '../../../../common/services/utils';
 import { routing } from '../../services/routing';
 import { resumeFollowerIndex } from '../../store/actions';
+import { arrify } from '../../../../common/services/utils';
 
 class FollowerIndexResumeProviderUi extends PureComponent {
   static propTypes = {

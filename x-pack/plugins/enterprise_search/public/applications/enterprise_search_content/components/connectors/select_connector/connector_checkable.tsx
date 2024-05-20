@@ -29,7 +29,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { BETA_LABEL, CONNECTOR_CLIENT_LABEL, NATIVE_LABEL } from '../../../../shared/constants';
+import { BETA_LABEL, NATIVE_LABEL, CONNECTOR_CLIENT_LABEL } from '../../../../shared/constants';
 
 import { PlatinumLicensePopover } from '../../shared/platinum_license_popover/platinum_license_popover';
 
@@ -55,17 +55,13 @@ const getCss = (
   showNativeBadge: ConnectorCheckableProps['showNativeBadge']
 ) => {
   return css`
-    ${
-      showNativeBadge &&
-      `box-shadow: 8px 9px 0px -1px ${euiTheme.colors.lightestShade},
-      8px 9px 0px 0px ${euiTheme.colors.lightShade};`
-    }
-    ${
-      isDisabled &&
-      `background-color: ${euiTheme.colors.lightestShade};
+    ${showNativeBadge &&
+    `box-shadow: 8px 9px 0px -1px ${euiTheme.colors.lightestShade},
+      8px 9px 0px 0px ${euiTheme.colors.lightShade};`}
+    ${isDisabled &&
+    `background-color: ${euiTheme.colors.lightestShade};
     color: ${euiTheme.colors.disabledText};
-    `
-    }
+    `}
   `;
 };
 

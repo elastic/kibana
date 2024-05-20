@@ -7,18 +7,18 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import type { NodeID } from '.';
 import {
   firstNonNullValue,
   values,
 } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
 import type {
   ECSField,
-  FieldsObject,
   ResolverNode,
+  FieldsObject,
   ResolverSchema,
 } from '../../../../../../common/endpoint/types';
 import { DescendantsQuery } from '../queries/descendants';
+import type { NodeID } from '.';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { StatsQuery } from '../queries/stats';
 
@@ -55,10 +55,7 @@ export type TreeResponse = Promise<
 export class Fetcher {
   private alertsClient?: AlertsClient;
 
-  constructor(
-    private readonly client: IScopedClusterClient,
-    alertsClient?: AlertsClient
-  ) {
+  constructor(private readonly client: IScopedClusterClient, alertsClient?: AlertsClient) {
     this.alertsClient = alertsClient;
   }
 

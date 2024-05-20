@@ -10,9 +10,9 @@ import { render } from '@testing-library/react';
 import React from 'react';
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { KibanaErrorBoundaryProviderDeps } from '../../types';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '../..';
 import { BadComponent } from '../../mocks';
-import { KibanaErrorBoundaryProviderDeps } from '../../types';
 
 describe('<KibanaErrorBoundaryProvider>', () => {
   let analytics: KibanaErrorBoundaryProviderDeps['analytics'];

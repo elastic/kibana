@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
+import { AssistantSettingsButton } from './assistant_settings_button';
 import { welcomeConvo } from '../../mock/conversation';
 import { CONVERSATIONS_TAB } from './assistant_settings';
-import { AssistantSettingsButton } from './assistant_settings_button';
 
 const setIsSettingsModalVisible = jest.fn();
 const onConversationSelected = jest.fn();

@@ -50,7 +50,9 @@
             "tags": [],
             "label": "codec",
             "description": [],
-            "signature": ["C"],
+            "signature": [
+              "C"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/default_array/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -86,8 +88,13 @@
             "type": "Object",
             "tags": [],
             "label": "itemSchema",
-            "description": ["Schema of the array's items."],
-            "signature": ["Type", "<TItem, TItem, unknown>"],
+            "description": [
+              "Schema of the array's items."
+            ],
+            "signature": [
+              "Type",
+              "<TItem, TItem, unknown>"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/default_csv_array/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -99,8 +106,12 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["(Optional) Name of the resulting schema."],
-            "signature": ["string | undefined"],
+            "description": [
+              "(Optional) Name of the resulting schema."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/default_csv_array/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -136,8 +147,13 @@
             "type": "Object",
             "tags": [],
             "label": "valueSchema",
-            "description": ["Base schema of a value."],
-            "signature": ["Type", "<TValue, TValue, unknown>"],
+            "description": [
+              "Base schema of a value."
+            ],
+            "signature": [
+              "Type",
+              "<TValue, TValue, unknown>"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/default_value/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -149,8 +165,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
-            "description": ["Default value to set."],
-            "signature": ["TValue"],
+            "description": [
+              "Default value to set."
+            ],
+            "signature": [
+              "TValue"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/default_value/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -162,8 +182,12 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["(Optional) Name of the resulting schema."],
-            "signature": ["string | undefined"],
+            "description": [
+              "(Optional) Name of the resulting schema."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/default_value/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -179,7 +203,9 @@
         "type": "Function",
         "tags": [],
         "label": "enumeration",
-        "description": ["\nConverts string value to a Typescript enum\n - \"foo\" -> MyEnum.foo\n"],
+        "description": [
+          "\nConverts string value to a Typescript enum\n - \"foo\" -> MyEnum.foo\n"
+        ],
         "signature": [
           "(name: string, originalEnum: Record<string, EnumType>) => ",
           "Type",
@@ -195,8 +221,12 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["Enum name"],
-            "signature": ["string"],
+            "description": [
+              "Enum name"
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/enumeration/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -208,15 +238,21 @@
             "type": "Object",
             "tags": [],
             "label": "originalEnum",
-            "description": ["Typescript enum"],
-            "signature": ["Record<string, EnumType>"],
+            "description": [
+              "Typescript enum"
+            ],
+            "signature": [
+              "Record<string, EnumType>"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/enumeration/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["Codec"],
+        "returnComment": [
+          "Codec"
+        ],
         "initialIsOpen": false
       },
       {
@@ -259,7 +295,9 @@
                 "tags": [],
                 "label": "codec",
                 "description": [],
-                "signature": ["C"],
+                "signature": [
+                  "C"
+                ],
                 "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -271,7 +309,9 @@
                 "tags": [],
                 "label": "minSize",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -283,7 +323,9 @@
                 "tags": [],
                 "label": "maxSize",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -295,7 +337,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-securitysolution-io-ts-types/src/limited_size_array/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -335,7 +379,9 @@
             "tags": [],
             "label": "codec",
             "description": [],
-            "signature": ["C"],
+            "signature": [
+              "C"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_array/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -348,7 +394,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_array/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -381,7 +429,9 @@
             "tags": [],
             "label": "{ allowedUnits }",
             "description": [],
-            "signature": ["TimeDurationType"],
+            "signature": [
+              "TimeDurationType"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -402,7 +452,10 @@
         "tags": [],
         "label": "DefaultStringBooleanFalseC",
         "description": [],
-        "signature": ["Type", "<boolean, string | boolean | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<boolean, string | boolean | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_string_boolean_false/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -415,7 +468,9 @@
         "tags": [],
         "label": "DefaultVersionNumberDecoded",
         "description": [],
-        "signature": ["number"],
+        "signature": [
+          "number"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_version_number/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -428,7 +483,9 @@
         "tags": [],
         "label": "EmptyStringArrayDecoded",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/empty_string_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -441,7 +498,9 @@
         "tags": [],
         "label": "EmptyStringArrayEncoded",
         "description": [],
-        "signature": ["string | null | undefined"],
+        "signature": [
+          "string | null | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/empty_string_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -483,8 +542,12 @@
         "type": "Type",
         "tags": [],
         "label": "IsoDateString",
-        "description": ["\nTypes the IsoDateString as:\n  - A string that is an ISOString"],
-        "signature": ["string"],
+        "description": [
+          "\nTypes the IsoDateString as:\n  - A string that is an ISOString"
+        ],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/iso_date_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -497,7 +560,10 @@
         "tags": [],
         "label": "IsoDateStringC",
         "description": [],
-        "signature": ["Type", "<string, string, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/iso_date_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -510,7 +576,9 @@
         "tags": [],
         "label": "NonEmptyOrNullableStringArray",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_or_nullable_string_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -523,7 +591,9 @@
         "tags": [],
         "label": "NonEmptyOrNullableStringArrayDecoded",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_or_nullable_string_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -536,7 +606,9 @@
         "tags": [],
         "label": "NonEmptyStringArray",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -549,7 +621,9 @@
         "tags": [],
         "label": "NonEmptyStringArrayDecoded",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -562,7 +636,10 @@
         "tags": [],
         "label": "NonEmptyStringC",
         "description": [],
-        "signature": ["Type", "<string, string, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -575,7 +652,9 @@
         "tags": [],
         "label": "Operator",
         "description": [],
-        "signature": ["\"equals\""],
+        "signature": [
+          "\"equals\""
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -600,7 +679,10 @@
         "tags": [],
         "label": "StringToPositiveNumberC",
         "description": [],
-        "signature": ["Type", "<number, string, unknown>"],
+        "signature": [
+          "Type",
+          "<number, string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/string_to_positive_number/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -630,7 +712,9 @@
             "tags": [],
             "label": "__0",
             "description": [],
-            "signature": ["TimeDurationType"],
+            "signature": [
+              "TimeDurationType"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -645,7 +729,10 @@
         "tags": [],
         "label": "UUIDC",
         "description": [],
-        "signature": ["Type", "<string, string, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/uuid/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -658,7 +745,9 @@
         "tags": [],
         "label": "Version",
         "description": [],
-        "signature": ["number"],
+        "signature": [
+          "number"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/version/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -671,7 +760,9 @@
         "tags": [],
         "label": "VersionOrUndefined",
         "description": [],
-        "signature": ["number | undefined"],
+        "signature": [
+          "number | undefined"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/version/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -688,7 +779,10 @@
         "description": [
           "\nTypes the DefaultBooleanFalse as:\n  - If null or undefined, then a default false will be set"
         ],
-        "signature": ["Type", "<boolean, boolean | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<boolean, boolean | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_boolean_false/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -703,7 +797,10 @@
         "description": [
           "\nTypes the DefaultBooleanTrue as:\n  - If null or undefined, then a default true will be set"
         ],
-        "signature": ["Type", "<boolean, boolean | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<boolean, boolean | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_boolean_true/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -718,7 +815,10 @@
         "description": [
           "\nTypes the DefaultEmptyString as:\n  - If null or undefined, then a default of an empty string \"\" will be used"
         ],
-        "signature": ["Type", "<string, string | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_empty_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -733,7 +833,10 @@
         "description": [
           "\nTypes the DefaultStringArray as:\n  - If undefined, then a default array will be set\n  - If an array is sent in, then the array will be validated to ensure all elements are a string"
         ],
-        "signature": ["Type", "<string[], string[] | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string[], string[] | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_string_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -748,7 +851,10 @@
         "description": [
           "\nTypes the DefaultStringBooleanFalse as:\n  - If a string this will convert the string to a boolean\n  - If null or undefined, then a default false will be set"
         ],
-        "signature": ["Type", "<boolean, string | boolean | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<boolean, string | boolean | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_string_boolean_false/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -763,7 +869,10 @@
         "description": [
           "\nTypes the DefaultUuid as:\n  - If null or undefined, then a default string uuidv4() will be\n    created otherwise it will be checked just against an empty string"
         ],
-        "signature": ["Type", "<string, string | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_uuid/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -778,7 +887,10 @@
         "description": [
           "\nTypes the DefaultVersionNumber as:\n  - If null or undefined, then a default of the number 1 will be used"
         ],
-        "signature": ["Type", "<number, number | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/default_version_number/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -793,7 +905,10 @@
         "description": [
           "\nTypes the EmptyStringArray as:\n  - A value that can be undefined, or null (which will be turned into an empty array)\n  - A comma separated string that can turn into an array by splitting on it\n  - Example input converted to output: undefined -> []\n  - Example input converted to output: null -> []\n  - Example input converted to output: \"a,b,c\" -> [\"a\", \"b\", \"c\"]"
         ],
-        "signature": ["Type", "<string[], string | null | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<string[], string | null | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/empty_string_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -832,7 +947,10 @@
         "tags": [],
         "label": "IsoDateString",
         "description": [],
-        "signature": ["Type", "<string, string, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/iso_date_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -847,7 +965,10 @@
         "description": [
           "\nTypes the nonEmptyOrNullableStringArray as:\n  - An array of non empty strings of length 1 or greater\n  - This differs from NonEmptyStringArray in that both input and output are type array\n"
         ],
-        "signature": ["Type", "<string[], string[], unknown>"],
+        "signature": [
+          "Type",
+          "<string[], string[], unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_or_nullable_string_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -859,8 +980,13 @@
         "type": "Object",
         "tags": [],
         "label": "NonEmptyString",
-        "description": ["\nTypes the NonEmptyString as:\n  - A string that is not empty"],
-        "signature": ["Type", "<string, string, unknown>"],
+        "description": [
+          "\nTypes the NonEmptyString as:\n  - A string that is not empty"
+        ],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -875,7 +1001,10 @@
         "description": [
           "\nTypes the NonEmptyStringArray as:\n  - A string that is not empty (which will be turned into an array of size 1)\n  - A comma separated string that can turn into an array by splitting on it\n  - Example input converted to output: \"a,b,c\" -> [\"a\", \"b\", \"c\"]"
         ],
-        "signature": ["Type", "<string[], string, unknown>"],
+        "signature": [
+          "Type",
+          "<string[], string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/non_empty_string_array/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -890,7 +1019,10 @@
         "description": [
           "\nTypes a number between 0 and 1 inclusive. Useful for specifying a probability, weighting, etc."
         ],
-        "signature": ["Type", "<number, number, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/number_between_zero_and_one_inclusive/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -905,7 +1037,10 @@
         "description": [
           "\nTypes the OnlyFalseAllowed as:\n  - If null or undefined, then a default false will be set\n  - If true is sent in then this will return an error\n  - If false is sent in then this will allow it only false"
         ],
-        "signature": ["Type", "<boolean, boolean | undefined, unknown>"],
+        "signature": [
+          "Type",
+          "<boolean, boolean | undefined, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/only_false_allowed/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -918,7 +1053,10 @@
         "tags": [],
         "label": "operator",
         "description": [],
-        "signature": ["KeyofC", "<{ equals: null; }>"],
+        "signature": [
+          "KeyofC",
+          "<{ equals: null; }>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -931,7 +1069,10 @@
         "tags": [],
         "label": "operatorExcluded",
         "description": [],
-        "signature": ["KeyofC", "<{ excluded: null; }>"],
+        "signature": [
+          "KeyofC",
+          "<{ excluded: null; }>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -944,7 +1085,10 @@
         "tags": [],
         "label": "operatorIncluded",
         "description": [],
-        "signature": ["KeyofC", "<{ included: null; }>"],
+        "signature": [
+          "KeyofC",
+          "<{ included: null; }>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -959,7 +1103,10 @@
         "description": [
           "\nTypes the positive integer are:\n  - Natural Number (positive integer and not a float),\n  - zero or greater"
         ],
-        "signature": ["Type", "<number, number, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/positive_integer/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -974,7 +1121,10 @@
         "description": [
           "\nTypes the positive integer greater than zero is:\n  - Natural Number (positive integer and not a float),\n  - 1 or greater"
         ],
-        "signature": ["Type", "<number, number, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/positive_integer_greater_than_zero/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -989,7 +1139,10 @@
         "description": [
           "\nTypes the StrongToPositiveNumber as:\n  - If a string this converts the string into a number\n  - Ensures it is a number (and not NaN)\n  - Ensures it is positive number"
         ],
-        "signature": ["Type", "<number, string, unknown>"],
+        "signature": [
+          "Type",
+          "<number, string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/string_to_positive_number/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1004,7 +1157,10 @@
         "description": [
           "\nTypes the risk score as:\n  - Natural Number (positive integer and not a float),\n  - Between the values [0 and 100] inclusive."
         ],
-        "signature": ["Type", "<string, string, unknown>"],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/uuid/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1019,7 +1175,10 @@
         "description": [
           "\nNote this is just a positive number, but we use it as a type here which is still ok.\nThis type was originally from \"x-pack/plugins/security_solution/common/detection_engine/schemas/common/schemas.ts\"\nbut is moved here to make things more portable. No unit tests, but see PositiveIntegerGreaterThanZero integer for unit tests."
         ],
-        "signature": ["Type", "<number, number, unknown>"],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/version/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1032,7 +1191,14 @@
         "tags": [],
         "label": "versionOrUndefined",
         "description": [],
-        "signature": ["UnionC", "<[", "Type", "<number, number, unknown>, ", "UndefinedC", "]>"],
+        "signature": [
+          "UnionC",
+          "<[",
+          "Type",
+          "<number, number, unknown>, ",
+          "UndefinedC",
+          "]>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/version/index.ts",
         "deprecated": false,
         "trackAdoption": false,

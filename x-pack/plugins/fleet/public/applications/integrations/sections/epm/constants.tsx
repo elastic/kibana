@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { KibanaSavedObjectType, ServiceName } from '../../types';
+import type { ServiceName, KibanaSavedObjectType } from '../../types';
 import { ElasticsearchAssetType, KibanaAssetType } from '../../types';
 
 // only allow Kibana assets for the kibana key, ES assets for elasticsearch, etc

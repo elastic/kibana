@@ -10,7 +10,10 @@
     },
     "function": "<anonymous>",
     "context": {
-      "pre": ["    })", ""],
+      "pre": [
+        "    })",
+        ""
+      ],
       "post": [
         "    req.body.lines.forEach(function (line) {",
         "      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())"
@@ -88,8 +91,14 @@
     },
     "function": "exports.client",
     "context": {
-      "pre": ["", "exports.client = function (cb) {"],
-      "post": ["}", ""]
+      "pre": [
+        "",
+        "exports.client = function (cb) {"
+      ],
+      "post": [
+        "}",
+        ""
+      ]
     }
   },
   {
@@ -103,8 +112,14 @@
     },
     "function": "<anonymous>",
     "context": {
-      "pre": ["  }", ""],
-      "post": ["    if (err) return error(err, res)", ""]
+      "pre": [
+        "  }",
+        ""
+      ],
+      "post": [
+        "    if (err) return error(err, res)",
+        ""
+      ]
     }
   },
   {
@@ -262,7 +277,10 @@
         "app.use('/api', function (req, res, next) {",
         "  if (Math.random() > opbeansRedirectProbability) {"
       ],
-      "post": ["  }", ""]
+      "post": [
+        "  }",
+        ""
+      ]
     }
   },
   {

@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { Observable, firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import {
   ElasticsearchClient,
@@ -17,8 +17,8 @@ import {
   ServiceStatus,
   ServiceStatusLevels,
 } from '@kbn/core/server';
-import { Stats } from '../../../common/types';
 import { CollectorSet } from '../../collector';
+import { Stats } from '../../../common/types';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 export function registerStatsRoute({

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import { useMemo } from 'react';
-import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
+import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 
 export const useRuleIndices = (
   machineLearningJobId?: string[],

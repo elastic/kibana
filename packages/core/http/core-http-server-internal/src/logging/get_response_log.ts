@@ -7,11 +7,11 @@
  */
 
 import querystring from 'querystring';
-import numeral from '@elastic/numeral';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
-import type { KibanaRequestState } from '@kbn/core-http-server';
+import numeral from '@elastic/numeral';
 import type { LogMeta, Logger } from '@kbn/logging';
+import type { KibanaRequestState } from '@kbn/core-http-server';
 import { getResponsePayloadBytes } from './get_payload_size';
 
 // If you are updating these, consider whether they should also be updated in the

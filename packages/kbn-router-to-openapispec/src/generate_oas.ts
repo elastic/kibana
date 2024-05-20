@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
+import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { OasConverter } from './oas_converter';
 import { createOperationIdCounter } from './operation_id_counter';
 import { processRouter } from './process_router';

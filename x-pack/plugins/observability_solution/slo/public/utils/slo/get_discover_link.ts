@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { ALL_VALUE, kqlWithFiltersSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Filter, FilterStateStore, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
-import { ALL_VALUE, SLOWithSummaryResponse, kqlWithFiltersSchema } from '@kbn/slo-schema';
-import { isEmpty } from 'lodash';
 import { v4 } from 'uuid';
+import { isEmpty } from 'lodash';
 
 function createDiscoverLocator(
   slo: SLOWithSummaryResponse,

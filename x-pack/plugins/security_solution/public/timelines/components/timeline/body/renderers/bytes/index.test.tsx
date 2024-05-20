@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { PreferenceFormattedBytes } from '../../../../../../common/components/formatted_bytes';
 import { TestProviders } from '../../../../../../common/mock';
+import { PreferenceFormattedBytes } from '../../../../../../common/components/formatted_bytes';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
 import { Bytes } from '.';

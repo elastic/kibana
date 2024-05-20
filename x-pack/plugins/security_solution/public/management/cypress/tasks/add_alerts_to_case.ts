@@ -11,10 +11,10 @@ import {
 } from '@kbn/cases-plugin/common';
 import type { UserActionFindResponse } from '@kbn/cases-plugin/common';
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../common';
-import { DEFAULT_ALERTS_INDEX, DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
-import type { Rule } from '../../../detection_engine/rule_management/logic';
+import { DEFAULT_ALERTS_INDEX, DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { request } from './common';
+import type { Rule } from '../../../detection_engine/rule_management/logic';
 
 export interface AddAlertsToCaseOptions {
   caseId: string;

@@ -7,9 +7,9 @@
  */
 
 import { sum } from 'lodash';
+import { createTopNFunctions } from './functions';
 import { decodeStackTraceResponse } from '..';
 import { stacktraces } from './__fixtures__/stacktraces';
-import { createTopNFunctions } from './functions';
 
 describe('TopN function operations', () => {
   const { events, stackTraces, stackFrames, executables, samplingRate } = decodeStackTraceResponse(

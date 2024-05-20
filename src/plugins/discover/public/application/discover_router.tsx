@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import React from 'react';
+import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { History } from 'history';
-import React from 'react';
-import { Redirect } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { ExperimentalFeatures } from '../../common/config';
-import { DiscoverServices } from '../build_services';
-import type { DiscoverCustomizationContext } from '../customizations';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
 import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
+import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
+import type { DiscoverCustomizationContext } from '../customizations';
 
 export type DiscoverRouterProps = Omit<DiscoverRoutesProps, 'customizationContext'> & {
   customizationContext$: Observable<DiscoverCustomizationContext>;

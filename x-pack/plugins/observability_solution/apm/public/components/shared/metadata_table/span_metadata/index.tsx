@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React, { useMemo } from 'react';
-import { MetadataTable } from '..';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { getSectionsFromFields } from '../helper';
+import { MetadataTable } from '..';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 interface Props {
   span: Span;

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
-import {
-  SampleDataCardKibanaDependencies,
-  SampleDataCardKibanaProvider,
-  SampleDataCardProvider,
-  SampleDataCardServices,
-} from '@kbn/home-sample-data-card';
-import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import React, { FC, PropsWithChildren, useContext } from 'react';
+import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { SampleDataSet } from '@kbn/home-sample-data-types';
+import {
+  SampleDataCardServices,
+  SampleDataCardKibanaDependencies,
+  SampleDataCardProvider,
+  SampleDataCardKibanaProvider,
+} from '@kbn/home-sample-data-card';
 
 import { URL_SAMPLE_DATA_API } from './constants';
 
@@ -89,23 +89,24 @@ export type SampleDataTabKibanaDependencies = KibanaDependencies & SampleDataCar
 /**
  * Kibana-specific Provider that maps dependencies to services.
  */
-export const SampleDataTabKibanaProvider: FC<PropsWithChildren<SampleDataTabKibanaDependencies>> =
-  ({ children, ...dependencies }) => {
-    const { coreStart, trackUiMetric } = dependencies;
-    const { http, notifications } = coreStart;
+export const SampleDataTabKibanaProvider: FC<
+  PropsWithChildren<SampleDataTabKibanaDependencies>
+> = ({ children, ...dependencies }) => {
+  const { coreStart, trackUiMetric } = dependencies;
+  const { http, notifications } = coreStart;
 
-    const value: Services = {
-      fetchSampleDataSets: async () => (await http.get(URL_SAMPLE_DATA_API)) as SampleDataSet[],
-      notifyError: (input) => notifications.toasts.addDanger(input),
-      logClick: (eventName) => trackUiMetric('click', eventName),
-    };
-
-    return (
-      <Context.Provider {...{ value }}>
-        <SampleDataCardKibanaProvider {...dependencies}>{children}</SampleDataCardKibanaProvider>
-      </Context.Provider>
-    );
+  const value: Services = {
+    fetchSampleDataSets: async () => (await http.get(URL_SAMPLE_DATA_API)) as SampleDataSet[],
+    notifyError: (input) => notifications.toasts.addDanger(input),
+    logClick: (eventName) => trackUiMetric('click', eventName),
   };
+
+  return (
+    <Context.Provider {...{ value }}>
+      <SampleDataCardKibanaProvider {...dependencies}>{children}</SampleDataCardKibanaProvider>
+    </Context.Provider>
+  );
+};
 
 /**
  * React hook for accessing pre-wired services.

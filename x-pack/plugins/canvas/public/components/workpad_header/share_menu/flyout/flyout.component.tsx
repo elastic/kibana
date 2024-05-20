@@ -5,34 +5,34 @@
  * 2.0.
  */
 
+import React, { FC, useCallback } from 'react';
 import {
-  EuiBetaBadge,
+  EuiText,
+  EuiSpacer,
   EuiCallOut,
+  EuiSteps,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiTitle,
+  EuiLink,
   EuiCode,
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiLink,
-  EuiSpacer,
-  EuiSteps,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, useCallback } from 'react';
 
-import { CANVAS, HTML, ZIP } from '../../../../../i18n/constants';
 import type { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
-import { useNotifyService } from '../../../../services';
 import { useDownloadRenderedWorkpad } from '../../../hooks';
-import { OnCloseFn } from '../share_menu.component';
 import { useDownloadRuntime, useDownloadZippedRuntime } from './hooks';
+import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';
+import { OnCloseFn } from '../share_menu.component';
+import { WorkpadStep } from './workpad_step';
 import { RuntimeStep } from './runtime_step';
 import { SnippetsStep } from './snippets_step';
-import { WorkpadStep } from './workpad_step';
+import { useNotifyService } from '../../../../services';
 
 const strings = {
   getCopyShareConfigMessage: () =>

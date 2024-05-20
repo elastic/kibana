@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 
-import { EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 import { TextInput } from '../text_input';
 import type { TextExpansionInference } from './text_expansion_inference';
+import { INPUT_TYPE, RUNNING_STATE } from '../inference_base';
 
 const QueryInput: FC<{
   inferrer: TextExpansionInference;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import type { RuleAddProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useContext, useMemo } from 'react';
+import type { RuleAddProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 
 interface Props {

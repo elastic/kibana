@@ -7,8 +7,8 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import type { PiePublicConfig } from '../config';
 import { VisTypePiePlugin } from './plugin';
+import type { PiePublicConfig } from '../config';
 
 export { pieVisType } from './vis_type';
 export type { Dimensions, Dimension } from './types';

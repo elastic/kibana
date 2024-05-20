@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useContext } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,9 +14,8 @@ import {
   EuiHideFor,
   EuiShowFor,
 } from '@elastic/eui';
-import React, { useContext } from 'react';
-import { SyntheticsRefreshContext } from '../../contexts';
 import * as labels from './translations';
+import { SyntheticsRefreshContext } from '../../contexts';
 
 export const CertRefreshBtn = () => {
   const { refreshApp } = useContext(SyntheticsRefreshContext);

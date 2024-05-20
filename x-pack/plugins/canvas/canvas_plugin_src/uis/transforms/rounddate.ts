@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TransformStrings } from '../../../i18n';
 import { TransformFactory } from '../../../types/transforms';
 import { Arguments } from '../../functions/common/rounddate';
+import { TransformStrings } from '../../../i18n';
 
 const { RoundDate: strings } = TransformStrings;
 

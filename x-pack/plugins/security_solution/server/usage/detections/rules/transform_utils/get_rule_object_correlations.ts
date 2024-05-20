@@ -6,8 +6,8 @@
  */
 
 import type { SavedObjectsFindResult } from '@kbn/core/server';
-import type { RuleSearchResult } from '../../../types';
 import type { RuleMetric } from '../types';
+import type { RuleSearchResult } from '../../../types';
 
 export interface RuleObjectCorrelationsOptions {
   ruleResults: Array<SavedObjectsFindResult<RuleSearchResult>>;

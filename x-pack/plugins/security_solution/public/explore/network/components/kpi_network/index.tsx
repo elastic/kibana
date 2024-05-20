@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import { NetworkKpiDns } from './dns';
 import { NetworkKpiNetworkEvents } from './network_events';
 import { NetworkKpiTlsHandshakes } from './tls_handshakes';
-import type { NetworkKpiProps } from './types';
 import { NetworkKpiUniqueFlows } from './unique_flows';
 import { NetworkKpiUniquePrivateIps } from './unique_private_ips';
+import type { NetworkKpiProps } from './types';
 
 export const NetworkKpiComponent = React.memo<NetworkKpiProps>(({ from, to }) => (
   <EuiFlexGroup wrap>

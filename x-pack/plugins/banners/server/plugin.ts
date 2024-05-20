@@ -7,8 +7,8 @@
 
 import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { BannersConfigType } from './config';
-import { registerRoutes } from './routes';
 import { BannersRequestHandlerContext } from './types';
+import { registerRoutes } from './routes';
 import { registerSettings } from './ui_settings';
 
 export class BannersPlugin implements Plugin<{}, {}, {}, {}> {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Meta } from '@storybook/react';
 import { useEffect, useMemo } from 'react';
+import { Meta } from '@storybook/react';
 
 import { ErrorEmbeddable } from '..';
 

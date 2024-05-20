@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import Url from 'url';
-import HapiProxy from '@hapi/h2o2';
-import { Request, Server } from '@hapi/hapi';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
+import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import apm from 'elastic-apm-node';
+import { Server, Request } from '@hapi/hapi';
+import HapiProxy from '@hapi/h2o2';
 import { sampleSize } from 'lodash';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
 
 import { DevConfig, HttpConfig } from './config';
 import { Log } from './log';

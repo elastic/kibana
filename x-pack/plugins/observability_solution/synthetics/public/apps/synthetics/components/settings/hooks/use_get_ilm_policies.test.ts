@@ -6,8 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import * as hookPolicyAPI from './api';
 import { useGetIlmPolicies } from './use_get_ilm_policies';
+import * as hookPolicyAPI from './api';
 
 describe('useGetIlmPolicies', () => {
   beforeAll(() => {

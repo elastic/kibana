@@ -6,10 +6,10 @@
  */
 
 import {
-  HasParentApi,
-  PublishesUnifiedSearch,
   apiIsOfType,
   apiPublishesPartialUnifiedSearch,
+  HasParentApi,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { KibanaLocation } from '@kbn/share-plugin/public';
 import { Action } from '@kbn/ui-actions-plugin/public';

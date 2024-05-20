@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
 import fs from 'fs/promises';
 import globby from 'globby';
+import { resolve } from 'path';
 
 /**
  * Removes any *.gen.ts files from the target directory

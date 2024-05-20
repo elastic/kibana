@@ -7,9 +7,9 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { getInstallations } from './epm/packages';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { packagePolicyService } from './package_policy';
+import { getInstallations } from './epm/packages';
 
 jest.mock('./package_policy');
 jest.mock('./epm/packages');

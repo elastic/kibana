@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { nonEmptyNestedEntriesArray } from '../non_empty_nested_entries_array';
 
 export const entriesNested = t.exact(

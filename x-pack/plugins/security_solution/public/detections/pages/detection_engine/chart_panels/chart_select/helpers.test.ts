@@ -7,13 +7,13 @@
 
 import type { AlertViewSelection } from './helpers';
 import {
-  CHARTS_ID,
-  TABLE_ID,
-  TREEMAP_ID,
-  TREND_ID,
   getButtonProperties,
   getContextMenuPanels,
   getOptionProperties,
+  TABLE_ID,
+  TREEMAP_ID,
+  TREND_ID,
+  CHARTS_ID,
 } from './helpers';
 import * as i18n from './translations';
 

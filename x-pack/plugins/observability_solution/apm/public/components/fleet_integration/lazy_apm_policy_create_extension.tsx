@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PackagePolicyCreateExtensionComponent } from '@kbn/fleet-plugin/public';
 import { lazy } from 'react';
+import { PackagePolicyCreateExtensionComponent } from '@kbn/fleet-plugin/public';
 
 export const getLazyAPMPolicyCreateExtension = () => {
   return lazy<PackagePolicyCreateExtensionComponent>(async () => {

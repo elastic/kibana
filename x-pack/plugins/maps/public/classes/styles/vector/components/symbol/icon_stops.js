@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DEFAULT_ICON, ICON_SOURCE } from '../../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
 import { OTHER_CATEGORY_LABEL } from '../../style_util';
-import { PREFERRED_ICONS, SYMBOL_OPTIONS, getMakiSymbol } from '../../symbol_utils';
-import { StopInput } from '../stop_input';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { IconSelect } from './icon_select';
+import { StopInput } from '../stop_input';
+import { getMakiSymbol, PREFERRED_ICONS, SYMBOL_OPTIONS } from '../../symbol_utils';
 
 function isDuplicateStop(targetStop, iconStops) {
   const stops = iconStops.filter(({ stop }) => {

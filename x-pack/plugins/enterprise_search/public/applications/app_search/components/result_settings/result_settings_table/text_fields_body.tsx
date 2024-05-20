@@ -7,9 +7,9 @@
 
 import React, { useMemo } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiCheckbox, EuiTableRow, EuiTableRowCell, EuiTableRowCellCheckbox } from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell, EuiTableRowCellCheckbox, EuiCheckbox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ResultSettingsLogic } from '../result_settings_logic';

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import fn from './yaxis';
 import expect from '@kbn/expect';
 import invoke from './test_helpers/invoke_series_fn';
-import fn from './yaxis';
 
 describe('yaxis.js', () => {
   let seriesList;

@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import type { Action, Middleware } from 'redux';
+import { get } from 'lodash/fp';
 
 import {
-  addProvider,
   applyKqlFilterQuery,
+  addProvider,
   dataProviderEdited,
   removeColumn,
   removeProvider,
-  setChanged,
-  setExcludedRowRendererIds,
-  setFilters,
-  setSavedQueryId,
   updateColumns,
+  updateEqlOptions,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderType,
-  updateDataView,
-  updateEqlOptions,
   updateKqlMode,
   updateProviders,
   updateRange,
-  updateSavedSearch,
   updateSort,
-  updateTitleAndDescription,
   upsertColumn,
+  updateDataView,
+  updateTitleAndDescription,
+  setExcludedRowRendererIds,
+  setFilters,
+  setSavedQueryId,
+  setChanged,
+  updateSavedSearch,
 } from '../actions';
 
 /**

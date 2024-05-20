@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
-import * as constants from '../../../../common/constants';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
-  actionsHeaderTooltipDegradedAction,
   actionsHeaderTooltipExpandAction,
+  actionsHeaderTooltipDegradedAction,
   actionsHeaderTooltipParagraph,
   actionsHeaderTooltipStacktraceAction,
   actionsLabel,
   actionsLabelLowerCase,
 } from '../../common/translations';
-import { FieldWithToken } from './field_with_token';
 import { TooltipButton } from './tooltip_button';
+import * as constants from '../../../../common/constants';
+import { FieldWithToken } from './field_with_token';
 
 const spacingCSS = css`
   margin-bottom: ${euiThemeVars.euiSizeS};

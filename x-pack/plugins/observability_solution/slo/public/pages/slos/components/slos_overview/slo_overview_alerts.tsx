@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RulesParams, rulesLocatorID } from '@kbn/observability-plugin/public';
-import { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
 import React from 'react';
+import { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
+import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
 import { useAlertsUrl } from '../../../../hooks/use_alerts_url';
 import { useKibana } from '../../../../utils/kibana_react';
 import { OverViewItem } from './overview_item';

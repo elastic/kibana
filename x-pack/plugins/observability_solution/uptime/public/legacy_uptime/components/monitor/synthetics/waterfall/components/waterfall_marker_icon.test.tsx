@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../../../lib/helper/rtl_helpers';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';
 import { TestWrapper } from './waterfall_marker_test_helper';

@@ -10,41 +10,41 @@ import { URL } from 'url';
 import mime from 'mime-types';
 import semverGte from 'semver/functions/gte';
 
-import type { Logger } from '@kbn/logging';
 import type { Response } from 'node-fetch';
+import type { Logger } from '@kbn/logging';
 
 import { splitPkgKey as split } from '../../../../common/services';
 
-import { appContextService } from '../..';
-import {
-  PackageFailedVerificationError,
-  PackageNotFoundError,
-  PackageUnsupportedMediaTypeError,
-  RegistryResponseError,
-} from '../../../errors';
 import { KibanaAssetType } from '../../../types';
 import type {
-  ArchivePackage,
   AssetsGroupedByServiceByType,
-  AssetsMap,
-  BundledPackage,
   CategorySummaryList,
+  RegistryPackage,
+  RegistrySearchResults,
   GetCategoriesRequest,
   GetPackagesRequest,
   PackageVerificationResult,
-  RegistryPackage,
-  RegistrySearchResults,
+  ArchivePackage,
+  BundledPackage,
+  AssetsMap,
 } from '../../../types';
 import {
-  generatePackageInfoFromArchiveBuffer,
-  getPackageInfo,
   getPathParts,
-  getVerificationResult,
-  setPackageInfo,
   setVerificationResult,
+  getPackageInfo,
+  setPackageInfo,
+  generatePackageInfoFromArchiveBuffer,
   unpackBufferToAssetsMap,
+  getVerificationResult,
 } from '../archive';
 import { streamToBuffer, streamToString } from '../streams';
+import { appContextService } from '../..';
+import {
+  PackageNotFoundError,
+  RegistryResponseError,
+  PackageFailedVerificationError,
+  PackageUnsupportedMediaTypeError,
+} from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
 
@@ -52,8 +52,8 @@ import { withPackageSpan } from '../packages/utils';
 
 import { verifyPackageArchiveSignature } from '../packages/package_verification';
 
-import { getRegistryUrl } from './registry_url';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
+import { getRegistryUrl } from './registry_url';
 
 export const splitPkgKey = split;
 

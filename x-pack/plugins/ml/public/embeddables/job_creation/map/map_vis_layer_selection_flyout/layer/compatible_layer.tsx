@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiAccordion,
@@ -16,11 +19,8 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MapApi } from '@kbn/maps-plugin/public';
-import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
 import {
   type LayerResult,
   QuickGeoJobCreator,

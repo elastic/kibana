@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { pipe } from 'lodash/fp';
 import React from 'react';
+import { pipe } from 'lodash/fp';
 
 import type { ExceptionListSchema, OsType } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -14,18 +14,12 @@ import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution
 
 import type { HorizontalAlignment } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
+import type { Moment } from 'moment';
 import {
   HeaderMenu,
   generateLinkedRulesMenuItems,
 } from '@kbn/securitysolution-exception-list-components';
-import type { Moment } from 'moment';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type {
-  ExceptionListRuleReferencesInfoSchema,
-  ExceptionListRuleReferencesSchema,
-} from '../../../../../common/api/detection_engine/rule_exceptions';
 import { PopoverItems } from '../../../../common/components/popover_items';
-import { LinkToListDetails, LinkToRuleDetails } from '../../../../exceptions/components';
 import {
   enrichExceptionItemsWithOS,
   enrichNewExceptionItemsWithComments,
@@ -35,7 +29,13 @@ import {
   enrichSharedExceptions,
   lowercaseHashValues,
 } from '../../utils/helpers';
+import type {
+  ExceptionListRuleReferencesInfoSchema,
+  ExceptionListRuleReferencesSchema,
+} from '../../../../../common/api/detection_engine/rule_exceptions';
+import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 /**
  * Adds user defined name to all new exceptionItems

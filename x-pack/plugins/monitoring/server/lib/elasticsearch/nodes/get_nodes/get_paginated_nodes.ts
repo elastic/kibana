@@ -6,13 +6,13 @@
  */
 
 import { isUndefined } from 'lodash';
-import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
-import { LegacyRequest } from '../../../../types';
-import { getMetrics } from '../../../details/get_metrics';
-import { filter } from '../../../pagination/filter';
-import { paginate } from '../../../pagination/paginate';
 import { getNodeIds } from './get_node_ids';
+import { filter } from '../../../pagination/filter';
 import { sortNodes } from './sort_nodes';
+import { paginate } from '../../../pagination/paginate';
+import { getMetrics } from '../../../details/get_metrics';
+import { LegacyRequest } from '../../../../types';
+import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
 
 /**
  * This function performs an optimization around the node listing tables in the UI. To avoid

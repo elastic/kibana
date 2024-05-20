@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React, { ChangeEvent } from 'react';
+import { shallow } from 'enzyme';
 import { EuiFieldNumber } from '@elastic/eui';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { shallow } from 'enzyme';
-import React, { ChangeEvent } from 'react';
 
 import { TruncateFormatEditor } from './truncate';
 

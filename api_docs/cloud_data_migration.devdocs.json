@@ -62,7 +62,9 @@
             "tags": [],
             "label": "breadcrumbService",
             "description": [],
-            "signature": ["BreadcrumbService"],
+            "signature": [
+              "BreadcrumbService"
+            ],
             "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -131,7 +133,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"migrate_data\""],
+        "signature": [
+          "\"migrate_data\""
+        ],
         "path": "x-pack/plugins/cloud_integrations/cloud_data_migration/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

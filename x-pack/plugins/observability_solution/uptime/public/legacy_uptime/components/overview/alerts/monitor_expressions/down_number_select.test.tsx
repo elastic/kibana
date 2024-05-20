@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { DownNoExpressionSelect } from './down_number_select';
 
 describe('DownNoExpressionSelect component', () => {

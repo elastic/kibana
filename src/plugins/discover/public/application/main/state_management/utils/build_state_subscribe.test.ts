@@ -1,9 +1,3 @@
-import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../../__mocks__/services';
-import { FetchStatus } from '../../../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,6 +6,12 @@ import { FetchStatus } from '../../../types';
  * Side Public License, v 1.
  */
 import { buildStateSubscribe } from './build_state_subscribe';
+import { savedSearchMock } from '../../../../__mocks__/saved_search';
+import { FetchStatus } from '../../../types';
+import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 describe('buildStateSubscribe', () => {
   const savedSearch = savedSearchMock;

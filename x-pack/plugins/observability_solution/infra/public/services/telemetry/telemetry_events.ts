@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { InfraTelemetryEvent, InfraTelemetryEventTypes } from './types';
+import { InfraTelemetryEventTypes, InfraTelemetryEvent } from './types';
 
 const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
   eventType: InfraTelemetryEventTypes.HOSTS_VIEW_QUERY_SUBMITTED,

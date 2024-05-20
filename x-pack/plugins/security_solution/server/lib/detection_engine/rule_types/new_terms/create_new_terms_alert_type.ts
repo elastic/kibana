@@ -5,45 +5,45 @@
  * 2.0.
  */
 
-import { chunk, isObject } from 'lodash';
+import { isObject, chunk } from 'lodash';
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import { NewTermsRuleParams } from '../../rule_schema';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateIndexPatterns } from '../utils';
-import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
-import { createEnrichEventsFunction } from '../utils/enrichments';
-import { getFilter } from '../utils/get_filter';
-import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { singleSearchAfter } from '../utils/single_search_after';
+import { getFilter } from '../utils/get_filter';
+import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
+import { wrapSuppressedNewTermsAlerts } from './wrap_suppressed_new_terms_alerts';
+import { bulkCreateSuppressedNewTermsAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
+import type { EventsAndTerms } from './types';
+import type {
+  RecentTermsAggResult,
+  DocFetchAggResult,
+  NewTermsAggResult,
+  CreateAlertsHook,
+} from './build_new_terms_aggregation';
+import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import {
+  buildRecentTermsAgg,
+  buildNewTermsAgg,
+  buildDocFetchAgg,
+} from './build_new_terms_aggregation';
+import { validateIndexPatterns } from '../utils';
+import { parseDateString, validateHistoryWindowStart, transformBucketsToValues } from './utils';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
+  getUnprocessedExceptionsWarnings,
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
-  getUnprocessedExceptionsWarnings,
 } from '../utils/utils';
-import type {
-  CreateAlertsHook,
-  DocFetchAggResult,
-  NewTermsAggResult,
-  RecentTermsAggResult,
-} from './build_new_terms_aggregation';
-import {
-  buildDocFetchAgg,
-  buildNewTermsAgg,
-  buildRecentTermsAgg,
-} from './build_new_terms_aggregation';
-import { bulkCreateSuppressedNewTermsAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
+import { createEnrichEventsFunction } from '../utils/enrichments';
+import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { multiTermsComposite } from './multi_terms_composite';
-import type { EventsAndTerms } from './types';
-import { parseDateString, transformBucketsToValues, validateHistoryWindowStart } from './utils';
-import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
-import { wrapSuppressedNewTermsAlerts } from './wrap_suppressed_new_terms_alerts';
+import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions

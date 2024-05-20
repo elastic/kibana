@@ -9,13 +9,13 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY } from '../../../../../common/components/drag_and_drop/translations';
-import { getEmptyValue } from '../../../../../common/components/empty_value';
-import { TestProviders, defaultHeaders, mockTimelineData } from '../../../../../common/mock';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { emptyColumnRenderer } from './empty_column_renderer';
+import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { deleteItemIdx, findItem } from './helpers';
+import { emptyColumnRenderer } from './empty_column_renderer';
 
 jest.mock('../../../../../common/lib/kibana');
 

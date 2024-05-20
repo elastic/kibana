@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
@@ -13,47 +15,45 @@ import {
   getColorsFromMapping,
 } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { AccessorConfig } from '@kbn/visualization-ui-components';
-import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { AccessorConfig } from '@kbn/visualization-ui-components';
 import useObservable from 'react-use/lib/useObservable';
-import { DatasourcePublicAPI } from '../..';
-import {
-  CategoryDisplay,
-  LegendDisplay,
-  NumberDisplay,
-  PieChartTypes,
-} from '../../../common/constants';
-import { PieLayerState, PieVisualizationState } from '../../../common/types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import type {
-  OperationMetadata,
-  Suggestion,
-  UserMessage,
   Visualization,
+  OperationMetadata,
   VisualizationDimensionGroupConfig,
-  VisualizationInfo,
+  Suggestion,
   VisualizeEditorContext,
+  VisualizationInfo,
+  UserMessage,
 } from '../../types';
-import { getColorMappingDefaults, nonNullable } from '../../utils';
-import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
-import { LayerSettings } from './layer_settings';
-import { PartitionChartsMeta } from './partition_charts_meta';
-import { PersistedPieVisualizationState, convertToRuntime } from './persistence';
-import { checkTableForContainsSmallValues } from './render_helpers';
-import { suggestions } from './suggestions';
 import {
   getColumnToLabelMap,
   getSortedAccessorsForGroup,
   toExpression,
   toPreviewExpression,
 } from './to_expression';
+import { PieLayerState, PieVisualizationState } from '../../../common/types';
+import {
+  CategoryDisplay,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+} from '../../../common/constants';
+import { suggestions } from './suggestions';
+import { PartitionChartsMeta } from './partition_charts_meta';
 import { PieToolbar } from './toolbar';
+import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
+import { LayerSettings } from './layer_settings';
+import { checkTableForContainsSmallValues } from './render_helpers';
+import { DatasourcePublicAPI } from '../..';
+import { nonNullable, getColorMappingDefaults } from '../../utils';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { PersistedPieVisualizationState, convertToRuntime } from './persistence';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -186,8 +186,8 @@ export const getPieVisualization = ({
     return state.layers.length > 0 && state.layers[0].colorMapping
       ? { type: 'colorMapping', value: state.layers[0].colorMapping }
       : state.palette
-        ? { type: 'legacyPalette', value: state.palette }
-        : undefined;
+      ? { type: 'legacyPalette', value: state.palette }
+      : undefined;
   },
 
   getSuggestions: suggestions,

@@ -2,12 +2,16 @@ const semver = require('semver');
 const { PKG_JSON } = require('@kbn/repo-info');
 
 module.exports = {
-  plugins: ['react', 'react-hooks', 'jsx-a11y'],
+  plugins: [
+    'react',
+    'react-hooks',
+    'jsx-a11y',
+  ],
 
   parserOptions: {
     ecmaFeatures: {
-      jsx: true,
-    },
+      jsx: true
+    }
   },
 
   settings: {
@@ -62,4 +66,4 @@ module.exports = {
     'react/prefer-stateless-function': ['error', { ignorePureComponents: true }],
     'react/no-unescaped-entities': 'error',
   },
-};
+}

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
 import globby from 'globby';
+import fs from 'fs';
 import { SpecDefinitionsService } from '.';
 import type { EndpointDefinition, EndpointsAvailability } from '../../common/types';
 

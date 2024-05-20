@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import * as redux from 'react-redux';
-import { CLIENT_DEFAULTS } from '../../../../../common/constants';
-import { UptimeSettingsContext } from '../../../contexts';
-import { forNearestButton, render } from '../../../lib/helper/rtl_helpers';
 import { MLFlyoutView } from './ml_flyout';
+import { UptimeSettingsContext } from '../../../contexts';
+import { CLIENT_DEFAULTS } from '../../../../../common/constants';
+import * as redux from 'react-redux';
+import { render, forNearestButton } from '../../../lib/helper/rtl_helpers';
 import * as labels from './translations';
 
 describe('ML Flyout component', () => {

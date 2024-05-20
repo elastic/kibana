@@ -1,7 +1,3 @@
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,16 +5,20 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
  * 2.0.
  */
 import React, { lazy, Suspense } from 'react';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
-import type { CspRouterProps } from './application/csp_router';
-import { SetupContext } from './application/setup_context';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { CspLoadingState } from './components/csp_loading_state';
+import type { CspRouterProps } from './application/csp_router';
 import type {
   CspClientPluginSetup,
-  CspClientPluginSetupDeps,
   CspClientPluginStart,
+  CspClientPluginSetupDeps,
   CspClientPluginStartDeps,
 } from './types';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import { SetupContext } from './application/setup_context';
 
 const LazyCspPolicyTemplateForm = lazy(
   () => import('./components/fleet_extensions/policy_template_form')

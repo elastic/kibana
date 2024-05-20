@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { SchemaConfig } from '../../../types';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataType, FormatParams } from '../../types';
-import { getLabel } from '../utils';
+import { SchemaConfig } from '../../../types';
 import { AggId, ExtraColumnFields, GeneralColumnWithMeta } from './types';
+import { getLabel } from '../utils';
 
 export const createAggregationId = (agg: SchemaConfig): AggId => `${agg.aggId}`;
 

@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiFieldText, EuiForm, EuiModal } from '@elastic/eui';
+import { EuiForm, EuiFieldText, EuiModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SchemaFieldTypeSelect } from '..';

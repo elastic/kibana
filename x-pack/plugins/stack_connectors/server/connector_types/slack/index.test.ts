@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import {
-  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
-  Services,
-} from '@kbn/actions-plugin/server/types';
 import { Logger } from '@kbn/core/server';
-import { loggerMock } from '@kbn/logging-mocks';
 import {
-  ConnectorTypeId,
+  Services,
+  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+} from '@kbn/actions-plugin/server/types';
+import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
+import {
+  getConnectorType,
   SlackConnectorType,
   SlackConnectorTypeExecutorOptions,
-  getConnectorType,
+  ConnectorTypeId,
 } from '.';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('@slack/webhook', () => {
   return {

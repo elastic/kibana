@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { addBasePath } from '..';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
   names: schema.string(),

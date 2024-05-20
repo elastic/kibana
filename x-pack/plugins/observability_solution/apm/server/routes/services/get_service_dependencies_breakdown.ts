@@ -1,4 +1,3 @@
-import { kqlQuery } from '@kbn/observability-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { kqlQuery } from '@kbn/observability-plugin/server';
  * 2.0.
  */
 import { sortBy, take } from 'lodash';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import { getNodeName } from '../../../common/connections';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';

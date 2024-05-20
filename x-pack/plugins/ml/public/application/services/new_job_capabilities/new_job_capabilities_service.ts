@@ -1,5 +1,3 @@
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataViewType } from '@kbn/data-views-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,16 +5,18 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
  * 2.0.
  */
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  type AggId,
-  type Aggregation,
-  EVENT_RATE_FIELD_ID,
   type Field,
+  type Aggregation,
+  type AggId,
   type FieldId,
+  EVENT_RATE_FIELD_ID,
 } from '@kbn/ml-anomaly-utils';
-import { filterCategoryFields, getGeoFields } from '../../../../common/util/fields_utils';
-import { type MlApiServices, ml } from '../ml_api_service';
-import { NewJobCapabilitiesServiceBase, processTextAndKeywordFields } from './new_job_capabilities';
+import { DataViewType } from '@kbn/data-views-plugin/public';
+import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
+import { ml, type MlApiServices } from '../ml_api_service';
+import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
 export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
   private _catFields: Field[] = [];

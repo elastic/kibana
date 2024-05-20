@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React, { memo, useCallback, useMemo } from 'react';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { memo, useCallback, useMemo } from 'react';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
 export interface FlyoutNavigationProps {

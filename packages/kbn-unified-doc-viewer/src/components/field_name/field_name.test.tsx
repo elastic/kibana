@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { stubLogstashDataView as dataView } from '@kbn/data-plugin/common/stubs';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { render } from 'enzyme';
 import React from 'react';
+import { render } from 'enzyme';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { stubLogstashDataView as dataView } from '@kbn/data-plugin/common/stubs';
 import { FieldName } from './field_name';
 
 describe('FieldName', function () {

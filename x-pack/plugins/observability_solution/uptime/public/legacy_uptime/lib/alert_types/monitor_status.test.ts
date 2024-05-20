@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { validateMonitorStatusParams as validate } from './lazy_wrapper/validate_monitor_status';
 import { initMonitorStatusAlertType } from './monitor_status';
+import { validateMonitorStatusParams as validate } from './lazy_wrapper/validate_monitor_status';
 
 describe('monitor status alert type', () => {
   describe('validate', () => {

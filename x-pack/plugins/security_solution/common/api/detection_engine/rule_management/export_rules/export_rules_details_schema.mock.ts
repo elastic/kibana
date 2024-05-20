@@ -7,8 +7,8 @@
 
 import { getExceptionExportDetailsMock } from '@kbn/lists-plugin/common/schemas/response/exception_export_details_schema.mock';
 import type { ExportExceptionDetailsMock } from '@kbn/lists-plugin/common/schemas/response/exception_export_details_schema.mock';
-import type { DefaultActionConnectorDetails } from '../../../../../server/lib/detection_engine/rule_management/logic/export/get_export_rule_action_connectors';
 import type { ExportRulesDetails } from './export_rules_details_schema';
+import type { DefaultActionConnectorDetails } from '../../../../../server/lib/detection_engine/rule_management/logic/export/get_export_rule_action_connectors';
 
 interface RuleDetailsMock {
   totalCount?: number;

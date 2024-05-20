@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Parent } from 'mdast';
 import type { Node } from 'unist';
+import type { Parent } from 'mdast';
 
 export const customCodeBlockLanguagePlugin = () => {
   const visitor = (node: Node, parent?: Parent) => {

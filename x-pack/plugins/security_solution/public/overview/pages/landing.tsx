@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import React, { memo } from 'react';
+import { css } from '@emotion/react';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
 
 export const LandingPage = memo(() => {
   return (

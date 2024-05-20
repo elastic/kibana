@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactNode } from 'react';
 import React, { memo, useEffect } from 'react';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer } from '@elastic/eui';
+import { UnsupportedMessageCallout } from './unsupported_message_callout';
 import type { CommandExecutionComponentProps } from '../types';
 import { CommandInputUsage } from './command_usage';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ConsoleCodeBlock } from './console_code_block';
-import { UnsupportedMessageCallout } from './unsupported_message_callout';
 
 /**
  * Shows a validation error. The error message needs to be defined via the Command defintion's

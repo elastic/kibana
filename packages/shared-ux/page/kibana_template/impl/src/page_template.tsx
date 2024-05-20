@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
 import React, { FC } from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
 
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 import {
   NoDataConfigPage,
   NoDataConfigPageWithSolutionNavBar,
 } from '@kbn/shared-ux-page-no-data-config';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 

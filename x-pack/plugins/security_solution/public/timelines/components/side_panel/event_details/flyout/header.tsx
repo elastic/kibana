@@ -8,8 +8,8 @@
 import { EuiFlyoutHeader } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import type { GetFieldsData } from '../../../../../common/hooks/use_get_fields_data';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
+import type { GetFieldsData } from '../../../../../common/hooks/use_get_fields_data';
 import { ExpandableEventTitle } from '../expandable_event';
 import { BackToAlertDetailsLink } from './back_to_alert_details_link';
 

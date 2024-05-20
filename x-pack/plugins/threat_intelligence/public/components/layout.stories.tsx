@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
-import { Story } from '@storybook/react';
 import React from 'react';
-import { StoryProvidersComponent } from '../mocks/story_providers';
+import { Story } from '@storybook/react';
+import { EuiText } from '@elastic/eui';
 import { DefaultPageLayout } from './layout';
+import { StoryProvidersComponent } from '../mocks/story_providers';
 
 export default {
   title: 'DefaultPageLayout',

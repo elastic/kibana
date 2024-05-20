@@ -7,24 +7,24 @@
 
 import { Action } from 'redux-actions';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
-import type { AppState } from '..';
 import {
-  createMLJobAction,
-  deleteMLJobAction,
-  getAnomalyRecordsAction,
-  getExistingMLJobAction,
   getMLCapabilitiesAction,
+  getExistingMLJobAction,
+  createMLJobAction,
+  getAnomalyRecordsAction,
+  deleteMLJobAction,
 } from '../actions';
-import type { DeleteJobResults, MonitorIdParam } from '../actions/types';
-import { anomalyAlertSelector, deleteAlertAction } from '../alerts/alerts';
+import { fetchEffectFactory } from './fetch_effect';
 import {
-  createMLJob,
-  deleteMLJob,
-  fetchAnomalyRecords,
   getExistingJobs,
+  createMLJob,
+  fetchAnomalyRecords,
+  deleteMLJob,
   getMLCapabilities,
 } from '../api/ml_anomaly';
-import { fetchEffectFactory } from './fetch_effect';
+import type { MonitorIdParam, DeleteJobResults } from '../actions/types';
+import { anomalyAlertSelector, deleteAlertAction } from '../alerts/alerts';
+import type { AppState } from '..';
 
 export function* fetchMLJobEffect() {
   yield takeLatest(

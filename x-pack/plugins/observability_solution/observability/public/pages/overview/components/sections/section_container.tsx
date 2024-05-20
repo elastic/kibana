@@ -7,17 +7,17 @@
 
 import {
   EuiAccordion,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
-import { ExperimentalBadge } from '../../../../components/experimental_badge';
 import { useKibana } from '../../../../utils/kibana_react';
 import { ErrorPanel } from './error_panel/error_panel';
+import { ExperimentalBadge } from '../../../../components/experimental_badge';
 
 interface AppLink {
   label: string;

@@ -77,13 +77,10 @@ export class PluginServices<Services extends Record<keyof Services, {}>> {
 
     const providerNames = Object.keys(providers) as Array<keyof typeof providers>;
 
-    return providerNames.reduce(
-      (acc, providerName) => {
-        acc[providerName] = { useService: providers[providerName].getServiceReactHook() };
-        return acc;
-      },
-      {} as ServiceHooks<Services>
-    );
+    return providerNames.reduce((acc, providerName) => {
+      acc[providerName] = { useService: providers[providerName].getServiceReactHook() };
+      return acc;
+    }, {} as ServiceHooks<Services>);
   }
 
   getServices(): Services {

@@ -13,12 +13,12 @@ import styled from 'styled-components';
 
 import { CompareFieldsTable } from '../../../compare_fields_table';
 import { getEcsCompliantTableColumns } from '../../../compare_fields_table/helpers';
-import type { PartitionedFieldMetadata } from '../../../types';
 import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
 import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
-import * as i18n from '../../index_properties/translations';
 import { showMissingTimestampCallout } from '../helpers';
 import { CalloutItem } from '../styles';
+import * as i18n from '../../index_properties/translations';
+import type { PartitionedFieldMetadata } from '../../../types';
 
 const EmptyPromptContainer = styled.div`
   width: 100%;

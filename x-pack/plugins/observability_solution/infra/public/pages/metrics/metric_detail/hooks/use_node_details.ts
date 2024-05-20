@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { InventoryItemType, InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { InventoryMetric, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
-  NodeDetailsMetricDataResponse,
   NodeDetailsMetricDataResponseRT,
+  NodeDetailsMetricDataResponse,
 } from '../../../../../common/http_api/node_details_api';
 import { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
-import { useHTTPRequest } from '../../../../hooks/use_http_request';
 
 export function useNodeDetails(
   metrics: InventoryMetric[],

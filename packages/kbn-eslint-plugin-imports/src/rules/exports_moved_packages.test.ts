@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import dedent from 'dedent';
 import { RuleTester } from 'eslint';
 import { ExportsMovedPackagesRule, MovedExportsRule } from './exports_moved_packages';
+import dedent from 'dedent';
 
 const fmt = (str: TemplateStringsArray) => dedent(str) + '\n';
 

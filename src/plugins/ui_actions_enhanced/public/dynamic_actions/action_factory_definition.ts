@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import { Configurable } from '@kbn/kibana-utils-plugin/public';
 import { LicenseType } from '@kbn/licensing-plugin/public';
 import {
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,
 } from '@kbn/ui-actions-plugin/public';
+import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import {
   BaseActionConfig,
   BaseActionFactoryContext,
@@ -26,7 +26,7 @@ import {
 export interface ActionFactoryDefinition<
   Config extends BaseActionConfig = BaseActionConfig,
   ExecutionContext extends object = object,
-  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
+  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > extends Partial<Omit<Presentable<FactoryContext>, 'getHref'>>,
     Configurable<Config, FactoryContext>,
     PersistableStateDefinition<SerializedEvent> {

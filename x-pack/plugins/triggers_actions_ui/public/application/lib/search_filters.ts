@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FILTERS, FilterStateStore, PhraseFilter, PhrasesFilter } from '@kbn/es-query';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_RULE_TYPE_ID,
   AlertConsumers,
   DefaultAlertFieldName,
 } from '@kbn/rule-data-utils';
+import { FILTERS, FilterStateStore, PhraseFilter, PhrasesFilter } from '@kbn/es-query';
 
 const $state = {
   store: FilterStateStore.APP_STATE,
@@ -43,7 +43,7 @@ export const createMatchPhraseFilter = (field: DefaultAlertFieldName, value: unk
         [field]: value,
       },
     },
-  }) as PhraseFilter;
+  } as PhraseFilter);
 
 /**
  * Creates a match_phrases filter without an index pattern
@@ -76,7 +76,7 @@ export const createMatchPhrasesFilter = (
         })),
       },
     },
-  }) as PhrasesFilter;
+  } as PhrasesFilter);
 
 /**
  * Creates a match_phrase filter targeted to filtering alerts by producer

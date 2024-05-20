@@ -7,7 +7,7 @@
 
 // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/40309
 
-import type { DraggableId, MovementMode } from '@hello-pangea/dnd';
+import type { MovementMode, DraggableId } from '@hello-pangea/dnd';
 
 export interface BeforeCapture {
   draggableId: DraggableId;

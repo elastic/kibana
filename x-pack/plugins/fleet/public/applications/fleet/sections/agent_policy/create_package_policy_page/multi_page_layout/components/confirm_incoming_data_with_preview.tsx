@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiCallOut,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
+  EuiText,
+  EuiSpacer,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiText,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
   formatDate,
+  EuiDescriptionList,
+  EuiSkeletonText,
 } from '@elastic/eui';
-import type { SearchHit } from '@kbn/es-types';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
 import omit from 'lodash/omit';
-import React from 'react';
+import type { SearchHit } from '@kbn/es-types';
 
 import styled from 'styled-components';
 
-import { useIsGuidedOnboardingActive, useStartServices } from '../../../../../../../hooks';
+import { useStartServices, useIsGuidedOnboardingActive } from '../../../../../../../hooks';
 
 import type { PackageInfo } from '../../../../../../../../common';
 

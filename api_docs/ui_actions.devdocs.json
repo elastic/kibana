@@ -41,7 +41,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/ui_actions/public/actions/incompatible_action_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -69,7 +71,9 @@
             "tags": [],
             "label": "executionService",
             "description": [],
-            "signature": ["UiActionsExecutionService"],
+            "signature": [
+              "UiActionsExecutionService"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -81,7 +85,11 @@
             "tags": [],
             "label": "triggers",
             "description": [],
-            "signature": ["Map<string, ", "TriggerInternal", "<object>>"],
+            "signature": [
+              "Map<string, ",
+              "TriggerInternal",
+              "<object>>"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -93,7 +101,11 @@
             "tags": [],
             "label": "actions",
             "description": [],
-            "signature": ["Map<string, ", "ActionInternal", "<object>>"],
+            "signature": [
+              "Map<string, ",
+              "ActionInternal",
+              "<object>>"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -105,7 +117,9 @@
             "tags": [],
             "label": "triggerToActions",
             "description": [],
-            "signature": ["Map<string, string[]>"],
+            "signature": [
+              "Map<string, string[]>"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -117,7 +131,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -199,7 +215,9 @@
             "tags": [],
             "label": "hasTrigger",
             "description": [],
-            "signature": ["(triggerId: string) => boolean"],
+            "signature": [
+              "(triggerId: string) => boolean"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -211,7 +229,9 @@
                 "tags": [],
                 "label": "triggerId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -227,7 +247,11 @@
             "tags": [],
             "label": "getTrigger",
             "description": [],
-            "signature": ["(triggerId: string) => ", "TriggerContract", "<object>"],
+            "signature": [
+              "(triggerId: string) => ",
+              "TriggerContract",
+              "<object>"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -239,7 +263,9 @@
                 "tags": [],
                 "label": "triggerId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -310,7 +336,9 @@
             "tags": [],
             "label": "unregisterAction",
             "description": [],
-            "signature": ["(actionId: string) => void"],
+            "signature": [
+              "(actionId: string) => void"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -322,7 +350,9 @@
                 "tags": [],
                 "label": "actionId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -338,7 +368,9 @@
             "tags": [],
             "label": "hasAction",
             "description": [],
-            "signature": ["(actionId: string) => boolean"],
+            "signature": [
+              "(actionId: string) => boolean"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -350,7 +382,9 @@
                 "tags": [],
                 "label": "actionId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -366,7 +400,9 @@
             "tags": [],
             "label": "attachAction",
             "description": [],
-            "signature": ["(triggerId: string, actionId: string) => void"],
+            "signature": [
+              "(triggerId: string, actionId: string) => void"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -378,7 +414,9 @@
                 "tags": [],
                 "label": "triggerId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -391,7 +429,9 @@
                 "tags": [],
                 "label": "actionId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -407,7 +447,9 @@
             "tags": [],
             "label": "detachAction",
             "description": [],
-            "signature": ["(triggerId: string, actionId: string) => void"],
+            "signature": [
+              "(triggerId: string, actionId: string) => void"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -419,7 +461,9 @@
                 "tags": [],
                 "label": "triggerId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -432,7 +476,9 @@
                 "tags": [],
                 "label": "actionId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -472,7 +518,9 @@
                 "tags": [],
                 "label": "triggerId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -532,7 +580,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -570,7 +620,9 @@
                 "tags": [],
                 "label": "triggerId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -608,7 +660,9 @@
                 "tags": [],
                 "label": "triggerId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -621,7 +675,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["object"],
+                "signature": [
+                  "object"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -659,7 +715,9 @@
                 "tags": [],
                 "label": "triggerId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -672,7 +730,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["object"],
+                "signature": [
+                  "object"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -685,10 +745,14 @@
             "parentPluginId": "uiActions",
             "id": "def-public.UiActionsService.executeTriggerActions",
             "type": "Function",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "executeTriggerActions",
             "description": [],
-            "signature": ["(triggerId: string, context: object) => Promise<void>"],
+            "signature": [
+              "(triggerId: string, context: object) => Promise<void>"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -750,7 +814,9 @@
                 "tags": [],
                 "label": "triggerId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -763,7 +829,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["object"],
+                "signature": [
+                  "object"
+                ],
                 "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -778,8 +846,12 @@
             "type": "Function",
             "tags": [],
             "label": "clear",
-            "description": ["\nRemoves all registered triggers and actions."],
-            "signature": ["() => void"],
+            "description": [
+              "\nRemoves all registered triggers and actions."
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -843,7 +915,9 @@
             "tags": [],
             "label": "{\n  actions,\n  title = defaultTitle,\n  closeMenu = () => {},\n}",
             "description": [],
-            "signature": ["BuildContextMenuParams"],
+            "signature": [
+              "BuildContextMenuParams"
+            ],
             "path": "src/plugins/ui_actions/public/context_menu/build_eui_context_menu_panels.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -957,7 +1031,9 @@
             "description": [
               "\nDetermined the order when there is more than one action matched to a trigger.\nHigher numbers are displayed first."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -968,7 +1044,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nA unique identifier for this action instance."],
+            "description": [
+              "\nA unique identifier for this action instance."
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -979,7 +1057,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["\nThe action type is what determines the context shape."],
+            "description": [
+              "\nThe action type is what determines the context shape."
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -990,7 +1070,9 @@
             "type": "Function",
             "tags": [],
             "label": "getIconType",
-            "description": ["\nOptional EUI icon type that can be displayed along with the title."],
+            "description": [
+              "\nOptional EUI icon type that can be displayed along with the title."
+            ],
             "signature": [
               "(context: ",
               {
@@ -1037,7 +1119,9 @@
             "type": "Function",
             "tags": [],
             "label": "getDisplayName",
-            "description": ["\nReturns a title to be displayed to the user."],
+            "description": [
+              "\nReturns a title to be displayed to the user."
+            ],
             "signature": [
               "(context: ",
               {
@@ -1133,7 +1217,9 @@
             "type": "Function",
             "tags": [],
             "label": "execute",
-            "description": ["\nExecutes the action."],
+            "description": [
+              "\nExecutes the action."
+            ],
             "signature": [
               "(context: ",
               {
@@ -1305,7 +1391,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1335,7 +1423,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["a subscription that can be used to unsubscribe from the changes."]
+            "returnComment": [
+              "a subscription that can be used to unsubscribe from the changes."
+            ]
           },
           {
             "parentPluginId": "uiActions",
@@ -1346,7 +1436,9 @@
             "description": [
               "\nDetermines if action could become compatible given the context. If present,\nit should be much more lenient than `isCompatible` and return true if there\nis any chance that `isCompatible` could return true in the future."
             ],
-            "signature": ["((context: Context) => boolean) | undefined"],
+            "signature": [
+              "((context: Context) => boolean) | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1358,7 +1450,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1373,8 +1467,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "disabled",
-            "description": ["\naction is disabled or not\n"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\naction is disabled or not\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1388,7 +1486,9 @@
             "description": [
               "\nDetermines if notification should be shown in menu for that action\n"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1402,7 +1502,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ActionDefinition",
-        "description": ["\nA convenience interface used to register an action."],
+        "description": [
+          "\nA convenience interface used to register an action."
+        ],
         "signature": [
           {
             "pluginId": "uiActions",
@@ -1449,7 +1551,9 @@
             "description": [
               "\nID of the factory for this action. Used to construct dynamic actions."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1479,7 +1583,10 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["ActionDefinitionContext", "<Context>"],
+                "signature": [
+                  "ActionDefinitionContext",
+                  "<Context>"
+                ],
                 "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1494,8 +1601,14 @@
             "type": "Function",
             "tags": [],
             "label": "execute",
-            "description": ["\nExecutes the action."],
-            "signature": ["(context: ", "ActionDefinitionContext", "<Context>) => Promise<void>"],
+            "description": [
+              "\nExecutes the action."
+            ],
+            "signature": [
+              "(context: ",
+              "ActionDefinitionContext",
+              "<Context>) => Promise<void>"
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1507,7 +1620,10 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["ActionDefinitionContext", "<Context>"],
+                "signature": [
+                  "ActionDefinitionContext",
+                  "<Context>"
+                ],
                 "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1541,7 +1657,10 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["ActionDefinitionContext", "<Context>"],
+                "signature": [
+                  "ActionDefinitionContext",
+                  "<Context>"
+                ],
                 "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1575,7 +1694,10 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["ActionDefinitionContext", "<Context>"],
+                "signature": [
+                  "ActionDefinitionContext",
+                  "<Context>"
+                ],
                 "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1590,8 +1712,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "disabled",
-            "description": ["\naction is disabled or not\n"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\naction is disabled or not\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1605,7 +1731,9 @@
             "description": [
               "\nDetermines if notification should be shown in menu for that action\n"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1643,7 +1771,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1673,7 +1803,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["a subscription that can be used to unsubscribe from the changes."]
+            "returnComment": [
+              "a subscription that can be used to unsubscribe from the changes."
+            ]
           },
           {
             "parentPluginId": "uiActions",
@@ -1684,7 +1816,9 @@
             "description": [
               "\nDetermines if action could become compatible given the context. If present,\nit should be much more lenient than `isCompatible` and return true if there\nis any chance that `isCompatible` could return true in the future."
             ],
-            "signature": ["((context: Context) => boolean) | undefined"],
+            "signature": [
+              "((context: Context) => boolean) | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/actions/action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1696,7 +1830,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "src/plugins/ui_actions/public/actions/action.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1727,7 +1863,9 @@
             "type": "Object",
             "tags": [],
             "label": "trigger",
-            "description": ["\nTrigger that executed the action"],
+            "description": [
+              "\nTrigger that executed the action"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ui-actions-browser",
@@ -1795,7 +1933,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Presentable",
-        "description": ["\nRepresents something that can be displayed to user in UI."],
+        "description": [
+          "\nRepresents something that can be displayed to user in UI."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ui-actions-browser",
@@ -1816,7 +1956,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nID that uniquely identifies this object."],
+            "description": [
+              "\nID that uniquely identifies this object."
+            ],
             "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1843,7 +1985,9 @@
             "description": [
               "\nComponent to render when displaying this entity as a context menu item.\nIf not provided, `getDisplayName` will be used instead."
             ],
-            "signature": ["React.FC<{ context: Context; }> | undefined"],
+            "signature": [
+              "React.FC<{ context: Context; }> | undefined"
+            ],
             "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1854,8 +1998,12 @@
             "type": "Function",
             "tags": [],
             "label": "getIconType",
-            "description": ["\nOptional EUI icon type that can be displayed along with the title."],
-            "signature": ["(context: Context) => string | undefined"],
+            "description": [
+              "\nOptional EUI icon type that can be displayed along with the title."
+            ],
+            "signature": [
+              "(context: Context) => string | undefined"
+            ],
             "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1867,7 +2015,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1882,8 +2032,12 @@
             "type": "Function",
             "tags": [],
             "label": "getDisplayName",
-            "description": ["\nReturns a title to be displayed to the user."],
-            "signature": ["(context: Context) => string"],
+            "description": [
+              "\nReturns a title to be displayed to the user."
+            ],
+            "signature": [
+              "(context: Context) => string"
+            ],
             "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1895,7 +2049,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1913,7 +2069,9 @@
             "description": [
               "\nReturns tooltip text which should be displayed when user hovers this object.\nShould return empty string if tooltip should not be displayed."
             ],
-            "signature": ["((context: Context) => string) | undefined"],
+            "signature": [
+              "((context: Context) => string) | undefined"
+            ],
             "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1925,7 +2083,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1943,7 +2103,9 @@
             "description": [
               "\nThis method should return a link if this item can be clicked on. The link\nis used to navigate user if user middle-clicks it or Ctrl + clicks or\nright-clicks and selects \"Open in new tab\"."
             ],
-            "signature": ["((context: Context) => Promise<string | undefined>) | undefined"],
+            "signature": [
+              "((context: Context) => Promise<string | undefined>) | undefined"
+            ],
             "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1955,7 +2117,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1973,7 +2137,9 @@
             "description": [
               "\nReturns a promise that resolves to true if this item is compatible given\nthe context and should be displayed to user, otherwise resolves to false."
             ],
-            "signature": ["(context: Context) => Promise<boolean>"],
+            "signature": [
+              "(context: Context) => Promise<boolean>"
+            ],
             "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1985,7 +2151,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Context"],
+                "signature": [
+                  "Context"
+                ],
                 "path": "packages/kbn-ui-actions-browser/src/types/presentable.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2052,8 +2220,12 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["\nUser friendly name of the trigger."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nUser friendly name of the trigger."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2064,8 +2236,12 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["\nA longer user friendly description of the trigger."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nA longer user friendly description of the trigger."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ui-actions-browser/src/triggers/trigger.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2091,7 +2267,10 @@
             "tags": [],
             "label": "triggers",
             "description": [],
-            "signature": ["TriggerRegistry", " | undefined"],
+            "signature": [
+              "TriggerRegistry",
+              " | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2103,7 +2282,10 @@
             "tags": [],
             "label": "actions",
             "description": [],
-            "signature": ["ActionRegistry", " | undefined"],
+            "signature": [
+              "ActionRegistry",
+              " | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2114,8 +2296,13 @@
             "type": "Object",
             "tags": [],
             "label": "triggerToActions",
-            "description": ["\nA 1-to-N mapping from `Trigger` to zero or more `Action`."],
-            "signature": ["TriggerToActionsRegistry", " | undefined"],
+            "description": [
+              "\nA 1-to-N mapping from `Trigger` to zero or more `Action`."
+            ],
+            "signature": [
+              "TriggerToActionsRegistry",
+              " | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/service/ui_actions_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2222,7 +2409,9 @@
             "tags": [],
             "label": "contextualFields",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2255,7 +2444,9 @@
             "tags": [],
             "label": "originatingApp",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2294,7 +2485,9 @@
         "tags": [],
         "label": "ACTION_VISUALIZE_FIELD",
         "description": [],
-        "signature": ["\"ACTION_VISUALIZE_FIELD\""],
+        "signature": [
+          "\"ACTION_VISUALIZE_FIELD\""
+        ],
         "path": "src/plugins/ui_actions/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2307,7 +2500,9 @@
         "tags": [],
         "label": "ACTION_VISUALIZE_GEO_FIELD",
         "description": [],
-        "signature": ["\"ACTION_VISUALIZE_GEO_FIELD\""],
+        "signature": [
+          "\"ACTION_VISUALIZE_GEO_FIELD\""
+        ],
         "path": "src/plugins/ui_actions/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2320,7 +2515,9 @@
         "tags": [],
         "label": "ACTION_VISUALIZE_LENS_FIELD",
         "description": [],
-        "signature": ["\"ACTION_VISUALIZE_LENS_FIELD\""],
+        "signature": [
+          "\"ACTION_VISUALIZE_LENS_FIELD\""
+        ],
         "path": "src/plugins/ui_actions/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2409,7 +2606,9 @@
         "tags": [],
         "label": "ROW_CLICK_TRIGGER",
         "description": [],
-        "signature": ["\"ROW_CLICK_TRIGGER\""],
+        "signature": [
+          "\"ROW_CLICK_TRIGGER\""
+        ],
         "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2453,7 +2652,9 @@
         "tags": [],
         "label": "VISUALIZE_FIELD_TRIGGER",
         "description": [],
-        "signature": ["\"VISUALIZE_FIELD_TRIGGER\""],
+        "signature": [
+          "\"VISUALIZE_FIELD_TRIGGER\""
+        ],
         "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2466,7 +2667,9 @@
         "tags": [],
         "label": "VISUALIZE_GEO_FIELD_TRIGGER",
         "description": [],
-        "signature": ["\"VISUALIZE_GEO_FIELD_TRIGGER\""],
+        "signature": [
+          "\"VISUALIZE_GEO_FIELD_TRIGGER\""
+        ],
         "path": "packages/kbn-ui-actions-browser/src/triggers/visualize_geo_field_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,

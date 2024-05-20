@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { after, before, expect, journey, step } from '@elastic/synthetics';
+import { journey, step, expect, before, after } from '@elastic/synthetics';
 import { recordVideo } from '../../helpers/record_video';
 import { byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';

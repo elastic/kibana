@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty, EuiComboBoxOptionOption, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
-import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
-import { AggDescriptor } from '../../../common/descriptor_types';
-import { getMaskI18nLabel } from '../../classes/layers/vector_layer/mask';
-import { inputStrings } from '../../connected_components/input_strings';
-import { getTermsFields } from '../../index_pattern_util';
-import { SingleFieldSelect } from '../single_field_select';
-import { ValidatedNumberInput } from '../validated_number_input';
-import { MaskExpression } from './mask_expression';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { MetricSelect } from './metric_select';
+import { SingleFieldSelect } from '../single_field_select';
+import { AggDescriptor } from '../../../common/descriptor_types';
+import { AGG_TYPE, DEFAULT_PERCENTILE } from '../../../common/constants';
+import { getTermsFields } from '../../index_pattern_util';
+import { ValidatedNumberInput } from '../validated_number_input';
+import { getMaskI18nLabel } from '../../classes/layers/vector_layer/mask';
+import { MaskExpression } from './mask_expression';
+import { inputStrings } from '../../connected_components/input_strings';
 
 function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
   if (!fields) {

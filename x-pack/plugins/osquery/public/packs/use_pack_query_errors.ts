@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-plugin/common';
-import { SortDirection } from '@kbn/data-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
+import type { DataView } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-plugin/common';
 
-import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 import { useKibana } from '../common/lib/kibana';
+import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 interface UsePackQueryErrorsProps {
   actionId: string;

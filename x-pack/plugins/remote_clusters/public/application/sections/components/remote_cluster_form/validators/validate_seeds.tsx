@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function validateSeeds(seeds: string[], seedInput?: string) {
   const seedsHaveBeenCreated = seeds.some((seed) => Boolean(seed.trim()));

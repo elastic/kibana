@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

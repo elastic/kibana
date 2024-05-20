@@ -7,14 +7,14 @@
 
 import { DATASET_VAR_NAME } from '../constants';
 import type {
-  InstallablePackage,
-  PackageInfo,
-  RegistryDataStream,
-  RegistryInput,
+  RegistryPolicyTemplate,
   RegistryPolicyInputOnlyTemplate,
   RegistryPolicyIntegrationTemplate,
-  RegistryPolicyTemplate,
+  RegistryInput,
+  PackageInfo,
   RegistryVarsEntry,
+  RegistryDataStream,
+  InstallablePackage,
 } from '../types';
 
 const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { merge, pick } from 'lodash';
 import { combineLatest, of } from 'rxjs';
+import { pick, merge } from 'lodash';
 import { map, startWith } from 'rxjs';
+import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { TaskManagerConfig } from '../config';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
-import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 
 const CONFIG_FIELDS_TO_EXPOSE = [
   'request_capacity',
@@ -21,7 +21,7 @@ const CONFIG_FIELDS_TO_EXPOSE = [
 
 export type ConfigStat = Pick<
   TaskManagerConfig,
-  'max_workers' | 'poll_interval' | (typeof CONFIG_FIELDS_TO_EXPOSE)[number]
+  'max_workers' | 'poll_interval' | typeof CONFIG_FIELDS_TO_EXPOSE[number]
 >;
 
 export function createConfigurationAggregator(

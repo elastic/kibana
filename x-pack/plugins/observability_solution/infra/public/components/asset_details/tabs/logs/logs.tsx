@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  DEFAULT_LOG_VIEW,
-  LogViewReference,
-  getLogsLocatorsFromUrlService,
-} from '@kbn/logs-shared-plugin/common';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
+import {
+  DEFAULT_LOG_VIEW,
+  getLogsLocatorsFromUrlService,
+  LogViewReference,
+} from '@kbn/logs-shared-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
 
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;

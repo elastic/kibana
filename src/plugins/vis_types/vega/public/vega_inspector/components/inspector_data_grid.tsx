@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridSorting } from '@elastic/eui';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { EuiDataGrid, EuiDataGridSorting, EuiDataGridProps } from '@elastic/eui';
 import { VegaRuntimeData } from '../vega_adapter';
 
 const DEFAULT_PAGE_SIZE = 15;

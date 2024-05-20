@@ -1,6 +1,3 @@
-import { EuiHorizontalRule, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { css } from '@emotion/css';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,26 +5,29 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { memo, useState, useEffect } from 'react';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { StepRuleActionsReadOnly } from '../../../../detection_engine/rule_creation/components/step_rule_actions';
-import { RuleAboutSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_about_section';
-import { RuleDefinitionSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_definition_section';
-import { RuleScheduleSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_schedule_section';
+import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { usePreviewPanelContext } from '../context';
+import { ExpandableSection } from '../../right/components/expandable_section';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { getStepsData } from '../../../../detections/pages/detection_engine/rules/helpers';
-import { FlyoutError } from '../../../shared/components/flyout_error';
-import { FlyoutLoading } from '../../../shared/components/flyout_loading';
-import { ExpandableSection } from '../../right/components/expandable_section';
-import { usePreviewPanelContext } from '../context';
 import { RulePreviewTitle } from './rule_preview_title';
+import { RuleAboutSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_about_section';
+import { RuleScheduleSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_schedule_section';
+import { RuleDefinitionSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_definition_section';
+import { StepRuleActionsReadOnly } from '../../../../detection_engine/rule_creation/components/step_rule_actions';
+import { FlyoutLoading } from '../../../shared/components/flyout_loading';
+import { FlyoutError } from '../../../shared/components/flyout_error';
 import {
-  RULE_PREVIEW_ABOUT_TEST_ID,
-  RULE_PREVIEW_ACTIONS_TEST_ID,
   RULE_PREVIEW_BODY_TEST_ID,
+  RULE_PREVIEW_ABOUT_TEST_ID,
   RULE_PREVIEW_DEFINITION_TEST_ID,
-  RULE_PREVIEW_LOADING_TEST_ID,
   RULE_PREVIEW_SCHEDULE_TEST_ID,
+  RULE_PREVIEW_ACTIONS_TEST_ID,
+  RULE_PREVIEW_LOADING_TEST_ID,
 } from './test_ids';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 const panelViewStyle = css`
   dt {

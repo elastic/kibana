@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import React, { useState } from 'react';
 import { MonitoringStartServices } from '../../../types';
 
 const INGEST_PIPELINE_DASHBOARD_ID = 'elasticsearch-metrics-ingest-pipelines';

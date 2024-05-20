@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type TypeOf, schema } from '@kbn/config-schema';
-import type { CoreStart, IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { Logger, CoreStart, IScopedClusterClient } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
-  TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskInstance,
 } from '@kbn/task-manager-plugin/server';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { savedObjectClientsFactory } from './util';
 import { mlSavedObjectServiceFactory } from './service';
 import { syncSavedObjectsFactory } from './sync';
-import { savedObjectClientsFactory } from './util';
 
 const SAVED_OBJECTS_SYNC_TASK_TYPE = 'ML:saved-objects-sync';
 const SAVED_OBJECTS_SYNC_TASK_ID = 'ML:saved-objects-sync-task';

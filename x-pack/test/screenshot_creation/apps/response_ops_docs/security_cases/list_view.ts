@@ -6,9 +6,9 @@
  */
 
 import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createAndUploadFile } from '../../../../cases_api_integration/common/lib/api';
 import { SECURITY_SOLUTION_FILE_KIND } from '../../../../cases_api_integration/common/lib/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObject, getService, getPageObjects }: FtrProviderContext) {
   const cases = getService('cases');

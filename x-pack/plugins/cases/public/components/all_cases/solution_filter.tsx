@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import React from 'react';
 
 import { OWNER_INFO } from '../../../common/constants';
-import type { CasesOwners } from '../../client/helpers/can_use_cases';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
 import * as i18n from './translations';
 import type { Solution } from './types';
+import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
+import type { CasesOwners } from '../../client/helpers/can_use_cases';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface FilterPopoverProps {
   onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;

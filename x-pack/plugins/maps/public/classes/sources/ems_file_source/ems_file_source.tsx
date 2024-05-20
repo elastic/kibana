@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { FileLayer } from '@elastic/ems-client';
+import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Feature, GeoJsonProperties } from 'geojson';
-import React, { ReactElement } from 'react';
-import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
-import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
-import { getEMSSettings } from '../../../kibana_services';
-import { LICENSED_FEATURES } from '../../../licensed_features';
-import { getEmsFileLayers } from '../../../util';
-import { EMSFileField } from '../../fields/ems_file_field';
-import { IField } from '../../fields/field';
-import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { FileLayer } from '@elastic/ems-client';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
+import { SOURCE_TYPES, FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { getEmsFileLayers } from '../../../util';
+import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
+import { EMSFileField } from '../../fields/ems_file_field';
+import { IField } from '../../fields/field';
+import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { getEMSSettings } from '../../../kibana_services';
+import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
 function getErrorInfo(fileId: string) {
   return i18n.translate('xpack.maps.source.emsFile.unableToFindFileIdErrorMessage', {

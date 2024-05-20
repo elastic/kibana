@@ -1,8 +1,3 @@
-import { Chart, Settings, Wordcloud, WordcloudSpec } from '@elastic/charts';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import { mount } from 'enzyme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,9 +6,14 @@ import { mount } from 'enzyme';
  * Side Public License, v 1.
  */
 import React from 'react';
-import { Orientation, ScaleOptions } from '../../common/constants';
-import { TagCloudRendererParams } from '../../common/types';
+import { Wordcloud, Settings, WordcloudSpec, Chart } from '@elastic/charts';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { mount } from 'enzyme';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import TagCloudChart, { TagCloudChartProps } from './tagcloud_component';
+import { TagCloudRendererParams } from '../../common/types';
+import { ScaleOptions, Orientation } from '../../common/constants';
 
 jest.mock('../format_service', () => ({
   getFormatService: jest.fn(() => {

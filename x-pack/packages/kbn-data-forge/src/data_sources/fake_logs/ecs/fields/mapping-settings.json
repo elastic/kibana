@@ -10,7 +10,7 @@
           "type": "keyword",
           "ignore_above": 1024,
           "fields": {
-            "text": { "type": "text", "norms": false }
+            "text": { "type": "text", "norms" : false }
           }
         },
         "match_mapping_type": "string"

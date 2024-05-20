@@ -7,42 +7,42 @@
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
-import { isArray, isNil } from 'lodash/fp';
-import type { MouseEvent, SyntheticEvent } from 'react';
+import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback, useEffect } from 'react';
-import { APP_UI_ID, IP_REPUTATION_LINKS_SETTING } from '../../../../common/constants';
-import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
-import { encodeIpv6 } from '../../lib/helpers';
-import { useKibana, useUiSetting$ } from '../../lib/kibana';
-import { isUrlInvalid } from '../../utils/validators';
-import { useTourContext } from '../guided_onboarding_tour';
-import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
+import { isArray, isNil } from 'lodash/fp';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
+import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
+import { useTourContext } from '../guided_onboarding_tour';
+import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
+import { encodeIpv6 } from '../../lib/helpers';
 import {
   getCaseDetailsUrl,
-  getCreateCaseUrl,
   getHostDetailsUrl,
-  getNetworkDetailsUrl,
   getTabsOnHostDetailsUrl,
+  getNetworkDetailsUrl,
+  getCreateCaseUrl,
   useFormatUrl,
 } from '../link_to';
+import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+import { useUiSetting$, useKibana } from '../../lib/kibana';
+import { isUrlInvalid } from '../../utils/validators';
 
+import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
-import type { HostsTableType } from '../../../explore/hosts/store/model';
-import type { UsersTableType } from '../../../explore/users/store/model';
 import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
 import type { ReputationLinkSetting } from './helpers';
 import {
-  Comma,
-  GenericLinkButton,
   LinkAnchor,
-  LinkButton,
+  GenericLinkButton,
   PortContainer,
+  Comma,
+  LinkButton,
   ReputationLinksOverflow,
 } from './helpers';
+import type { HostsTableType } from '../../../explore/hosts/store/model';
+import type { UsersTableType } from '../../../explore/users/store/model';
 import { useGetSecuritySolutionLinkProps, withSecuritySolutionLink } from './link_props';
-import * as i18n from './translations';
 
 export { useSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from './link_props';
 export { LinkButton, LinkAnchor } from './helpers';

@@ -17,8 +17,8 @@ import { shallow } from 'enzyme';
 import { EuiSteps } from '@elastic/eui';
 
 import {
-  PersonalDashboardLayout,
   WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
 } from '../../../../../components/layout';
 
 import { ExternalConnectorConfig } from './external_connector_config';

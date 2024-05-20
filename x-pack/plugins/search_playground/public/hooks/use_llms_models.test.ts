@@ -6,9 +6,9 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { LLMs } from '../types';
-import { useLLMsModels } from './use_llms_models';
 import { useLoadConnectors } from './use_load_connectors';
+import { useLLMsModels } from './use_llms_models';
+import { LLMs } from '../types';
 
 jest.mock('./use_load_connectors', () => ({
   useLoadConnectors: jest.fn(),

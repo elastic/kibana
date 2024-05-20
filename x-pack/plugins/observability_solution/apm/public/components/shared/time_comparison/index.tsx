@@ -7,19 +7,19 @@
 
 import { EuiCheckbox, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../links/url_helpers';
-import { TimeRangeComparisonEnum, getComparisonOptions } from './get_comparison_options';
+import { getComparisonOptions, TimeRangeComparisonEnum } from './get_comparison_options';
 
 const PrependContainer = euiStyled.div`
   display: flex;

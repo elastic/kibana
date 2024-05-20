@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { DataViewsService } from '../../../common';
+import { handleErrors } from './util/handle_errors';
+import { dataViewSpecSchema } from '../schema';
+import { DataViewSpecRestResponse } from '../route_types';
+import type {
+  DataViewsServerPluginStartDependencies,
+  DataViewsServerPluginStart,
+} from '../../types';
 import {
-  INITIAL_REST_VERSION,
-  SERVICE_KEY,
-  SERVICE_KEY_LEGACY,
   SPECIFIC_DATA_VIEW_PATH,
   SPECIFIC_DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+  INITIAL_REST_VERSION,
 } from '../../constants';
-import type {
-  DataViewsServerPluginStart,
-  DataViewsServerPluginStartDependencies,
-} from '../../types';
-import { DataViewSpecRestResponse } from '../route_types';
-import { dataViewSpecSchema } from '../schema';
-import { handleErrors } from './util/handle_errors';
 
 interface GetDataViewArgs {
   dataViewsService: DataViewsService;

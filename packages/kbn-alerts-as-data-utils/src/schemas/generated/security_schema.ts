@@ -1,4 +1,3 @@
-import { Either } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +9,7 @@ import { Either } from 'fp-ts/lib/Either';
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
 import { AlertSchema } from './alert_schema';
 import { EcsSchema } from './ecs_schema';
 import { LegacyAlertSchema } from './legacy_alert_schema';
@@ -211,12 +211,6 @@ const SecurityAlertOptional = rt.partial({
 });
 
 // prettier-ignore
-export const SecurityAlertSchema = rt.intersection([
-  SecurityAlertRequired,
-  SecurityAlertOptional,
-  AlertSchema,
-  EcsSchema,
-  LegacyAlertSchema,
-]);
+export const SecurityAlertSchema = rt.intersection([SecurityAlertRequired, SecurityAlertOptional, AlertSchema, EcsSchema, LegacyAlertSchema]);
 // prettier-ignore
 export type SecurityAlert = rt.TypeOf<typeof SecurityAlertSchema>;

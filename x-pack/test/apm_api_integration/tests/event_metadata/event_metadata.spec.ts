@@ -1,7 +1,3 @@
-import { PROCESSOR_EVENT } from '@kbn/apm-plugin/common/es_fields/apm';
-import { ErrorRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/error_raw';
-import { SpanRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/span_raw';
-import { TransactionRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/transaction_raw';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +6,10 @@ import { TransactionRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/transacti
  */
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { PROCESSOR_EVENT } from '@kbn/apm-plugin/common/es_fields/apm';
+import { SpanRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/span_raw';
+import { ErrorRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/error_raw';
+import { TransactionRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/transaction_raw';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

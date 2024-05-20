@@ -10,8 +10,8 @@ import { BehaviorSubject } from 'rxjs';
 
 jest.mock('!!raw-loader!./disable_animations.css', () => 'MOCK DISABLE ANIMATIONS CSS');
 
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { StylesService } from './styles_service';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 describe('StylesService', () => {
   const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 100));

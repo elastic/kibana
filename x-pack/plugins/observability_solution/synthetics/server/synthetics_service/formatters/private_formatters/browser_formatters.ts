@@ -13,8 +13,8 @@ import {
   stringToJsonFormatter,
 } from './formatting_utils';
 
-import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
 import { tlsFormatters } from './tls_formatters';
+import { BrowserFields, ConfigKey } from '../../../../common/runtime_types';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 

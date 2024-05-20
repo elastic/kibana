@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { HorizontalAlignment } from '@elastic/eui';
-import { EuiBasicTable, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import type { FC, ReactNode } from 'react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { HorizontalAlignment } from '@elastic/eui';
+import { EuiBasicTable, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import type { FieldDataRowProps } from '../../types';
 import { isIndexBasedFieldVisConfig } from '../../types';
-import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { ExpandedRowPanel } from './expanded_row_panel';
 
 const metaTableColumns = [

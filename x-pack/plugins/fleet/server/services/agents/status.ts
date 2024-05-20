@@ -19,13 +19,13 @@ import type {
 import { agentStatusesToSummary } from '../../../common/services';
 
 import { AGENTS_INDEX } from '../../constants';
-import { FleetUnauthorizedError } from '../../errors';
 import type { AgentStatus } from '../../types';
+import { FleetUnauthorizedError } from '../../errors';
 
 import { appContextService } from '../app_context';
 
-import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { getAgentById, removeSOAttributes } from './crud';
+import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 
 interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase {
   key: AgentStatus;

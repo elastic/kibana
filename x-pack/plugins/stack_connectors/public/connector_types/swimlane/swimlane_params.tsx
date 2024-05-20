@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { EuiCallOut, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import * as i18n from './translations';
 import { SwimlaneActionConnector, SwimlaneActionParams, SwimlaneConnectorType } from './types';
 

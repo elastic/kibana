@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { PipelinesTable } from './pipelines_table';
+import { EuiLink } from '@elastic/eui';
 
 describe('PipelinesTable component', () => {
   let props;

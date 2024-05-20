@@ -6,9 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { MONITOR_ADD_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../common/constants';
 import { PLUGIN } from '../../../../../common/constants/plugin';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 
 export const useMonitorAddEditBreadcrumbs = (isEdit?: boolean) => {
   const kibana = useKibana();

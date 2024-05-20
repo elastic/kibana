@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { App } from './containers/app';
+import { CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BfetchExplorerStartPlugins, ExplorerService } from './plugin';
+import { App } from './containers/app';
 
 export interface BfetchDeps {
   appBasePath: string;

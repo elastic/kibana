@@ -12,8 +12,8 @@ import {
   AssetClientDependencies,
   AssetClientOptionsWithInjectedValues,
 } from '../../asset_client_types';
-import { collectContainers } from '../../collectors';
 import { parseEan } from '../../parse_ean';
+import { collectContainers } from '../../collectors';
 import { validateStringDateRange } from '../../validators/validate_date_range';
 
 export type GetContainersOptions = GetContainersOptionsPublic & AssetClientDependencies;

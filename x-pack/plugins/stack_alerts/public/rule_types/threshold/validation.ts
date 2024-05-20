@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   ValidationResult,
+  builtInGroupByTypes,
   builtInAggregationTypes,
   builtInComparators,
-  builtInGroupByTypes,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { IndexThresholdRuleParams } from './types';
 

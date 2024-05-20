@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '../../../types';
 import type {
   CloudFormationProps,
   CloudSecurityIntegrationAwsAccountType,
 } from '../../agent_enrollment_flyout/types';
+import type { PackagePolicy } from '../../../types';
 
 const AWS_ACCOUNT_TYPE = 'aws.account_type';
 

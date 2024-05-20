@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { fireEvent } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import React from 'react';
-import { startPlugins } from '../../lib/__mocks__/uptime_plugin_start_mock';
-import { render } from '../../lib/helper/rtl_helpers';
 import { UptimeDatePicker } from './uptime_date_picker';
+import { startPlugins } from '../../lib/__mocks__/uptime_plugin_start_mock';
+import { createMemoryHistory } from 'history';
+import { render } from '../../lib/helper/rtl_helpers';
+import { fireEvent } from '@testing-library/react';
 
 describe('UptimeDatePicker component', () => {
   jest.setTimeout(10_000);

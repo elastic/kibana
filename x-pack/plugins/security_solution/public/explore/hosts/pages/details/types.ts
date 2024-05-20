@@ -6,11 +6,11 @@
  */
 
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import type { NavTab } from '../../../../common/components/navigation/types';
-import type { hostsModel } from '../../store';
 import type { HostsTableType } from '../../store/model';
-import type { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
 import type { HostsQueryProps } from '../types';
+import type { NavTab } from '../../../../common/components/navigation/types';
+import type { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
+import type { hostsModel } from '../../store';
 
 interface HostBodyComponentDispatchProps {
   detailName: string;

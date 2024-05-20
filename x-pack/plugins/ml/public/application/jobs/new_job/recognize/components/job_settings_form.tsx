@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiButton,
@@ -16,22 +20,18 @@ import {
   EuiSwitch,
   EuiTextAlign,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
-import type { FC } from 'react';
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
+import { useDataSource } from '../../../../contexts/ml/data_source_context';
+import type { ModuleJobUI } from '../page';
+import { SAVE_STATE } from '../page';
 import {
   composeValidators,
   maxLengthValidator,
   patternValidator,
 } from '../../../../../../common/util/validators';
-import { useDataSource } from '../../../../contexts/ml/data_source_context';
+import { JOB_ID_MAX_LENGTH } from '../../../../../../common/constants/validation';
 import type { TimeRange } from '../../common/components';
 import { TimeRangePicker } from '../../common/components';
-import type { ModuleJobUI } from '../page';
-import { SAVE_STATE } from '../page';
 
 export interface JobSettingsFormValues {
   jobPrefix: string;

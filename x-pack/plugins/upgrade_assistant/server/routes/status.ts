@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { API_BASE_PATH } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
-import { getESSystemIndicesMigrationStatus } from '../lib/es_system_indices_migration';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { getKibanaUpgradeStatus } from '../lib/kibana_status';
+import { getESSystemIndicesMigrationStatus } from '../lib/es_system_indices_migration';
 import { RouteDependencies } from '../types';
 
 /**
@@ -63,8 +63,9 @@ export function registerUpgradeStatusRoute({
         ).length;
 
         // Fetch Kibana upgrade status
-        const { totalCriticalDeprecations: kibanaTotalCriticalDeps } =
-          await getKibanaUpgradeStatus(deprecationsClient);
+        const { totalCriticalDeprecations: kibanaTotalCriticalDeps } = await getKibanaUpgradeStatus(
+          deprecationsClient
+        );
         const readyForUpgrade =
           esTotalCriticalDeps === 0 &&
           kibanaTotalCriticalDeps === 0 &&

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
-import { RenderOptions, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { LegendLocationSettings, LegendLocationSettingsProps } from './legend_location_settings';
+import { RenderOptions, fireEvent, render, screen } from '@testing-library/react';
+import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 
 describe('Legend Location Settings', () => {
   let defaultProps: LegendLocationSettingsProps;

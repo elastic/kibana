@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { Component } from 'react';
 import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
 import { MB } from '../../../common/constants';
 import { GEO_FILE_TYPES, geoImporterFactory } from '../../importer/geo';
 import type { GeoFileImporter, GeoFilePreview } from '../../importer/geo';

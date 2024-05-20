@@ -7,10 +7,10 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
-import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
+import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 
 export class ThemeService {
   /** Returns default charts theme */

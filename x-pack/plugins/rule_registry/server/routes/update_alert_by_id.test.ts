@@ -6,10 +6,10 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
+import { updateAlertByIdRoute } from './update_alert_by_id';
 import { requestContextMock } from './__mocks__/request_context';
 import { getUpdateRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
-import { updateAlertByIdRoute } from './update_alert_by_id';
 
 describe('updateAlertByIdRoute', () => {
   let server: ReturnType<typeof serverMock.create>;

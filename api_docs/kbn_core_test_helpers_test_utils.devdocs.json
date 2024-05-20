@@ -48,7 +48,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_exportable_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -109,7 +111,9 @@
                 "tags": [],
                 "label": "hide",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -121,7 +125,9 @@
                 "tags": [],
                 "label": "hideFromHttpApis",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -223,7 +229,9 @@
             "tags": [],
             "label": "coreId",
             "description": [],
-            "signature": ["symbol"],
+            "signature": [
+              "symbol"
+            ],
             "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/setup_server.ts",
             "deprecated": false,
             "trackAdoption": false,

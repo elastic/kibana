@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import datemath from '@kbn/datemath';
 import {
   CoreKibanaRequest,
-  type CoreStart,
   type KibanaRequest,
   SECURITY_EXTENSION_ID,
+  type CoreStart,
 } from '@kbn/core/server';
-import datemath from '@kbn/datemath';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 
 import type { Range } from '../../../../../common/entity_analytics/risk_engine';

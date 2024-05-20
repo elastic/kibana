@@ -1,4 +1,3 @@
-import { migrationMocks } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,24 +5,25 @@ import { migrationMocks } from '@kbn/core/server/mocks';
  * 2.0.
  */
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { omit } from 'lodash';
+import { migration880 } from './8.8.0';
+import { migrationMocks } from '@kbn/core/server/mocks';
+import { ConfigKey, ScheduleUnit } from '../../../../common/runtime_types';
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,
-  PROFILES_MAP,
   PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
 } from '../../../../common/constants/monitor_defaults';
-import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
-import { ConfigKey, ScheduleUnit } from '../../../../common/runtime_types';
-import { migration880 } from './8.8.0';
-import { httpUI as httpUI850 } from './test_fixtures/8.5.0';
 import {
-  browserProject,
   browserUI,
+  browserProject,
   browserUptimeUI,
-  httpUptimeUI,
-  icmpUptimeUI,
   tcpUptimeUI,
+  icmpUptimeUI,
+  httpUptimeUI,
 } from './test_fixtures/8.7.0';
+import { httpUI as httpUI850 } from './test_fixtures/8.5.0';
+import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
+import { omit } from 'lodash';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();

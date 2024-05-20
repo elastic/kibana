@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { isString, startCase } from 'lodash/fp';
-import React, { useMemo } from 'react';
 import type { CriticalityLevel } from '../../../../../../common/entity_analytics/asset_criticality/types';
-import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { CRITICALITY_LEVEL_COLOR } from '../../../../../entity_analytics/components/asset_criticality';
+import { DefaultDraggable } from '../../../../../common/components/draggables';
 
 interface Props {
   contextId: string;

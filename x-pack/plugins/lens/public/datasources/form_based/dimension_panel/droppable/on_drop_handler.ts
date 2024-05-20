@@ -6,31 +6,31 @@
  */
 import { DropType } from '@kbn/dom-drag-drop';
 import {
-  DatasourceDimensionDropHandlerProps,
-  DragDropOperation,
-  DraggedField,
-  IndexPatternMap,
-  VisualizationDimensionGroupConfig,
-  isOperation,
-} from '../../../../types';
-import {
   isDraggedDataViewField,
   reorderElements,
   shouldRemoveSource as shouldRemoveSourceChecker,
 } from '../../../../utils';
-import { removeColumn } from '../../form_based';
 import {
-  copyColumn,
-  getColumnOrder,
-  getOperationHelperForMultipleFields,
-  hasOperationSupportForMultipleFields,
+  DatasourceDimensionDropHandlerProps,
+  DragDropOperation,
+  IndexPatternMap,
+  isOperation,
+  VisualizationDimensionGroupConfig,
+  DraggedField,
+} from '../../../../types';
+import {
   insertOrReplaceColumn,
+  getColumnOrder,
   reorderByGroups,
+  copyColumn,
+  hasOperationSupportForMultipleFields,
+  getOperationHelperForMultipleFields,
   replaceColumn,
 } from '../../operations';
 import { mergeLayer, mergeLayers } from '../../state_helpers';
-import { DataViewDragDropOperation, FormBasedPrivateState } from '../../types';
-import { getField, getNewOperation } from './get_drop_props';
+import { getNewOperation, getField } from './get_drop_props';
+import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
+import { removeColumn } from '../../form_based';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {
   state: FormBasedPrivateState;

@@ -86,7 +86,9 @@
             "tags": [],
             "label": "auto_number",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -98,7 +100,9 @@
             "tags": [],
             "label": "cell_type",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -110,7 +114,9 @@
             "tags": [],
             "label": "execution_count",
             "description": [],
-            "signature": ["number | null | undefined"],
+            "signature": [
+              "number | null | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -122,7 +128,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -134,7 +142,9 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -146,7 +156,9 @@
             "tags": [],
             "label": "metadata",
             "description": [],
-            "signature": ["{ id?: string | undefined; } | undefined"],
+            "signature": [
+              "{ id?: string | undefined; } | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -179,7 +191,9 @@
             "tags": [],
             "label": "prompt_number",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -191,7 +205,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -259,7 +275,9 @@
             "tags": [],
             "label": "nbformat",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -271,7 +289,9 @@
             "tags": [],
             "label": "nbformat_minor",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -339,7 +359,9 @@
             "tags": [],
             "label": "'text/plain'",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -351,7 +373,9 @@
             "tags": [],
             "label": "'text/html'",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -363,7 +387,9 @@
             "tags": [],
             "label": "'text/latex'",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -375,7 +401,9 @@
             "tags": [],
             "label": "'image/png'",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -387,7 +415,9 @@
             "tags": [],
             "label": "'image/jpeg'",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -399,7 +429,9 @@
             "tags": [],
             "label": "'image/gif'",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -411,7 +443,9 @@
             "tags": [],
             "label": "'image/svg+xml'",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -423,7 +457,9 @@
             "tags": [],
             "label": "'application/javascript'",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -449,7 +485,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -461,7 +499,9 @@
             "tags": [],
             "label": "ename",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -473,7 +513,9 @@
             "tags": [],
             "label": "evalue",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -485,7 +527,9 @@
             "tags": [],
             "label": "traceback",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -518,7 +562,9 @@
             "tags": [],
             "label": "output_type",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -530,7 +576,9 @@
             "tags": [],
             "label": "png",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -542,7 +590,9 @@
             "tags": [],
             "label": "jpeg",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -554,7 +604,9 @@
             "tags": [],
             "label": "gif",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -566,7 +618,9 @@
             "tags": [],
             "label": "svg",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -578,7 +632,9 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -590,7 +646,9 @@
             "tags": [],
             "label": "execution_count",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-ipynb/types.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -7,19 +7,19 @@
  */
 import './source.scss';
 
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { SEARCH_FIELDS_FROM_SOURCE, isLegacyTableEnabled } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import React, { useEffect, useState } from 'react';
-import { useEsDocSearch } from '../../hooks';
+import { isLegacyTableEnabled, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
+import { useEsDocSearch } from '../../hooks';
 import { getHeight } from './get_height';
+import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
 
 interface SourceViewerProps {
   id: string;

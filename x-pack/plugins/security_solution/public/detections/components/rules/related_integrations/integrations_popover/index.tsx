@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
+import {
+  EuiPopover,
+  EuiBadge,
+  EuiPopoverTitle,
+  EuiFlexGroup,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import type { RelatedIntegrationArray } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { IntegrationDescription } from '../integrations_description';

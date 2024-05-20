@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { RetryService, commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { commonFunctionalServices, RetryService } from '@kbn/ftr-common-functional-services';
 import { EsArchiverProvider } from '@kbn/ftr-common-functional-services/services/es_archiver';
 import { KibanaServerProvider } from '@kbn/ftr-common-functional-services/services/kibana_server';
 import { ProvidedType } from '@kbn/test';
-import { AuthService } from './auth';
 import { EsProvider } from './es';
+import { AuthService } from './auth';
 
 export const services = {
   es: EsProvider,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
-import type { Filter } from '@kbn/es-query';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import type { AnomalyResults } from '../../../machine_learning';
 import { getAnomalies } from '../../../machine_learning';
 

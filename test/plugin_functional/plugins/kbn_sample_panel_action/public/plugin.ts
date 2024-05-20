@@ -7,8 +7,8 @@
  */
 
 import { CoreSetup, Plugin } from '@kbn/core/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createSamplePanelAction } from './sample_panel_action';
 import { createSamplePanelLink } from './sample_panel_link';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Role } from '@kbn/security-plugin/common';
 import type { LoginState } from '@kbn/security-plugin/common/login_state';
+import type { Role } from '@kbn/security-plugin/common';
 import { ENDPOINT_SECURITY_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
 import type { SecurityTestUser } from '../common/constants';
 import { COMMON_API_HEADERS, request } from './common';

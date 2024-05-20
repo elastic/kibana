@@ -9,8 +9,8 @@
 import { renderHook } from '@testing-library/react-hooks';
 import type { History } from 'history';
 
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useSavedSearchAliasMatchRedirect } from './saved_search_alias_match_redirect';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 

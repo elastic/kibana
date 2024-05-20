@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { SerializableRecord } from '@kbn/utility-types';
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import { fireEvent, render } from '@testing-library/react';
 import { TEST_SUBJ_ACTION_FACTORY_ITEM, TEST_SUBJ_SELECTED_ACTION_FACTORY } from './action_wizard';
 import {
-  Demo,
   dashboardFactory,
   dashboards,
-  urlDrilldownActionFactory,
+  Demo,
   urlFactory,
+  urlDrilldownActionFactory,
 } from './test_data';
+import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { SerializableRecord } from '@kbn/utility-types';
 
 test('Pick and configure action', () => {
   const screen = render(

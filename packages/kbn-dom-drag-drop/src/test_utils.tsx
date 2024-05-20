@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { RenderOptions, render } from '@testing-library/react';
-import faker from 'faker';
 import React, { ReactElement } from 'react';
+import faker from 'faker';
+import { RenderOptions, render } from '@testing-library/react';
 import { DragContextState, RootDragDropProvider } from './providers';
 
 export const EXACT = {

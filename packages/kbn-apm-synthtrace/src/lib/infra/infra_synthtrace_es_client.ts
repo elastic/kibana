@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Readable, Transform, pipeline } from 'stream';
 import { Client } from '@elastic/elasticsearch';
 import { ESDocumentWithOperation, InfraDocument } from '@kbn/apm-synthtrace-client';
+import { pipeline, Readable, Transform } from 'stream';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';

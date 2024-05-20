@@ -1,6 +1,3 @@
-import { EuiComment, EuiCommentList } from '@elastic/eui';
-import { UserAvatarTip, UserToolTip } from '@kbn/user-profile-components';
-import type { UserProfile, UserProfileAvatarData } from '@kbn/user-profile-components';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import type { UserProfile, UserProfileAvatarData } from '@kbn/user-profile-compo
  * Side Public License, v 1.
  */
 import React, { FunctionComponent } from 'react';
+import { UserAvatarTip, UserToolTip } from '@kbn/user-profile-components';
+import type { UserProfile, UserProfileAvatarData } from '@kbn/user-profile-components';
+import { EuiCommentList, EuiComment } from '@elastic/eui';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
 export const ToolTipDemo: FunctionComponent = () => {

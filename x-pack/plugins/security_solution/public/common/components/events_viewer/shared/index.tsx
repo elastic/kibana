@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { createContext } from 'react';
 import {
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
   EuiLoadingSpinner,
-  EuiPanel,
+  EuiImage,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { createContext } from 'react';
+import type { CoreStart } from '@kbn/core/public';
 
 const heights = {
   tall: 490,

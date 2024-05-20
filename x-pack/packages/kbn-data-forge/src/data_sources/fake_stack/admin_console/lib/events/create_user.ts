@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { sample, camelCase, random } from 'lodash';
 import { faker } from '@faker-js/faker';
-import { camelCase, random, sample } from 'lodash';
-import { EventFunction } from '../../../../../types';
 import { ADMIN_CONSOLE, ADMIN_CONSOLE_HOSTS, DOMAINS } from '../../../common/constants';
-import { createWriteEvent } from '../../../mongodb/lib/events/mongo_actions';
-import { createNginxLog } from '../../../nginx_proxy/lib/events/create_nginx_log';
-import { createUser as createNewUser, getLoggedInUser } from '../login_cache';
+import { getLoggedInUser, createUser as createNewUser } from '../login_cache';
 import { createEvent } from './create_base_event';
+import { createWriteEvent } from '../../../mongodb/lib/events/mongo_actions';
+import { EventFunction } from '../../../../../types';
+import { createNginxLog } from '../../../nginx_proxy/lib/events/create_nginx_log';
 
 export const createUser: EventFunction = (_schedule, timestamp) => {
   const user = getLoggedInUser();

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HEALTH_HEX_CODES, getHeathBarLinearGradient } from './gradient';
+import { getHeathBarLinearGradient, HEALTH_HEX_CODES } from './gradient';
 
 describe('getHeathBarLinearGradient', () => {
   test('should return linear-gradient with percentages for each status', () => {

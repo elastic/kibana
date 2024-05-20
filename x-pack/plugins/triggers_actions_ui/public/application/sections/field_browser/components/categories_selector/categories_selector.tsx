@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useCallback, useMemo, useState } from 'react';
+import { omit } from 'lodash';
 import {
   EuiBadge,
   EuiFilterButton,
@@ -10,16 +18,8 @@ import {
   FilterChecked,
 } from '@elastic/eui';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { omit } from 'lodash';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { useCallback, useMemo, useState } from 'react';
-import { getFieldCount, isEscape } from '../../helpers';
 import * as i18n from '../../translations';
+import { getFieldCount, isEscape } from '../../helpers';
 import { styles } from './categories_selector.styles';
 
 interface CategoriesSelectorProps {

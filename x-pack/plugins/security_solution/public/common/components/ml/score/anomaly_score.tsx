@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiFlexItem, EuiIcon, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
+import { EuiPopover, EuiDescriptionList, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
-import type { Anomaly, NarrowDateRange } from '../types';
-import { createDescriptionList } from './create_description_list';
+import type { NarrowDateRange, Anomaly } from '../types';
 import { Score } from './score';
+import { createDescriptionList } from './create_description_list';
 
 interface Args {
   startDate: string;

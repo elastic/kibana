@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiButtonIcon } from '@elastic/eui';
 
-import { COPY_API_KEY_BUTTON_LABEL, HIDE_API_KEY_LABEL, SHOW_API_KEY_LABEL } from '../constants';
+import { SHOW_API_KEY_LABEL, HIDE_API_KEY_LABEL, COPY_API_KEY_BUTTON_LABEL } from '../constants';
 
 interface Props {
   copy: () => void;

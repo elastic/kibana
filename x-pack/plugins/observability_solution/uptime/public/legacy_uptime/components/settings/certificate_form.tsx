@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiCode,
   EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
-  EuiSpacer,
+  EuiCode,
+  EuiFieldText,
   EuiText,
   EuiTitle,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { DefaultEmail, DynamicSettings } from '../../../../common/runtime_types';
 import { SettingsFormProps } from '../../pages/settings';

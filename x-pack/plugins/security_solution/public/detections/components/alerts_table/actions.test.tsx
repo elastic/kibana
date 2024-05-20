@@ -5,17 +5,45 @@
  * 2.0.
  */
 
+import sinon from 'sinon';
+import moment from 'moment';
 import set from '@kbn/safer-lodash-set/set';
 import cloneDeep from 'lodash/cloneDeep';
-import moment from 'moment';
-import sinon from 'sinon';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
+import {
+  sendAlertToTimelineAction,
+  sendBulkEventsToTimelineAction,
+  determineToAndFrom,
+  getNewTermsData,
+} from './actions';
+import {
+  defaultTimelineProps,
+  getThresholdDetectionAlertAADMock,
+  mockEcsDataWithAlert,
+  mockTimelineDetails,
+  mockTimelineResult,
+  mockAADEcsDataWithAlert,
+  mockGetOneTimelineResult,
+  mockTimelineData,
+} from '../../../common/mock';
+import type { CreateTimeline, UpdateTimelineLoading } from './types';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { DataProvider } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { searchServiceMock } from '@kbn/data-plugin/public/search/mocks';
+import { getTimelineTemplate } from '../../../timelines/containers/api';
+import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
+import { KibanaServices } from '../../../common/lib/kibana';
+import {
+  DEFAULT_FROM_MOMENT,
+  DEFAULT_TO_MOMENT,
+} from '../../../common/utils/default_date_settings';
 import {
   COMMENTS,
   DATE_NOW,
@@ -28,36 +56,8 @@ import {
   TIE_BREAKER,
   USER,
 } from '@kbn/lists-plugin/common/constants.mock';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { of } from 'rxjs';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import type { DataProvider } from '../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { KibanaServices } from '../../../common/lib/kibana';
-import {
-  defaultTimelineProps,
-  getThresholdDetectionAlertAADMock,
-  mockAADEcsDataWithAlert,
-  mockEcsDataWithAlert,
-  mockGetOneTimelineResult,
-  mockTimelineData,
-  mockTimelineDetails,
-  mockTimelineResult,
-} from '../../../common/mock';
-import {
-  DEFAULT_FROM_MOMENT,
-  DEFAULT_TO_MOMENT,
-} from '../../../common/utils/default_date_settings';
-import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import { getTimelineTemplate } from '../../../timelines/containers/api';
 import { timelineDefaults } from '../../../timelines/store/defaults';
-import {
-  determineToAndFrom,
-  getNewTermsData,
-  sendAlertToTimelineAction,
-  sendBulkEventsToTimelineAction,
-} from './actions';
-import type { CreateTimeline, UpdateTimelineLoading } from './types';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),

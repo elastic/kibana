@@ -6,42 +6,42 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { AxiosError } from 'axios';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
-import {
-  SentinelOneDownloadAgentFileParamsSchema,
-  SentinelOneDownloadAgentFileResponseSchema,
-  SentinelOneExecuteScriptParamsSchema,
-  SentinelOneExecuteScriptResponseSchema,
-  SentinelOneFetchAgentFilesParamsSchema,
-  SentinelOneFetchAgentFilesResponseSchema,
-  SentinelOneGetActivitiesParamsSchema,
-  SentinelOneGetActivitiesResponseSchema,
-  SentinelOneGetAgentsParamsSchema,
-  SentinelOneGetAgentsResponseSchema,
-  SentinelOneGetRemoteScriptStatusParamsSchema,
-  SentinelOneGetRemoteScriptStatusResponseSchema,
-  SentinelOneGetRemoteScriptsParamsSchema,
-  SentinelOneGetRemoteScriptsResponseSchema,
-  SentinelOneIsolateHostParamsSchema,
-  SentinelOneIsolateHostResponseSchema,
-} from '../../../common/sentinelone/schema';
+import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type {
-  SentinelOneBaseApiResponse,
   SentinelOneConfig,
-  SentinelOneExecuteScriptParams,
-  SentinelOneGetAgentsParams,
+  SentinelOneSecrets,
   SentinelOneGetAgentsResponse,
+  SentinelOneGetAgentsParams,
   SentinelOneGetRemoteScriptStatusParams,
+  SentinelOneBaseApiResponse,
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
   SentinelOneIsolateHostParams,
-  SentinelOneSecrets,
+  SentinelOneExecuteScriptParams,
 } from '../../../common/sentinelone/types';
 import {
-  SentinelOneDownloadAgentFileParams,
+  SentinelOneExecuteScriptParamsSchema,
+  SentinelOneGetRemoteScriptsParamsSchema,
+  SentinelOneGetRemoteScriptsResponseSchema,
+  SentinelOneGetAgentsResponseSchema,
+  SentinelOneIsolateHostResponseSchema,
+  SentinelOneIsolateHostParamsSchema,
+  SentinelOneGetRemoteScriptStatusParamsSchema,
+  SentinelOneGetRemoteScriptStatusResponseSchema,
+  SentinelOneGetAgentsParamsSchema,
+  SentinelOneExecuteScriptResponseSchema,
+  SentinelOneFetchAgentFilesParamsSchema,
+  SentinelOneFetchAgentFilesResponseSchema,
+  SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneDownloadAgentFileResponseSchema,
+  SentinelOneGetActivitiesParamsSchema,
+  SentinelOneGetActivitiesResponseSchema,
+} from '../../../common/sentinelone/schema';
+import { SUB_ACTION } from '../../../common/sentinelone/constants';
+import {
   SentinelOneFetchAgentFilesParams,
+  SentinelOneDownloadAgentFileParams,
   SentinelOneGetActivitiesParams,
 } from '../../../common/sentinelone/types';
 

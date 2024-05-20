@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Container } from '../../../containers';
 import { EmbeddableFactoryDefinition } from '../../../embeddables';
+import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { ContactCardInitializer } from './contact_card_initializer';
 

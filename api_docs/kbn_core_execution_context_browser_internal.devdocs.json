@@ -69,7 +69,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_container.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -107,7 +109,9 @@
             "tags": [],
             "label": "toHeader",
             "description": [],
-            "signature": ["() => { \"x-kbn-context\": string; }"],
+            "signature": [
+              "() => { \"x-kbn-context\": string; }"
+            ],
             "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_container.ts",
             "deprecated": false,
             "trackAdoption": false,

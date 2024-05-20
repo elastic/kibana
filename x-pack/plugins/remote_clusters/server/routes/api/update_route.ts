@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
-import { RequestHandler } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import { RequestHandler } from '@kbn/core/server';
 
-import { API_BASE_PATH, PROXY_MODE, SNIFF_MODE } from '../../../common/constants';
-import { Cluster, ClusterInfoEs, deserializeCluster, serializeCluster } from '../../../common/lib';
+import { API_BASE_PATH, SNIFF_MODE, PROXY_MODE } from '../../../common/constants';
+import { serializeCluster, deserializeCluster, Cluster, ClusterInfoEs } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
-import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { RouteDependencies } from '../../types';
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 
 const bodyValidation = schema.object({
   skipUnavailable: schema.boolean(),

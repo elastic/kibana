@@ -5,71 +5,71 @@
  * 2.0.
  */
 
+import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { omit } from 'lodash/fp';
 
 import {
-  AlertAttachmentAttributes,
-  AlertAttachmentPayload,
   AttachmentType,
+  UserCommentAttachmentAttributes,
+  AlertAttachmentAttributes,
   CaseStatuses,
   ExternalReferenceSOAttachmentPayload,
+  AlertAttachmentPayload,
   ExternalReferenceStorageType,
-  UserCommentAttachmentAttributes,
 } from '@kbn/cases-plugin/common/types/domain';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  defaultUser,
+  postCaseReq,
+  postCommentUserReq,
+  postCommentAlertReq,
+  getPostCaseRequest,
+  getFilesAttachmentReq,
+  fileAttachmentMetadata,
+  fileMetadata,
+  postCommentAlertMultipleIdsReq,
+} from '../../../../common/lib/mock';
+import {
+  deleteAllCaseItems,
+  deleteCasesByESQuery,
+  deleteCasesUserActions,
+  deleteComments,
+  createCase,
+  createComment,
+  removeServerGeneratedPropertiesFromSavedObject,
+  superUserSpace1Auth,
+  updateCase,
+  getCaseUserActions,
+  removeServerGeneratedPropertiesFromUserAction,
+  getAllComments,
+  bulkCreateAttachments,
+} from '../../../../common/lib/api';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
 } from '../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  createSecuritySolutionAlerts,
-  getAlertById,
-  getSecuritySolutionAlerts,
-} from '../../../../common/lib/alerts';
-import {
-  bulkCreateAttachments,
-  createCase,
-  createComment,
-  deleteAllCaseItems,
-  deleteCasesByESQuery,
-  deleteCasesUserActions,
-  deleteComments,
-  getAllComments,
-  getCaseUserActions,
-  removeServerGeneratedPropertiesFromSavedObject,
-  removeServerGeneratedPropertiesFromUserAction,
-  superUserSpace1Auth,
-  updateCase,
-} from '../../../../common/lib/api';
-import { User } from '../../../../common/lib/authentication/types';
 import {
   globalRead,
   noKibanaPrivileges,
   obsOnly,
   obsOnlyRead,
-  obsOnlyReadAlerts,
-  obsSec,
   obsSecRead,
   secOnly,
   secOnlyRead,
+  superUser,
+  obsOnlyReadAlerts,
+  obsSec,
   secOnlyReadAlerts,
   secSolutionOnlyReadNoIndexAlerts,
-  superUser,
 } from '../../../../common/lib/authentication/users';
 import {
-  defaultUser,
-  fileAttachmentMetadata,
-  fileMetadata,
-  getFilesAttachmentReq,
-  getPostCaseRequest,
-  postCaseReq,
-  postCommentAlertMultipleIdsReq,
-  postCommentAlertReq,
-  postCommentUserReq,
-} from '../../../../common/lib/mock';
+  getSecuritySolutionAlerts,
+  createSecuritySolutionAlerts,
+  getAlertById,
+} from '../../../../common/lib/alerts';
+import { User } from '../../../../common/lib/authentication/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

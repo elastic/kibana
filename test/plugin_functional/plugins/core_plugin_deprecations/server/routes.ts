@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { HttpServiceSetup } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const router = http.createRouter();

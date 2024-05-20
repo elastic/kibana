@@ -6,23 +6,23 @@
  */
 
 import { omit } from 'lodash';
+import type {
+  ExternalReferenceSOAttachmentAttributes,
+  ExternalReferenceNoSOAttachmentAttributes,
+  PersistableStateAttachmentAttributes,
+  PersistableStateAttachmentPayload,
+} from '../../common/types/domain';
 import {
   AttachmentType,
   ExternalReferenceStorageType,
   SECURITY_SOLUTION_OWNER,
 } from '../../common';
-import type {
-  ExternalReferenceNoSOAttachmentAttributes,
-  ExternalReferenceSOAttachmentAttributes,
-  PersistableStateAttachmentAttributes,
-  PersistableStateAttachmentPayload,
-} from '../../common/types/domain';
 import { ExternalReferenceAttachmentTypeRegistry } from './external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
 import type {
-  ExternalReferenceAttachmentType,
-  PersistableStateAttachmentState,
   PersistableStateAttachmentTypeSetup,
+  PersistableStateAttachmentState,
+  ExternalReferenceAttachmentType,
 } from './types';
 
 export const getPersistableAttachment = (): PersistableStateAttachmentTypeSetup => ({

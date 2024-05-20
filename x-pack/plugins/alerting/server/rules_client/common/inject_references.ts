@@ -6,14 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/server';
 import { omit } from 'lodash';
-import { RuleActionAttributes } from '../../data/rule/types';
+import { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RawRule, RuleTypeParams } from '../../types';
+import { RuleActionAttributes } from '../../data/rule/types';
 import {
-  extractedSavedObjectParamReferenceNamePrefix,
   preconfiguredConnectorActionRefPrefix,
+  extractedSavedObjectParamReferenceNamePrefix,
   systemConnectorActionRefPrefix,
 } from './constants';
 
@@ -50,7 +50,7 @@ export function injectReferencesIntoActions(
 
 export function injectReferencesIntoParams<
   Params extends RuleTypeParams,
-  ExtractedParams extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams
 >(
   ruleId: string,
   ruleType: UntypedNormalizedRuleType,

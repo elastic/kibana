@@ -18,7 +18,7 @@ import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyTimeseries } from '../../transactions/get_latency_charts';
-import { GenericMetricsChart, fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
+import { fetchAndTransformMetrics, GenericMetricsChart } from '../fetch_and_transform_metrics';
 import { ChartBase } from '../types';
 
 const billedDurationAvg = {

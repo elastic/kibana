@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
-import * as i18n from '../translations';
 import type {
   ActionTimelineToShow,
   DeleteTimelines,
   EnableExportTimelineDownloader,
   OnCreateRuleFromTimeline,
-  OnOpenDeleteTimelineModal,
   OnOpenTimeline,
   OpenTimelineResult,
+  OnOpenDeleteTimelineModal,
   TimelineActionsOverflowColumns,
 } from '../types';
+import * as i18n from '../translations';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 /**
  * Returns the action columns (e.g. delete, open duplicate timeline)
  */

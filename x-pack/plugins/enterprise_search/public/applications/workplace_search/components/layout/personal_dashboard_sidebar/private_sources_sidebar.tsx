@@ -13,10 +13,10 @@ import { EuiSideNav } from '@elastic/eui';
 
 import { AppLogic } from '../../../app_logic';
 import {
-  PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
   PRIVATE_CAN_CREATE_PAGE_TITLE,
-  PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
   PRIVATE_VIEW_ONLY_PAGE_TITLE,
+  PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
+  PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
 } from '../../../constants';
 import { useSourceSubNav } from '../../../views/content_sources/components/source_sub_nav';
 import { SourceLogic } from '../../../views/content_sources/source_logic';

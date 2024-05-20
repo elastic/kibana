@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { isLegacyTableEnabled } from '@kbn/discover-utils';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { OnSaveProps, SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
-import { SaveSavedSearchOptions, SavedSearch } from '@kbn/saved-search-plugin/public';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import { isLegacyTableEnabled } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../../build_services';
-import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
+import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 
 async function saveDataSource({
   savedSearch,

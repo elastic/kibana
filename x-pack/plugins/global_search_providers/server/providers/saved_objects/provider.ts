@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { from, combineLatest, of } from 'rxjs';
+import { map, takeUntil, first } from 'rxjs';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/server';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
-import { combineLatest, from, of } from 'rxjs';
-import { first, map, takeUntil } from 'rxjs';
-import { getSearchableTypes } from './get_searchable_types';
 import { mapToResults } from './map_object_to_result';
+import { getSearchableTypes } from './get_searchable_types';
 
 export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider => {
   return {

@@ -8,10 +8,10 @@
 
 import * as t from 'io-ts';
 
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { left } from 'fp-ts/lib/Either';
 import { DefaultArray } from '.';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 const testSchema = t.keyof({
   valid: true,

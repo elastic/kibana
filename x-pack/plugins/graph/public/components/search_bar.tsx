@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { Query, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiToolTip } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { connect } from 'react-redux';
+import { toElasticsearchQuery, fromKueryExpression, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { TooltipWrapper } from '@kbn/visualization-utils';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   IUnifiedSearchPluginServices,
   UnifiedSearchPublicPluginStart,
 } from '@kbn/unified-search-plugin/public/types';
-import { TooltipWrapper } from '@kbn/visualization-utils';
-import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
+import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
   GraphState,
-  IndexpatternDatasource,
   datasourceSelector,
   requestDatasource,
-  selectedFieldsSelector,
+  IndexpatternDatasource,
   submitSearch,
+  selectedFieldsSelector,
 } from '../state_management';
-import { IndexPatternProvider, IndexPatternSavedObject, WorkspaceField } from '../types';
 
 export interface SearchBarProps {
   isLoading: boolean;

@@ -7,15 +7,15 @@
  */
 
 import type { PackageInfo } from '@kbn/config';
-import type { IRouter } from '@kbn/core-http-server';
-import { InternalStaticAssets } from '@kbn/core-http-server-internal';
-import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import * as KbnMonaco from '@kbn/monaco/server';
 import { fromRoot } from '@kbn/repo-info';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { distDir as UiSharedDepsSrcDistDir } from '@kbn/ui-shared-deps-src';
-import { registerRouteForBundle } from './bundles_route';
+import * as KbnMonaco from '@kbn/monaco/server';
+import type { IRouter } from '@kbn/core-http-server';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { InternalStaticAssets } from '@kbn/core-http-server-internal';
 import { FileHashCache } from './file_hash_cache';
+import { registerRouteForBundle } from './bundles_route';
 
 /**
  *  Creates the routes that serves files from `bundlesPath`.

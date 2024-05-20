@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { EuiComboBox } from '@elastic/eui';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { getOperationSupportMatrix } from '.';
-import { IndexPattern, VisualizationDimensionGroupConfig } from '../../../types';
-import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';
+import { EuiComboBox } from '@elastic/eui';
 import { GenericOperationDefinition } from '../operations';
 import {
-  FieldBasedIndexPatternColumn,
   averageOperation,
   countOperation,
   derivativeOperation,
-  minOperation,
-  staticValueOperation,
+  FieldBasedIndexPatternColumn,
   termsOperation,
+  staticValueOperation,
+  minOperation,
 } from '../operations/definitions';
-import { ReferenceBasedIndexPatternColumn } from '../operations/definitions/column_types';
-import { FormBasedLayer, FormBasedPrivateState, GenericIndexPatternColumn } from '../types';
 import { FieldInput, getErrorMessage } from './field_input';
+import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';
+import { getOperationSupportMatrix } from '.';
+import { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from '../types';
+import { ReferenceBasedIndexPatternColumn } from '../operations/definitions/column_types';
 import { FieldSelect } from './field_select';
+import { IndexPattern, VisualizationDimensionGroupConfig } from '../../../types';
 
 jest.mock('../operations/layer_helpers', () => {
   const original = jest.requireActual('../operations/layer_helpers');

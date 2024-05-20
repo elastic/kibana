@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 import { useInventoryViews } from '../../../../hooks/use_inventory_views';
+import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 
 export const SavedViews = () => {

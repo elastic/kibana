@@ -7,24 +7,24 @@
  */
 
 import {
+  mockIsSavedObjectIndex,
   mockCleanSavedObjectIndices,
   mockDeleteSavedObjectIndices,
-  mockIsSavedObjectIndex,
 } from './create_index_stream.test.mock';
 
-import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
-import Chance from 'chance';
 import sinon from 'sinon';
+import Chance from 'chance';
+import { createPromiseFromStreams, createConcatStream, createListStream } from '@kbn/utils';
 
 import { createCreateIndexStream } from './create_index_stream';
 
 import {
-  createStubClient,
+  createStubStats,
+  createStubIndexRecord,
   createStubDataStreamRecord,
   createStubDocRecord,
-  createStubIndexRecord,
+  createStubClient,
   createStubLogger,
-  createStubStats,
 } from './__mocks__/stubs';
 
 const chance = new Chance();

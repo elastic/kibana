@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import React from 'react';
 
-import { TestProviders } from '../../common/mock';
-import { mappings } from './__mock__';
 import type { FieldMappingProps } from './field_mapping';
 import { FieldMapping } from './field_mapping';
+import { mappings } from './__mock__';
+import { TestProviders } from '../../common/mock';
 import { FieldMappingRowStatic } from './field_mapping_row_static';
 
 describe('FieldMappingRow', () => {

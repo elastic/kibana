@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import type {
+  SentinelOneGetAgentsResponse,
+  SentinelOneGetActivitiesResponse,
+} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import type {
-  SentinelOneGetActivitiesResponse,
-  SentinelOneGetAgentsResponse,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { merge } from 'lodash';
 import type { NormalizedExternalConnectorClient } from '../../..';
 import type { ResponseActionsClientOptionsMock } from '../mocks';

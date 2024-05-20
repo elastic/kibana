@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 import {
-  OPEN_TELEMETRY_AGENT_NAMES,
-  OpenTelemetryAgentName,
   isAndroidAgentName,
   isIosAgentName,
   isJavaAgentName,
   isRumAgentName,
+  OpenTelemetryAgentName,
+  OPEN_TELEMETRY_AGENT_NAMES,
 } from '@kbn/elastic-agent-utils';
-import androidIcon from '../../../assets/android.svg';
+import defaultIcon from '../../../assets/default.svg';
 import cppIcon from '../../../assets/cpp.svg';
 import darkCppIcon from '../../../assets/cpp_dark.svg';
-import defaultIcon from '../../../assets/default.svg';
 import dotNetIcon from '../../../assets/dot_net.svg';
 import erlangIcon from '../../../assets/erlang.svg';
 import darkErlangIcon from '../../../assets/erlang_dark.svg';
@@ -28,13 +27,14 @@ import nodeJsIcon from '../../../assets/nodejs.svg';
 import ocamlIcon from '../../../assets/ocaml.svg';
 import openTelemetryIcon from '../../../assets/otel_default.svg';
 import phpIcon from '../../../assets/php.svg';
-import darkPhpIcon from '../../../assets/php_dark.svg';
 import pythonIcon from '../../../assets/python.svg';
 import rubyIcon from '../../../assets/ruby.svg';
 import rumJsIcon from '../../../assets/rumjs.svg';
+import darkPhpIcon from '../../../assets/php_dark.svg';
 import darkRumJsIcon from '../../../assets/rumjs_dark.svg';
 import rustIcon from '../../../assets/rust.svg';
 import darkRustIcon from '../../../assets/rust_dark.svg';
+import androidIcon from '../../../assets/android.svg';
 
 const agentIcons: { [key: string]: string } = {
   cpp: cppIcon,

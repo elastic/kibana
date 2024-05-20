@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isPromise, withTimeout } from './promise';
+import { withTimeout, isPromise } from './promise';
 
 const delay = (ms: number, resolveValue?: any) =>
   new Promise((resolve) => setTimeout(resolve, ms, resolveValue));

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useState } from 'react';
+import { EuiCallOut, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useEditPolicyContext } from '../edit_policy_context';
+import { getIndicesListPath } from '../../../services/navigation';
 import { useKibana } from '../../../../shared_imports';
 import { IndexTemplatesFlyout } from '../../../components/index_templates_flyout';
-import { getIndicesListPath } from '../../../services/navigation';
-import { useEditPolicyContext } from '../edit_policy_context';
 
 export const EditWarning: FunctionComponent = () => {
   const { isNewPolicy, indices, indexTemplates, policyName, policy } = useEditPolicyContext();

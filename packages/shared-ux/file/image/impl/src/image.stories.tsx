@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ComponentMeta, ComponentStory } from '@storybook/react';
 import React from 'react';
+import { ComponentStory, ComponentMeta } from '@storybook/react';
 
-import { base64dLogo, getImageData as getBlob } from '@kbn/shared-ux-file-image-mocks';
 import { getImageMetadata } from '@kbn/shared-ux-file-util';
+import { getImageData as getBlob, base64dLogo } from '@kbn/shared-ux-file-image-mocks';
 import { Image, Props } from './image';
 
 const defaultArgs: Props = { alt: 'test', src: `data:image/png;base64,${base64dLogo}` };

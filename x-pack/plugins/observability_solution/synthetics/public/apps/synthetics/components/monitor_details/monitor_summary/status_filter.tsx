@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFilterGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFilterGroup } from '@elastic/eui';
+import { FilterStatusButton } from '../../common/components/filter_status_button';
 import {
   STATUS_DOWN_LABEL,
   STATUS_UP_LABEL,
 } from '../../../../../../common/translations/translations';
-import { FilterStatusButton } from '../../common/components/filter_status_button';
 
 export const StatusFilter: React.FC = () => {
   return (

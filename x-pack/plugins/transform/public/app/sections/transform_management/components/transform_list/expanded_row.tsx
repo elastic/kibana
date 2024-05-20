@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import React, { type FC } from 'react';
+import { css } from '@emotion/react';
 
 import { EuiTabbedContent } from '@elastic/eui';
 
@@ -18,10 +18,10 @@ import type { TransformHealthAlertRule } from '../../../../../../common/types/al
 import type { TransformListRow } from '../../../../common';
 
 import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
-import { ExpandedRowHealthPane } from './expanded_row_health_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
+import { ExpandedRowHealthPane } from './expanded_row_health_pane';
 import { ExpandedRowStatsPane } from './expanded_row_stats_pane';
 
 interface Props {

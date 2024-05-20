@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 
 const i18nTexts = {
   title: i18n.translate('reporting.share.panelContent.unsavedStateErrorTitle', {

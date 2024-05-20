@@ -29,7 +29,9 @@
         "tags": [],
         "label": "AppId",
         "description": [],
-        "signature": ["\"ml\""],
+        "signature": [
+          "\"ml\""
+        ],
         "path": "packages/deeplinks/ml/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,

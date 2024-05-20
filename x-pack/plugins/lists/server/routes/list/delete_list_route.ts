@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   EntriesArray,
@@ -14,16 +15,15 @@ import {
   FoundExceptionListSchema,
   exceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import { getExceptionListClient, getListClient } from '..';
-import { deleteListRequestQuery, deleteListResponse } from '../../../common/api';
+import type { ListsPluginRouter } from '../../types';
 import type { ExceptionListClient } from '../../services/exception_lists/exception_list_client';
 import { escapeQuotes } from '../../services/utils/escape_query';
-import type { ListsPluginRouter } from '../../types';
+import { deleteListRequestQuery, deleteListResponse } from '../../../common/api';
 import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { getExceptionListClient, getListClient } from '..';
 
 export const deleteListRoute = (router: ListsPluginRouter): void => {
   router.versioned

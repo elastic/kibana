@@ -7,11 +7,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { MetaRewritePolicyConfig } from '@kbn/core-logging-server';
 import { LogRecord } from '@kbn/logging';
 import { set } from '@kbn/safer-lodash-set';
-import { assertNever } from '@kbn/std';
 import { has, unset } from 'lodash';
+import { assertNever } from '@kbn/std';
+import type { MetaRewritePolicyConfig } from '@kbn/core-logging-server';
 import { RewritePolicy } from '../policy';
 
 export const metaRewritePolicyConfigSchema = schema.object({

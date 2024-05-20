@@ -7,14 +7,14 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import { getPackageInfo, getInstallation } from '../epm/packages';
+import {
+  PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
+  AGENT_POLICY_DEFAULT_MONITORING_DATASETS,
+} from '../../constants';
+import type { FullAgentPolicyOutputPermissions } from '../../../common/types';
 import { FLEET_ELASTIC_AGENT_PACKAGE } from '../../../common';
 import { dataTypes } from '../../../common/constants';
-import type { FullAgentPolicyOutputPermissions } from '../../../common/types';
-import {
-  AGENT_POLICY_DEFAULT_MONITORING_DATASETS,
-  PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
-} from '../../constants';
-import { getInstallation, getPackageInfo } from '../epm/packages';
 
 import { getDataStreamPrivileges } from './package_policies_to_agent_permissions';
 

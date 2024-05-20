@@ -1,5 +1,3 @@
-import { EuiHealth, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
-import { action } from '@storybook/addon-actions';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,23 +6,25 @@ import { action } from '@storybook/addon-actions';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { action } from '@storybook/addon-actions';
+import { EuiText, EuiTextColor, EuiSpacer, EuiHealth } from '@elastic/eui';
 
+import { FieldConfig } from '../../types';
 import {
-  CheckBoxField,
+  TextField,
+  TextAreaField,
+  NumericField,
+  ToggleField,
   ComboBoxField,
+  CheckBoxField,
   JsonEditorField,
   MultiSelectField,
-  NumericField,
   RadioGroupField,
   RangeField,
   SelectField,
   SuperSelectField,
-  TextAreaField,
-  TextField,
-  ToggleField,
 } from '../../../components';
 import { fieldFormatters } from '../../../helpers';
-import { FieldConfig } from '../../types';
 import { UseField } from '../use_field';
 
 const fieldTypeOptions = [
@@ -42,7 +42,7 @@ const fieldTypeOptions = [
   'toggle',
 ] as const;
 
-type FieldType = (typeof fieldTypeOptions)[number];
+type FieldType = typeof fieldTypeOptions[number];
 
 const fieldConfigBase: FieldConfig<unknown> = {
   label: 'My field',

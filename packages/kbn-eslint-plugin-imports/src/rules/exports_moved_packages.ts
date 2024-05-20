@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { Rule, AST } from 'eslint';
 import * as T from '@babel/types';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
-import type { AST, Rule } from 'eslint';
 
-import { Importer, visitAllImportStatements } from '../helpers/visit_all_import_statements';
+import { visitAllImportStatements, Importer } from '../helpers/visit_all_import_statements';
 
 export interface MovedExportsRule {
   from: string;
@@ -145,10 +145,10 @@ function inspectImports(
           ? 'export type'
           : 'export'
         : (T.isImportDeclaration(importer) ||
-              importer.type === TSESTree.AST_NODE_TYPES.ImportDeclaration) &&
-            importer.importKind === 'type'
-          ? 'import type'
-          : 'import';
+            importer.type === TSESTree.AST_NODE_TYPES.ImportDeclaration) &&
+          importer.importKind === 'type'
+        ? 'import type'
+        : 'import';
 
     return {
       importCount: importer.specifiers.length,

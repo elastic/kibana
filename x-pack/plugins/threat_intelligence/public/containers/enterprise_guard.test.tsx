@@ -9,8 +9,8 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
 import { SecuritySolutionPluginContext } from '../types';
-import { EnterpriseGuard } from './enterprise_guard';
 import { SecuritySolutionContext } from './security_solution_context';
+import { EnterpriseGuard } from './enterprise_guard';
 
 describe('<EnterpriseGuard />', () => {
   describe('when on enterprise plan', () => {

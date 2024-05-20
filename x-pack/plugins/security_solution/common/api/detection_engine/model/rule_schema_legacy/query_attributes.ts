@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import {
   LimitedSizeArray,
   PositiveIntegerGreaterThanZero,
   enumeration,
 } from '@kbn/securitysolution-io-ts-types';
-import * as t from 'io-ts';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../rule_schema/common_attributes.gen';
 
 export type AlertSuppressionMissingFields = t.TypeOf<typeof AlertSuppressionMissingFields>;

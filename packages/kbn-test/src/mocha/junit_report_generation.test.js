@@ -7,12 +7,12 @@
  */
 
 import { resolve } from 'path';
-import { promisify } from 'util';
 import { readFile } from 'fs/promises';
+import { promisify } from 'util';
 
+import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
-import { parseString } from 'xml2js';
 import { getUniqueJunitReportPath } from '../report_path';
 
 import { setupJUnitReportGeneration } from './junit_report_generation';

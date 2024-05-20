@@ -6,15 +6,15 @@
  */
 
 import type { NerInference } from './ner';
+import type { TextExpansionInference } from './text_expansion';
 import type { QuestionAnsweringInference } from './question_answering';
 import type {
-  FillMaskInference,
-  LangIdentInference,
   TextClassificationInference,
   ZeroShotClassificationInference,
+  FillMaskInference,
+  LangIdentInference,
 } from './text_classification';
 import type { TextEmbeddingInference } from './text_embedding';
-import type { TextExpansionInference } from './text_expansion';
 
 export type InferrerType =
   | NerInference

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { FC } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiButton,
+  EuiButtonEmpty,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC } from 'react';
 
 import { CanvasVariable } from '../../../types';
 

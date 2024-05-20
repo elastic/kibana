@@ -7,30 +7,30 @@
 
 import type {
   Agent,
-  CreateAgentPolicyResponse,
   GetAgentsResponse,
   GetInfoResponse,
-  GetOneAgentPolicyResponse,
   GetPackagePoliciesResponse,
+  GetOneAgentPolicyResponse,
+  CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
-  API_VERSIONS,
-  agentPolicyRouteService,
   agentRouteService,
   epmRouteService,
   packagePolicyRouteService,
+  API_VERSIONS,
+  agentPolicyRouteService,
 } from '@kbn/fleet-plugin/common';
-import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services/routes';
 import type {
   GetOneAgentResponse,
   PutAgentReassignResponse,
   UpdateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
-import type { UninstallToken } from '@kbn/fleet-plugin/common/types/models/uninstall_token';
+import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services/routes';
 import type { GetUninstallTokensMetadataResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
+import type { UninstallToken } from '@kbn/fleet-plugin/common/types/models/uninstall_token';
+import { logger } from './logger';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { request } from './common';
-import { logger } from './logger';
 
 export const getEndpointIntegrationVersion = (): Cypress.Chainable<string> =>
   request<GetInfoResponse>({

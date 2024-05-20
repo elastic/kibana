@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { RuleDurationFormat, getFormattedDuration } from './rule_duration_format';
+import { getFormattedDuration, RuleDurationFormat } from './rule_duration_format';
 
 describe('RuleDurationFormat', () => {
   describe('getFormattedDuration', () => {

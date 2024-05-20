@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { sortBy } from 'lodash';
-import { getEndpointConsoleCommands } from '../..';
-import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import type { ConsoleTestSetup, HelpSidePanelSelectorsAndActions } from '../../../console/mocks';
 import {
   getConsoleTestSetup,
   getHelpSidePanelSelectorsAndActionsMock,
 } from '../../../console/mocks';
+import { getEndpointConsoleCommands } from '../..';
+import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
+import { sortBy } from 'lodash';
 import { HELP_GROUPS } from '../console_commands_definition';
 
 describe('When displaying Endpoint Response Actions', () => {

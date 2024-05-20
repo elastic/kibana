@@ -19,8 +19,8 @@ import {
   isValidSortMode,
   isValidSortNumericType,
 } from '../../../../../../common/pivot_aggs';
-import { TopMetricsAggForm } from './components/top_metrics_agg_form';
 import type { PivotAggsConfigTopMetrics } from './types';
+import { TopMetricsAggForm } from './components/top_metrics_agg_form';
 
 /**
  * Gets initial basic configuration of the top_metrics aggregation.

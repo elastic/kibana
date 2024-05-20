@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { LayoutDirection } from '@elastic/charts';
-import { CUSTOM_PALETTE, CustomPaletteParams, PaletteRegistry } from '@kbn/coloring';
+import { CustomPaletteParams, CUSTOM_PALETTE, PaletteRegistry } from '@kbn/coloring';
 import type {
-  MetricVisExpressionFunctionDefinition,
   TrendlineExpressionFunctionDefinition,
+  MetricVisExpressionFunctionDefinition,
 } from '@kbn/expression-metric-vis-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { Ast } from '@kbn/interpreter';
+import { LayoutDirection } from '@elastic/charts';
 import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
 import { DatasourceLayers } from '../../types';
 import { showingBar } from './metric_visualization';
-import { DEFAULT_MAX_COLUMNS, MetricVisualizationState, getDefaultColor } from './visualization';
+import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
 
 // TODO - deduplicate with gauges?
 function computePaletteParams(params: CustomPaletteParams) {

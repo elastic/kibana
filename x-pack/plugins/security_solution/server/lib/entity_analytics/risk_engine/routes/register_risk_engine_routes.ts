@@ -1,6 +1,3 @@
-import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { riskEngineDisableRoute } from './disable';
-import { riskEngineEnableRoute } from './enable';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,9 +5,12 @@ import { riskEngineEnableRoute } from './enable';
  * 2.0.
  */
 import { riskEngineInitRoute } from './init';
+import { riskEngineEnableRoute } from './enable';
+import { riskEngineDisableRoute } from './disable';
+import { riskEngineStatusRoute } from './status';
 import { riskEnginePrivilegesRoute } from './privileges';
 import { riskEngineSettingsRoute } from './settings';
-import { riskEngineStatusRoute } from './status';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 export const registerRiskEngineRoutes = ({
   router,

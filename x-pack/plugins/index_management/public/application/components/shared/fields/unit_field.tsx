@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
 import React, { FunctionComponent, useState } from 'react';
+import { EuiFilterSelectItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import { UseField } from '../../../../shared_imports';
 
 interface Props {

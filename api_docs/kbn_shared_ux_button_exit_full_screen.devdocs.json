@@ -74,7 +74,9 @@
         "type": "Function",
         "tags": [],
         "label": "ExitFullScreenButtonKibanaProvider",
-        "description": ["\nKibana-specific Provider that maps to known dependency types."],
+        "description": [
+          "\nKibana-specific Provider that maps to known dependency types."
+        ],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "KibanaDependencies",
@@ -113,7 +115,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ExitFullScreenButtonProps",
-        "description": ["\nProps for the service-enabled `ExitFullScreenButton` component."],
+        "description": [
+          "\nProps for the service-enabled `ExitFullScreenButton` component."
+        ],
         "path": "packages/shared-ux/button/exit_full_screen/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -124,8 +128,12 @@
             "type": "Function",
             "tags": [],
             "label": "onExit",
-            "description": ["Optional handler to call when one exits full-screen mode."],
-            "signature": ["(() => void) | undefined"],
+            "description": [
+              "Optional handler to call when one exits full-screen mode."
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "packages/shared-ux/button/exit_full_screen/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -138,8 +146,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "toggleChrome",
-            "description": ["Should the button toggle the Chrome visibility?"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Should the button toggle the Chrome visibility?"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/shared-ux/button/exit_full_screen/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -159,7 +171,9 @@
         "description": [
           "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component as well as any dependencies."
         ],
-        "signature": ["KibanaDependencies"],
+        "signature": [
+          "KibanaDependencies"
+        ],
         "path": "packages/shared-ux/button/exit_full_screen/types.ts",
         "deprecated": false,
         "trackAdoption": false,

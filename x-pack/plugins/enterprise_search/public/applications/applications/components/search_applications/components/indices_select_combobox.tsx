@@ -7,12 +7,12 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiComboBoxProps,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,

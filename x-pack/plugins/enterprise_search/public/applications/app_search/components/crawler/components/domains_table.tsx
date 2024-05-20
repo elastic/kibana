@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiBasicTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

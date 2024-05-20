@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ES_FIELD_TYPES } from '../../../../types';
 import {
-  CalculateHistogramIntervalParams,
   calculateHistogramInterval,
+  CalculateHistogramIntervalParams,
 } from './histogram_calculate_interval';
+import { ES_FIELD_TYPES } from '../../../../types';
 
 describe('calculateHistogramInterval', () => {
   describe('auto calculating mode', () => {

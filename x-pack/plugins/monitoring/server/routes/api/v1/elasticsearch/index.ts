@@ -11,8 +11,8 @@ import { ccrShardRoute } from './ccr_shard';
 import { esIndexRoute } from './index_detail';
 import { esIndicesRoute } from './indices';
 import { mlJobRoute } from './ml_jobs';
-import { esNodeRoute } from './node_detail';
 import { esNodesRoute } from './nodes';
+import { esNodeRoute } from './node_detail';
 import { esOverviewRoute } from './overview';
 
 export function registerV1ElasticsearchRoutes(server: MonitoringCore) {

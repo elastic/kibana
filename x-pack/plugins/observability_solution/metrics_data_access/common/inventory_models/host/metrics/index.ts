@@ -1,6 +1,3 @@
-import { InventoryMetricsWithCharts } from '../../types';
-import type { HostCharts } from './charts';
-import type { HostFormulas } from './formulas';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import type { HostFormulas } from './formulas';
  */
 import { snapshot } from './snapshot';
 import { tsvb } from './tsvb';
+import { InventoryMetricsWithCharts } from '../../types';
+import type { HostFormulas } from './formulas';
+import type { HostCharts } from './charts';
 
 // not sure why this is the only model with "count"
 const { count, ...exposedHostSnapshotMetrics } = snapshot;

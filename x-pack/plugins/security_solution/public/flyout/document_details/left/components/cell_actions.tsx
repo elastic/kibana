@@ -7,15 +7,15 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { useLeftPanelContext } from '../context';
+import { getSourcererScopeId } from '../../../../helpers';
+import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { SecurityCellActionType } from '../../../../app/actions/constants';
 import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
-import { getSourcererScopeId } from '../../../../helpers';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
-import { useLeftPanelContext } from '../context';
 
 interface CellActionsProps {
   /**

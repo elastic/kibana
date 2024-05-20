@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { type Aggregation, EVENT_RATE_FIELD_ID, type Field } from '@kbn/ml-anomaly-utils';
+import { type Field, type Aggregation, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
+import type { IndexPatternTitle } from '../../../../../../../common/types/kibana';
 import type {
+  Job,
   Datafeed,
   Detector,
-  Job,
 } from '../../../../../../../common/types/anomaly_detection_jobs';
-import type { IndexPatternTitle } from '../../../../../../../common/types/kibana';
 import { splitIndexPatternNames } from '../../../../../../../common/util/job_utils';
 
 export function createEmptyJob(): Job {

@@ -6,10 +6,10 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { actionsClientMock } from '../actions_client/actions_client.mock';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
+import { actionsClientMock } from '../actions_client/actions_client.mock';
+import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 const actionsClient = actionsClientMock.create();

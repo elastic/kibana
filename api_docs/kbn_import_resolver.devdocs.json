@@ -59,7 +59,9 @@
                 "tags": [],
                 "label": "repoRoot",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -72,7 +74,10 @@
                 "tags": [],
                 "label": "packages",
                 "description": [],
-                "signature": ["Package", "[]"],
+                "signature": [
+                  "Package",
+                  "[]"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -88,7 +93,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -100,7 +107,9 @@
                 "tags": [],
                 "label": "cwd",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -113,7 +122,11 @@
                 "tags": [],
                 "label": "pkgsById",
                 "description": [],
-                "signature": ["Map<string, ", "Package", ">"],
+                "signature": [
+                  "Map<string, ",
+                  "Package",
+                  ">"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -129,7 +142,9 @@
             "tags": [],
             "label": "getPackageIdForPath",
             "description": [],
-            "signature": ["(path: string) => string | null"],
+            "signature": [
+              "(path: string) => string | null"
+            ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -141,7 +156,9 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -157,7 +174,11 @@
             "tags": [],
             "label": "getPackageManifestForPath",
             "description": [],
-            "signature": ["(path: string) => ", "KibanaPackageManifest", " | undefined"],
+            "signature": [
+              "(path: string) => ",
+              "KibanaPackageManifest",
+              " | undefined"
+            ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -169,7 +190,9 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -185,7 +208,9 @@
             "tags": [],
             "label": "getAbsolutePackageDir",
             "description": [],
-            "signature": ["(pkgId: string) => string | null"],
+            "signature": [
+              "(pkgId: string) => string | null"
+            ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -197,7 +222,9 @@
                 "tags": [],
                 "label": "pkgId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -213,7 +240,9 @@
             "tags": [],
             "label": "isRepoPkg",
             "description": [],
-            "signature": ["(pkgId: string) => boolean"],
+            "signature": [
+              "(pkgId: string) => boolean"
+            ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -225,7 +254,9 @@
                 "tags": [],
                 "label": "pkgId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -241,7 +272,11 @@
             "tags": [],
             "label": "getPkgManifest",
             "description": [],
-            "signature": ["(pkgId: string) => ", "KibanaPackageManifest", " | undefined"],
+            "signature": [
+              "(pkgId: string) => ",
+              "KibanaPackageManifest",
+              " | undefined"
+            ],
             "path": "packages/kbn-import-resolver/src/import_resolver.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -253,7 +288,9 @@
                 "tags": [],
                 "label": "pkgId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -268,7 +305,9 @@
             "type": "Function",
             "tags": [],
             "label": "resolve",
-            "description": ["\nResolve an import request from a file in the given dirname"],
+            "description": [
+              "\nResolve an import request from a file in the given dirname"
+            ],
             "signature": [
               "(req: string, dirname: string) => ",
               {
@@ -291,7 +330,9 @@
                 "tags": [],
                 "label": "req",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -304,7 +345,9 @@
                 "tags": [],
                 "label": "dirname",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-import-resolver/src/import_resolver.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -325,7 +368,9 @@
         "tags": [],
         "label": "getPackageRelativeImportReq",
         "description": [],
-        "signature": ["(options: PackageRelativeImportReqOptions) => string"],
+        "signature": [
+          "(options: PackageRelativeImportReqOptions) => string"
+        ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -337,7 +382,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["PackageRelativeImportReqOptions"],
+            "signature": [
+              "PackageRelativeImportReqOptions"
+            ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -354,7 +401,9 @@
         "tags": [],
         "label": "getRelativeImportReq",
         "description": [],
-        "signature": ["(options: RelativeImportReqOptions) => string"],
+        "signature": [
+          "(options: RelativeImportReqOptions) => string"
+        ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -366,7 +415,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["RelativeImportReqOptions"],
+            "signature": [
+              "RelativeImportReqOptions"
+            ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -405,7 +456,9 @@
             "tags": [],
             "label": "req",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -439,7 +492,9 @@
             "tags": [],
             "label": "original",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -452,7 +507,9 @@
             "tags": [],
             "label": "sourceExt",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -484,7 +541,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"built-in\""],
+            "signature": [
+              "\"built-in\""
+            ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -512,7 +571,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"file\""],
+            "signature": [
+              "\"file\""
+            ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -535,7 +596,9 @@
             "tags": [],
             "label": "pkgId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -547,7 +610,9 @@
             "tags": [],
             "label": "nodeModule",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -559,7 +624,9 @@
             "tags": [],
             "label": "prefix",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -571,7 +638,9 @@
             "tags": [],
             "label": "postfix",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -599,7 +668,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"ignore\""],
+            "signature": [
+              "\"ignore\""
+            ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -627,7 +698,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"optional-and-missing\""],
+            "signature": [
+              "\"optional-and-missing\""
+            ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -655,7 +728,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"@types\""],
+            "signature": [
+              "\"@types\""
+            ],
             "path": "packages/kbn-import-resolver/src/resolve_result.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -684,7 +759,9 @@
         "tags": [],
         "label": "ImportType",
         "description": [],
-        "signature": ["\"esm\" | \"require\" | \"require-resolve\" | \"jest\""],
+        "signature": [
+          "\"esm\" | \"require\" | \"require-resolve\" | \"jest\""
+        ],
         "path": "packages/kbn-import-resolver/src/helpers/import_req.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -696,7 +773,9 @@
         "type": "Type",
         "tags": [],
         "label": "ResolveResult",
-        "description": ["\nPossible resolve result types"],
+        "description": [
+          "\nPossible resolve result types"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/import-resolver",

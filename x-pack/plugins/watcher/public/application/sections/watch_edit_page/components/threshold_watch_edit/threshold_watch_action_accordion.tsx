@@ -5,49 +5,49 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import React, { Fragment, useContext, useState } from 'react';
+import { css } from '@emotion/react';
 
 import {
   EuiAccordion,
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
-  euiCanAnimate,
+  EuiForm,
+  EuiCallOut,
+  EuiLink,
+  EuiText,
+  EuiSpacer,
   useEuiTheme,
+  euiCanAnimate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Action } from '../../../../models/action';
-import { ExecuteDetails } from '../../../../models/execute_details';
-import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
 import { WatchHistoryItem } from '../../../../models/watch_history_item';
+import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
+import { ExecuteDetails } from '../../../../models/execute_details';
 
-import { ACTION_MODES, ACTION_TYPES } from '../../../../../../common/constants';
 import { ActionType } from '../../../../../../common/types/action_types';
+import { ACTION_TYPES, ACTION_MODES } from '../../../../../../common/constants';
 import { WatchContext } from '../../watch_context';
 
-import { useAppContext } from '../../../../app_context';
-import { SectionError } from '../../../../components';
-import { executeWatch } from '../../../../lib/api';
 import {
-  EmailActionFields,
-  IndexActionFields,
-  JiraActionFields,
-  LoggingActionFields,
-  PagerDutyActionFields,
-  SlackActionFields,
   WebhookActionFields,
+  LoggingActionFields,
+  IndexActionFields,
+  SlackActionFields,
+  EmailActionFields,
+  PagerDutyActionFields,
+  JiraActionFields,
 } from './action_fields';
+import { executeWatch } from '../../../../lib/api';
+import { SectionError } from '../../../../components';
+import { useAppContext } from '../../../../app_context';
 
 const actionFieldsComponentMap = {
   [ACTION_TYPES.LOGGING]: LoggingActionFields,

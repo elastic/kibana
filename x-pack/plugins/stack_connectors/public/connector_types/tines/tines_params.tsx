@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiCallOut,
@@ -20,21 +21,20 @@ import {
 import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   JsonEditorWithMessageVariables,
-  useKibana,
   useSubAction,
+  useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SUB_ACTION } from '../../../common/tines/constants';
 import type {
-  TinesStoriesActionParams,
-  TinesStoriesActionResponse,
   TinesStoryObject,
   TinesWebhookObject,
   TinesWebhooksActionParams,
+  TinesStoriesActionResponse,
   TinesWebhooksActionResponse,
+  TinesStoriesActionParams,
 } from '../../../common/tines/types';
-import * as i18n from './translations';
 import type { TinesExecuteActionParams, TinesExecuteSubActionParams } from './types';
+import * as i18n from './translations';
 
 type StoryOption = EuiComboBoxOptionOption<TinesStoryObject>;
 type WebhookOption = EuiComboBoxOptionOption<TinesWebhookObject>;
@@ -259,8 +259,8 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
               webhookUrl
                 ? i18n.DISABLED_BY_WEBHOOK_URL_PLACEHOLDER
                 : selectedStoryOption
-                  ? i18n.WEBHOOK_PLACEHOLDER
-                  : i18n.WEBHOOK_DISABLED_PLACEHOLDER
+                ? i18n.WEBHOOK_PLACEHOLDER
+                : i18n.WEBHOOK_DISABLED_PLACEHOLDER
             }
             singleSelection={{ asPlainText: true }}
             options={webhooksOptions}

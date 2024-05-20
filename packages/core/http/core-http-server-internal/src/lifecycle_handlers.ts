@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
 import type {
-  KibanaRequest,
   OnPostAuthHandler,
   OnPreResponseHandler,
   OnPreResponseInfo,
+  KibanaRequest,
 } from '@kbn/core-http-server';
+import { isSafeMethod } from '@kbn/core-http-router-server-internal';
 import { Logger } from '@kbn/logging';
+import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 import { HttpConfig } from './http_config';
 
 const VERSION_HEADER = 'kbn-version';

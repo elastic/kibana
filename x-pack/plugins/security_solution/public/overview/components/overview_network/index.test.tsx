@@ -8,12 +8,12 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { render } from '@testing-library/react';
+import { TestProviders } from '../../../common/mock';
 import { OverviewNetwork } from '.';
+import { useNetworkOverview } from '../../containers/overview_network';
 import { SecurityPageName } from '../../../app/types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
-import { TestProviders } from '../../../common/mock';
-import { useNetworkOverview } from '../../containers/overview_network';
+import { render } from '@testing-library/react';
 
 jest.mock('../../../common/components/link_to');
 const mockNavigateToApp = jest.fn();

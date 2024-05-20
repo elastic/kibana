@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { lazy } from 'react';
 import { SUB_ACTION } from '../../../common/openai/constants';
 import { OPENAI_CONNECTOR_ID, OPENAI_TITLE } from '../../../common/openai/constants';
 import { ActionParams, OpenAIConnector } from './types';

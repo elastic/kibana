@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type {
   MappingDynamicMapping,
   Metadata,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
   createOrUpdateIndexTemplate,
 } from '@kbn/alerting-plugin/server';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import { getRiskScoreLatestIndex } from '../../../../common/entity_analytics/risk_engine';
-import { createDataStream } from '../utils/create_datastream';
-import { createTransform, getLatestTransformId } from '../utils/transforms';
 import {
   getIndexPatternDataStream,
   getTransformOptions,
@@ -28,14 +25,17 @@ import {
   riskScoreFieldMap,
   totalFieldsLimit,
 } from './configurations';
-import { getRiskInputsIndex } from './get_risk_inputs_index';
+import { createDataStream } from '../utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
+import { getRiskScoreLatestIndex } from '../../../../common/entity_analytics/risk_engine';
+import { createTransform, getLatestTransformId } from '../utils/transforms';
+import { getRiskInputsIndex } from './get_risk_inputs_index';
 
-import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
 import { RiskScoreAuditActions } from './audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;

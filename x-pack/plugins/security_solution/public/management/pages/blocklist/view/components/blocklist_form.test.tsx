@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { ENDPOINT_BLOCKLISTS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { licenseService } from '../../../../../common/hooks/use_license';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import type { BlocklistEntry } from './blocklist_form';
+import { BlockListForm } from './blocklist_form';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
 } from '../../../../components/artifact_list_page';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { ERRORS } from '../../translations';
-import type { BlocklistEntry } from './blocklist_form';
-import { BlockListForm } from './blocklist_form';
+import { licenseService } from '../../../../../common/hooks/use_license';
+import type { PolicyData } from '../../../../../../common/endpoint/types';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {

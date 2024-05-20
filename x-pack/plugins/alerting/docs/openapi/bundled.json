@@ -37,7 +37,9 @@
         "summary": "Creates a rule with a randomly generated rule identifier.",
         "operationId": "createRule",
         "description": "To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -129,7 +131,9 @@
         "summary": "Retrieves a rule by its identifier.",
         "operationId": "getRule",
         "description": "You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To get rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/rule_id"
@@ -180,7 +184,9 @@
         "summary": "Deletes a rule.",
         "operationId": "deleteRule",
         "description": "To delete a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're deleting. For example, the **Management** > **Stack Rules** feature, **Analytics** > **Discover** or **Machine Learning** features, **Observability**, or **Security** features. WARNING: After you delete a rule, you cannot recover it. If the API key that is used by the rule was created automatically, it is deleted.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -222,7 +228,9 @@
         "summary": "Creates a rule with a specific rule identifier.",
         "operationId": "createRuleId",
         "description": "To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -237,7 +245,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"]
+              "examples": [
+                "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+              ]
             }
           }
         ],
@@ -316,7 +326,9 @@
         "summary": "Updates the attributes for a rule.",
         "operationId": "updateRule",
         "description": "To update a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're updating. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs. NOTE: If the API key has different privileges than the key that created or most recently updated the rule, the rule behavior might change. Though some properties are optional, when you update the rule the existing property values are overwritten with default values. Therefore, it is recommended to explicitly set all property values.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -387,7 +399,9 @@
         "summary": "Disables a rule.",
         "operationId": "disableRule",
         "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -431,7 +445,9 @@
         "summary": "Enables a rule.",
         "operationId": "enableRule",
         "description": "To enable a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. This API supports both key- and token-based authentication. To use key-based authentication, create an API key in Kibana and use it in the header of the API call. To use token-based authentication, provide a username and password; an API key that matches the current privileges of the user is created automatically. In both cases, the API key is subsequently used for authorization when the rule runs.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -475,7 +491,9 @@
         "summary": "Retrieves information about rules.",
         "operationId": "findRules",
         "description": "You must have `read` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rules you're seeking. For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features. To find rules associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -487,7 +505,9 @@
             "schema": {
               "type": "string",
               "default": "OR",
-              "examples": ["AND"]
+              "examples": [
+                "AND"
+              ]
             }
           },
           {
@@ -532,7 +552,9 @@
             "schema": {
               "type": "integer",
               "default": 1,
-              "examples": [1]
+              "examples": [
+                1
+              ]
             }
           },
           {
@@ -542,7 +564,9 @@
             "schema": {
               "type": "integer",
               "default": 20,
-              "examples": [20]
+              "examples": [
+                20
+              ]
             }
           },
           {
@@ -551,7 +575,9 @@
             "description": "An Elasticsearch simple_query_string query that filters the objects in the response.",
             "schema": {
               "type": "string",
-              "examples": ["threshold +-test*"]
+              "examples": [
+                "threshold +-test*"
+              ]
             }
           },
           {
@@ -562,7 +588,9 @@
               "oneOf": [
                 {
                   "type": "string",
-                  "examples": ["name"]
+                  "examples": [
+                    "name"
+                  ]
                 },
                 {
                   "type": "array",
@@ -587,9 +615,14 @@
             "description": "Determines the sort order.",
             "schema": {
               "type": "string",
-              "enum": ["asc", "desc"],
+              "enum": [
+                "asc",
+                "desc"
+              ],
               "default": "desc",
-              "examples": ["asc"]
+              "examples": [
+                "asc"
+              ]
             }
           }
         ],
@@ -647,7 +680,9 @@
         "summary": "Retrieves the health status of the alerting framework.",
         "operationId": "getAlertingHealth",
         "description": "You must have `read` privileges for the **Management > Stack Rules** feature or for at least one of the **Analytics > Discover**, **Analytics > Machine Learning**, **Observability**, or **Security** features.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -671,13 +706,21 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": ["ok"],
-                              "enum": ["error", "ok", "warn"]
+                              "examples": [
+                                "ok"
+                              ],
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
                             },
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": ["2023-01-13T01:28:00.280Z"]
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -687,13 +730,21 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": ["ok"],
-                              "enum": ["error", "ok", "warn"]
+                              "examples": [
+                                "ok"
+                              ],
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
                             },
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": ["2023-01-13T01:28:00.280Z"]
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -703,13 +754,21 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": ["ok"],
-                              "enum": ["error", "ok", "warn"]
+                              "examples": [
+                                "ok"
+                              ],
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
                             },
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": ["2023-01-13T01:28:00.280Z"]
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         }
@@ -718,12 +777,16 @@
                     "has_permanent_encryption_key": {
                       "type": "boolean",
                       "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
-                      "examples": [true]
+                      "examples": [
+                        true
+                      ]
                     },
                     "is_sufficiently_secure": {
                       "type": "boolean",
                       "description": "If `false`, security is enabled but TLS is not.",
-                      "examples": [true]
+                      "examples": [
+                        true
+                      ]
                     }
                   }
                 },
@@ -753,7 +816,9 @@
         "summary": "Retrieves a list of rule types.",
         "operationId": "getRuleTypes",
         "description": "If you have `read` privileges for one or more Kibana features, the API response contains information about the appropriate rule types. For example, there are rule types associated with the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, and **Security** features. To get rule types associated with the **Stack Monitoring** feature, use the `monitoring_user` built-in role.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -857,7 +922,12 @@
                           "dynamic": {
                             "type": "string",
                             "description": "Indicates whether new fields are added dynamically.",
-                            "enum": ["false", "runtime", "strict", "true"]
+                            "enum": [
+                              "false",
+                              "runtime",
+                              "strict",
+                              "true"
+                            ]
                           },
                           "isSpaceAware": {
                             "type": "boolean",
@@ -1024,7 +1094,11 @@
                       "category": {
                         "type": "string",
                         "description": "The rule category, which is used by features such as category-specific maintenance windows.",
-                        "enum": ["management", "observability", "securitySolution"]
+                        "enum": [
+                          "management",
+                          "observability",
+                          "securitySolution"
+                        ]
                       },
                       "default_action_group_id": {
                         "description": "The default identifier for the rule type group.",
@@ -1056,7 +1130,9 @@
                       "minimum_license_required": {
                         "description": "The subscriptions required to use the rule type.",
                         "type": "string",
-                        "examples": ["basic"]
+                        "examples": [
+                          "basic"
+                        ]
                       },
                       "name": {
                         "description": "The descriptive name of the rule type.",
@@ -1065,7 +1141,9 @@
                       "producer": {
                         "description": "An identifier for the application that produces this rule type.",
                         "type": "string",
-                        "examples": ["stackAlerts"]
+                        "examples": [
+                          "stackAlerts"
+                        ]
                       },
                       "recovery_action_group": {
                         "description": "An action group to use when an alert goes from an active state to an inactive one.",
@@ -1081,7 +1159,9 @@
                       },
                       "rule_task_timeout": {
                         "type": "string",
-                        "examples": ["5m"]
+                        "examples": [
+                          "5m"
+                        ]
                       }
                     }
                   }
@@ -1112,7 +1192,9 @@
         "summary": "Mutes all alerts.",
         "operationId": "muteAllAlerts",
         "description": "This API snoozes the notifications for the rule indefinitely. The rule checks continue to occur but alerts will not trigger any actions. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1146,7 +1228,9 @@
         "summary": "Unmutes all alerts.",
         "operationId": "unmuteAllAlerts",
         "description": "If the rule has its notifications snoozed indefinitely, this API cancels the snooze. You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1180,7 +1264,9 @@
         "summary": "Updates the API key for a rule.",
         "operationId": "updateRuleAPIKey",
         "description": "The new API key has the credentials of the user that submits the request.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1214,7 +1300,9 @@
         "summary": "Mutes an alert.",
         "operationId": "muteAlert",
         "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1251,7 +1339,9 @@
         "summary": "Unmutes an alert.",
         "operationId": "unmuteAlert",
         "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1289,7 +1379,9 @@
         "operationId": "legaryDeleteAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the delete rule API instead. WARNING: After you delete an alert, you cannot recover it.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1304,7 +1396,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["41893910-6bca-11eb-9e0d-85d233e3ee35"]
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1329,7 +1423,9 @@
         "operationId": "legacyGetAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get rule API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -1341,7 +1437,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["41893910-6bca-11eb-9e0d-85d233e3ee35"]
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1373,7 +1471,9 @@
         "operationId": "legacyCreateAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the create rule API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1385,7 +1485,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["41893910-6bca-11eb-9e0d-85d233e3ee35"]
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           },
           {
@@ -1399,13 +1501,25 @@
               "schema": {
                 "title": "Legacy create alert request properties",
                 "type": "object",
-                "required": ["alertTypeId", "consumer", "name", "notifyWhen", "params", "schedule"],
+                "required": [
+                  "alertTypeId",
+                  "consumer",
+                  "name",
+                  "notifyWhen",
+                  "params",
+                  "schedule"
+                ],
                 "properties": {
                   "actions": {
                     "type": "array",
                     "items": {
                       "type": "object",
-                      "required": ["actionTypeId", "group", "id", "params"],
+                      "required": [
+                        "actionTypeId",
+                        "group",
+                        "id",
+                        "params"
+                      ],
                       "properties": {
                         "actionTypeId": {
                           "type": "string",
@@ -1445,7 +1559,11 @@
                   "notifyWhen": {
                     "type": "string",
                     "description": "The condition for throttling the notification.",
-                    "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"]
+                    "enum": [
+                      "onActionGroupChange",
+                      "onActiveAlert",
+                      "onThrottleInterval"
+                    ]
                   },
                   "params": {
                     "type": "object",
@@ -1458,7 +1576,9 @@
                       "interval": {
                         "type": "string",
                         "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
-                        "examples": ["10s"]
+                        "examples": [
+                          "10s"
+                        ]
                       }
                     }
                   },
@@ -1506,7 +1626,9 @@
         "operationId": "legacyUpdateAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the update rule API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1521,7 +1643,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["41893910-6bca-11eb-9e0d-85d233e3ee35"]
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1532,13 +1656,23 @@
               "schema": {
                 "title": "Legacy update alert request properties",
                 "type": "object",
-                "required": ["name", "notifyWhen", "params", "schedule"],
+                "required": [
+                  "name",
+                  "notifyWhen",
+                  "params",
+                  "schedule"
+                ],
                 "properties": {
                   "actions": {
                     "type": "array",
                     "items": {
                       "type": "object",
-                      "required": ["actionTypeId", "group", "id", "params"],
+                      "required": [
+                        "actionTypeId",
+                        "group",
+                        "id",
+                        "params"
+                      ],
                       "properties": {
                         "actionTypeId": {
                           "type": "string",
@@ -1566,7 +1700,11 @@
                   "notifyWhen": {
                     "type": "string",
                     "description": "The condition for throttling the notification.",
-                    "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"]
+                    "enum": [
+                      "onActionGroupChange",
+                      "onActiveAlert",
+                      "onThrottleInterval"
+                    ]
                   },
                   "params": {
                     "type": "object",
@@ -1579,7 +1717,9 @@
                       "interval": {
                         "type": "string",
                         "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
-                        "examples": ["1d"]
+                        "examples": [
+                          "1d"
+                        ]
                       }
                     }
                   },
@@ -1629,7 +1769,9 @@
         "operationId": "legacyDisableAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the disable rule API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1644,7 +1786,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["41893910-6bca-11eb-9e0d-85d233e3ee35"]
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1671,7 +1815,9 @@
         "operationId": "legacyEnableAlert",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the enable rule API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1686,7 +1832,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["41893910-6bca-11eb-9e0d-85d233e3ee35"]
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1713,7 +1861,9 @@
         "operationId": "legacyMuteAllAlertInstances",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the mute all alerts API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1728,7 +1878,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["41893910-6bca-11eb-9e0d-85d233e3ee35"]
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1755,7 +1907,9 @@
         "operationId": "legacyUnmuteAllAlertInstances",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the unmute all alerts API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1770,7 +1924,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["41893910-6bca-11eb-9e0d-85d233e3ee35"]
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           }
         ],
@@ -1797,7 +1953,9 @@
         "operationId": "legacyFindAlerts",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the find rules API instead. NOTE: Alert `params` are stored as a flattened field type and analyzed as keywords. As alerts change in Kibana, the results on each page of the response also change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.\n",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -1809,7 +1967,9 @@
             "schema": {
               "type": "string",
               "default": "OR",
-              "examples": ["OR"]
+              "examples": [
+                "OR"
+              ]
             }
           },
           {
@@ -1854,7 +2014,9 @@
             "schema": {
               "type": "integer",
               "default": 1,
-              "examples": [1]
+              "examples": [
+                1
+              ]
             }
           },
           {
@@ -1864,7 +2026,9 @@
             "schema": {
               "type": "integer",
               "default": 20,
-              "examples": [20]
+              "examples": [
+                20
+              ]
             }
           },
           {
@@ -1907,9 +2071,14 @@
             "description": "Determines the sort order.",
             "schema": {
               "type": "string",
-              "enum": ["asc", "desc"],
+              "enum": [
+                "asc",
+                "desc"
+              ],
               "default": "desc",
-              "examples": ["asc"]
+              "examples": [
+                "asc"
+              ]
             }
           }
         ],
@@ -1960,7 +2129,9 @@
         "operationId": "legacyGetAlertingHealth",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get alerting framework health API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -1984,13 +2155,21 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": ["ok"],
-                              "enum": ["error", "ok", "warn"]
+                              "examples": [
+                                "ok"
+                              ],
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
                             },
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": ["2023-01-13T01:28:00.280Z"]
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -2000,13 +2179,21 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": ["ok"],
-                              "enum": ["error", "ok", "warn"]
+                              "examples": [
+                                "ok"
+                              ],
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
                             },
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": ["2023-01-13T01:28:00.280Z"]
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         },
@@ -2016,13 +2203,21 @@
                           "properties": {
                             "status": {
                               "type": "string",
-                              "examples": ["ok"],
-                              "enum": ["error", "ok", "warn"]
+                              "examples": [
+                                "ok"
+                              ],
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
                             },
                             "timestamp": {
                               "type": "string",
                               "format": "date-time",
-                              "examples": ["2023-01-13T01:28:00.280Z"]
+                              "examples": [
+                                "2023-01-13T01:28:00.280Z"
+                              ]
                             }
                           }
                         }
@@ -2031,12 +2226,16 @@
                     "hasPermanentEncryptionKey": {
                       "type": "boolean",
                       "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
-                      "examples": [true]
+                      "examples": [
+                        true
+                      ]
                     },
                     "isSufficientlySecure": {
                       "type": "boolean",
                       "description": "If `false`, security is enabled but TLS is not.",
-                      "examples": [true]
+                      "examples": [
+                        true
+                      ]
                     }
                   }
                 }
@@ -2062,7 +2261,9 @@
         "operationId": "legacyGetAlertTypes",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get rule types API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -2210,7 +2411,9 @@
         "operationId": "legacyMuteAlertInstance",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the mute alert API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -2225,7 +2428,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["41893910-6bca-11eb-9e0d-85d233e3ee35"]
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           },
           {
@@ -2235,7 +2440,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"]
+              "examples": [
+                "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+              ]
             }
           }
         ],
@@ -2262,7 +2469,9 @@
         "operationId": "legacyUnmuteAlertInstance",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the unmute alert API instead.",
-        "tags": ["alerting"],
+        "tags": [
+          "alerting"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -2277,7 +2486,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["41893910-6bca-11eb-9e0d-85d233e3ee35"]
+              "examples": [
+                "41893910-6bca-11eb-9e0d-85d233e3ee35"
+              ]
             }
           },
           {
@@ -2287,7 +2498,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"]
+              "examples": [
+                "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+              ]
             }
           }
         ],
@@ -2339,7 +2552,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "examples": ["default"]
+          "examples": [
+            "default"
+          ]
         }
       },
       "rule_id": {
@@ -2349,7 +2564,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "examples": ["ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"]
+          "examples": [
+            "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          ]
         }
       },
       "alert_id": {
@@ -2359,7 +2576,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "examples": ["ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"]
+          "examples": [
+            "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+          ]
         }
       }
     },
@@ -2368,7 +2587,13 @@
         "title": "Create anomaly detection rule request",
         "description": "A rule that checks if the anomaly detection job results contain anomalies that match the rule conditions. \n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2396,7 +2621,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["xpack.ml.anomaly_detection_alert"]
+            "enum": [
+              "xpack.ml.anomaly_detection_alert"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2413,7 +2640,13 @@
         "title": "Create anomaly detection jobs health rule request",
         "description": "An rule that monitors job health and alerts if an operational issue occurred that may prevent the job from detecting anomalies.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2441,7 +2674,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["xpack.ml.anomaly_detection_jobs_health"]
+            "enum": [
+              "xpack.ml.anomaly_detection_jobs_health"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2458,7 +2693,13 @@
         "title": "Create APM anomaly rule rule request",
         "description": "A rule that detects when either the latency, throughput, or failed transaction rate of a service is anomalous.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2484,7 +2725,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["apm.anomaly"]
+            "enum": [
+              "apm.anomaly"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2501,7 +2744,13 @@
         "title": "Create APM error count rule request",
         "description": "A rule that detects when the number of errors in a service exceeds a defined threshold.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2527,7 +2776,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["apm.error_rate"]
+            "enum": [
+              "apm.error_rate"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2544,7 +2795,13 @@
         "title": "Create latency threshold rule request",
         "description": "A rule that detects when the latency of a specific transaction type in a service exceeds a threshold.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2570,7 +2827,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["apm.transaction_duration"]
+            "enum": [
+              "apm.transaction_duration"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2587,7 +2846,13 @@
         "title": "Create APM transaction error rate rule request",
         "description": "A rule that sends notifications when the rate of transaction errors in a service exceeds a threshold.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2613,7 +2878,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["apm.transaction_error_rate"]
+            "enum": [
+              "apm.transaction_error_rate"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2630,7 +2897,13 @@
         "title": "Create Elasticsearch query rule request",
         "description": "A rule that runs a user-configured query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.  \n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2656,7 +2929,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": [".es-query"]
+            "enum": [
+              ".es-query"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2673,7 +2948,13 @@
         "title": "Create tracking containment rule request",
         "description": "A rule that runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index. In the event that an entity is contained within a boundary, an alert may be generated.  \n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2701,7 +2982,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": [".geo-containment"]
+            "enum": [
+              ".geo-containment"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2718,7 +3001,13 @@
         "title": "Create index threshold rule request",
         "description": "A rule that runs an Elasticsearch query, aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2744,7 +3033,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": [".index-threshold"]
+            "enum": [
+              ".index-threshold"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2761,7 +3052,13 @@
         "title": "Create infra inventory rule request",
         "description": "A rule that sends notifications when a metric has reached or exceeded a value for a specific resource or a group of resources within your infrastructure.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2787,7 +3084,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["metrics.alert.inventory.threshold"]
+            "enum": [
+              "metrics.alert.inventory.threshold"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2803,7 +3102,13 @@
       "create_infra_metric_anomaly_rule_request": {
         "title": "Create infrastructure anomaly rule request",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2831,7 +3136,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["metrics.alert.anomaly"]
+            "enum": [
+              "metrics.alert.anomaly"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2848,7 +3155,13 @@
         "title": "Create infra metric threshold rule request",
         "description": "A rule that sends notifications when a metric has reached or exceeded a value for a specific time period.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2874,7 +3187,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["metrics.alert.threshold"]
+            "enum": [
+              "metrics.alert.threshold"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2891,7 +3206,13 @@
         "title": "Create JVM memory usage rule request",
         "description": "A rule that detects when a node reports high memory usage.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2916,7 +3237,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_jvm_memory_usage"]
+            "enum": [
+              "monitoring_alert_jvm_memory_usage"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2933,7 +3256,13 @@
         "title": "Create log threshold rule request",
         "description": "A rule that detects when a log aggregation exceeds a threshold.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -2959,7 +3288,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["logs.alert.document.count"]
+            "enum": [
+              "logs.alert.document.count"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -2976,7 +3307,13 @@
         "title": "Create CCR read exceptions rule request",
         "description": "A rule that detects cross-cluster replication (CCR) read exceptions.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3001,7 +3338,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_ccr_read_exceptions"]
+            "enum": [
+              "monitoring_ccr_read_exceptions"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3018,7 +3357,13 @@
         "title": "Create cluster health rule request",
         "description": "A rule that detects when the health of the cluster changes.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3043,7 +3388,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_cluster_health"]
+            "enum": [
+              "monitoring_alert_cluster_health"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3060,7 +3407,13 @@
         "title": "Create CPU usage rule request",
         "description": "A rule that detects when the CPU load for a node is consistently high.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3085,7 +3438,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_cpu_usage"]
+            "enum": [
+              "monitoring_alert_cpu_usage"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3102,7 +3457,13 @@
         "title": "Create disk usage rule request",
         "description": "A rule that detects when the disk usage for a node is consistently high.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3127,7 +3488,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_disk_usage"]
+            "enum": [
+              "monitoring_alert_disk_usage"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3144,7 +3507,13 @@
         "title": "Create Elasticsearch version mismatch rule request",
         "description": "A rule that detects when the cluster has multipe versions of Elasticsearch.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3169,7 +3538,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_elasticsearch_version_mismatch"]
+            "enum": [
+              "monitoring_alert_elasticsearch_version_mismatch"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3186,7 +3557,13 @@
         "title": "Create license expiration rule request",
         "description": "A rule that detects when the cluster license is about to expire.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3211,7 +3588,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_license_expiration"]
+            "enum": [
+              "monitoring_alert_license_expiration"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3228,7 +3607,13 @@
         "title": "Create Kibana version mismatch rule request",
         "description": "A rule that detects when the cluster has multiple versions of Kibana.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3253,7 +3638,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_kibana_version_mismatch"]
+            "enum": [
+              "monitoring_alert_kibana_version_mismatch"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3270,7 +3657,13 @@
         "title": "Create Logstash version mismatch rule request",
         "description": "A rule that detects when the cluster has multiple versions of Logstash.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3295,7 +3688,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_logstash_version_mismatch"]
+            "enum": [
+              "monitoring_alert_logstash_version_mismatch"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3312,7 +3707,13 @@
         "title": "Create missing monitoring data rule request",
         "description": "A rule that detects when monitoring data is missing.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3337,7 +3738,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_missing_monitoring_data"]
+            "enum": [
+              "monitoring_alert_missing_monitoring_data"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3354,7 +3757,13 @@
         "title": "Create nodes changed rule request",
         "description": "A rule that detects when nodes are added, removed, or restarted.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3379,7 +3788,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_nodes_changed"]
+            "enum": [
+              "monitoring_alert_nodes_changed"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3396,7 +3807,13 @@
         "title": "Create shard size rule request",
         "description": "A rule that detects when the average shard size is larger than a threshold.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3421,7 +3838,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_shard_size"]
+            "enum": [
+              "monitoring_shard_size"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3438,7 +3857,13 @@
         "title": "Create thread pool search rejections rule request",
         "description": "A rule that detects when the number of rejections in the thread pool exceeds a threshold.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3463,7 +3888,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_thread_pool_search_rejections"]
+            "enum": [
+              "monitoring_alert_thread_pool_search_rejections"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3480,7 +3907,13 @@
         "title": "Create thread pool write rejections rule request",
         "description": "A rule that detects when the number of rejections in the write thread pool exceeds a threshold.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3505,7 +3938,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["monitoring_alert_thread_pool_write_rejections"]
+            "enum": [
+              "monitoring_alert_thread_pool_write_rejections"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3522,7 +3957,13 @@
         "title": "Create event correlation rule request",
         "description": "A rule that uses Event Query Language (EQL) to match events, generate sequences, and stack data.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3547,7 +3988,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["siem.eqlRule"]
+            "enum": [
+              "siem.eqlRule"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3564,7 +4007,13 @@
         "title": "Create indicator match rule request",
         "description": "A rule that uses indicators from intelligence sources to detect matching events and alerts.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3589,7 +4038,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["siem.indicatorRule"]
+            "enum": [
+              "siem.indicatorRule"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3606,7 +4057,13 @@
         "title": "Create machine learning rule request",
         "description": "A rule that detects when a machine learning job discovers an anomaly above the defined threshold.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3631,7 +4088,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["siem.mlRule"]
+            "enum": [
+              "siem.mlRule"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3648,7 +4107,13 @@
         "title": "Create new terms rule request",
         "description": "A rule that finds documents with values that appear for the first time.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3673,7 +4138,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["siem.newTermsRule"]
+            "enum": [
+              "siem.newTermsRule"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3689,7 +4156,13 @@
       "create_siem_notifications_rule_request": {
         "title": "Create security solution notification (legacy) rule request",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3714,7 +4187,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["siem.notifications"]
+            "enum": [
+              "siem.notifications"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3731,7 +4206,13 @@
         "title": "Create custom query rule request",
         "description": "A rule that uses KQL or Lucene to detect issues across indices.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3756,7 +4237,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["siem.queryRule"]
+            "enum": [
+              "siem.queryRule"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3773,7 +4256,13 @@
         "title": "Create saved query rule request",
         "description": "A rule that searches the defined indices and creates an alert when a document matches the saved search.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3798,7 +4287,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["siem.savedQueryRule"]
+            "enum": [
+              "siem.savedQueryRule"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3815,7 +4306,13 @@
         "title": "Create threshold rule request",
         "description": "A rule that aggregates query results to detect when the number of matches exceeds a threshold.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3840,7 +4337,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["siem.thresholdRule"]
+            "enum": [
+              "siem.thresholdRule"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3857,7 +4356,13 @@
         "title": "Create slo burn rate rule request",
         "description": "A rule that detects when the burn rate is above a defined threshold for two different lookback periods. The two periods are a long period and a short period that is 1/12th of the long period. For each lookback period, the burn rate is computed as the error rate divided by the error budget. When the burn rates for both periods surpass the threshold, an alert occurs.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3883,7 +4388,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["slo.rules.burnRate"]
+            "enum": [
+              "slo.rules.burnRate"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3900,7 +4407,13 @@
         "title": "Create synthetics monitor status rule request",
         "description": "A rule that detects when a monitor is down or an availability threshold is breached.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3928,7 +4441,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["xpack.synthetics.alerts.monitorStatus"]
+            "enum": [
+              "xpack.synthetics.alerts.monitorStatus"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3945,7 +4460,13 @@
         "title": "Create synthetics uptime duration anomaly rule request",
         "description": "A rule that detects response durations for all of the geographic locations of each monitor. When a monitor runs for an unusual amount of time, at a particular time, an anomaly is recorded.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -3973,7 +4494,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["xpack.uptime.alerts.durationAnomaly"]
+            "enum": [
+              "xpack.uptime.alerts.durationAnomaly"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -3989,7 +4512,13 @@
       "create_synthetics_uptime_tls_rule_request": {
         "title": "Create synthetics uptime TLS rule request",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -4012,7 +4541,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["xpack.uptime.alerts.tls"]
+            "enum": [
+              "xpack.uptime.alerts.tls"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -4029,7 +4560,13 @@
         "title": "Create TLS certificate rule request",
         "description": "A rule that detects when a monitor has a TLS certificate expiring or when it exceeds an age limit.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -4057,7 +4594,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["xpack.uptime.alerts.tlsCertificate"]
+            "enum": [
+              "xpack.uptime.alerts.tlsCertificate"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -4074,7 +4613,13 @@
         "title": "Create transform health rule request",
         "description": "A rule that monitors transforms health and alerts if an operational issue occurred.\n",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -4102,7 +4647,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["transform_health"]
+            "enum": [
+              "transform_health"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -4119,7 +4666,13 @@
         "title": "Create uptime monitor status rule request",
         "description": "A rule that detects monitor errors and outages.",
         "type": "object",
-        "required": ["consumer", "name", "params", "rule_type_id", "schedule"],
+        "required": [
+          "consumer",
+          "name",
+          "params",
+          "rule_type_id",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -4145,7 +4698,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The ID of the rule type that you want to call when the rule is scheduled to run.",
-            "enum": ["xpack.uptime.alerts.monitorStatus"]
+            "enum": [
+              "xpack.uptime.alerts.monitorStatus"
+            ]
           },
           "schedule": {
             "$ref": "#/components/schemas/schedule"
@@ -4166,7 +4721,10 @@
             "type": "object",
             "properties": {
               "alias": {
-                "type": ["string", "null"]
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "controlledBy": {
                 "type": "string"
@@ -4214,21 +4772,39 @@
       "notify_when_action": {
         "type": "string",
         "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
-        "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"],
-        "examples": ["onActiveAlert"]
+        "enum": [
+          "onActionGroupChange",
+          "onActiveAlert",
+          "onThrottleInterval"
+        ],
+        "examples": [
+          "onActiveAlert"
+        ]
       },
       "throttle_action": {
-        "type": ["string", "null"],
+        "type": [
+          "string",
+          "null"
+        ],
         "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "default": null,
-        "examples": ["10m"]
+        "examples": [
+          "10m"
+        ]
       },
       "actions": {
-        "type": ["array", "null"],
+        "type": [
+          "array",
+          "null"
+        ],
         "default": [],
         "items": {
           "type": "object",
-          "required": ["group", "id", "params"],
+          "required": [
+            "group",
+            "id",
+            "params"
+          ],
           "description": "An action that runs under defined conditions.\n",
           "properties": {
             "alerts_filter": {
@@ -4261,7 +4837,15 @@
                       "items": {
                         "type": "integer"
                       },
-                      "examples": [[1, 2, 3, 4, 5]]
+                      "examples": [
+                        [
+                          1,
+                          2,
+                          3,
+                          4,
+                          5
+                        ]
+                      ]
                     },
                     "hours": {
                       "type": "object",
@@ -4270,19 +4854,25 @@
                         "end": {
                           "type": "string",
                           "description": "The end of the time frame in 24-hour notation (`hh:mm`).",
-                          "examples": ["17:00"]
+                          "examples": [
+                            "17:00"
+                          ]
                         },
                         "start": {
                           "type": "string",
                           "description": "The start of the time frame in 24-hour notation (`hh:mm`).",
-                          "examples": ["08:00"]
+                          "examples": [
+                            "08:00"
+                          ]
                         }
                       }
                     },
                     "timezone": {
                       "type": "string",
                       "description": "The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.\n",
-                      "examples": ["Europe/Madrid"]
+                      "examples": [
+                        "Europe/Madrid"
+                      ]
                     }
                   }
                 }
@@ -4291,13 +4881,18 @@
             "connector_type_id": {
               "type": "string",
               "description": "The type of connector. This property appears in responses but cannot be set in requests.",
-              "examples": [".server-log"],
+              "examples": [
+                ".server-log"
+              ],
               "readOnly": true
             },
             "frequency": {
               "type": "object",
               "description": "The properties that affect how often actions are generated. If the rule type supports setting `summary` to `true`, the action can be a summary of alerts at the specified notification interval. Otherwise, an action runs for each alert at the specified notification interval. NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.\n",
-              "required": ["notify_when", "summary"],
+              "required": [
+                "notify_when",
+                "summary"
+              ],
               "properties": {
                 "notify_when": {
                   "$ref": "#/components/schemas/notify_when_action"
@@ -4314,12 +4909,16 @@
             "group": {
               "type": "string",
               "description": "The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.\n",
-              "examples": ["default"]
+              "examples": [
+                "default"
+              ]
             },
             "id": {
               "type": "string",
               "description": "The identifier for the connector saved object.",
-              "examples": ["9dca3e00-74f5-11ed-9801-35303b735aef"]
+              "examples": [
+                "9dca3e00-74f5-11ed-9801-35303b735aef"
+              ]
             },
             "params": {
               "type": "object",
@@ -4329,7 +4928,9 @@
             "uuid": {
               "type": "string",
               "description": "A universally unique identifier (UUID) for the action.",
-              "examples": ["1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"]
+              "examples": [
+                "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
+              ]
             }
           }
         }
@@ -4337,7 +4938,9 @@
       "alert_delay": {
         "type": "object",
         "description": "Indicates that an alert occurs only when the specified number of consecutive runs met the rule conditions.",
-        "required": ["active"],
+        "required": [
+          "active"
+        ],
         "properties": {
           "active": {
             "type": "number",
@@ -4361,9 +4964,15 @@
       "notify_when": {
         "type": "string",
         "description": "Deprecated in 8.13.0. Use the `notify_when` property in the action `frequency` object instead. Indicates how often alerts generate actions. NOTE: You cannot specify `notify_when` at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
-        "enum": ["onActionGroupChange", "onActiveAlert", "onThrottleInterval"],
+        "enum": [
+          "onActionGroupChange",
+          "onActiveAlert",
+          "onThrottleInterval"
+        ],
         "deprecated": true,
-        "examples": ["onActiveAlert"]
+        "examples": [
+          "onActiveAlert"
+        ]
       },
       "schedule": {
         "type": "object",
@@ -4371,7 +4980,9 @@
         "properties": {
           "interval": {
             "type": "string",
-            "examples": ["1m"]
+            "examples": [
+              "1m"
+            ]
           }
         }
       },
@@ -4384,14 +4995,24 @@
         "default": []
       },
       "throttle": {
-        "type": ["string", "null"],
+        "type": [
+          "string",
+          "null"
+        ],
         "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "default": null,
         "deprecated": true,
-        "examples": ["10m"]
+        "examples": [
+          "10m"
+        ]
       },
       "params_property_apm_anomaly": {
-        "required": ["windowSize", "windowUnit", "environment", "anomalySeverityType"],
+        "required": [
+          "windowSize",
+          "windowUnit",
+          "environment",
+          "anomalySeverityType"
+        ],
         "properties": {
           "serviceName": {
             "type": "string",
@@ -4409,7 +5030,11 @@
           "windowUnit": {
             "type": "string",
             "description": "The window size unit",
-            "enum": ["m", "h", "d"]
+            "enum": [
+              "m",
+              "h",
+              "d"
+            ]
           },
           "environment": {
             "type": "string",
@@ -4418,12 +5043,22 @@
           "anomalySeverityType": {
             "type": "string",
             "description": "The anomaly threshold value",
-            "enum": ["critical", "major", "minor", "warning"]
+            "enum": [
+              "critical",
+              "major",
+              "minor",
+              "warning"
+            ]
           }
         }
       },
       "params_property_apm_error_count": {
-        "required": ["windowSize", "windowUnit", "threshold", "environment"],
+        "required": [
+          "windowSize",
+          "windowUnit",
+          "threshold",
+          "environment"
+        ],
         "properties": {
           "serviceName": {
             "type": "string",
@@ -4437,7 +5072,11 @@
           "windowUnit": {
             "type": "string",
             "description": "The window size unit",
-            "enum": ["m", "h", "d"]
+            "enum": [
+              "m",
+              "h",
+              "d"
+            ]
           },
           "environment": {
             "type": "string",
@@ -4449,7 +5088,10 @@
           },
           "groupBy": {
             "type": "array",
-            "default": ["service.name", "service.environment"],
+            "default": [
+              "service.name",
+              "service.environment"
+            ],
             "uniqueItems": true,
             "items": {
               "type": "string",
@@ -4467,7 +5109,13 @@
         }
       },
       "params_property_apm_transaction_duration": {
-        "required": ["windowSize", "windowUnit", "threshold", "environment", "aggregationType"],
+        "required": [
+          "windowSize",
+          "windowUnit",
+          "threshold",
+          "environment",
+          "aggregationType"
+        ],
         "properties": {
           "serviceName": {
             "type": "string",
@@ -4489,7 +5137,11 @@
           "windowUnit": {
             "type": "string",
             "description": "ç",
-            "enum": ["m", "h", "d"]
+            "enum": [
+              "m",
+              "h",
+              "d"
+            ]
           },
           "environment": {
             "type": "string"
@@ -4500,7 +5152,11 @@
           },
           "groupBy": {
             "type": "array",
-            "default": ["service.name", "service.environment", "transaction.type"],
+            "default": [
+              "service.name",
+              "service.environment",
+              "transaction.type"
+            ],
             "uniqueItems": true,
             "items": {
               "type": "string",
@@ -4514,12 +5170,21 @@
           },
           "aggregationType": {
             "type": "string",
-            "enum": ["avg", "95th", "99th"]
+            "enum": [
+              "avg",
+              "95th",
+              "99th"
+            ]
           }
         }
       },
       "params_property_apm_transaction_error_rate": {
-        "required": ["windowSize", "windowUnit", "threshold", "environment"],
+        "required": [
+          "windowSize",
+          "windowUnit",
+          "threshold",
+          "environment"
+        ],
         "properties": {
           "serviceName": {
             "type": "string",
@@ -4541,7 +5206,11 @@
           "windowUnit": {
             "type": "string",
             "description": "The window size unit",
-            "enum": ["m", "h", "d"]
+            "enum": [
+              "m",
+              "h",
+              "d"
+            ]
           },
           "environment": {
             "type": "string",
@@ -4553,7 +5222,11 @@
           },
           "groupBy": {
             "type": "array",
-            "default": ["service.name", "service.environment", "transaction.type"],
+            "default": [
+              "service.name",
+              "service.environment",
+              "transaction.type"
+            ],
             "uniqueItems": true,
             "items": {
               "type": "string",
@@ -4574,7 +5247,13 @@
       "aggtype": {
         "description": "The type of aggregation to perform.",
         "type": "string",
-        "enum": ["avg", "count", "max", "min", "sum"],
+        "enum": [
+          "avg",
+          "count",
+          "max",
+          "min",
+          "sum"
+        ],
         "default": "count"
       },
       "excludehitsfrompreviousrun": {
@@ -4584,7 +5263,10 @@
       "groupby": {
         "description": "Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.\n",
         "type": "string",
-        "enum": ["all", "top"],
+        "enum": [
+          "all",
+          "top"
+        ],
         "default": "all"
       },
       "termsize": {
@@ -4598,13 +5280,22 @@
       "timewindowsize": {
         "description": "The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.\n",
         "type": "integer",
-        "examples": [5]
+        "examples": [
+          5
+        ]
       },
       "timewindowunit": {
         "description": "The type of units for the time window: seconds, minutes, hours, or days.\n",
         "type": "string",
-        "enum": ["s", "m", "h", "d"],
-        "examples": ["m"]
+        "enum": [
+          "s",
+          "m",
+          "h",
+          "d"
+        ],
+        "examples": [
+          "m"
+        ]
       },
       "size": {
         "description": "The number of documents to pass to the configured actions when the threshold condition is met.\n",
@@ -4630,14 +5321,25 @@
         "type": "array",
         "items": {
           "type": "integer",
-          "examples": [4000]
+          "examples": [
+            4000
+          ]
         }
       },
       "thresholdcomparator": {
         "description": "The comparison function for the threshold. For example, \"is above\", \"is above or equals\", \"is below\", \"is below or equals\", \"is between\", and \"is not between\".",
         "type": "string",
-        "enum": [">", ">=", "<", "<=", "between", "notBetween"],
-        "examples": [">"]
+        "enum": [
+          ">",
+          ">=",
+          "<",
+          "<=",
+          "between",
+          "notBetween"
+        ],
+        "examples": [
+          ">"
+        ]
       },
       "params_es_query_rule": {
         "oneOf": [
@@ -4663,7 +5365,9 @@
               },
               "esqlQuery": {
                 "type": "object",
-                "required": ["esql"],
+                "required": [
+                  "esql"
+                ],
                 "properties": {
                   "esql": {
                     "description": "The query definition, which uses Elasticsearch Query Language.",
@@ -4680,13 +5384,19 @@
               "searchType": {
                 "description": "The type of query, in this case a query that uses Elasticsearch Query Language (ES|QL).",
                 "type": "string",
-                "enum": ["esqlQuery"],
-                "examples": ["esqlQuery"]
+                "enum": [
+                  "esqlQuery"
+                ],
+                "examples": [
+                  "esqlQuery"
+                ]
               },
               "size": {
                 "type": "integer",
                 "description": "When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.\n",
-                "examples": [0]
+                "examples": [
+                  0
+                ]
               },
               "termSize": {
                 "$ref": "#/components/schemas/termsize"
@@ -4703,8 +5413,12 @@
               "thresholdComparator": {
                 "type": "string",
                 "description": "The comparison function for the threshold. When `searchType` is `esqlQuery`, this property is required and must be set to \">\". Since the `threshold` value must be `0`, the result is that an alert occurs whenever the query returns results.\n",
-                "enum": [">"],
-                "examples": [">"]
+                "enum": [
+                  ">"
+                ],
+                "examples": [
+                  ">"
+                ]
               },
               "timeField": {
                 "$ref": "#/components/schemas/timefield"
@@ -4770,7 +5484,9 @@
                     "properties": {
                       "language": {
                         "type": "string",
-                        "examples": ["kuery"]
+                        "examples": [
+                          "kuery"
+                        ]
                       },
                       "query": {
                         "type": "string"
@@ -4782,8 +5498,12 @@
               "searchType": {
                 "description": "The type of query, in this case a text-based query that uses KQL or Lucene.",
                 "type": "string",
-                "enum": ["searchSource"],
-                "examples": ["searchSource"]
+                "enum": [
+                  "searchSource"
+                ],
+                "examples": [
+                  "searchSource"
+                ]
               },
               "size": {
                 "$ref": "#/components/schemas/size"
@@ -4857,9 +5577,13 @@
               "searchType": {
                 "description": "The type of query, in this case a query that uses Elasticsearch Query DSL.",
                 "type": "string",
-                "enum": ["esQuery"],
+                "enum": [
+                  "esQuery"
+                ],
                 "default": "esQuery",
-                "examples": ["esQuery"]
+                "examples": [
+                  "esQuery"
+                ]
               },
               "size": {
                 "$ref": "#/components/schemas/size"
@@ -4987,7 +5711,12 @@
                 },
                 "timeUnit": {
                   "type": "string",
-                  "enum": ["s", "m", "h", "d"]
+                  "enum": [
+                    "s",
+                    "m",
+                    "h",
+                    "d"
+                  ]
                 },
                 "sourceId": {
                   "type": "string"
@@ -5000,21 +5729,35 @@
                 },
                 "comparator": {
                   "type": "string",
-                  "enum": ["<", "<=", ">", ">=", "between", "outside"]
+                  "enum": [
+                    "<",
+                    "<=",
+                    ">",
+                    ">=",
+                    "between",
+                    "outside"
+                  ]
                 },
                 "customMetric": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "enum": ["custom"]
+                      "enum": [
+                        "custom"
+                      ]
                     },
                     "field": {
                       "type": "string"
                     },
                     "aggregation": {
                       "type": "string",
-                      "enum": ["avg", "max", "min", "rate"]
+                      "enum": [
+                        "avg",
+                        "max",
+                        "min",
+                        "rate"
+                      ]
                     },
                     "id": {
                       "type": "string"
@@ -5032,7 +5775,14 @@
                 },
                 "warningComparator": {
                   "type": "string",
-                  "enum": ["<", "<=", ">", ">=", "between", "outside"]
+                  "enum": [
+                    "<",
+                    "<=",
+                    ">",
+                    ">=",
+                    "between",
+                    "outside"
+                  ]
                 }
               }
             }
@@ -5045,7 +5795,15 @@
           },
           "nodeType": {
             "type": "string",
-            "enum": ["host", "pod", "container", "awsEC2", "awsS3", "awsSQS", "awsRDS"]
+            "enum": [
+              "host",
+              "pod",
+              "container",
+              "awsEC2",
+              "awsS3",
+              "awsSQS",
+              "awsRDS"
+            ]
           },
           "sourceId": {
             "type": "string"
@@ -5073,7 +5831,14 @@
                     },
                     "comparator": {
                       "type": "string",
-                      "enum": ["<", "<=", ">", ">=", "between", "outside"]
+                      "enum": [
+                        "<",
+                        "<=",
+                        ">",
+                        ">=",
+                        "between",
+                        "outside"
+                      ]
                     },
                     "timeUnit": {
                       "type": "string"
@@ -5089,7 +5854,14 @@
                     },
                     "warningComparator": {
                       "type": "string",
-                      "enum": ["<", "<=", ">", ">=", "between", "outside"]
+                      "enum": [
+                        "<",
+                        "<=",
+                        ">",
+                        ">=",
+                        "between",
+                        "outside"
+                      ]
                     },
                     "metric": {
                       "type": "string"
@@ -5123,7 +5895,14 @@
                     },
                     "comparator": {
                       "type": "string",
-                      "enum": ["<", "<=", ">", ">=", "between", "outside"]
+                      "enum": [
+                        "<",
+                        "<=",
+                        ">",
+                        ">=",
+                        "between",
+                        "outside"
+                      ]
                     },
                     "timeUnit": {
                       "type": "string"
@@ -5139,11 +5918,20 @@
                     },
                     "warningComparator": {
                       "type": "string",
-                      "enum": ["<", "<=", ">", ">=", "between", "outside"]
+                      "enum": [
+                        "<",
+                        "<=",
+                        ">",
+                        ">=",
+                        "between",
+                        "outside"
+                      ]
                     },
                     "aggType": {
                       "type": "string",
-                      "enum": ["count"]
+                      "enum": [
+                        "count"
+                      ]
                     }
                   }
                 },
@@ -5159,7 +5947,14 @@
                     },
                     "comparator": {
                       "type": "string",
-                      "enum": ["<", "<=", ">", ">=", "between", "outside"]
+                      "enum": [
+                        "<",
+                        "<=",
+                        ">",
+                        ">=",
+                        "between",
+                        "outside"
+                      ]
                     },
                     "timeUnit": {
                       "type": "string"
@@ -5175,11 +5970,20 @@
                     },
                     "warningComparator": {
                       "type": "string",
-                      "enum": ["<", "<=", ">", ">=", "between", "outside"]
+                      "enum": [
+                        "<",
+                        "<=",
+                        ">",
+                        ">=",
+                        "between",
+                        "outside"
+                      ]
                     },
                     "aggType": {
                       "type": "string",
-                      "enum": ["custom"]
+                      "enum": [
+                        "custom"
+                      ]
                     },
                     "customMetric": {
                       "type": "array",
@@ -5193,7 +5997,13 @@
                               },
                               "aggType": {
                                 "type": "string",
-                                "enum": ["avg", "sum", "max", "min", "cardinality"]
+                                "enum": [
+                                  "avg",
+                                  "sum",
+                                  "max",
+                                  "min",
+                                  "cardinality"
+                                ]
                               },
                               "field": {
                                 "type": "string"
@@ -5208,7 +6018,9 @@
                               },
                               "aggType": {
                                 "type": "string",
-                                "enum": ["count"]
+                                "enum": [
+                                  "count"
+                                ]
                               },
                               "filter": {
                                 "type": "string"
@@ -5261,7 +6073,12 @@
           {
             "title": "Count",
             "type": "object",
-            "required": ["count", "timeSize", "timeUnit", "logView"],
+            "required": [
+              "count",
+              "timeSize",
+              "timeUnit",
+              "logView"
+            ],
             "properties": {
               "criteria": {
                 "type": "array",
@@ -5332,7 +6149,12 @@
               },
               "timeUnit": {
                 "type": "string",
-                "enum": ["s", "m", "h", "d"]
+                "enum": [
+                  "s",
+                  "m",
+                  "h",
+                  "d"
+                ]
               },
               "logView": {
                 "type": "object",
@@ -5342,7 +6164,9 @@
                   },
                   "type": {
                     "type": "string",
-                    "enum": ["log-view-reference"],
+                    "enum": [
+                      "log-view-reference"
+                    ],
                     "example": "log-view-reference"
                   }
                 }
@@ -5358,7 +6182,12 @@
           {
             "title": "Ratio",
             "type": "object",
-            "required": ["count", "timeSize", "timeUnit", "logView"],
+            "required": [
+              "count",
+              "timeSize",
+              "timeUnit",
+              "logView"
+            ],
             "properties": {
               "criteria": {
                 "type": "array",
@@ -5434,7 +6263,12 @@
               },
               "timeUnit": {
                 "type": "string",
-                "enum": ["s", "m", "h", "d"]
+                "enum": [
+                  "s",
+                  "m",
+                  "h",
+                  "d"
+                ]
               },
               "logView": {
                 "type": "object",
@@ -5444,7 +6278,9 @@
                   },
                   "type": {
                     "type": "string",
-                    "enum": ["log-view-reference"],
+                    "enum": [
+                      "log-view-reference"
+                    ],
                     "example": "log-view-reference"
                   }
                 }
@@ -5524,7 +6360,11 @@
         }
       },
       "params_property_synthetics_monitor_status": {
-        "required": ["numTimes", "shouldCheckStatus", "shouldCheckAvailability"],
+        "required": [
+          "numTimes",
+          "shouldCheckStatus",
+          "shouldCheckAvailability"
+        ],
         "properties": {
           "availability": {
             "type": "object",
@@ -5834,56 +6674,82 @@
           "api_key_created_by_user": {
             "type": "boolean",
             "description": "Indicates whether the API key that is associated with the rule was created by the user.",
-            "examples": [false]
+            "examples": [
+              false
+            ]
           },
           "api_key_owner": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The owner of the API key that is associated with the rule and used to run background tasks.\n",
-            "examples": ["elastic"]
+            "examples": [
+              "elastic"
+            ]
           },
           "consumer": {
             "type": "string",
             "description": "The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
-            "examples": ["alerts"]
+            "examples": [
+              "alerts"
+            ]
           },
           "created_at": {
             "type": "string",
             "description": "The date and time that the rule was created.",
             "format": "date-time",
-            "examples": ["2022-12-05T23:36:58.284Z"]
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "created_by": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The identifier for the user that created the rule.",
-            "examples": ["elastic"]
+            "examples": [
+              "elastic"
+            ]
           },
           "enabled": {
             "type": "boolean",
             "description": "Indicates whether the rule is currently enabled.",
-            "examples": [true]
+            "examples": [
+              true
+            ]
           },
           "execution_status": {
             "type": "object",
             "properties": {
               "last_duration": {
                 "type": "integer",
-                "examples": [55]
+                "examples": [
+                  55
+                ]
               },
               "last_execution_date": {
                 "type": "string",
                 "format": "date-time",
-                "examples": ["2022-12-06T00:13:43.890Z"]
+                "examples": [
+                  "2022-12-06T00:13:43.890Z"
+                ]
               },
               "status": {
                 "type": "string",
-                "examples": ["ok"]
+                "examples": [
+                  "ok"
+                ]
               }
             }
           },
           "id": {
             "type": "string",
             "description": "The identifier for the rule.",
-            "examples": ["b530fed0-74f5-11ed-9801-35303b735aef"]
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "last_run": {
             "type": "object",
@@ -5907,10 +6773,15 @@
               },
               "outcome": {
                 "type": "string",
-                "examples": ["succeeded"]
+                "examples": [
+                  "succeeded"
+                ]
               },
               "outcome_msg": {
-                "type": ["array", "null"],
+                "type": [
+                  "array",
+                  "null"
+                ],
                 "items": {
                   "type": "string"
                 }
@@ -5919,33 +6790,53 @@
                 "type": "integer"
               },
               "warning": {
-                "type": ["string", "null"],
-                "examples": [null]
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "examples": [
+                  null
+                ]
               }
             }
           },
           "muted_alert_ids": {
-            "type": ["array", "null"],
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
           "mute_all": {
             "type": "boolean",
-            "examples": [false]
+            "examples": [
+              false
+            ]
           },
           "name": {
             "type": "string",
             "description": "The name of the rule.",
-            "examples": ["cluster_health_rule"]
+            "examples": [
+              "cluster_health_rule"
+            ]
           },
           "next_run": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
-            "examples": ["2022-12-06T00:14:43.818Z"]
+            "examples": [
+              "2022-12-06T00:14:43.818Z"
+            ]
           },
           "notify_when": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Indicates how often alerts generate actions."
           },
           "params": {
@@ -5960,7 +6851,9 @@
           "rule_type_id": {
             "type": "string",
             "description": "The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.\n",
-            "examples": ["monitoring_alert_cluster_health"]
+            "examples": [
+              "monitoring_alert_cluster_health"
+            ]
           },
           "running": {
             "type": "boolean",
@@ -5971,7 +6864,9 @@
           },
           "scheduled_task_id": {
             "type": "string",
-            "examples": ["b530fed0-74f5-11ed-9801-35303b735aef"]
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "tags": {
             "$ref": "#/components/schemas/tags"
@@ -5982,12 +6877,19 @@
           "updated_at": {
             "type": "string",
             "description": "The date and time that the rule was updated most recently.",
-            "examples": ["2022-12-05T23:36:58.284Z"]
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "updated_by": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The identifier for the user that updated this rule most recently.",
-            "examples": ["elastic"]
+            "examples": [
+              "elastic"
+            ]
           }
         }
       },
@@ -5997,16 +6899,24 @@
         "properties": {
           "error": {
             "type": "string",
-            "examples": ["Unauthorized"],
-            "enum": ["Unauthorized"]
+            "examples": [
+              "Unauthorized"
+            ],
+            "enum": [
+              "Unauthorized"
+            ]
           },
           "message": {
             "type": "string"
           },
           "statusCode": {
             "type": "integer",
-            "examples": [401],
-            "enum": [401]
+            "examples": [
+              401
+            ],
+            "enum": [
+              401
+            ]
           }
         }
       },
@@ -6015,17 +6925,27 @@
         "properties": {
           "error": {
             "type": "string",
-            "examples": ["Not Found"],
-            "enum": ["Not Found"]
+            "examples": [
+              "Not Found"
+            ],
+            "enum": [
+              "Not Found"
+            ]
           },
           "message": {
             "type": "string",
-            "examples": ["Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found"]
+            "examples": [
+              "Saved object [alert/caaad6d0-920c-11ed-b36a-874bd1548a00] not found"
+            ]
           },
           "statusCode": {
             "type": "integer",
-            "examples": [404],
-            "enum": [404]
+            "examples": [
+              404
+            ],
+            "enum": [
+              404
+            ]
           }
         }
       },
@@ -6033,7 +6953,11 @@
         "title": "Update rule request",
         "description": "The update rule API request body varies depending on the type of rule and actions.\n",
         "type": "object",
-        "required": ["name", "params", "schedule"],
+        "required": [
+          "name",
+          "params",
+          "schedule"
+        ],
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
@@ -6044,7 +6968,9 @@
           "name": {
             "type": "string",
             "description": "The name of the rule.",
-            "examples": ["cluster_health_rule"]
+            "examples": [
+              "cluster_health_rule"
+            ]
           },
           "notify_when": {
             "$ref": "#/components/schemas/notify_when"
@@ -6124,18 +7050,26 @@
       "400_response": {
         "title": "Bad request",
         "type": "object",
-        "required": ["error", "message", "statusCode"],
+        "required": [
+          "error",
+          "message",
+          "statusCode"
+        ],
         "properties": {
           "error": {
             "type": "string",
-            "enum": ["Bad Request"]
+            "enum": [
+              "Bad Request"
+            ]
           },
           "message": {
             "type": "string"
           },
           "statusCode": {
             "type": "integer",
-            "enum": [400]
+            "enum": [
+              400
+            ]
           }
         }
       },
@@ -6151,27 +7085,40 @@
           },
           "alertTypeId": {
             "type": "string",
-            "examples": [".index-threshold"]
+            "examples": [
+              ".index-threshold"
+            ]
           },
           "apiKeyOwner": {
-            "type": ["string", "null"],
-            "examples": ["elastic"]
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "elastic"
+            ]
           },
           "createdAt": {
             "type": "string",
             "description": "The date and time that the alert was created.",
             "format": "date-time",
-            "examples": ["2022-12-05T23:36:58.284Z"]
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "createdBy": {
             "type": "string",
             "description": "The identifier for the user that created the alert.",
-            "examples": ["elastic"]
+            "examples": [
+              "elastic"
+            ]
           },
           "enabled": {
             "type": "boolean",
             "description": "Indicates whether the alert is currently enabled.",
-            "examples": [true]
+            "examples": [
+              true
+            ]
           },
           "executionStatus": {
             "type": "object",
@@ -6179,25 +7126,36 @@
               "lastExecutionDate": {
                 "type": "string",
                 "format": "date-time",
-                "examples": ["2022-12-06T00:13:43.890Z"]
+                "examples": [
+                  "2022-12-06T00:13:43.890Z"
+                ]
               },
               "status": {
                 "type": "string",
-                "examples": ["ok"]
+                "examples": [
+                  "ok"
+                ]
               }
             }
           },
           "id": {
             "type": "string",
             "description": "The identifier for the alert.",
-            "examples": ["b530fed0-74f5-11ed-9801-35303b735aef"]
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "muteAll": {
             "type": "boolean",
-            "examples": [false]
+            "examples": [
+              false
+            ]
           },
           "mutedInstanceIds": {
-            "type": ["array", "null"],
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -6205,11 +7163,15 @@
           "name": {
             "type": "string",
             "description": "The name of the alert.",
-            "examples": ["my alert"]
+            "examples": [
+              "my alert"
+            ]
           },
           "notifyWhen": {
             "type": "string",
-            "examples": ["onActionGroupChange"]
+            "examples": [
+              "onActionGroupChange"
+            ]
           },
           "params": {
             "type": "object",
@@ -6225,7 +7187,9 @@
           },
           "scheduledTaskId": {
             "type": "string",
-            "examples": ["b530fed0-74f5-11ed-9801-35303b735aef"]
+            "examples": [
+              "b530fed0-74f5-11ed-9801-35303b735aef"
+            ]
           },
           "tags": {
             "type": "array",
@@ -6234,16 +7198,26 @@
             }
           },
           "throttle": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "updatedAt": {
             "type": "string",
-            "examples": ["2022-12-05T23:36:58.284Z"]
+            "examples": [
+              "2022-12-05T23:36:58.284Z"
+            ]
           },
           "updatedBy": {
-            "type": ["string", "null"],
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The identifier for the user that updated this alert most recently.",
-            "examples": ["elastic"]
+            "examples": [
+              "elastic"
+            ]
           }
         }
       }
@@ -6263,7 +7237,9 @@
             "timeWindowUnit": "d",
             "size": 0,
             "thresholdComparator": ">",
-            "threshold": [0]
+            "threshold": [
+              0
+            ]
           },
           "consumer": "stackAlerts",
           "rule_type_id": ".es-query",
@@ -6320,9 +7296,13 @@
           "name": "my Elasticsearch query rule",
           "params": {
             "esQuery": "\"\"\"{\"query\":{\"match_all\" : {}}}\"\"\"",
-            "index": ["kibana_sample_data_logs"],
+            "index": [
+              "kibana_sample_data_logs"
+            ],
             "size": 100,
-            "threshold": [100],
+            "threshold": [
+              100
+            ],
             "thresholdComparator": ">",
             "timeField": "@timestamp",
             "timeWindowSize": 1,
@@ -6352,7 +7332,9 @@
             },
             "searchType": "searchSource",
             "size": 100,
-            "threshold": [1000],
+            "threshold": [
+              1000
+            ],
             "thresholdComparator": ">",
             "timeWindowSize": 5,
             "timeWindowUnit": "m"
@@ -6392,8 +7374,12 @@
             "timeWindowSize": 5,
             "timeWindowUnit": "m",
             "groupBy": "top",
-            "threshold": [1000],
-            "index": [".test-index"],
+            "threshold": [
+              1000
+            ],
+            "index": [
+              ".test-index"
+            ],
             "timeField": "@timestamp",
             "aggField": "sheet.version",
             "termField": "name.keyword"
@@ -6402,7 +7388,9 @@
           "schedule": {
             "interval": "1m"
           },
-          "tags": ["cpu"]
+          "tags": [
+            "cpu"
+          ]
         }
       },
       "create_tracking_containment_rule_request": {
@@ -6467,7 +7455,9 @@
             "timeWindowUnit": "d",
             "size": 0,
             "thresholdComparator": ">",
-            "threshold": [0],
+            "threshold": [
+              0
+            ],
             "excludeHitsFromPreviousRun\"": "true,",
             "aggType": "count",
             "groupBy": "all"
@@ -6539,10 +7529,14 @@
             "thresholdComparator": ">",
             "timeWindowSize": 1,
             "timeWindowUnit": "d",
-            "threshold": [100],
+            "threshold": [
+              100
+            ],
             "size": 100,
             "timeField": "@timestamp",
-            "index": ["kibana_sample_data_logs"],
+            "index": [
+              "kibana_sample_data_logs"
+            ],
             "esQuery": "\"\"\"{\"query\":{\"match_all\" : {}}}\"\"\"",
             "excludeHitsFromPreviousRun": true,
             "aggType": "count",
@@ -6592,7 +7586,9 @@
             "searchType": "searchSource",
             "timeWindowSize": 5,
             "timeWindowUnit": "m",
-            "threshold": [1000],
+            "threshold": [
+              1000
+            ],
             "thresholdComparator": ">",
             "size": 100,
             "aggType": "count",
@@ -6663,8 +7659,12 @@
             "timeWindowSize": 5,
             "timeWindowUnit": "m",
             "groupBy": "top",
-            "threshold": [1000],
-            "index": [".test-index"],
+            "threshold": [
+              1000
+            ],
+            "index": [
+              ".test-index"
+            ],
             "timeField": "@timestamp",
             "aggField": "sheet.version",
             "termField": "name.keyword"
@@ -6676,7 +7676,9 @@
             "interval": "1m"
           },
           "scheduled_task_id": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
-          "tags": ["cpu"],
+          "tags": [
+            "cpu"
+          ],
           "throttle": null,
           "updated_at": "2022-06-08T17:20:31.632Z",
           "updated_by": "elastic"
@@ -6745,7 +7747,9 @@
         "value": {
           "id": "31697a40-7b36-11ed-aa79-f742c05329b2",
           "consumer": "alerts",
-          "tags": ["cpu"],
+          "tags": [
+            "cpu"
+          ],
           "name": "my alert",
           "enabled": true,
           "throttle": null,
@@ -6759,8 +7763,12 @@
             "timeWindowSize": 5,
             "timeWindowUnit": "m",
             "groupBy": "top",
-            "threshold": [1000],
-            "index": ["test-index"],
+            "threshold": [
+              1000
+            ],
+            "index": [
+              "test-index"
+            ],
             "timeField": "@timestamp",
             "aggField": "sheet.version",
             "termField": "name.keyword"
@@ -6834,11 +7842,15 @@
           "params": {
             "aggField": "sheet.version",
             "aggType": "avg",
-            "index": [".updated-index"],
+            "index": [
+              ".updated-index"
+            ],
             "groupBy": "top",
             "termField": "name.keyword",
             "termSize": 6,
-            "threshold": [1000],
+            "threshold": [
+              1000
+            ],
             "thresholdComparator": ">",
             "timeField": "@timestamp",
             "timeWindowSize": 5,
@@ -6866,14 +7878,18 @@
             "interval": "1m"
           },
           "params": {
-            "index": [".updated-index"],
+            "index": [
+              ".updated-index"
+            ],
             "timeField": "@timestamp",
             "groupBy": "top",
             "aggType": "avg",
             "timeWindowSize": 5,
             "timeWindowUnit": "m",
             "thresholdComparator": ">",
-            "threshold": [1000],
+            "threshold": [
+              1000
+            ],
             "aggField": "sheet.version",
             "termField": "name.keyword",
             "termSize": 6
@@ -6934,7 +7950,9 @@
             {
               "id": "3583a470-74f6-11ed-9801-35303b735aef",
               "consumer": "alerts",
-              "tags": ["cpu"],
+              "tags": [
+                "cpu"
+              ],
               "name": "my alert",
               "enabled": true,
               "throttle": null,
@@ -6948,8 +7966,12 @@
                 "timeWindowSize": 5,
                 "timeWindowUnit": "m",
                 "groupBy": "top",
-                "threshold": [1000],
-                "index": ["test-index"],
+                "threshold": [
+                  1000
+                ],
+                "index": [
+                  "test-index"
+                ],
                 "timeField": "@timestamp",
                 "aggField": "sheet.version",
                 "termField": "name.keyword"
@@ -7047,11 +8069,15 @@
                 "exceptionsList": [],
                 "type": "threshold",
                 "language": "kuery",
-                "index": ["kibana_sample_data_logs"],
+                "index": [
+                  "kibana_sample_data_logs"
+                ],
                 "query": "*",
                 "filters": [],
                 "threshold": {
-                  "field": ["bytes"],
+                  "field": [
+                    "bytes"
+                  ],
                   "value": 1,
                   "cardinality": []
                 }
@@ -7102,7 +8128,9 @@
                   "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
                   "alerts_filter": {
                     "timeframe": {
-                      "days": [7],
+                      "days": [
+                        7
+                      ],
                       "timezone": "UTC",
                       "hours": {
                         "start": "08:00",
@@ -7146,7 +8174,9 @@
                   "recovered": 0,
                   "active": 0
                 },
-                "outcome_msg": ["Rule execution completed successfully"],
+                "outcome_msg": [
+                  "Rule execution completed successfully"
+                ],
                 "outcome_order": 0,
                 "warning": null,
                 "outcome": "succeeded"

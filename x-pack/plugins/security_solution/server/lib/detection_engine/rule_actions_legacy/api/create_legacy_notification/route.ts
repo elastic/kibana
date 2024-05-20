@@ -8,16 +8,16 @@
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 
-import { UPDATE_OR_CREATE_LEGACY_ACTIONS } from '../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 // eslint-disable-next-line no-restricted-imports
-import { legacyCreateNotifications } from '../../logic/notifications/legacy_create_notifications';
+import { legacyUpdateOrCreateRuleActionsSavedObject } from '../../logic/rule_actions/legacy_update_or_create_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
 import { legacyReadNotifications } from '../../logic/notifications/legacy_read_notifications';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationRuleTypeParams } from '../../logic/notifications/legacy_types';
 // eslint-disable-next-line no-restricted-imports
-import { legacyUpdateOrCreateRuleActionsSavedObject } from '../../logic/rule_actions/legacy_update_or_create_rule_actions_saved_object';
+import { legacyCreateNotifications } from '../../logic/notifications/legacy_create_notifications';
+import { UPDATE_OR_CREATE_LEGACY_ACTIONS } from '../../../../../../common/constants';
 
 /**
  * Given an "alert_id" and a valid "action_id" this will create a legacy notification. This is for testing

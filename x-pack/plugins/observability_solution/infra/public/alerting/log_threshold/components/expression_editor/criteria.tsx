@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback } from 'react';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonEmpty, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type {
   PersistedLogViewReference,
   ResolvedLogViewField,
 } from '@kbn/logs-shared-plugin/common';
-import React, { useCallback } from 'react';
+import { Criterion } from './criterion';
 import {
+  PartialRuleParams,
   PartialCountCriteria as PartialCountCriteriaType,
   PartialCriteria as PartialCriteriaType,
   PartialCriterion as PartialCriterionType,
   PartialRatioCriteria as PartialRatioCriteriaType,
-  PartialRuleParams,
-  getDenominator,
-  getNumerator,
   isRatioRule,
+  getNumerator,
+  getDenominator,
 } from '../../../../../common/alerting/logs/log_threshold/types';
-import { CriterionErrors, Errors } from '../../validation';
-import { Criterion } from './criterion';
-import { CriterionPreview } from './criterion_preview_chart';
+import { Errors, CriterionErrors } from '../../validation';
 import { ExpressionLike } from './editor';
+import { CriterionPreview } from './criterion_preview_chart';
 
 const QueryAText = i18n.translate('xpack.infra.logs.alerting.threshold.ratioCriteriaQueryAText', {
   defaultMessage: 'Query A',

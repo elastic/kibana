@@ -6,7 +6,7 @@
  */
 
 import type { RiskScoreKpiRequestOptionsInput } from '../../../../../../../common/api/search_strategy';
-import { RiskQueries, RiskScoreEntity } from '../../../../../../../common/search_strategy';
+import { RiskScoreEntity, RiskQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: RiskScoreKpiRequestOptionsInput = {
   defaultIndex: [

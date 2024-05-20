@@ -7,11 +7,11 @@
 
 import { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import {
-  byNameTagSorter,
-  convertTagNameToId,
   getObjectTags,
-  getTag,
+  convertTagNameToId,
+  byNameTagSorter,
   getTagIdsFromReferences,
+  getTag,
 } from './utils';
 
 const createTag = (id: string, name: string = id) => ({

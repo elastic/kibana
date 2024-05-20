@@ -8,9 +8,9 @@
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
 import { Space, User } from '../types';
-import { getTestRuleData } from './get_test_rule_data';
 import { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
+import { getTestRuleData } from './get_test_rule_data';
 
 export interface AlertUtilsOpts {
   user?: User;

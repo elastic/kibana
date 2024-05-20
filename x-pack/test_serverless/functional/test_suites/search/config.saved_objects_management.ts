@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { findTestPluginPaths } from '@kbn/test';
+import { resolve } from 'path';
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({

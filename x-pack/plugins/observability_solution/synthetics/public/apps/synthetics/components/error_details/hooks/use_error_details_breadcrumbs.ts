@@ -6,11 +6,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PLUGIN } from '../../../../../../common/constants/plugin';
-import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
-import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
 import { useTestRunDetailsBreadcrumbs } from '../../test_run_details/hooks/use_test_run_details_breadcrumbs';
+import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
+import { ConfigKey } from '../../../../../../common/runtime_types';
+import { PLUGIN } from '../../../../../../common/constants/plugin';
 
 export const useErrorDetailsBreadcrumbs = (
   extraCrumbs?: Array<{ text: string; href?: string }>

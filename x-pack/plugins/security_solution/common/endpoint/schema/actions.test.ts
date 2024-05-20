@@ -7,6 +7,11 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import {
+  RESPONSE_ACTION_AGENT_TYPE,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  RESPONSE_ACTION_TYPE,
+} from '../service/response_actions/constants';
 import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
 import type { HapiReadableStream } from '../../../server/types';
 import { EndpointActionListRequestSchema, UploadActionRequestSchema } from '../../api/endpoint';
@@ -15,11 +20,6 @@ import {
   NoParametersRequestSchema,
 } from '../../api/endpoint/actions/common/base';
 import { ExecuteActionRequestSchema } from '../../api/endpoint/actions/execute_route';
-import {
-  RESPONSE_ACTION_AGENT_TYPE,
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
-  RESPONSE_ACTION_TYPE,
-} from '../service/response_actions/constants';
 
 // NOTE: Even though schemas are kept in common/api/endpoint - we keep tests here, because common/api should import from outside
 describe('actions schemas', () => {

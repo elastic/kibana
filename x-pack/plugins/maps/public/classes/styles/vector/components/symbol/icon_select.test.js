@@ -30,8 +30,8 @@ jest.mock('../../symbol_utils', () => {
   };
 });
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
 import { IconSelect } from './icon_select';
 

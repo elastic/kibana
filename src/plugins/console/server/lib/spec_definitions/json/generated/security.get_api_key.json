@@ -14,8 +14,12 @@
       "active_only": "__flag__",
       "with_profile_uid": "__flag__"
     },
-    "methods": ["GET"],
-    "patterns": ["_security/api_key"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_security/api_key"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-api-key.html",
     "availability": {
       "stack": true,

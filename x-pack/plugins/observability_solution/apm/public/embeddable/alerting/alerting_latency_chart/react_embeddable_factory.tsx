@@ -1,6 +1,3 @@
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,10 +5,13 @@ import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentatio
  * 2.0.
  */
 import React from 'react';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { ApmEmbeddableContext } from '../../embeddable_context';
-import type { EmbeddableDeps } from '../../types';
 import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
+import type { EmbeddableDeps } from '../../types';
+import { ApmEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingLatencyChart } from './chart';
 
 export const APM_ALERTING_LATENCY_CHART_EMBEDDABLE = 'APM_ALERTING_LATENCY_CHART_EMBEDDABLE';

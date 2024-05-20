@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import type { ConfigType } from '../../../../../config';
-import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 
 /**
  * Installs the prebuilt rules package of the config's specified or latest version.

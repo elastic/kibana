@@ -20,9 +20,7 @@ import { useTimeRangeMetadata } from '../context/time_range_metadata/use_time_ra
  */
 
 export function usePreferredDataSourceAndBucketSize<
-  TDocumentType extends
-    | ApmDocumentType.ServiceTransactionMetric
-    | ApmDocumentType.TransactionMetric,
+  TDocumentType extends ApmDocumentType.ServiceTransactionMetric | ApmDocumentType.TransactionMetric
 >({
   start,
   end,

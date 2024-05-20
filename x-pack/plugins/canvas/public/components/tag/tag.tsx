@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiHealth } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
+import PropTypes from 'prop-types';
+import { EuiBadge, EuiHealth } from '@elastic/eui';
 
 interface Props {
   /**

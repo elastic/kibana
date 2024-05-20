@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { AsApiContract } from '@kbn/actions-plugin/common';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
-import { i18n } from '@kbn/i18n';
-import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AsApiContract } from '@kbn/actions-plugin/common';
+import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../utils/kibana_react';
 
 export interface UseFetchRuleResponse {

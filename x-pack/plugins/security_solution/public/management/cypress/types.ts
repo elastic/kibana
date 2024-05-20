@@ -10,8 +10,8 @@
 import type { Role } from '@kbn/security-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ActionDetails } from '../../../common/endpoint/types';
-import type { SecurityTestUser } from './common/constants';
 import type { CyLoadEndpointDataOptions } from './support/plugin_handlers/endpoint_data_loader';
+import type { SecurityTestUser } from './common/constants';
 
 type PossibleChainable =
   | Cypress.Chainable<any>
@@ -39,10 +39,10 @@ export type ReturnTypeFromChainable<C extends PossibleChainable> = C extends Cyp
 >
   ? Value
   : C extends (args?: any) => Cypress.Chainable<infer ValueFromFnResponse>
-    ? ValueFromFnResponse
-    : C extends (args?: any) => Promise<Cypress.Chainable<infer ValueFromPromiseChainable>>
-      ? ValueFromPromiseChainable
-      : never;
+  ? ValueFromFnResponse
+  : C extends (args?: any) => Promise<Cypress.Chainable<infer ValueFromPromiseChainable>>
+  ? ValueFromPromiseChainable
+  : never;
 
 export type IndexEndpointHostsCyTaskOptions = Partial<
   {

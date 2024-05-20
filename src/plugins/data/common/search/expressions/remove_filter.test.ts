@@ -7,9 +7,9 @@
  */
 
 import { createMockContext } from '@kbn/expressions-plugin/common';
-import { KibanaContext } from './kibana_context_type';
-import { removeFilterFunction } from './remove_filter';
 import { functionWrapper } from './utils';
+import { removeFilterFunction } from './remove_filter';
+import { KibanaContext } from './kibana_context_type';
 
 describe('interpreter/functions#removeFilter', () => {
   const fn = functionWrapper(removeFilterFunction);

@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React, { useContext, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
-  EuiButtonIcon,
   EuiDataGridCellValueElementProps,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { formatFieldValue } from '@kbn/discover-utils';
-import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { i18n } from '@kbn/i18n';
-import React, { useContext, useEffect } from 'react';
-import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
-import { SourceDocument } from '../components/source_document';
-import SourcePopoverContent from '../components/source_popover_content';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
+import { formatFieldValue } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
+import { SourceDocument } from '../components/source_document';
+import SourcePopoverContent from '../components/source_popover_content';
+import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 

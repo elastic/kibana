@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ColorMode } from '@kbn/charts-plugin/common';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { themeServiceMock } from '@kbn/core/public/mocks';
+import { getLegacyMetricVisualization } from './visualization';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState } from '../../../common/types';
-import { generateId } from '../../id_generator';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import { generateId } from '../../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../../types';
-import { getLegacyMetricVisualization } from './visualization';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { ColorMode } from '@kbn/charts-plugin/common';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../id_generator');
 
@@ -281,9 +281,8 @@ describe('metric_visualization', () => {
         datasourceLayers: { l1: datasource },
       };
 
-      expect(
-        metricVisualization.toExpression(exampleState(), frame.datasourceLayers)
-      ).toMatchInlineSnapshot(`
+      expect(metricVisualization.toExpression(exampleState(), frame.datasourceLayers))
+        .toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {

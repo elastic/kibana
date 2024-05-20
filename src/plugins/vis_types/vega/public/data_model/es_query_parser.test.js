@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import { of } from 'rxjs';
 import { EsQueryParser } from './es_query_parser';
 
 const second = 1000;

@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { useRefetch } from './use_refetch';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { renderHook } from '@testing-library/react-hooks';
-import { Subject } from 'rxjs';
-import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -18,7 +17,8 @@ import {
   UnifiedHistogramInput$,
   UnifiedHistogramRequestContext,
 } from '../../types';
-import { useRefetch } from './use_refetch';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { Subject } from 'rxjs';
 
 describe('useRefetch', () => {
   const getDeps: () => {

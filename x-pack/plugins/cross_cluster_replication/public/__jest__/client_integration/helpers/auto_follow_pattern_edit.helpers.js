@@ -7,8 +7,8 @@
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { AutoFollowPatternEdit } from '../../../app/sections/auto_follow_pattern_edit';
-import { routing } from '../../../app/services/routing';
 import { ccrStore } from '../../../app/store';
+import { routing } from '../../../app/services/routing';
 
 import { AUTO_FOLLOW_PATTERN_EDIT_NAME } from './constants';
 

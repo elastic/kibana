@@ -6,7 +6,7 @@
  */
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../../containers/constants';
+import { DEFAULT_QUERY_PARAMS, DEFAULT_FILTER_OPTIONS } from '../../../containers/constants';
 
 import { allCasesUrlStateSerializer } from './all_cases_url_state_serializer';
 

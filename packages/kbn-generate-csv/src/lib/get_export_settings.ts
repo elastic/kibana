@@ -9,8 +9,8 @@
 import type { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
-import type { TaskInstanceFields } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
+import type { TaskInstanceFields } from '@kbn/reporting-common/types';
 import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,

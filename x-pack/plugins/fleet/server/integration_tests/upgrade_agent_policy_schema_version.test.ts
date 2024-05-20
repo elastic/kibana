@@ -7,26 +7,26 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  ElasticsearchClient,
   KibanaRequest,
   SavedObjectsClientContract,
+  ElasticsearchClient,
 } from '@kbn/core/server';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
-  createRootWithCorePlugins,
   createTestServers,
+  createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
-import { AGENT_POLICY_INDEX } from '../../common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '../constants';
-import { agentPolicyService } from '../services';
 import { upgradeAgentPolicySchemaVersion } from '../services/setup/upgrade_agent_policy_schema_version';
+import { AGENT_POLICY_INDEX } from '../../common';
+import { agentPolicyService } from '../services';
 
 import { useDockerRegistry, waitForFleetSetup } from './helpers';
 

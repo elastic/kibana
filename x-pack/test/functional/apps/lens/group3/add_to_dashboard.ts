@@ -71,8 +71,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      const isLinked =
-        await PageObjects.timeToVisualize.libraryNotificationExists('New Lens from Modal');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'New Lens from Modal'
+      );
       expect(isLinked).to.be(false);
 
       const panelCount = await PageObjects.dashboard.getPanelCount();
@@ -115,8 +116,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.lens.assertLegacyMetric('Average of bytes', '5,727.322');
-      const isLinked =
-        await PageObjects.timeToVisualize.libraryNotificationExists('New Lens from Modal');
+      const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+        'New Lens from Modal'
+      );
       expect(isLinked).to.be(false);
 
       const panelCount = await PageObjects.dashboard.getPanelCount();

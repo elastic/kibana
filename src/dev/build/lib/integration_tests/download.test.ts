@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { readFileSync } from 'fs';
-import { IncomingMessage, ServerResponse, createServer } from 'http';
-import { tmpdir } from 'os';
+import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { join } from 'path';
+import { tmpdir } from 'os';
+import { readFileSync } from 'fs';
 
-import { createReplaceSerializer, createStripAnsiSerializer } from '@kbn/jest-serializers';
+import del from 'del';
 import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import del from 'del';
+import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 
-import { downloadToDisk, downloadToString } from '../download';
 import { mkdirp } from '../fs';
+import { downloadToDisk, downloadToString } from '../download';
 
 const TMP_DIR = join(tmpdir(), CI_PARALLEL_PROCESS_PREFIX, 'download-js-test-tmp-dir');
 const TMP_DESTINATION = join(TMP_DIR, '__tmp_download_js_test_file__');

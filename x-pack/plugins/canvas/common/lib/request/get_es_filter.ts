@@ -11,8 +11,8 @@
   filter is the abstracted canvas filter.
 */
 
-import { ExpressionValueFilter } from '../../../types';
 import { filters } from './filters';
+import { ExpressionValueFilter } from '../../../types';
 
 export function getESFilter(filter: ExpressionValueFilter) {
   if (!filter.filterType || !filters[filter.filterType]) {

@@ -6,14 +6,14 @@
  */
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { AddIndicesField } from './add_indices_field';
+import { IndicesTable } from './indices_table';
+import { StartChatPanel } from '../start_chat_panel';
+import { CreateIndexCallout } from './create_index_callout';
 import { useQueryIndices } from '../../hooks/use_query_indices';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
-import { StartChatPanel } from '../start_chat_panel';
-import { AddIndicesField } from './add_indices_field';
-import { CreateIndexCallout } from './create_index_callout';
-import { IndicesTable } from './indices_table';
 
 export const SourcesPanelForStartChat: React.FC = () => {
   const {

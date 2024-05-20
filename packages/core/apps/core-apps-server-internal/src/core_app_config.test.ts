@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreAppConfig, config } from './core_app_config';
+import { config, CoreAppConfig } from './core_app_config';
 
 describe('CoreApp Config', () => {
   test('set correct defaults', () => {

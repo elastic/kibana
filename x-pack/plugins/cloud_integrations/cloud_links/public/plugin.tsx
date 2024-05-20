@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import * as connectionDetails from '@kbn/cloud/connection_details';
-import type { CoreStart, Plugin } from '@kbn/core/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { CoreStart, Plugin } from '@kbn/core/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import * as connectionDetails from '@kbn/cloud/connection_details';
 import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 
 interface CloudLinksDepsSetup {

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
-import type { EuiDataGridColumn } from '@elastic/eui';
-import { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
 import type { DataTableProps } from '.';
 import { DataTableComponent } from '.';
+import { REMOVE_COLUMN } from './column_headers/translations';
+import { useMountAppended } from '../../utils/use_mount_appended';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { TableId } from '../../common/types';
-import { mockGlobalState } from '../../mock/global_state';
 import { defaultHeaders } from '../../mock/header';
-import { mockBrowserFields } from '../../mock/mock_source';
+import { mockGlobalState } from '../../mock/global_state';
 import { mockTimelineData } from '../../mock/mock_timeline_data';
 import { TestProviders } from '../../mock/test_providers';
-import { useMountAppended } from '../../utils/use_mount_appended';
-import { REMOVE_COLUMN } from './column_headers/translations';
+import { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
+import { mockBrowserFields } from '../../mock/mock_source';
 import { getMappedNonEcsValue } from './utils';
 
 const mockDispatch = jest.fn();

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getTime, requestsToStreams } from './stream';
+import { requestsToStreams, getTime } from './stream';
 
 test('requests to stream', () => {
   const requests = new Array(

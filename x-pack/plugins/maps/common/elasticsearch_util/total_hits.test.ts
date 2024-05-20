@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TotalHits, isTotalHitsGreaterThan } from './total_hits';
+import { isTotalHitsGreaterThan, TotalHits } from './total_hits';
 
 describe('total.relation: eq', () => {
   const totalHits = {

@@ -7,9 +7,9 @@
  */
 
 import {
+  type KqlWildcardNode,
   KQL_NODE_TYPE_WILDCARD,
   KQL_WILDCARD_SYMBOL,
-  type KqlWildcardNode,
   buildNode,
   hasLeadingWildcard,
   test as testNode,

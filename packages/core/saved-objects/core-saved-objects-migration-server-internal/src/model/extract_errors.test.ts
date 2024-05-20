@@ -7,11 +7,11 @@
  */
 
 import {
-  extractDiscardedCorruptDocs,
-  extractDiscardedUnknownDocs,
-  extractTransformFailuresReason,
   extractUnknownDocFailureReason,
+  extractDiscardedUnknownDocs,
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
+  extractDiscardedCorruptDocs,
+  extractTransformFailuresReason,
 } from './extract_errors';
 
 describe('extractUnknownDocFailureReason', () => {

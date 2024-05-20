@@ -5,41 +5,41 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiHorizontalRule,
   EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
   EuiText,
+  EuiHorizontalRule,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
   useGeneratedHtmlId,
+  EuiFormRow,
 } from '@elastic/eui';
+import { i18n as I18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   AnonymizationFieldResponse,
   PerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { i18n as I18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { find, uniqBy } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import { ContextEditor } from '../context_editor';
+import { Stats } from '../stats';
+import * as i18n from '../../data_anonymization/settings/anonymization_settings/translations';
+import { SelectedPromptContext } from '../../assistant/prompt_context/types';
+import { BatchUpdateListItem } from '../context_editor/types';
+import { updateSelectedPromptContext, getIsDataAnonymizable } from '../helpers';
+import { useAssistantContext } from '../../assistant_context';
 import { bulkUpdateAnonymizationFields } from '../../assistant/api/anonymization_fields/bulk_update_anonymization_fields';
 import { useFetchAnonymizationFields } from '../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
-import { SelectedPromptContext } from '../../assistant/prompt_context/types';
-import { useAssistantContext } from '../../assistant_context';
-import * as i18n from '../../data_anonymization/settings/anonymization_settings/translations';
-import { ContextEditor } from '../context_editor';
-import { BatchUpdateListItem } from '../context_editor/types';
-import { getIsDataAnonymizable, updateSelectedPromptContext } from '../helpers';
-import { Stats } from '../stats';
 
 export interface Props {
   onClose: () => void;

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { isLeft, isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isRight, isLeft } from 'fp-ts/lib/Either';
 import { strictKeysRt } from '.';
-import { isoToEpochRt } from '../iso_to_epoch_rt';
 import { jsonRt } from '../json_rt';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isoToEpochRt } from '../iso_to_epoch_rt';
 
 describe('strictKeysRt', () => {
   it('correctly and deeply validates object keys', () => {

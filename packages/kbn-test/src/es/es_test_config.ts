@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Url from 'url';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+import Url from 'url';
 import { systemIndicesSuperuser } from '../kbn';
 
 class EsTestConfig {

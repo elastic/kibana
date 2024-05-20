@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import {
   AuthenticationExpiredError,
@@ -22,11 +24,9 @@ import {
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
-import { type TaskInstanceFields } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
+import { type TaskInstanceFields } from '@kbn/reporting-common/types';
 import { zipObject } from 'lodash';
-import { lastValueFrom } from 'rxjs';
 
 import { CONTENT_TYPE_CSV } from '../constants';
 import { type CsvExportSettings, getExportSettings } from './lib/get_export_settings';

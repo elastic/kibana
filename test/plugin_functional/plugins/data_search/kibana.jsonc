@@ -6,7 +6,11 @@
     "id": "dataSearchPlugin",
     "server": true,
     "browser": false,
-    "configPath": ["data_search_test_plugin"],
-    "requiredPlugins": ["data"]
+    "configPath": [
+      "data_search_test_plugin"
+    ],
+    "requiredPlugins": [
+      "data"
+    ]
   }
 }

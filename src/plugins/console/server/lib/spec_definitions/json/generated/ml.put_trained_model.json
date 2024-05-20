@@ -8,8 +8,12 @@
       "defer_definition_decompression": "__flag__",
       "wait_for_completion": "__flag__"
     },
-    "methods": ["PUT"],
-    "patterns": ["_ml/trained_models/{model_id}"],
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_ml/trained_models/{model_id}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-trained-models.html",
     "availability": {
       "stack": true,

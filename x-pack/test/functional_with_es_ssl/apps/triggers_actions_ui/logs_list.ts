@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { Role, User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../cases_api_integration/common/lib/authentication';
-import { Role, User } from '../../../cases_api_integration/common/lib/authentication/types';
-import { FtrProviderContext } from '../../ftr_provider_context';
 
 const SPACE2 = {
   id: 'space-2',

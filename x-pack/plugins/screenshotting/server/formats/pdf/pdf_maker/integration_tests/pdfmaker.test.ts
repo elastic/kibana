@@ -7,8 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import path from 'path';
 import { PackageInfo } from '@kbn/core/server';
+import path from 'path';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { isUint8Array } from 'util/types';
 import { errors } from '../../../../../common';

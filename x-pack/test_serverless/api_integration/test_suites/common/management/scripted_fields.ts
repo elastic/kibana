@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DATA_VIEW_PATH } from '@kbn/data-views-plugin/server';
 import expect from 'expect';
+import { DATA_VIEW_PATH } from '@kbn/data-views-plugin/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FC, useCallback, useMemo } from 'react';
+import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { EmbeddableFactory, ReactEmbeddableSavedObject } from '@kbn/embeddable-plugin/public';
-import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectFinder, SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
+import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
+import { EmbeddableFactory, ReactEmbeddableSavedObject } from '@kbn/embeddable-plugin/public';
 import { useEmbeddablesService, usePlatformService } from '../../services';
 
 const strings = {
@@ -89,11 +89,11 @@ export const AddEmbeddableFlyout: FC<Props> = ({
           )
         )
         .map((factory) => factory.savedObjectMetaData)
-        .filter<SavedObjectMetaData<{}>>(
-          function (maybeSavedObjectMetaData): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
-            return maybeSavedObjectMetaData !== undefined;
-          }
-        )
+        .filter<SavedObjectMetaData<{}>>(function (
+          maybeSavedObjectMetaData
+        ): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
+          return maybeSavedObjectMetaData !== undefined;
+        })
         .sort((a, b) => a.type.localeCompare(b.type)),
     [
       availableEmbeddables,

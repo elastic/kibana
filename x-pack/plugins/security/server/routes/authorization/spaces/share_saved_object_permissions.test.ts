@@ -11,10 +11,10 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { CheckPrivileges } from '@kbn/security-plugin-types-server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { defineShareSavedObjectPermissionRoutes } from './share_saved_object_permissions';
 import type { RouteDefinitionParams } from '../..';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';
-import { defineShareSavedObjectPermissionRoutes } from './share_saved_object_permissions';
 
 describe('Share Saved Object Permissions', () => {
   let router: jest.Mocked<SecurityRouter>;

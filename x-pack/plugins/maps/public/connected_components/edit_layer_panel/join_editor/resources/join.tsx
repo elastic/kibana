@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
-import type { DataView, DataViewField, Query } from '@kbn/data-plugin/common';
-import { indexPatterns } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
+import { indexPatterns } from '@kbn/data-plugin/public';
+import { SpatialJoinExpression } from './spatial_join_expression';
+import { TermJoinExpression } from './term_join_expression';
+import { MetricsExpression } from './metrics_expression';
+import { WhereExpression } from './where_expression';
+import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
+import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
 import {
   AbstractESJoinSourceDescriptor,
   AggDescriptor,
@@ -19,22 +25,16 @@ import {
   JoinDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../common/descriptor_types';
-import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
-import { GlobalTimeCheckbox } from '../../../../components/global_time_checkbox';
-import { MetricsExpression } from './metrics_expression';
-import { SpatialJoinExpression } from './spatial_join_expression';
-import { TermJoinExpression } from './term_join_expression';
-import { WhereExpression } from './where_expression';
 
-import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
+import { getIndexPatternService } from '../../../../kibana_services';
 import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
+import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
+import type { JoinField } from '../join_editor';
 import { isSpatialJoin } from '../../../../classes/joins/is_spatial_join';
 import {
   isSpatialSourceComplete,
   isTermSourceComplete,
 } from '../../../../classes/sources/join_sources';
-import { getIndexPatternService } from '../../../../kibana_services';
-import type { JoinField } from '../join_editor';
 
 interface Props {
   join: Partial<JoinDescriptor>;

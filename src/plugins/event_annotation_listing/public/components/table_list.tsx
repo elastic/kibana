@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
+import React, { useCallback, useEffect, useState } from 'react';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
-import { IToasts } from '@kbn/core-notifications-browser';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
+import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
+import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { ISessionService, UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
 import type {
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
 } from '@kbn/event-annotation-common';
+import { ISessionService, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { QueryInputServices } from '@kbn/visualization-ui-components';
-import React, { useCallback, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import { GroupEditorFlyout } from './group_editor_flyout';
 
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';

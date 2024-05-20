@@ -7,14 +7,14 @@
  */
 
 import {
-  ControlGroupInput,
-  ControlPanelState,
   ControlWidth,
+  ControlPanelState,
   OPTIONS_LIST_CONTROL,
-  OptionsListEmbeddableInput,
   RANGE_SLIDER_CONTROL,
+  OptionsListEmbeddableInput,
   RangeSliderEmbeddableInput,
   getDefaultControlGroupInput,
+  ControlGroupInput,
 } from '..';
 import { mockOptionsListEmbeddableInput, mockRangeSliderEmbeddableInput } from '../mocks';
 import { removeHideExcludeAndHideExists } from './control_group_migrations';

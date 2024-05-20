@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { TestBed, registerTestBed } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
 import { AppDependencies } from '../../../..';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { ConfigurationForm } from '../../components/configuration_form';
-import { TestSubjects } from './helpers/mappings_editor.helpers';
 import { WithAppDependencies } from './helpers/setup_environment';
+import { TestSubjects } from './helpers/mappings_editor.helpers';
+import { act } from 'react-dom/test-utils';
 
 const setup = (props: any = { onUpdate() {} }, appDependencies?: any) => {
   const setupTestBed = registerTestBed<TestSubjects>(

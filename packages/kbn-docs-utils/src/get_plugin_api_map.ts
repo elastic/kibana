@@ -18,8 +18,8 @@ import type {
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
 } from './types';
-import { AdoptionTrackedAPIStats } from './types';
 import { removeBrokenLinks } from './utils';
+import { AdoptionTrackedAPIStats } from './types';
 
 export function getPluginApiMap(
   project: Project,

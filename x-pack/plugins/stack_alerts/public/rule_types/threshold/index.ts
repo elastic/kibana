@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { lazy } from 'react';
-import { IndexThresholdRuleParams } from './types';
 import { validateExpression } from './validation';
+import { IndexThresholdRuleParams } from './types';
 
 export function getRuleType(): RuleTypeModel<IndexThresholdRuleParams> {
   return {

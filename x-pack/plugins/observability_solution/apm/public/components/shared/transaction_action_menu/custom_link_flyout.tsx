@@ -7,11 +7,11 @@
 
 import { useMemo } from 'react';
 import React from 'react';
-import { Filter } from '../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { Filter } from '../../../../common/custom_link/custom_link_types';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { CreateEditCustomLinkFlyout } from '../../app/settings/custom_link/create_edit_custom_link_flyout';
 import { convertFiltersToQuery } from '../../app/settings/custom_link/create_edit_custom_link_flyout/helper';
+import { CreateEditCustomLinkFlyout } from '../../app/settings/custom_link/create_edit_custom_link_flyout';
 
 export function CustomLinkFlyout({
   transaction,

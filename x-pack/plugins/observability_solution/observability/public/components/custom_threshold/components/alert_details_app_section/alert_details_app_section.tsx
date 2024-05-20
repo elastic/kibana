@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import chroma from 'chroma-js';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,47 +18,43 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  transparentize,
   useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import {
+  ALERT_END,
+  ALERT_START,
+  ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
+  TAGS,
+} from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
-import { TimeRange } from '@kbn/es-query';
 import type {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import {
-  ALERT_END,
-  ALERT_EVALUATION_VALUES,
-  ALERT_GROUP,
-  ALERT_START,
-  TAGS,
-} from '@kbn/rule-data-utils';
-import chroma from 'chroma-js';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
-import { AlertSummaryField } from '../../../..';
-import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
-import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
-import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
-import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
+import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { TimeRange } from '@kbn/es-query';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
+import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
+import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
+import { AlertSummaryField } from '../../../..';
 import { AlertParams } from '../../types';
 import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../custom_threshold';
-import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
-import { CustomThresholdAlert, CustomThresholdRule } from '../types';
-import { Groups } from './groups';
-import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and_tooltip';
+import { CustomThresholdRule, CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
+import { Groups } from './groups';
 import { Tags } from './tags';
+import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
+import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and_tooltip';
 
 interface AppSectionProps {
   alert: CustomThresholdAlert;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
 export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
 

@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
-import differenceInMilliseconds from 'date-fns/differenceInMilliseconds';
 import type { Response } from 'superagent';
+import differenceInMilliseconds from 'date-fns/differenceInMilliseconds';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

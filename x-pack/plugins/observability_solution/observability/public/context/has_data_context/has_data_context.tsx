@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import { asyncForEach } from '@kbn/std';
 import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
-import { ApmIndicesConfig } from '../../../common/typings';
-import { useDatePickerContext } from '../../hooks/use_date_picker_context';
-import { ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
+import { asyncForEach } from '@kbn/std';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../utils/kibana_react';
 import {
   ALERT_APP,
@@ -24,7 +21,10 @@ import {
   UX_APP,
 } from '../constants';
 import { getDataHandler } from './data_handler';
+import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { getObservabilityAlerts } from './get_observability_alerts';
+import { ObservabilityFetchDataPlugins } from '../../typings/fetch_overview_data';
+import { ApmIndicesConfig } from '../../../common/typings';
 
 export type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 

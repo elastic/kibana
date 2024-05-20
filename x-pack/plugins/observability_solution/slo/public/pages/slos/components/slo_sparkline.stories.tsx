@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { HistoricalSummaryResponse } from '@kbn/slo-schema';
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import {
   DEGRADING_FAST_ROLLING_SLO,
   HEALTHY_RANDOM_ROLLING_SLO,
   HEALTHY_ROLLING_SLO,
   HEALTHY_STEP_DOWN_ROLLING_SLO,
-  NO_DATA_TO_HEALTHY_ROLLING_SLO,
   historicalSummaryData,
+  NO_DATA_TO_HEALTHY_ROLLING_SLO,
 } from '../../../data/slo/historical_summary_data';
-import { SloSparkline as Component, Props } from './slo_sparkline';
+import { Props, SloSparkline as Component } from './slo_sparkline';
 
 export default {
   component: Component,

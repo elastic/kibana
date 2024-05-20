@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { CoverageOverviewDashboard } from './coverage_overview_dashboard';
+import { SecurityPageName } from '../../../../app/types';
 import { CoverageOverviewDashboardContextProvider } from './coverage_overview_dashboard_context';
+import { CoverageOverviewDashboard } from './coverage_overview_dashboard';
 
 export const CoverageOverviewPage = () => (
   <>

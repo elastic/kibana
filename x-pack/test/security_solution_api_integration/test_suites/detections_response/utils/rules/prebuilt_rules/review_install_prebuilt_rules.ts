@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ReviewRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route';
 import { REVIEW_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/urls';
+import { ReviewRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route';
 import type SuperTest from 'supertest';
 
 /**

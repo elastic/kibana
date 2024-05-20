@@ -1,5 +1,3 @@
-import { readdirSync } from 'fs';
-import path from 'path';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +8,8 @@ import path from 'path';
 import datemath from '@kbn/datemath';
 import { Argv } from 'yargs';
 import yargs from 'yargs/yargs';
+import { readdirSync } from 'fs';
+import path from 'path';
 import { intervalToMs } from './utils/interval_to_ms';
 import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { startHistoricalDataUpload } from './utils/start_historical_data_upload';

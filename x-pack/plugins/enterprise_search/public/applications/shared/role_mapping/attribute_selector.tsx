@@ -9,9 +9,9 @@ import React from 'react';
 
 import { EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { AttributeExamples, AttributeName } from '../types';
+import { AttributeName, AttributeExamples } from '../types';
 
-import { ATTRIBUTE_VALUE_LABEL, EXTERNAL_ATTRIBUTE_LABEL, REQUIRED_LABEL } from './constants';
+import { ATTRIBUTE_VALUE_LABEL, REQUIRED_LABEL, EXTERNAL_ATTRIBUTE_LABEL } from './constants';
 
 interface Props {
   attributeName: AttributeName;

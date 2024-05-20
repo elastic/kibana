@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import * as rt from 'io-ts';
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 
 const CloudAccountRT = rt.type({
   value: rt.string,

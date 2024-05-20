@@ -6,15 +6,15 @@
  */
 
 import type { ESFilter } from '@kbn/es-types';
+import { getQueryStringFilter } from './search/get_query_string_filter';
+import { UMElasticsearchQueryFn } from '../adapters';
 import { CONTEXT_DEFAULTS } from '../../../../common/constants';
+import { Snapshot } from '../../../../common/runtime_types';
+import { QueryContext } from './search';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { Snapshot } from '../../../../common/runtime_types';
-import { UMElasticsearchQueryFn } from '../adapters';
-import { QueryContext } from './search';
-import { getQueryStringFilter } from './search/get_query_string_filter';
 
 export interface GetSnapshotCountParams {
   dateRangeStart: string;

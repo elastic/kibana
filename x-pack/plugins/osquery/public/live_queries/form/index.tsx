@@ -8,29 +8,29 @@
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import { find, isEmpty, isNumber, pickBy } from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { FormProvider, useForm as useHookForm } from 'react-hook-form';
+import { useForm as useHookForm, FormProvider } from 'react-hook-form';
+import { isEmpty, find, pickBy, isNumber } from 'lodash';
 
 import { QUERY_TIMEOUT } from '../../../common/constants';
 import {
   containsDynamicQuery,
   replaceParamsQuery,
 } from '../../../common/utils/replace_params_query';
-import { useLiveQueryDetails } from '../../actions/use_live_query_details';
-import type { AgentSelection } from '../../agents/types';
-import { AlertAttachmentContext } from '../../common/contexts';
+import { QueryPackSelectable } from './query_pack_selectable';
+import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import { useKibana } from '../../common/lib/kibana';
-import { usePacks } from '../../packs/use_packs';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { SavedQueryFlyout } from '../../saved_queries';
-import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
+import { usePacks } from '../../packs/use_packs';
+import { useCreateLiveQuery } from '../use_create_live_query_action';
+import { useLiveQueryDetails } from '../../actions/use_live_query_details';
+import type { AgentSelection } from '../../agents/types';
+import LiveQueryQueryField from './live_query_query_field';
+import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
-import { useCreateLiveQuery } from '../use_create_live_query_action';
-import { AgentsTableField } from './agents_table_field';
-import LiveQueryQueryField from './live_query_query_field';
-import { QueryPackSelectable } from './query_pack_selectable';
+import { AlertAttachmentContext } from '../../common/contexts';
 
 export interface LiveQueryFormFields {
   alertIds?: string[];

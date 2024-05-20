@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { APP_ID } from '../../../../common/constants';
 
 const MAX_CASES_TO_SHOW = 3;
 const RecentCasesComponent = () => {

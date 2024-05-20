@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { StorageContext } from '.';
 import { EventBus } from './event_bus';
-import { createMockedStorage } from './mocks';
 import { MSearchService } from './msearch';
 import { ContentRegistry } from './registry';
+import { createMockedStorage } from './mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { StorageContext } from '.';
 
 const SEARCH_LISTING_LIMIT = 100;
 const SEARCH_PER_PAGE = 10;

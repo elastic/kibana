@@ -1,5 +1,3 @@
-import { EuiNotificationBadge, EuiTab, EuiTabs } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,14 +5,16 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React, { useState, useMemo, useCallback } from 'react';
-import type { Process, ProcessEvent } from '../../../common';
-import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
+import { EuiTabs, EuiTab, EuiNotificationBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { EuiTabProps } from '../../types';
-import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
-import { DetailPanelMetadataTab } from '../detail_panel_metadata_tab';
-import { DetailPanelProcessTab } from '../detail_panel_process_tab';
+import type { Process, ProcessEvent } from '../../../common';
 import { getSelectedTabContent } from './helpers';
+import { DetailPanelProcessTab } from '../detail_panel_process_tab';
+import { DetailPanelMetadataTab } from '../detail_panel_metadata_tab';
 import { useStyles } from './styles';
+import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
+import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
 interface SessionViewDetailPanelDeps {
   index: string;

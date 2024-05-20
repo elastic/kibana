@@ -32,18 +32,15 @@ export const computeExpectationsAndRanges = (
 
   const ranges = tempPercentiles
     .map((tP) => Math.round(tP))
-    .reduce(
-      (p, to) => {
-        const from = p[p.length - 1]?.to;
-        if (from !== undefined) {
-          p.push({ from, to });
-        } else {
-          p.push({ to });
-        }
-        return p;
-      },
-      [] as Array<{ from?: number; to?: number }>
-    );
+    .reduce((p, to) => {
+      const from = p[p.length - 1]?.to;
+      if (from !== undefined) {
+        p.push({ from, to });
+      } else {
+        p.push({ to });
+      }
+      return p;
+    }, [] as Array<{ from?: number; to?: number }>);
   if (ranges.length > 0) {
     ranges.push({ from: ranges[ranges.length - 1].to });
   }

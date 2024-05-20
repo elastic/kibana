@@ -7,17 +7,17 @@
 
 import { memoize } from 'lodash';
 
-import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { AIAssistantService } from '../ai_assistant_service';
-import { appContextService } from '../services/app_context';
 import {
   ElasticAssistantApiRequestHandlerContext,
   ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantRequestHandlerContext,
 } from '../types';
+import { AIAssistantService } from '../ai_assistant_service';
+import { appContextService } from '../services/app_context';
 
 export interface IRequestContextFactory {
   create(

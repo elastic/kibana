@@ -7,9 +7,9 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { registerGetMessageByIdRoute, registerPostMessageRoute } from './message_routes';
-import { registerGetRandomNumberBetweenRoute } from './random_number_between_generator';
 import { registerGetRandomNumberRoute } from './random_number_generator';
+import { registerGetRandomNumberBetweenRoute } from './random_number_between_generator';
+import { registerGetMessageByIdRoute, registerPostMessageRoute } from './message_routes';
 
 export function registerRoutes(router: IRouter) {
   registerGetRandomNumberRoute(router);

@@ -6,11 +6,11 @@
  */
 
 import type {
-  IKibanaResponse,
-  KibanaRequest,
-  KibanaResponseFactory,
   Logger,
   PluginInitializerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
   RouteValidatorConfig,
 } from '@kbn/core/server';
 

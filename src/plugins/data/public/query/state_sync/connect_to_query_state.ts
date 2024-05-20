@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { COMPARE_ALL_OPTIONS, FilterStateStore, compareFilters } from '@kbn/es-query';
-import { BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
-import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs';
+import _ from 'lodash';
+import { COMPARE_ALL_OPTIONS, compareFilters, FilterStateStore } from '@kbn/es-query';
+import { BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState } from '../query_state';
-import { validateTimeRange } from '../timefilter';
 import { QueryStateChange } from './types';
+import { validateTimeRange } from '../timefilter';
 
 /**
  * Helper to setup two-way syncing of global data and a state container

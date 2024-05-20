@@ -14,9 +14,9 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import merge from 'lodash/merge';
+import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
-import semverValid from 'semver/functions/valid';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,
@@ -32,18 +32,18 @@ import {
 } from '../../../common/constants';
 import type {
   AwsCredentialsType,
-  CloudSecurityPolicyTemplate,
   PostureInput,
+  CloudSecurityPolicyTemplate,
 } from '../../../common/types_old';
 import { cloudPostureIntegrations } from '../../common/constants';
+import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './aws_credentials_form/get_aws_credentials_form_options';
-import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
-import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
 import { GCP_CREDENTIALS_TYPE, GCP_SETUP_ACCESS } from './gcp_credentials_form/gcp_credential_form';
+import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';

@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { Pagination } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import type { Rule } from '@kbn/securitysolution-exception-list-components';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListType,
@@ -15,6 +12,9 @@ import type {
   UpdateExceptionListItemSchema,
   UpdateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import type { Pagination } from '@elastic/eui';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { Rule } from '@kbn/securitysolution-exception-list-components';
 
 export interface FetchItems {
   http: HttpSetup | undefined;

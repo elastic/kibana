@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_USERS_TABLE, HEADER_SUBTITLE } from '../../../screens/users/all_users';
+import { HEADER_SUBTITLE, ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { ANOMALIES_TAB, ANOMALIES_TAB_CONTENT } from '../../../screens/users/user_anomalies';
 import {
   AUTHENTICATIONS_TAB,
@@ -17,8 +17,8 @@ import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../../screens/users/u
 import { login } from '../../../tasks/login';
 import { visitUserDetailsPage, visitWithTimeRange } from '../../../tasks/navigation';
 
-import { waitForTabToBeLoaded } from '../../../tasks/common';
 import { usersUrl } from '../../../urls/navigation';
+import { waitForTabToBeLoaded } from '../../../tasks/common';
 
 describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {

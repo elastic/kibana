@@ -7,9 +7,9 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { ChartCollapse } from '.';
-import { TestProviders } from '../../../../../common/mock';
 import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
+import { TestProviders } from '../../../../../common/mock';
+import { ChartCollapse } from '.';
 import { useSummaryChartData } from '../../../../components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 import * as mock from './mock_data';
 

@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import type {
   MacosLinuxConditionEntry,
-  OperatorFieldIds,
   WindowsConditionEntry,
+  OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
 
 export const NAME_LABEL = i18n.translate('xpack.securitySolution.trustedApps.name.label', {

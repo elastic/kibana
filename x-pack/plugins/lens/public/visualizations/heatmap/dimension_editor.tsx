@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { CustomizablePalette, PaletteRegistry } from '@kbn/coloring';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
+import { PalettePanelContainer } from '../../shared_components';
 import './dimension_editor.scss';
 import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';

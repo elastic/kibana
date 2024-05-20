@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { getPolicyPayload, getTemplatePayload } from './fixtures';
-import { getRandomString, initElasticsearchHelpers } from './lib';
-import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
+import { initElasticsearchHelpers, getRandomString } from './lib';
+import { getTemplatePayload, getPolicyPayload } from './fixtures';
 import { registerHelpers as registerTemplatesHelpers } from './templates.helpers';
+import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

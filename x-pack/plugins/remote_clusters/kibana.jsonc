@@ -6,9 +6,24 @@
     "id": "remoteClusters",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "remote_clusters"],
-    "requiredPlugins": ["licensing", "management", "indexManagement", "features", "share"],
-    "optionalPlugins": ["usageCollection", "cloud"],
-    "requiredBundles": ["kibanaReact", "esUiShared"]
+    "configPath": [
+      "xpack",
+      "remote_clusters"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "indexManagement",
+      "features",
+      "share"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "cloud"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
   }
 }

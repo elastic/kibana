@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LogsExplorerPluginStart } from '@kbn/logs-explorer-plugin/public';
-import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { SloPublicStart } from '@kbn/slo-plugin/public';
+import { AppMountParameters, ScopedHistory } from '@kbn/core/public';
+import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
+import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
+import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { SloPublicStart } from '@kbn/slo-plugin/public';
 import {
-  ObservabilityLogsExplorerLocationState,
   ObservabilityLogsExplorerLocators,
+  ObservabilityLogsExplorerLocationState,
 } from '../common/locators';
 
 export interface ObservabilityLogsExplorerPluginSetup {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import type { Story } from '@storybook/react';
 import React from 'react';
+import type { Story } from '@storybook/react';
+import { EuiIcon } from '@elastic/eui';
 import { ExpandablePanel } from './expandable_panel';
 
 export default {

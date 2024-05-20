@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { mkdirSync, writeFileSync } from 'fs';
-import { dirname, relative, resolve } from 'path';
+import { resolve, dirname, relative } from 'path';
+import { writeFileSync, mkdirSync } from 'fs';
 
 import xmlBuilder from 'xmlbuilder';
 
-import { AggregatedResult, BaseReporter, Test } from '@jest/reporters';
-import type { Config } from '@jest/types';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { Config } from '@jest/types';
+import { AggregatedResult, Test, BaseReporter } from '@jest/reporters';
 
 import { escapeCdata } from '../../mocha/xml';
 import { getUniqueJunitReportPath } from '../../report_path';

@@ -7,19 +7,19 @@
  */
 
 import {
-  getJsDependencyPathsMock,
+  renderTemplateMock,
   getPluginsBundlePathsMock,
   getThemeTagMock,
-  renderTemplateMock,
+  getJsDependencyPathsMock,
 } from './bootstrap_renderer.test.mocks';
 
 import { PackageInfo } from '@kbn/config';
 import { AuthStatus } from '@kbn/core-http-server';
-import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { bootstrapRendererFactory, BootstrapRenderer } from './bootstrap_renderer';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
-import { BootstrapRenderer, bootstrapRendererFactory } from './bootstrap_renderer';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   branch: 'master',

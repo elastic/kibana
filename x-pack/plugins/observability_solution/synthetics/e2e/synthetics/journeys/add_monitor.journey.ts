@@ -1,4 +1,3 @@
-import { Page, expect, journey, step } from '@elastic/synthetics';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +5,9 @@ import { Page, expect, journey, step } from '@elastic/synthetics';
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { FormMonitorType } from '../../../common/runtime_types';
+import { journey, step, expect, Page } from '@elastic/synthetics';
 import { recordVideo } from '../../helpers/record_video';
+import { FormMonitorType } from '../../../common/runtime_types';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 const customLocation = process.env.SYNTHETICS_TEST_LOCATION;

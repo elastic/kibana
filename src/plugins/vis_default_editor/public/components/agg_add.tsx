@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -15,11 +16,10 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { AggGroupNames, IAggConfig } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
-import React, { useState } from 'react';
 
 interface DefaultEditorAggAddProps {
   group?: IAggConfig[];

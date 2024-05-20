@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { panAnimationDuration } from '@kbn/security-solution-plugin/public/resolver/store/camera/scaling_constants';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -92,9 +92,9 @@ export default function ({
           let button: WebElementWrapper;
           beforeEach(async () => {
             // hover the button
-            button = await (await element()).findByCssSelector(
-              `button[data-test-resolver-node-id="${nodeID}"]`
-            );
+            button = await (
+              await element()
+            ).findByCssSelector(`button[data-test-resolver-node-id="${nodeID}"]`);
             await button.moveMouseTo();
           });
           it('should render as expected', async () => {
@@ -143,9 +143,9 @@ export default function ({
                   beforeEach(async () => {
                     firstPill = async () => {
                       // select a pill
-                      const pills = await (await element()).findAllByTestSubject(
-                        'resolver:map:node-submenu-item'
-                      );
+                      const pills = await (
+                        await element()
+                      ).findAllByTestSubject('resolver:map:node-submenu-item');
                       return pills[0];
                     };
 

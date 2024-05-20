@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiIcon, EuiPopover, useEuiFontSize, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type { SearchResponseWarning } from '../../types';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { EuiButton, EuiIcon, EuiPopover, useEuiTheme, useEuiFontSize } from '@elastic/eui';
 import { SearchResponseWarningsBadgePopoverContent } from './badge_popover_content';
+import type { SearchResponseWarning } from '../../types';
 
 interface Props {
   warnings: SearchResponseWarning[];

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { buildAlertFieldsRequest as buildFieldsRequest } from '@kbn/alerts-as-data-utils';
-import type { IEsSearchResponse } from '@kbn/search-types';
 import { cloneDeep, getOr } from 'lodash/fp';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import { buildAlertFieldsRequest as buildFieldsRequest } from '@kbn/alerts-as-data-utils';
 import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
   EventHit,
-  TimelineEdges,
   TimelineEventsAllStrategyResponse,
+  TimelineEdges,
 } from '../../../../../../common/search_strategy';
-import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { TIMELINE_EVENTS_FIELDS } from '../../helpers/constants';
-import { formatTimelineData } from '../../helpers/format_timeline_data';
 import { TimelineFactory } from '../../types';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
+import { formatTimelineData } from '../../helpers/format_timeline_data';
+import { TIMELINE_EVENTS_FIELDS } from '../../helpers/constants';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
   buildDsl: ({ authFilter, ...options }) => {

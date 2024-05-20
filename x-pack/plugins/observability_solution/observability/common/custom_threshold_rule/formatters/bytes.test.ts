@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createBytesFormatter } from './bytes';
 import { InfraWaffleMapDataFormat } from './types';
+import { createBytesFormatter } from './bytes';
 
 describe('createDataFormatter', () => {
   it('should format bytes as bytesDecimal', () => {

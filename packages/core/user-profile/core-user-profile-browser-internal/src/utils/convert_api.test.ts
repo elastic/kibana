@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import { of } from 'rxjs';
+import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import type { InternalUserProfileServiceStart } from '../internal_contracts';
 import { convertUserProfileAPI } from './convert_api';
 

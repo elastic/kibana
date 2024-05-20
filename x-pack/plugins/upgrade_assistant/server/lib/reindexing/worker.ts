@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { FakeRequest, IClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from '@kbn/core/server';
+import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import moment from 'moment';
-import { Subject, exhaustMap, takeUntil, timer } from 'rxjs';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { Credential, CredentialStore } from './credential_store';
-import { isQueuedOp, queuedOpHasStarted, sortAndOrderReindexOperations } from './op_utils';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
+import { sortAndOrderReindexOperations, queuedOpHasStarted, isQueuedOp } from './op_utils';
 
 const POLL_INTERVAL = 30000;
 // If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.

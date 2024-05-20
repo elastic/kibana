@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { DataStream } from '@kbn/index-management-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { keyBy } from 'lodash';
+import { DataStream } from '@kbn/index-management-plugin/common';
 import { useContext } from 'react';
+import { keyBy } from 'lodash';
+import { getDslPolicies } from './api';
 import { SyntheticsRefreshContext } from '../../../contexts';
 import { formatBytes } from '../../step_details_page/hooks/use_object_metrics';
 import { formatAge } from '../data_retention/common';
 import { policyLabels } from '../data_retention/policy_labels';
-import { getDslPolicies } from './api';
 
 export type DataStreamStatus = DataStream & {
   dataStreamName?: string;

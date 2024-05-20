@@ -9,9 +9,9 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
 
 import { useQuickTimeRanges } from '@kbn/observability-shared-plugin/public';
-import { ReportTypes } from '../../configurations/constants';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesUrl } from '../../types';
+import { ReportTypes } from '../../configurations/constants';
 
 interface Props {
   seriesId: number;

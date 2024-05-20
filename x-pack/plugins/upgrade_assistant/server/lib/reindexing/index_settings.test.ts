@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getMockVersionInfo } from '../__fixtures__/version';
 import { versionService } from '../version';
+import { getMockVersionInfo } from '../__fixtures__/version';
 
 import {
   generateNewIndexName,

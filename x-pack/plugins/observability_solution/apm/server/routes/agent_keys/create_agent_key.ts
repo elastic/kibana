@@ -7,8 +7,8 @@
 
 import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import Boom from '@hapi/boom';
-import { ClusterPrivilegeType } from '../../../common/privilege_type';
 import { ApmPluginRequestHandlerContext } from '../typings';
+import { ClusterPrivilegeType } from '../../../common/privilege_type';
 
 const resource = '*';
 const CLUSTER_PRIVILEGES = [ClusterPrivilegeType.MANAGE_OWN_API_KEY];

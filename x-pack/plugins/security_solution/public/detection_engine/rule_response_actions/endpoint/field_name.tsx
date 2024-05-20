@@ -1,9 +1,3 @@
-import {
-  UseField,
-  getFieldValidityAndErrorMessage,
-  useFormContext,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,11 +5,17 @@ import {
  * 2.0.
  */
 import React, { useMemo, useEffect } from 'react';
+import {
+  getFieldValidityAndErrorMessage,
+  UseField,
+  useFormData,
+  useFormContext,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
+import { EuiComboBox, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import ECSSchema from './v.8.10.0_process.json';
 
 interface FieldNameFieldProps {

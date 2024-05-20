@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CreateExceptionListSchema,
@@ -14,18 +13,19 @@ import {
   ExceptionListItemSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { fetchRule, getSimpleRule, createExceptionList } from '../../../../utils';
 import {
-  createAlertsIndex,
   createRule,
-  deleteAllAlerts,
+  createAlertsIndex,
   deleteAllRules,
+  deleteAllAlerts,
 } from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllExceptions,
   removeExceptionListItemServerGeneratedProperties,
 } from '../../../../../lists_and_exception_lists/utils';
-import { createExceptionList, fetchRule, getSimpleRule } from '../../../../utils';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
   description: 'Exception item for rule default exception list',

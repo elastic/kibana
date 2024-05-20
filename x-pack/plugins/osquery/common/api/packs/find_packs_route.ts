@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { toNumberRt } from '@kbn/io-ts-utils';
 
 export const findPacksRequestQuerySchema = t.type({
   page: t.union([toNumberRt, t.undefined]),

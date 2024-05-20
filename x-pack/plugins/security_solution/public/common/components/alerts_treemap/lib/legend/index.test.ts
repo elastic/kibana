@@ -7,17 +7,17 @@
 
 import { omit } from 'lodash/fp';
 
-import { TableId } from '@kbn/securitysolution-data-table';
+import type { LegendItem } from '../../../charts/draggable_legend_item';
+import { getRiskScorePalette, RISK_SCORE_STEPS } from '../chart_palette';
+import { bucketsWithStackByField1, maxRiskSubAggregations } from '../flatten/mocks/mock_buckets';
 import {
   getFirstGroupLegendItems,
-  getLegendItemFromFlattenedBucket,
   getLegendItemFromRawBucket,
+  getLegendItemFromFlattenedBucket,
   getLegendMap,
 } from '.';
-import type { LegendItem } from '../../../charts/draggable_legend_item';
 import type { FlattenedBucket, RawBucket } from '../../types';
-import { RISK_SCORE_STEPS, getRiskScorePalette } from '../chart_palette';
-import { bucketsWithStackByField1, maxRiskSubAggregations } from '../flatten/mocks/mock_buckets';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 describe('legend', () => {
   const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS);

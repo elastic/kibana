@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import type { ESFilter } from '@kbn/es-types';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { uniq } from 'lodash';
 import { ApmDataSource } from '../../../../../common/data_source';

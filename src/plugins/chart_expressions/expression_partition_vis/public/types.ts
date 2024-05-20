@@ -1,5 +1,3 @@
-import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,15 +7,17 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
  */
 import type {
   CellValueContext,
-  MultiValueClickContext,
   ValueClickContext,
+  MultiValueClickContext,
 } from '@kbn/embeddable-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import {
   Plugin as ExpressionsPublicPlugin,
   ExpressionsServiceStart,
 } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export type ExpressionPartitionVisPluginSetup = void;
 export type ExpressionPartitionVisPluginStart = void;

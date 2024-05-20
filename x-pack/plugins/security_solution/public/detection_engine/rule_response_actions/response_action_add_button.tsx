@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -14,12 +15,11 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useLicense } from '../../common/hooks/use_license';
-import { useFormData } from '../../shared_imports';
 import type { ResponseActionType } from './get_supported_response_actions';
+import { useFormData } from '../../shared_imports';
 
 interface IResponseActionsAddButtonProps {
   supportedResponseActionTypes: ResponseActionType[];

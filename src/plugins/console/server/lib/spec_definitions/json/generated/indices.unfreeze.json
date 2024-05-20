@@ -6,14 +6,34 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "allow_no_indices": "__flag__",
-      "expand_wildcards": ["all", "open", "closed", "hidden", "none"],
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
       "ignore_unavailable": "__flag__",
-      "master_timeout": ["30s", "-1", "0"],
-      "timeout": ["30s", "-1", "0"],
-      "wait_for_active_shards": ["1"]
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "wait_for_active_shards": [
+        "1"
+      ]
     },
-    "methods": ["POST"],
-    "patterns": ["{index}/_unfreeze"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_unfreeze"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/unfreeze-index-api.html",
     "availability": {
       "stack": true,

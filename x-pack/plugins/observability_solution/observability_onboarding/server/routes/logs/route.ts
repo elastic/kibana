@@ -6,12 +6,12 @@
  */
 
 import * as t from 'io-ts';
-import { getFallbackKibanaUrl } from '../../lib/get_fallback_urls';
-import { saveObservabilityOnboardingFlow } from '../../lib/state';
-import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { createShipperApiKey } from './api_key/create_shipper_api_key';
+import { getFallbackKibanaUrl } from '../../lib/get_fallback_urls';
 import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
+import { saveObservabilityOnboardingFlow } from '../../lib/state';
+import { createShipperApiKey } from './api_key/create_shipper_api_key';
+import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 
 const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/privileges',
@@ -50,8 +50,9 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     // explicitly deciding to not append the current version.
     const includeCurrentVersion = kibanaVersion.endsWith('-SNAPSHOT') ? false : undefined;
 
-    const elasticAgentVersion =
-      await agentClient.getLatestAgentAvailableVersion(includeCurrentVersion);
+    const elasticAgentVersion = await agentClient.getLatestAgentAvailableVersion(
+      includeCurrentVersion
+    );
 
     const kibanaUrl =
       core.setup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl

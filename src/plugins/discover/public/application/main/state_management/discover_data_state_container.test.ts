@@ -1,6 +1,3 @@
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
-import { waitFor } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,12 +6,15 @@ import { waitFor } from '@testing-library/react';
  * Side Public License, v 1.
  */
 import { BehaviorSubject, Subject } from 'rxjs';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
-import { savedSearchMockWithESQL } from '../../../__mocks__/saved_search';
+import { waitFor } from '@testing-library/react';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../__mocks__/services';
+import { savedSearchMockWithESQL } from '../../../__mocks__/saved_search';
 import { FetchStatus } from '../../types';
-import { fetchDocuments } from '../data_fetching/fetch_documents';
 import { DataDocuments$, RecordRawType } from './discover_data_state_container';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { fetchDocuments } from '../data_fetching/fetch_documents';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
+import moment from 'moment-timezone';
+import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  EuiButton,
-  EuiCallOut,
+  EuiSkeletonText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSkeletonText,
-  EuiSpacer,
   EuiText,
+  EuiButton,
+  EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import moment from 'moment-timezone';
-import React, { useEffect } from 'react';
 
 import { CLOUD_SNAPSHOT_REPOSITORY } from '../../../../../common/constants';
-import { ResponseError } from '../../../../../common/types';
 import { useAppContext } from '../../../app_context';
-import { UIM_BACKUP_DATA_CLOUD_CLICK, uiMetricService } from '../../../lib/ui_metric';
+import { ResponseError } from '../../../../../common/types';
+import { uiMetricService, UIM_BACKUP_DATA_CLOUD_CLICK } from '../../../lib/ui_metric';
 
 interface Props {
   cloudSnapshotsUrl: string;

@@ -8,8 +8,8 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { UtilityBarAction } from '.';
 import { TestProviders } from '../../mock';
+import { UtilityBarAction } from '.';
 
 describe('UtilityBarAction', () => {
   test('it renders', () => {

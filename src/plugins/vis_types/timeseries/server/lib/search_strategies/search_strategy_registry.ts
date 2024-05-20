@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { FetchedIndexPattern } from '../../../common/types';
 import { VisTypeTimeseriesRequest, VisTypeTimeseriesRequestHandlerContext } from '../../types';
 import { AbstractSearchStrategy } from './strategies';
+import type { FetchedIndexPattern } from '../../../common/types';
 
 export class SearchStrategyRegistry {
   private strategies: AbstractSearchStrategy[] = [];

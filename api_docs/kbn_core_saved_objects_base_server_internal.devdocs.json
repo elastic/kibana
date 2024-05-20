@@ -99,7 +99,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/saved_objects_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -232,7 +234,9 @@
         "description": [
           "\nAsserts the provided number or string is a valid model version, and returns it.\n\nA valid model version is a positive integer.\n"
         ],
-        "signature": ["(modelVersion: string | number) => number"],
+        "signature": [
+          "(modelVersion: string | number) => number"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -244,7 +248,9 @@
             "tags": [],
             "label": "modelVersion",
             "description": [],
-            "signature": ["string | number"],
+            "signature": [
+              "string | number"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -438,7 +444,9 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/decode_request_version.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -471,7 +479,9 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/decode_version.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -515,7 +525,9 @@
                 "tags": [],
                 "label": "_seq_no",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_hit_version.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -527,7 +539,9 @@
                 "tags": [],
                 "label": "_primary_term",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_hit_version.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -547,7 +561,9 @@
         "description": [
           "\nEncode the sequence params into an \"opaque\" version string\nthat can be used in the saved object API in place of numeric\nversion numbers"
         ],
-        "signature": ["(seqNo: number | undefined, primaryTerm: number | undefined) => string"],
+        "signature": [
+          "(seqNo: number | undefined, primaryTerm: number | undefined) => string"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_version.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -559,7 +575,9 @@
             "tags": [],
             "label": "seqNo",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_version.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -572,7 +590,9 @@
             "tags": [],
             "label": "primaryTerm",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/version/encode_version.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -713,7 +733,9 @@
             "tags": [],
             "label": "mappings",
             "description": [],
-            "signature": ["SavedObjectsTypeMappingDefinitions"],
+            "signature": [
+              "SavedObjectsTypeMappingDefinitions"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -744,7 +766,9 @@
             "tags": [],
             "label": "{\n  type,\n  typeRegistry,\n  defaultIndex,\n  kibanaVersion,\n}",
             "description": [],
-            "signature": ["GetIndexForTypeOptions"],
+            "signature": [
+              "GetIndexForTypeOptions"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_index_for_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -865,7 +889,9 @@
         "type": "Function",
         "tags": [],
         "label": "getLatestModelVersion",
-        "description": ["\nReturns the latest registered model version number for the given type."],
+        "description": [
+          "\nReturns the latest registered model version number for the given type."
+        ],
         "signature": [
           "(type: ",
           {
@@ -930,7 +956,9 @@
             "tags": [],
             "label": "{\n  currentVersions,\n  targetVersions,\n  deletedTypes,\n}",
             "description": [],
-            "signature": ["GetModelVersionDeltaOpts"],
+            "signature": [
+              "GetModelVersionDeltaOpts"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/get_version_delta.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -946,7 +974,9 @@
         "type": "Function",
         "tags": [],
         "label": "getModelVersionMapForTypes",
-        "description": ["\nBuild a version map for the given types."],
+        "description": [
+          "\nBuild a version map for the given types."
+        ],
         "signature": [
           "(types: ",
           {
@@ -1057,7 +1087,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["string | string[]"],
+            "signature": [
+              "string | string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1099,7 +1131,9 @@
             "tags": [],
             "label": "mapping",
             "description": [],
-            "signature": ["IndexMapping"],
+            "signature": [
+              "IndexMapping"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_root_properties.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1139,7 +1173,9 @@
             "tags": [],
             "label": "mappings",
             "description": [],
-            "signature": ["IndexMapping"],
+            "signature": [
+              "IndexMapping"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_root_properties_objects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1155,8 +1191,14 @@
         "type": "Function",
         "tags": [],
         "label": "getTypes",
-        "description": ["\n Get the names of the types defined in the EsMappingsDsl"],
-        "signature": ["(mappings: ", "IndexMapping", ") => string[]"],
+        "description": [
+          "\n Get the names of the types defined in the EsMappingsDsl"
+        ],
+        "signature": [
+          "(mappings: ",
+          "IndexMapping",
+          ") => string[]"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1168,7 +1210,9 @@
             "tags": [],
             "label": "mappings",
             "description": [],
-            "signature": ["IndexMapping"],
+            "signature": [
+              "IndexMapping"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1373,7 +1417,9 @@
             "tags": [],
             "label": "{\n  meta,\n  source,\n  knownTypes,\n}",
             "description": [],
-            "signature": ["GetModelVersionsFromMappingMetaOpts"],
+            "signature": [
+              "GetModelVersionsFromMappingMetaOpts"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1416,7 +1462,9 @@
             "tags": [],
             "label": "{\n  mappings,\n  source,\n  knownTypes,\n}",
             "description": [],
-            "signature": ["GetModelVersionsFromMappingsOpts"],
+            "signature": [
+              "GetModelVersionsFromMappingsOpts"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/model_version_from_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1435,7 +1483,9 @@
         "description": [
           "\nReturn true if the given semver version is a virtual model version.\nVirtual model versions are version which major is the {@link modelVersionVirtualMajor}\n"
         ],
-        "signature": ["(version: string) => boolean"],
+        "signature": [
+          "(version: string) => boolean"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1447,7 +1497,9 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1463,8 +1515,12 @@
         "type": "Function",
         "tags": [],
         "label": "modelVersionToVirtualVersion",
-        "description": ["\nReturns the virtual version associated with the given model version\n"],
-        "signature": ["(modelVersion: string | number) => string"],
+        "description": [
+          "\nReturns the virtual version associated with the given model version\n"
+        ],
+        "signature": [
+          "(modelVersion: string | number) => string"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1476,7 +1532,9 @@
             "tags": [],
             "label": "modelVersion",
             "description": [],
-            "signature": ["string | number"],
+            "signature": [
+              "string | number"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1492,8 +1550,12 @@
         "type": "Function",
         "tags": [],
         "label": "virtualVersionToModelVersion",
-        "description": ["\nConverts a virtual model version to its model version.\n"],
-        "signature": ["(virtualVersion: string) => number"],
+        "description": [
+          "\nConverts a virtual model version to its model version.\n"
+        ],
+        "signature": [
+          "(virtualVersion: string) => number"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1505,7 +1567,9 @@
             "tags": [],
             "label": "virtualVersion",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/conversion.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1535,7 +1599,9 @@
             "tags": [],
             "label": "greater",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1547,7 +1613,9 @@
             "tags": [],
             "label": "lesser",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1559,7 +1627,9 @@
             "tags": [],
             "label": "equal",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1584,8 +1654,12 @@
             "type": "Object",
             "tags": [],
             "label": "appVersions",
-            "description": ["The latest model version of the types registered in the application"],
-            "signature": ["{ [x: string]: string; }"],
+            "description": [
+              "The latest model version of the types registered in the application"
+            ],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1596,8 +1670,12 @@
             "type": "Object",
             "tags": [],
             "label": "indexVersions",
-            "description": ["The model version stored in the index"],
-            "signature": ["{ [x: string]: string; }"],
+            "description": [
+              "The model version stored in the index"
+            ],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1608,8 +1686,12 @@
             "type": "Array",
             "tags": [],
             "label": "deletedTypes",
-            "description": ["The list of deleted types to exclude during the compare process"],
-            "signature": ["string[]"],
+            "description": [
+              "The list of deleted types to exclude during the compare process"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1635,7 +1717,9 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": ["\"conflict\" | \"greater\" | \"lesser\" | \"equal\""],
+            "signature": [
+              "\"conflict\" | \"greater\" | \"lesser\" | \"equal\""
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1669,7 +1753,9 @@
         "type": "Interface",
         "tags": [],
         "label": "DocumentMigrateOptions",
-        "description": ["\nOptions for {@link IDocumentMigrator.migrate}"],
+        "description": [
+          "\nOptions for {@link IDocumentMigrator.migrate}"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1683,7 +1769,9 @@
             "description": [
               "\nDefines whether it is allowed to convert documents from an higher version or not.\n- If `true`, documents from higher versions will go though the downgrade pipeline.\n- If `false`, an error will be thrown when trying to process a document with an higher type version.\nDefaults to `false`."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1697,7 +1785,9 @@
             "description": [
               "\nIf specified, will migrate to the given version instead of the latest known version."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1711,7 +1801,9 @@
         "type": "Interface",
         "tags": [],
         "label": "IDocumentMigrator",
-        "description": ["\nManages transformations of individual documents."],
+        "description": [
+          "\nManages transformations of individual documents."
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1722,7 +1814,9 @@
             "type": "Function",
             "tags": [],
             "label": "migrate",
-            "description": ["\nMigrates a document to its latest version."],
+            "description": [
+              "\nMigrates a document to its latest version."
+            ],
             "signature": [
               "(doc: ",
               {
@@ -1946,7 +2040,9 @@
         "type": "Interface",
         "tags": [],
         "label": "IsDowngradeRequiredOptions",
-        "description": ["\nOptions for {@link IDocumentMigrator.isDowngradeRequired}"],
+        "description": [
+          "\nOptions for {@link IDocumentMigrator.isDowngradeRequired}"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1960,7 +2056,9 @@
             "description": [
               "\nIf specified, will migrate to the given version instead of the latest known version."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1980,7 +2078,9 @@
         "description": [
           "\nThe overall status of the model version comparison:\n- `greater`: app version is greater than the index version\n- `lesser`: app version is lesser than the index version\n- `equal`: app version is equal to the index version\n- `conflict`: app and index versions are incompatible (versions for some types are higher, and for other types lower)"
         ],
-        "signature": ["\"conflict\" | \"greater\" | \"lesser\" | \"equal\""],
+        "signature": [
+          "\"conflict\" | \"greater\" | \"lesser\" | \"equal\""
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_compare.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1993,7 +2093,9 @@
         "tags": [],
         "label": "FieldListMap",
         "description": [],
-        "signature": ["{ [x: string]: string[]; }"],
+        "signature": [
+          "{ [x: string]: string[]; }"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/utils/get_field_list.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2008,7 +2110,9 @@
         "description": [
           "\nThe stack version where all types will be forced to switch to using the model version system."
         ],
-        "signature": ["\"8.10.0\""],
+        "signature": [
+          "\"8.10.0\""
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2020,8 +2124,12 @@
         "type": "Type",
         "tags": [],
         "label": "ModelVersionMap",
-        "description": ["\nA map of SO type name to Model Version."],
-        "signature": ["{ [x: string]: number; }"],
+        "description": [
+          "\nA map of SO type name to Model Version."
+        ],
+        "signature": [
+          "{ [x: string]: number; }"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2033,8 +2141,12 @@
         "type": "number",
         "tags": [],
         "label": "modelVersionVirtualMajor",
-        "description": ["\nThe major version that is used to represent model versions."],
-        "signature": ["10"],
+        "description": [
+          "\nThe major version that is used to represent model versions."
+        ],
+        "signature": [
+          "10"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2100,8 +2212,12 @@
         "type": "Type",
         "tags": [],
         "label": "VirtualVersionMap",
-        "description": ["\nA map of SO type name to {@link VirtualVersion}."],
-        "signature": ["{ [x: string]: string; }"],
+        "description": [
+          "\nA map of SO type name to {@link VirtualVersion}."
+        ],
+        "signature": [
+          "{ [x: string]: string; }"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/model_version/version_map.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2115,7 +2231,9 @@
         "type": "Object",
         "tags": [],
         "label": "DEFAULT_INDEX_TYPES_MAP",
-        "description": ["\nThis map holds the default breakdown of SO types per index (pre 8.8.0)"],
+        "description": [
+          "\nThis map holds the default breakdown of SO types per index (pre 8.8.0)"
+        ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2127,7 +2245,9 @@
             "tags": [],
             "label": "'.kibana_task_manager'",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2139,7 +2259,9 @@
             "tags": [],
             "label": "'.kibana'",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
             "deprecated": false,
             "trackAdoption": false

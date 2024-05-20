@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
-import { Type, schema } from '@kbn/config-schema';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   InventoryItemType,
   SnapshotMetricType,
   SnapshotMetricTypeKeys,
 } from '@kbn/metrics-data-access-plugin/common';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
 import {
   Comparator,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../../common/alerting/metrics';
-import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import {
-  SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregation,
+  SNAPSHOT_CUSTOM_AGGREGATIONS,
 } from '../../../../common/http_api/snapshot_api';
-import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
@@ -46,13 +45,14 @@ import {
   viewInAppUrlActionVariableDescription,
 } from '../common/messages';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
-import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 import {
+  createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
   FIRED_ACTIONS_ID,
   WARNING_ACTIONS,
-  createInventoryMetricThresholdExecutor,
 } from './inventory_metric_threshold_executor';
+import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),

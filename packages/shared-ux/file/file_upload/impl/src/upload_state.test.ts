@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
+import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { of, delay, merge, tap, mergeMap } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
 import type {
-  FileJSON,
   FileKindBrowser,
+  FileJSON,
   BaseFilesClient as FilesClient,
 } from '@kbn/shared-ux-file-types';
+import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { ImageMetadataFactory } from '@kbn/shared-ux-file-util';
-import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { delay, merge, mergeMap, of, tap } from 'rxjs';
-import { TestScheduler } from 'rxjs/testing';
 
 import { UploadState } from './upload_state';
 

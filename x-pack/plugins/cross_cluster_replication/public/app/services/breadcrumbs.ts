@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 

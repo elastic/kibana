@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { ErrorCode } from '../../../common/types/error_codes';
 import {
   EnterpriseSearchApplication,
-  EnterpriseSearchApplicationUpsertResponse,
   EnterpriseSearchApplicationsResponse,
+  EnterpriseSearchApplicationUpsertResponse,
 } from '../../../common/types/search_applications';
 import { createApiKey } from '../../lib/search_applications/create_api_key';
 import { fetchAliasIndices } from '../../lib/search_applications/fetch_alias_indices';

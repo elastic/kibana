@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import get from 'lodash/fp/get';
 import type { Filter } from '@kbn/es-query';
 import type {
   ThreatMapping,
   ThreatMappingEntries,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import get from 'lodash/fp/get';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   BooleanFilter,
   BuildEntriesMappingFilterOptions,

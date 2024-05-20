@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@kbn/datemath';
 import moment from 'moment';
+import dateMath from '@kbn/datemath';
 
 export const parseScheduleDates = (time: string): moment.Moment | null => {
   const isValidDateString = !isNaN(Date.parse(time));
@@ -15,8 +15,8 @@ export const parseScheduleDates = (time: string): moment.Moment | null => {
   const formattedDate = isValidDateString
     ? moment(time)
     : isValidInput
-      ? dateMath.parse(time)
-      : null;
+    ? dateMath.parse(time)
+    : null;
 
   return formattedDate != null ? formattedDate : null;
 };

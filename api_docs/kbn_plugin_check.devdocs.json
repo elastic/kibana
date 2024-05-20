@@ -28,7 +28,9 @@
         "description": [
           "\nA CLI for checking the consistency of a plugin's declared and implicit dependencies."
         ],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/kbn-plugin-check/index.ts",
         "deprecated": false,
         "trackAdoption": false,

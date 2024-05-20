@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import { Item, PresentablePickerItem } from './presentable_picker_item';
+import { EuiFlexGroup } from '@elastic/eui';
+import { PresentablePickerItem, Item } from './presentable_picker_item';
 
 export type { Item } from './presentable_picker_item';
 

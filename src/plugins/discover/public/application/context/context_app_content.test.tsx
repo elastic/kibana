@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { SortDirection } from '@kbn/data-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { UnifiedDataTable } from '@kbn/unified-data-table';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { discoverServiceMock } from '../../__mocks__/services';
-import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from './components/action_bar/action_bar';
+import { GetStateReturn } from './services/context_state';
+import { SortDirection } from '@kbn/data-plugin/public';
+import { UnifiedDataTable } from '@kbn/unified-data-table';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
-import { GetStateReturn } from './services/context_state';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { discoverServiceMock } from '../../__mocks__/services';
+import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { act } from 'react-dom/test-utils';
 
 describe('ContextAppContent test', () => {
   const mountComponent = async ({

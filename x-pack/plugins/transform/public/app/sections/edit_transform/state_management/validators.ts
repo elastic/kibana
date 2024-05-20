@@ -8,10 +8,10 @@
 import {
   frequencyValidator,
   integerAboveZeroValidator,
-  retentionPolicyMaxAgeValidator,
-  stringValidator,
   transformSettingsNumberOfRetriesValidator,
   transformSettingsPageSearchSizeValidator,
+  retentionPolicyMaxAgeValidator,
+  stringValidator,
 } from '../../../common/validators';
 
 export const validators = {

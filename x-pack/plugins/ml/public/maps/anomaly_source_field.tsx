@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+// eslint-disable-next-line max-classes-per-file
+import type { ReactNode } from 'react';
+import React from 'react';
 import type {
   AggregationsExtendedStatsAggregation,
   AggregationsPercentilesAggregation,
   AggregationsTermsAggregation,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Filter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { DECIMAL_DEGREES_PRECISION, FIELD_ORIGIN } from '@kbn/maps-plugin/common';
-import type { TileMetaFeature } from '@kbn/maps-plugin/common/descriptor_types';
-import type { IField, IVectorSource } from '@kbn/maps-plugin/public';
-import type { ITooltipProperty } from '@kbn/maps-plugin/public';
 import { escape } from 'lodash';
-// eslint-disable-next-line max-classes-per-file
-import type { ReactNode } from 'react';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
+import type { IField, IVectorSource } from '@kbn/maps-plugin/public';
+import { FIELD_ORIGIN, DECIMAL_DEGREES_PRECISION } from '@kbn/maps-plugin/common';
+import type { TileMetaFeature } from '@kbn/maps-plugin/common/descriptor_types';
+import type { ITooltipProperty } from '@kbn/maps-plugin/public';
 import type { AnomalySource } from './anomaly_source';
 
 export const ACTUAL_LABEL = i18n.translate('xpack.ml.maps.anomalyLayerActualLabel', {
@@ -117,10 +117,7 @@ function roundCoordinate(coordinate: number) {
 }
 
 export class AnomalySourceTooltipProperty implements ITooltipProperty {
-  constructor(
-    private readonly _field: string,
-    private readonly _value: string
-  ) {}
+  constructor(private readonly _field: string, private readonly _value: string) {}
 
   async getESFilters(): Promise<Filter[]> {
     return [];

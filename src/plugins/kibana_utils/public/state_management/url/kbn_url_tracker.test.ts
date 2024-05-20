@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
+import { createMemoryHistory, History } from 'history';
+import { createKbnUrlTracker, KbnUrlTracker } from './kbn_url_tracker';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { App, AppUpdater, ToastsSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { History, createMemoryHistory } from 'history';
-import { BehaviorSubject, Subject } from 'rxjs';
 import { unhashUrl } from './hash_unhash_url';
-import { KbnUrlTracker, createKbnUrlTracker } from './kbn_url_tracker';
 
 jest.mock('./hash_unhash_url', () => ({
   unhashUrl: jest.fn((x) => x),

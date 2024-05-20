@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NodeEventsInCategoryState, PanelViewAndParameters } from '../../types';
+import type { PanelViewAndParameters, NodeEventsInCategoryState } from '../../types';
 
 /**
  * `NodeEventsInCategoryState` is used to model an ordered collection of events that are all related to the same node and which all belong to a given category.

@@ -6,10 +6,10 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { API_PRIVILEGES, RulesSettingsFlapping } from '../../common';
 import { ILicenseState } from '../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { RewriteResponseCase, verifyAccessAndContext } from './lib';
+import { verifyAccessAndContext, RewriteResponseCase } from './lib';
+import { API_PRIVILEGES, RulesSettingsFlapping } from '../../common';
 
 const rewriteBodyRes: RewriteResponseCase<RulesSettingsFlapping> = ({
   lookBackWindow,

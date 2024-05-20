@@ -8,14 +8,14 @@
 
 /* eslint @elastic/eui/href-or-on-click:0 */
 
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import * as React from 'react';
-import { TelemetryConstants } from '..';
-import { TelemetryService } from '../services';
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { HttpSetup } from '@kbn/core/public';
 import { OptInMessage } from './opt_in_message';
+import { TelemetryService } from '../services';
+import { TelemetryConstants } from '..';
 
 interface Props {
   http: HttpSetup;

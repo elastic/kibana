@@ -6,8 +6,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PLUGIN } from '../../../../../../common/constants/plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { PLUGIN } from '../../../../../../common/constants/plugin';
 
 export const useOverviewBreadcrumbs = () => {
   const kibana = useKibana();

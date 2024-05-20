@@ -12,13 +12,13 @@ import { css } from '@emotion/react';
 import { useValues } from 'kea';
 
 import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

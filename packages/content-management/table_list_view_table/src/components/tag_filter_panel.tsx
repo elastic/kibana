@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import type { FC } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiPopover,
-  EuiPopoverFooter,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiSpacer,
   EuiText,
+  EuiButtonEmpty,
   EuiTextColor,
+  EuiSpacer,
+  EuiLink,
   useEuiTheme,
+  EuiPopoverFooter,
+  EuiButton,
 } from '@elastic/eui';
 import type { EuiSelectableProps, ExclusiveUnion } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import React from 'react';
-import type { FC } from 'react';
 
 import { useServices } from '../services';
 import type { TagOptionItem } from './use_tag_filter_panel';

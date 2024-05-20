@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Layout } from '.';
 import { InvalidLayoutParametersError } from '../../common/errors';
 import type { LayoutParams, LayoutType } from '../../common/layout';
+import type { Layout } from '.';
 import { CanvasLayout } from './canvas_layout';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';

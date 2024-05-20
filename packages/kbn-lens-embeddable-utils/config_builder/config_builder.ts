@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FormulaPublicApi, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
+import { LensAttributes, LensConfig, LensConfigOptions } from './types';
 import {
   buildGauge,
   buildHeatmap,
   buildMetric,
-  buildPartitionChart,
   buildRegionMap,
-  buildTable,
   buildTagCloud,
+  buildTable,
   buildXY,
+  buildPartitionChart,
 } from './charts';
-import { LensAttributes, LensConfig, LensConfigOptions } from './types';
 
 export class LensConfigBuilder {
   private charts = {

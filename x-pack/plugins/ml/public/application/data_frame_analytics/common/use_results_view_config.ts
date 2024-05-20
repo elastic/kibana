@@ -10,23 +10,23 @@ import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
+  isClassificationAnalysis,
+  isRegressionAnalysis,
   type DataFrameAnalyticsConfig,
   type DataFrameTaskStateType,
   type TotalFeatureImportance,
-  isClassificationAnalysis,
-  isRegressionAnalysis,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { useMlKibana } from '../../contexts/kibana';
 import { ml } from '../../services/ml_api_service';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlIndexUtils } from '../../util/index_service';
 
+import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { getToastNotificationService } from '../../services/toast_notification_service';
-import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { getDestinationIndex } from './get_destination_index';
 
 export const useResultsViewConfig = (jobId: string) => {

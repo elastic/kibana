@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
-import { schema } from '@kbn/config-schema';
-import { DEFAULT_APP_CATEGORIES, SavedObjectReference } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
+import { SavedObjectReference, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
-import { STACK_ALERTS_AAD_CONFIG } from '../constants';
-import { ActionGroupId, GEO_CONTAINMENT_ID, RecoveryActionGroupId } from './constants';
-import { executor } from './executor';
 import type {
+  GeoContainmentRuleType,
   GeoContainmentExtractedRuleParams,
   GeoContainmentRuleParams,
-  GeoContainmentRuleType,
 } from './types';
+import { executor } from './executor';
+import { ActionGroupId, RecoveryActionGroupId, GEO_CONTAINMENT_ID } from './constants';
+import { STACK_ALERTS_AAD_CONFIG } from '../constants';
 
 const actionVariables = {
   context: [

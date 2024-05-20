@@ -8,12 +8,12 @@
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
 import type {
   UseFetchRelatedAlertsBySessionParams,
   UseFetchRelatedAlertsBySessionResult,
 } from './use_fetch_related_alerts_by_session';
 import { useFetchRelatedAlertsBySession } from './use_fetch_related_alerts_by_session';
+import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
 
 jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
 

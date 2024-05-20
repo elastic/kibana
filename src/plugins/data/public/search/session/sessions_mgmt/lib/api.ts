@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs';
-import { SearchSessionStatus, SearchSessionsFindResponse } from '../../../../../common';
-import { SearchSessionsConfigSchema } from '../../../../../config';
-import { SearchUsageCollector } from '../../../collectors';
-import { ISessionsClient } from '../../sessions_client';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { SerializableRecord } from '@kbn/utility-types';
 import { ACTION } from '../components/actions';
 import {
   PersistedSearchSessionSavedObjectAttributes,
   UISearchSessionState,
   UISession,
 } from '../types';
+import { ISessionsClient } from '../../sessions_client';
+import { SearchUsageCollector } from '../../../collectors';
+import { SearchSessionsFindResponse, SearchSessionStatus } from '../../../../../common';
+import { SearchSessionsConfigSchema } from '../../../../../config';
 
 type LocatorsStart = SharePluginStart['url']['locators'];
 

@@ -10,9 +10,9 @@ import type {
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
 } from '@kbn/core/server';
-import { migrationMocks } from '@kbn/core/server/mocks';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { removeRuleInformation } from './alerts';
 
 describe('alert user actions', () => {

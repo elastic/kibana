@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import Chalk from 'chalk';
 import { diff as jestDiff } from 'jest-diff';
 import stripAnsi from 'strip-ansi';
+import Chalk from 'chalk';
 
 function reformatJestDiff(diff: string) {
   const diffLines = diff.split('\n');

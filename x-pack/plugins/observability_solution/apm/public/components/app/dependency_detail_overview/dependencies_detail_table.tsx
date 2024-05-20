@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { NodeType, getNodeName } from '../../../../common/connections';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
+import { getNodeName, NodeType } from '../../../../common/connections';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { DependenciesTable } from '../../shared/dependencies_table';
 import { ServiceLink } from '../../shared/links/apm/service_link';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { getComparisonEnabled } from '../../shared/time_comparison/get_comparison_enabled';
-import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function DependenciesDetailTable() {
   const {

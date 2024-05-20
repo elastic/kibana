@@ -1,15 +1,3 @@
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  htmlIdGenerator,
-} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -21,16 +9,28 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  htmlIdGenerator,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTitle,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 
-import { PANEL_TYPES } from '../../../../common/enums';
-import { limitOfSeries } from '../../../../common/ui_restrictions';
-import { ColorRules } from '../color_rules';
-import { IndexPattern } from '../index_pattern';
-import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { QueryBarWrapper } from '../query_bar_wrapper';
 import { SeriesEditor } from '../series_editor';
+import { IndexPattern } from '../index_pattern';
+import { ColorRules } from '../color_rules';
 import { YesNo } from '../yes_no';
-import { PANEL_CONFIG_TABS, PanelConfigProps } from './types';
+import { QueryBarWrapper } from '../query_bar_wrapper';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+import { limitOfSeries } from '../../../../common/ui_restrictions';
+import { PANEL_TYPES } from '../../../../common/enums';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 
 export class MetricPanelConfig extends Component<
   PanelConfigProps,

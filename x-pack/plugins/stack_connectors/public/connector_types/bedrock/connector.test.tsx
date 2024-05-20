@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+import React from 'react';
+import BedrockConnectorFields from './connector';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
-import { ConnectorFormTestProvider } from '../lib/test_utils';
-import BedrockConnectorFields from './connector';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({

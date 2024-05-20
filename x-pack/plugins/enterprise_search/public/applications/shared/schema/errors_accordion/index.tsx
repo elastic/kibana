@@ -22,11 +22,11 @@ import {
 import { EuiLinkTo } from '../../react_router_helpers';
 import { TruncatedContent } from '../../truncate';
 
-import { FieldCoercionErrors, Schema } from '../types';
+import { Schema, FieldCoercionErrors } from '../types';
 
 import {
-  ERROR_TABLE_ERROR_HEADER,
   ERROR_TABLE_ID_HEADER,
+  ERROR_TABLE_ERROR_HEADER,
   ERROR_TABLE_REVIEW_CONTROL,
   ERROR_TABLE_VIEW_LINK,
 } from './constants';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { useMemo } from 'react';
 import { useMlKibana } from '../contexts/kibana';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;

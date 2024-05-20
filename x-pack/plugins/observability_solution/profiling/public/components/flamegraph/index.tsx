@@ -11,10 +11,10 @@ import {
   Flame,
   FlameLayerValue,
   FlameSpec,
-  LEGACY_LIGHT_THEME,
   PartialTheme,
   Settings,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,8 +26,8 @@ import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
 import { Frame } from '../frame_information_window';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { ComparisonMode } from '../normalization_menu';
-import { FlameGraphLegend } from './flame_graph_legend';
 import { FlameGraphTooltip } from './flamegraph_tooltip';
+import { FlameGraphLegend } from './flame_graph_legend';
 
 interface Props {
   id: string;

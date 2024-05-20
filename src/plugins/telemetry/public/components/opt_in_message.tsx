@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiLink } from '@elastic/eui';
-import type { IBasePath } from '@kbn/core-http-browser';
-import { FormattedMessage } from '@kbn/i18n-react';
 import * as React from 'react';
+import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { TelemetryService } from '../services';
 import type { TelemetryConstants } from '..';
 import { PATH_TO_ADVANCED_SETTINGS } from '../../common/constants';
-import type { TelemetryService } from '../services';
 
 export interface OptInMessageProps {
   telemetryConstants: TelemetryConstants;

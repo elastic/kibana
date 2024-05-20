@@ -1,4 +1,3 @@
-import { EventEmitter, PassThrough, type Readable } from 'stream';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,10 +11,11 @@ import { waitFor } from '@testing-library/react';
 import { last, merge, repeat } from 'lodash';
 import type OpenAI from 'openai';
 import { Subject } from 'rxjs';
+import { EventEmitter, PassThrough, type Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
 import { createResourceNamesMap } from '..';
-import { type Message, MessageRole } from '../../../common';
+import { MessageRole, type Message } from '../../../common';
 import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,

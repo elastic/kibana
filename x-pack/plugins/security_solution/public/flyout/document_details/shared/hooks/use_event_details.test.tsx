@@ -7,13 +7,13 @@
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import type { UseEventDetailsParams, UseEventDetailsResult } from './use_event_details';
 import { useEventDetails } from './use_event_details';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
+import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 
 jest.mock('../../../../common/hooks/use_space_id');
 jest.mock('../../../../common/utils/route/use_route_spy');

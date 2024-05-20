@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { SyntheticEvent } from 'react';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { Dispatch } from 'redux';
-import { APP_NAME } from '../../../../../common/constants';
-import { TimelineId } from '../../../../../common/types/timeline';
 import { SecurityPageName } from '../../../../app/types';
-import { timelineActions } from '../../../../timelines/store';
-import { updateBreadcrumbsNav } from '../../../breadcrumbs';
-import { type NavigateTo, useKibana, useNavigateTo } from '../../../lib/kibana';
-import type { TelemetryClientStart } from '../../../lib/telemetry';
-import { getAncestorLinksInfo } from '../../../links';
 import type { RouteSpyState } from '../../../utils/route/types';
-import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import { timelineActions } from '../../../../timelines/store';
+import { TimelineId } from '../../../../../common/types/timeline';
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { useGetSecuritySolutionUrl } from '../../link_to';
+import type { TelemetryClientStart } from '../../../lib/telemetry';
+import { useKibana, useNavigateTo, type NavigateTo } from '../../../lib/kibana';
+import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import { updateBreadcrumbsNav } from '../../../breadcrumbs';
+import { getAncestorLinksInfo } from '../../../links';
+import { APP_NAME } from '../../../../../common/constants';
 import { getTrailingBreadcrumbs } from './trailing_breadcrumbs';
 
 export const useBreadcrumbsNav = () => {

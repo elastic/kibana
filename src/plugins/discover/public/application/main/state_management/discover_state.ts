@@ -6,59 +6,59 @@
  * Side Public License, v 1.
  */
 
-import {
-  DataPublicPluginStart,
-  SearchSessionInfoProvider,
-  noSearchSessionStorageCapabilityMessage,
-} from '@kbn/data-plugin/public';
-import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
-import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { History } from 'history';
 import {
+  createKbnUrlStateStorage,
   IKbnUrlStateStorage,
   StateContainer,
-  createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { History } from 'history';
-import { merge } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
 import {
-  DataSourceType,
-  createDataViewDataSource,
-  isDataSourceType,
-} from '../../../../common/data_sources';
-import { DiscoverServices } from '../../../build_services';
-import type { DiscoverCustomizationContext } from '../../../customizations';
+  DataPublicPluginStart,
+  noSearchSessionStorageCapabilityMessage,
+  SearchSessionInfoProvider,
+} from '@kbn/data-plugin/public';
+import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
+import { merge } from 'rxjs';
+import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-import { addLog } from '../../../utils/add_log';
 import { FetchStatus } from '../../types';
+import { changeDataView } from './utils/change_data_view';
+import { buildStateSubscribe } from './utils/build_state_subscribe';
+import { addLog } from '../../../utils/add_log';
+import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
+import { DiscoverSearchSessionManager } from './discover_search_session';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
 import {
   DiscoverAppState,
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
 } from './discover_app_state_container';
-import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
-import {
-  DiscoverGlobalStateContainer,
-  getDiscoverGlobalStateContainer,
-} from './discover_global_state_container';
 import {
   DiscoverInternalStateContainer,
   getInternalStateContainer,
 } from './discover_internal_state_container';
+import { DiscoverServices } from '../../../build_services';
 import {
-  DiscoverSavedSearchContainer,
   getDefaultAppState,
   getSavedSearchContainer,
+  DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
-import { DiscoverSearchSessionManager } from './discover_search_session';
-import { buildStateSubscribe } from './utils/build_state_subscribe';
-import { changeDataView } from './utils/change_data_view';
-import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { updateFiltersReferences } from './utils/update_filter_references';
+import {
+  getDiscoverGlobalStateContainer,
+  DiscoverGlobalStateContainer,
+} from './discover_global_state_container';
+import type { DiscoverCustomizationContext } from '../../../customizations';
+import {
+  createDataViewDataSource,
+  DataSourceType,
+  isDataSourceType,
+} from '../../../../common/data_sources';
 
 export interface DiscoverStateContainerParams {
   /**

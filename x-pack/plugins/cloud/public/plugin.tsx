@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { Logger } from '@kbn/logging';
 import React, { FC, PropsWithChildren } from 'react';
-import { CLOUD_SNAPSHOTS_PATH } from '../common/constants';
-import { type DecodedCloudId, decodeCloudId } from '../common/decode_cloud_id';
+import type { Logger } from '@kbn/logging';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
-import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
-import { getFullCloudUrl } from '../common/utils';
+import { CLOUD_SNAPSHOTS_PATH } from '../common/constants';
+import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import type { CloudSetup, CloudStart } from './types';
+import { getFullCloudUrl } from '../common/utils';
 import { getSupportUrl } from './utils';
 
 export interface CloudConfigType {

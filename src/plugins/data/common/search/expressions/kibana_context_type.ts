@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExecutionContextSearch, Filter } from '@kbn/es-query';
+import { Filter, ExecutionContextSearch } from '@kbn/es-query';
 import { ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
-import { DataViewField } from '../..';
 import { Query } from '../../query';
+import { DataViewField } from '../..';
 
 export type ExpressionValueSearchContext = ExpressionValueBoxed<
   'kibana_context',

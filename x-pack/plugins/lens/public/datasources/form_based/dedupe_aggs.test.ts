@@ -6,8 +6,8 @@
  */
 
 import {
-  ExpressionAstExpressionBuilder,
   buildExpression,
+  ExpressionAstExpressionBuilder,
   parseExpression,
 } from '@kbn/expressions-plugin/common';
 import { dedupeAggs } from './dedupe_aggs';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
 
 interface RefineSearchFooterProps {
   documentSize: number;

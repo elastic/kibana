@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Chart, Datum, PartialTheme, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { UptimeThemeContext } from '../../../contexts';
+import { Chart, Datum, Partition, Settings, PartitionLayout, PartialTheme } from '@elastic/charts';
 import { DonutChartLegend } from './donut_chart_legend';
+import { UptimeThemeContext } from '../../../contexts';
 
 interface DonutChartProps {
   down: number;

@@ -8,15 +8,15 @@
 import type { CardId, StepId } from './types';
 
 import {
+  QuickStartSectionCardsId,
   AddAndValidateYourDataCardsId,
   GetStartedWithAlertsCardsId,
-  QuickStartSectionCardsId,
 } from './types';
 
-import { storage } from '../../../lib/local_storage';
-import type { ProductLine } from './configs';
 import { DEFAULT_FINISHED_STEPS, isDefaultFinishedCardStep } from './helpers';
 import { getSections } from './sections';
+import { storage } from '../../../lib/local_storage';
+import type { ProductLine } from './configs';
 
 export const ACTIVE_PRODUCTS_STORAGE_KEY = 'securitySolution.getStarted.activeProducts';
 export const FINISHED_STEPS_STORAGE_KEY = 'securitySolution.getStarted.finishedSteps';
@@ -148,13 +148,10 @@ export class OnboardingStorage {
 
     storage.set(
       expandedCardsStorageKey,
-      Object.entries(activeCards).reduce(
-        (acc, [cardId, card]) => {
-          acc[cardId as CardId] = defaultExpandedCards[cardId as CardId] ?? card;
-          return acc;
-        },
-        {} as Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>
-      )
+      Object.entries(activeCards).reduce((acc, [cardId, card]) => {
+        acc[cardId as CardId] = defaultExpandedCards[cardId as CardId] ?? card;
+        return acc;
+      }, {} as Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>)
     );
   };
   public addExpandedCardStepToStorage = (cardId: CardId, stepId: StepId) => {

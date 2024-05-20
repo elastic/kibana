@@ -12,13 +12,13 @@ import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_
 
 import { EuiFormRow } from '@elastic/eui';
 import {
-  DASHBOARD_LINK_TYPE,
-  EXTERNAL_LINK_TYPE,
   LinkType,
+  EXTERNAL_LINK_TYPE,
+  DASHBOARD_LINK_TYPE,
 } from '../../../common/content_management';
 import { UnorderedLink } from '../../editor/open_link_editor_flyout';
-import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
 import { ExternalLinkDestinationPicker } from '../external_link/external_link_destination_picker';
+import { DashboardLinkDestinationPicker } from '../dashboard_link/dashboard_link_destination_picker';
 import { LinksStrings } from '../links_strings';
 
 export const LinkDestination = ({

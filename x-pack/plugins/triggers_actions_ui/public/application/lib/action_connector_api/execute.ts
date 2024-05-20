@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ActionTypeExecutorResult, AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
+import { ActionTypeExecutorResult, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
 
 const rewriteBodyRes = <R>({

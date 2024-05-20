@@ -1,5 +1,7 @@
 {
-  "index_patterns": ["kbn-data-forge-fake_stack.message_processor-*"],
+  "index_patterns": [
+    "kbn-data-forge-fake_stack.message_processor-*"
+  ],
   "mappings": {
     "_meta": {
       "version": "1.6.0"

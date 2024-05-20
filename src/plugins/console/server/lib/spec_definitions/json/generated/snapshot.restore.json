@@ -5,11 +5,18 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "master_timeout": ["-1", "0"],
+      "master_timeout": [
+        "-1",
+        "0"
+      ],
       "wait_for_completion": "__flag__"
     },
-    "methods": ["POST"],
-    "patterns": ["_snapshot/{repository}/{snapshot}/_restore"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/{snapshot}/_restore"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
     "availability": {
       "stack": true,

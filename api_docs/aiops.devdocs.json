@@ -9,7 +9,9 @@
         "type": "Function",
         "tags": [],
         "label": "ChangePointDetection",
-        "description": ["\nLazy-wrapped ChangePointDetectionAppStateProps React component"],
+        "description": [
+          "\nLazy-wrapped ChangePointDetectionAppStateProps React component"
+        ],
         "signature": [
           "(props: React.PropsWithChildren<",
           {
@@ -31,7 +33,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": ["- properties specifying the data on which to run the analysis."],
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
             "signature": [
               "React.PropsWithChildren<",
               {
@@ -58,7 +62,9 @@
         "type": "Function",
         "tags": [],
         "label": "LogCategorization",
-        "description": ["\nLazy-wrapped LogCategorizationAppStateProps React component"],
+        "description": [
+          "\nLazy-wrapped LogCategorizationAppStateProps React component"
+        ],
         "signature": [
           "(props: React.PropsWithChildren<",
           {
@@ -80,7 +86,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": ["- properties specifying the data on which to run the analysis."],
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
             "signature": [
               "React.PropsWithChildren<",
               {
@@ -107,7 +115,9 @@
         "type": "Function",
         "tags": [],
         "label": "LogRateAnalysis",
-        "description": ["\nLazy-wrapped LogRateAnalysisAppState React component"],
+        "description": [
+          "\nLazy-wrapped LogRateAnalysisAppState React component"
+        ],
         "signature": [
           "(props: React.PropsWithChildren<",
           {
@@ -129,7 +139,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": ["- properties specifying the data on which to run the analysis."],
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
             "signature": [
               "React.PropsWithChildren<",
               {
@@ -156,7 +168,9 @@
         "type": "Function",
         "tags": [],
         "label": "LogRateAnalysisContent",
-        "description": ["\nLazy-wrapped LogRateAnalysisContentWrapperReact component"],
+        "description": [
+          "\nLazy-wrapped LogRateAnalysisContentWrapperReact component"
+        ],
         "signature": [
           "(props: React.PropsWithChildren<",
           {
@@ -178,7 +192,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": ["- properties specifying the data on which to run the analysis."],
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
             "signature": [
               "React.PropsWithChildren<",
               {
@@ -207,7 +223,9 @@
         "type": "Interface",
         "tags": [],
         "label": "AiopsAppDependencies",
-        "description": ["\nAIOps App Dependencies to be provided via React context."],
+        "description": [
+          "\nAIOps App Dependencies to be provided via React context."
+        ],
         "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -218,7 +236,9 @@
             "type": "Object",
             "tags": [],
             "label": "analytics",
-            "description": ["\nUsed for telemetry/performance metrics."],
+            "description": [
+              "\nUsed for telemetry/performance metrics."
+            ],
             "signature": [
               "{ optIn: (optInConfig: ",
               {
@@ -272,7 +292,9 @@
             "type": "Object",
             "tags": [],
             "label": "data",
-            "description": ["\nUsed for data fetching."],
+            "description": [
+              "\nUsed for data fetching."
+            ],
             "signature": [
               {
                 "pluginId": "data",
@@ -292,7 +314,9 @@
             "type": "Object",
             "tags": [],
             "label": "executionContext",
-            "description": ["\nProvides execution context for data fetching."],
+            "description": [
+              "\nProvides execution context for data fetching."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-execution-context-browser",
@@ -312,7 +336,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "charts",
-            "description": ["\nRequired as a dependency for the fields stats service."],
+            "description": [
+              "\nRequired as a dependency for the fields stats service."
+            ],
             "signature": [
               {
                 "pluginId": "charts",
@@ -367,7 +393,9 @@
             "type": "Object",
             "tags": [],
             "label": "http",
-            "description": ["\nUsed for data fetching."],
+            "description": [
+              "\nUsed for data fetching."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-browser",
@@ -387,7 +415,9 @@
             "type": "Object",
             "tags": [],
             "label": "notifications",
-            "description": ["\nUsed for toast notifications."],
+            "description": [
+              "\nUsed for toast notifications."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
@@ -407,7 +437,9 @@
             "type": "Object",
             "tags": [],
             "label": "storage",
-            "description": ["\nUsed to store user settings in local storage."],
+            "description": [
+              "\nUsed to store user settings in local storage."
+            ],
             "signature": [
               {
                 "pluginId": "kibanaUtils",
@@ -428,7 +460,9 @@
             "type": "Object",
             "tags": [],
             "label": "theme",
-            "description": ["\nTheme service."],
+            "description": [
+              "\nTheme service."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-theme-browser",
@@ -448,7 +482,9 @@
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
-            "description": ["\nUI settings."],
+            "description": [
+              "\nUI settings."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-browser",
@@ -468,7 +504,9 @@
             "type": "Object",
             "tags": [],
             "label": "unifiedSearch",
-            "description": ["\nUnified search."],
+            "description": [
+              "\nUnified search."
+            ],
             "signature": [
               {
                 "pluginId": "unifiedSearch",
@@ -488,7 +526,9 @@
             "type": "Object",
             "tags": [],
             "label": "usageCollection",
-            "description": ["\nUsage collection."],
+            "description": [
+              "\nUsage collection."
+            ],
             "signature": [
               {
                 "pluginId": "usageCollection",
@@ -509,7 +549,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "share",
-            "description": ["\nUsed to create deep links to other plugins."],
+            "description": [
+              "\nUsed to create deep links to other plugins."
+            ],
             "signature": [
               "{ toggleShareContextMenu: (options: ",
               {
@@ -549,7 +591,9 @@
             "type": "Object",
             "tags": [],
             "label": "lens",
-            "description": ["\nUsed to create lens embeddables."],
+            "description": [
+              "\nUsed to create lens embeddables."
+            ],
             "signature": [
               {
                 "pluginId": "lens",
@@ -569,7 +613,9 @@
             "type": "Object",
             "tags": [],
             "label": "uiActions",
-            "description": ["\nUI actions."],
+            "description": [
+              "\nUI actions."
+            ],
             "signature": [
               {
                 "pluginId": "uiActions",
@@ -590,7 +636,9 @@
             "type": "Object",
             "tags": [],
             "label": "i18n",
-            "description": ["\nInternationalisation service"],
+            "description": [
+              "\nInternationalisation service"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-i18n-browser",
@@ -610,7 +658,9 @@
             "type": "Object",
             "tags": [],
             "label": "fieldStats",
-            "description": ["\nDeps for unified fields stats."],
+            "description": [
+              "\nDeps for unified fields stats."
+            ],
             "signature": [
               "{ useFieldStatsTrigger: () => { renderOption: ((option: ",
               "EuiComboBoxOptionOption",
@@ -714,7 +764,9 @@
             "tags": [],
             "label": "isServerless",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -725,8 +777,12 @@
             "type": "string",
             "tags": [],
             "label": "embeddingOrigin",
-            "description": ["Identifier to indicate the plugin utilizing the component"],
-            "signature": ["string | undefined"],
+            "description": [
+              "Identifier to indicate the plugin utilizing the component"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -740,7 +796,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ChangePointDetectionAppStateProps",
-        "description": ["\nProps for the ChangePointDetectionAppState component."],
+        "description": [
+          "\nProps for the ChangePointDetectionAppState component."
+        ],
         "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -751,7 +809,9 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": ["The data view to analyze."],
+            "description": [
+              "The data view to analyze."
+            ],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -771,7 +831,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "savedSearch",
-            "description": ["The saved search to analyze."],
+            "description": [
+              "The saved search to analyze."
+            ],
             "signature": [
               {
                 "pluginId": "savedSearch",
@@ -792,7 +854,9 @@
             "type": "Object",
             "tags": [],
             "label": "appDependencies",
-            "description": ["App dependencies"],
+            "description": [
+              "App dependencies"
+            ],
             "signature": [
               {
                 "pluginId": "aiops",
@@ -812,8 +876,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "showFrozenDataTierChoice",
-            "description": ["Optional flag to indicate whether kibana is running in serverless"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -827,7 +895,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LogCategorizationAppStateProps",
-        "description": ["\nProps for the LogCategorizationAppState component."],
+        "description": [
+          "\nProps for the LogCategorizationAppState component."
+        ],
         "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -838,7 +908,9 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": ["The data view to analyze."],
+            "description": [
+              "The data view to analyze."
+            ],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -858,7 +930,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "savedSearch",
-            "description": ["The saved search to analyze."],
+            "description": [
+              "The saved search to analyze."
+            ],
             "signature": [
               {
                 "pluginId": "savedSearch",
@@ -879,7 +953,9 @@
             "type": "Object",
             "tags": [],
             "label": "appDependencies",
-            "description": ["App dependencies"],
+            "description": [
+              "App dependencies"
+            ],
             "signature": [
               {
                 "pluginId": "aiops",
@@ -899,8 +975,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "showFrozenDataTierChoice",
-            "description": ["Optional flag to indicate whether kibana is running in serverless"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -914,7 +994,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LogRateAnalysisAppStateProps",
-        "description": ["\nProps for the LogRateAnalysisAppState component."],
+        "description": [
+          "\nProps for the LogRateAnalysisAppState component."
+        ],
         "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -925,7 +1007,9 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": ["The data view to analyze."],
+            "description": [
+              "The data view to analyze."
+            ],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -945,7 +1029,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "savedSearch",
-            "description": ["The saved search to analyze."],
+            "description": [
+              "The saved search to analyze."
+            ],
             "signature": [
               {
                 "pluginId": "savedSearch",
@@ -966,7 +1052,9 @@
             "type": "Object",
             "tags": [],
             "label": "appDependencies",
-            "description": ["App dependencies"],
+            "description": [
+              "App dependencies"
+            ],
             "signature": [
               {
                 "pluginId": "aiops",
@@ -986,8 +1074,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "stickyHistogram",
-            "description": ["Option to make main histogram sticky"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Option to make main histogram sticky"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -998,8 +1090,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "showFrozenDataTierChoice",
-            "description": ["Optional flag to indicate whether kibana is running in serverless"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1013,7 +1109,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LogRateAnalysisContentWrapperProps",
-        "description": ["\nProps for the LogRateAnalysisContentWrapper component."],
+        "description": [
+          "\nProps for the LogRateAnalysisContentWrapper component."
+        ],
         "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1024,7 +1122,9 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": ["The data view to analyze."],
+            "description": [
+              "The data view to analyze."
+            ],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -1044,8 +1144,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "stickyHistogram",
-            "description": ["Option to make main histogram sticky"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Option to make main histogram sticky"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1056,7 +1160,9 @@
             "type": "Object",
             "tags": [],
             "label": "appDependencies",
-            "description": ["App dependencies"],
+            "description": [
+              "App dependencies"
+            ],
             "signature": [
               {
                 "pluginId": "aiops",
@@ -1076,7 +1182,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "initialAnalysisStart",
-            "description": ["Timestamp for start of initial analysis"],
+            "description": [
+              "Timestamp for start of initial analysis"
+            ],
             "signature": [
               "number | ",
               {
@@ -1098,8 +1206,12 @@
             "type": "Object",
             "tags": [],
             "label": "timeRange",
-            "description": ["Optional time range"],
-            "signature": ["{ min: moment.Moment; max: moment.Moment; } | undefined"],
+            "description": [
+              "Optional time range"
+            ],
+            "signature": [
+              "{ min: moment.Moment; max: moment.Moment; } | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1110,8 +1222,13 @@
             "type": "Object",
             "tags": [],
             "label": "esSearchQuery",
-            "description": ["Elasticsearch query to pass to analysis endpoint"],
-            "signature": ["QueryDslQueryContainer", " | undefined"],
+            "description": [
+              "Elasticsearch query to pass to analysis endpoint"
+            ],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1122,8 +1239,12 @@
             "type": "string",
             "tags": [],
             "label": "barColorOverride",
-            "description": ["Optional color override for the default bar color for charts"],
-            "signature": ["string | undefined"],
+            "description": [
+              "Optional color override for the default bar color for charts"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1134,8 +1255,12 @@
             "type": "string",
             "tags": [],
             "label": "barHighlightColorOverride",
-            "description": ["Optional color override for the highlighted bar color for charts"],
-            "signature": ["string | undefined"],
+            "description": [
+              "Optional color override for the highlighted bar color for charts"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1146,7 +1271,9 @@
             "type": "Function",
             "tags": [],
             "label": "onAnalysisCompleted",
-            "description": ["\nOptional callback that exposes data of the completed analysis"],
+            "description": [
+              "\nOptional callback that exposes data of the completed analysis"
+            ],
             "signature": [
               "((d: ",
               {
@@ -1168,7 +1295,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "d",
-                "description": ["Log rate analysis results data"],
+                "description": [
+                  "Log rate analysis results data"
+                ],
                 "signature": [
                   {
                     "pluginId": "aiops",
@@ -1192,8 +1321,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "showFrozenDataTierChoice",
-            "description": ["Optional flag to indicate whether kibana is running in serverless"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1204,7 +1337,9 @@
             "type": "string",
             "tags": [],
             "label": "embeddingOrigin",
-            "description": ["Identifier to indicate the plugin utilizing the component"],
+            "description": [
+              "Identifier to indicate the plugin utilizing the component"
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1218,7 +1353,9 @@
         "type": "Interface",
         "tags": [],
         "label": "LogRateAnalysisResultsData",
-        "description": ["\nInterface for log rate analysis results data."],
+        "description": [
+          "\nInterface for log rate analysis results data."
+        ],
         "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1229,8 +1366,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "analysisType",
-            "description": ["The type of analysis, whether it's a spike or dip"],
-            "signature": ["\"spike\" | \"dip\""],
+            "description": [
+              "The type of analysis, whether it's a spike or dip"
+            ],
+            "signature": [
+              "\"spike\" | \"dip\""
+            ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_results.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1241,7 +1382,9 @@
             "type": "Array",
             "tags": [],
             "label": "significantItems",
-            "description": ["Statistically significant field/value items."],
+            "description": [
+              "Statistically significant field/value items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
@@ -1262,7 +1405,9 @@
             "type": "Array",
             "tags": [],
             "label": "significantItemsGroups",
-            "description": ["Statistically significant groups of field/value items."],
+            "description": [
+              "Statistically significant groups of field/value items."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
@@ -1298,7 +1443,9 @@
       "type": "Interface",
       "tags": [],
       "label": "AiopsPluginSetup",
-      "description": ["\naiops plugin server setup contract"],
+      "description": [
+        "\naiops plugin server setup contract"
+      ],
       "path": "x-pack/plugins/aiops/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -1312,7 +1459,9 @@
       "type": "Interface",
       "tags": [],
       "label": "AiopsPluginStart",
-      "description": ["\naiops plugin server start contract"],
+      "description": [
+        "\naiops plugin server start contract"
+      ],
       "path": "x-pack/plugins/aiops/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import type { Tag } from '@kbn/saved-objects-tagging-plugin/common';
 import { useFetchSecurityTags } from '../containers/use_fetch_security_tags';
 
 export interface TagReference extends Tag {

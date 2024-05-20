@@ -11,8 +11,8 @@ import { useParams } from 'react-router-dom';
 
 import { DeleteTimelineModalOverlay } from '.';
 import { TimelineType } from '../../../../../common/api/timeline';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 

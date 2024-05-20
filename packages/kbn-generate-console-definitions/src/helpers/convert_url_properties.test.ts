@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SpecificationTypes } from '../types';
-import { convertUrlProperties } from './convert_url_properties';
 import { getMockProperty, mockSchema } from './test_helpers';
+import { convertUrlProperties } from './convert_url_properties';
+import { SpecificationTypes } from '../types';
 
 describe('convertUrlProperties', () => {
   it('converts builtin types', () => {

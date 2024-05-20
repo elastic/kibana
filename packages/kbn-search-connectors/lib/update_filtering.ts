@@ -9,8 +9,8 @@
 import { Result } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { FilteringRules } from '../types/connectors';
 import { fetchConnectorById } from './fetch_connectors';
+import { FilteringRules } from '../types/connectors';
 
 export const updateFiltering = async (
   client: ElasticsearchClient,

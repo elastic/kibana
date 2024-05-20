@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
+import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import moment from 'moment';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import {
   type IdentifierType,
   RiskScoreEntity,
 } from '../../../../../common/entity_analytics/risk_engine';
+import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
+import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
+import { RiskScoreDataClient } from '../risk_score_data_client';
+import { isRiskScoreCalculationComplete } from '../helpers';
 import {
-  RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
-  RISK_SCORE_EXECUTION_ERROR_EVENT,
+  defaultState,
+  stateSchemaByVersion,
+  type LatestTaskStateSchema as RiskScoringTaskState,
+} from './state';
+import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
+import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
+import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
+  RISK_SCORE_EXECUTION_ERROR_EVENT,
+  RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
 } from '../../../telemetry/event_based/events';
 import {
   AssetCriticalityDataClient,
   assetCriticalityServiceFactory,
 } from '../../asset_criticality';
-import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
 import type { EntityAnalyticsConfig, EntityAnalyticsRoutesDeps } from '../../types';
-import { isRiskScoreCalculationComplete } from '../helpers';
-import { RiskScoreDataClient } from '../risk_score_data_client';
-import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
-import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
-import {
-  type LatestTaskStateSchema as RiskScoringTaskState,
-  defaultState,
-  stateSchemaByVersion,
-} from './state';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -230,8 +230,9 @@ export const runTask = async ({
       return { state: updatedState };
     }
 
-    const configuration =
-      await riskScoreService.getConfigurationWithDefaults(entityAnalyticsConfig);
+    const configuration = await riskScoreService.getConfigurationWithDefaults(
+      entityAnalyticsConfig
+    );
     if (configuration == null) {
       log(
         'Risk engine configuration not found; exiting task. Please reinitialize the risk engine and try again'

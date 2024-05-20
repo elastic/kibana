@@ -11,7 +11,7 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import pRetry from 'p-retry';
-import { APM_ALERTS_INDEX, ApmAlertFields } from './alerting_api_helper';
+import { ApmAlertFields, APM_ALERTS_INDEX } from './alerting_api_helper';
 
 async function getAlertByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
   const response = (await es.search({

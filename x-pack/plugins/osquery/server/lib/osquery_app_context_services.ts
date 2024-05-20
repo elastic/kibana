@@ -6,17 +6,17 @@
  */
 
 import type { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
-  AgentPolicyServiceInterface,
   AgentService,
   FleetStartContract,
-  PackagePolicyClient,
   PackageService,
+  AgentPolicyServiceInterface,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions';
 import type { ConfigType } from '../../common/config';
 import type { TelemetryEventsSender } from './telemetry/sender';
 

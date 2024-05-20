@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
+import { EuiText, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Loading } from '..';
-import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
+import { useFleetStatus, useFleetServerStandalone, useGetEnrollmentSettings } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
-import { useFleetServerStandalone, useFleetStatus, useGetEnrollmentSettings } from '../../hooks';
+import { Loading } from '..';
+import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
 
-import { DefaultMissingRequirements } from './default_missing_requirements';
-import { ManagedSteps, StandaloneSteps } from './steps';
 import type { InstructionProps } from './types';
+import { ManagedSteps, StandaloneSteps } from './steps';
+import { DefaultMissingRequirements } from './default_missing_requirements';
 
 export const Instructions = (props: InstructionProps) => {
   const {

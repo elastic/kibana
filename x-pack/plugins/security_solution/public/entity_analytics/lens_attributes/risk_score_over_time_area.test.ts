@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { XYState } from '@kbn/lens-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
+import type { XYState } from '@kbn/lens-plugin/public';
 
-import { wrapper } from '../../common/components/visualization_actions/mocks';
-import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
 import { getRiskScoreOverTimeAreaAttributes } from './risk_score_over_time_area';
+import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
+import { wrapper } from '../../common/components/visualization_actions/mocks';
 
 jest.mock('../../common/containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({

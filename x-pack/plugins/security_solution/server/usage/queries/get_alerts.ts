@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   AggregationsCompositeAggregation,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type { AlertAggs, AlertBucket } from '../types';
+import type { AlertBucket, AlertAggs } from '../types';
 
 export interface GetAlertsOptions {
   esClient: ElasticsearchClient;

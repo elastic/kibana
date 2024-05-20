@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { TaskRunnerFactory } from '../task_runner';
+import { RuleTypeRegistry, ConstructorOptions } from '../rule_type_registry';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { RULE_SAVED_OBJECT_TYPE } from '.';
-import { AlertingConfig } from '../config';
 import { ILicenseState } from '../lib/license_state';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import { ConstructorOptions, RuleTypeRegistry } from '../rule_type_registry';
-import { TaskRunnerFactory } from '../task_runner';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { isRuleExportable } from './is_rule_exportable';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { AlertingConfig } from '../config';
+import { RULE_SAVED_OBJECT_TYPE } from '.';
 
 let ruleTypeRegistryParams: ConstructorOptions;
 let logger: MockedLogger;

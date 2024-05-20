@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mockAnomalies } from '../mock';
 import { getUserNameFromInfluencers } from './get_user_name_from_influencers';
+import { mockAnomalies } from '../mock';
 
 describe('get_user_name_from_influencers', () => {
   test('returns user names from influencers from the mock', () => {

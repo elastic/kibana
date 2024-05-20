@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
-import expect from '@kbn/expect';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createApmRule } from '../../alerts/helpers/alerting_api_helper';
 import { cleanupRuleAndAlertState } from '../../alerts/helpers/cleanup_rule_and_alert_state';

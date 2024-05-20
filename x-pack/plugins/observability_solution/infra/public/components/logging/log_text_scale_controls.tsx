@@ -9,7 +9,7 @@ import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as React from 'react';
 
-import { TextScale, isTextScale } from '../../../common/log_text_scale';
+import { isTextScale, TextScale } from '../../../common/log_text_scale';
 
 interface LogTextScaleControlsProps {
   availableTextScales: TextScale[];

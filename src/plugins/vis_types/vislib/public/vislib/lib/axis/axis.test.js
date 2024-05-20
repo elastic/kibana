@@ -7,12 +7,12 @@
  */
 
 import d3 from 'd3';
-import $ from 'jquery';
 import _ from 'lodash';
+import $ from 'jquery';
 
-import { getMockUiState } from '../../../fixtures/mocks';
-import { VisConfig } from '../vis_config';
 import { Axis } from './axis';
+import { VisConfig } from '../vis_config';
+import { getMockUiState } from '../../../fixtures/mocks';
 
 describe('Vislib Axis Class Test Suite', function () {
   let mockUiState;

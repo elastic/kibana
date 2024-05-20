@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiScreenReaderLive, EuiSkipLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FC, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { EuiScreenReaderLive, EuiSkipLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { HeaderProps } from './header';

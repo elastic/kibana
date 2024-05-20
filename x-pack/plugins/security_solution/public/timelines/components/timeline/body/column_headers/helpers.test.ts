@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import type { BrowserFields } from '../../../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
-import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultHeaders } from './default_headers';
+import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import {
-  getColumnHeader,
-  getColumnHeaders,
   getColumnWidthFromType,
+  getColumnHeaders,
   getRootCategory,
+  getColumnHeader,
 } from './helpers';
 
 describe('helpers', () => {

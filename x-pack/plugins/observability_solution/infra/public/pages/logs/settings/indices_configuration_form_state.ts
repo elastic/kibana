@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import {
   LogDataViewReference,
   LogIndexNameReference,
   logIndexNameReferenceRT,
 } from '@kbn/logs-shared-plugin/common';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { useMemo } from 'react';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
 import { useFormElement } from './form_elements';
 import {
   FormValidationError,
   validateIndexPattern,
-  validateStringNoSpaces,
   validateStringNotEmpty,
+  validateStringNoSpaces,
 } from './validation_errors';
 
 export type LogIndicesFormState = LogIndexNameReference | LogDataViewReference | undefined;

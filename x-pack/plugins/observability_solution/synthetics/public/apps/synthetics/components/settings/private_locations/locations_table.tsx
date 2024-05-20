@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -14,23 +15,22 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
-import { useSyntheticsSettingsContext } from '../../../contexts';
-import { setAddingNewPrivateLocation } from '../../../state/private_locations';
-import { NoPermissionsTooltip } from '../../common/components/permissions';
+import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import { CopyName } from './copy_name';
+import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
-import { CopyName } from './copy_name';
-import { DeleteLocation } from './delete_location';
+import { useSyntheticsSettingsContext } from '../../../contexts';
+import { setAddingNewPrivateLocation } from '../../../state/private_locations';
 import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
+import { PrivateLocation } from '../../../../../../common/runtime_types';
+import { NoPermissionsTooltip } from '../../common/components/permissions';
+import { DeleteLocation } from './delete_location';
 import { useLocationMonitors } from './hooks/use_location_monitors';
-import { LOCATION_NAME_LABEL } from './location_form';
 import { PolicyName } from './policy_name';
-import { ViewLocationMonitors } from './view_location_monitors';
+import { LOCATION_NAME_LABEL } from './location_form';
 
 interface ListItem extends PrivateLocation {
   monitors: number;

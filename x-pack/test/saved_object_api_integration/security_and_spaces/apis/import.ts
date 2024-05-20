@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { SPACES } from '../../common/lib/spaces';
+import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  TEST_CASES as CASES,
-  ImportTestDefinition,
-  SPECIAL_TEST_CASES,
-  importTestCaseFailures,
   importTestSuiteFactory,
+  importTestCaseFailures,
+  TEST_CASES as CASES,
+  SPECIAL_TEST_CASES,
+  ImportTestDefinition,
 } from '../../common/suites/import';
 
 const {
@@ -250,8 +250,8 @@ export default function ({ getService }: FtrProviderContext) {
         overwrite
           ? ' with overwrite enabled'
           : createNewCopies
-            ? ' with createNewCopies enabled'
-            : ''
+          ? ' with createNewCopies enabled'
+          : ''
       }`;
       const { unauthorizedRead, unauthorizedWrite, authorized } = createTests(
         overwrite,

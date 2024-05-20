@@ -6,9 +6,9 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import { handleEsError } from '../shared_imports';
+import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
-import { MockRouter, createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
+import { handleEsError } from '../shared_imports';
 
 jest.mock('../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,

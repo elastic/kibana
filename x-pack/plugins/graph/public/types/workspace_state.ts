@@ -9,7 +9,7 @@ import { JsonObject } from '@kbn/utility-types';
 import d3 from 'd3';
 import { TargetOptions } from '../components/control_panel';
 import { GenericIcon } from '../helpers/style_choices';
-import { AdvancedSettings, WorkspaceField } from './app_state';
+import { WorkspaceField, AdvancedSettings } from './app_state';
 
 export interface WorkspaceNode {
   id: string;

@@ -7,38 +7,38 @@
 
 import './layer_panel.scss';
 
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
+  EuiPanel,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
-  EuiPanel,
-  EuiSpacer,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { DragDropIdentifier, DropType, ReorderProvider } from '@kbn/dom-drag-drop';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { FlyoutContainer } from '../../../shared_components/flyout_container';
-import {
-  selectDatasourceStates,
-  selectIsFullscreenDatasource,
-  selectResolvedDateRange,
-  useLensSelector,
-} from '../../../state_management';
-import { LayerAction, VisualizationDimensionGroupConfig, isOperation } from '../../../types';
-import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
-import { EmptyDimensionButton } from './buttons/empty_dimension_button';
-import { FakeDimensionButton } from './buttons/fake_dimension_button';
-import { DimensionContainer } from './dimension_container';
 import { LayerActions } from './layer_actions';
-import { getSharedActions } from './layer_actions/layer_actions';
+import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
 import { LayerHeader } from './layer_header';
 import { LayerPanelProps } from './types';
+import { DimensionContainer } from './dimension_container';
+import { EmptyDimensionButton } from './buttons/empty_dimension_button';
+import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
+import {
+  useLensSelector,
+  selectIsFullscreenDatasource,
+  selectResolvedDateRange,
+  selectDatasourceStates,
+} from '../../../state_management';
+import { getSharedActions } from './layer_actions/layer_actions';
+import { FlyoutContainer } from '../../../shared_components/flyout_container';
+import { FakeDimensionButton } from './buttons/fake_dimension_button';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{

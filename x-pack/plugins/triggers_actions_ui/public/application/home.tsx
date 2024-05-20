@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useState, lazy, useEffect, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
-import { Section, routeToLogs, routeToRules } from './constants';
+import { Section, routeToRules, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 
-import { useKibana } from '../common/lib/kibana';
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
-import { useLoadRuleTypesQuery } from './hooks/use_load_rule_types_query';
+import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { useLoadRuleTypesQuery } from './hooks/use_load_rule_types_query';
 
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
 const LogsList = lazy(

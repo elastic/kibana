@@ -1,7 +1,3 @@
-import { Chart, Datum, Partition, PartitionLayout } from '@elastic/charts';
-import { percentValueGetter } from '@elastic/charts/dist/chart_types/partition_chart/layout/config';
-import { euiPaletteColorBlind } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +5,10 @@ import { isEmpty } from 'lodash';
  * 2.0.
  */
 import React from 'react';
+import { Chart, Datum, Partition, PartitionLayout } from '@elastic/charts';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { percentValueGetter } from '@elastic/charts/dist/chart_types/partition_chart/layout/config';
+import { isEmpty } from 'lodash';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ChartContainer } from '../chart_container';
 

@@ -39,7 +39,9 @@
             "type": "Function",
             "tags": [],
             "label": "getRegistered",
-            "description": ["\nReturns registered uiSettings values {@link UiSettingsParams}"],
+            "description": [
+              "\nReturns registered uiSettings values {@link UiSettingsParams}"
+            ],
             "signature": [
               "() => Readonly<Record<string, Omit<",
               {
@@ -66,7 +68,9 @@
             "description": [
               "\nRetrieves uiSettings values set by the user with fallbacks to default values if not specified."
             ],
-            "signature": ["<T = any>(key: string) => Promise<T>"],
+            "signature": [
+              "<T = any>(key: string) => Promise<T>"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -78,7 +82,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -96,7 +102,9 @@
             "description": [
               "\nRetrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified."
             ],
-            "signature": ["<T = any>() => Promise<Record<string, T>>"],
+            "signature": [
+              "<T = any>() => Promise<Record<string, T>>"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -109,7 +117,9 @@
             "type": "Function",
             "tags": [],
             "label": "getUserProvided",
-            "description": ["\nRetrieves a set of all uiSettings values set by the user."],
+            "description": [
+              "\nRetrieves a set of all uiSettings values set by the user."
+            ],
             "signature": [
               "<T = any>() => Promise<Record<string, ",
               {
@@ -136,7 +146,9 @@
             "description": [
               "\nWrites multiple uiSettings values and marks them as set by the user."
             ],
-            "signature": ["(changes: Record<string, any>) => Promise<void>"],
+            "signature": [
+              "(changes: Record<string, any>) => Promise<void>"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -148,7 +160,9 @@
                 "tags": [],
                 "label": "changes",
                 "description": [],
-                "signature": ["Record<string, any>"],
+                "signature": [
+                  "Record<string, any>"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -163,8 +177,12 @@
             "type": "Function",
             "tags": [],
             "label": "set",
-            "description": ["\nWrites uiSettings value and marks it as set by the user."],
-            "signature": ["(key: string, value: any) => Promise<void>"],
+            "description": [
+              "\nWrites uiSettings value and marks it as set by the user."
+            ],
+            "signature": [
+              "(key: string, value: any) => Promise<void>"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -176,7 +194,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -189,7 +209,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -204,8 +226,12 @@
             "type": "Function",
             "tags": [],
             "label": "remove",
-            "description": ["\nRemoves uiSettings value by key."],
-            "signature": ["(key: string) => Promise<void>"],
+            "description": [
+              "\nRemoves uiSettings value by key."
+            ],
+            "signature": [
+              "(key: string) => Promise<void>"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -217,7 +243,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -232,7 +260,9 @@
             "type": "Function",
             "tags": [],
             "label": "removeMany",
-            "description": ["\nRemoves multiple uiSettings values by keys."],
+            "description": [
+              "\nRemoves multiple uiSettings values by keys."
+            ],
             "signature": [
               "(keys: string[], options?: { validateKeys?: boolean | undefined; handleWriteErrors?: boolean | undefined; } | undefined) => Promise<void>"
             ],
@@ -247,7 +277,9 @@
                 "tags": [],
                 "label": "keys",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -271,7 +303,9 @@
                     "tags": [],
                     "label": "validateKeys",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -283,7 +317,9 @@
                     "tags": [],
                     "label": "handleWriteErrors",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -299,8 +335,12 @@
             "type": "Function",
             "tags": [],
             "label": "isOverridden",
-            "description": ["\nShows whether the uiSettings value set by the user."],
-            "signature": ["(key: string) => boolean"],
+            "description": [
+              "\nShows whether the uiSettings value set by the user."
+            ],
+            "signature": [
+              "(key: string) => boolean"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -312,7 +352,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -330,7 +372,9 @@
             "description": [
               "\nShows whether the uiSetting is a sensitive value. Used by telemetry to not send sensitive values."
             ],
-            "signature": ["(key: string) => boolean"],
+            "signature": [
+              "(key: string) => boolean"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -342,7 +386,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -360,7 +406,9 @@
             "description": [
               "\nValidates the uiSettings value and returns a ValueValidation object."
             ],
-            "signature": ["(key: string, value: unknown) => Promise<ValueValidation>"],
+            "signature": [
+              "(key: string, value: unknown) => Promise<ValueValidation>"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -372,7 +420,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -385,7 +435,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["unknown"],
+                "signature": [
+                  "unknown"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -403,7 +455,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UiSettingsRequestHandlerContext",
-        "description": ["\nCore's `uiSettings` request handler context."],
+        "description": [
+          "\nCore's `uiSettings` request handler context."
+        ],
         "path": "packages/core/ui-settings/core-ui-settings-server/src/request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -468,7 +522,9 @@
             "type": "Function",
             "tags": [],
             "label": "register",
-            "description": ["\nSets settings with default values for the uiSettings"],
+            "description": [
+              "\nSets settings with default values for the uiSettings"
+            ],
             "signature": [
               "(settings: Record<string, ",
               {
@@ -516,7 +572,9 @@
             "type": "Function",
             "tags": [],
             "label": "registerGlobal",
-            "description": ["\nSets settings with default values for the global uiSettings"],
+            "description": [
+              "\nSets settings with default values for the global uiSettings"
+            ],
             "signature": [
               "(settings: Record<string, ",
               {
@@ -564,8 +622,12 @@
             "type": "Function",
             "tags": [],
             "label": "setAllowlist",
-            "description": ["\nSets an allowlist of setting keys."],
-            "signature": ["(keys: string[]) => void"],
+            "description": [
+              "\nSets an allowlist of setting keys."
+            ],
+            "signature": [
+              "(keys: string[]) => void"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -577,7 +639,9 @@
                 "tags": [],
                 "label": "keys",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/core/ui-settings/core-ui-settings-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,

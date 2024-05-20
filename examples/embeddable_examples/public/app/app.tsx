@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
+import { AppMountParameters } from '@kbn/core-application-browser';
 import {
   EuiPage,
   EuiPageBody,
@@ -19,7 +20,6 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core-application-browser';
 import { Overview } from './overview';
 import { RegisterEmbeddable } from './register_embeddable';
 import { RenderExamples } from './render_examples';

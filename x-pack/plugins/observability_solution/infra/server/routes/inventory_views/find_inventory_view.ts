@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { createValidationFunction } from '../../../common/runtime_types';
 import {
-  INVENTORY_VIEW_URL,
   findInventoryViewResponsePayloadRT,
   inventoryViewRequestQueryRT,
+  INVENTORY_VIEW_URL,
 } from '../../../common/http_api/latest';
-import { createValidationFunction } from '../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 
 export const initFindInventoryViewRoute = ({

@@ -6,9 +6,9 @@
  */
 
 import {
-  TransformPivotConfig,
   isLatestTransform,
   isPivotTransform,
+  TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig } from '../helpers';

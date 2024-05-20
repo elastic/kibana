@@ -10,8 +10,13 @@
       "if_seq_no": "",
       "version": ""
     },
-    "methods": ["PUT", "POST"],
-    "patterns": ["_watcher/watch/{id}"],
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_watcher/watch/{id}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-put-watch.html",
     "availability": {
       "stack": true,

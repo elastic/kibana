@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCode,
   EuiDescribedFormGroup,
@@ -16,8 +18,6 @@ import {
   EuiSelect,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useState } from 'react';
 import { ReadonlyRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
 

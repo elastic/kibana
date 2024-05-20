@@ -8,16 +8,16 @@
 // The parameters and response for the `timeSeriesQuery()` service function,
 // and associated HTTP endpoint.
 
-import { TypeOf, schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { parseDuration } from '@kbn/alerting-plugin/server';
+import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 import {
   MAX_INTERVALS,
   getDateStartAfterDateEndErrorMessage,
   getTooManyIntervalsErrorMessage,
 } from '../../../common/data';
-import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 
 export type { TimeSeriesResult, TimeSeriesResultRow, MetricResult } from '../../../common/data';
 

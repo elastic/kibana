@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BuildkiteTriggerStep } from '#pipeline-utils';
-import { getSelectedCommitHash } from './info_sections/commit_info';
 import { buildkite } from './shared';
+import { getSelectedCommitHash } from './info_sections/commit_info';
+import { BuildkiteTriggerStep } from '#pipeline-utils';
 
 const IS_DRY_RUN = process.env.DRY_RUN?.match(/(1|true)/i);
 const REMOTE_SERVICE_CONFIG = `https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/config.yaml`;

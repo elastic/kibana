@@ -41,7 +41,11 @@
             "tags": [],
             "label": "createPrebootContract",
             "description": [],
-            "signature": ["() => jest.Mocked<", "InternalUiSettingsServicePreboot", ">"],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalUiSettingsServicePreboot",
+              ">"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -127,7 +131,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<UiSettingsServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<UiSettingsServiceContract>"
+            ],
             "path": "packages/core/ui-settings/core-ui-settings-server-mocks/src/ui_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

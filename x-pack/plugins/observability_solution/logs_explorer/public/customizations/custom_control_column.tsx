@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
-import { LogDocument } from '@kbn/discover-utils/src';
-import type { DataTableRecord } from '@kbn/discover-utils/src/types';
+import React, { ComponentClass } from 'react';
 import {
-  type ControlColumnsProps,
-  DataTableRowControl,
   OPEN_DETAILS,
   SELECT_ROW,
+  type ControlColumnsProps,
+  DataTableRowControl,
 } from '@kbn/unified-data-table';
+import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { useActor } from '@xstate/react';
-import React, { ComponentClass } from 'react';
-import * as constants from '../../common/constants';
+import { LogDocument } from '@kbn/discover-utils/src';
+import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 import {
   degradedDocButtonLabelWhenNotPresent,
   degradedDocButtonLabelWhenPresent,
   stacktraceAvailableControlButton,
   stacktraceNotAvailableControlButton,
 } from '../components/common/translations';
-import { ActionsColumnTooltip } from '../components/virtual_columns/column_tooltips/actions_column_tooltip';
-import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
+import * as constants from '../../common/constants';
 import { getStacktraceFields } from '../utils/get_stack_trace';
+import { ActionsColumnTooltip } from '../components/virtual_columns/column_tooltips/actions_column_tooltip';
 
 const ConnectedDegradedDocs = ({
   rowIndex,

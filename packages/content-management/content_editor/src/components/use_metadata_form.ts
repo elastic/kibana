@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useMemo, useRef, useState } from 'react';
 
 import type { Item } from '../types';
 

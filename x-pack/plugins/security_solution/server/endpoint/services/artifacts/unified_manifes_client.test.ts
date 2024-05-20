@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { UNIFIED_MANIFEST_ALL_NAMESPACES, UnifiedManifestClient } from './unified_manifest_client';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ManifestConstants } from '../../lib/artifacts';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InternalUnifiedManifestSchema } from '../../schemas';
-import { UNIFIED_MANIFEST_ALL_NAMESPACES, UnifiedManifestClient } from './unified_manifest_client';
 
 describe('unified_manifest_client', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;

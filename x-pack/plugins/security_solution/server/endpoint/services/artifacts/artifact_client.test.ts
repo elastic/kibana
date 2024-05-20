@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createArtifactsClientMock } from '@kbn/fleet-plugin/server/mocks';
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { EndpointArtifactClient } from './artifact_client';
+import { createArtifactsClientMock } from '@kbn/fleet-plugin/server/mocks';
 
 describe('artifact_client', () => {
   describe('ArtifactClient checks', () => {

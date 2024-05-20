@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ICON_TYPES } from '@elastic/eui';
 import { useEffect, useState } from 'react';
+import { ICON_TYPES } from '@elastic/eui';
 
 import type { PackageInfo, PackageListItem } from '../types';
 

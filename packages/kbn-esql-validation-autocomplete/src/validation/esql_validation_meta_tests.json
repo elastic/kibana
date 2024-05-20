@@ -1,5 +1,12 @@
 {
-  "indexes": ["a_index", "index", "other_index", ".secret_index", "my-index", "unsupported_index"],
+  "indexes": [
+    "a_index",
+    "index",
+    "other_index",
+    ".secret_index",
+    "my-index",
+    "unsupported_index"
+  ],
   "fields": [
     {
       "name": "numberField",
@@ -75,15 +82,25 @@
   "policies": [
     {
       "name": "policy",
-      "sourceIndices": ["enrich_index"],
+      "sourceIndices": [
+        "enrich_index"
+      ],
       "matchField": "otherStringField",
-      "enrichFields": ["otherField", "yetAnotherField"]
+      "enrichFields": [
+        "otherField",
+        "yetAnotherField"
+      ]
     },
     {
       "name": "policy$",
-      "sourceIndices": ["enrich_index"],
+      "sourceIndices": [
+        "enrich_index"
+      ],
       "matchField": "otherStringField",
-      "enrichFields": ["otherField", "yetAnotherField"]
+      "enrichFields": [
+        "otherField",
+        "yetAnotherField"
+      ]
     }
   ],
   "unsupported_field": [
@@ -165,17 +182,24 @@
     },
     {
       "query": "from ",
-      "error": ["SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"
+      ],
       "warning": []
     },
     {
       "query": "from index,",
-      "error": ["SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"
+      ],
       "warning": []
     },
     {
       "query": "from assignment = 1",
-      "error": ["SyntaxError: mismatched input '=' expecting <EOF>", "Unknown index [assignment]"],
+      "error": [
+        "SyntaxError: mismatched input '=' expecting <EOF>",
+        "Unknown index [assignment]"
+      ],
       "warning": []
     },
     {
@@ -208,55 +232,77 @@
     },
     {
       "query": "from index, missingIndex",
-      "error": ["Unknown index [missingIndex]"],
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
       "warning": []
     },
     {
       "query": "from fn()",
-      "error": ["Unknown index [fn()]"],
+      "error": [
+        "Unknown index [fn()]"
+      ],
       "warning": []
     },
     {
       "query": "from average()",
-      "error": ["Unknown index [average()]"],
+      "error": [
+        "Unknown index [average()]"
+      ],
       "warning": []
     },
     {
       "query": "from index [METADATA _id]",
       "error": [],
-      "warning": ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
     },
     {
       "query": "from index [metadata _id]",
       "error": [],
-      "warning": ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
     },
     {
       "query": "from index [METADATA _id, _source]",
       "error": [],
-      "warning": ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
     },
     {
       "query": "from index [METADATA _id, _source2]",
       "error": [
         "Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]"
       ],
-      "warning": ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
     },
     {
       "query": "from index [metadata _id, _source] [METADATA _id2]",
-      "error": ["SyntaxError: mismatched input '[' expecting <EOF>"],
-      "warning": ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
+      "error": [
+        "SyntaxError: mismatched input '[' expecting <EOF>"
+      ],
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
     },
     {
       "query": "from remote-ccs:indexes [METADATA _id]",
       "error": [],
-      "warning": ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
     },
     {
       "query": "from *:indexes [METADATA _id]",
       "error": [],
-      "warning": ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
+      "warning": [
+        "Square brackets '[]' need to be removed from FROM METADATA declaration"
+      ]
     },
     {
       "query": "from index METADATA _id",
@@ -282,7 +328,9 @@
     },
     {
       "query": "from index metadata _id, _source METADATA _id2",
-      "error": ["SyntaxError: mismatched input 'METADATA' expecting <EOF>"],
+      "error": [
+        "SyntaxError: mismatched input 'METADATA' expecting <EOF>"
+      ],
       "warning": []
     },
     {
@@ -297,7 +345,9 @@
     },
     {
       "query": "from index (metadata _id)",
-      "error": ["SyntaxError: mismatched input '(metadata' expecting <EOF>"],
+      "error": [
+        "SyntaxError: mismatched input '(metadata' expecting <EOF>"
+      ],
       "warning": []
     },
     {
@@ -382,7 +432,9 @@
     },
     {
       "query": "from indexes*",
-      "error": ["Unknown index [indexes*]"],
+      "error": [
+        "Unknown index [indexes*]"
+      ],
       "warning": []
     },
     {
@@ -417,12 +469,16 @@
     },
     {
       "query": "from numberField",
-      "error": ["Unknown index [numberField]"],
+      "error": [
+        "Unknown index [numberField]"
+      ],
       "warning": []
     },
     {
       "query": "from policy",
-      "error": ["Unknown index [policy]"],
+      "error": [
+        "Unknown index [policy]"
+      ],
       "warning": []
     },
     {
@@ -434,17 +490,24 @@
     },
     {
       "query": "row missing_column",
-      "error": ["Unknown column [missing_column]"],
+      "error": [
+        "Unknown column [missing_column]"
+      ],
       "warning": []
     },
     {
       "query": "row fn()",
-      "error": ["Unknown function [fn]"],
+      "error": [
+        "Unknown function [fn]"
+      ],
       "warning": []
     },
     {
       "query": "row missing_column, missing_column2",
-      "error": ["Unknown column [missing_column]", "Unknown column [missing_column2]"],
+      "error": [
+        "Unknown column [missing_column]",
+        "Unknown column [missing_column2]"
+      ],
       "warning": []
     },
     {
@@ -454,12 +517,16 @@
     },
     {
       "query": "row a=1, missing_column",
-      "error": ["Unknown column [missing_column]"],
+      "error": [
+        "Unknown column [missing_column]"
+      ],
       "warning": []
     },
     {
       "query": "row a=1, b = average()",
-      "error": ["Unknown function [average]"],
+      "error": [
+        "Unknown function [average]"
+      ],
       "warning": []
     },
     {
@@ -517,7 +584,9 @@
     },
     {
       "query": "row var = 1 in ",
-      "error": ["SyntaxError: mismatched input '<EOF>' expecting '('"],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting '('"
+      ],
       "warning": []
     },
     {
@@ -530,7 +599,9 @@
     },
     {
       "query": "row var = 1 not in ",
-      "error": ["SyntaxError: mismatched input '<EOF>' expecting '('"],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting '('"
+      ],
       "warning": []
     },
     {
@@ -640,7 +711,9 @@
     },
     {
       "query": "row var = (numberField > 0)",
-      "error": ["Unknown column [numberField]"],
+      "error": [
+        "Unknown column [numberField]"
+      ],
       "warning": []
     },
     {
@@ -688,7 +761,9 @@
     },
     {
       "query": "row var = (numberField >= 0)",
-      "error": ["Unknown column [numberField]"],
+      "error": [
+        "Unknown column [numberField]"
+      ],
       "warning": []
     },
     {
@@ -736,7 +811,9 @@
     },
     {
       "query": "row var = (numberField < 0)",
-      "error": ["Unknown column [numberField]"],
+      "error": [
+        "Unknown column [numberField]"
+      ],
       "warning": []
     },
     {
@@ -784,7 +861,9 @@
     },
     {
       "query": "row var = (numberField <= 0)",
-      "error": ["Unknown column [numberField]"],
+      "error": [
+        "Unknown column [numberField]"
+      ],
       "warning": []
     },
     {
@@ -832,7 +911,9 @@
     },
     {
       "query": "row var = (numberField == 0)",
-      "error": ["Unknown column [numberField]"],
+      "error": [
+        "Unknown column [numberField]"
+      ],
       "warning": []
     },
     {
@@ -877,7 +958,9 @@
     },
     {
       "query": "row var = (numberField != 0)",
-      "error": ["Unknown column [numberField]"],
+      "error": [
+        "Unknown column [numberField]"
+      ],
       "warning": []
     },
     {
@@ -922,7 +1005,9 @@
     },
     {
       "query": "row var = now() + now()",
-      "error": ["Argument of [+] must be [time_literal], found value [now()] type [date]"],
+      "error": [
+        "Argument of [+] must be [time_literal], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -937,7 +1022,9 @@
     },
     {
       "query": "row var = now() - now()",
-      "error": ["Argument of [-] must be [time_literal], found value [now()] type [date]"],
+      "error": [
+        "Argument of [-] must be [time_literal], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -1016,22 +1103,30 @@
     },
     {
       "query": "row var = 5 like \"?a\"",
-      "error": ["Argument of [like] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [like] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "row var = 5 NOT like \"?a\"",
-      "error": ["Argument of [not_like] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [not_like] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "row var = NOT 5 like \"?a\"",
-      "error": ["Argument of [like] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [like] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "row var = NOT 5 NOT like \"?a\"",
-      "error": ["Argument of [not_like] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [not_like] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
@@ -1056,28 +1151,38 @@
     },
     {
       "query": "row var = 5 rlike \"?a\"",
-      "error": ["Argument of [rlike] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [rlike] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "row var = 5 NOT rlike \"?a\"",
-      "error": ["Argument of [not_rlike] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [not_rlike] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "row var = NOT 5 rlike \"?a\"",
-      "error": ["Argument of [rlike] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [rlike] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "row var = NOT 5 NOT rlike \"?a\"",
-      "error": ["Argument of [not_rlike] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [not_rlike] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "row var = mv_sort([\"a\", \"b\"], \"bogus\")",
       "error": [],
-      "warning": ["Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."]
+      "warning": [
+        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
     },
     {
       "query": "row var = mv_sort([\"a\", \"b\"], \"ASC\")",
@@ -1091,27 +1196,37 @@
     },
     {
       "query": "row 1 anno",
-      "error": ["ROW does not support [date_period] in expression [1 anno]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 anno]"
+      ],
       "warning": []
     },
     {
       "query": "row var = 1 anno",
-      "error": ["Unexpected time interval qualifier: 'anno'"],
+      "error": [
+        "Unexpected time interval qualifier: 'anno'"
+      ],
       "warning": []
     },
     {
       "query": "row now() + 1 anno",
-      "error": ["Unexpected time interval qualifier: 'anno'"],
+      "error": [
+        "Unexpected time interval qualifier: 'anno'"
+      ],
       "warning": []
     },
     {
       "query": "row 1 year",
-      "error": ["ROW does not support [date_period] in expression [1 year]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 year]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                year",
-      "error": ["ROW does not support [date_period] in expression [1 year]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 year]"
+      ],
       "warning": []
     },
     {
@@ -1136,7 +1251,9 @@
     },
     {
       "query": "row 1 year + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 year] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 year] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1165,12 +1282,16 @@
     },
     {
       "query": "row 1 years",
-      "error": ["ROW does not support [date_period] in expression [1 years]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 years]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                years",
-      "error": ["ROW does not support [date_period] in expression [1 years]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 years]"
+      ],
       "warning": []
     },
     {
@@ -1195,7 +1316,9 @@
     },
     {
       "query": "row 1 years + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 years] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 years] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1224,12 +1347,16 @@
     },
     {
       "query": "row 1 month",
-      "error": ["ROW does not support [date_period] in expression [1 month]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 month]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                month",
-      "error": ["ROW does not support [date_period] in expression [1 month]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 month]"
+      ],
       "warning": []
     },
     {
@@ -1254,7 +1381,9 @@
     },
     {
       "query": "row 1 month + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 month] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 month] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1283,12 +1412,16 @@
     },
     {
       "query": "row 1 months",
-      "error": ["ROW does not support [date_period] in expression [1 months]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 months]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                months",
-      "error": ["ROW does not support [date_period] in expression [1 months]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 months]"
+      ],
       "warning": []
     },
     {
@@ -1313,7 +1446,9 @@
     },
     {
       "query": "row 1 months + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 months] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 months] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1342,12 +1477,16 @@
     },
     {
       "query": "row 1 week",
-      "error": ["ROW does not support [date_period] in expression [1 week]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 week]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                week",
-      "error": ["ROW does not support [date_period] in expression [1 week]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 week]"
+      ],
       "warning": []
     },
     {
@@ -1372,7 +1511,9 @@
     },
     {
       "query": "row 1 week + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 week] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 week] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1401,12 +1542,16 @@
     },
     {
       "query": "row 1 weeks",
-      "error": ["ROW does not support [date_period] in expression [1 weeks]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 weeks]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                weeks",
-      "error": ["ROW does not support [date_period] in expression [1 weeks]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 weeks]"
+      ],
       "warning": []
     },
     {
@@ -1431,7 +1576,9 @@
     },
     {
       "query": "row 1 weeks + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 weeks] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 weeks] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1460,12 +1607,16 @@
     },
     {
       "query": "row 1 day",
-      "error": ["ROW does not support [date_period] in expression [1 day]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 day]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                day",
-      "error": ["ROW does not support [date_period] in expression [1 day]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 day]"
+      ],
       "warning": []
     },
     {
@@ -1490,7 +1641,9 @@
     },
     {
       "query": "row 1 day + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 day] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 day] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1519,12 +1672,16 @@
     },
     {
       "query": "row 1 days",
-      "error": ["ROW does not support [date_period] in expression [1 days]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 days]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                days",
-      "error": ["ROW does not support [date_period] in expression [1 days]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 days]"
+      ],
       "warning": []
     },
     {
@@ -1549,7 +1706,9 @@
     },
     {
       "query": "row 1 days + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 days] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 days] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1578,12 +1737,16 @@
     },
     {
       "query": "row 1 hour",
-      "error": ["ROW does not support [date_period] in expression [1 hour]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 hour]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                hour",
-      "error": ["ROW does not support [date_period] in expression [1 hour]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 hour]"
+      ],
       "warning": []
     },
     {
@@ -1608,7 +1771,9 @@
     },
     {
       "query": "row 1 hour + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 hour] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 hour] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1637,12 +1802,16 @@
     },
     {
       "query": "row 1 hours",
-      "error": ["ROW does not support [date_period] in expression [1 hours]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 hours]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                hours",
-      "error": ["ROW does not support [date_period] in expression [1 hours]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 hours]"
+      ],
       "warning": []
     },
     {
@@ -1667,7 +1836,9 @@
     },
     {
       "query": "row 1 hours + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 hours] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 hours] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1696,12 +1867,16 @@
     },
     {
       "query": "row 1 minute",
-      "error": ["ROW does not support [date_period] in expression [1 minute]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 minute]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                minute",
-      "error": ["ROW does not support [date_period] in expression [1 minute]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 minute]"
+      ],
       "warning": []
     },
     {
@@ -1726,7 +1901,9 @@
     },
     {
       "query": "row 1 minute + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 minute] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 minute] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1755,12 +1932,16 @@
     },
     {
       "query": "row 1 minutes",
-      "error": ["ROW does not support [date_period] in expression [1 minutes]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 minutes]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                minutes",
-      "error": ["ROW does not support [date_period] in expression [1 minutes]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 minutes]"
+      ],
       "warning": []
     },
     {
@@ -1785,7 +1966,9 @@
     },
     {
       "query": "row 1 minutes + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 minutes] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 minutes] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1814,12 +1997,16 @@
     },
     {
       "query": "row 1 second",
-      "error": ["ROW does not support [date_period] in expression [1 second]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 second]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                second",
-      "error": ["ROW does not support [date_period] in expression [1 second]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 second]"
+      ],
       "warning": []
     },
     {
@@ -1844,7 +2031,9 @@
     },
     {
       "query": "row 1 second + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 second] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 second] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1873,12 +2062,16 @@
     },
     {
       "query": "row 1 seconds",
-      "error": ["ROW does not support [date_period] in expression [1 seconds]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 seconds]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                seconds",
-      "error": ["ROW does not support [date_period] in expression [1 seconds]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 seconds]"
+      ],
       "warning": []
     },
     {
@@ -1903,7 +2096,9 @@
     },
     {
       "query": "row 1 seconds + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 seconds] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 seconds] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1932,12 +2127,16 @@
     },
     {
       "query": "row 1 millisecond",
-      "error": ["ROW does not support [date_period] in expression [1 millisecond]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 millisecond]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                millisecond",
-      "error": ["ROW does not support [date_period] in expression [1 millisecond]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 millisecond]"
+      ],
       "warning": []
     },
     {
@@ -1962,7 +2161,9 @@
     },
     {
       "query": "row 1 millisecond + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 millisecond] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 millisecond] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -1991,12 +2192,16 @@
     },
     {
       "query": "row 1 milliseconds",
-      "error": ["ROW does not support [date_period] in expression [1 milliseconds]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 milliseconds]"
+      ],
       "warning": []
     },
     {
       "query": "row 1                milliseconds",
-      "error": ["ROW does not support [date_period] in expression [1 milliseconds]"],
+      "error": [
+        "ROW does not support [date_period] in expression [1 milliseconds]"
+      ],
       "warning": []
     },
     {
@@ -2021,7 +2226,9 @@
     },
     {
       "query": "row 1 milliseconds + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 milliseconds] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 milliseconds] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -2050,7 +2257,9 @@
     },
     {
       "query": "meta",
-      "error": ["SyntaxError: missing 'functions' at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing 'functions' at '<EOF>'"
+      ],
       "warning": []
     },
     {
@@ -2088,7 +2297,9 @@
     },
     {
       "query": "show",
-      "error": ["SyntaxError: missing 'info' at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing 'info' at '<EOF>'"
+      ],
       "warning": []
     },
     {
@@ -2130,7 +2341,9 @@
     },
     {
       "query": "from index | limit ",
-      "error": ["SyntaxError: missing INTEGER_LITERAL at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing INTEGER_LITERAL at '<EOF>'"
+      ],
       "warning": []
     },
     {
@@ -2140,22 +2353,30 @@
     },
     {
       "query": "from index | limit 4.5",
-      "error": ["SyntaxError: mismatched input '4.5' expecting INTEGER_LITERAL"],
+      "error": [
+        "SyntaxError: mismatched input '4.5' expecting INTEGER_LITERAL"
+      ],
       "warning": []
     },
     {
       "query": "from index | limit a",
-      "error": ["SyntaxError: mismatched input 'a' expecting INTEGER_LITERAL"],
+      "error": [
+        "SyntaxError: mismatched input 'a' expecting INTEGER_LITERAL"
+      ],
       "warning": []
     },
     {
       "query": "from index | limit numberField",
-      "error": ["SyntaxError: mismatched input 'numberField' expecting INTEGER_LITERAL"],
+      "error": [
+        "SyntaxError: mismatched input 'numberField' expecting INTEGER_LITERAL"
+      ],
       "warning": []
     },
     {
       "query": "from index | limit stringField",
-      "error": ["SyntaxError: mismatched input 'stringField' expecting INTEGER_LITERAL"],
+      "error": [
+        "SyntaxError: mismatched input 'stringField' expecting INTEGER_LITERAL"
+      ],
       "warning": []
     },
     {
@@ -2165,7 +2386,9 @@
     },
     {
       "query": "from index | keep ",
-      "error": ["SyntaxError: missing ID_PATTERN at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+      ],
       "warning": []
     },
     {
@@ -2190,12 +2413,16 @@
     },
     {
       "query": "from index | keep `4.5`",
-      "error": ["Unknown column [4.5]"],
+      "error": [
+        "Unknown column [4.5]"
+      ],
       "warning": []
     },
     {
       "query": "from index | keep missingField, numberField, dateField",
-      "error": ["Unknown column [missingField]"],
+      "error": [
+        "Unknown column [missingField]"
+      ],
       "warning": []
     },
     {
@@ -2258,17 +2485,23 @@
     },
     {
       "query": "from index | keep m*",
-      "error": ["Unknown column [m*]"],
+      "error": [
+        "Unknown column [m*]"
+      ],
       "warning": []
     },
     {
       "query": "from index | keep *m",
-      "error": ["Unknown column [*m]"],
+      "error": [
+        "Unknown column [*m]"
+      ],
       "warning": []
     },
     {
       "query": "from index | keep d*m",
-      "error": ["Unknown column [d*m]"],
+      "error": [
+        "Unknown column [d*m]"
+      ],
       "warning": []
     },
     {
@@ -2290,7 +2523,9 @@
     },
     {
       "query": "from index | drop ",
-      "error": ["SyntaxError: missing ID_PATTERN at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+      ],
       "warning": []
     },
     {
@@ -2310,7 +2545,9 @@
     },
     {
       "query": "from index | drop missingField, numberField, dateField",
-      "error": ["Unknown column [missingField]"],
+      "error": [
+        "Unknown column [missingField]"
+      ],
       "warning": []
     },
     {
@@ -2360,38 +2597,52 @@
     },
     {
       "query": "from index | drop m*",
-      "error": ["Unknown column [m*]"],
+      "error": [
+        "Unknown column [m*]"
+      ],
       "warning": []
     },
     {
       "query": "from index | drop *m",
-      "error": ["Unknown column [*m]"],
+      "error": [
+        "Unknown column [*m]"
+      ],
       "warning": []
     },
     {
       "query": "from index | drop d*m",
-      "error": ["Unknown column [d*m]"],
+      "error": [
+        "Unknown column [d*m]"
+      ],
       "warning": []
     },
     {
       "query": "from index | drop *",
-      "error": ["Removing all fields is not allowed [*]"],
+      "error": [
+        "Removing all fields is not allowed [*]"
+      ],
       "warning": []
     },
     {
       "query": "from index | drop stringField, *",
-      "error": ["Removing all fields is not allowed [*]"],
+      "error": [
+        "Removing all fields is not allowed [*]"
+      ],
       "warning": []
     },
     {
       "query": "from index | drop @timestamp",
       "error": [],
-      "warning": ["Drop [@timestamp] will remove all time filters to the search results"]
+      "warning": [
+        "Drop [@timestamp] will remove all time filters to the search results"
+      ]
     },
     {
       "query": "from index | drop stringField, @timestamp",
       "error": [],
-      "warning": ["Drop [@timestamp] will remove all time filters to the search results"]
+      "warning": [
+        "Drop [@timestamp] will remove all time filters to the search results"
+      ]
     },
     {
       "query": "FROM index | STATS ROUND(AVG(numberField * 1.5)), COUNT(*), MIN(numberField * 10) | DROP `MIN(numberField * 10)`",
@@ -2405,7 +2656,9 @@
     },
     {
       "query": "from a_index | mv_expand ",
-      "error": ["SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'"
+      ],
       "warning": []
     },
     {
@@ -2463,27 +2716,39 @@
     },
     {
       "query": "from a_index | rename",
-      "error": ["SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN"],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | rename stringField",
-      "error": ["SyntaxError: mismatched input '<EOF>' expecting 'as'"],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting 'as'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | rename a",
-      "error": ["SyntaxError: mismatched input '<EOF>' expecting 'as'", "Unknown column [a]"],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting 'as'",
+        "Unknown column [a]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | rename stringField as",
-      "error": ["SyntaxError: missing ID_PATTERN at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | rename missingField as",
-      "error": ["SyntaxError: missing ID_PATTERN at '<EOF>'", "Unknown column [missingField]"],
+      "error": [
+        "SyntaxError: missing ID_PATTERN at '<EOF>'",
+        "Unknown column [missingField]"
+      ],
       "warning": []
     },
     {
@@ -2528,12 +2793,17 @@
     },
     {
       "query": "from a_index |eval numberField + 1 | rename `numberField + 1` as ",
-      "error": ["SyntaxError: missing ID_PATTERN at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | rename s* as strings",
-      "error": ["Using wildcards (*) in RENAME is not allowed [s*]", "Unknown column [strings]"],
+      "error": [
+        "Using wildcards (*) in RENAME is not allowed [s*]",
+        "Unknown column [strings]"
+      ],
       "warning": []
     },
     {
@@ -2543,7 +2813,9 @@
     },
     {
       "query": "row a = 10 | rename a as this is fine",
-      "error": ["SyntaxError: mismatched input 'is' expecting <EOF>"],
+      "error": [
+        "SyntaxError: mismatched input 'is' expecting <EOF>"
+      ],
       "warning": []
     },
     {
@@ -2555,12 +2827,16 @@
     },
     {
       "query": "from a_index | dissect stringField",
-      "error": ["SyntaxError: missing QUOTED_STRING at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing QUOTED_STRING at '<EOF>'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | dissect stringField 2",
-      "error": ["SyntaxError: mismatched input '2' expecting QUOTED_STRING"],
+      "error": [
+        "SyntaxError: mismatched input '2' expecting QUOTED_STRING"
+      ],
       "warning": []
     },
     {
@@ -2586,12 +2862,16 @@
     },
     {
       "query": "from a_index | dissect numberField \"%{firstWord}\"",
-      "error": ["DISSECT only supports string type values, found [numberField] of type [number]"],
+      "error": [
+        "DISSECT only supports string type values, found [numberField] of type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | dissect stringField \"%{firstWord}\" option ",
-      "error": ["SyntaxError: mismatched input '<EOF>' expecting '='"],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting '='"
+      ],
       "warning": []
     },
     {
@@ -2604,7 +2884,9 @@
     },
     {
       "query": "from a_index | dissect stringField \"%{firstWord}\" option = 1",
-      "error": ["Invalid option for DISSECT: [option]"],
+      "error": [
+        "Invalid option for DISSECT: [option]"
+      ],
       "warning": []
     },
     {
@@ -2614,12 +2896,16 @@
     },
     {
       "query": "from a_index | dissect stringField \"%{firstWord}\" ignore_missing = true",
-      "error": ["Invalid option for DISSECT: [ignore_missing]"],
+      "error": [
+        "Invalid option for DISSECT: [ignore_missing]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | dissect stringField \"%{firstWord}\" append_separator = true",
-      "error": ["Invalid value for DISSECT append_separator: expected a string, but was [true]"],
+      "error": [
+        "Invalid value for DISSECT append_separator: expected a string, but was [true]"
+      ],
       "warning": []
     },
     {
@@ -2636,12 +2922,16 @@
     },
     {
       "query": "from a_index | grok stringField",
-      "error": ["SyntaxError: missing QUOTED_STRING at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing QUOTED_STRING at '<EOF>'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | grok stringField 2",
-      "error": ["SyntaxError: mismatched input '2' expecting QUOTED_STRING"],
+      "error": [
+        "SyntaxError: mismatched input '2' expecting QUOTED_STRING"
+      ],
       "warning": []
     },
     {
@@ -2654,7 +2944,9 @@
     },
     {
       "query": "from a_index | grok stringField %a",
-      "error": ["SyntaxError: mismatched input '%' expecting QUOTED_STRING"],
+      "error": [
+        "SyntaxError: mismatched input '%' expecting QUOTED_STRING"
+      ],
       "warning": []
     },
     {
@@ -2664,7 +2956,9 @@
     },
     {
       "query": "from a_index | grok numberField \"%{firstWord}\"",
-      "error": ["GROK only supports string type values, found [numberField] of type [number]"],
+      "error": [
+        "GROK only supports string type values, found [numberField] of type [number]"
+      ],
       "warning": []
     },
     {
@@ -2674,7 +2968,9 @@
     },
     {
       "query": "from a_index | where b",
-      "error": ["Unknown column [b]"],
+      "error": [
+        "Unknown column [b]"
+      ],
       "warning": []
     },
     {
@@ -3482,7 +3778,9 @@
     },
     {
       "query": "from a_index | eval stringField =~ 0",
-      "error": ["Argument of [=~] must be [string], found value [0] type [number]"],
+      "error": [
+        "Argument of [=~] must be [string], found value [0] type [number]"
+      ],
       "warning": []
     },
     {
@@ -3507,22 +3805,30 @@
     },
     {
       "query": "from a_index | where numberField like \"?a\"",
-      "error": ["Argument of [like] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [like] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where numberField NOT like \"?a\"",
-      "error": ["Argument of [not_like] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [not_like] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where NOT numberField like \"?a\"",
-      "error": ["Argument of [like] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [like] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where NOT numberField NOT like \"?a\"",
-      "error": ["Argument of [not_like] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [not_like] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -3547,7 +3853,9 @@
     },
     {
       "query": "from a_index | where numberField rlike \"?a\"",
-      "error": ["Argument of [rlike] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [rlike] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -3559,7 +3867,9 @@
     },
     {
       "query": "from a_index | where NOT numberField rlike \"?a\"",
-      "error": ["Argument of [rlike] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [rlike] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -3571,7 +3881,9 @@
     },
     {
       "query": "from a_index | where cidr_match(ipField)",
-      "error": ["Error: [cidr_match] function expects at least 2 arguments, got 1."],
+      "error": [
+        "Error: [cidr_match] function expects at least 2 arguments, got 1."
+      ],
       "warning": []
     },
     {
@@ -4008,17 +4320,23 @@
     },
     {
       "query": "from a_index | eval numberField + ",
-      "error": ["SyntaxError: no viable alternative at input 'numberField + '"],
+      "error": [
+        "SyntaxError: no viable alternative at input 'numberField + '"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField + 1",
-      "error": ["Argument of [+] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [+] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval a=b",
-      "error": ["Unknown column [b]"],
+      "error": [
+        "Unknown column [b]"
+      ],
       "warning": []
     },
     {
@@ -4031,12 +4349,16 @@
     },
     {
       "query": "from a_index | eval a=round",
-      "error": ["Unknown column [round]"],
+      "error": [
+        "Unknown column [round]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval a=round(",
-      "error": ["SyntaxError: no viable alternative at input 'round('"],
+      "error": [
+        "SyntaxError: no viable alternative at input 'round('"
+      ],
       "warning": []
     },
     {
@@ -4058,12 +4380,16 @@
     },
     {
       "query": "from a_index | eval a=round(numberField) + round(stringField) ",
-      "error": ["Argument of [round] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [round] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval a=round(numberField) + round(stringField), numberField  ",
-      "error": ["Argument of [round] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [round] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -4890,17 +5216,23 @@
     {
       "query": "from a_index | eval log10(-1)",
       "error": [],
-      "warning": ["Log of a negative number results in null: -1"]
+      "warning": [
+        "Log of a negative number results in null: -1"
+      ]
     },
     {
       "query": "from a_index | eval log(-1)",
       "error": [],
-      "warning": ["Log of a negative number results in null: -1"]
+      "warning": [
+        "Log of a negative number results in null: -1"
+      ]
     },
     {
       "query": "from a_index | eval log(-1, 20)",
       "error": [],
-      "warning": ["Log of a negative number results in null: -1"]
+      "warning": [
+        "Log of a negative number results in null: -1"
+      ]
     },
     {
       "query": "from a_index | eval log(-1, -20)",
@@ -4973,37 +5305,51 @@
     },
     {
       "query": "from a_index | eval numberField > stringField",
-      "error": ["Argument of [>] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField > numberField",
-      "error": ["Argument of [>] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval numberField > \"2022\"",
-      "error": ["Argument of [>] must be [number], found value [\"2022\"] type [string]"],
+      "error": [
+        "Argument of [>] must be [number], found value [\"2022\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval dateField > stringField",
-      "error": ["Argument of [>] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [>] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField > dateField",
-      "error": ["Argument of [>] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [>] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField > 0",
-      "error": ["Argument of [>] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [>] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField > now()",
-      "error": ["Argument of [>] must be [string], found value [now()] type [date]"],
+      "error": [
+        "Argument of [>] must be [string], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -5028,12 +5374,16 @@
     },
     {
       "query": "from a_index | eval booleanField > \"true\"",
-      "error": ["Argument of [>] must be [string], found value [booleanField] type [boolean]"],
+      "error": [
+        "Argument of [>] must be [string], found value [booleanField] type [boolean]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" > booleanField",
-      "error": ["Argument of [>] must be [string], found value [booleanField] type [boolean]"],
+      "error": [
+        "Argument of [>] must be [string], found value [booleanField] type [boolean]"
+      ],
       "warning": []
     },
     {
@@ -5101,37 +5451,51 @@
     },
     {
       "query": "from a_index | eval numberField >= stringField",
-      "error": ["Argument of [>=] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField >= numberField",
-      "error": ["Argument of [>=] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval numberField >= \"2022\"",
-      "error": ["Argument of [>=] must be [number], found value [\"2022\"] type [string]"],
+      "error": [
+        "Argument of [>=] must be [number], found value [\"2022\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval dateField >= stringField",
-      "error": ["Argument of [>=] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [>=] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField >= dateField",
-      "error": ["Argument of [>=] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [>=] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField >= 0",
-      "error": ["Argument of [>=] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [>=] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField >= now()",
-      "error": ["Argument of [>=] must be [string], found value [now()] type [date]"],
+      "error": [
+        "Argument of [>=] must be [string], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -5156,12 +5520,16 @@
     },
     {
       "query": "from a_index | eval booleanField >= \"true\"",
-      "error": ["Argument of [>=] must be [string], found value [booleanField] type [boolean]"],
+      "error": [
+        "Argument of [>=] must be [string], found value [booleanField] type [boolean]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" >= booleanField",
-      "error": ["Argument of [>=] must be [string], found value [booleanField] type [boolean]"],
+      "error": [
+        "Argument of [>=] must be [string], found value [booleanField] type [boolean]"
+      ],
       "warning": []
     },
     {
@@ -5229,37 +5597,51 @@
     },
     {
       "query": "from a_index | eval numberField < stringField",
-      "error": ["Argument of [<] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField < numberField",
-      "error": ["Argument of [<] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval numberField < \"2022\"",
-      "error": ["Argument of [<] must be [number], found value [\"2022\"] type [string]"],
+      "error": [
+        "Argument of [<] must be [number], found value [\"2022\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval dateField < stringField",
-      "error": ["Argument of [<] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [<] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField < dateField",
-      "error": ["Argument of [<] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [<] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField < 0",
-      "error": ["Argument of [<] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [<] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField < now()",
-      "error": ["Argument of [<] must be [string], found value [now()] type [date]"],
+      "error": [
+        "Argument of [<] must be [string], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -5284,12 +5666,16 @@
     },
     {
       "query": "from a_index | eval booleanField < \"true\"",
-      "error": ["Argument of [<] must be [string], found value [booleanField] type [boolean]"],
+      "error": [
+        "Argument of [<] must be [string], found value [booleanField] type [boolean]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" < booleanField",
-      "error": ["Argument of [<] must be [string], found value [booleanField] type [boolean]"],
+      "error": [
+        "Argument of [<] must be [string], found value [booleanField] type [boolean]"
+      ],
       "warning": []
     },
     {
@@ -5357,37 +5743,51 @@
     },
     {
       "query": "from a_index | eval numberField <= stringField",
-      "error": ["Argument of [<=] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField <= numberField",
-      "error": ["Argument of [<=] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval numberField <= \"2022\"",
-      "error": ["Argument of [<=] must be [number], found value [\"2022\"] type [string]"],
+      "error": [
+        "Argument of [<=] must be [number], found value [\"2022\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval dateField <= stringField",
-      "error": ["Argument of [<=] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [<=] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField <= dateField",
-      "error": ["Argument of [<=] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [<=] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField <= 0",
-      "error": ["Argument of [<=] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [<=] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField <= now()",
-      "error": ["Argument of [<=] must be [string], found value [now()] type [date]"],
+      "error": [
+        "Argument of [<=] must be [string], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -5412,12 +5812,16 @@
     },
     {
       "query": "from a_index | eval booleanField <= \"true\"",
-      "error": ["Argument of [<=] must be [string], found value [booleanField] type [boolean]"],
+      "error": [
+        "Argument of [<=] must be [string], found value [booleanField] type [boolean]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"true\" <= booleanField",
-      "error": ["Argument of [<=] must be [string], found value [booleanField] type [boolean]"],
+      "error": [
+        "Argument of [<=] must be [string], found value [booleanField] type [boolean]"
+      ],
       "warning": []
     },
     {
@@ -5482,37 +5886,51 @@
     },
     {
       "query": "from a_index | eval numberField == stringField",
-      "error": ["Argument of [==] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField == numberField",
-      "error": ["Argument of [==] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval numberField == \"2022\"",
-      "error": ["Argument of [==] must be [number], found value [\"2022\"] type [string]"],
+      "error": [
+        "Argument of [==] must be [number], found value [\"2022\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval dateField == stringField",
-      "error": ["Argument of [==] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [==] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField == dateField",
-      "error": ["Argument of [==] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [==] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField == 0",
-      "error": ["Argument of [==] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [==] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField == now()",
-      "error": ["Argument of [==] must be [string], found value [now()] type [date]"],
+      "error": [
+        "Argument of [==] must be [string], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -5607,37 +6025,51 @@
     },
     {
       "query": "from a_index | eval numberField != stringField",
-      "error": ["Argument of [!=] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [!=] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField != numberField",
-      "error": ["Argument of [!=] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [!=] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval numberField != \"2022\"",
-      "error": ["Argument of [!=] must be [number], found value [\"2022\"] type [string]"],
+      "error": [
+        "Argument of [!=] must be [number], found value [\"2022\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval dateField != stringField",
-      "error": ["Argument of [!=] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [!=] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField != dateField",
-      "error": ["Argument of [!=] must be [string], found value [dateField] type [date]"],
+      "error": [
+        "Argument of [!=] must be [string], found value [dateField] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField != 0",
-      "error": ["Argument of [!=] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [!=] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField != now()",
-      "error": ["Argument of [!=] must be [string], found value [now()] type [date]"],
+      "error": [
+        "Argument of [!=] must be [string], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
@@ -5717,17 +6149,23 @@
     },
     {
       "query": "from a_index | eval now() + now()",
-      "error": ["Argument of [+] must be [time_literal], found value [now()] type [date]"],
+      "error": [
+        "Argument of [+] must be [time_literal], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 + \"1\"",
-      "error": ["Argument of [+] must be [number], found value [\"1\"] type [string]"],
+      "error": [
+        "Argument of [+] must be [number], found value [\"1\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" + 1",
-      "error": ["Argument of [+] must be [number], found value [\"1\"] type [string]"],
+      "error": [
+        "Argument of [+] must be [number], found value [\"1\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -5747,17 +6185,23 @@
     },
     {
       "query": "from a_index | eval now() - now()",
-      "error": ["Argument of [-] must be [time_literal], found value [now()] type [date]"],
+      "error": [
+        "Argument of [-] must be [time_literal], found value [now()] type [date]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 - \"1\"",
-      "error": ["Argument of [-] must be [number], found value [\"1\"] type [string]"],
+      "error": [
+        "Argument of [-] must be [number], found value [\"1\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" - 1",
-      "error": ["Argument of [-] must be [number], found value [\"1\"] type [string]"],
+      "error": [
+        "Argument of [-] must be [number], found value [\"1\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -5785,12 +6229,16 @@
     },
     {
       "query": "from a_index | eval 1 * \"1\"",
-      "error": ["Argument of [*] must be [number], found value [\"1\"] type [string]"],
+      "error": [
+        "Argument of [*] must be [number], found value [\"1\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" * 1",
-      "error": ["Argument of [*] must be [number], found value [\"1\"] type [string]"],
+      "error": [
+        "Argument of [*] must be [number], found value [\"1\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -5818,12 +6266,16 @@
     },
     {
       "query": "from a_index | eval 1 / \"1\"",
-      "error": ["Argument of [/] must be [number], found value [\"1\"] type [string]"],
+      "error": [
+        "Argument of [/] must be [number], found value [\"1\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" / 1",
-      "error": ["Argument of [/] must be [number], found value [\"1\"] type [string]"],
+      "error": [
+        "Argument of [/] must be [number], found value [\"1\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -5851,43 +6303,59 @@
     },
     {
       "query": "from a_index | eval 1 % \"1\"",
-      "error": ["Argument of [%] must be [number], found value [\"1\"] type [string]"],
+      "error": [
+        "Argument of [%] must be [number], found value [\"1\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval \"1\" % 1",
-      "error": ["Argument of [%] must be [number], found value [\"1\"] type [string]"],
+      "error": [
+        "Argument of [%] must be [number], found value [\"1\"] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1/0",
       "error": [],
-      "warning": ["Cannot divide by zero: 1/0"]
+      "warning": [
+        "Cannot divide by zero: 1/0"
+      ]
     },
     {
       "query": "from a_index | eval var = 1/0",
       "error": [],
-      "warning": ["Cannot divide by zero: 1/0"]
+      "warning": [
+        "Cannot divide by zero: 1/0"
+      ]
     },
     {
       "query": "from a_index | eval 1 + 1/0",
       "error": [],
-      "warning": ["Cannot divide by zero: 1/0"]
+      "warning": [
+        "Cannot divide by zero: 1/0"
+      ]
     },
     {
       "query": "from a_index | eval 1%0",
       "error": [],
-      "warning": ["Module by zero can return null value: 1%0"]
+      "warning": [
+        "Module by zero can return null value: 1%0"
+      ]
     },
     {
       "query": "from a_index | eval var = 1%0",
       "error": [],
-      "warning": ["Module by zero can return null value: 1%0"]
+      "warning": [
+        "Module by zero can return null value: 1%0"
+      ]
     },
     {
       "query": "from a_index | eval 1 + 1%0",
       "error": [],
-      "warning": ["Module by zero can return null value: 1%0"]
+      "warning": [
+        "Module by zero can return null value: 1%0"
+      ]
     },
     {
       "query": "from a_index | eval stringField like \"?a\"",
@@ -5911,22 +6379,30 @@
     },
     {
       "query": "from a_index | eval numberField like \"?a\"",
-      "error": ["Argument of [like] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [like] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval numberField NOT like \"?a\"",
-      "error": ["Argument of [not_like] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [not_like] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval NOT numberField like \"?a\"",
-      "error": ["Argument of [like] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [like] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval NOT numberField NOT like \"?a\"",
-      "error": ["Argument of [not_like] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [not_like] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -5951,7 +6427,9 @@
     },
     {
       "query": "from a_index | eval numberField rlike \"?a\"",
-      "error": ["Argument of [rlike] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [rlike] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -5963,7 +6441,9 @@
     },
     {
       "query": "from a_index | eval NOT numberField rlike \"?a\"",
-      "error": ["Argument of [rlike] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [rlike] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -6040,7 +6520,9 @@
     },
     {
       "query": "from a_index | eval avg(numberField)",
-      "error": ["EVAL does not support function avg"],
+      "error": [
+        "EVAL does not support function avg"
+      ],
       "warning": []
     },
     {
@@ -6090,7 +6572,9 @@
     {
       "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"bogus\")",
       "error": [],
-      "warning": ["Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."]
+      "warning": [
+        "Invalid option [\"bogus\"] for mv_sort. Supported options: [\"asc\", \"desc\"]."
+      ]
     },
     {
       "query": "from a_index | eval mv_sort([\"a\", \"b\"], \"ASC\")",
@@ -6124,27 +6608,37 @@
     },
     {
       "query": "from a_index | eval 1 anno",
-      "error": ["EVAL does not support [date_period] in expression [1 anno]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 anno]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = 1 anno",
-      "error": ["Unexpected time interval qualifier: 'anno'"],
+      "error": [
+        "Unexpected time interval qualifier: 'anno'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval now() + 1 anno",
-      "error": ["Unexpected time interval qualifier: 'anno'"],
+      "error": [
+        "Unexpected time interval qualifier: 'anno'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1 year",
-      "error": ["EVAL does not support [date_period] in expression [1 year]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 year]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                year",
-      "error": ["EVAL does not support [date_period] in expression [1 year]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 year]"
+      ],
       "warning": []
     },
     {
@@ -6174,7 +6668,9 @@
     },
     {
       "query": "from a_index | eval 1 year + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 year] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 year] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6203,12 +6699,16 @@
     },
     {
       "query": "from a_index | eval 1 years",
-      "error": ["EVAL does not support [date_period] in expression [1 years]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 years]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                years",
-      "error": ["EVAL does not support [date_period] in expression [1 years]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 years]"
+      ],
       "warning": []
     },
     {
@@ -6238,7 +6738,9 @@
     },
     {
       "query": "from a_index | eval 1 years + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 years] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 years] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6267,12 +6769,16 @@
     },
     {
       "query": "from a_index | eval 1 month",
-      "error": ["EVAL does not support [date_period] in expression [1 month]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 month]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                month",
-      "error": ["EVAL does not support [date_period] in expression [1 month]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 month]"
+      ],
       "warning": []
     },
     {
@@ -6302,7 +6808,9 @@
     },
     {
       "query": "from a_index | eval 1 month + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 month] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 month] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6331,12 +6839,16 @@
     },
     {
       "query": "from a_index | eval 1 months",
-      "error": ["EVAL does not support [date_period] in expression [1 months]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 months]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                months",
-      "error": ["EVAL does not support [date_period] in expression [1 months]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 months]"
+      ],
       "warning": []
     },
     {
@@ -6366,7 +6878,9 @@
     },
     {
       "query": "from a_index | eval 1 months + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 months] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 months] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6395,12 +6909,16 @@
     },
     {
       "query": "from a_index | eval 1 week",
-      "error": ["EVAL does not support [date_period] in expression [1 week]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 week]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                week",
-      "error": ["EVAL does not support [date_period] in expression [1 week]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 week]"
+      ],
       "warning": []
     },
     {
@@ -6430,7 +6948,9 @@
     },
     {
       "query": "from a_index | eval 1 week + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 week] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 week] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6459,12 +6979,16 @@
     },
     {
       "query": "from a_index | eval 1 weeks",
-      "error": ["EVAL does not support [date_period] in expression [1 weeks]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 weeks]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                weeks",
-      "error": ["EVAL does not support [date_period] in expression [1 weeks]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 weeks]"
+      ],
       "warning": []
     },
     {
@@ -6494,7 +7018,9 @@
     },
     {
       "query": "from a_index | eval 1 weeks + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 weeks] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 weeks] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6523,12 +7049,16 @@
     },
     {
       "query": "from a_index | eval 1 day",
-      "error": ["EVAL does not support [date_period] in expression [1 day]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 day]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                day",
-      "error": ["EVAL does not support [date_period] in expression [1 day]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 day]"
+      ],
       "warning": []
     },
     {
@@ -6558,7 +7088,9 @@
     },
     {
       "query": "from a_index | eval 1 day + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 day] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 day] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6587,12 +7119,16 @@
     },
     {
       "query": "from a_index | eval 1 days",
-      "error": ["EVAL does not support [date_period] in expression [1 days]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 days]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                days",
-      "error": ["EVAL does not support [date_period] in expression [1 days]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 days]"
+      ],
       "warning": []
     },
     {
@@ -6622,7 +7158,9 @@
     },
     {
       "query": "from a_index | eval 1 days + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 days] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 days] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6651,12 +7189,16 @@
     },
     {
       "query": "from a_index | eval 1 hour",
-      "error": ["EVAL does not support [date_period] in expression [1 hour]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 hour]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                hour",
-      "error": ["EVAL does not support [date_period] in expression [1 hour]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 hour]"
+      ],
       "warning": []
     },
     {
@@ -6686,7 +7228,9 @@
     },
     {
       "query": "from a_index | eval 1 hour + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 hour] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 hour] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6715,12 +7259,16 @@
     },
     {
       "query": "from a_index | eval 1 hours",
-      "error": ["EVAL does not support [date_period] in expression [1 hours]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 hours]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                hours",
-      "error": ["EVAL does not support [date_period] in expression [1 hours]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 hours]"
+      ],
       "warning": []
     },
     {
@@ -6750,7 +7298,9 @@
     },
     {
       "query": "from a_index | eval 1 hours + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 hours] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 hours] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6779,12 +7329,16 @@
     },
     {
       "query": "from a_index | eval 1 minute",
-      "error": ["EVAL does not support [date_period] in expression [1 minute]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 minute]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                minute",
-      "error": ["EVAL does not support [date_period] in expression [1 minute]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 minute]"
+      ],
       "warning": []
     },
     {
@@ -6814,7 +7368,9 @@
     },
     {
       "query": "from a_index | eval 1 minute + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 minute] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 minute] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6843,12 +7399,16 @@
     },
     {
       "query": "from a_index | eval 1 minutes",
-      "error": ["EVAL does not support [date_period] in expression [1 minutes]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 minutes]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                minutes",
-      "error": ["EVAL does not support [date_period] in expression [1 minutes]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 minutes]"
+      ],
       "warning": []
     },
     {
@@ -6878,7 +7438,9 @@
     },
     {
       "query": "from a_index | eval 1 minutes + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 minutes] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 minutes] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6907,12 +7469,16 @@
     },
     {
       "query": "from a_index | eval 1 second",
-      "error": ["EVAL does not support [date_period] in expression [1 second]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 second]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                second",
-      "error": ["EVAL does not support [date_period] in expression [1 second]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 second]"
+      ],
       "warning": []
     },
     {
@@ -6942,7 +7508,9 @@
     },
     {
       "query": "from a_index | eval 1 second + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 second] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 second] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -6971,12 +7539,16 @@
     },
     {
       "query": "from a_index | eval 1 seconds",
-      "error": ["EVAL does not support [date_period] in expression [1 seconds]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 seconds]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                seconds",
-      "error": ["EVAL does not support [date_period] in expression [1 seconds]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 seconds]"
+      ],
       "warning": []
     },
     {
@@ -7006,7 +7578,9 @@
     },
     {
       "query": "from a_index | eval 1 seconds + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 seconds] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 seconds] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -7035,12 +7609,16 @@
     },
     {
       "query": "from a_index | eval 1 millisecond",
-      "error": ["EVAL does not support [date_period] in expression [1 millisecond]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 millisecond]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                millisecond",
-      "error": ["EVAL does not support [date_period] in expression [1 millisecond]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 millisecond]"
+      ],
       "warning": []
     },
     {
@@ -7070,7 +7648,9 @@
     },
     {
       "query": "from a_index | eval 1 millisecond + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 millisecond] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 millisecond] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -7099,12 +7679,16 @@
     },
     {
       "query": "from a_index | eval 1 milliseconds",
-      "error": ["EVAL does not support [date_period] in expression [1 milliseconds]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 milliseconds]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval 1                milliseconds",
-      "error": ["EVAL does not support [date_period] in expression [1 milliseconds]"],
+      "error": [
+        "EVAL does not support [date_period] in expression [1 milliseconds]"
+      ],
       "warning": []
     },
     {
@@ -7134,7 +7718,9 @@
     },
     {
       "query": "from a_index | eval 1 milliseconds + 1 year",
-      "error": ["Argument of [+] must be [date], found value [1 milliseconds] type [duration]"],
+      "error": [
+        "Argument of [+] must be [date], found value [1 milliseconds] type [duration]"
+      ],
       "warning": []
     },
     {
@@ -7163,7 +7749,9 @@
     },
     {
       "query": "from a_index | stats ",
-      "error": ["At least one aggregation or grouping expression required in [STATS]"],
+      "error": [
+        "At least one aggregation or grouping expression required in [STATS]"
+      ],
       "warning": []
     },
     {
@@ -7201,17 +7789,23 @@
     },
     {
       "query": "from a_index | stats avg(numberField) by wrongField",
-      "error": ["Unknown column [wrongField]"],
+      "error": [
+        "Unknown column [wrongField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(numberField) by wrongField + 1",
-      "error": ["Unknown column [wrongField]"],
+      "error": [
+        "Unknown column [wrongField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats avg(numberField) by var0 = wrongField + 1",
-      "error": ["Unknown column [wrongField]"],
+      "error": [
+        "Unknown column [wrongField]"
+      ],
       "warning": []
     },
     {
@@ -7221,7 +7815,9 @@
     },
     {
       "query": "from a_index | stats avg(numberField) by percentile(numberField)",
-      "error": ["STATS BY does not support function percentile"],
+      "error": [
+        "STATS BY does not support function percentile"
+      ],
       "warning": []
     },
     {
@@ -7294,17 +7890,23 @@
     },
     {
       "query": "from a_index | stats count(* + 1) BY ipField",
-      "error": ["SyntaxError: no viable alternative at input 'count(* +'"],
+      "error": [
+        "SyntaxError: no viable alternative at input 'count(* +'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats count(* + round(numberField)) BY ipField",
-      "error": ["SyntaxError: no viable alternative at input 'count(* +'"],
+      "error": [
+        "SyntaxError: no viable alternative at input 'count(* +'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats count(round(*)) BY ipField",
-      "error": ["Using wildcards (*) in round is not allowed"],
+      "error": [
+        "Using wildcards (*) in round is not allowed"
+      ],
       "warning": []
     },
     {
@@ -7316,7 +7918,9 @@
     },
     {
       "query": "from a_index | stats numberField + 1",
-      "error": ["At least one aggregation function required in [STATS], found [numberField+1]"],
+      "error": [
+        "At least one aggregation function required in [STATS], found [numberField+1]"
+      ],
       "warning": []
     },
     {
@@ -7331,17 +7935,23 @@
     },
     {
       "query": "from a_index | stats 5 +1 + numberField",
-      "error": ["At least one aggregation function required in [STATS], found [5+1+numberField]"],
+      "error": [
+        "At least one aggregation function required in [STATS], found [5+1+numberField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats 5 + numberField +1",
-      "error": ["At least one aggregation function required in [STATS], found [5+numberField+1]"],
+      "error": [
+        "At least one aggregation function required in [STATS], found [5+numberField+1]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats 5 + numberField +1, var0 = sum(numberField)",
-      "error": ["At least one aggregation function required in [STATS], found [5+numberField+1]"],
+      "error": [
+        "At least one aggregation function required in [STATS], found [5+numberField+1]"
+      ],
       "warning": []
     },
     {
@@ -7412,17 +8022,23 @@
     },
     {
       "query": "from a_index | stats 5 +1+1 + numberField",
-      "error": ["At least one aggregation function required in [STATS], found [5+1+1+numberField]"],
+      "error": [
+        "At least one aggregation function required in [STATS], found [5+1+1+numberField]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats 5 + numberField +1+1",
-      "error": ["At least one aggregation function required in [STATS], found [5+numberField+1+1]"],
+      "error": [
+        "At least one aggregation function required in [STATS], found [5+numberField+1+1]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats 5 + numberField +1+1, var0 = sum(numberField)",
-      "error": ["At least one aggregation function required in [STATS], found [5+numberField+1+1]"],
+      "error": [
+        "At least one aggregation function required in [STATS], found [5+numberField+1+1]"
+      ],
       "warning": []
     },
     {
@@ -7657,12 +8273,16 @@
     },
     {
       "query": "from a_index | stats 5 + numberField + 1",
-      "error": ["At least one aggregation function required in [STATS], found [5+numberField+1]"],
+      "error": [
+        "At least one aggregation function required in [STATS], found [5+numberField+1]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats numberField + 1 by ipField",
-      "error": ["At least one aggregation function required in [STATS], found [numberField+1]"],
+      "error": [
+        "At least one aggregation function required in [STATS], found [numberField+1]"
+      ],
       "warning": []
     },
     {
@@ -7697,7 +8317,9 @@
     },
     {
       "query": "from a_index | stats var0 = avg(fn(number)), count(*)",
-      "error": ["Unknown function [fn]"],
+      "error": [
+        "Unknown function [fn]"
+      ],
       "warning": []
     },
     {
@@ -7736,12 +8358,16 @@
     },
     {
       "query": "from index | stats by bucket(dateField, abs(numberField), \"\", \"\")",
-      "error": ["Argument of [bucket] must be a constant, received [abs(numberField)]"],
+      "error": [
+        "Argument of [bucket] must be a constant, received [abs(numberField)]"
+      ],
       "warning": []
     },
     {
       "query": "from index | stats by bucket(dateField, abs(length(numberField)), \"\", \"\")",
-      "error": ["Argument of [bucket] must be a constant, received [abs(length(numberField))]"],
+      "error": [
+        "Argument of [bucket] must be a constant, received [abs(length(numberField))]"
+      ],
       "warning": []
     },
     {
@@ -7782,7 +8408,9 @@
     },
     {
       "query": "from a_index | sort wrongField ",
-      "error": ["Unknown column [wrongField]"],
+      "error": [
+        "Unknown column [wrongField]"
+      ],
       "warning": []
     },
     {
@@ -7809,7 +8437,9 @@
     },
     {
       "query": "from a_index | sort numberField desc nulls ",
-      "error": ["SyntaxError: missing {'first', 'last'} at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing {'first', 'last'} at '<EOF>'"
+      ],
       "warning": []
     },
     {
@@ -7819,7 +8449,9 @@
     },
     {
       "query": "from a_index | sort numberField desc first",
-      "error": ["SyntaxError: extraneous input 'first' expecting <EOF>"],
+      "error": [
+        "SyntaxError: extraneous input 'first' expecting <EOF>"
+      ],
       "warning": []
     },
     {
@@ -7829,7 +8461,9 @@
     },
     {
       "query": "from a_index | sort numberField desc last",
-      "error": ["SyntaxError: extraneous input 'last' expecting <EOF>"],
+      "error": [
+        "SyntaxError: extraneous input 'last' expecting <EOF>"
+      ],
       "warning": []
     },
     {
@@ -7844,7 +8478,9 @@
     },
     {
       "query": "from a_index | sort numberField asc nulls ",
-      "error": ["SyntaxError: missing {'first', 'last'} at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing {'first', 'last'} at '<EOF>'"
+      ],
       "warning": []
     },
     {
@@ -7854,7 +8490,9 @@
     },
     {
       "query": "from a_index | sort numberField asc first",
-      "error": ["SyntaxError: extraneous input 'first' expecting <EOF>"],
+      "error": [
+        "SyntaxError: extraneous input 'first' expecting <EOF>"
+      ],
       "warning": []
     },
     {
@@ -7864,7 +8502,9 @@
     },
     {
       "query": "from a_index | sort numberField asc last",
-      "error": ["SyntaxError: extraneous input 'last' expecting <EOF>"],
+      "error": [
+        "SyntaxError: extraneous input 'last' expecting <EOF>"
+      ],
       "warning": []
     },
     {
@@ -7874,7 +8514,9 @@
     },
     {
       "query": "from a_index | sort numberField first",
-      "error": ["SyntaxError: extraneous input 'first' expecting <EOF>"],
+      "error": [
+        "SyntaxError: extraneous input 'first' expecting <EOF>"
+      ],
       "warning": []
     },
     {
@@ -7884,7 +8526,9 @@
     },
     {
       "query": "from a_index | sort numberField last",
-      "error": ["SyntaxError: extraneous input 'last' expecting <EOF>"],
+      "error": [
+        "SyntaxError: extraneous input 'last' expecting <EOF>"
+      ],
       "warning": []
     },
     {
@@ -7904,27 +8548,38 @@
     },
     {
       "query": "from a_index | sort sin(stringField)",
-      "error": ["Argument of [sin] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [sin] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | sort numberField + stringField",
-      "error": ["Argument of [+] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [+] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich",
-      "error": ["SyntaxError: missing ENRICH_POLICY_NAME at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing ENRICH_POLICY_NAME at '<EOF>'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich _",
-      "error": ["Unknown policy [_]"],
+      "error": [
+        "Unknown policy [_]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich _:",
-      "error": ["SyntaxError: token recognition error at: ':'", "Unknown policy [_]"],
+      "error": [
+        "SyntaxError: token recognition error at: ':'",
+        "Unknown policy [_]"
+      ],
       "warning": []
     },
     {
@@ -7936,17 +8591,25 @@
     },
     {
       "query": "from a_index | enrich :policy",
-      "error": ["SyntaxError: token recognition error at: ':'"],
+      "error": [
+        "SyntaxError: token recognition error at: ':'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich any:",
-      "error": ["SyntaxError: token recognition error at: ':'", "Unknown policy [any]"],
+      "error": [
+        "SyntaxError: token recognition error at: ':'",
+        "Unknown policy [any]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich _any:",
-      "error": ["SyntaxError: token recognition error at: ':'", "Unknown policy [_any]"],
+      "error": [
+        "SyntaxError: token recognition error at: ':'",
+        "Unknown policy [_any]"
+      ],
       "warning": []
     },
     {
@@ -7963,12 +8626,17 @@
     },
     {
       "query": "from a_index | enrich `this``is fine`",
-      "error": ["SyntaxError: mismatched input '`this``is fine`' expecting ENRICH_POLICY_NAME"],
+      "error": [
+        "SyntaxError: mismatched input '`this``is fine`' expecting ENRICH_POLICY_NAME"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich this is fine",
-      "error": ["SyntaxError: mismatched input 'is' expecting <EOF>", "Unknown policy [this]"],
+      "error": [
+        "SyntaxError: mismatched input 'is' expecting <EOF>",
+        "Unknown policy [this]"
+      ],
       "warning": []
     },
     {
@@ -8079,47 +8747,68 @@
     },
     {
       "query": "from a_index |enrich missing-policy ",
-      "error": ["Unknown policy [missing-policy]"],
+      "error": [
+        "Unknown policy [missing-policy]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index |enrich policy on ",
-      "error": ["SyntaxError: missing ID_PATTERN at '<EOF>'"],
+      "error": [
+        "SyntaxError: missing ID_PATTERN at '<EOF>'"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich policy on b ",
-      "error": ["Unknown column [b]"],
+      "error": [
+        "Unknown column [b]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich policy on `this``is fine`",
-      "error": ["Unknown column [this`is fine]"],
+      "error": [
+        "Unknown column [this`is fine]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich policy on this is fine",
-      "error": ["SyntaxError: mismatched input 'is' expecting <EOF>", "Unknown column [this]"],
+      "error": [
+        "SyntaxError: mismatched input 'is' expecting <EOF>",
+        "Unknown column [this]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich policy on stringField with ",
-      "error": ["SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN"],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich policy on stringField with var0 ",
-      "error": ["Unknown column [var0]"],
+      "error": [
+        "Unknown column [var0]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index |enrich policy on numberField with var0 = ",
-      "error": ["SyntaxError: missing ID_PATTERN at '<EOF>'", "Unknown column [var0]"],
+      "error": [
+        "SyntaxError: missing ID_PATTERN at '<EOF>'",
+        "Unknown column [var0]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | enrich policy on stringField with var0 = c ",
-      "error": ["Unknown column [var0]", "Unknown column [c]"],
+      "error": [
+        "Unknown column [var0]",
+        "Unknown column [c]"
+      ],
       "warning": []
     },
     {
@@ -8133,7 +8822,9 @@
     },
     {
       "query": "from a_index | enrich policy on stringField with var0 = otherField, var1 ",
-      "error": ["Unknown column [var1]"],
+      "error": [
+        "Unknown column [var1]"
+      ],
       "warning": []
     },
     {
@@ -8148,7 +8839,10 @@
     },
     {
       "query": "from a_index |enrich policy on numberField with var0 = otherField, var1 = ",
-      "error": ["SyntaxError: missing ID_PATTERN at '<EOF>'", "Unknown column [var1]"],
+      "error": [
+        "SyntaxError: missing ID_PATTERN at '<EOF>'",
+        "Unknown column [var1]"
+      ],
       "warning": []
     },
     {
@@ -8163,7 +8857,9 @@
     },
     {
       "query": "from a_index | enrich policy with ",
-      "error": ["SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN"],
+      "error": [
+        "SyntaxError: mismatched input '<EOF>' expecting ID_PATTERN"
+      ],
       "warning": []
     },
     {
@@ -8183,18 +8879,24 @@
     },
     {
       "query": "from a_index | enrich my-pol*",
-      "error": ["Using wildcards (*) in ENRICH is not allowed [my-pol*]"],
+      "error": [
+        "Using wildcards (*) in ENRICH is not allowed [my-pol*]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval stringField = 5",
       "error": [],
-      "warning": ["Column [stringField] of type string has been overwritten as new type: number"]
+      "warning": [
+        "Column [stringField] of type string has been overwritten as new type: number"
+      ]
     },
     {
       "query": "from a_index | eval numberField = \"5\"",
       "error": [],
-      "warning": ["Column [numberField] of type number has been overwritten as new type: string"]
+      "warning": [
+        "Column [numberField] of type number has been overwritten as new type: string"
+      ]
     },
     {
       "query": "from a_index | eval round(numberField) + 1 | eval `round(numberField) + 1` + 1 | keep ```round(numberField) + 1`` + 1`",
@@ -8250,12 +8952,16 @@
     },
     {
       "query": "from a_index | eval date_diff(\"month\", stringField, dateField)",
-      "error": ["Argument of [date_diff] must be [date], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [date_diff] must be [date], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval date_diff(\"month\", dateField, stringField)",
-      "error": ["Argument of [date_diff] must be [date], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [date_diff] must be [date], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8275,7 +8981,9 @@
     },
     {
       "query": "row var = abs(\"a\")",
-      "error": ["Argument of [abs] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [abs] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8285,7 +8993,9 @@
     },
     {
       "query": "from a_index | where abs(stringField) > 0",
-      "error": ["Argument of [abs] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [abs] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8305,17 +9015,23 @@
     },
     {
       "query": "from a_index | eval abs(stringField)",
-      "error": ["Argument of [abs] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [abs] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval abs(numberField, extraArg)",
-      "error": ["Error: [abs] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [abs] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = abs(*)",
-      "error": ["Using wildcards (*) in abs is not allowed"],
+      "error": [
+        "Using wildcards (*) in abs is not allowed"
+      ],
       "warning": []
     },
     {
@@ -8340,7 +9056,9 @@
     },
     {
       "query": "row var = acos(\"a\")",
-      "error": ["Argument of [acos] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [acos] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8350,7 +9068,9 @@
     },
     {
       "query": "from a_index | where acos(stringField) > 0",
-      "error": ["Argument of [acos] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [acos] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8370,17 +9090,23 @@
     },
     {
       "query": "from a_index | eval acos(stringField)",
-      "error": ["Argument of [acos] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [acos] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval acos(numberField, extraArg)",
-      "error": ["Error: [acos] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [acos] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = acos(*)",
-      "error": ["Using wildcards (*) in acos is not allowed"],
+      "error": [
+        "Using wildcards (*) in acos is not allowed"
+      ],
       "warning": []
     },
     {
@@ -8405,7 +9131,9 @@
     },
     {
       "query": "row var = asin(\"a\")",
-      "error": ["Argument of [asin] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [asin] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8415,7 +9143,9 @@
     },
     {
       "query": "from a_index | where asin(stringField) > 0",
-      "error": ["Argument of [asin] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [asin] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8435,17 +9165,23 @@
     },
     {
       "query": "from a_index | eval asin(stringField)",
-      "error": ["Argument of [asin] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [asin] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval asin(numberField, extraArg)",
-      "error": ["Error: [asin] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [asin] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = asin(*)",
-      "error": ["Using wildcards (*) in asin is not allowed"],
+      "error": [
+        "Using wildcards (*) in asin is not allowed"
+      ],
       "warning": []
     },
     {
@@ -8470,7 +9206,9 @@
     },
     {
       "query": "row var = atan(\"a\")",
-      "error": ["Argument of [atan] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [atan] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8480,7 +9218,9 @@
     },
     {
       "query": "from a_index | where atan(stringField) > 0",
-      "error": ["Argument of [atan] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [atan] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8500,17 +9240,23 @@
     },
     {
       "query": "from a_index | eval atan(stringField)",
-      "error": ["Argument of [atan] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [atan] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval atan(numberField, extraArg)",
-      "error": ["Error: [atan] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [atan] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = atan(*)",
-      "error": ["Using wildcards (*) in atan is not allowed"],
+      "error": [
+        "Using wildcards (*) in atan is not allowed"
+      ],
       "warning": []
     },
     {
@@ -8579,7 +9325,9 @@
     },
     {
       "query": "from a_index | eval atan2(numberField, numberField, extraArg)",
-      "error": ["Error: [atan2] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [atan2] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -8629,7 +9377,9 @@
     },
     {
       "query": "row var = ceil(\"a\")",
-      "error": ["Argument of [ceil] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [ceil] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8639,7 +9389,9 @@
     },
     {
       "query": "from a_index | where ceil(stringField) > 0",
-      "error": ["Argument of [ceil] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [ceil] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8659,17 +9411,23 @@
     },
     {
       "query": "from a_index | eval ceil(stringField)",
-      "error": ["Argument of [ceil] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [ceil] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval ceil(numberField, extraArg)",
-      "error": ["Error: [ceil] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [ceil] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = ceil(*)",
-      "error": ["Using wildcards (*) in ceil is not allowed"],
+      "error": [
+        "Using wildcards (*) in ceil is not allowed"
+      ],
       "warning": []
     },
     {
@@ -8770,7 +9528,9 @@
     },
     {
       "query": "row var = concat(5, 5)",
-      "error": ["Argument of [concat] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [concat] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
@@ -8780,7 +9540,9 @@
     },
     {
       "query": "from a_index | where length(concat(numberField, numberField)) > 0",
-      "error": ["Argument of [concat] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [concat] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -8800,7 +9562,9 @@
     },
     {
       "query": "from a_index | eval concat(numberField, numberField)",
-      "error": ["Argument of [concat] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [concat] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -8825,7 +9589,9 @@
     },
     {
       "query": "row var = cos(\"a\")",
-      "error": ["Argument of [cos] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [cos] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8835,7 +9601,9 @@
     },
     {
       "query": "from a_index | where cos(stringField) > 0",
-      "error": ["Argument of [cos] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [cos] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8855,17 +9623,23 @@
     },
     {
       "query": "from a_index | eval cos(stringField)",
-      "error": ["Argument of [cos] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [cos] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval cos(numberField, extraArg)",
-      "error": ["Error: [cos] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [cos] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = cos(*)",
-      "error": ["Using wildcards (*) in cos is not allowed"],
+      "error": [
+        "Using wildcards (*) in cos is not allowed"
+      ],
       "warning": []
     },
     {
@@ -8890,7 +9664,9 @@
     },
     {
       "query": "row var = cosh(\"a\")",
-      "error": ["Argument of [cosh] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [cosh] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8900,7 +9676,9 @@
     },
     {
       "query": "from a_index | where cosh(stringField) > 0",
-      "error": ["Argument of [cosh] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [cosh] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -8920,17 +9698,23 @@
     },
     {
       "query": "from a_index | eval cosh(stringField)",
-      "error": ["Argument of [cosh] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [cosh] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval cosh(numberField, extraArg)",
-      "error": ["Error: [cosh] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [cosh] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = cosh(*)",
-      "error": ["Using wildcards (*) in cosh is not allowed"],
+      "error": [
+        "Using wildcards (*) in cosh is not allowed"
+      ],
       "warning": []
     },
     {
@@ -8964,7 +9748,9 @@
     },
     {
       "query": "from a_index | eval date_diff(\"year\", dateField, dateField, extraArg)",
-      "error": ["Error: [date_diff] function expects exactly 3 arguments, got 4."],
+      "error": [
+        "Error: [date_diff] function expects exactly 3 arguments, got 4."
+      ],
       "warning": []
     },
     {
@@ -9007,7 +9793,9 @@
     },
     {
       "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", dateField, extraArg)",
-      "error": ["Error: [date_extract] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [date_extract] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -9050,7 +9838,9 @@
     },
     {
       "query": "from a_index | eval date_format(dateField, stringField, extraArg)",
-      "error": ["Error: [date_format] function expects no more than 2 arguments, got 3."],
+      "error": [
+        "Error: [date_format] function expects no more than 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -9106,7 +9896,9 @@
     },
     {
       "query": "from a_index | eval date_parse(stringField, stringField, extraArg)",
-      "error": ["Error: [date_parse] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [date_parse] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -9149,7 +9941,9 @@
     },
     {
       "query": "from a_index | eval date_trunc(1 year, dateField, extraArg)",
-      "error": ["Error: [date_trunc] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [date_trunc] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -9184,7 +9978,9 @@
     },
     {
       "query": "from a_index | eval e(extraArg)",
-      "error": ["Error: [e] function expects exactly 0 arguments, got 1."],
+      "error": [
+        "Error: [e] function expects exactly 0 arguments, got 1."
+      ],
       "warning": []
     },
     {
@@ -9240,7 +10036,9 @@
     },
     {
       "query": "from a_index | eval ends_with(stringField, stringField, extraArg)",
-      "error": ["Error: [ends_with] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [ends_with] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -9265,7 +10063,9 @@
     },
     {
       "query": "row var = floor(\"a\")",
-      "error": ["Argument of [floor] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [floor] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -9275,7 +10075,9 @@
     },
     {
       "query": "from a_index | where floor(stringField) > 0",
-      "error": ["Argument of [floor] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [floor] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -9295,17 +10097,23 @@
     },
     {
       "query": "from a_index | eval floor(stringField)",
-      "error": ["Argument of [floor] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [floor] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval floor(numberField, extraArg)",
-      "error": ["Error: [floor] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [floor] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = floor(*)",
-      "error": ["Using wildcards (*) in floor is not allowed"],
+      "error": [
+        "Using wildcards (*) in floor is not allowed"
+      ],
       "warning": []
     },
     {
@@ -9424,7 +10232,9 @@
     },
     {
       "query": "from a_index | eval left(stringField, numberField, extraArg)",
-      "error": ["Error: [left] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [left] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -9449,7 +10259,9 @@
     },
     {
       "query": "row var = length(5)",
-      "error": ["Argument of [length] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [length] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
@@ -9459,7 +10271,9 @@
     },
     {
       "query": "from a_index | where length(numberField) > 0",
-      "error": ["Argument of [length] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [length] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -9479,17 +10293,23 @@
     },
     {
       "query": "from a_index | eval length(numberField)",
-      "error": ["Argument of [length] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [length] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval length(stringField, extraArg)",
-      "error": ["Error: [length] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [length] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = length(*)",
-      "error": ["Using wildcards (*) in length is not allowed"],
+      "error": [
+        "Using wildcards (*) in length is not allowed"
+      ],
       "warning": []
     },
     {
@@ -9558,7 +10378,9 @@
     },
     {
       "query": "from a_index | eval log(numberField, numberField, extraArg)",
-      "error": ["Error: [log] function expects no more than 2 arguments, got 3."],
+      "error": [
+        "Error: [log] function expects no more than 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -9583,7 +10405,9 @@
     },
     {
       "query": "row var = log10(\"a\")",
-      "error": ["Argument of [log10] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [log10] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -9593,7 +10417,9 @@
     },
     {
       "query": "from a_index | where log10(stringField) > 0",
-      "error": ["Argument of [log10] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [log10] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -9613,17 +10439,23 @@
     },
     {
       "query": "from a_index | eval log10(stringField)",
-      "error": ["Argument of [log10] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [log10] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval log10(numberField, extraArg)",
-      "error": ["Error: [log10] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [log10] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = log10(*)",
-      "error": ["Using wildcards (*) in log10 is not allowed"],
+      "error": [
+        "Using wildcards (*) in log10 is not allowed"
+      ],
       "warning": []
     },
     {
@@ -9648,7 +10480,9 @@
     },
     {
       "query": "row var = ltrim(5)",
-      "error": ["Argument of [ltrim] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [ltrim] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
@@ -9658,7 +10492,9 @@
     },
     {
       "query": "from a_index | where length(ltrim(numberField)) > 0",
-      "error": ["Argument of [ltrim] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [ltrim] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -9678,17 +10514,23 @@
     },
     {
       "query": "from a_index | eval ltrim(numberField)",
-      "error": ["Argument of [ltrim] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [ltrim] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval ltrim(stringField, extraArg)",
-      "error": ["Error: [ltrim] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [ltrim] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = ltrim(*)",
-      "error": ["Using wildcards (*) in ltrim is not allowed"],
+      "error": [
+        "Using wildcards (*) in ltrim is not allowed"
+      ],
       "warning": []
     },
     {
@@ -9713,7 +10555,9 @@
     },
     {
       "query": "row var = mv_avg(\"a\")",
-      "error": ["Argument of [mv_avg] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [mv_avg] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -9723,7 +10567,9 @@
     },
     {
       "query": "from a_index | where mv_avg(stringField) > 0",
-      "error": ["Argument of [mv_avg] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [mv_avg] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -9743,17 +10589,23 @@
     },
     {
       "query": "from a_index | eval mv_avg(stringField)",
-      "error": ["Argument of [mv_avg] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [mv_avg] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval mv_avg(numberField, extraArg)",
-      "error": ["Error: [mv_avg] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [mv_avg] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = mv_avg(*)",
-      "error": ["Using wildcards (*) in mv_avg is not allowed"],
+      "error": [
+        "Using wildcards (*) in mv_avg is not allowed"
+      ],
       "warning": []
     },
     {
@@ -9822,7 +10674,9 @@
     },
     {
       "query": "from a_index | eval mv_concat(stringField, stringField, extraArg)",
-      "error": ["Error: [mv_concat] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [mv_concat] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -9852,7 +10706,9 @@
     },
     {
       "query": "from a_index | eval var = mv_count(*)",
-      "error": ["Using wildcards (*) in mv_count is not allowed"],
+      "error": [
+        "Using wildcards (*) in mv_count is not allowed"
+      ],
       "warning": []
     },
     {
@@ -9882,7 +10738,9 @@
     },
     {
       "query": "from a_index | eval var = mv_dedupe(*)",
-      "error": ["Using wildcards (*) in mv_dedupe is not allowed"],
+      "error": [
+        "Using wildcards (*) in mv_dedupe is not allowed"
+      ],
       "warning": []
     },
     {
@@ -9912,7 +10770,9 @@
     },
     {
       "query": "from a_index | eval var = mv_first(*)",
-      "error": ["Using wildcards (*) in mv_first is not allowed"],
+      "error": [
+        "Using wildcards (*) in mv_first is not allowed"
+      ],
       "warning": []
     },
     {
@@ -9942,7 +10802,9 @@
     },
     {
       "query": "from a_index | eval var = mv_last(*)",
-      "error": ["Using wildcards (*) in mv_last is not allowed"],
+      "error": [
+        "Using wildcards (*) in mv_last is not allowed"
+      ],
       "warning": []
     },
     {
@@ -9972,7 +10834,9 @@
     },
     {
       "query": "from a_index | eval var = mv_max(*)",
-      "error": ["Using wildcards (*) in mv_max is not allowed"],
+      "error": [
+        "Using wildcards (*) in mv_max is not allowed"
+      ],
       "warning": []
     },
     {
@@ -9997,7 +10861,9 @@
     },
     {
       "query": "row var = mv_median(\"a\")",
-      "error": ["Argument of [mv_median] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [mv_median] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10036,12 +10902,16 @@
     },
     {
       "query": "from a_index | eval mv_median(numberField, extraArg)",
-      "error": ["Error: [mv_median] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [mv_median] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = mv_median(*)",
-      "error": ["Using wildcards (*) in mv_median is not allowed"],
+      "error": [
+        "Using wildcards (*) in mv_median is not allowed"
+      ],
       "warning": []
     },
     {
@@ -10071,7 +10941,9 @@
     },
     {
       "query": "from a_index | eval var = mv_min(*)",
-      "error": ["Using wildcards (*) in mv_min is not allowed"],
+      "error": [
+        "Using wildcards (*) in mv_min is not allowed"
+      ],
       "warning": []
     },
     {
@@ -10146,7 +11018,9 @@
     },
     {
       "query": "row var = mv_sum(\"a\")",
-      "error": ["Argument of [mv_sum] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [mv_sum] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10156,7 +11030,9 @@
     },
     {
       "query": "from a_index | where mv_sum(stringField) > 0",
-      "error": ["Argument of [mv_sum] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [mv_sum] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10176,17 +11052,23 @@
     },
     {
       "query": "from a_index | eval mv_sum(stringField)",
-      "error": ["Argument of [mv_sum] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [mv_sum] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval mv_sum(numberField, extraArg)",
-      "error": ["Error: [mv_sum] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [mv_sum] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = mv_sum(*)",
-      "error": ["Using wildcards (*) in mv_sum is not allowed"],
+      "error": [
+        "Using wildcards (*) in mv_sum is not allowed"
+      ],
       "warning": []
     },
     {
@@ -10258,7 +11140,9 @@
     },
     {
       "query": "from a_index | eval mv_zip(stringField, stringField, stringField, extraArg)",
-      "error": ["Error: [mv_zip] function expects exactly 3 arguments, got 4."],
+      "error": [
+        "Error: [mv_zip] function expects exactly 3 arguments, got 4."
+      ],
       "warning": []
     },
     {
@@ -10288,7 +11172,9 @@
     },
     {
       "query": "from a_index | eval now(extraArg)",
-      "error": ["Error: [now] function expects exactly 0 arguments, got 1."],
+      "error": [
+        "Error: [now] function expects exactly 0 arguments, got 1."
+      ],
       "warning": []
     },
     {
@@ -10323,7 +11209,9 @@
     },
     {
       "query": "from a_index | eval pi(extraArg)",
-      "error": ["Error: [pi] function expects exactly 0 arguments, got 1."],
+      "error": [
+        "Error: [pi] function expects exactly 0 arguments, got 1."
+      ],
       "warning": []
     },
     {
@@ -10392,7 +11280,9 @@
     },
     {
       "query": "from a_index | eval pow(numberField, numberField, extraArg)",
-      "error": ["Error: [pow] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [pow] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -10464,7 +11354,9 @@
     },
     {
       "query": "from a_index | eval replace(stringField, stringField, stringField, extraArg)",
-      "error": ["Error: [replace] function expects exactly 3 arguments, got 4."],
+      "error": [
+        "Error: [replace] function expects exactly 3 arguments, got 4."
+      ],
       "warning": []
     },
     {
@@ -10533,7 +11425,9 @@
     },
     {
       "query": "from a_index | eval right(stringField, numberField, extraArg)",
-      "error": ["Error: [right] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [right] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -10602,7 +11496,9 @@
     },
     {
       "query": "from a_index | eval round(numberField, numberField, extraArg)",
-      "error": ["Error: [round] function expects no more than 2 arguments, got 3."],
+      "error": [
+        "Error: [round] function expects no more than 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -10627,7 +11523,9 @@
     },
     {
       "query": "row var = rtrim(5)",
-      "error": ["Argument of [rtrim] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [rtrim] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
@@ -10637,7 +11535,9 @@
     },
     {
       "query": "from a_index | where length(rtrim(numberField)) > 0",
-      "error": ["Argument of [rtrim] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [rtrim] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -10657,17 +11557,23 @@
     },
     {
       "query": "from a_index | eval rtrim(numberField)",
-      "error": ["Argument of [rtrim] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [rtrim] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval rtrim(stringField, extraArg)",
-      "error": ["Error: [rtrim] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [rtrim] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = rtrim(*)",
-      "error": ["Using wildcards (*) in rtrim is not allowed"],
+      "error": [
+        "Using wildcards (*) in rtrim is not allowed"
+      ],
       "warning": []
     },
     {
@@ -10692,7 +11598,9 @@
     },
     {
       "query": "row var = signum(\"a\")",
-      "error": ["Argument of [signum] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [signum] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10702,7 +11610,9 @@
     },
     {
       "query": "from a_index | where signum(stringField) > 0",
-      "error": ["Argument of [signum] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [signum] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10722,17 +11632,23 @@
     },
     {
       "query": "from a_index | eval signum(stringField)",
-      "error": ["Argument of [signum] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [signum] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval signum(numberField, extraArg)",
-      "error": ["Error: [signum] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [signum] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = signum(*)",
-      "error": ["Using wildcards (*) in signum is not allowed"],
+      "error": [
+        "Using wildcards (*) in signum is not allowed"
+      ],
       "warning": []
     },
     {
@@ -10757,7 +11673,9 @@
     },
     {
       "query": "row var = sin(\"a\")",
-      "error": ["Argument of [sin] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [sin] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10767,7 +11685,9 @@
     },
     {
       "query": "from a_index | where sin(stringField) > 0",
-      "error": ["Argument of [sin] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [sin] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10787,17 +11707,23 @@
     },
     {
       "query": "from a_index | eval sin(stringField)",
-      "error": ["Argument of [sin] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [sin] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval sin(numberField, extraArg)",
-      "error": ["Error: [sin] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [sin] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = sin(*)",
-      "error": ["Using wildcards (*) in sin is not allowed"],
+      "error": [
+        "Using wildcards (*) in sin is not allowed"
+      ],
       "warning": []
     },
     {
@@ -10822,7 +11748,9 @@
     },
     {
       "query": "row var = sinh(\"a\")",
-      "error": ["Argument of [sinh] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [sinh] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10832,7 +11760,9 @@
     },
     {
       "query": "from a_index | where sinh(stringField) > 0",
-      "error": ["Argument of [sinh] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [sinh] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10852,17 +11782,23 @@
     },
     {
       "query": "from a_index | eval sinh(stringField)",
-      "error": ["Argument of [sinh] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [sinh] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval sinh(numberField, extraArg)",
-      "error": ["Error: [sinh] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [sinh] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = sinh(*)",
-      "error": ["Using wildcards (*) in sinh is not allowed"],
+      "error": [
+        "Using wildcards (*) in sinh is not allowed"
+      ],
       "warning": []
     },
     {
@@ -10931,7 +11867,9 @@
     },
     {
       "query": "from a_index | eval split(stringField, stringField, extraArg)",
-      "error": ["Error: [split] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [split] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -10956,7 +11894,9 @@
     },
     {
       "query": "row var = sqrt(\"a\")",
-      "error": ["Argument of [sqrt] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [sqrt] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10966,7 +11906,9 @@
     },
     {
       "query": "from a_index | where sqrt(stringField) > 0",
-      "error": ["Argument of [sqrt] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [sqrt] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -10986,17 +11928,23 @@
     },
     {
       "query": "from a_index | eval sqrt(stringField)",
-      "error": ["Argument of [sqrt] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [sqrt] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval sqrt(numberField, extraArg)",
-      "error": ["Error: [sqrt] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [sqrt] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = sqrt(*)",
-      "error": ["Using wildcards (*) in sqrt is not allowed"],
+      "error": [
+        "Using wildcards (*) in sqrt is not allowed"
+      ],
       "warning": []
     },
     {
@@ -11147,7 +12095,9 @@
     },
     {
       "query": "from a_index | eval st_contains(geoPointField, geoPointField, extraArg)",
-      "error": ["Error: [st_contains] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11167,7 +12117,9 @@
     },
     {
       "query": "from a_index | eval st_contains(geoPointField, geoShapeField, extraArg)",
-      "error": ["Error: [st_contains] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11187,7 +12139,9 @@
     },
     {
       "query": "from a_index | eval st_contains(geoShapeField, geoPointField, extraArg)",
-      "error": ["Error: [st_contains] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11202,7 +12156,9 @@
     },
     {
       "query": "from a_index | eval st_contains(geoShapeField, geoShapeField, extraArg)",
-      "error": ["Error: [st_contains] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11222,7 +12178,9 @@
     },
     {
       "query": "from a_index | eval st_contains(cartesianPointField, cartesianPointField, extraArg)",
-      "error": ["Error: [st_contains] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11242,7 +12200,9 @@
     },
     {
       "query": "from a_index | eval st_contains(cartesianPointField, cartesianShapeField, extraArg)",
-      "error": ["Error: [st_contains] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11262,7 +12222,9 @@
     },
     {
       "query": "from a_index | eval st_contains(cartesianShapeField, cartesianPointField, extraArg)",
-      "error": ["Error: [st_contains] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11277,7 +12239,9 @@
     },
     {
       "query": "from a_index | eval st_contains(cartesianShapeField, cartesianShapeField, extraArg)",
-      "error": ["Error: [st_contains] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_contains] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11428,7 +12392,9 @@
     },
     {
       "query": "from a_index | eval st_disjoint(geoPointField, geoPointField, extraArg)",
-      "error": ["Error: [st_disjoint] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11448,7 +12414,9 @@
     },
     {
       "query": "from a_index | eval st_disjoint(geoPointField, geoShapeField, extraArg)",
-      "error": ["Error: [st_disjoint] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11468,7 +12436,9 @@
     },
     {
       "query": "from a_index | eval st_disjoint(geoShapeField, geoPointField, extraArg)",
-      "error": ["Error: [st_disjoint] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11483,7 +12453,9 @@
     },
     {
       "query": "from a_index | eval st_disjoint(geoShapeField, geoShapeField, extraArg)",
-      "error": ["Error: [st_disjoint] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11503,7 +12475,9 @@
     },
     {
       "query": "from a_index | eval st_disjoint(cartesianPointField, cartesianPointField, extraArg)",
-      "error": ["Error: [st_disjoint] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11523,7 +12497,9 @@
     },
     {
       "query": "from a_index | eval st_disjoint(cartesianPointField, cartesianShapeField, extraArg)",
-      "error": ["Error: [st_disjoint] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11543,7 +12519,9 @@
     },
     {
       "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianPointField, extraArg)",
-      "error": ["Error: [st_disjoint] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11558,7 +12536,9 @@
     },
     {
       "query": "from a_index | eval st_disjoint(cartesianShapeField, cartesianShapeField, extraArg)",
-      "error": ["Error: [st_disjoint] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_disjoint] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11709,7 +12689,9 @@
     },
     {
       "query": "from a_index | eval st_intersects(geoPointField, geoPointField, extraArg)",
-      "error": ["Error: [st_intersects] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11729,7 +12711,9 @@
     },
     {
       "query": "from a_index | eval st_intersects(geoPointField, geoShapeField, extraArg)",
-      "error": ["Error: [st_intersects] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11749,7 +12733,9 @@
     },
     {
       "query": "from a_index | eval st_intersects(geoShapeField, geoPointField, extraArg)",
-      "error": ["Error: [st_intersects] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11764,7 +12750,9 @@
     },
     {
       "query": "from a_index | eval st_intersects(geoShapeField, geoShapeField, extraArg)",
-      "error": ["Error: [st_intersects] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11784,7 +12772,9 @@
     },
     {
       "query": "from a_index | eval st_intersects(cartesianPointField, cartesianPointField, extraArg)",
-      "error": ["Error: [st_intersects] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11804,7 +12794,9 @@
     },
     {
       "query": "from a_index | eval st_intersects(cartesianPointField, cartesianShapeField, extraArg)",
-      "error": ["Error: [st_intersects] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11824,7 +12816,9 @@
     },
     {
       "query": "from a_index | eval st_intersects(cartesianShapeField, cartesianPointField, extraArg)",
-      "error": ["Error: [st_intersects] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11839,7 +12833,9 @@
     },
     {
       "query": "from a_index | eval st_intersects(cartesianShapeField, cartesianShapeField, extraArg)",
-      "error": ["Error: [st_intersects] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_intersects] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -11990,7 +12986,9 @@
     },
     {
       "query": "from a_index | eval st_within(geoPointField, geoPointField, extraArg)",
-      "error": ["Error: [st_within] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -12010,7 +13008,9 @@
     },
     {
       "query": "from a_index | eval st_within(geoPointField, geoShapeField, extraArg)",
-      "error": ["Error: [st_within] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -12030,7 +13030,9 @@
     },
     {
       "query": "from a_index | eval st_within(geoShapeField, geoPointField, extraArg)",
-      "error": ["Error: [st_within] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -12045,7 +13047,9 @@
     },
     {
       "query": "from a_index | eval st_within(geoShapeField, geoShapeField, extraArg)",
-      "error": ["Error: [st_within] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -12065,7 +13069,9 @@
     },
     {
       "query": "from a_index | eval st_within(cartesianPointField, cartesianPointField, extraArg)",
-      "error": ["Error: [st_within] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -12085,7 +13091,9 @@
     },
     {
       "query": "from a_index | eval st_within(cartesianPointField, cartesianShapeField, extraArg)",
-      "error": ["Error: [st_within] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -12105,7 +13113,9 @@
     },
     {
       "query": "from a_index | eval st_within(cartesianShapeField, cartesianPointField, extraArg)",
-      "error": ["Error: [st_within] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -12120,7 +13130,9 @@
     },
     {
       "query": "from a_index | eval st_within(cartesianShapeField, cartesianShapeField, extraArg)",
-      "error": ["Error: [st_within] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [st_within] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -12145,7 +13157,9 @@
     },
     {
       "query": "row var = st_x(\"a\")",
-      "error": ["Argument of [st_x] must be [geo_point], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [st_x] must be [geo_point], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -12180,17 +13194,23 @@
     },
     {
       "query": "from a_index | eval st_x(stringField)",
-      "error": ["Argument of [st_x] must be [geo_point], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [st_x] must be [geo_point], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval st_x(geoPointField, extraArg)",
-      "error": ["Error: [st_x] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [st_x] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = st_x(*)",
-      "error": ["Using wildcards (*) in st_x is not allowed"],
+      "error": [
+        "Using wildcards (*) in st_x is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12210,7 +13230,9 @@
     },
     {
       "query": "from a_index | eval st_x(cartesianPointField, extraArg)",
-      "error": ["Error: [st_x] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [st_x] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
@@ -12235,7 +13257,9 @@
     },
     {
       "query": "row var = st_y(\"a\")",
-      "error": ["Argument of [st_y] must be [geo_point], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [st_y] must be [geo_point], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -12270,17 +13294,23 @@
     },
     {
       "query": "from a_index | eval st_y(stringField)",
-      "error": ["Argument of [st_y] must be [geo_point], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [st_y] must be [geo_point], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval st_y(geoPointField, extraArg)",
-      "error": ["Error: [st_y] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [st_y] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = st_y(*)",
-      "error": ["Using wildcards (*) in st_y is not allowed"],
+      "error": [
+        "Using wildcards (*) in st_y is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12300,7 +13330,9 @@
     },
     {
       "query": "from a_index | eval st_y(cartesianPointField, extraArg)",
-      "error": ["Error: [st_y] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [st_y] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
@@ -12356,7 +13388,9 @@
     },
     {
       "query": "from a_index | eval starts_with(stringField, stringField, extraArg)",
-      "error": ["Error: [starts_with] function expects exactly 2 arguments, got 3."],
+      "error": [
+        "Error: [starts_with] function expects exactly 2 arguments, got 3."
+      ],
       "warning": []
     },
     {
@@ -12428,7 +13462,9 @@
     },
     {
       "query": "from a_index | eval substring(stringField, numberField, numberField, extraArg)",
-      "error": ["Error: [substring] function expects exactly 3 arguments, got 4."],
+      "error": [
+        "Error: [substring] function expects exactly 3 arguments, got 4."
+      ],
       "warning": []
     },
     {
@@ -12453,7 +13489,9 @@
     },
     {
       "query": "row var = tan(\"a\")",
-      "error": ["Argument of [tan] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [tan] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -12463,7 +13501,9 @@
     },
     {
       "query": "from a_index | where tan(stringField) > 0",
-      "error": ["Argument of [tan] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [tan] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -12483,17 +13523,23 @@
     },
     {
       "query": "from a_index | eval tan(stringField)",
-      "error": ["Argument of [tan] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [tan] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval tan(numberField, extraArg)",
-      "error": ["Error: [tan] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [tan] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = tan(*)",
-      "error": ["Using wildcards (*) in tan is not allowed"],
+      "error": [
+        "Using wildcards (*) in tan is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12518,7 +13564,9 @@
     },
     {
       "query": "row var = tanh(\"a\")",
-      "error": ["Argument of [tanh] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [tanh] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -12528,7 +13576,9 @@
     },
     {
       "query": "from a_index | where tanh(stringField) > 0",
-      "error": ["Argument of [tanh] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [tanh] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
@@ -12548,17 +13598,23 @@
     },
     {
       "query": "from a_index | eval tanh(stringField)",
-      "error": ["Argument of [tanh] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [tanh] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval tanh(numberField, extraArg)",
-      "error": ["Error: [tanh] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [tanh] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = tanh(*)",
-      "error": ["Using wildcards (*) in tanh is not allowed"],
+      "error": [
+        "Using wildcards (*) in tanh is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12593,7 +13649,9 @@
     },
     {
       "query": "from a_index | eval tau(extraArg)",
-      "error": ["Error: [tau] function expects exactly 0 arguments, got 1."],
+      "error": [
+        "Error: [tau] function expects exactly 0 arguments, got 1."
+      ],
       "warning": []
     },
     {
@@ -12633,7 +13691,9 @@
     },
     {
       "query": "from a_index | eval var = to_boolean(*)",
-      "error": ["Using wildcards (*) in to_boolean is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_boolean is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12663,7 +13723,9 @@
     },
     {
       "query": "from a_index | eval var = to_cartesianpoint(*)",
-      "error": ["Using wildcards (*) in to_cartesianpoint is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_cartesianpoint is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12693,7 +13755,9 @@
     },
     {
       "query": "from a_index | eval var = to_cartesianshape(*)",
-      "error": ["Using wildcards (*) in to_cartesianshape is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_cartesianshape is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12733,7 +13797,9 @@
     },
     {
       "query": "from a_index | eval var = to_datetime(*)",
-      "error": ["Using wildcards (*) in to_datetime is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_datetime is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12758,7 +13824,9 @@
     },
     {
       "query": "row var = to_degrees(\"a\")",
-      "error": ["Argument of [to_degrees] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [to_degrees] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -12797,12 +13865,16 @@
     },
     {
       "query": "from a_index | eval to_degrees(numberField, extraArg)",
-      "error": ["Error: [to_degrees] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [to_degrees] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = to_degrees(*)",
-      "error": ["Using wildcards (*) in to_degrees is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_degrees is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12842,7 +13914,9 @@
     },
     {
       "query": "from a_index | eval var = to_double(*)",
-      "error": ["Using wildcards (*) in to_double is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_double is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12872,7 +13946,9 @@
     },
     {
       "query": "from a_index | eval var = to_geopoint(*)",
-      "error": ["Using wildcards (*) in to_geopoint is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_geopoint is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12902,7 +13978,9 @@
     },
     {
       "query": "from a_index | eval var = to_geoshape(*)",
-      "error": ["Using wildcards (*) in to_geoshape is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_geoshape is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12942,7 +14020,9 @@
     },
     {
       "query": "from a_index | eval var = to_integer(*)",
-      "error": ["Using wildcards (*) in to_integer is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_integer is not allowed"
+      ],
       "warning": []
     },
     {
@@ -12972,7 +14052,9 @@
     },
     {
       "query": "from a_index | eval var = to_ip(*)",
-      "error": ["Using wildcards (*) in to_ip is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_ip is not allowed"
+      ],
       "warning": []
     },
     {
@@ -13002,7 +14084,9 @@
     },
     {
       "query": "from a_index | eval var = to_long(*)",
-      "error": ["Using wildcards (*) in to_long is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_long is not allowed"
+      ],
       "warning": []
     },
     {
@@ -13027,7 +14111,9 @@
     },
     {
       "query": "row var = to_lower(5)",
-      "error": ["Argument of [to_lower] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [to_lower] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
@@ -13037,7 +14123,9 @@
     },
     {
       "query": "from a_index | where length(to_lower(numberField)) > 0",
-      "error": ["Argument of [to_lower] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [to_lower] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -13057,17 +14145,23 @@
     },
     {
       "query": "from a_index | eval to_lower(numberField)",
-      "error": ["Argument of [to_lower] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [to_lower] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval to_lower(stringField, extraArg)",
-      "error": ["Error: [to_lower] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [to_lower] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = to_lower(*)",
-      "error": ["Using wildcards (*) in to_lower is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_lower is not allowed"
+      ],
       "warning": []
     },
     {
@@ -13092,7 +14186,9 @@
     },
     {
       "query": "row var = to_radians(\"a\")",
-      "error": ["Argument of [to_radians] must be [number], found value [\"a\"] type [string]"],
+      "error": [
+        "Argument of [to_radians] must be [number], found value [\"a\"] type [string]"
+      ],
       "warning": []
     },
     {
@@ -13131,12 +14227,16 @@
     },
     {
       "query": "from a_index | eval to_radians(numberField, extraArg)",
-      "error": ["Error: [to_radians] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [to_radians] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = to_radians(*)",
-      "error": ["Using wildcards (*) in to_radians is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_radians is not allowed"
+      ],
       "warning": []
     },
     {
@@ -13176,7 +14276,9 @@
     },
     {
       "query": "from a_index | eval var = to_string(*)",
-      "error": ["Using wildcards (*) in to_string is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_string is not allowed"
+      ],
       "warning": []
     },
     {
@@ -13226,7 +14328,9 @@
     },
     {
       "query": "from a_index | eval var = to_unsigned_long(*)",
-      "error": ["Using wildcards (*) in to_unsigned_long is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_unsigned_long is not allowed"
+      ],
       "warning": []
     },
     {
@@ -13251,7 +14355,9 @@
     },
     {
       "query": "row var = to_upper(5)",
-      "error": ["Argument of [to_upper] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [to_upper] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
@@ -13261,7 +14367,9 @@
     },
     {
       "query": "from a_index | where length(to_upper(numberField)) > 0",
-      "error": ["Argument of [to_upper] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [to_upper] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -13281,17 +14389,23 @@
     },
     {
       "query": "from a_index | eval to_upper(numberField)",
-      "error": ["Argument of [to_upper] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [to_upper] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval to_upper(stringField, extraArg)",
-      "error": ["Error: [to_upper] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [to_upper] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = to_upper(*)",
-      "error": ["Using wildcards (*) in to_upper is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_upper is not allowed"
+      ],
       "warning": []
     },
     {
@@ -13331,7 +14445,9 @@
     },
     {
       "query": "from a_index | eval var = to_version(*)",
-      "error": ["Using wildcards (*) in to_version is not allowed"],
+      "error": [
+        "Using wildcards (*) in to_version is not allowed"
+      ],
       "warning": []
     },
     {
@@ -13356,7 +14472,9 @@
     },
     {
       "query": "row var = trim(5)",
-      "error": ["Argument of [trim] must be [string], found value [5] type [number]"],
+      "error": [
+        "Argument of [trim] must be [string], found value [5] type [number]"
+      ],
       "warning": []
     },
     {
@@ -13366,7 +14484,9 @@
     },
     {
       "query": "from a_index | where length(trim(numberField)) > 0",
-      "error": ["Argument of [trim] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
@@ -13386,17 +14506,23 @@
     },
     {
       "query": "from a_index | eval trim(numberField)",
-      "error": ["Argument of [trim] must be [string], found value [numberField] type [number]"],
+      "error": [
+        "Argument of [trim] must be [string], found value [numberField] type [number]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval trim(stringField, extraArg)",
-      "error": ["Error: [trim] function expects exactly one argument, got 2."],
+      "error": [
+        "Error: [trim] function expects exactly one argument, got 2."
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = trim(*)",
-      "error": ["Using wildcards (*) in trim is not allowed"],
+      "error": [
+        "Using wildcards (*) in trim is not allowed"
+      ],
       "warning": []
     },
     {
@@ -13515,47 +14641,65 @@
     },
     {
       "query": "from a_index | stats avg(stringField)",
-      "error": ["Argument of [avg] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [avg] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = avg(*)",
-      "error": ["Using wildcards (*) in avg is not allowed"],
+      "error": [
+        "Using wildcards (*) in avg is not allowed"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | sort avg(numberField)",
-      "error": ["SORT does not support function avg"],
+      "error": [
+        "SORT does not support function avg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where avg(numberField)",
-      "error": ["WHERE does not support function avg"],
+      "error": [
+        "WHERE does not support function avg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where avg(numberField) > 0",
-      "error": ["WHERE does not support function avg"],
+      "error": [
+        "WHERE does not support function avg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = avg(numberField)",
-      "error": ["EVAL does not support function avg"],
+      "error": [
+        "EVAL does not support function avg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = avg(numberField) > 0",
-      "error": ["EVAL does not support function avg"],
+      "error": [
+        "EVAL does not support function avg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval avg(numberField)",
-      "error": ["EVAL does not support function avg"],
+      "error": [
+        "EVAL does not support function avg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval avg(numberField) > 0",
-      "error": ["EVAL does not support function avg"],
+      "error": [
+        "EVAL does not support function avg"
+      ],
       "warning": []
     },
     {
@@ -13669,47 +14813,65 @@
     },
     {
       "query": "from a_index | stats sum(stringField)",
-      "error": ["Argument of [sum] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [sum] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = sum(*)",
-      "error": ["Using wildcards (*) in sum is not allowed"],
+      "error": [
+        "Using wildcards (*) in sum is not allowed"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | sort sum(numberField)",
-      "error": ["SORT does not support function sum"],
+      "error": [
+        "SORT does not support function sum"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where sum(numberField)",
-      "error": ["WHERE does not support function sum"],
+      "error": [
+        "WHERE does not support function sum"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where sum(numberField) > 0",
-      "error": ["WHERE does not support function sum"],
+      "error": [
+        "WHERE does not support function sum"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = sum(numberField)",
-      "error": ["EVAL does not support function sum"],
+      "error": [
+        "EVAL does not support function sum"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = sum(numberField) > 0",
-      "error": ["EVAL does not support function sum"],
+      "error": [
+        "EVAL does not support function sum"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval sum(numberField)",
-      "error": ["EVAL does not support function sum"],
+      "error": [
+        "EVAL does not support function sum"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval sum(numberField) > 0",
-      "error": ["EVAL does not support function sum"],
+      "error": [
+        "EVAL does not support function sum"
+      ],
       "warning": []
     },
     {
@@ -13823,47 +14985,65 @@
     },
     {
       "query": "from a_index | stats median(stringField)",
-      "error": ["Argument of [median] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [median] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = median(*)",
-      "error": ["Using wildcards (*) in median is not allowed"],
+      "error": [
+        "Using wildcards (*) in median is not allowed"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | sort median(numberField)",
-      "error": ["SORT does not support function median"],
+      "error": [
+        "SORT does not support function median"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where median(numberField)",
-      "error": ["WHERE does not support function median"],
+      "error": [
+        "WHERE does not support function median"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where median(numberField) > 0",
-      "error": ["WHERE does not support function median"],
+      "error": [
+        "WHERE does not support function median"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = median(numberField)",
-      "error": ["EVAL does not support function median"],
+      "error": [
+        "EVAL does not support function median"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = median(numberField) > 0",
-      "error": ["EVAL does not support function median"],
+      "error": [
+        "EVAL does not support function median"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval median(numberField)",
-      "error": ["EVAL does not support function median"],
+      "error": [
+        "EVAL does not support function median"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval median(numberField) > 0",
-      "error": ["EVAL does not support function median"],
+      "error": [
+        "EVAL does not support function median"
+      ],
       "warning": []
     },
     {
@@ -13984,42 +15164,58 @@
     },
     {
       "query": "from a_index | stats var = median_absolute_deviation(*)",
-      "error": ["Using wildcards (*) in median_absolute_deviation is not allowed"],
+      "error": [
+        "Using wildcards (*) in median_absolute_deviation is not allowed"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | sort median_absolute_deviation(numberField)",
-      "error": ["SORT does not support function median_absolute_deviation"],
+      "error": [
+        "SORT does not support function median_absolute_deviation"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where median_absolute_deviation(numberField)",
-      "error": ["WHERE does not support function median_absolute_deviation"],
+      "error": [
+        "WHERE does not support function median_absolute_deviation"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where median_absolute_deviation(numberField) > 0",
-      "error": ["WHERE does not support function median_absolute_deviation"],
+      "error": [
+        "WHERE does not support function median_absolute_deviation"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = median_absolute_deviation(numberField)",
-      "error": ["EVAL does not support function median_absolute_deviation"],
+      "error": [
+        "EVAL does not support function median_absolute_deviation"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = median_absolute_deviation(numberField) > 0",
-      "error": ["EVAL does not support function median_absolute_deviation"],
+      "error": [
+        "EVAL does not support function median_absolute_deviation"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval median_absolute_deviation(numberField)",
-      "error": ["EVAL does not support function median_absolute_deviation"],
+      "error": [
+        "EVAL does not support function median_absolute_deviation"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval median_absolute_deviation(numberField) > 0",
-      "error": ["EVAL does not support function median_absolute_deviation"],
+      "error": [
+        "EVAL does not support function median_absolute_deviation"
+      ],
       "warning": []
     },
     {
@@ -14054,7 +15250,9 @@
     },
     {
       "query": "from a_index | stats percentile(numberField, numberField)",
-      "error": ["Argument of [percentile] must be a constant, received [numberField]"],
+      "error": [
+        "Argument of [percentile] must be a constant, received [numberField]"
+      ],
       "warning": []
     },
     {
@@ -14145,37 +15343,51 @@
     },
     {
       "query": "from a_index | sort percentile(numberField, 5)",
-      "error": ["SORT does not support function percentile"],
+      "error": [
+        "SORT does not support function percentile"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where percentile(numberField, 5)",
-      "error": ["WHERE does not support function percentile"],
+      "error": [
+        "WHERE does not support function percentile"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where percentile(numberField, 5) > 0",
-      "error": ["WHERE does not support function percentile"],
+      "error": [
+        "WHERE does not support function percentile"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = percentile(numberField, 5)",
-      "error": ["EVAL does not support function percentile"],
+      "error": [
+        "EVAL does not support function percentile"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = percentile(numberField, 5) > 0",
-      "error": ["EVAL does not support function percentile"],
+      "error": [
+        "EVAL does not support function percentile"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval percentile(numberField, 5)",
-      "error": ["EVAL does not support function percentile"],
+      "error": [
+        "EVAL does not support function percentile"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval percentile(numberField, 5) > 0",
-      "error": ["EVAL does not support function percentile"],
+      "error": [
+        "EVAL does not support function percentile"
+      ],
       "warning": []
     },
     {
@@ -14289,12 +15501,16 @@
     },
     {
       "query": "from a_index | stats max(stringField)",
-      "error": ["Argument of [max] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [max] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = max(*)",
-      "error": ["Using wildcards (*) in max is not allowed"],
+      "error": [
+        "Using wildcards (*) in max is not allowed"
+      ],
       "warning": []
     },
     {
@@ -14329,67 +15545,93 @@
     },
     {
       "query": "from a_index | sort max(numberField)",
-      "error": ["SORT does not support function max"],
+      "error": [
+        "SORT does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where max(numberField)",
-      "error": ["WHERE does not support function max"],
+      "error": [
+        "WHERE does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where max(numberField) > 0",
-      "error": ["WHERE does not support function max"],
+      "error": [
+        "WHERE does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where max(dateField)",
-      "error": ["WHERE does not support function max"],
+      "error": [
+        "WHERE does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where max(dateField) > 0",
-      "error": ["WHERE does not support function max"],
+      "error": [
+        "WHERE does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = max(numberField)",
-      "error": ["EVAL does not support function max"],
+      "error": [
+        "EVAL does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = max(numberField) > 0",
-      "error": ["EVAL does not support function max"],
+      "error": [
+        "EVAL does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval max(numberField)",
-      "error": ["EVAL does not support function max"],
+      "error": [
+        "EVAL does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval max(numberField) > 0",
-      "error": ["EVAL does not support function max"],
+      "error": [
+        "EVAL does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = max(dateField)",
-      "error": ["EVAL does not support function max"],
+      "error": [
+        "EVAL does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = max(dateField) > 0",
-      "error": ["EVAL does not support function max"],
+      "error": [
+        "EVAL does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval max(dateField)",
-      "error": ["EVAL does not support function max"],
+      "error": [
+        "EVAL does not support function max"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval max(dateField) > 0",
-      "error": ["EVAL does not support function max"],
+      "error": [
+        "EVAL does not support function max"
+      ],
       "warning": []
     },
     {
@@ -14503,12 +15745,16 @@
     },
     {
       "query": "from a_index | stats min(stringField)",
-      "error": ["Argument of [min] must be [number], found value [stringField] type [string]"],
+      "error": [
+        "Argument of [min] must be [number], found value [stringField] type [string]"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | stats var = min(*)",
-      "error": ["Using wildcards (*) in min is not allowed"],
+      "error": [
+        "Using wildcards (*) in min is not allowed"
+      ],
       "warning": []
     },
     {
@@ -14543,67 +15789,93 @@
     },
     {
       "query": "from a_index | sort min(numberField)",
-      "error": ["SORT does not support function min"],
+      "error": [
+        "SORT does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where min(numberField)",
-      "error": ["WHERE does not support function min"],
+      "error": [
+        "WHERE does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where min(numberField) > 0",
-      "error": ["WHERE does not support function min"],
+      "error": [
+        "WHERE does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where min(dateField)",
-      "error": ["WHERE does not support function min"],
+      "error": [
+        "WHERE does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where min(dateField) > 0",
-      "error": ["WHERE does not support function min"],
+      "error": [
+        "WHERE does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = min(numberField)",
-      "error": ["EVAL does not support function min"],
+      "error": [
+        "EVAL does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = min(numberField) > 0",
-      "error": ["EVAL does not support function min"],
+      "error": [
+        "EVAL does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval min(numberField)",
-      "error": ["EVAL does not support function min"],
+      "error": [
+        "EVAL does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval min(numberField) > 0",
-      "error": ["EVAL does not support function min"],
+      "error": [
+        "EVAL does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = min(dateField)",
-      "error": ["EVAL does not support function min"],
+      "error": [
+        "EVAL does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = min(dateField) > 0",
-      "error": ["EVAL does not support function min"],
+      "error": [
+        "EVAL does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval min(dateField)",
-      "error": ["EVAL does not support function min"],
+      "error": [
+        "EVAL does not support function min"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval min(dateField) > 0",
-      "error": ["EVAL does not support function min"],
+      "error": [
+        "EVAL does not support function min"
+      ],
       "warning": []
     },
     {
@@ -14638,37 +15910,51 @@
     },
     {
       "query": "from a_index | sort count(stringField)",
-      "error": ["SORT does not support function count"],
+      "error": [
+        "SORT does not support function count"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where count(stringField)",
-      "error": ["WHERE does not support function count"],
+      "error": [
+        "WHERE does not support function count"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where count(stringField) > 0",
-      "error": ["WHERE does not support function count"],
+      "error": [
+        "WHERE does not support function count"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = count(stringField)",
-      "error": ["EVAL does not support function count"],
+      "error": [
+        "EVAL does not support function count"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = count(stringField) > 0",
-      "error": ["EVAL does not support function count"],
+      "error": [
+        "EVAL does not support function count"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval count(stringField)",
-      "error": ["EVAL does not support function count"],
+      "error": [
+        "EVAL does not support function count"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval count(stringField) > 0",
-      "error": ["EVAL does not support function count"],
+      "error": [
+        "EVAL does not support function count"
+      ],
       "warning": []
     },
     {
@@ -14703,37 +15989,51 @@
     },
     {
       "query": "from a_index | sort count_distinct(stringField, numberField)",
-      "error": ["SORT does not support function count_distinct"],
+      "error": [
+        "SORT does not support function count_distinct"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where count_distinct(stringField, numberField)",
-      "error": ["WHERE does not support function count_distinct"],
+      "error": [
+        "WHERE does not support function count_distinct"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where count_distinct(stringField, numberField) > 0",
-      "error": ["WHERE does not support function count_distinct"],
+      "error": [
+        "WHERE does not support function count_distinct"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = count_distinct(stringField, numberField)",
-      "error": ["EVAL does not support function count_distinct"],
+      "error": [
+        "EVAL does not support function count_distinct"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = count_distinct(stringField, numberField) > 0",
-      "error": ["EVAL does not support function count_distinct"],
+      "error": [
+        "EVAL does not support function count_distinct"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval count_distinct(stringField, numberField)",
-      "error": ["EVAL does not support function count_distinct"],
+      "error": [
+        "EVAL does not support function count_distinct"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval count_distinct(stringField, numberField) > 0",
-      "error": ["EVAL does not support function count_distinct"],
+      "error": [
+        "EVAL does not support function count_distinct"
+      ],
       "warning": []
     },
     {
@@ -14769,7 +16069,9 @@
     },
     {
       "query": "from a_index | stats var = st_centroid_agg(*)",
-      "error": ["Using wildcards (*) in st_centroid_agg is not allowed"],
+      "error": [
+        "Using wildcards (*) in st_centroid_agg is not allowed"
+      ],
       "warning": []
     },
     {
@@ -14784,67 +16086,93 @@
     },
     {
       "query": "from a_index | sort st_centroid_agg(cartesianPointField)",
-      "error": ["SORT does not support function st_centroid_agg"],
+      "error": [
+        "SORT does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where st_centroid_agg(cartesianPointField)",
-      "error": ["WHERE does not support function st_centroid_agg"],
+      "error": [
+        "WHERE does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where st_centroid_agg(cartesianPointField) > 0",
-      "error": ["WHERE does not support function st_centroid_agg"],
+      "error": [
+        "WHERE does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where st_centroid_agg(geoPointField)",
-      "error": ["WHERE does not support function st_centroid_agg"],
+      "error": [
+        "WHERE does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where st_centroid_agg(geoPointField) > 0",
-      "error": ["WHERE does not support function st_centroid_agg"],
+      "error": [
+        "WHERE does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = st_centroid_agg(cartesianPointField)",
-      "error": ["EVAL does not support function st_centroid_agg"],
+      "error": [
+        "EVAL does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = st_centroid_agg(cartesianPointField) > 0",
-      "error": ["EVAL does not support function st_centroid_agg"],
+      "error": [
+        "EVAL does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval st_centroid_agg(cartesianPointField)",
-      "error": ["EVAL does not support function st_centroid_agg"],
+      "error": [
+        "EVAL does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval st_centroid_agg(cartesianPointField) > 0",
-      "error": ["EVAL does not support function st_centroid_agg"],
+      "error": [
+        "EVAL does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = st_centroid_agg(geoPointField)",
-      "error": ["EVAL does not support function st_centroid_agg"],
+      "error": [
+        "EVAL does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = st_centroid_agg(geoPointField) > 0",
-      "error": ["EVAL does not support function st_centroid_agg"],
+      "error": [
+        "EVAL does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval st_centroid_agg(geoPointField)",
-      "error": ["EVAL does not support function st_centroid_agg"],
+      "error": [
+        "EVAL does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval st_centroid_agg(geoPointField) > 0",
-      "error": ["EVAL does not support function st_centroid_agg"],
+      "error": [
+        "EVAL does not support function st_centroid_agg"
+      ],
       "warning": []
     },
     {
@@ -14859,37 +16187,51 @@
     },
     {
       "query": "from a_index | sort values(stringField)",
-      "error": ["SORT does not support function values"],
+      "error": [
+        "SORT does not support function values"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where values(stringField)",
-      "error": ["WHERE does not support function values"],
+      "error": [
+        "WHERE does not support function values"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | where values(stringField) > 0",
-      "error": ["WHERE does not support function values"],
+      "error": [
+        "WHERE does not support function values"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = values(stringField)",
-      "error": ["EVAL does not support function values"],
+      "error": [
+        "EVAL does not support function values"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval var = values(stringField) > 0",
-      "error": ["EVAL does not support function values"],
+      "error": [
+        "EVAL does not support function values"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval values(stringField)",
-      "error": ["EVAL does not support function values"],
+      "error": [
+        "EVAL does not support function values"
+      ],
       "warning": []
     },
     {
       "query": "from a_index | eval values(stringField) > 0",
-      "error": ["EVAL does not support function values"],
+      "error": [
+        "EVAL does not support function values"
+      ],
       "warning": []
     },
     {
@@ -14909,7 +16251,9 @@
     },
     {
       "query": "from a_index | stats by bucket(numberField, numberField)",
-      "error": ["Argument of [bucket] must be a constant, received [numberField]"],
+      "error": [
+        "Argument of [bucket] must be a constant, received [numberField]"
+      ],
       "warning": []
     },
     {
@@ -15014,7 +16358,9 @@
     },
     {
       "query": "from a_index | sort bucket(dateField, 1 year)",
-      "error": ["SORT does not support function bucket"],
+      "error": [
+        "SORT does not support function bucket"
+      ],
       "warning": []
     }
   ]

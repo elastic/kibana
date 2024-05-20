@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
-import expect from '@kbn/expect';
 
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import type { CasesMetricsResponse, SingleCaseMetricsResponse } from '@kbn/cases-plugin/common';
+import type SuperTest from 'supertest';
 import {
   CASES_INTERNAL_URL,
   CASES_URL,
@@ -27,6 +26,19 @@ import {
   INTERNAL_CASE_METRICS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common';
+import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
+import type { SavedObjectsRawDocSource } from '@kbn/core/server';
+import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
+import {
+  ConnectorMappingsAttributes,
+  Case,
+  Cases,
+  CaseStatuses,
+  CaseCustomField,
+} from '@kbn/cases-plugin/common/types/domain';
 import {
   AlertResponse,
   CaseResolveResponse,
@@ -37,18 +49,6 @@ import {
   CustomFieldPutRequest,
   GetRelatedCasesByAlertResponse,
 } from '@kbn/cases-plugin/common/types/api';
-import {
-  Case,
-  CaseCustomField,
-  CaseStatuses,
-  Cases,
-  ConnectorMappingsAttributes,
-} from '@kbn/cases-plugin/common/types/domain';
-import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
-import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
-import type { SavedObjectsRawDocSource } from '@kbn/core/server';
-import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
-import type SuperTest from 'supertest';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';

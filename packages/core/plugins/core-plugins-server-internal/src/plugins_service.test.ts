@@ -8,26 +8,26 @@
 
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
-import { join, resolve } from 'path';
-import { ConfigPath, ConfigService, Env } from '@kbn/config';
-import { schema } from '@kbn/config-schema';
+import { resolve, join } from 'path';
+import { BehaviorSubject, from } from 'rxjs';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { BehaviorSubject, from } from 'rxjs';
+import { schema } from '@kbn/config-schema';
+import { ConfigPath, ConfigService, Env } from '@kbn/config';
 
-import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
-import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
-import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
-import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-import { take } from 'rxjs';
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
-import { PluginsConfigType, config } from './plugins_config';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
+import { config, PluginsConfigType } from './plugins_config';
+import { take } from 'rxjs';
+import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 
@@ -167,9 +167,8 @@ describe('PluginsService', () => {
         plugin$: from([]),
       });
 
-      await expect(
-        pluginsService.discover({ environment: environmentPreboot, node: nodePreboot })
-      ).rejects.toMatchInlineSnapshot(`
+      await expect(pluginsService.discover({ environment: environmentPreboot, node: nodePreboot }))
+        .rejects.toMatchInlineSnapshot(`
               [Error: Failed to initialize plugins:
               	Invalid JSON (invalid-manifest, path-1)]
             `);
@@ -190,9 +189,8 @@ describe('PluginsService', () => {
         plugin$: from([]),
       });
 
-      await expect(
-        pluginsService.discover({ environment: environmentPreboot, node: nodePreboot })
-      ).rejects.toMatchInlineSnapshot(`
+      await expect(pluginsService.discover({ environment: environmentPreboot, node: nodePreboot }))
+        .rejects.toMatchInlineSnapshot(`
               [Error: Failed to initialize plugins:
               	Incompatible version (incompatible-version, path-3)]
             `);

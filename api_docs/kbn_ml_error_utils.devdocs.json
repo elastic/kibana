@@ -22,9 +22,16 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.MLRequestFailure",
         "type": "Class",
-        "tags": ["export", "class", "typedef", "extends"],
+        "tags": [
+          "export",
+          "class",
+          "typedef",
+          "extends"
+        ],
         "label": "MLRequestFailure",
-        "description": ["\nML Request Failure\n"],
+        "description": [
+          "\nML Request Failure\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-error-utils",
@@ -43,10 +50,16 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.MLRequestFailure.Unnamed",
             "type": "Function",
-            "tags": ["constructor"],
+            "tags": [
+              "constructor"
+            ],
             "label": "Constructor",
-            "description": ["\nCreates an instance of MLRequestFailure.\n"],
-            "signature": ["any"],
+            "description": [
+              "\nCreates an instance of MLRequestFailure.\n"
+            ],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/request_error.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -210,10 +223,16 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.isBoomError",
         "type": "Function",
-        "tags": ["export"],
+        "tags": [
+          "export"
+        ],
         "label": "isBoomError",
-        "description": ["\nType guard to check if error is of type Boom."],
-        "signature": ["(error: any) => boolean"],
+        "description": [
+          "\nType guard to check if error is of type Boom."
+        ],
+        "signature": [
+          "(error: any) => boolean"
+        ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -225,7 +244,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -239,10 +260,16 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.isErrorString",
         "type": "Function",
-        "tags": ["export"],
+        "tags": [
+          "export"
+        ],
         "label": "isErrorString",
-        "description": ["\nType guard to check if error is a string."],
-        "signature": ["(error: any) => boolean"],
+        "description": [
+          "\nType guard to check if error is a string."
+        ],
+        "signature": [
+          "(error: any) => boolean"
+        ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -254,7 +281,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -268,10 +297,16 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.isEsErrorBody",
         "type": "Function",
-        "tags": ["export"],
+        "tags": [
+          "export"
+        ],
         "label": "isEsErrorBody",
-        "description": ["\nType guard to check if error is of type EsErrorBody"],
-        "signature": ["(error: any) => boolean"],
+        "description": [
+          "\nType guard to check if error is of type EsErrorBody"
+        ],
+        "signature": [
+          "(error: any) => boolean"
+        ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -283,7 +318,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -297,10 +334,16 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.isMLResponseError",
         "type": "Function",
-        "tags": ["export"],
+        "tags": [
+          "export"
+        ],
         "label": "isMLResponseError",
-        "description": ["\nType guard to check if error is of type MLResponseError."],
-        "signature": ["(error: any) => boolean"],
+        "description": [
+          "\nType guard to check if error is of type MLResponseError."
+        ],
+        "signature": [
+          "(error: any) => boolean"
+        ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -312,7 +355,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -328,9 +373,15 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.ErrorMessage",
         "type": "Interface",
-        "tags": ["export", "interface", "typedef"],
+        "tags": [
+          "export",
+          "interface",
+          "typedef"
+        ],
         "label": "ErrorMessage",
-        "description": ["\nInterface holding error message"],
+        "description": [
+          "\nInterface holding error message"
+        ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -339,9 +390,13 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.ErrorMessage.message",
             "type": "string",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "message",
-            "description": ["\nmessage"],
+            "description": [
+              "\nmessage"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -353,9 +408,15 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.MLErrorObject",
         "type": "Interface",
-        "tags": ["export", "interface", "typedef"],
+        "tags": [
+          "export",
+          "interface",
+          "typedef"
+        ],
         "label": "MLErrorObject",
-        "description": ["\nML Error Object"],
+        "description": [
+          "\nML Error Object"
+        ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -364,10 +425,16 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.MLErrorObject.causedBy",
             "type": "string",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "causedBy",
-            "description": ["\nOptional causedBy"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional causedBy"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -376,9 +443,13 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.MLErrorObject.message",
             "type": "string",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "message",
-            "description": ["\nmessage"],
+            "description": [
+              "\nmessage"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -387,10 +458,16 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.MLErrorObject.statusCode",
             "type": "number",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "statusCode",
-            "description": ["\nOptional statusCode"],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nOptional statusCode"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -399,10 +476,17 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.MLErrorObject.fullError",
             "type": "Object",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "fullError",
-            "description": ["\nOptional fullError"],
-            "signature": ["ErrorResponseBase", " | undefined"],
+            "description": [
+              "\nOptional fullError"
+            ],
+            "signature": [
+              "ErrorResponseBase",
+              " | undefined"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -414,9 +498,17 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.MLHttpFetchErrorBase",
         "type": "Interface",
-        "tags": ["export", "interface", "typedef", "template", "extends"],
+        "tags": [
+          "export",
+          "interface",
+          "typedef",
+          "template",
+          "extends"
+        ],
         "label": "MLHttpFetchErrorBase",
-        "description": ["\nMLHttpFetchErrorBase"],
+        "description": [
+          "\nMLHttpFetchErrorBase"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-error-utils",
@@ -443,10 +535,16 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.MLHttpFetchErrorBase.body",
             "type": "Uncategorized",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "body",
-            "description": ["\nbody"],
-            "signature": ["T"],
+            "description": [
+              "\nbody"
+            ],
+            "signature": [
+              "T"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -458,9 +556,15 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.MLResponseError",
         "type": "Interface",
-        "tags": ["export", "interface", "typedef"],
+        "tags": [
+          "export",
+          "interface",
+          "typedef"
+        ],
         "label": "MLResponseError",
-        "description": ["\nML Response error"],
+        "description": [
+          "\nML Response error"
+        ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -469,9 +573,13 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.MLResponseError.statusCode",
             "type": "number",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "statusCode",
-            "description": ["\nstatusCode"],
+            "description": [
+              "\nstatusCode"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -480,9 +588,13 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.MLResponseError.error",
             "type": "string",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "error",
-            "description": ["\nerror"],
+            "description": [
+              "\nerror"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -491,9 +603,13 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.MLResponseError.message",
             "type": "string",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "message",
-            "description": ["\nmessage"],
+            "description": [
+              "\nmessage"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -502,10 +618,18 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.MLResponseError.attributes",
             "type": "Object",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "attributes",
-            "description": ["\nOptional attributes"],
-            "signature": ["{ body: ", "ErrorResponseBase", "; } | undefined"],
+            "description": [
+              "\nOptional attributes"
+            ],
+            "signature": [
+              "{ body: ",
+              "ErrorResponseBase",
+              "; } | undefined"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -519,7 +643,9 @@
         "type": "Interface",
         "tags": [],
         "label": "QueryErrorMessage",
-        "description": ["\nTo be used for client side errors related to search query bars."],
+        "description": [
+          "\nTo be used for client side errors related to search query bars."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-error-utils",
@@ -545,9 +671,13 @@
             "parentPluginId": "@kbn/ml-error-utils",
             "id": "def-common.QueryErrorMessage.query",
             "type": "string",
-            "tags": ["type"],
+            "tags": [
+              "type"
+            ],
             "label": "query",
-            "description": ["\nquery"],
+            "description": [
+              "\nquery"
+            ],
             "path": "x-pack/packages/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -562,9 +692,14 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.ErrorType",
         "type": "Type",
-        "tags": ["export", "typedef"],
+        "tags": [
+          "export",
+          "typedef"
+        ],
         "label": "ErrorType",
-        "description": ["\nUnion type of error types"],
+        "description": [
+          "\nUnion type of error types"
+        ],
         "signature": [
           "string | ",
           {
@@ -589,10 +724,16 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.EsErrorBody",
         "type": "Type",
-        "tags": ["typedef"],
+        "tags": [
+          "typedef"
+        ],
         "label": "EsErrorBody",
-        "description": ["\nShort hand type of estypes.ErrorResponseBase."],
-        "signature": ["ErrorResponseBase"],
+        "description": [
+          "\nShort hand type of estypes.ErrorResponseBase."
+        ],
+        "signature": [
+          "ErrorResponseBase"
+        ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -602,10 +743,17 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.EsErrorRootCause",
         "type": "Type",
-        "tags": ["typedef"],
+        "tags": [
+          "typedef"
+        ],
         "label": "EsErrorRootCause",
-        "description": ["\nShort hand type of estypes.ErrorCause."],
-        "signature": ["ErrorCauseKeys", " & { [property: string]: any; }"],
+        "description": [
+          "\nShort hand type of estypes.ErrorCause."
+        ],
+        "signature": [
+          "ErrorCauseKeys",
+          " & { [property: string]: any; }"
+        ],
         "path": "x-pack/packages/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -615,9 +763,14 @@
         "parentPluginId": "@kbn/ml-error-utils",
         "id": "def-common.MLHttpFetchError",
         "type": "Type",
-        "tags": ["export", "typedef"],
+        "tags": [
+          "export",
+          "typedef"
+        ],
         "label": "MLHttpFetchError",
-        "description": ["\nMLHttpFetchError"],
+        "description": [
+          "\nMLHttpFetchError"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-error-utils",

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { updateSearchSource } from './context';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
 describe('context api', function () {
   test('createSearchSource when useFieldsApi is true', () => {

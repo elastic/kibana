@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PackagePolicyEditExtensionComponent } from '@kbn/fleet-plugin/public';
 import { lazy } from 'react';
+import { PackagePolicyEditExtensionComponent } from '@kbn/fleet-plugin/public';
 
 export const LazySyntheticsPolicyEditExtension = lazy<PackagePolicyEditExtensionComponent>(
   async () => {

@@ -9,8 +9,8 @@
 import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
-  apiHasParentApi,
   apiPublishesPhaseEvents,
+  apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -23,7 +23,7 @@ import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './t
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  ComponentPropsType extends {} = {},
+  ComponentPropsType extends {} = {}
 >({
   index,
   hideHeader,

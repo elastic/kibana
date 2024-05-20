@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FittingFunction } from '@kbn/expression-xy-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { FittingFunction } from '@kbn/expression-xy-plugin/common';
 
 export const fittingFunctionDefinitions: Array<{ id: FittingFunction } & Record<string, string>> = [
   {

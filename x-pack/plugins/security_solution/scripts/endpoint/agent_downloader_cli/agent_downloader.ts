@@ -8,8 +8,8 @@
 import { ok } from 'assert';
 import type { RunFn } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { downloadAndStoreAgent } from '../common/agent_downloads_service';
 import { getAgentDownloadUrl, getAgentFileName } from '../common/fleet_services';
+import { downloadAndStoreAgent } from '../common/agent_downloads_service';
 
 const downloadAndStoreElasticAgent = async (
   version: string,

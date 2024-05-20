@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { shallow } from 'enzyme';
-import React from 'react';
 
 import { ExceptionsAddToListsOptions } from '.';
 

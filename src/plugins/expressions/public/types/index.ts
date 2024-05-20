@@ -7,14 +7,14 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { ExecutionContextSearch } from '@kbn/es-query';
 import { Adapters } from '@kbn/inspector-plugin/public';
+import { ExecutionContextSearch } from '@kbn/es-query';
 import {
+  IInterpreterRenderHandlers,
   ExpressionValue,
   ExpressionsService,
-  IInterpreterRenderEvent,
-  IInterpreterRenderHandlers,
   RenderMode,
+  IInterpreterRenderEvent,
 } from '../../common';
 import { ExpressionRenderHandlerParams } from '../render';
 

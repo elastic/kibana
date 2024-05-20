@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { DatePicker } from '.';
 import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id';
 import { toBoolean, toNumber } from '../../../context/url_params_context/helpers';
-import { useApmParams } from '../../../hooks/use_apm_params';
 
 export const DEFAULT_REFRESH_INTERVAL = 60000;
 

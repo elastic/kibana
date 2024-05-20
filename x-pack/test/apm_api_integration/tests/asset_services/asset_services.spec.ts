@@ -6,23 +6,23 @@
  */
 
 import { Readable } from 'stream';
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import {
-  APIClientRequestParamsOf,
-  APIReturnType,
-} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
-import {
+  apm,
+  timerange,
+  log,
+  generateShortId,
   Instance,
   Serializable,
-  apm,
-  generateShortId,
-  log,
-  timerange,
 } from '@kbn/apm-synthtrace-client';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import expect from '@kbn/expect';
 import moment from 'moment';
+import {
+  APIReturnType,
+  APIClientRequestParamsOf,
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

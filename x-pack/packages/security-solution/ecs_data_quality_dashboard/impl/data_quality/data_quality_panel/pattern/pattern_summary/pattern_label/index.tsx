@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import type { IlmExplainPhaseCounts } from '../../../../types';
+import { getResultToolTip, showResult } from './helpers';
 import { IlmPhaseCounts } from '../../../ilm_phase_counts';
 import { getResultIcon, getResultIconColor } from '../../../summary_table/helpers';
 import * as i18n from '../translations';
-import { getResultToolTip, showResult } from './helpers';
+import type { IlmExplainPhaseCounts } from '../../../../types';
 
 const ResultContainer = styled.div`
   margin-right: ${({ theme }) => theme.eui.euiSizeS};

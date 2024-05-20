@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import { USERS_PATH } from '../../../../common/constants';
-import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomalies_user_table';
-import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
-import { UsersTableType } from '../store/model';
-import { AllUsersQueryTabBody, AuthenticationsQueryTabBody } from './navigation';
 import type { UsersTabsProps } from './types';
+import { UsersTableType } from '../store/model';
+import { USERS_PATH } from '../../../../common/constants';
+import { AllUsersQueryTabBody, AuthenticationsQueryTabBody } from './navigation';
+import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
+import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomalies_user_table';
 
-import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { UserRiskScoreQueryTabBody } from '../../../entity_analytics/components/user_risk_score_tab_body';
+import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { userNameExistsFilter } from './details/helpers';
 
 export const UsersTabs = memo<UsersTabsProps>(

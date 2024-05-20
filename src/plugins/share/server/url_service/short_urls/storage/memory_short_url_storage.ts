@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { v4 as uuidv4 } from 'uuid';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from '@kbn/core/server';
 import { ShortUrlData } from '../../../../common/url_service/short_urls/types';
-import { ShortUrlRecord, ShortUrlStorage } from '../types';
+import { ShortUrlStorage, ShortUrlRecord } from '../types';
 
 const clone = <P>(obj: P): P => JSON.parse(JSON.stringify(obj)) as P;
 

@@ -10,9 +10,9 @@ import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { IdFormat } from '../../../../../common/http_api/latest';
 
 import {
-  LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
   getLogEntryExamplesRequestPayloadRT,
   getLogEntryExamplesSuccessResponsePayloadRT,
+  LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
 } from '../../../../../common/http_api';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 

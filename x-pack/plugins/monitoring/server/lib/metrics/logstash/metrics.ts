@@ -6,23 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  LARGE_ABBREVIATED,
-  LARGE_BYTES,
-  LARGE_FLOAT,
-  SMALL_BYTES,
-} from '../../../../common/formatting';
 import { QuotaMetric } from '../classes';
 import {
-  LogstashEventsLatencyClusterMetric,
-  LogstashEventsLatencyMetric,
   LogstashEventsRateClusterMetric,
+  LogstashEventsLatencyClusterMetric,
   LogstashEventsRateMetric,
+  LogstashEventsLatencyMetric,
   LogstashMetric,
-  LogstashPipelineNodeCountMetric,
   LogstashPipelineQueueSizeMetric,
   LogstashPipelineThroughputMetric,
+  LogstashPipelineNodeCountMetric,
 } from './classes';
+import {
+  LARGE_FLOAT,
+  LARGE_BYTES,
+  SMALL_BYTES,
+  LARGE_ABBREVIATED,
+} from '../../../../common/formatting';
 
 const instanceSystemLoadTitle = i18n.translate(
   'xpack.monitoring.metrics.logstash.systemLoadTitle',

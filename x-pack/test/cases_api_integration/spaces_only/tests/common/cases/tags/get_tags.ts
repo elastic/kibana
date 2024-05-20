@@ -9,10 +9,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import {
-  createCase,
   deleteCasesByESQuery,
-  getAuthWithSuperUser,
+  createCase,
   getTags,
+  getAuthWithSuperUser,
 } from '../../../../../common/lib/api';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 

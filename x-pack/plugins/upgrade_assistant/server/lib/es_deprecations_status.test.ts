@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ScopedClusterClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import _ from 'lodash';
+import { elasticsearchServiceMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { getESUpgradeStatus, getHealthIndicators } from './es_deprecations_status';
 import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 import * as healthIndicatorsMock from './__fixtures__/health_indicators';
-import { getESUpgradeStatus, getHealthIndicators } from './es_deprecations_status';
 
 import type { FeatureSet } from '../../common/types';
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { Adapters, InspectorViewProps } from '@kbn/inspector-plugin/public';
-import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
+import type { Adapters, InspectorViewProps } from '@kbn/inspector-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 
 export const VectorTileInspectorView = {
   title: i18n.translate('xpack.maps.inspector.vectorTileViewTitle', {

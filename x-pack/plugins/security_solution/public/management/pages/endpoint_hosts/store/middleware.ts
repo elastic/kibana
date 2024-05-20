@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { CoreStart, HttpStart } from '@kbn/core/public';
+import { firstValueFrom } from 'rxjs';
 import type { DataViewBase, Query } from '@kbn/es-query';
+import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { Dispatch } from 'redux';
+import semverGte from 'semver/functions/gte';
 import type {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
-import type { Dispatch } from 'redux';
-import { firstValueFrom } from 'rxjs';
-import semverGte from 'semver/functions/gte';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   HOST_METADATA_LIST_ROUTE,
@@ -33,10 +33,6 @@ import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isol
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import type { AppAction } from '../../../../common/store/actions';
-import {
-  sendBulkGetPackagePolicies,
-  sendGetEndpointSecurityPackage,
-} from '../../../services/policies/ingest';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import {
   asStaleResourceState,
@@ -44,6 +40,10 @@ import {
   createLoadedResourceState,
   createLoadingResourceState,
 } from '../../../state';
+import {
+  sendBulkGetPackagePolicies,
+  sendGetEndpointSecurityPackage,
+} from '../../../services/policies/ingest';
 import type { GetPolicyListResponse } from '../../policy/types';
 import type {
   AgentIdsPendingActions,

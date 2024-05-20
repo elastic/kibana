@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { configure, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { configure, waitFor, fireEvent } from '@testing-library/react';
 import type { RecentCasesProps } from '.';
 import RecentCases from '.';
-import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import type { AppMockRenderer } from '../../common/mock';
-import { TestProviders, createAppMockRenderer, noCasesCapabilities } from '../../common/mock';
+import { createAppMockRenderer, noCasesCapabilities, TestProviders } from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
+import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/use_get_cases');

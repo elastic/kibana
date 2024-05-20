@@ -10,7 +10,7 @@
  * In case of changes in the grammar, this script should be updated: esql_update_ast_script.js
  */
 
-import { type ParserRuleContext, type TerminalNode, type Token } from 'antlr4';
+import { type Token, type ParserRuleContext, type TerminalNode } from 'antlr4';
 import type {
   ArithmeticUnaryContext,
   DecimalValueContext,
@@ -20,17 +20,17 @@ import type {
 import { getPosition } from './ast_position_utils';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
-  ESQLAstItem,
-  ESQLColumn,
   ESQLCommand,
-  ESQLCommandMode,
-  ESQLCommandOption,
-  ESQLFunction,
-  ESQLList,
   ESQLLiteral,
-  ESQLLocation,
-  ESQLSource,
+  ESQLList,
   ESQLTimeInterval,
+  ESQLLocation,
+  ESQLFunction,
+  ESQLSource,
+  ESQLColumn,
+  ESQLCommandOption,
+  ESQLAstItem,
+  ESQLCommandMode,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {

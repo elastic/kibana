@@ -6,7 +6,7 @@
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
-import { mockKibanaValues, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues, mockKibanaValues } from '../../../../../__mocks__/kea_logic';
 
 import { mockUseParams } from '../../../../../__mocks__/react_router';
 
@@ -15,8 +15,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  PersonalDashboardLayout,
   WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
 } from '../../../../components/layout';
 
 import { getSourceData } from '../../source_data';

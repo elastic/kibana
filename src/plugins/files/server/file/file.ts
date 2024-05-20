@@ -6,31 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
 import { Logger } from '@kbn/core/server';
+import { Readable } from 'stream';
 import {
-  NEVER,
-  Observable,
-  catchError,
-  defer,
-  from,
-  lastValueFrom,
   map,
-  mergeMap,
+  from,
   race,
+  defer,
+  NEVER,
+  mergeMap,
+  catchError,
+  Observable,
+  lastValueFrom,
 } from 'rxjs';
-import type { FileJSON, File as IFile, UpdatableFileMetadata } from '../../common';
-import type { FileShareJSON, FileShareJSONWithToken } from '../../common/types';
 import { UploadOptions } from '../blob_storage_service';
+import type { FileShareJSON, FileShareJSONWithToken } from '../../common/types';
+import type { File as IFile, UpdatableFileMetadata, FileJSON } from '../../common';
+import { fileAttributesReducer, Action } from './file_attributes_reducer';
 import type { FileClientImpl } from '../file_client/file_client';
 import {
   AbortedUploadError,
   AlreadyDeletedError,
-  ContentAlreadyUploadedError,
-  NoDownloadAvailableError,
   UploadInProgressError,
+  NoDownloadAvailableError,
+  ContentAlreadyUploadedError,
 } from './errors';
-import { Action, fileAttributesReducer } from './file_attributes_reducer';
 
 /**
  * Scopes file actions to an ID and set of attributes.

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { UnifiedFieldListExampleApp } from './example_app';
+import { I18nProvider } from '@kbn/i18n-react';
+import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';
+import { UnifiedFieldListExampleApp } from './example_app';
 
 export const renderApp = (
   core: CoreStart,

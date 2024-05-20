@@ -7,23 +7,21 @@
 
 /* eslint require-atomic-updates: ["error", { "allowProperties": true }] */
 
+import type { KibanaRequest } from '@kbn/core/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
-import type { Filter } from '@kbn/es-query';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Filter } from '@kbn/es-query';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import type { SetupPlugins } from '../../../../plugin';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type { AnomalyResults } from '../../../machine_learning';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema';
-import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
+import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../utils/large_list_filters/filter_events_against_list';
+import { findMlSignals } from './find_ml_signals';
+import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
 import {
   addToSearchAfterReturn,
   createErrorsFromShard,
@@ -31,8 +29,10 @@ import {
   getMaxSignalsWarning,
   mergeReturns,
 } from '../utils/utils';
-import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { findMlSignals } from './find_ml_signals';
+import type { SetupPlugins } from '../../../../plugin';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { AnomalyResults } from '../../../machine_learning';
 
 export const mlExecutor = async ({
   completeRule,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 
 import * as i18n from './translations';
 

@@ -1,7 +1,8 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
+    "aliases": {
+    },
     "index": "kibana_sample_data_logstsdb",
     "mappings": {
       "_data_stream_timestamp": {

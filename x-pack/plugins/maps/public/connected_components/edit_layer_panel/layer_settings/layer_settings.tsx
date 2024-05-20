@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import React, { ChangeEvent, Fragment } from 'react';
 import {
   EuiCallOut,
-  EuiFieldText,
-  EuiFormRow,
+  EuiText,
+  EuiTitle,
   EuiPanel,
+  EuiFormRow,
+  EuiFieldText,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiText,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
-import React, { ChangeEvent, Fragment } from 'react';
-import { AUTOSELECT_EMS_LOCALE, MAX_ZOOM, NO_EMS_LOCALE } from '../../../../common/constants';
 import { Attribution } from '../../../../common/descriptor_types';
-import { ILayer } from '../../../classes/layers/layer';
-import { isLayerGroup } from '../../../classes/layers/layer_group';
-import { isVectorLayer } from '../../../classes/layers/vector_layer';
+import { AUTOSELECT_EMS_LOCALE, NO_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
+import { ILayer } from '../../../classes/layers/layer';
+import { isVectorLayer } from '../../../classes/layers/vector_layer';
 import { AttributionFormRow } from './attribution_form_row';
+import { isLayerGroup } from '../../../classes/layers/layer_group';
 
 export interface Props {
   layer: ILayer;

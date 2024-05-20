@@ -7,30 +7,41 @@
 
 import expect from '@kbn/expect';
 import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
   Alerts,
   createCaseAttachAlertAndDeleteAlert,
   createSecuritySolutionAlerts,
   getAlertById,
   getSecuritySolutionAlerts,
 } from '../../../../common/lib/alerts';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
-  bulkCreateAttachments,
-  createCase,
-  createComment,
+  getPostCaseRequest,
+  persistableStateAttachment,
+  postCaseReq,
+  postCommentActionsReleaseReq,
+  postCommentActionsReq,
+  postCommentAlertReq,
+  postCommentUserReq,
+  postExternalReferenceESReq,
+  postExternalReferenceSOReq,
+} from '../../../../common/lib/mock';
+import {
   deleteAllCaseItems,
-  deleteAllComments,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
-  getAllComments,
+  createCase,
+  createComment,
+  deleteAllComments,
   superUserSpace1Auth,
+  bulkCreateAttachments,
+  getAllComments,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -46,17 +57,6 @@ import {
   secSolutionOnlyReadNoIndexAlerts,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import {
-  getPostCaseRequest,
-  persistableStateAttachment,
-  postCaseReq,
-  postCommentActionsReleaseReq,
-  postCommentActionsReq,
-  postCommentAlertReq,
-  postCommentUserReq,
-  postExternalReferenceESReq,
-  postExternalReferenceSOReq,
-} from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

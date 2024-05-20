@@ -8,9 +8,9 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { packagePolicyService } from '../../package_policy';
 import type { PackagePolicyClient } from '../../package_policy_service';
 import * as storage from '../archive/storage';
+import { packagePolicyService } from '../../package_policy';
 
 import { removeOldAssets } from './cleanup';
 

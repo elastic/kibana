@@ -6,12 +6,12 @@
  */
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
-import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registerConnectorTypes } from '..';
-import { SUB_ACTION, TINES_CONNECTOR_ID, TINES_TITLE } from '../../../common/tines/constants';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { TinesExecuteActionParams } from './types';
+import { SUB_ACTION, TINES_CONNECTOR_ID, TINES_TITLE } from '../../../common/tines/constants';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 let actionTypeModel: ConnectorTypeModel;
 

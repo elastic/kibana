@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { CaseDetailsLink } from '../../../../common/components/links';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
-import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import { CaseDetailsLink } from '../../../../common/components/links';
 import {
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
 } from './test_ids';
+import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 
 const ICON = 'warning';
 

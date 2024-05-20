@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import { Journey, Step } from '@elastic/synthetics/dist/dsl';
 import { Reporter, ReporterOptions } from '@elastic/synthetics';
 import {
   JourneyEndResult,
   JourneyStartResult,
   StepEndResult,
 } from '@elastic/synthetics/dist/common_types';
-import { Journey, Step } from '@elastic/synthetics/dist/dsl';
 
-import { bold, cyan, green, red, yellow } from 'chalk';
+import { yellow, green, cyan, red, bold } from 'chalk';
 
 // eslint-disable-next-line no-console
 const log = console.log;
 
-import * as fs from 'fs';
-import { join } from 'path';
-import { CACHE_PATH } from '@elastic/synthetics/dist/helpers';
-import { gatherScreenshots } from '@elastic/synthetics/dist/reporters/json';
 import { performance } from 'perf_hooks';
+import * as fs from 'fs';
+import { gatherScreenshots } from '@elastic/synthetics/dist/reporters/json';
+import { CACHE_PATH } from '@elastic/synthetics/dist/helpers';
+import { join } from 'path';
 
 function renderError(error: any) {
   let output = '';

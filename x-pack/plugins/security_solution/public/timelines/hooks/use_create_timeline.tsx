@@ -7,21 +7,21 @@
 
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { TimelineTypeLiteral } from '../../../common/api/timeline';
-import { TimelineId } from '../../../common/types/timeline';
-import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { appActions } from '../../common/store/app';
-import { inputsActions, inputsSelectors } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import type { TimeRange } from '../../common/store/inputs/model';
+import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
+import { timelineActions } from '../store';
+import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
+import { TimelineId } from '../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../common/api/timeline';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { inputsActions, inputsSelectors } from '../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../common/store/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
+import { appActions } from '../../common/store/app';
+import type { TimeRange } from '../../common/store/inputs/model';
+import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
-import { timelineActions } from '../store';
 
 export interface UseCreateTimelineParams {
   /**

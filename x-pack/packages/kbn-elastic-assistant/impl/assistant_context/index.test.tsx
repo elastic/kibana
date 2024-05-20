@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useLocalStorage } from 'react-use';
 import { useAssistantContext } from '.';
+import { useLocalStorage } from 'react-use';
 import { TestProviders } from '../mock/test_providers/test_providers';
 
 jest.mock('react-use', () => ({

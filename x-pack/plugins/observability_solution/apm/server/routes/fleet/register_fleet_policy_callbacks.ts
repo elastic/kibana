@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { Logger, CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   FleetStartContract,
   PostPackagePolicyCreateCallback,
@@ -15,15 +14,16 @@ import {
   PutPackagePolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server';
 import { get } from 'lodash';
-import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
-import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
-import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
 import { addApiKeysToPackagePolicyIfMissing } from './api_keys/add_api_keys_to_policies_if_missing';
 import {
   AGENT_CONFIG_API_KEY_PATH,
   SOURCE_MAP_API_KEY_PATH,
 } from './get_package_policy_decorators';
-import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
+import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
+import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
+import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 
 export async function registerFleetPolicyCallbacks({
   logger,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { BUCKET_KEY, MAX_SIZE } from '../constants';
-import { createFilters } from '../helpers/query';
 import { GetHostsArgs } from '../types';
+import { BUCKET_KEY, MAX_SIZE } from '../constants';
 import { assertQueryStructure } from '../utils';
+import { createFilters } from '../helpers/query';
 
 export const getFilteredHosts = async ({ infraMetricsClient, params }: GetHostsArgs) => {
   assertQueryStructure(params.query);

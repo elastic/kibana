@@ -1,14 +1,3 @@
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
-import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
-import { BehaviorSubject } from 'rxjs';
-import { filter } from 'rxjs';
-import { FetchStatus } from '../../types';
-import {
-  DataDocumentsMsg,
-  DataMainMsg,
-  RecordRawType,
-} from '../state_management/discover_data_state_container';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -21,12 +10,23 @@ import {
   sendCompleteMsg,
   sendErrorMsg,
   sendErrorTo,
-  sendLoadingMoreFinishedMsg,
-  sendLoadingMoreMsg,
   sendLoadingMsg,
+  sendLoadingMoreMsg,
+  sendLoadingMoreFinishedMsg,
   sendNoResultsFoundMsg,
   sendPartialMsg,
 } from './use_saved_search_messages';
+import { FetchStatus } from '../../types';
+import { BehaviorSubject } from 'rxjs';
+import {
+  DataDocumentsMsg,
+  DataMainMsg,
+  RecordRawType,
+} from '../state_management/discover_data_state_container';
+import { filter } from 'rxjs';
+import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 
 describe('test useSavedSearch message generators', () => {
   test('sendCompleteMsg', (done) => {

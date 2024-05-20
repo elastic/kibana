@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonGroup, EuiTable } from '@elastic/eui';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { INDEX_PATTERN_TYPE, MatchedItem } from '@kbn/data-views-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { EuiTable, EuiButtonGroup } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { INDEX_PATTERN_TYPE, MatchedItem } from '@kbn/data-views-plugin/public';
+import { Props as PreviewPanelProps, PreviewPanel } from './preview_panel';
 import { from } from 'rxjs';
-import { PreviewPanel, Props as PreviewPanelProps } from './preview_panel';
 
 const indices = [
   { name: 'kibana_1', tags: [] },

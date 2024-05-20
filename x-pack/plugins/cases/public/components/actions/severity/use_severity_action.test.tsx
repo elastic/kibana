@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { useSeverityAction } from './use_severity_action';
 
-import { CaseSeverity } from '../../../../common/types/domain';
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
+import { CaseSeverity } from '../../../../common/types/domain';
 
 jest.mock('../../../containers/api');
 

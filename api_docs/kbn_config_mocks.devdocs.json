@@ -62,7 +62,9 @@
                 "tags": [],
                 "label": "repoRoot",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-config-mocks/src/env.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -74,7 +76,10 @@
                 "tags": [],
                 "label": "envOptions",
                 "description": [],
-                "signature": ["EnvOptions", " | undefined"],
+                "signature": [
+                  "EnvOptions",
+                  " | undefined"
+                ],
                 "path": "packages/kbn-config-mocks/src/env.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -86,7 +91,10 @@
                 "tags": [],
                 "label": "packageInfo",
                 "description": [],
-                "signature": ["RawPackageInfo", " | undefined"],
+                "signature": [
+                  "RawPackageInfo",
+                  " | undefined"
+                ],
                 "path": "packages/kbn-config-mocks/src/env.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -104,7 +112,10 @@
         "tags": [],
         "label": "createTestPackageInfo",
         "description": [],
-        "signature": ["({ dist }?: { dist?: boolean | undefined; }) => ", "RawPackageInfo"],
+        "signature": [
+          "({ dist }?: { dist?: boolean | undefined; }) => ",
+          "RawPackageInfo"
+        ],
         "path": "packages/kbn-config-mocks/src/env.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -127,7 +138,9 @@
                 "tags": [],
                 "label": "dist",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/kbn-config-mocks/src/env.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -145,7 +158,12 @@
         "tags": [],
         "label": "getEnvOptions",
         "description": [],
-        "signature": ["(options: DeepPartial<", "EnvOptions", ">) => ", "EnvOptions"],
+        "signature": [
+          "(options: DeepPartial<",
+          "EnvOptions",
+          ">) => ",
+          "EnvOptions"
+        ],
         "path": "packages/kbn-config-mocks/src/env.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -157,7 +175,11 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["DeepPartial<", "EnvOptions", ">"],
+            "signature": [
+              "DeepPartial<",
+              "EnvOptions",
+              ">"
+            ],
             "path": "packages/kbn-config-mocks/src/env.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

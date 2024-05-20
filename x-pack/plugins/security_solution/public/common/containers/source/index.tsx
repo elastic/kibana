@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { DataViewBase } from '@kbn/es-query';
-import type { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
 import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { DataViewBase } from '@kbn/es-query';
+import type { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
+import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
-import type { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
-import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import { getDataViewStateFromIndexFields } from './use_data_view';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import type { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
 
 export type { BrowserField, BrowserFields };
 

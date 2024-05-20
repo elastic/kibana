@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Either, fold, left, right } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
-import { get, isObject } from 'lodash/fp';
+import { left, Either, fold, right } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { isObject, get } from 'lodash/fp';
 
 /**
  * Given an original object and a decoded object this will return an error

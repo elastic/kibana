@@ -7,13 +7,13 @@
 
 import React from 'react';
 import '../../mock/formatted_relative';
+import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
-import { getEmptyValue } from '../empty_value';
 
+import { useMountAppended } from '../../utils/use_mount_appended';
 import { useTimelineLastEventTime } from '../../containers/events/last_event_time';
 import { TestProviders } from '../../mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { LastEventTime } from '.';
 

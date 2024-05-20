@@ -6,10 +6,10 @@
  */
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import type { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup, SavedObjectsClientContract } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
+import type { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
 import type { CasesClient } from '../client';
 import { getCasesConnectorAdapter, getCasesConnectorType } from './cases';
 

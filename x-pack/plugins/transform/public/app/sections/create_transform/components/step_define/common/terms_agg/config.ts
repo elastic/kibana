@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { TermsAggForm } from './terms_form_component';
 import type {
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
 } from '../../../../../../common/pivot_aggs';
 import {
-  TERMS_AGG_DEFAULT_SIZE,
   isPivotAggsConfigWithUiBase,
+  TERMS_AGG_DEFAULT_SIZE,
 } from '../../../../../../common/pivot_aggs';
-import { TermsAggForm } from './terms_form_component';
 import type { IPivotAggsConfigTerms } from './types';
 
 export function getTermsAggConfig(

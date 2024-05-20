@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiHealth, EuiTable, EuiTableHeaderCell, EuiTableRow } from '@elastic/eui';
+import { EuiTable, EuiTableHeaderCell, EuiTableRow, EuiHealth } from '@elastic/eui';
 
 import { SchemaFieldTypeSelect } from '../../../../shared/schema';
 

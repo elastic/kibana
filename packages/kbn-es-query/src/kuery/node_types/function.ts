@@ -8,17 +8,17 @@
 
 import _ from 'lodash';
 
-import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import {
+  functions,
   KQL_FUNCTION_AND,
   KQL_FUNCTION_EXISTS,
-  KQL_FUNCTION_IS,
   KQL_FUNCTION_NESTED,
+  KQL_FUNCTION_IS,
   KQL_FUNCTION_NOT,
   KQL_FUNCTION_OR,
   KQL_FUNCTION_RANGE,
-  functions,
 } from '../functions';
+import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import type { KqlContext } from '../types';
 
 export const KQL_NODE_TYPE_FUNCTION = 'function';

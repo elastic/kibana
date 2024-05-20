@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import getopts from 'getopts';
 // @ts-expect-error no types available, very simple module https://github.com/evanlucas/argsplit
 import argsplit from 'argsplit';
-import getopts from 'getopts';
 
 const execOpts = getopts(process.execArgv);
 const envOpts = getopts(process.env.NODE_OPTIONS ? argsplit(process.env.NODE_OPTIONS) : []);

@@ -6,10 +6,10 @@
  */
 
 import sinon from 'sinon';
-import { AlertInstanceContext, AlertInstanceState, DefaultActionGroupId } from '../../common';
+import { Alert } from './alert';
+import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { alertWithAnyUUID } from '../test_utils';
 import { CombinedSummarizedAlerts } from '../types';
-import { Alert } from './alert';
 
 let clock: sinon.SinonFakeTimers;
 

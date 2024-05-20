@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { UNNAMED_LOCATION } from '../../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
+import { UMElasticsearchQueryFn } from '../adapters';
 import { GetMonitorAvailabilityParams, Ping } from '../../../../common/runtime_types';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { UMElasticsearchQueryFn } from '../adapters';
 import { AfterKey } from './get_monitor_status';
+import { UNNAMED_LOCATION } from '../../../../common/constants';
 
 export interface AvailabilityKey {
   monitorId: string;

@@ -6,18 +6,18 @@
  */
 
 import {
-  deleteAllIndex,
-  deletePolicy,
+  transformError,
   getIndexExists,
   getPolicyExists,
-  transformError,
+  deletePolicy,
+  deleteAllIndex,
 } from '@kbn/securitysolution-es-utils';
 
 import type { IKibanaResponse } from '@kbn/core/server';
-import type { DeleteIndexResponse } from '../../../../../common/api/detection_engine';
-import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
+import type { DeleteIndexResponse } from '../../../../../common/api/detection_engine';
 
 /**
  * Deletes all of the indexes, template, ilm policies, and aliases. You can check

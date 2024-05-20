@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { AggParamsTerms, BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { SchemaConfig } from '../../..';
+import { AggParamsTerms, IAggConfig, METRIC_TYPES, BUCKET_TYPES } from '@kbn/data-plugin/common';
 import { convertToTermsColumn } from './terms';
 import { AggBasedColumn, TermsColumn } from './types';
+import { SchemaConfig } from '../../..';
 
 const mockConvertMetricToColumns = jest.fn();
 

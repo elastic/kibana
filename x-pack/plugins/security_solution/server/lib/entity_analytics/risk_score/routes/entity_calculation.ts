@@ -10,19 +10,19 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { isEmpty } from 'lodash/fp';
-import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import type { RiskScoresCalculationResponse } from '../../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
+import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_URL } from '../../../../../common/constants';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
-import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
-import { withRiskEnginePrivilegeCheck } from '../../risk_engine/risk_engine_privileges';
+import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
-import { getRiskInputsIndex } from '../get_risk_inputs_index';
-import { getFieldForIdentifier } from '../helpers';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { convertRangeToISO } from '../tasks/helpers';
 import { buildRiskScoreServiceForRequest } from './helpers';
+import { getFieldForIdentifier } from '../helpers';
+import { withRiskEnginePrivilegeCheck } from '../../risk_engine/risk_engine_privileges';
 
 export const riskScoreEntityCalculationRoute = (
   router: EntityAnalyticsRoutesDeps['router'],

@@ -7,15 +7,15 @@
  */
 
 import { resolve } from 'path';
-import { FileHashCache, registerRouteForBundle } from '@kbn/core-apps-server-internal';
+import { readFile } from 'fs/promises';
+import supertest from 'supertest';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { createHttpService } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { readFile } from 'fs/promises';
-import supertest from 'supertest';
+import { registerRouteForBundle, FileHashCache } from '@kbn/core-apps-server-internal';
 
 const buildHash = 'buildHash';
 const fooPluginFixture = resolve(__dirname, './__fixtures__/plugin/foo');

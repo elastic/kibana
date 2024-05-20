@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
 import Handlebars from 'handlebars';
+import { resolve } from 'path';
 import { GenerationContext } from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
 import { registerTemplates } from './register_templates';
 
 export const AVAILABLE_TEMPLATES = ['zod_operation_schema'] as const;
 
-export type TemplateName = (typeof AVAILABLE_TEMPLATES)[number];
+export type TemplateName = typeof AVAILABLE_TEMPLATES[number];
 
 export interface ITemplateService {
   compileTemplate: (templateName: TemplateName, context: GenerationContext) => string;

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { deepFreeze } from '@kbn/std';
 import {
   CoreSetup,
   PluginInitializer,
-  SavedObject,
-  SavedObjectUnsanitizedDoc,
   SavedObjectsNamespaceType,
+  SavedObjectUnsanitizedDoc,
+  SavedObject,
 } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { deepFreeze } from '@kbn/std';
 import { registerHiddenSORoutes } from './hidden_saved_object_routes';
 
 const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';

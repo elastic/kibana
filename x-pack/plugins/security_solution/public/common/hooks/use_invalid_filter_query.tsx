@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/es-query';
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import type { Query } from '@kbn/es-query';
 import { appSelectors } from '../store';
 import { appActions } from '../store/app';
 import { useAppToasts } from './use_app_toasts';

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../../objects/rule';
+import { openTableTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { closeTimeline, openActiveTimeline } from '../../../../tasks/timeline';
+import { PROVIDER_BADGE } from '../../../../screens/timeline';
+import { removeKqlFilter } from '../../../../tasks/search_bar';
 import { COLUMN_HEADER, FILTER_BADGE, TIMESTAMP_COLUMN } from '../../../../screens/alerts';
 import {
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_HOST_OS_BUILD_ROW,
@@ -14,11 +18,6 @@ import {
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_table_tab';
-import { PROVIDER_BADGE } from '../../../../screens/timeline';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { openTableTab } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import {
   addToTimelineTableTabTable,
   filterInTableTabTable,
@@ -26,12 +25,13 @@ import {
   filterTableTabTable,
   toggleColumnTableTabTable,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel_table_tab';
-import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { removeKqlFilter } from '../../../../tasks/search_bar';
-import { closeTimeline, openActiveTimeline } from '../../../../tasks/timeline';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout right panel table tab',

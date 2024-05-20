@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 export interface ColumnProps {
   name: string;

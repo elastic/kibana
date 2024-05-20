@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import * as React from 'react';
 import { EuiSpacer, EuiTabbedContent, EuiTabbedContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as React from 'react';
 import { useDrilldownManager } from '../context';
-import { DrilldownList } from '../drilldown_list';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
+import { DrilldownList } from '../drilldown_list';
 import { TemplatePicker } from '../template_picker';
 
 export const txtCreateNew = i18n.translate(

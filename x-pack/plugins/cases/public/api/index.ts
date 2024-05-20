@@ -6,30 +6,30 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import {
-  CASE_FIND_URL,
-  CASE_STATUS_URL,
-  INTERNAL_BULK_GET_CASES_URL,
-  INTERNAL_CASE_METRICS_URL,
-} from '../../common/constants';
 import type {
-  CasesBulkGetRequest,
-  CasesBulkGetResponse,
   CasesFindRequest,
   CasesFindResponse,
-  CasesMetricsRequest,
-  CasesMetricsResponse,
   CasesStatusRequest,
   CasesStatusResponse,
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
+  CasesMetricsRequest,
+  CasesMetricsResponse,
 } from '../../common/types/api';
-import type { CasesFindResponseUI, CasesMetrics, CasesStatus } from '../../common/ui';
+import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../../common/ui';
+import {
+  CASE_FIND_URL,
+  INTERNAL_CASE_METRICS_URL,
+  CASE_STATUS_URL,
+  INTERNAL_BULK_GET_CASES_URL,
+} from '../../common/constants';
+import { convertAllCasesToCamel, convertToCamelCase } from './utils';
 import {
   decodeCasesBulkGetResponse,
   decodeCasesFindResponse,
   decodeCasesMetricsResponse,
   decodeCasesStatusResponse,
 } from './decoders';
-import { convertAllCasesToCamel, convertToCamelCase } from './utils';
 
 export interface HTTPService {
   http: HttpStart;

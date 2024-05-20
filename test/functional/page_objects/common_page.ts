@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { getUrl } from '@kbn/test';
 import moment from 'moment';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrService } from '../ftr_provider_context';
 
 interface NavigateProps {

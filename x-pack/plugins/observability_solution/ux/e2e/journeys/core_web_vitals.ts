@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { before, expect, journey, step } from '@elastic/synthetics';
+import { journey, step, expect, before } from '@elastic/synthetics';
 import { recordVideo } from '../helpers/record_video';
 import { UXDashboardDatePicker } from '../page_objects/date_picker';
 import { loginToKibana, waitForLoadingToFinish } from './utils';

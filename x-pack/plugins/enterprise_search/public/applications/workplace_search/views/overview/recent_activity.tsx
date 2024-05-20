@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 import moment from 'moment';
 
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';

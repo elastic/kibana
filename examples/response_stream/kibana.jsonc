@@ -6,7 +6,11 @@
     "id": "responseStream",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["developerExamples"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredPlugins": [
+      "developerExamples"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

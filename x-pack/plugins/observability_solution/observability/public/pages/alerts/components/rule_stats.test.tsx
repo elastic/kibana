@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { RulesParams } from '../../../locators/rules';
 import { renderRuleStats } from './rule_stats';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { RulesParams } from '../../../locators/rules';
 
 const RULES_PAGE_LINK = '/app/observability/alerts/rules';
 const STAT_CLASS = 'euiStat';

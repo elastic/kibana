@@ -10,7 +10,7 @@ jest.mock('../hooks', () => ({
   useSearchContextState: jest.fn(() => ({})),
 }));
 
-import { useSearchContextActions, useSearchContextState } from '../hooks';
+import { useSearchContextState, useSearchContextActions } from '../hooks';
 
 export const setMockSearchContextState = (values: object) => {
   (useSearchContextState as jest.Mock).mockImplementation(() => values);

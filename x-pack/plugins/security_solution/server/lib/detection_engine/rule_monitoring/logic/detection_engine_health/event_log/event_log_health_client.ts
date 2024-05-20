@@ -20,12 +20,12 @@ import type {
   SpaceHealthSnapshot,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
+import * as f from '../../event_log/event_log_fields';
 import {
   ALERTING_PROVIDER,
   RULE_EXECUTION_LOG_PROVIDER,
   RULE_SAVED_OBJECT_TYPE,
 } from '../../event_log/event_log_constants';
-import * as f from '../../event_log/event_log_fields';
 import { kqlOr } from '../../utils/kql';
 import type { IRuleSpacesClient } from '../rule_spaces/rule_spaces_client';
 import {

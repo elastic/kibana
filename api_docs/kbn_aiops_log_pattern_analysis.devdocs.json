@@ -28,7 +28,9 @@
         "type": "Type",
         "tags": [],
         "label": "CategorizeSchema",
-        "description": ["\nSchema for categorization API request body."],
+        "description": [
+          "\nSchema for categorization API request body."
+        ],
         "signature": [
           "{ readonly query?: any; readonly intervalMs?: number | undefined; readonly index: string; readonly field: string; readonly from: number; readonly to: number; readonly timeField: string; }"
         ],
@@ -45,7 +47,9 @@
         "type": "Object",
         "tags": [],
         "label": "categorizeSchema",
-        "description": ["\nDefines the schema for the categorization API request body."],
+        "description": [
+          "\nDefines the schema for the categorization API request body."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/config-schema",

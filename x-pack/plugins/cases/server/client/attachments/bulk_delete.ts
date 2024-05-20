@@ -7,23 +7,23 @@
 
 import Boom from '@hapi/boom';
 
+import type { PromiseResult, PromiseRejectedResult } from 'p-settle';
+import pSettle from 'p-settle';
+import { partition } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { File, FileJSON } from '@kbn/files-plugin/common';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
-import { partition } from 'lodash';
-import type { PromiseRejectedResult, PromiseResult } from 'p-settle';
-import pSettle from 'p-settle';
-import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
-import { CaseFileMetadataForDeletionRt } from '../../../common/files';
 import { BulkDeleteFileAttachmentsRequestRt } from '../../../common/types/api';
-import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import type { CasesClientArgs } from '../types';
+import { createCaseError } from '../../common/error';
+import { Operations } from '../../authorization';
+import type { BulkDeleteFileArgs } from './types';
+import { CaseFileMetadataForDeletionRt } from '../../../common/files';
 import type { CasesClient } from '../client';
 import { createFileEntities, deleteFiles } from '../files';
-import type { CasesClientArgs } from '../types';
-import type { BulkDeleteFileArgs } from './types';
 
 export const bulkDeleteFileAttachments = async (
   { caseId, fileIds }: BulkDeleteFileArgs,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import assert from 'assert';
 import type { Logger } from '@kbn/core/server';
+import assert from 'assert';
 import sinon from 'sinon';
 import { buildMonitoredClusters } from './build_monitored_clusters';
 

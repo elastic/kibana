@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBetaBadge, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { EuiBetaBadge, EuiBadge, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { TruncatableText } from '../truncatable_text';
 import type { BadgeOptions, TitleProp } from './types';
+import { TruncatableText } from '../truncatable_text';
 
 const Header = styled.h1`
   display: grid;

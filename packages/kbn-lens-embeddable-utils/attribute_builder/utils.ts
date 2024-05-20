@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type {
   DateHistogramIndexPatternColumn,
   PersistedIndexPatternLayer,
   TermsIndexPatternColumn,
 } from '@kbn/lens-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 export const DEFAULT_LAYER_ID = 'layer';
 export const DEFAULT_AD_HOC_DATA_VIEW_ID = 'infra_lens_ad_hoc_default';

@@ -6,8 +6,8 @@
  */
 
 import type {
-  SignalIds as AlertIds,
   Status,
+  SignalIds as AlertIds,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 export const setAlertStatus = ({

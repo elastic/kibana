@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { format } from 'url';
+import supertest from 'supertest';
+import request from 'superagent';
 import type { APIClientRequestParamsOf, APIReturnType } from '@kbn/dataset-quality-plugin/common';
+import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/dataset-quality-plugin/server/routes';
 import { formatRequest } from '@kbn/server-route-repository';
-import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
-import request from 'superagent';
-import supertest from 'supertest';
 import { InheritedFtrProviderContext } from '../../../../services';
 
 export function createDatasetQualityApiClient(st: supertest.SuperTest<supertest.Test>) {

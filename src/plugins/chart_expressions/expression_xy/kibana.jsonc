@@ -16,7 +16,9 @@
       "eventAnnotation",
       "visualizations"
     ],
-    "optionalPlugins": ["usageCollection"],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
     "requiredBundles": []
   }
 }

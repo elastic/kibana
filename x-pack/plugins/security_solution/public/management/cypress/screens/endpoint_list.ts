@@ -6,13 +6,13 @@
  */
 
 import type { DeepReadonly } from 'utility-types';
-import { APP_PATH } from '../../../../common';
-import { getEndpointDetailsPath } from '../../common/routing';
-import { loadPage } from '../tasks/common';
-import { getNoPrivilegesPage } from './common';
 import type { EndpointManagementPageMap } from './page_reference';
 import { getEndpointManagementPageMap } from './page_reference';
 import type { UserAuthzAccessLevel } from './types';
+import { getNoPrivilegesPage } from './common';
+import { loadPage } from '../tasks/common';
+import { APP_PATH } from '../../../../common';
+import { getEndpointDetailsPath } from '../../common/routing';
 
 interface ListRowOptions {
   endpointId?: string;

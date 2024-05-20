@@ -6,15 +6,15 @@
  */
 
 import type { HttpHandler } from '@kbn/core-http-browser';
-import type { EcsMetadata, OnCheckCompleted, PartitionedFieldMetadata } from '../../../../types';
-import { fetchMappings } from '../../../../use_mappings/helpers';
-import { fetchUnallowedValues, getUnallowedValues } from '../../../../use_unallowed_values/helpers';
 import { getUnallowedValueRequestItems } from '../../../allowed_values/helpers';
 import {
   getMappingsProperties,
   getSortedPartitionedFieldMetadata,
 } from '../../../index_properties/helpers';
 import * as i18n from './translations';
+import type { EcsMetadata, OnCheckCompleted, PartitionedFieldMetadata } from '../../../../types';
+import { fetchMappings } from '../../../../use_mappings/helpers';
+import { fetchUnallowedValues, getUnallowedValues } from '../../../../use_unallowed_values/helpers';
 
 export const EMPTY_PARTITIONED_FIELD_METADATA: PartitionedFieldMetadata = {
   all: [],

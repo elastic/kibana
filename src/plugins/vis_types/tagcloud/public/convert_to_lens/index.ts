@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { NavigateToLensContext, TagcloudVisConfiguration } from '@kbn/visualizations-plugin/common';
-import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { v4 as uuidv4 } from 'uuid';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Vis } from '@kbn/visualizations-plugin/public';
-import { v4 as uuidv4 } from 'uuid';
-import { getDataViewsStart } from '../services';
+import { NavigateToLensContext, TagcloudVisConfiguration } from '@kbn/visualizations-plugin/common';
 import type { TagCloudVisParams } from '../types';
+import { getDataViewsStart } from '../services';
 
 export const convertToLens = async (
   vis: Vis<TagCloudVisParams>,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EuiButtonProps, EuiPopoverProps } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ClassComponent, Component } from 'react';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { EuiPopoverProps, EuiButtonProps } from '@elastic/eui';
 import type { Index } from '../../../../../../common';
 
 export interface IndexActionsContextMenuProps {

@@ -5,24 +5,22 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { schema } from '@kbn/config-schema';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { asyncForEach } from '@kbn/std';
+import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import {
-  AlertsLocatorParams,
   alertsLocatorID,
+  AlertsLocatorParams,
   getAlertUrl,
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
-import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
-import { IRuleDataClient, createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { asyncForEach } from '@kbn/std';
-import {
-  SYNTHETICS_ALERT_RULE_TYPES,
-  TLS_CERTIFICATE,
-} from '../../../common/constants/synthetics_alerts';
+import { schema } from '@kbn/config-schema';
+import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
+import { TlsTranslations } from '../../../common/rules/synthetics/translations';
 import {
   CERT_COMMON_NAME,
   CERT_HASH_SHA256,
@@ -30,14 +28,16 @@ import {
   CERT_VALID_NOT_AFTER,
   CERT_VALID_NOT_BEFORE,
 } from '../../../common/field_names';
-import { TlsTranslations } from '../../../common/rules/synthetics/translations';
-import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
-import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
-import { UptimeRuleTypeAlertDefinition, generateAlertMessage, updateState } from '../common';
 import { getCertSummary, setTLSRecoveredAlertsContext } from './message_utils';
+import { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { TLSRuleExecutor } from './tls_rule_executor';
+import {
+  SYNTHETICS_ALERT_RULE_TYPES,
+  TLS_CERTIFICATE,
+} from '../../../common/constants/synthetics_alerts';
+import { generateAlertMessage, updateState, UptimeRuleTypeAlertDefinition } from '../common';
+import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_CERTIFICATE>;
 

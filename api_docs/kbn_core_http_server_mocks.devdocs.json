@@ -98,7 +98,12 @@
         "tags": [],
         "label": "createCoreContext",
         "description": [],
-        "signature": ["(overrides?: Partial<", "CoreContext", ">) => ", "CoreContext"],
+        "signature": [
+          "(overrides?: Partial<",
+          "CoreContext",
+          ">) => ",
+          "CoreContext"
+        ],
         "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -110,7 +115,11 @@
             "tags": [],
             "label": "overrides",
             "description": [],
-            "signature": ["Partial<", "CoreContext", ">"],
+            "signature": [
+              "Partial<",
+              "CoreContext",
+              ">"
+            ],
             "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -126,7 +135,9 @@
         "type": "Function",
         "tags": [],
         "label": "createHttpService",
-        "description": ["\nCreates a concrete HttpService with a mocked context."],
+        "description": [
+          "\nCreates a concrete HttpService with a mocked context."
+        ],
         "signature": [
           "({ buildNum, ...overrides }?: Partial<",
           "CoreContext",
@@ -144,7 +155,11 @@
             "tags": [],
             "label": "{\n  buildNum,\n  ...overrides\n}",
             "description": [],
-            "signature": ["Partial<", "CoreContext", " & { buildNum: number; }>"],
+            "signature": [
+              "Partial<",
+              "CoreContext",
+              " & { buildNum: number; }>"
+            ],
             "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -743,7 +758,10 @@
                 "tags": [],
                 "label": "__0",
                 "description": [],
-                "signature": ["RequestFixtureOptions", "<P, Q, B>"],
+                "signature": [
+                  "RequestFixtureOptions",
+                  "<P, Q, B>"
+                ],
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1273,7 +1291,9 @@
             "tags": [],
             "label": "createToolkit",
             "description": [],
-            "signature": ["() => ToolkitMock"],
+            "signature": [
+              "() => ToolkitMock"
+            ],
             "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1301,7 +1321,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<HttpServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<HttpServiceContract>"
+            ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1315,7 +1337,9 @@
             "tags": [],
             "label": "createBasePath",
             "description": [],
-            "signature": ["(serverBasePath?: string, publicBaseUrl?: string) => BasePathMocked"],
+            "signature": [
+              "(serverBasePath?: string, publicBaseUrl?: string) => BasePathMocked"
+            ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1352,7 +1376,9 @@
             "tags": [],
             "label": "createAuth",
             "description": [],
-            "signature": ["() => AuthMocked"],
+            "signature": [
+              "() => AuthMocked"
+            ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1388,7 +1414,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["CreateMockArgs"],
+                "signature": [
+                  "CreateMockArgs"
+                ],
                 "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1700,7 +1728,9 @@
                 "tags": [],
                 "label": "__0",
                 "description": [],
-                "signature": ["{ routerPath?: string | undefined; }"],
+                "signature": [
+                  "{ routerPath?: string | undefined; }"
+                ],
                 "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

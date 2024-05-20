@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   GroupByEntry,
-  LatestTransformTestData,
-  PivotTransformTestData,
   isLatestTransformTestData,
   isPivotTransformTestData,
+  LatestTransformTestData,
+  PivotTransformTestData,
 } from '../../helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

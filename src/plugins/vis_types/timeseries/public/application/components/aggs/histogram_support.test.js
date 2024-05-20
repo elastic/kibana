@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { setDataStart } from '../../../services';
-import { FIELDS, METRIC, PANEL, SERIES } from '../../../test_utils';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Agg } from './agg';
 import { FieldSelect } from './field_select';
+import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
+import { setDataStart } from '../../../services';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('../query_bar_wrapper', () => ({
   QueryBarWrapper: jest.fn(() => null),

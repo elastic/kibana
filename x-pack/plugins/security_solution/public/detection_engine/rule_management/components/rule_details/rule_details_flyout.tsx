@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiTabbedContent,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import type { EuiFlyoutProps, EuiTabbedContentProps, EuiTabbedContentTab } from '@elastic/eui';
-import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  EuiButtonEmpty,
+  EuiTitle,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiTabbedContent,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
+import { RuleInvestigationGuideTab } from './rule_investigation_guide_tab';
 import {
   DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS,
   LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS,
 } from './constants';
-import { RuleInvestigationGuideTab } from './rule_investigation_guide_tab';
-import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
 
 import * as i18n from './translations';
 

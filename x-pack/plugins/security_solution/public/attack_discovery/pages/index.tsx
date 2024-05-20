@@ -18,15 +18,11 @@ import { uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocalStorage } from 'react-use';
 
+import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
-import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { AttackDiscoveryPanel } from '../attack_discovery_panel';
-import type { AttackDiscovery } from '../types';
-import { useAttackDiscovery } from '../use_attack_discovery';
-import { EmptyStates } from './empty_states';
 import { Header } from './header';
 import {
   CONNECTOR_ID_LOCAL_STORAGE_KEY,
@@ -34,10 +30,14 @@ import {
   showLoading,
   showSummary,
 } from './helpers';
+import { AttackDiscoveryPanel } from '../attack_discovery_panel';
+import { EmptyStates } from './empty_states';
 import { LoadingCallout } from './loading_callout';
 import { PageTitle } from './page_title';
 import { Summary } from './summary';
 import { Upgrade } from './upgrade';
+import { useAttackDiscovery } from '../use_attack_discovery';
+import type { AttackDiscovery } from '../types';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const spaceId = useSpaceId() ?? 'default';

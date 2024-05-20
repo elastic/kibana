@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import supertest from 'supertest';
+import { parse as parseCookie } from 'tough-cookie';
 import { schema } from '@kbn/config-schema';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { createHttpService } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import supertest from 'supertest';
-import { parse as parseCookie } from 'tough-cookie';
 
 let server: HttpService;
 
@@ -279,7 +279,7 @@ describe('OnPreRouting', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    registerOnPreRouting((req, res, t) => ({}) as any);
+    registerOnPreRouting((req, res, t) => ({} as any));
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -423,7 +423,7 @@ describe('OnPreAuth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) => ({}) as any);
+    registerOnPreAuth((req, res, t) => ({} as any));
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -593,7 +593,7 @@ describe('OnPostAuth', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPostAuth((req, res, t) => ({}) as any);
+    registerOnPostAuth((req, res, t) => ({} as any));
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -841,8 +841,9 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    const sessionStorageFactory =
-      await createCookieSessionStorageFactory<StorageData>(cookieOptions);
+    const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
+      cookieOptions
+    );
     registerAuth((req, res, toolkit) => {
       const user = { id: '42' };
       const sessionStorage = sessionStorageFactory.asScoped(req);
@@ -878,8 +879,9 @@ describe('Auth', () => {
     } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    const sessionStorageFactory =
-      await createCookieSessionStorageFactory<StorageData>(cookieOptions);
+    const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
+      cookieOptions
+    );
     registerAuth((req, res, toolkit) => {
       const user = { id: '42' };
       const sessionStorage = sessionStorageFactory.asScoped(req);
@@ -1127,7 +1129,7 @@ describe('Auth', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPostAuth((req, res, t) => ({}) as any);
+    registerOnPostAuth((req, res, t) => ({} as any));
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -1331,7 +1333,7 @@ describe('OnPreResponse', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPreResponse((req, res, t) => ({}) as any);
+    registerOnPreResponse((req, res, t) => ({} as any));
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);

@@ -10,9 +10,9 @@ import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';
+import * as i18n from './translations';
 import type { GenerationInterval } from '../../../../types';
 import { GenerationTiming } from './generation_timing';
-import * as i18n from './translations';
 
 interface Props {
   connectorIntervals: GenerationInterval[];

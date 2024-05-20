@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiIcon, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiSpacer, EuiIcon } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

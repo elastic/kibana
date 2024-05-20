@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { AppMountParameters } from '@kbn/core/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { History } from 'history';
+import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { AppMountParameters } from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
-import { KbnUrlStateStorageFromRouterProvider } from '../utils/kbn_url_state_context';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
+import { KbnUrlStateStorageFromRouterProvider } from '../utils/kbn_url_state_context';
 
 export const renderApp = (
   core: CoreStart,

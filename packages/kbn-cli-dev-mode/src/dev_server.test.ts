@@ -11,9 +11,9 @@ import { PassThrough } from 'stream';
 
 import * as Rx from 'rxjs';
 
+import { extendedEnvSerializer } from './test_helpers';
 import { DevServer, Options } from './dev_server';
 import { TestLog } from './log';
-import { extendedEnvSerializer } from './test_helpers';
 
 jest.useFakeTimers();
 

@@ -9,24 +9,24 @@ import React, { useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { isActiveTimeline } from '../../../helpers';
-import { timelineSelectors } from '../../../timelines/store';
-import { timelineDefaults } from '../../../timelines/store/defaults';
-import type { TimelineModel } from '../../../timelines/store/model';
-import type { BrowserFields } from '../../containers/source';
+import { InputsModelId } from '../../store/inputs/constants';
 import { useGlobalTime } from '../../containers/use_global_time';
+import type { BrowserFields } from '../../containers/source';
 import { useKibana } from '../../lib/kibana';
 import { combineQueries } from '../../lib/kuery';
-import type { State, inputsModel } from '../../store';
+import type { inputsModel, State } from '../../store';
 import { inputsSelectors } from '../../store';
-import { InputsModelId } from '../../store/inputs/constants';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import { timelineSelectors } from '../../../timelines/store';
+import type { TimelineModel } from '../../../timelines/store/model';
 
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 import { getOptions, isDetectionsAlertsTable } from './helpers';
 import { TopN } from './top_n';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' };

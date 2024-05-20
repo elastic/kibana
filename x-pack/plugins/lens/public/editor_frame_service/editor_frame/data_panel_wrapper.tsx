@@ -7,37 +7,37 @@
 
 import './data_panel_wrapper.scss';
 
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DragDropIdentifier } from '@kbn/dom-drag-drop';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import React, { useMemo, memo, useEffect, useCallback } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { isEqual } from 'lodash';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import memoizeOne from 'memoize-one';
-import React, { useMemo, memo, useEffect, useCallback } from 'react';
-import type { IndexPatternServiceAPI } from '../../data_views_service/service';
+import { isEqual } from 'lodash';
+import { Easteregg } from './easteregg';
 import {
-  applyChanges,
-  selectActiveDatasourceId,
-  selectDatasourceStates,
-  selectExecutionContext,
-  selectVisualizationState,
-  setState,
-  updateDatasourceState,
-  useLensDispatch,
-  useLensSelector,
-} from '../../state_management';
-import { changeIndexPattern } from '../../state_management/lens_slice';
-import {
+  StateSetter,
   DatasourceDataPanelProps,
   DatasourceMap,
   FramePublicAPI,
-  StateSetter,
   VisualizationMap,
 } from '../../types';
-import { getInitialDataViewsObject } from '../../utils';
-import { Easteregg } from './easteregg';
+import {
+  useLensDispatch,
+  updateDatasourceState,
+  useLensSelector,
+  setState,
+  applyChanges,
+  selectExecutionContext,
+  selectActiveDatasourceId,
+  selectDatasourceStates,
+  selectVisualizationState,
+} from '../../state_management';
 import { initializeSources } from './state_helpers';
+import type { IndexPatternServiceAPI } from '../../data_views_service/service';
+import { changeIndexPattern } from '../../state_management/lens_slice';
+import { getInitialDataViewsObject } from '../../utils';
 
 interface DataPanelWrapperProps {
   datasourceMap: DatasourceMap;

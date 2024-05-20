@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import {
-  CoreDeprecationsRouteHandlerContext,
-  type InternalDeprecationsServiceStart,
-} from '@kbn/core-deprecations-server-internal';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import {
   CoreElasticsearchRouteHandlerContext,
   type InternalElasticsearchServiceStart,
 } from '@kbn/core-elasticsearch-server-internal';
-import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   CoreSavedObjectsRouteHandlerContext,
   type InternalSavedObjectsServiceStart,
 } from '@kbn/core-saved-objects-server-internal';
 import {
-  CoreSecurityRouteHandlerContext,
-  type InternalSecurityServiceStart,
-} from '@kbn/core-security-server-internal';
+  CoreDeprecationsRouteHandlerContext,
+  type InternalDeprecationsServiceStart,
+} from '@kbn/core-deprecations-server-internal';
 import {
   CoreUiSettingsRouteHandlerContext,
   type InternalUiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server-internal';
+import {
+  CoreSecurityRouteHandlerContext,
+  type InternalSecurityServiceStart,
+} from '@kbn/core-security-server-internal';
 import {
   CoreUserProfileRouteHandlerContext,
   type InternalUserProfileServiceStart,

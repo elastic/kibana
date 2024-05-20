@@ -8,17 +8,17 @@
 
 import React, { memo, useState, BaseSyntheticEvent, KeyboardEvent } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import {
+  EuiPopover,
+  keys,
+  EuiIcon,
+  EuiSpacer,
   EuiButtonEmpty,
+  EuiPopoverProps,
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
-  EuiIcon,
-  EuiPopover,
-  EuiPopoverProps,
-  EuiSpacer,
-  keys,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { ColorPicker } from '@kbn/charts-plugin/public';
 import { LegendItem } from './models';

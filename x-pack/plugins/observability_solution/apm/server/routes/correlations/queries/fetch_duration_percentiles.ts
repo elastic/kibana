@@ -6,12 +6,12 @@
  */
 
 import { SIGNIFICANT_VALUE_DIGITS } from '../../../../common/correlations/constants';
-import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
+import { getCommonCorrelationsQuery } from './get_common_correlations_query';
+import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
+import { getDurationField, getEventType } from '../utils';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBackwardCompatibleDocumentTypeFilter } from '../../../lib/helpers/transactions';
-import { getDurationField, getEventType } from '../utils';
-import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 
 export const fetchDurationPercentiles = async ({
   chartType,

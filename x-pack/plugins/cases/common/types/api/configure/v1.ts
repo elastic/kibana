@@ -13,8 +13,8 @@ import {
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema, regexStringRt } from '../../../schema';
 import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
-import type { Configuration, Configurations } from '../../domain/configure/v1';
-import { ClosureTypeRt, ConfigurationBasicWithoutOwnerRt } from '../../domain/configure/v1';
+import type { Configurations, Configuration } from '../../domain/configure/v1';
+import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
 

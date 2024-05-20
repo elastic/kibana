@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
-import deepEqual from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
+import deepEqual from 'fast-deep-equal';
+import chalk from 'chalk';
 import { insertRefByPointer } from '../../utils/insert_by_json_pointer';
-import { BundledDocument } from '../bundle_document';
 import { ResolvedRef } from '../types';
+import { BundledDocument } from '../bundle_document';
 
 export function mergeSharedComponents(
   bundledDocuments: BundledDocument[]

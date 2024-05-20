@@ -1,19 +1,3 @@
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
-import {
-  getIsChartCollapseAgg,
-  parseChartCollapseData,
-} from '../../../pages/detection_engine/chart_panels/chart_collapse/helpers';
-import {
-  getIsAlertsByRuleAgg,
-  getIsAlertsByTypeAgg,
-  parseAlertsRuleData,
-  parseAlertsTypeData,
-} from '../alerts_by_type_panel/helpers';
-import {
-  getIsAlertsByGroupingAgg,
-  parseAlertsGroupingData,
-} from '../alerts_progress_bar_panel/helpers';
-import { getIsAlertsBySeverityAgg, parseSeverityData } from '../severity_level_panel/helpers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -21,6 +5,22 @@ import { getIsAlertsBySeverityAgg, parseSeverityData } from '../severity_level_p
  * 2.0.
  */
 import type { SummaryChartsAgg } from './types';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import { parseSeverityData, getIsAlertsBySeverityAgg } from '../severity_level_panel/helpers';
+import {
+  parseAlertsTypeData,
+  getIsAlertsByTypeAgg,
+  parseAlertsRuleData,
+  getIsAlertsByRuleAgg,
+} from '../alerts_by_type_panel/helpers';
+import {
+  parseAlertsGroupingData,
+  getIsAlertsByGroupingAgg,
+} from '../alerts_progress_bar_panel/helpers';
+import {
+  parseChartCollapseData,
+  getIsChartCollapseAgg,
+} from '../../../pages/detection_engine/chart_panels/chart_collapse/helpers';
 
 export const parseData = (data: AlertSearchResponse<{}, SummaryChartsAgg>) => {
   if (getIsAlertsBySeverityAgg(data)) {

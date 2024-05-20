@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import { LocationDescriptorObject } from 'history';
-import { merge } from 'lodash';
 import React from 'react';
+import { merge } from 'lodash';
+import { LocationDescriptorObject } from 'history';
 import SemVer from 'semver/classes/semver';
 
 import { HttpSetup } from '@kbn/core/public';
 import {
-  applicationServiceMock,
+  notificationServiceMock,
   docLinksServiceMock,
+  uiSettingsServiceMock,
+  themeServiceMock,
+  scopedHistoryMock,
   executionContextServiceMock,
+  applicationServiceMock,
   fatalErrorsServiceMock,
   httpServiceMock,
-  notificationServiceMock,
-  scopedHistoryMock,
-  themeServiceMock,
-  uiSettingsServiceMock,
 } from '@kbn/core/public/mocks';
 
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
-import {
-  ComponentTemplatesProvider,
-  MappingsEditorProvider,
-} from '../../../public/application/components';
-import { componentTemplatesMockDependencies } from '../../../public/application/components/component_templates/__jest__';
-import { setUiMetricService } from '../../../public/application/services/api';
+import { httpService } from '../../../public/application/services/http';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { documentationService } from '../../../public/application/services/documentation';
-import { httpService } from '../../../public/application/services/http';
 import { notificationService } from '../../../public/application/services/notification';
-import { UiMetricService } from '../../../public/application/services/ui_metric';
-import { setExtensionsService } from '../../../public/application/store/selectors/extension_service';
 import { ExtensionsService } from '../../../public/services';
+import { UiMetricService } from '../../../public/application/services/ui_metric';
+import { setUiMetricService } from '../../../public/application/services/api';
+import { setExtensionsService } from '../../../public/application/store/selectors/extension_service';
+import {
+  MappingsEditorProvider,
+  ComponentTemplatesProvider,
+} from '../../../public/application/components';
+import { componentTemplatesMockDependencies } from '../../../public/application/components/component_templates/__jest__';
 import { init as initHttpRequests } from './http_requests';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;

@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
+import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
+import type { UserActionFindRequestTypes } from '../../../../common/types/api';
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
+import { defaultSortField } from '../../../common/utils';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
-import type { UserActionFindRequestTypes } from '../../../../common/types/api';
-import { decodeOrThrow } from '../../../common/runtime_types';
-import { defaultSortField } from '../../../common/utils';
-import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 
-import type { UserActionType } from '../../../../common/types/domain';
-import {
-  AttachmentType,
-  UserActionActions,
-  UserActionTypes,
-} from '../../../../common/types/domain';
-import { NodeBuilderOperators, buildFilter, combineFilters } from '../../../client/utils';
+import type { FindOptions, ServiceContext } from '../types';
+import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
+import { buildFilter, combineFilters, NodeBuilderOperators } from '../../../client/utils';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
   UserActionTransformedAttributes,
 } from '../../../common/types/user_actions';
-import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
 import { bulkDecodeSOAttributes } from '../../utils';
-import { transformFindResponseToExternalModel, transformToExternalModel } from '../transform';
-import type { FindOptions, ServiceContext } from '../types';
+import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
+import type { UserActionType } from '../../../../common/types/domain';
+import {
+  UserActionActions,
+  UserActionTypes,
+  AttachmentType,
+} from '../../../../common/types/domain';
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}

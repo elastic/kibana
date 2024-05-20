@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { transparentize, useEuiTheme } from '@elastic/eui';
-import { CSSObject, css } from '@emotion/react';
 import { useMemo } from 'react';
+import { useEuiTheme, transparentize } from '@elastic/eui';
+import { CSSObject, css } from '@emotion/react';
 
 export const useStyles = (minimal = false, isInvestigated = false) => {
   const { euiTheme } = useEuiTheme();

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 import * as runtimeTypes from 'io-ts';
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 
 import { stringEnum, unionWithNullType } from '../../../utility_types';
 
 import type { Maybe } from '../../../search_strategy';
 import { Direction } from '../../../search_strategy';
+import type { PinnedEvent } from '../pinned_events/pinned_events_route';
+import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
 // TODO https://github.com/elastic/security-team/issues/7491
 // eslint-disable-next-line no-restricted-imports
 import {
@@ -19,8 +21,6 @@ import {
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
 } from '../../detection_engine/model/rule_schema_legacy';
-import type { PinnedEvent } from '../pinned_events/pinned_events_route';
-import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
 import { ErrorSchema } from './error_schema';
 
 export const BareNoteSchema = runtimeTypes.intersection([

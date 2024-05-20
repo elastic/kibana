@@ -6,8 +6,8 @@
  */
 
 import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
-import { ReindexStep } from '../../../common/types';
 import { getDeprecationsUpperLimit, getReindexProgressLabel, validateRegExpString } from './utils';
+import { ReindexStep } from '../../../common/types';
 
 describe('validRegExpString', () => {
   it('correctly returns false for invalid strings', () => {

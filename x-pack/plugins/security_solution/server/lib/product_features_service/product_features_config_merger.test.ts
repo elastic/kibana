@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
-import type { ProductFeatureKibanaConfig } from '@kbn/security-solution-features';
 import { ProductFeaturesConfigMerger } from './product_features_config_merger';
+import type { Logger } from '@kbn/core/server';
+import type { ProductFeatureKibanaConfig } from '@kbn/security-solution-features';
+import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 
 const category = {
   id: 'security',

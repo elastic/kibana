@@ -6,20 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Observable, catchError, from, of } from 'rxjs';
-import { last, map, mergeMap, toArray } from 'rxjs';
+import { catchError, from, Observable, of } from 'rxjs';
+import { mergeMap, last, map, toArray } from 'rxjs';
 import type { RuntimeField, RuntimeFieldSpec, RuntimePrimitiveTypes } from '../types';
 
 export const removeFieldAttrs = (runtimeField: RuntimeField): RuntimeFieldSpec => {
   const { type, script, fields } = runtimeField;
   const fieldsTypeOnly = fields && {
-    fields: Object.entries(fields).reduce(
-      (col, [fieldName, field]) => {
-        col[fieldName] = { type: field.type };
-        return col;
-      },
-      {} as Record<string, { type: RuntimePrimitiveTypes }>
-    ),
+    fields: Object.entries(fields).reduce((col, [fieldName, field]) => {
+      col[fieldName] = { type: field.type };
+      return col;
+    }, {} as Record<string, { type: RuntimePrimitiveTypes }>),
   };
 
   return {

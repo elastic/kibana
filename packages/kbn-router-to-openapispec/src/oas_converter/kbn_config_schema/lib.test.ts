@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { metaFields, schema } from '@kbn/config-schema';
+import { schema, metaFields } from '@kbn/config-schema';
 import { set } from '@kbn/safer-lodash-set';
 import { omit } from 'lodash';
 import { OpenAPIV3 } from 'openapi-types';
-import { is, isNullableObjectType, tryConvertToRef } from './lib';
+import { is, tryConvertToRef, isNullableObjectType } from './lib';
 
 describe('is', () => {
   test.each([

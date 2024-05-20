@@ -10,24 +10,24 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { EuiBadge, EuiIcon, EuiSideNavItemType, EuiText } from '@elastic/eui';
+import { EuiSideNavItemType, EuiText, EuiBadge, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateNavLink } from '../../../shared/layout';
 import { AppLogic } from '../../app_logic';
 import {
-  ENGINE_ANALYTICS_PATH,
-  ENGINE_API_LOGS_PATH,
-  ENGINE_CRAWLER_PATH,
-  ENGINE_CURATIONS_PATH,
-  ENGINE_DOCUMENTS_PATH,
   ENGINE_PATH,
-  ENGINE_RELEVANCE_TUNING_PATH,
-  ENGINE_RESULT_SETTINGS_PATH,
+  ENGINE_ANALYTICS_PATH,
+  ENGINE_DOCUMENTS_PATH,
   ENGINE_SCHEMA_PATH,
-  ENGINE_SEARCH_UI_PATH,
-  ENGINE_SYNONYMS_PATH,
+  ENGINE_CRAWLER_PATH,
   META_ENGINE_SOURCE_ENGINES_PATH,
+  ENGINE_RELEVANCE_TUNING_PATH,
+  ENGINE_SYNONYMS_PATH,
+  ENGINE_CURATIONS_PATH,
+  ENGINE_RESULT_SETTINGS_PATH,
+  ENGINE_SEARCH_UI_PATH,
+  ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { ANALYTICS_TITLE } from '../analytics';
 import { API_LOGS_TITLE } from '../api_logs';

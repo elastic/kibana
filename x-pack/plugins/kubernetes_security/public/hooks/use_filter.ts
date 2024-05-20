@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemo } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { StartPlugins } from '../types';
 
 export const useSetFilter = () => {

@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 import {
-  APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
   DEPRECATION_LOGS_INDEX,
+  APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
 } from '../../../../common/constants';
 import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';

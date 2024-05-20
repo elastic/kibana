@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import { DataViewType } from '@kbn/data-views-plugin/common';
-import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { KbnSearchError } from '../../report_search_error';
+import { errors } from '@elastic/elasticsearch';
 import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
-import { getMockSearchConfig } from '../../../../config.mock';
-import { createSearchSessionsClientMock } from '../../mocks';
-import { KbnSearchError } from '../../report_search_error';
 import { SearchStrategyDependencies } from '../../types';
 import { enhancedEsSearchStrategyProvider } from './ese_search_strategy';
+import { createSearchSessionsClientMock } from '../../mocks';
+import { getMockSearchConfig } from '../../../../config.mock';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 
 const mockAsyncStatusResponse = (isComplete = false) => ({
   body: {

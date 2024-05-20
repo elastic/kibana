@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { RenderResult, WaitForNextUpdate } from '@testing-library/react-hooks';
-import { act, cleanup, renderHook } from '@testing-library/react-hooks';
 import React, { useEffect } from 'react';
+import { TestProviders } from '../../mock';
+import type { RenderResult, WaitForNextUpdate } from '@testing-library/react-hooks';
+import { renderHook, act, cleanup } from '@testing-library/react-hooks';
 import type { GlobalFullScreen } from '.';
 import { useGlobalFullScreen } from '.';
-import { TestProviders } from '../../mock';
 
 describe('useFullScreen', () => {
   describe('with no data-grid present in the dom', () => {

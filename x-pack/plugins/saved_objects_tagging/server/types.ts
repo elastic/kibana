@@ -6,8 +6,8 @@
  */
 
 import type {
-  CustomRequestHandlerContext,
   IRouter,
+  CustomRequestHandlerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { ITagsClient } from '../common/types';

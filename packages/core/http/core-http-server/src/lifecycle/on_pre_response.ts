@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest, ResponseHeaders } from '../router';
+import type { ResponseHeaders, KibanaRequest } from '../router';
 
 /**
  * @public

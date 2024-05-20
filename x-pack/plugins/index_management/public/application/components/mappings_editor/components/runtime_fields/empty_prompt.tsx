@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent } from 'react';
+import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 
 interface Props {
   createField: () => void;

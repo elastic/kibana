@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import rison from '@kbn/rison';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import rison from '@kbn/rison';
-import { APP_ID, INITIAL_LAYERS_KEY } from '../../../common/constants';
+import { INITIAL_LAYERS_KEY, APP_ID } from '../../../common/constants';
 import type { MapsAppLocatorDependencies, MapsAppLocatorParams } from './types';
 
 export function getLocation(params: MapsAppLocatorParams, deps: MapsAppLocatorDependencies) {

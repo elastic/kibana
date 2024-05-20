@@ -6,13 +6,13 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { useDeleteComment } from './use_delete_comment';
+import * as api from './api';
+import { basicCaseId } from './mock';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
-import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
-import * as api from './api';
-import { basicCaseId } from './mock';
-import { useDeleteComment } from './use_delete_comment';
 
 jest.mock('../common/lib/kibana');
 jest.mock('./api');

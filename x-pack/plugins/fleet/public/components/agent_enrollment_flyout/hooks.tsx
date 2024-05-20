@@ -1,34 +1,34 @@
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
-import {
-  FLEET_CLOUD_DEFEND_PACKAGE,
-  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
-  FLEET_KUBERNETES_PACKAGE,
-} from '../../../common';
+import type { PackagePolicy, AgentPolicy } from '../../types';
 import { sendGetOneAgentPolicy, useGetPackageInfoByKeyQuery, useStartServices } from '../../hooks';
-import type { AgentPolicy, PackagePolicy } from '../../types';
+import {
+  FLEET_KUBERNETES_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+  FLEET_CLOUD_DEFEND_PACKAGE,
+} from '../../../common';
 
 import {
-  SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG,
-  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-  getCloudShellUrlFromAgentPolicy,
   getTemplateUrlFromAgentPolicy,
   getTemplateUrlFromPackageInfo,
+  getCloudShellUrlFromAgentPolicy,
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+  SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG,
 } from '../cloud_security_posture/services';
 
 import type {
-  CloudSecurityIntegration,
-  CloudSecurityIntegrationAwsAccountType,
-  CloudSecurityIntegrationAzureAccountType,
-  CloudSecurityIntegrationType,
   K8sMode,
+  CloudSecurityIntegrationType,
+  CloudSecurityIntegrationAwsAccountType,
+  CloudSecurityIntegration,
+  CloudSecurityIntegrationAzureAccountType,
 } from './types';
 
 // Packages that requires custom elastic-agent manifest

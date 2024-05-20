@@ -14,8 +14,8 @@ import {
   keys,
   useEuiTheme,
 } from '@elastic/eui';
-import classNames from 'classnames';
 import React, { useCallback, type FC } from 'react';
+import classNames from 'classnames';
 
 import { usePanel } from './context';
 import { getNavPanelStyles, getPanelWrapperStyles } from './styles';

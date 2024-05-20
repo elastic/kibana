@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 import Util from 'util';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import JSON5 from 'json5';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { getMigrationDocLink, delay } from '../test_utils';
 import {
   clearLog,
   currentVersion,
@@ -21,7 +22,6 @@ import {
   nextMinor,
   startElasticsearch,
 } from '../kibana_migrator_test_kit';
-import { delay, getMigrationDocLink } from '../test_utils';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, 'cleanup.log');

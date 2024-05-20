@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { Operation, compare } from '../../../canvas_plugin_src/functions/common/compare';
+import { compare, Operation } from '../../../canvas_plugin_src/functions/common/compare';
+import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import {
-  BOOLEAN_FALSE,
-  BOOLEAN_TRUE,
   CONTEXT,
   TYPE_BOOLEAN,
-  TYPE_NULL,
   TYPE_NUMBER,
   TYPE_STRING,
+  BOOLEAN_TRUE,
+  BOOLEAN_FALSE,
+  TYPE_NULL,
 } from '../../constants';
-import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof compare>> = {
   help: i18n.translate('xpack.canvas.functions.compareHelpText', {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { CustomRequestHandlerContext, IRouter, IScopedClusterClient } from '@kbn/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { IRouter, CustomRequestHandlerContext, IScopedClusterClient } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { wrapEsError } from './lib';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { License } from './services';
+import { wrapEsError } from './lib';
 import { handleEsError } from './shared_imports';
 
 export interface Dependencies {

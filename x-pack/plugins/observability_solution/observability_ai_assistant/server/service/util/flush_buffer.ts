@@ -6,7 +6,7 @@
  */
 
 import { repeat } from 'lodash';
-import { Observable, OperatorFunction, identity } from 'rxjs';
+import { identity, Observable, OperatorFunction } from 'rxjs';
 import {
   BufferFlushEvent,
   StreamingChatResponseEventType,

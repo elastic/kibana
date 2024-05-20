@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
-import type { CoreTheme } from '@kbn/core-theme-browser';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { ReactWrapper } from 'enzyme';
 import React, { FC, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject, of } from 'rxjs';
+import type { ReactWrapper } from 'enzyme';
+import { of, BehaviorSubject } from 'rxjs';
+import { useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { CoreTheme } from '@kbn/core-theme-browser';
 import { CoreThemeProvider } from './core_theme_provider';
 
 describe('CoreThemeProvider', () => {

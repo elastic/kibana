@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { IndexTemplateDef } from '../../../../types';
 import { MESSAGE_PROCESSOR } from '../../common/constants';
-import base from './generated/elasticsearch/composable/component/base.json';
-import host from './generated/elasticsearch/composable/component/host.json';
-import log from './generated/elasticsearch/composable/component/log.json';
-import processor from './generated/elasticsearch/composable/component/processor.json';
 import template from './generated/elasticsearch/composable/template.json';
+import base from './generated/elasticsearch/composable/component/base.json';
+import log from './generated/elasticsearch/composable/component/log.json';
+import host from './generated/elasticsearch/composable/component/host.json';
+import processor from './generated/elasticsearch/composable/component/processor.json';
+import { IndexTemplateDef } from '../../../../types';
 
 const ECS_VERSION = template._meta.ecs_version;
 

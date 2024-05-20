@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type {
-  MutableRuleTaskState,
-  RawAlertInstance,
-  RuleTaskState,
-  WrappedLifecycleRuleState,
-} from '@kbn/alerting-state-types';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { omit, cloneDeep } from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { cloneDeep, omit } from 'lodash';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import type {
+  RuleTaskState,
+  MutableRuleTaskState,
+  WrappedLifecycleRuleState,
+  RawAlertInstance,
+} from '@kbn/alerting-state-types';
 
-import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
 import { getMigrations } from './migrations';
+import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
 
 type RawAlertInstances = Record<string, RawAlertInstance>;
 

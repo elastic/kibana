@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
-import { DataAnonymizationEditor } from '.';
 import { SelectedPromptContext } from '../assistant/prompt_context/types';
 import { TestProviders } from '../mock/test_providers/test_providers';
+import { DataAnonymizationEditor } from '.';
 
 describe('DataAnonymizationEditor', () => {
   const mockSelectedPromptContext: SelectedPromptContext = {

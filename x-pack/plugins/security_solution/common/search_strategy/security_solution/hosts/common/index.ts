@@ -6,9 +6,9 @@
  */
 
 import type { CloudEcs, HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
-import type { CommonFields } from '../..';
-import type { EndpointPendingActions, HostInfo } from '../../../../endpoint/types';
 import type { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
+import type { EndpointPendingActions, HostInfo } from '../../../../endpoint/types';
+import type { CommonFields } from '../..';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',

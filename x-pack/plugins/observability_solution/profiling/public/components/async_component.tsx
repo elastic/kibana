@@ -8,9 +8,9 @@ import {
   EuiFlexGroup,
   EuiFlexGroupProps,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingChart,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';

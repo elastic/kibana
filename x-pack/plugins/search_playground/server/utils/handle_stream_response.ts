@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
+import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
 const timeout = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

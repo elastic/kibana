@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import { getStaticDataViewId } from '@kbn/apm-data-view';
-import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  AGG_TYPE,
-  COLOR_MAP_TYPE,
-  FIELD_ORIGIN,
-  GRID_RESOLUTION,
-  RENDER_AS,
-  SOURCE_TYPES,
-  STYLE_TYPE,
-  VECTOR_STYLES,
-  emsWorldLayerId,
-} from '../../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
 import {
   AggDescriptor,
   ColorDynamicOptions,
@@ -27,17 +16,28 @@ import {
   StylePropertyField,
   VectorStylePropertiesDescriptor,
 } from '../../../../../../common/descriptor_types';
+import {
+  AGG_TYPE,
+  COLOR_MAP_TYPE,
+  emsWorldLayerId,
+  FIELD_ORIGIN,
+  GRID_RESOLUTION,
+  RENDER_AS,
+  SOURCE_TYPES,
+  STYLE_TYPE,
+  VECTOR_STYLES,
+} from '../../../../../../common/constants';
 import { getJoinAggKey, getSourceAggKey } from '../../../../../../common/get_agg_key';
-import { getSpaceId } from '../../../../../kibana_services';
-import { EMSFileSource } from '../../../../sources/ems_file_source';
-import { ESGeoGridSource } from '../../../../sources/es_geo_grid_source';
-import { VectorStyle } from '../../../../styles/vector/vector_style';
-import { getDefaultDynamicProperties } from '../../../../styles/vector/vector_style_defaults';
-import { HeatmapLayer } from '../../../heatmap_layer';
-import { GeoJsonVectorLayer } from '../../../vector_layer';
-import { DISPLAY } from './display_select';
 import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { OBSERVABILITY_METRIC_TYPE } from './metric_select';
+import { DISPLAY } from './display_select';
+import { VectorStyle } from '../../../../styles/vector/vector_style';
+import { EMSFileSource } from '../../../../sources/ems_file_source';
+import { ESGeoGridSource } from '../../../../sources/es_geo_grid_source';
+import { GeoJsonVectorLayer } from '../../../vector_layer';
+import { HeatmapLayer } from '../../../heatmap_layer';
+import { getDefaultDynamicProperties } from '../../../../styles/vector/vector_style_defaults';
+import { getSpaceId } from '../../../../../kibana_services';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 

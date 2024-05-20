@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { waitFor } from '@testing-library/react';
-import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../common/endpoint/constants';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import { createMockEndpointAppContextService } from '../../mocks';
-import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
-import { responseActionsClientMock } from '../../services/actions/clients/mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
+import { responseActionsClientMock } from '../../services/actions/clients/mocks';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../common/endpoint/constants';
+import { waitFor } from '@testing-library/react';
+import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
 
 describe('CompleteExternalTaskRunner class', () => {
   let endpointContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;

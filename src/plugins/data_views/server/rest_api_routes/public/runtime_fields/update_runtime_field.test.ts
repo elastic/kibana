@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataViewLazy } from '../../../../common';
+import { updateRuntimeField } from './update_runtime_field';
 import { dataViewsService } from '../../../mocks';
 import { getUsageCollection } from '../test_utils';
-import { updateRuntimeField } from './update_runtime_field';
+import { DataViewLazy } from '../../../../common';
 
 describe('update runtime field', () => {
   it('call usageCollection', async () => {
@@ -26,7 +26,7 @@ describe('update runtime field', () => {
               runtimeField: {},
             }),
           },
-        }) as unknown as DataViewLazy
+        } as unknown as DataViewLazy)
     );
 
     await updateRuntimeField({

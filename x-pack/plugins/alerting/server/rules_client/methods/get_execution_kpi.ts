@@ -6,21 +6,21 @@
  */
 
 import { KueryNode } from '@kbn/es-query';
-import { getRule } from '../../application/rule/methods/get/get_rule';
+import { SanitizedRuleWithLegacyId } from '../../types';
 import {
+  ReadOperations,
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
-  ReadOperations,
 } from '../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
   formatExecutionKPIResult,
   getExecutionKPIAggregation,
 } from '../../lib/get_execution_log_aggregation';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { SanitizedRuleWithLegacyId } from '../../types';
-import { parseDate } from '../common';
-import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
 import { RulesClientContext } from '../types';
+import { parseDate } from '../common';
+import { getRule } from '../../application/rule/methods/get/get_rule';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetRuleExecutionKPIParams {
   id: string;

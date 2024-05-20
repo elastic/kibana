@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { FatalErrorsStart } from '@kbn/core-fatal-errors-browser';
+import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
-import type { FatalErrorsStart } from '@kbn/core-fatal-errors-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-browser';
-import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 
 /**

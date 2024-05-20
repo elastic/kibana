@@ -1,6 +1,3 @@
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import userEvent from '@testing-library/user-event';
  */
 import React from 'react';
 import { MultiSelectFilter } from './multi_select_filter';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 describe('multi select filter', () => {
   it('should render the amount of options available', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getConnectorsTelemetryData } from './connectors';
 
 describe('getConnectorsTelemetryData', () => {

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { useQuery as _useQuery } from '@tanstack/react-query';
+import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import { useGetFileInfo } from './use_get_file_info';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type {
   ActionDetails,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
 } from '../../../../common/endpoint/types';
-import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
-import { useGetFileInfo } from './use_get_file_info';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { useQuery as _useQuery } from '@tanstack/react-query';
 
 const useQueryMock = _useQuery as jest.Mock;
 

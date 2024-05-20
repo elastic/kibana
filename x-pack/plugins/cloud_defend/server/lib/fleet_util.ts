@@ -1,17 +1,3 @@
-import { errors } from '@elastic/elasticsearch';
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
-import type {
-  AgentPolicy,
-  GetAgentStatusResponse,
-  ListResult,
-  PackagePolicy,
-} from '@kbn/fleet-plugin/common';
-import type {
-  AgentPolicyServiceInterface,
-  AgentService,
-  PackagePolicyClient,
-} from '@kbn/fleet-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -19,13 +5,27 @@ import type {
  * 2.0.
  */
 import { map, uniq } from 'lodash';
-import type { PoliciesQueryParams } from '../../common';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type {
+  AgentPolicyServiceInterface,
+  AgentService,
+  PackagePolicyClient,
+} from '@kbn/fleet-plugin/server';
+import type {
+  AgentPolicy,
+  GetAgentStatusResponse,
+  ListResult,
+  PackagePolicy,
+} from '@kbn/fleet-plugin/common';
+import { errors } from '@elastic/elasticsearch';
+import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
 import {
-  CLOUD_DEFEND_FLEET_PACKAGE_KUERY,
   INPUT_CONTROL,
+  CLOUD_DEFEND_FLEET_PACKAGE_KUERY,
   INTEGRATION_PACKAGE_NAME,
 } from '../../common/constants';
 import { POLICIES_PACKAGE_POLICY_PREFIX } from '../../common/constants';
+import type { PoliciesQueryParams } from '../../common';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 

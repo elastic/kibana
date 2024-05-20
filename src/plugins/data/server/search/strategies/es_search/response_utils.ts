@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ConnectionRequestParams } from '@elastic/transport';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ISearchOptions } from '@kbn/search-types';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 

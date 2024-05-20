@@ -6,10 +6,10 @@
  */
 
 import { RulesClient } from '@kbn/alerting-plugin/server';
-import { RULES } from '../../../common/constants';
 import { AlertInstanceState } from '../../../common/types/alerts';
-import { CommonAlertFilter, CommonAlertState, RulesByType } from '../../../common/types/alerts';
 import { RulesFactory } from '../../rules';
+import { CommonAlertState, CommonAlertFilter, RulesByType } from '../../../common/types/alerts';
+import { RULES } from '../../../common/constants';
 
 export async function fetchStatus(
   rulesClient: RulesClient,

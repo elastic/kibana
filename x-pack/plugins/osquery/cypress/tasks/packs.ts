@@ -8,9 +8,9 @@
 import { some } from 'lodash';
 import { API_VERSIONS } from '../../common/constants';
 import type { UsePacksResponse } from '../../public/packs/use_packs';
-import { cleanupPack } from './api_fixtures';
 import { request } from './common';
 import { closeModalIfVisible, closeToastIfVisible } from './integrations';
+import { cleanupPack } from './api_fixtures';
 
 export const preparePack = (packName: string) => {
   cy.contains('Packs').click();

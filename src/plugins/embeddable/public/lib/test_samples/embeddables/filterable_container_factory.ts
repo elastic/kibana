@@ -8,12 +8,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { Container, EmbeddableFactoryDefinition } from '../..';
-import { EmbeddableStart } from '../../../plugin';
 import {
-  FILTERABLE_CONTAINER,
   FilterableContainer,
   FilterableContainerInput,
+  FILTERABLE_CONTAINER,
 } from './filterable_container';
+import { EmbeddableStart } from '../../../plugin';
 
 export class FilterableContainerFactory
   implements EmbeddableFactoryDefinition<FilterableContainerInput>

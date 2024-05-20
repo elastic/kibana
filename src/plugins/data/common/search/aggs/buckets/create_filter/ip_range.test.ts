@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { RangeFilter } from '@kbn/es-query';
-import { IpFormat } from '@kbn/field-formats-plugin/common';
+import { createFilterIpRange } from './ip_range';
 import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
-import { IBucketAggConfig } from '../bucket_agg_type';
+import { IpFormat } from '@kbn/field-formats-plugin/common';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { createFilterIpRange } from './ip_range';
+import { IBucketAggConfig } from '../bucket_agg_type';
+import { RangeFilter } from '@kbn/es-query';
 
 describe('AggConfig Filters', () => {
   describe('IP range', () => {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import {
   ProductFeaturesPrivilegeId,
   ProductFeaturesPrivileges,
 } from '../product_features_privileges';
 
-import { APP_ID } from '../constants';
 import { SecuritySubFeatureId } from '../product_features_keys';
+import { APP_ID } from '../constants';
 import type { SecurityFeatureParams } from './types';
 
 const endpointListSubFeature: SubFeatureConfig = {

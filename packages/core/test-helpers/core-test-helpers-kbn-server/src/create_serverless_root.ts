@@ -7,14 +7,14 @@
  */
 
 import Path from 'path';
+import { defaultsDeep } from 'lodash';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { CliArgs } from '@kbn/config';
 import { Cluster, ServerlessProjectType } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { esTestConfig } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
-import { defaultsDeep } from 'lodash';
-import { type TestElasticsearchUtils, type TestKibanaUtils, createRoot } from './create_root';
+import { esTestConfig } from '@kbn/test';
+import { CliArgs } from '@kbn/config';
+import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
 export type TestServerlessESUtils = Pick<TestElasticsearchUtils, 'stop' | 'es'> & {
   getClient: () => Client;

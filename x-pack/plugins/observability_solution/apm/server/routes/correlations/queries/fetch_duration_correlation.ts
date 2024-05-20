@@ -7,10 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { SPAN_DURATION, TRANSACTION_DURATION } from '../../../../common/es_fields/apm';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchDurationCorrelation = async ({
   apmEventClient,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { safeDecode } from '@kbn/rison';
 import { useCallback, useEffect } from 'react';
+import { safeDecode } from '@kbn/rison';
 
 import { TimelineTabs } from '../../../../common/types';
+import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { TimelineUrl } from '../../../timelines/store/model';
-import { useInitializeUrlParam } from '../../utils/global_query_string';
-import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import { URL_PARAM_KEY } from '../use_url_state';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 
 export const useInitTimelineFromUrlParam = () => {
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(

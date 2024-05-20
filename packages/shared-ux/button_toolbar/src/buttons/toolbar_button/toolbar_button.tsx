@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiButtonIcon, IconType, useEuiTheme } from '@elastic/eui';
-import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import React from 'react';
+import { EuiButton, EuiButtonIcon, useEuiTheme, IconType } from '@elastic/eui';
+import { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
 import { ToolbarButtonStyles, fontWeightDefinitions } from './toolbar_button.styles';
 
@@ -121,8 +121,8 @@ const ToolbarStandardButton = ({
   const toolbarButtonStyleProps: EuiButtonPropsForButton = isDisabled
     ? {}
     : type === 'primary'
-      ? { color: 'primary', fill: true }
-      : { color: 'text' };
+    ? { color: 'primary', fill: true }
+    : { color: 'text' };
 
   const icon = iconType ?? (hasArrow ? 'arrowDown' : '');
 

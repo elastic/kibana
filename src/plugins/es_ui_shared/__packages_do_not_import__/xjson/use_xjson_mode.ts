@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Dispatch, useState } from 'react';
+import { useState, Dispatch } from 'react';
 
 import { collapseLiteralStrings, expandLiteralStrings } from './json_xjson_translation_tools';
 

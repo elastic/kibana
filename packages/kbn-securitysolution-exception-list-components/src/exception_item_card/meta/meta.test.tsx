@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { getExceptionListItemSchemaMock } from '../../mocks/exception_list_item_schema.mock';
 
 import { ExceptionItemCardMetaInfo } from '.';

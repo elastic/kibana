@@ -17,10 +17,18 @@
         "suspended"
       ],
       "connector_id": "",
-      "job_type": ["full", "incremental", "access_control"]
+      "job_type": [
+        "full",
+        "incremental",
+        "access_control"
+      ]
     },
-    "methods": ["GET"],
-    "patterns": ["_connector/_sync_job"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_connector/_sync_job"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/list-connector-sync-jobs-api.html",
     "availability": {
       "stack": true,

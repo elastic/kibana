@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { hasUnsavedChange } from '@kbn/management-settings-utilities';

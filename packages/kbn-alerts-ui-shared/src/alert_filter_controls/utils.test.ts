@@ -7,15 +7,15 @@
  */
 
 import { ControlGroupInput, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
-import { isEqualWith } from 'lodash';
-import { initialInputData } from './mocks/data';
-import type { FilterControlConfig } from './types';
 import {
-  getFilterControlsComparator,
   getFilterItemObjListFromControlInput,
   mergeControls,
   reorderControlsWithDefaultControls,
+  getFilterControlsComparator,
 } from './utils';
+import { initialInputData } from './mocks/data';
+import type { FilterControlConfig } from './types';
+import { isEqualWith } from 'lodash';
 
 const defaultControls: FilterControlConfig[] = [
   {
@@ -61,13 +61,10 @@ const thirdControlsSet: FilterControlConfig[] = [
 
 const emptyControlSet: FilterControlConfig[] = [];
 
-const defaultControlsObj = defaultControls.reduce(
-  (prev, current) => {
-    prev[current.fieldName] = current;
-    return prev;
-  },
-  {} as Record<string, FilterControlConfig>
-);
+const defaultControlsObj = defaultControls.reduce((prev, current) => {
+  prev[current.fieldName] = current;
+  return prev;
+}, {} as Record<string, FilterControlConfig>);
 describe('utils', () => {
   describe('getFilterItemObjListFromControlOutput', () => {
     it('should return ordered filterItem where passed in order', () => {

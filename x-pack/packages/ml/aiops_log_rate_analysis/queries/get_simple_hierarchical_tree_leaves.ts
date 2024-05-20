@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { orderBy } from 'lodash';
 import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
 import { stringHash } from '@kbn/ml-string-hash';
-import { orderBy } from 'lodash';
 
 import type { SimpleHierarchicalTreeNode } from '../types';
 

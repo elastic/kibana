@@ -7,8 +7,8 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { removeSharedComponentId } from '../lib';
 import { processRef as processRefMutation } from './mutations/ref';
+import { removeSharedComponentId } from '../lib';
 
 export interface IContext {
   sharedSchemas: Map<string, OpenAPIV3.SchemaObject>;

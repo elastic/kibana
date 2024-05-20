@@ -5,34 +5,34 @@
  * 2.0.
  */
 
+import React, { useEffect, useState, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiPopover,
   EuiButtonEmpty,
-  EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiPopover,
   EuiSpacer,
+  EuiLoadingSpinner,
+  EuiLink,
+  EuiPageTemplate,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import React, { useEffect, useState, Fragment } from 'react';
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
 import {
-  Error,
+  WithPrivileges,
   NotAuthorizedSection,
   PageError,
   PageLoading,
-  WithPrivileges,
+  Error,
   useExecutionContext,
 } from '../../../../shared_imports';
-import { useAppContext, useServices } from '../../../app_context';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useLoadRestores } from '../../../services/http';
 import { linkToSnapshots } from '../../../services/navigation';
+import { useAppContext, useServices } from '../../../app_context';
 import { RestoreTable } from './restore_table';
 
 const ONE_SECOND_MS = 1000;

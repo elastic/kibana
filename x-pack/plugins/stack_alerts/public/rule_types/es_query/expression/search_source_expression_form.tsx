@@ -5,31 +5,28 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { getTime, mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import type { ISearchSource, SavedQuery } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
+import { lastValueFrom } from 'rxjs';
 import type { Filter, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { mapAndFlattenFilters, getTime } from '@kbn/data-plugin/public';
+import type { SavedQuery, ISearchSource } from '@kbn/data-plugin/public';
 import {
   BUCKET_SELECTOR_FIELD,
-  FieldOption,
   buildAggregation,
+  FieldOption,
   isCountAggregation,
   isGroupAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
-import deepEqual from 'fast-deep-equal';
-import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { lastValueFrom } from 'rxjs';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
 import { Comparator } from '../../../../common/comparator_types';
-import { DataViewSelectPopover } from '../../components/data_view_select_popover';
-import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
-import { RuleCommonExpressions } from '../rule_common_expressions';
 import {
   CommonRuleParams,
   EsQueryRuleMetaData,
@@ -37,7 +34,10 @@ import {
   SearchType,
   SourceField,
 } from '../types';
-import { convertFieldSpecToFieldOption, useTriggerUiActionServices } from '../util';
+import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
+import { DataViewSelectPopover } from '../../components/data_view_select_popover';
+import { RuleCommonExpressions } from '../rule_common_expressions';
+import { useTriggerUiActionServices, convertFieldSpecToFieldOption } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
@@ -118,8 +118,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       size: ruleParams.size
         ? ruleParams.size
         : isServerless
-          ? SERVERLESS_DEFAULT_VALUES.SIZE
-          : DEFAULT_VALUES.SIZE,
+        ? SERVERLESS_DEFAULT_VALUES.SIZE
+        : DEFAULT_VALUES.SIZE,
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
       sourceFields: ruleParams.sourceFields,

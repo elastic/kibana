@@ -7,20 +7,20 @@
 
 import type { EuiCommentProps } from '@elastic/eui';
 
-import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
-import { AttachmentType, UserActionActions } from '../../../../common/types/domain';
-import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
-import type { AttachmentUI } from '../../../containers/types';
-import { createCommonUpdateUserActionBuilder } from '../common';
+import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
+import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
-import { createActionAttachmentUserActionBuilder } from './actions';
-import { createAlertAttachmentUserActionBuilder } from './alert';
-import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
-import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
+import { createCommonUpdateUserActionBuilder } from '../common';
+import type { AttachmentUI } from '../../../containers/types';
 import * as i18n from './translations';
 import { createUserAttachmentUserActionBuilder } from './user';
+import { createAlertAttachmentUserActionBuilder } from './alert';
+import { createActionAttachmentUserActionBuilder } from './actions';
+import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
+import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
+import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 

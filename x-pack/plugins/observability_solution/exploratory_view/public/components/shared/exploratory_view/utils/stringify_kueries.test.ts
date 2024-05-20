@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { USER_AGENT_NAME } from '../configurations/constants/elasticsearch_fieldnames';
-import { UrlFilter } from '../types';
 import { urlFiltersToKueryString } from './stringify_kueries';
+import { UrlFilter } from '../types';
+import { USER_AGENT_NAME } from '../configurations/constants/elasticsearch_fieldnames';
 
 describe('stringifyKueries', () => {
   let filters: UrlFilter[];

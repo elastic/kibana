@@ -8,21 +8,21 @@
 
 import deepEqual from 'fast-deep-equal';
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 
 import {
   createOptionsListExtract,
   createOptionsListInject,
 } from '../../../common/options_list/options_list_persistable_state';
 import {
-  OPTIONS_LIST_CONTROL,
   OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
 } from '../../../common/options_list/types';
-import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 import { OptionsListEditorOptions } from '../components/options_list_editor_options';
+import { ControlEmbeddable, IEditableControlFactory } from '../../types';
 
 export class OptionsListEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<OptionsListEmbeddableInput>

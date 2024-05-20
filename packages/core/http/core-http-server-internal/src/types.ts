@@ -8,16 +8,16 @@
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type {
-  HttpServiceSetup,
-  HttpServiceStart,
-  IAuthHeadersStorage,
-  IContextContainer,
-  IContextProvider,
   IRouter,
   RequestHandlerContextBase,
+  IContextProvider,
+  IAuthHeadersStorage,
+  IContextContainer,
+  HttpServiceSetup,
+  HttpServiceStart,
 } from '@kbn/core-http-server';
-import type { ExternalUrlConfig } from './external_url';
 import type { HttpServerSetup } from './http_server';
+import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
 
 /** @internal */
@@ -35,8 +35,11 @@ export interface InternalHttpServicePreboot
     | 'getServerInfo'
   > {
   registerRoutes<
-    DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase,
-  >(path: string, callback: (router: IRouter<DefaultRequestHandlerType>) => void): void;
+    DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+  >(
+    path: string,
+    callback: (router: IRouter<DefaultRequestHandlerType>) => void
+  ): void;
 }
 
 /** @internal */
@@ -55,7 +58,7 @@ export interface InternalHttpServiceSetup
   authRequestHeaders: IAuthHeadersStorage;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContextBase,
-    ContextName extends keyof Omit<Context, 'resolve'>,
+    ContextName extends keyof Omit<Context, 'resolve'>
   >(
     pluginOpaqueId: PluginOpaqueId,
     contextName: ContextName,

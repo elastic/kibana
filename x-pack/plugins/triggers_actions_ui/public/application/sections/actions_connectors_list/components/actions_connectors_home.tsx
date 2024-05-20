@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { lazy, useCallback, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { EuiButtonEmpty, EuiPageHeader, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../common/lib/kibana';
-import { HealthCheck } from '../../../components/health_check';
-import { Section, routeToConnectorEdit, routeToConnectors, routeToLogs } from '../../../constants';
-import { HealthContextProvider } from '../../../context/health_context';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiButtonEmpty, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
+import { routeToConnectorEdit, routeToConnectors, routeToLogs, Section } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
+import { HealthContextProvider } from '../../../context/health_context';
+import { HealthCheck } from '../../../components/health_check';
+import { useKibana } from '../../../../common/lib/kibana';
 import ConnectorEventLogListTableWithApi from './actions_connectors_event_log_list_table';
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));

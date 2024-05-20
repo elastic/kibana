@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildEsQuery } from '@kbn/es-query';
 import { matchAllQuery } from '@kbn/ml-query-utils';
 
 import { isDataView } from '../../../../common/types/data_view';

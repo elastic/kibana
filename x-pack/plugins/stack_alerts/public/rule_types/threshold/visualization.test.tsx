@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { Chart, LineAnnotation, LineSeries } from '@elastic/charts';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { ThresholdVisualization } from './visualization';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import {
   builtInAggregationTypes,
   builtInComparators,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { ThresholdVisualization } from './visualization';
+import { Chart, LineAnnotation, LineSeries } from '@elastic/charts';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('./index_threshold_api', () => ({

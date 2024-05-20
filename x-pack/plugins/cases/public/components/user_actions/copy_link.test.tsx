@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import copy from 'copy-to-clipboard';
+import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import React from 'react';
+import copy from 'copy-to-clipboard';
 
 import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';

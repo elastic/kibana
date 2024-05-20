@@ -1,5 +1,3 @@
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,13 +5,8 @@ import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-p
  * 2.0.
  */
 import { omit } from 'lodash';
-import {
-  ALLOWED_SCHEDULES_IN_MINUTES,
-  CUSTOM_LABEL,
-  PROFILES_MAP,
-  PROFILE_VALUES,
-  PROFILE_VALUES_ENUM,
-} from '../../../../common/constants/monitor_defaults';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
 import {
   BrowserFields,
@@ -23,15 +16,22 @@ import {
   SyntheticsMonitorWithSecretsAttributes,
   ThrottlingConfig,
 } from '../../../../common/runtime_types';
+import {
+  ALLOWED_SCHEDULES_IN_MINUTES,
+  CUSTOM_LABEL,
+  PROFILE_VALUES,
+  PROFILE_VALUES_ENUM,
+  PROFILES_MAP,
+} from '../../../../common/constants/monitor_defaults';
+import {
+  LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
+  SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
+} from '../../synthetics_monitor';
 import { validateMonitor } from '../../../routes/monitor_cruds/monitor_validation';
 import {
   formatSecrets,
   normalizeMonitorSecretAttributes,
 } from '../../../synthetics_service/utils/secrets';
-import {
-  LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
-  SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
-} from '../../synthetics_monitor';
 
 export type SyntheticsMonitor880 = Omit<
   SyntheticsMonitorWithSecretsAttributes,

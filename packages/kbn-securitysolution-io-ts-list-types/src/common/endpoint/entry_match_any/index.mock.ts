@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EndpointEntryMatchAny } from '.';
 import { ENTRY_VALUE, FIELD, MATCH_ANY, OPERATOR } from '../../../constants/index.mock';
+import { EndpointEntryMatchAny } from '.';
 
 export const getEndpointEntryMatchAnyMock = (): EndpointEntryMatchAny => ({
   field: FIELD,

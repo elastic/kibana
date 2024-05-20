@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { APP_WRAPPER_CLASS, AppMountParameters, CoreStart } from '@kbn/core/public';
-import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ConfigSchema } from '..';
-import { ApmAppRoot } from '../components/routing/app_root';
-import type { KibanaEnvContext } from '../context/kibana_environment_context/kibana_environment_context';
 import { ApmPluginSetupDeps, ApmPluginStartDeps, ApmServices } from '../plugin';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { setHelpExtension } from '../set_help_extension';
 import { setReadonlyBadge } from '../update_badge';
+import { ApmAppRoot } from '../components/routing/app_root';
+import type { KibanaEnvContext } from '../context/kibana_environment_context/kibana_environment_context';
 
 /**
  * This module is rendered asynchronously in the Kibana platform.

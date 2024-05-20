@@ -8,10 +8,10 @@
 import React from 'react';
 
 import {
-  EuiButtonEmpty,
   EuiFilterGroup,
   EuiPopover,
   EuiPopoverTitle,
+  EuiButtonEmpty,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

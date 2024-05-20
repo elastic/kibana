@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { css } from '@emotion/react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ResultLinks } from '../job_actions';
 import { MultiJobActionsMenu } from './actions_menu';
 import { GroupSelector } from './group_selector';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const cssOverride = css({
   height: '20px',

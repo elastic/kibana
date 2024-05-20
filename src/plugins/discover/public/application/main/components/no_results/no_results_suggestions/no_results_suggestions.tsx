@@ -6,23 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
+import { EuiEmptyPrompt, EuiButton, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
+  isOfQueryType,
+  isOfAggregateQueryType,
+  type Query,
   type AggregateQuery,
   type Filter,
-  type Query,
-  isOfAggregateQueryType,
-  isOfQueryType,
 } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
-import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
+import { i18n } from '@kbn/i18n';
 import { isTextBasedQuery } from '../../../utils/is_text_based_query';
-import { hasActiveFilter } from '../../layout/utils';
-import { NoResultsIllustration } from './assets/no_results_illustration';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
 import {
   NoResultsSuggestionWhenFilters,
@@ -30,7 +27,10 @@ import {
 } from './no_results_suggestion_when_filters';
 import { NoResultsSuggestionWhenQuery } from './no_results_suggestion_when_query';
 import { NoResultsSuggestionWhenTimeRange } from './no_results_suggestion_when_time_range';
-import { TimeRangeExtendingStatus, useFetchOccurrencesRange } from './use_fetch_occurances_range';
+import { hasActiveFilter } from '../../layout/utils';
+import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
+import { useFetchOccurrencesRange, TimeRangeExtendingStatus } from './use_fetch_occurances_range';
+import { NoResultsIllustration } from './assets/no_results_illustration';
 
 interface NoResultsSuggestionProps {
   dataView: DataView;

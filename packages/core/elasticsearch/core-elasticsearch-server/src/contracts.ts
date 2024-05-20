@@ -8,9 +8,9 @@
 
 import { Observable } from 'rxjs';
 import type {
-  ElasticsearchClientConfig,
   IClusterClient,
   ICustomClusterClient,
+  ElasticsearchClientConfig,
   UnauthorizedErrorHandler,
 } from './client';
 import { IElasticsearchConfig } from './elasticsearch_config';

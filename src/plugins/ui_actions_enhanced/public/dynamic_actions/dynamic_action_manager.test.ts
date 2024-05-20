@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { of } from '@kbn/kibana-utils-plugin/common';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { UiActionsService } from '@kbn/ui-actions-plugin/public';
-import { ActionRegistry } from '@kbn/ui-actions-plugin/public/types';
-import { UiActionsServiceEnhancements } from '../services';
-import { ActionFactoryDefinition } from './action_factory_definition';
-import { dynamicActionGrouping } from './dynamic_action_grouping';
 import { DynamicActionManager } from './dynamic_action_manager';
 import { ActionStorage, MemoryActionStorage } from './dynamic_action_storage';
+import { UiActionsService } from '@kbn/ui-actions-plugin/public';
+import { ActionRegistry } from '@kbn/ui-actions-plugin/public/types';
+import { of } from '@kbn/kibana-utils-plugin/common';
+import { UiActionsServiceEnhancements } from '../services';
+import { ActionFactoryDefinition } from './action_factory_definition';
 import { SerializedAction, SerializedEvent } from './types';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { dynamicActionGrouping } from './dynamic_action_grouping';
 
 const actionFactoryDefinition1: ActionFactoryDefinition = {
   id: 'ACTION_FACTORY_1',

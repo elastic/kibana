@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Case, CasePostRequest } from '@kbn/cases-plugin/common';
-import { CASES_URL, CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common';
 import type { KbnClient } from '@kbn/test';
+import type { Case, CasePostRequest } from '@kbn/cases-plugin/common';
+import { CaseSeverity, CASES_URL, ConnectorTypes } from '@kbn/cases-plugin/common';
 import type { AxiosError } from 'axios';
 import { EndpointError } from '../errors';
 

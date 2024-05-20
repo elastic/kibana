@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import classnames from 'classnames';
+import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
 import { EuiButtonIcon, EuiButtonIconProps, EuiHighlight, EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
-import { i18n } from '@kbn/i18n';
-import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
-import classnames from 'classnames';
-import React from 'react';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 import './field_item_button.scss';
 

@@ -8,15 +8,15 @@
 import * as rt from 'io-ts';
 
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
-import {
-  anomaliesSortRT,
-  logEntryAnomalyDatasetsRT,
-  logEntryAnomalyRT,
-  paginationCursorRT,
-  paginationRT,
-} from '../../../../log_analysis';
-import { routeTimingMetadataRT, timeRangeRT } from '../../../shared';
 import { idFormatByJobTypeRT } from '../../id_formats/v1/id_formats';
+import { timeRangeRT, routeTimingMetadataRT } from '../../../shared';
+import {
+  logEntryAnomalyRT,
+  logEntryAnomalyDatasetsRT,
+  anomaliesSortRT,
+  paginationRT,
+  paginationCursorRT,
+} from '../../../../log_analysis';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_PATH =
   '/api/infra/log_analysis/results/log_entry_anomalies';

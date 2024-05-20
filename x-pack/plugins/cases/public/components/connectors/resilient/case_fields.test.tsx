@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { waitFor, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { connector, resilientIncidentTypes, resilientSeverity } from '../mock';
-import { MockFormWrapperComponent } from '../test_utils';
-import Fields from './case_fields';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
+import Fields from './case_fields';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
+import { MockFormWrapperComponent } from '../test_utils';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_incident_types');

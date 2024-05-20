@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { useListArtifact } from './use_list_artifact';
 import type { HttpSetup } from '@kbn/core/public';
-import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import {
-  getFakeHttpService,
-  getFakeListDefinition,
   getFakeListId,
+  getFakeListDefinition,
+  getFakeHttpService,
   renderQuery,
 } from '../test_utils';
-import { useListArtifact } from './use_list_artifact';
 
 describe('List artifact hook', () => {
   let result: ReturnType<typeof useListArtifact>;

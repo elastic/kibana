@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import * as api from './apis/bulk_get_cases';
+import { waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useBulkGetCases } from './use_bulk_get_cases';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
-import * as api from './apis/bulk_get_cases';
-import { useBulkGetCases } from './use_bulk_get_cases';
 
 jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');

@@ -1,6 +1,3 @@
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,15 +5,18 @@ import { useDebouncedValue } from '@kbn/visualization-ui-components';
  * 2.0.
  */
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { OperationDefinition } from '.';
-import type { IndexPattern } from '../../../../types';
-import { getColumnOrder } from '../layer_helpers';
 import {
-  GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
+  GenericIndexPatternColumn,
   ValueFormatConfig,
 } from './column_types';
+import type { IndexPattern } from '../../../../types';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
+import { getColumnOrder } from '../layer_helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
   defaultMessage: 'Static value',

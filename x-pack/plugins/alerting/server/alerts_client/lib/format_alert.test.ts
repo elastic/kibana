@@ -1,3 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import {
+  expandFlattenedAlert,
+  compactObject,
+  removeUnflattenedFieldsFromAlert,
+} from './format_alert';
 import {
   ALERT_ACTION_GROUP,
   ALERT_DURATION,
@@ -29,17 +40,6 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import {
-  compactObject,
-  expandFlattenedAlert,
-  removeUnflattenedFieldsFromAlert,
-} from './format_alert';
 
 describe('expandFlattenedAlert', () => {
   test('should correctly expand flattened alert', () => {

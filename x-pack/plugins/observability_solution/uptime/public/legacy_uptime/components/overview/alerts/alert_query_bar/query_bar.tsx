@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useEffect, useState } from 'react';
-import { ClientPluginsStart } from '../../../../../plugin';
-import { useUptimeDataView } from '../../../../hooks';
 import { isValidKuery } from '../../query_bar/query_bar';
 import * as labels from '../translations';
+import { useUptimeDataView } from '../../../../hooks';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 interface Props {
   query: string;

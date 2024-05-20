@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
 import React, { memo } from 'react';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
 
 import { Status } from '../status/status';
 import { CaseStatuses } from '../status/types';
 import { IconWithCount } from './icon_with_count';
+import { getTruncatedText } from './utils';
 import * as i18n from './translations';
 import type { CaseTooltipContentProps } from './types';
-import { getTruncatedText } from './utils';
 
 const TITLE_TRUNCATE_LENGTH = 35;
 const DESCRIPTION_TRUNCATE_LENGTH = 80;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import React, { MouseEventHandler } from 'react';
+import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 
 import { ProjectType } from '@kbn/serverless-types';
 

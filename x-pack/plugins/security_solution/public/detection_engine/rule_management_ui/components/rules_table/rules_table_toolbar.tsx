@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NewChat } from '@kbn/elastic-assistant';
-import React, { useCallback, useMemo } from 'react';
-import { getPromptContextFromDetectionRules } from '../../../../assistant/helpers';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { useUserData } from '../../../../detections/components/user_info';
-import * as i18nAssistant from '../../../../detections/pages/detection_engine/rules/translations';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
-import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from './translations';
+import { getPromptContextFromDetectionRules } from '../../../../assistant/helpers';
+import { useRulesTableContext } from './rules_table/rules_table_context';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import * as i18nAssistant from '../../../../detections/pages/detection_engine/rules/translations';
 
 export enum AllRulesTabs {
   management = 'management',

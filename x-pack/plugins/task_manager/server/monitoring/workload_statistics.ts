@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { combineLatest, Observable, timer } from 'rxjs';
+import { mergeMap, map, filter, switchMap, catchError } from 'rxjs';
 import { Logger } from '@kbn/core/server';
-import type { AggregationResultOf } from '@kbn/es-types';
 import { JsonObject } from '@kbn/utility-types';
 import { keyBy, mapValues } from 'lodash';
-import { Observable, combineLatest, timer } from 'rxjs';
-import { catchError, filter, map, mergeMap, switchMap } from 'rxjs';
-import { asInterval, parseIntervalAsMillisecond, parseIntervalAsSecond } from '../lib/intervals';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationResultOf } from '@kbn/es-types';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { TaskStore } from '../task_store';
+import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
 import { HealthStatus } from './monitoring_stats_stream';
+import { TaskStore } from '../task_store';
 import { createRunningAveragedStat } from './task_run_calcultors';
 
 interface StatusStat extends JsonObject {
@@ -231,9 +231,7 @@ export function createWorkloadAggregator(
           doc_count: overdue,
           nonRecurring: { doc_count: overdueNonRecurring },
         },
-        scheduleDensity: {
-          buckets: [scheduleDensity] = [],
-        } = {},
+        scheduleDensity: { buckets: [scheduleDensity] = [] } = {},
       } = aggregations.idleTasks;
 
       const { schedules, cadence } = aggregations.schedule.buckets.reduce(

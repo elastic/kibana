@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import {
   EuiButton,
   EuiPageHeader,
@@ -13,11 +14,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { resetIndexUrlParams } from './reset_index_url_params';
+import { renderBadges } from '../../../../lib/render_badges';
 import { Index } from '../../../../../../common';
 import {
   INDEX_OPEN,
@@ -25,17 +27,15 @@ import {
   IndexDetailsTab,
   IndexDetailsTabId,
 } from '../../../../../../common/constants';
+import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
-import { renderBadges } from '../../../../lib/render_badges';
-import { getIndexDetailsLink } from '../../../../services/routing';
-import { DetailsPageMappings } from './details_page_mappings';
+import { ManageIndexButton } from './manage_index_button';
 import { DetailsPageOverview } from './details_page_overview';
+import { DetailsPageMappings } from './details_page_mappings';
 import { DetailsPageSettings } from './details_page_settings';
 import { DetailsPageStats } from './details_page_stats';
 import { DetailsPageTab } from './details_page_tab';
-import { ManageIndexButton } from './manage_index_button';
-import { resetIndexUrlParams } from './reset_index_url_params';
 
 const defaultTabs: IndexDetailsTab[] = [
   {

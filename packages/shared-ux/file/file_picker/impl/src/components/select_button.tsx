@@ -7,10 +7,10 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import type { FileJSON } from '@kbn/shared-ux-file-types';
-import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { useFilePickerContext } from '../context';
 import { i18nTexts } from '../i18n_texts';
 

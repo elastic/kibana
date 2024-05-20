@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import type { AreaSeriesStyle, RecursivePartial, SettingsProps } from '@elastic/charts';
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import React, { useMemo } from 'react';
+import type { AreaSeriesStyle, RecursivePartial, SettingsProps } from '@elastic/charts';
+import { Axis, AreaSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 
-import { get, getOr, isNull, isNumber } from 'lodash/fp';
+import { getOr, get, isNull, isNumber } from 'lodash/fp';
 
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTimeZone } from '../../lib/kibana';
 import { useThrottledResizeObserver } from '../utils';
-import { VisualizationActions } from '../visualization_actions/actions';
-import type { VisualizationActionsProps } from '../visualization_actions/types';
 import { ChartPlaceHolder } from './chart_place_holder';
+import { useTimeZone } from '../../lib/kibana';
 import type { ChartSeriesConfigs, ChartSeriesData } from './common';
 import {
-  ChartWrapper,
-  WrappedByAutoSizer,
-  Wrapper,
   chartDefaultSettings,
   getChartHeight,
   getChartWidth,
+  WrappedByAutoSizer,
   useThemes,
+  Wrapper,
+  ChartWrapper,
 } from './common';
+import { VisualizationActions } from '../visualization_actions/actions';
+import type { VisualizationActionsProps } from '../visualization_actions/types';
 
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';

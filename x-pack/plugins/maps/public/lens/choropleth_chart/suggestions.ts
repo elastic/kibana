@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FileLayer } from '@elastic/ems-client';
-import { IconRegionMap } from '@kbn/chart-icons';
-import { i18n } from '@kbn/i18n';
-import type { SuggestionRequest, VisualizationSuggestion } from '@kbn/lens-plugin/public';
 import { partition } from 'lodash';
-import { getEmsSuggestion } from './get_ems_suggestion';
+import { i18n } from '@kbn/i18n';
+import type { FileLayer } from '@elastic/ems-client';
+import type { SuggestionRequest, VisualizationSuggestion } from '@kbn/lens-plugin/public';
+import { IconRegionMap } from '@kbn/chart-icons';
 import type { ChoroplethChartState } from './types';
+import { getEmsSuggestion } from './get_ems_suggestion';
 
 /**
  * Generate choroplath chart suggestions for buckets that match administrative boundaries from the Elastic Maps Service.

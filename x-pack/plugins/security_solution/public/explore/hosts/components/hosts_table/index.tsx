@@ -10,17 +10,6 @@ import { useDispatch } from 'react-redux';
 
 import type { HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
 import { HostsFields } from '../../../../../common/api/search_strategy/hosts/model/sort';
-import { SecurityPageName } from '../../../../../common/constants';
-import type { Direction, RiskSeverity } from '../../../../../common/search_strategy';
-import type {
-  HostItem,
-  HostsEdges,
-  HostsSortField,
-} from '../../../../../common/search_strategy/security_solution/hosts';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
 import type {
   Columns,
   Criteria,
@@ -28,10 +17,21 @@ import type {
   SortingBasicTable,
 } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
-import { HostsTableType } from '../../store/model';
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
+import type {
+  HostsEdges,
+  HostItem,
+  HostsSortField,
+} from '../../../../../common/search_strategy/security_solution/hosts';
+import type { Direction, RiskSeverity } from '../../../../../common/search_strategy';
+import { SecurityPageName } from '../../../../../common/constants';
+import { HostsTableType } from '../../store/model';
+import { useNavigateTo } from '../../../../common/lib/kibana/hooks';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -53,7 +53,7 @@ export type HostsTableColumns = [
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
   Columns<OsEcs['version']>,
-  Columns<RiskSeverity>?,
+  Columns<RiskSeverity>?
 ];
 
 const rowItems: ItemsPerRow[] = [

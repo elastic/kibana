@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import React, { FunctionComponent, createElement } from 'react';
+import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import { RenderingMetadata } from '../types';
 import { Fonts } from './fonts';
 import { Logo } from './logo';

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { FindActionResult } from '@kbn/actions-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
-  ACTION_GROUP_DEFINITIONS,
-  SYNTHETICS_STATUS_RULE,
-  SYNTHETICS_TLS_RULE,
-} from '../../../common/constants/synthetics_alerts';
+import { FindActionResult } from '@kbn/actions-plugin/server';
+import { savedObjectsAdapter } from '../../saved_objects';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
 import {
   SyntheticsMonitorStatusTranslations,
   TlsTranslations,
 } from '../../../common/rules/synthetics/translations';
-import { savedObjectsAdapter } from '../../saved_objects';
 import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
+import {
+  ACTION_GROUP_DEFINITIONS,
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '../../../common/constants/synthetics_alerts';
 
 type DefaultRuleType = typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE;
 export class DefaultAlertService {

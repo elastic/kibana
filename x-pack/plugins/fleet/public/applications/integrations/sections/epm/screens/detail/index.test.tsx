@@ -5,10 +5,22 @@
  * 2.0.
  */
 
+import React, { lazy, memo } from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import { act, cleanup } from '@testing-library/react';
-import React, { lazy, memo } from 'react';
 
+import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
+import type {
+  CheckPermissionsResponse,
+  GetAgentPoliciesResponse,
+  GetFleetStatusResponse,
+  GetInfoResponse,
+  GetPackagePoliciesResponse,
+  GetStatsResponse,
+  GetSettingsResponse,
+  GetVerificationKeyIdResponse,
+} from '../../../../../../../common/types/rest_spec';
+import type { KibanaAssetType } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
   appRoutesService,
@@ -16,20 +28,8 @@ import {
   fleetSetupRouteService,
   packagePolicyRouteService,
 } from '../../../../../../../common/services';
-import type { KibanaAssetType } from '../../../../../../../common/types/models';
-import type {
-  CheckPermissionsResponse,
-  GetAgentPoliciesResponse,
-  GetFleetStatusResponse,
-  GetInfoResponse,
-  GetPackagePoliciesResponse,
-  GetSettingsResponse,
-  GetStatsResponse,
-  GetVerificationKeyIdResponse,
-} from '../../../../../../../common/types/rest_spec';
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
-import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
@@ -348,7 +348,7 @@ describe('when on integration detail', () => {
 });
 
 interface MockedApi<
-  R extends Record<string, jest.MockedFunction<any>> = Record<string, jest.MockedFunction<any>>,
+  R extends Record<string, jest.MockedFunction<any>> = Record<string, jest.MockedFunction<any>>
 > {
   /** Will return a promise that resolves when triggered APIs are complete */
   waitForApi: () => Promise<void>;

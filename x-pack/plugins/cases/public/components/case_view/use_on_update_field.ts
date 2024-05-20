@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import { useCallback, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
 
-import type { CaseAttributes, CaseConnector, CaseStatuses } from '../../../common/types/domain';
+import type { CaseStatuses, CaseAttributes, CaseConnector } from '../../../common/types/domain';
 import type { CaseUI, UpdateByKey, UpdateKey } from '../../containers/types';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { vislibGaugeConfig } from './gauge';
 import { vislibPointSeriesTypes as pointSeries } from './point_series';
+import { vislibGaugeConfig } from './gauge';
 
 export const vislibTypesConfig = {
   heatmap: pointSeries.heatmap,

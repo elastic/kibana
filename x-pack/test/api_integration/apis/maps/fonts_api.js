@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import path from 'path';
+import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import expect from '@kbn/expect';
+import path from 'path';
 import { copyFile, rm } from 'fs/promises';
 
 export default function ({ getService }) {

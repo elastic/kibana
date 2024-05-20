@@ -26,7 +26,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ErrorToastOptions",
-        "description": ["\nOptions available for {@link IToasts} error APIs."],
+        "description": [
+          "\nOptions available for {@link IToasts} error APIs."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-notifications-browser",
@@ -54,7 +56,9 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["\nThe title of the toast and the dialog when expanding the message."],
+            "description": [
+              "\nThe title of the toast and the dialog when expanding the message."
+            ],
             "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -68,7 +72,9 @@
             "description": [
               "\nThe message to be shown in the toast. If this is not specified the error's\nmessage will be shown in the toast instead. Overwriting that message can\nbe used to provide more user-friendly toasts. If you specify this, the error\nmessage will still be shown in the detailed error modal."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -272,7 +278,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -338,7 +346,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -404,7 +414,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -470,7 +482,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -515,7 +529,9 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": ["Error"],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -565,7 +581,9 @@
             "type": "Object",
             "tags": [],
             "label": "toasts",
-            "description": ["{@link ToastsSetup}"],
+            "description": [
+              "{@link ToastsSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
@@ -599,7 +617,9 @@
             "type": "Object",
             "tags": [],
             "label": "toasts",
-            "description": ["{@link ToastsStart}"],
+            "description": [
+              "{@link ToastsStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-notifications-browser",
@@ -620,7 +640,9 @@
             "tags": [],
             "label": "showErrorDialog",
             "description": [],
-            "signature": ["(options: { title: string; error: Error; }) => void"],
+            "signature": [
+              "(options: { title: string; error: Error; }) => void"
+            ],
             "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -654,7 +676,9 @@
                     "tags": [],
                     "label": "error",
                     "description": [],
-                    "signature": ["Error"],
+                    "signature": [
+                      "Error"
+                    ],
                     "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -673,7 +697,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ToastOptions",
-        "description": ["\nOptions available for {@link IToasts} APIs."],
+        "description": [
+          "\nOptions available for {@link IToasts} APIs."
+        ],
         "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -684,8 +710,12 @@
             "type": "number",
             "tags": [],
             "label": "toastLifeTimeMs",
-            "description": ["\nHow long should the toast remain on screen."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nHow long should the toast remain on screen."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -735,7 +765,9 @@
         "type": "Type",
         "tags": [],
         "label": "ToastInput",
-        "description": ["\nInputs for {@link IToasts} APIs."],
+        "description": [
+          "\nInputs for {@link IToasts} APIs."
+        ],
         "signature": [
           "string | ",
           {
@@ -757,7 +789,9 @@
         "type": "Type",
         "tags": [],
         "label": "ToastInputFields",
-        "description": ["\nAllowed fields for {@link ToastInput}.\n"],
+        "description": [
+          "\nAllowed fields for {@link ToastInput}.\n"
+        ],
         "signature": [
           "Pick<",
           "Toast",
@@ -790,7 +824,9 @@
         "type": "Type",
         "tags": [],
         "label": "ToastsSetup",
-        "description": ["\n{@link IToasts}"],
+        "description": [
+          "\n{@link IToasts}"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-notifications-browser",
@@ -811,7 +847,9 @@
         "type": "Type",
         "tags": [],
         "label": "ToastsStart",
-        "description": ["\n{@link IToasts}"],
+        "description": [
+          "\n{@link IToasts}"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-notifications-browser",

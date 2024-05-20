@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
-import { OnSourceChangeArgs } from '../source';
+import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EmsTmsSourceConfig, TileServiceSelect } from './tile_service_select';
+import { OnSourceChangeArgs } from '../source';
 
 interface Props {
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;

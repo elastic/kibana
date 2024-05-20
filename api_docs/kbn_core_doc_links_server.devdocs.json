@@ -37,7 +37,9 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": ["The branch/version the docLinks are pointing to"],
+            "description": [
+              "The branch/version the docLinks are pointing to"
+            ],
             "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -48,7 +50,9 @@
             "type": "string",
             "tags": [],
             "label": "elasticWebsiteUrl",
-            "description": ["The base url for the elastic website"],
+            "description": [
+              "The base url for the elastic website"
+            ],
             "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -59,7 +63,9 @@
             "type": "Object",
             "tags": [],
             "label": "links",
-            "description": ["A record of all registered doc links"],
+            "description": [
+              "A record of all registered doc links"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/doc-links",

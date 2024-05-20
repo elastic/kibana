@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { LensApi } from '@kbn/lens-plugin/public';
-import { getPanelTitle } from '@kbn/presentation-publishing';
 import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiFlyoutBody,
+  EuiTitle,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { getPanelTitle } from '@kbn/presentation-publishing';
+import type { LensApi } from '@kbn/lens-plugin/public';
+import { Layer } from './layer';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { VisualizationExtractor } from '../../../../application/jobs/new_job/job_from_lens';
 import { useMlFromLensKibanaContext } from '../../common/context';
-import { Layer } from './layer';
 
 interface Props {
   embeddable: LensApi;

@@ -6,11 +6,11 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import { useCasesToast } from '../common/use_cases_toast';
-import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
 import { createAttachments } from './api';
-import { casesMutationsKeys } from './constants';
 import * as i18n from './translations';
+import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
+import { useCasesToast } from '../common/use_cases_toast';
+import { casesMutationsKeys } from './constants';
 
 export interface PostComment {
   caseId: string;

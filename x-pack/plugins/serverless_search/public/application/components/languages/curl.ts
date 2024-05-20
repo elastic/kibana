@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
-import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
 
 export const curlDefinition: LanguageDefinition = {
@@ -55,7 +55,9 @@ export API_KEY="${apiKey}"`,
     apiKey,
     indexName,
     ingestPipeline,
-  }) => `curl -X POST "\$\{url\}/_bulk?pretty${ingestPipeline ? `&pipeline=${ingestPipeline}` : ''}" \\
+  }) => `curl -X POST "\$\{url\}/_bulk?pretty${
+    ingestPipeline ? `&pipeline=${ingestPipeline}` : ''
+  }" \\
   -H "Authorization: ApiKey ${apiKey}" \\
   -H "Content-Type: application/json" \\
   -d'

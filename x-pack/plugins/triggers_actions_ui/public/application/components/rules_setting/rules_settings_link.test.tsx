@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
-import { coreMock } from '@kbn/core/public/mocks';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render, cleanup, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { coreMock } from '@kbn/core/public/mocks';
+import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
+import { RulesSettingsLink } from './rules_settings_link';
 import { useKibana } from '../../../common/lib/kibana';
 import { getFlappingSettings } from '../../lib/rule_api/get_flapping_settings';
 import { getQueryDelaySettings } from '../../lib/rule_api/get_query_delay_settings';
-import { RulesSettingsLink } from './rules_settings_link';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/rule_api/get_flapping_settings', () => ({

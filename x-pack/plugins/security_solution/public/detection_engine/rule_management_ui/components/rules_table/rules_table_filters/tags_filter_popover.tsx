@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
-import { toggleSelectedGroup } from '../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import { toggleSelectedGroup } from '../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
 import { caseInsensitiveSort } from '../helpers';
 
 const TAGS_POPOVER_WIDTH = 274;

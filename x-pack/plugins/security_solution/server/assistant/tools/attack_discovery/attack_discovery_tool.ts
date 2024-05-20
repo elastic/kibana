@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import { PromptTemplate } from '@langchain/core/prompts';
-import { DynamicTool } from '@langchain/core/tools';
+import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
+import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { LLMChain } from 'langchain/chains';
 import { OutputFixingParser } from 'langchain/output_parsers';
+import { DynamicTool } from '@langchain/core/tools';
 
 import { APP_UI_ID } from '../../../../common';
-import { sizeIsOutOfRange } from '../open_and_acknowledged_alerts/helpers';
 import { getAnonymizedAlerts } from './get_anonymized_alerts';
-import { getAttackDiscoveryPrompt } from './get_attack_discovery_prompt';
 import { getOutputParser } from './get_output_parser';
+import { sizeIsOutOfRange } from '../open_and_acknowledged_alerts/helpers';
+import { getAttackDiscoveryPrompt } from './get_attack_discovery_prompt';
 
 export interface AttackDiscoveryToolParams extends AssistantToolParams {
   alertsIndexPattern: string;

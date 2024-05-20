@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { DataViewsPublicPluginSetup } from '@kbn/data-views-plugin/public/types';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { UIM_APP_NAME } from '../common';
-import { init as initDocumentation, setHttp } from './crud_app/services';
+import { DataViewsPublicPluginSetup } from '@kbn/data-views-plugin/public/types';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
-import { setFatalErrors, setNotifications, setUiStatsReporter } from './kibana_services';
+import { UIM_APP_NAME } from '../common';
+import { setHttp, init as initDocumentation } from './crud_app/services';
+import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
 import { ClientConfigType } from './types';
 
 export interface RollupPluginSetupDependencies {

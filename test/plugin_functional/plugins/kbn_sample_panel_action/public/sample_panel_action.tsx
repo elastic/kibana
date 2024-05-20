@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { CoreSetup } from '@kbn/core/public';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { createAction } from '@kbn/ui-actions-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export const SAMPLE_PANEL_ACTION = 'samplePanelAction';
 

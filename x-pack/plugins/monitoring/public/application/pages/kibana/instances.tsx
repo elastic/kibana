@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { find } from 'lodash';
 import React, { useContext, useState, useCallback, useEffect } from 'react';
-import { KIBANA_SYSTEM_ID, RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
-import { AlertsByName } from '../../../alerts/types';
-import { KibanaInstances } from '../../../components/kibana/instances';
-import { SetupModeProps, SetupModeRenderer } from '../../../components/renderers/setup_mode';
-import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { useTable } from '../../hooks/use_table';
+import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { useTable } from '../../hooks/use_table';
 import { KibanaTemplate } from './kibana_template';
+import { KibanaInstances } from '../../../components/kibana/instances';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { AlertsByName } from '../../../alerts/types';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { KIBANA_SYSTEM_ID, RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
 
 export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { cluster_uuid: clusterUuid, ccs } = useContext(GlobalStateContext);

@@ -7,18 +7,18 @@
 
 import Boom from '@hapi/boom';
 
-import type { CasesClientArgs } from '..';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { AttachmentPatchRequestRt } from '../../../common/types/api';
-import type { Case } from '../../../common/types/domain';
-import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
-import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
 import { CaseCommentModel } from '../../common/models';
+import { createCaseError } from '../../common/error';
+import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
+import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
-import { validateMaxUserActions } from '../../common/validators';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
+import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
+import { validateMaxUserActions } from '../../common/validators';
 
 /**
  * Update an attachment.

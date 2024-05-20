@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { ClientPluginsStart } from '../../plugin';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { UptimeSettingsContext } from '../contexts';
+import { ClientPluginsStart } from '../../plugin';
 import { indexStatusSelector } from '../state/selectors';
 
 export function useNoDataConfig(): NoDataConfig | undefined {

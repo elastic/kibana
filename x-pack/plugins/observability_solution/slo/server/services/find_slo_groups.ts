@@ -8,14 +8,14 @@ import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/co
 import {
   FindSLOGroupsParams,
   FindSLOGroupsResponse,
-  Pagination,
   findSLOGroupsResponseSchema,
+  Pagination,
   sloGroupWithSummaryResponseSchema,
 } from '@kbn/slo-schema';
+import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
-import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 

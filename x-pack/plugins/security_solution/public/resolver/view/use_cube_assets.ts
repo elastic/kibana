@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { EuiButtonColor } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { EuiButtonColor } from '@elastic/eui';
 import { useMemo } from 'react';
-import type { NodeDataStatus, ResolverProcessType } from '../types';
-import { useColors } from './use_colors';
+import type { ResolverProcessType, NodeDataStatus } from '../types';
 import { useSymbolIDs } from './use_symbol_ids';
+import { useColors } from './use_colors';
 
 /**
  * Provides colors and HTML IDs used to render the 'cube' graphic that accompanies nodes.

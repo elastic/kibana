@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { act, renderHook } from '@testing-library/react-hooks';
 import {
-  useGlobalQueryString,
   useInitializeUrlParam,
+  useGlobalQueryString,
   useSyncGlobalQueryString,
   useUpdateUrlParam,
 } from '.';
-import { SecurityPageName } from '../../../app/types';
-import type { LinkInfo } from '../../links';
-import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
 import type { GlobalUrlParam } from '../../store/global_url_param';
 import { globalUrlParamActions } from '../../store/global_url_param';
 import { mockHistory } from '../route/mocks';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
+import type { LinkInfo } from '../../links';
+import { SecurityPageName } from '../../../app/types';
 
 const mockDispatch = jest.fn();
 

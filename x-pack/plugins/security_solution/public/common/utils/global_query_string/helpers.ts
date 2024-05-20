@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { url } from '@kbn/kibana-utils-plugin/public';
 import type { RisonValue } from '@kbn/rison';
-import { encode, safeDecode } from '@kbn/rison';
+import { safeDecode, encode } from '@kbn/rison';
 import type { ParsedQuery } from 'query-string';
 import { parse, stringify } from 'query-string';
-import { useCallback } from 'react';
+import { url } from '@kbn/kibana-utils-plugin/public';
 import { useHistory } from 'react-router-dom';
+import { useCallback } from 'react';
 import { SecurityPageName } from '../../../app/types';
 
 export const isDetectionsPages = (pageName: string) =>

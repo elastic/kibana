@@ -1,7 +1,3 @@
-import { PassThrough, Transform } from 'stream';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,22 +5,26 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
  * 2.0.
  */
 import aws from 'aws4';
-import { AxiosError } from 'axios';
-import {
-  BEDROCK_CONNECTOR_ID,
-  DEFAULT_BEDROCK_MODEL,
-  DEFAULT_BEDROCK_URL,
-  DEFAULT_TIMEOUT_MS,
-  DEFAULT_TOKEN_LIMIT,
-} from '../../../common/bedrock/constants';
+import { PassThrough, Transform } from 'stream';
+import { BedrockConnector } from './bedrock';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
   StreamingResponseSchema,
 } from '../../../common/bedrock/schema';
+import {
+  BEDROCK_CONNECTOR_ID,
+  DEFAULT_BEDROCK_MODEL,
+  DEFAULT_BEDROCK_URL,
+  DEFAULT_TOKEN_LIMIT,
+  DEFAULT_TIMEOUT_MS,
+} from '../../../common/bedrock/constants';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { BedrockConnector } from './bedrock';
+import { AxiosError } from 'axios';
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 
 // @ts-ignore

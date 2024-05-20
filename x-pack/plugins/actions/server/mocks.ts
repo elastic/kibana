@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -13,11 +12,12 @@ import {
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { ActionsClientMock, actionsClientMock } from './actions_client/actions_client.mock';
-import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
-import { ConnectorTokenClient } from './lib/connector_token_client';
+import { Logger } from '@kbn/core/server';
+import { actionsClientMock, ActionsClientMock } from './actions_client/actions_client.mock';
 import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
 import { Services, UnsecuredServices } from './types';
+import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
 export { actionsAuthorizationMock };
 export { actionsClientMock };

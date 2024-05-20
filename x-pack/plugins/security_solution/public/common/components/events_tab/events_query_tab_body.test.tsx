@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
 import { render } from '@testing-library/react';
 import React from 'react';
+import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
 import { HostsType } from '../../../explore/hosts/store/model';
+import { TestProviders } from '../../mock';
+import type { EventsQueryTabBodyComponentProps } from './events_query_tab_body';
+import { EventsQueryTabBody, ALERTS_EVENTS_HISTOGRAM_ID } from './events_query_tab_body';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { licenseService } from '../../hooks/use_license';
-import { TestProviders } from '../../mock';
 import { mockHistory } from '../../mock/router';
-import type { EventsQueryTabBodyComponentProps } from './events_query_tab_body';
-import { ALERTS_EVENTS_HISTOGRAM_ID, EventsQueryTabBody } from './events_query_tab_body';
 
 const mockGetDefaultControlColumn = jest.fn();
 jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({

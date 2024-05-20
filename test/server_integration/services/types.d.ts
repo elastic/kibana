@@ -7,8 +7,8 @@
  */
 
 import { GenericFtrProviderContext } from '@kbn/test';
-import { services as kibanaApiIntegrationServices } from '../../api_integration/services';
 import { services as kibanaCommonServices } from '../../common/services';
+import { services as kibanaApiIntegrationServices } from '../../api_integration/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<
   typeof kibanaCommonServices & { supertest: typeof kibanaApiIntegrationServices.supertest },

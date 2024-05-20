@@ -4,19 +4,18 @@
  */
 
 import Handlebars from 'handlebars';
-// @ts-expect-error: Could not find a declaration file for module
-import AST from 'handlebars/dist/cjs/handlebars/compiler/ast';
-// @ts-expect-error: Could not find a declaration file for module
-import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
 import {
   createProtoAccessControl,
   resultIsAllowed,
   // @ts-expect-error: Could not find a declaration file for module
 } from 'handlebars/dist/cjs/handlebars/internal/proto-access';
 // @ts-expect-error: Could not find a declaration file for module
-import { createFrame, indexOf } from 'handlebars/dist/cjs/handlebars/utils';
+import AST from 'handlebars/dist/cjs/handlebars/compiler/ast';
+// @ts-expect-error: Could not find a declaration file for module
+import { indexOf, createFrame } from 'handlebars/dist/cjs/handlebars/utils';
+// @ts-expect-error: Could not find a declaration file for module
+import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
 
-import { kAmbiguous, kHelper, kSimple } from './symbols';
 import type {
   AmbiguousHelperOptions,
   CompileOptions,
@@ -37,6 +36,7 @@ import type {
   TemplateDelegate,
   VisitorHelper,
 } from './types';
+import { kAmbiguous, kHelper, kSimple } from './symbols';
 import {
   initData,
   isBlock,

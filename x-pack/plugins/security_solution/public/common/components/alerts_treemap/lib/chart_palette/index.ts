@@ -8,13 +8,13 @@
 import { clamp } from 'lodash/fp';
 
 import {
-  RISK_COLOR_CRITICAL,
-  RISK_COLOR_HIGH,
   RISK_COLOR_LOW,
   RISK_COLOR_MEDIUM,
-  RISK_SCORE_CRITICAL,
-  RISK_SCORE_HIGH,
+  RISK_COLOR_HIGH,
+  RISK_COLOR_CRITICAL,
   RISK_SCORE_MEDIUM,
+  RISK_SCORE_HIGH,
+  RISK_SCORE_CRITICAL,
 } from '../../../../constants';
 
 /**

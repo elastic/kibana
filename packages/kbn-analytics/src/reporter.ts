@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationUsageMetric, Metric, createUiCounterMetric, trackUsageAgent } from './metrics';
 import { wrapArray } from './util';
+import { Metric, createUiCounterMetric, trackUsageAgent, ApplicationUsageMetric } from './metrics';
 
+import { Storage, ReportStorageManager } from './storage';
 import { Report, ReportManager } from './report';
-import { ReportStorageManager, Storage } from './storage';
 
 export interface ReporterConfig {
   http: ReportHTTP;

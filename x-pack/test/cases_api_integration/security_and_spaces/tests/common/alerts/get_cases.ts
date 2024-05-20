@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import { Case } from '@kbn/cases-plugin/common/types/domain';
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
+  getPostCaseRequest,
+  postCommentAlertReq,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
+import {
   createCase,
   createComment,
-  deleteAllCaseItems,
   getCasesByAlert,
+  deleteAllCaseItems,
 } from '../../../../common/lib/api';
+import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -27,12 +33,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import {
-  getPostCaseRequest,
-  postCommentAlertReq,
-  postCommentUserReq,
-} from '../../../../common/lib/mock';
-import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -6,8 +6,8 @@
  */
 
 import { RouteInitializerDeps } from '..';
-import { initializeDownloadShareableWorkpadRoute } from './download';
 import { initializeZipShareableWorkpadRoute } from './zip';
+import { initializeDownloadShareableWorkpadRoute } from './download';
 
 export function initShareablesRoutes(deps: RouteInitializerDeps) {
   initializeDownloadShareableWorkpadRoute(deps);

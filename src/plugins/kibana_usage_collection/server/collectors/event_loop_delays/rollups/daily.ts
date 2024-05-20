@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 import { deleteHistogramSavedObjects } from '../saved_objects';
 
 /**

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 
-import { useMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
-import * as i18n from '../translations';
 import { LinkIcon } from './link_icon';
+import * as i18n from '../translations';
 import { TruncatedText } from './truncated_text';
+import { useMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 
 export const styles = {
   linkBack: css`

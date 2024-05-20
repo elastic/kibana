@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { mount } from 'enzyme';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { mount } from 'enzyme';
-import React from 'react';
-import { SnapshotHeading } from '../../overview/snapshot/snapshot_heading';
 import { ChartWrapper } from './chart_wrapper';
+import { SnapshotHeading } from '../../overview/snapshot/snapshot_heading';
 import { DonutChart } from './donut_chart';
 const SNAPSHOT_CHART_HEIGHT = 144;
 describe('ChartWrapper component', () => {

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import type { MockedKeys } from '@kbn/utility-types-jest';
 import { of } from 'rxjs';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
 import { SearchSource, SearchSourceDependencies } from './search_source';
-import { ISearchSource, ISearchStartSearchSource, SearchSourceFields } from './types';
+import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setOverwriteDataViewType: jest.fn(),

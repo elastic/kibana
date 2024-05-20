@@ -7,12 +7,12 @@
  */
 
 import _ from 'lodash';
-import {
-  compileBodyDescription,
-  globalsOnlyAutocompleteComponents,
-} from '../autocomplete/body_completer';
 import { UrlPatternMatcher } from '../autocomplete/components';
 import { UrlParams } from '../autocomplete/url_params';
+import {
+  globalsOnlyAutocompleteComponents,
+  compileBodyDescription,
+} from '../autocomplete/body_completer';
 
 /**
  *

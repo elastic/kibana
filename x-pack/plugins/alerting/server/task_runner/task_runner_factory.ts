@@ -6,19 +6,19 @@
  */
 
 import { RunContext } from '@kbn/task-manager-plugin/server';
-import { InMemoryMetrics } from '../monitoring';
-import { NormalizedRuleType } from '../rule_type_registry';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
-  AlertInstanceContext,
-  AlertInstanceState,
   RuleAlertData,
   RuleTypeParams,
   RuleTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
 } from '../types';
-import { AdHocTaskRunner } from './ad_hoc_task_runner';
 import { TaskRunner } from './task_runner';
+import { NormalizedRuleType } from '../rule_type_registry';
+import { InMemoryMetrics } from '../monitoring';
 import { TaskRunnerContext } from './types';
+import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { AdHocTaskRunner } from './ad_hoc_task_runner';
 
 export class TaskRunnerFactory {
   private isInitialized = false;
@@ -40,7 +40,7 @@ export class TaskRunnerFactory {
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string,
-    AlertData extends RuleAlertData,
+    AlertData extends RuleAlertData
   >(
     ruleType: NormalizedRuleType<
       Params,

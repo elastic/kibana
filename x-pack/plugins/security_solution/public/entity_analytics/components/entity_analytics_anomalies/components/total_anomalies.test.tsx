@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
 import { AnomalyEntity } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
-import { TestProviders } from '../../../../common/mock';
+import { render } from '@testing-library/react';
 import { TotalAnomalies } from './total_anomalies';
+import { TestProviders } from '../../../../common/mock';
 
 const defaultProps = {
   count: 0,

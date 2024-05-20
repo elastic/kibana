@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import React, { useEffect, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { getGeoFields, getGeoPointFields } from '../../../../../index_pattern_util';
-import { DEFAULT_WITHIN_DISTANCE } from '../../../../sources/join_sources';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
-import { createDistanceJoinLayerDescriptor } from './create_spatial_join_layer_descriptor';
 import { LeftSourcePanel } from './left_source_panel';
 import { RightSourcePanel } from './right_source_panel';
+import { createDistanceJoinLayerDescriptor } from './create_spatial_join_layer_descriptor';
+import { DEFAULT_WITHIN_DISTANCE } from '../../../../sources/join_sources';
 
 function isLeftConfigComplete(
   leftDataView: DataView | undefined,

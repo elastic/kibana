@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from '.';
+import { sourcererModel } from '../../store/sourcerer';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
-import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
-import { sourcererModel } from '../../store/sourcerer';
-import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const mockDispatch = jest.fn();
 

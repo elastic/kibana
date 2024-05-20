@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+import _ from 'lodash';
 import type { Color, Modifiers } from 'chalk';
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import type {
+  Table as TableType,
+  TableInstanceOptions,
   CharName,
   HorizontalAlignment,
-  TableInstanceOptions,
-  Table as TableType,
 } from 'cli-table3';
-/* eslint-disable no-console */
-import _ from 'lodash';
 
 type ChalkColor = typeof Color | typeof Modifiers;
 type CharType = 'border' | 'noBorder' | 'outsideBorder' | 'pageDivider' | 'allBorders';

@@ -36,7 +36,9 @@
       "post": {
         "summary": "Creates a connector.",
         "operationId": "createConnector",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -101,7 +103,9 @@
       "get": {
         "summary": "Retrieves a connector by ID.",
         "operationId": "getConnector",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/connector_id"
@@ -134,7 +138,9 @@
       "delete": {
         "summary": "Deletes a connector.",
         "operationId": "deleteConnector",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -158,7 +164,9 @@
       "post": {
         "summary": "Creates a connector.",
         "operationId": "createConnectorId",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -170,7 +178,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"]
+              "examples": [
+                "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+              ]
             }
           }
         ],
@@ -213,7 +223,9 @@
       "put": {
         "summary": "Updates the attributes for a connector.",
         "operationId": "updateConnector",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -265,7 +277,9 @@
         "summary": "Runs a connector.",
         "operationId": "runConnector",
         "description": "You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.\n",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -320,7 +334,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["connector_id", "status"],
+                  "required": [
+                    "connector_id",
+                    "status"
+                  ],
                   "properties": {
                     "connector_id": {
                       "type": "string",
@@ -345,7 +362,10 @@
                     "status": {
                       "type": "string",
                       "description": "The status of the action.",
-                      "enum": ["error", "ok"]
+                      "enum": [
+                        "error",
+                        "ok"
+                      ]
                     }
                   }
                 },
@@ -391,7 +411,9 @@
       "get": {
         "summary": "Retrieves all connectors.",
         "operationId": "getConnectors",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "responses": {
           "200": {
             "description": "Indicates a successful call.",
@@ -421,7 +443,9 @@
       "get": {
         "summary": "Retrieves a list of all connector types.",
         "operationId": "getConnectorTypes",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -447,34 +471,46 @@
                       "enabled": {
                         "type": "boolean",
                         "description": "Indicates whether the connector type is enabled in Kibana.",
-                        "examples": [true]
+                        "examples": [
+                          true
+                        ]
                       },
                       "enabled_in_config": {
                         "type": "boolean",
                         "description": "Indicates whether the connector type is enabled in the Kibana configuration file.",
-                        "examples": [true]
+                        "examples": [
+                          true
+                        ]
                       },
                       "enabled_in_license": {
                         "type": "boolean",
                         "description": "Indicates whether the connector is enabled in the license.",
-                        "examples": [true]
+                        "examples": [
+                          true
+                        ]
                       },
                       "id": {
                         "$ref": "#/components/schemas/connector_types"
                       },
                       "is_system_action_type": {
                         "type": "boolean",
-                        "examples": [false]
+                        "examples": [
+                          false
+                        ]
                       },
                       "minimum_license_required": {
                         "type": "string",
                         "description": "The license that is required to use the connector type.",
-                        "examples": ["basic"]
+                        "examples": [
+                          "basic"
+                        ]
                       },
                       "name": {
                         "type": "string",
                         "description": "The name of the connector type.",
-                        "examples": ["Index"]
+                        "examples": [
+                          "Index"
+                        ]
                       },
                       "supported_feature_ids": {
                         "type": "array",
@@ -482,7 +518,13 @@
                         "items": {
                           "$ref": "#/components/schemas/features"
                         },
-                        "examples": [["alerting", "cases", "siem"]]
+                        "examples": [
+                          [
+                            "alerting",
+                            "cases",
+                            "siem"
+                          ]
+                        ]
                       }
                     }
                   }
@@ -506,7 +548,9 @@
         "summary": "Creates a connector.",
         "operationId": "createConnectorWithSpaceId",
         "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -575,7 +619,9 @@
         "summary": "Retrieves a connector by ID.",
         "operationId": "getConnectorWithSpaceId",
         "description": "You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/connector_id"
@@ -612,7 +658,9 @@
         "summary": "Deletes a connector.",
         "operationId": "deleteConnectorWithSpaceId",
         "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. WARNING: When you delete a connector, it cannot be recovered.\n",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -640,7 +688,9 @@
         "summary": "Creates a connector.",
         "operationId": "createConnectorIdWithSpaceId",
         "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -655,7 +705,9 @@
             "required": true,
             "schema": {
               "type": "string",
-              "examples": ["ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"]
+              "examples": [
+                "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74"
+              ]
             }
           }
         ],
@@ -699,7 +751,9 @@
         "summary": "Updates the attributes for a connector.",
         "operationId": "updateConnectorWithSpaceId",
         "description": "You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -754,7 +808,9 @@
         "summary": "Retrieves all connectors.",
         "operationId": "getConnectorsWithSpaceId",
         "description": "You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.\n",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -790,7 +846,9 @@
         "summary": "Retrieves a list of all connector types.",
         "operationId": "getConnectorTypesWithSpaceId",
         "description": "You do not need any Kibana feature privileges to run this API.\n",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -819,17 +877,23 @@
                       "enabled": {
                         "type": "boolean",
                         "description": "Indicates whether the connector type is enabled in Kibana.",
-                        "examples": [true]
+                        "examples": [
+                          true
+                        ]
                       },
                       "enabled_in_config": {
                         "type": "boolean",
                         "description": "Indicates whether the connector type is enabled in the Kibana `.yml` file.",
-                        "examples": [true]
+                        "examples": [
+                          true
+                        ]
                       },
                       "enabled_in_license": {
                         "type": "boolean",
                         "description": "Indicates whether the connector is enabled in the license.",
-                        "examples": [true]
+                        "examples": [
+                          true
+                        ]
                       },
                       "id": {
                         "$ref": "#/components/schemas/connector_types"
@@ -837,12 +901,16 @@
                       "minimum_license_required": {
                         "type": "string",
                         "description": "The license that is required to use the connector type.",
-                        "examples": ["basic"]
+                        "examples": [
+                          "basic"
+                        ]
                       },
                       "name": {
                         "type": "string",
                         "description": "The name of the connector type.",
-                        "examples": ["Index"]
+                        "examples": [
+                          "Index"
+                        ]
                       },
                       "supported_feature_ids": {
                         "type": "array",
@@ -850,7 +918,13 @@
                         "items": {
                           "$ref": "#/components/schemas/features"
                         },
-                        "examples": [["alerting", "uptime", "siem"]]
+                        "examples": [
+                          [
+                            "alerting",
+                            "uptime",
+                            "siem"
+                          ]
+                        ]
                       }
                     }
                   }
@@ -874,7 +948,9 @@
         "summary": "Runs a connector.",
         "operationId": "runConnectorWithSpaceId",
         "description": "You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.\n",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -923,7 +999,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["connector_id", "status"],
+                  "required": [
+                    "connector_id",
+                    "status"
+                  ],
                   "properties": {
                     "connector_id": {
                       "type": "string",
@@ -954,7 +1033,10 @@
                     "status": {
                       "type": "string",
                       "description": "The status of the action.",
-                      "enum": ["error", "ok"]
+                      "enum": [
+                        "error",
+                        "ok"
+                      ]
                     }
                   }
                 },
@@ -993,7 +1075,9 @@
         "operationId": "legacyDeleteConnector",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the delete connector API instead. WARNING: When you delete a connector, it cannot be recovered.\n",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1019,7 +1103,9 @@
         "operationId": "legacyGetConnector",
         "description": "Deprecated in 7.13.0. Use the get connector API instead.",
         "deprecated": true,
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/action_id"
@@ -1042,7 +1128,9 @@
         "operationId": "legacyUpdateConnector",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the update connector API instead.",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1096,7 +1184,9 @@
         "operationId": "legacyGetConnectors",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get all connectors API instead.",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -1126,7 +1216,9 @@
         "operationId": "legacyCreateConnector",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the create connector API instead.",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1180,7 +1272,9 @@
         "operationId": "legacyGetConnectorTypes",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the get all connector types API instead.",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -1209,7 +1303,9 @@
                       "enabledInLicense": {
                         "type": "boolean",
                         "description": "Indicates whether the connector is enabled in the license.",
-                        "examples": [true]
+                        "examples": [
+                          true
+                        ]
                       },
                       "id": {
                         "type": "string",
@@ -1241,7 +1337,9 @@
         "operationId": "legacyRunConnector",
         "deprecated": true,
         "description": "Deprecated in 7.13.0. Use the run connector API instead.",
-        "tags": ["connectors"],
+        "tags": [
+          "connectors"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1261,7 +1359,9 @@
                 "title": "Legacy run connector request body properties",
                 "description": "The properties vary depending on the connector type.",
                 "type": "object",
-                "required": ["params"],
+                "required": [
+                  "params"
+                ],
                 "properties": {
                   "params": {
                     "type": "object",
@@ -1345,7 +1445,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "examples": ["df770e30-8b8b-11ed-a780-3b746c987a81"]
+          "examples": [
+            "df770e30-8b8b-11ed-a780-3b746c987a81"
+          ]
         }
       },
       "space_id": {
@@ -1355,7 +1457,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "examples": ["default"]
+          "examples": [
+            "default"
+          ]
         }
       },
       "action_id": {
@@ -1365,7 +1469,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "examples": ["c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"]
+          "examples": [
+            "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"
+          ]
         }
       }
     },
@@ -1374,7 +1480,12 @@
         "title": "Create Amazon Bedrock connector request",
         "description": "The Amazon Bedrock connector uses axios to send a POST request to Amazon Bedrock.",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_bedrock"
@@ -1382,13 +1493,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".bedrock"],
-            "examples": [".bedrock"]
+            "enum": [
+              ".bedrock"
+            ],
+            "examples": [
+              ".bedrock"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_bedrock"
@@ -1399,7 +1516,11 @@
         "title": "Create Webhook - Case Managment connector request",
         "description": "The Webhook - Case Management connector uses axios to send POST, PUT, and GET requests to a case management RESTful API web service.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_cases_webhook"
@@ -1407,13 +1528,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".cases-webhook"],
-            "examples": [".cases-webhook"]
+            "enum": [
+              ".cases-webhook"
+            ],
+            "examples": [
+              ".cases-webhook"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_cases_webhook"
@@ -1424,7 +1551,12 @@
         "title": "Create D3 Security connector request",
         "description": "The connector uses axios to send a POST request to a D3 Security endpoint.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_d3security"
@@ -1432,13 +1564,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".d3security"],
-            "examples": [".d3security"]
+            "enum": [
+              ".d3security"
+            ],
+            "examples": [
+              ".d3security"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_d3security"
@@ -1449,7 +1587,12 @@
         "title": "Create email connector request",
         "description": "The email connector uses the SMTP protocol to send mail messages, using an integration of Nodemailer. An exception is Microsoft Exchange, which uses HTTP protocol for sending emails, Send mail. Email message text is sent as both plain text and html text.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_email"
@@ -1457,13 +1600,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".email"],
-            "examples": [".email"]
+            "enum": [
+              ".email"
+            ],
+            "examples": [
+              ".email"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_email"
@@ -1474,7 +1623,12 @@
         "title": "Create OpenAI connector request",
         "description": "The OpenAI connector uses axios to send a POST request to either OpenAI or Azure OpenAPI.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_genai"
@@ -1482,13 +1636,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".gen-ai"],
-            "examples": [".gen-ai"]
+            "enum": [
+              ".gen-ai"
+            ],
+            "examples": [
+              ".gen-ai"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_genai"
@@ -1499,7 +1659,11 @@
         "title": "Create index connector request",
         "description": "The index connector indexes a document into Elasticsearch.",
         "type": "object",
-        "required": ["config", "connector_type_id", "name"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_index"
@@ -1507,13 +1671,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".index"],
-            "examples": [".index"]
+            "enum": [
+              ".index"
+            ],
+            "examples": [
+              ".index"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           }
         }
       },
@@ -1521,7 +1691,12 @@
         "title": "Create Jira connector request",
         "description": "The Jira connector uses the REST API v2 to create Jira issues.",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_jira"
@@ -1529,13 +1704,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".jira"],
-            "examples": [".jira"]
+            "enum": [
+              ".jira"
+            ],
+            "examples": [
+              ".jira"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_jira"
@@ -1546,7 +1727,12 @@
         "title": "Create Opsgenie connector request",
         "description": "The Opsgenie connector uses the Opsgenie alert API.",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_opsgenie"
@@ -1554,13 +1740,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".opsgenie"],
-            "examples": [".opsgenie"]
+            "enum": [
+              ".opsgenie"
+            ],
+            "examples": [
+              ".opsgenie"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_opsgenie"
@@ -1571,7 +1763,12 @@
         "title": "Create PagerDuty connector request",
         "description": "The PagerDuty connector uses the v2 Events API to trigger, acknowledge, and resolve PagerDuty alerts.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_pagerduty"
@@ -1579,13 +1776,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".pagerduty"],
-            "examples": [".pagerduty"]
+            "enum": [
+              ".pagerduty"
+            ],
+            "examples": [
+              ".pagerduty"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_pagerduty"
@@ -1596,7 +1799,12 @@
         "title": "Create IBM Resilient connector request",
         "description": "The IBM Resilient connector uses the RESILIENT REST v2 to create IBM Resilient incidents.",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_resilient"
@@ -1604,13 +1812,19 @@
           "connector_type_id": {
             "description": "The type of connector.",
             "type": "string",
-            "examples": [".resilient"],
-            "enum": [".resilient"]
+            "examples": [
+              ".resilient"
+            ],
+            "enum": [
+              ".resilient"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_resilient"
@@ -1622,7 +1836,12 @@
         "description": "The SentinelOne connector communicates with SentinelOne Management Console via REST API. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
         "x-technical-preview": true,
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_sentinelone"
@@ -1630,13 +1849,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".sentinelone"],
-            "examples": [".sentinelone"]
+            "enum": [
+              ".sentinelone"
+            ],
+            "examples": [
+              ".sentinelone"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_sentinelone"
@@ -1647,18 +1872,27 @@
         "title": "Create server log connector request",
         "description": "This connector writes an entry to the Kibana server log.",
         "type": "object",
-        "required": ["connector_type_id", "name"],
+        "required": [
+          "connector_type_id",
+          "name"
+        ],
         "properties": {
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".server-log"],
-            "examples": [".server-log"]
+            "enum": [
+              ".server-log"
+            ],
+            "examples": [
+              ".server-log"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           }
         }
       },
@@ -1666,7 +1900,12 @@
         "title": "Create ServiceNow ITSM connector request",
         "description": "The ServiceNow ITSM connector uses the import set API to create ServiceNow incidents. You can use the connector for rule actions and cases.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_servicenow"
@@ -1674,13 +1913,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".servicenow"],
-            "examples": [".servicenow"]
+            "enum": [
+              ".servicenow"
+            ],
+            "examples": [
+              ".servicenow"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_servicenow"
@@ -1691,7 +1936,12 @@
         "title": "Create ServiceNow ITOM connector request",
         "description": "The ServiceNow ITOM connector uses the event API to create ServiceNow events. You can use the connector for rule actions.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_servicenow_itom"
@@ -1699,13 +1949,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".servicenow-itom"],
-            "examples": [".servicenow-itom"]
+            "enum": [
+              ".servicenow-itom"
+            ],
+            "examples": [
+              ".servicenow-itom"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_servicenow"
@@ -1716,7 +1972,12 @@
         "title": "Create ServiceNow SecOps connector request",
         "description": "The ServiceNow SecOps connector uses the import set API to create ServiceNow security incidents. You can use the connector for rule actions and cases.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_servicenow"
@@ -1724,13 +1985,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".servicenow-sir"],
-            "examples": [".servicenow-sir"]
+            "enum": [
+              ".servicenow-sir"
+            ],
+            "examples": [
+              ".servicenow-sir"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_servicenow"
@@ -1741,7 +2008,11 @@
         "title": "Create Slack connector request",
         "description": "The Slack connector uses an API method to send Slack messages.",
         "type": "object",
-        "required": ["connector_type_id", "name", "secrets"],
+        "required": [
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_slack_api"
@@ -1749,13 +2020,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".slack_api"],
-            "examples": [".slack_api"]
+            "enum": [
+              ".slack_api"
+            ],
+            "examples": [
+              ".slack_api"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_slack_api"
@@ -1766,18 +2043,28 @@
         "title": "Create Slack connector request",
         "description": "The Slack connector uses Slack Incoming Webhooks.",
         "type": "object",
-        "required": ["connector_type_id", "name", "secrets"],
+        "required": [
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".slack"],
-            "examples": [".slack"]
+            "enum": [
+              ".slack"
+            ],
+            "examples": [
+              ".slack"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_slack_webhook"
@@ -1788,7 +2075,12 @@
         "title": "Create Swimlane connector request",
         "description": "The Swimlane connector uses the Swimlane REST API to create Swimlane records.",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_swimlane"
@@ -1796,13 +2088,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".swimlane"],
-            "examples": [".swimlane"]
+            "enum": [
+              ".swimlane"
+            ],
+            "examples": [
+              ".swimlane"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_swimlane"
@@ -1813,18 +2111,28 @@
         "title": "Create Microsoft Teams connector request",
         "description": "The Microsoft Teams connector uses Incoming Webhooks.",
         "type": "object",
-        "required": ["connector_type_id", "name", "secrets"],
+        "required": [
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".teams"],
-            "examples": [".teams"]
+            "enum": [
+              ".teams"
+            ],
+            "examples": [
+              ".teams"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_teams"
@@ -1835,7 +2143,12 @@
         "title": "Create Tines connector request",
         "description": "The Tines connector uses Tines Webhook actions to send events via POST request.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_tines"
@@ -1843,13 +2156,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".tines"],
-            "examples": [".tines"]
+            "enum": [
+              ".tines"
+            ],
+            "examples": [
+              ".tines"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_tines"
@@ -1860,7 +2179,12 @@
         "title": "Create Torq connector request",
         "description": "The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_torq"
@@ -1868,13 +2192,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".torq"],
-            "examples": [".torq"]
+            "enum": [
+              ".torq"
+            ],
+            "examples": [
+              ".torq"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_torq"
@@ -1885,7 +2215,12 @@
         "title": "Create Webhook connector request",
         "description": "The Webhook connector uses axios to send a POST or PUT request to a web service.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_webhook"
@@ -1893,13 +2228,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".webhook"],
-            "examples": [".webhook"]
+            "enum": [
+              ".webhook"
+            ],
+            "examples": [
+              ".webhook"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_webhook"
@@ -1910,7 +2251,12 @@
         "title": "Create xMatters connector request",
         "description": "The xMatters connector uses the xMatters Workflow for Elastic to send actionable alerts to on-call xMatters resources.\n",
         "type": "object",
-        "required": ["config", "connector_type_id", "name", "secrets"],
+        "required": [
+          "config",
+          "connector_type_id",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_xmatters"
@@ -1918,13 +2264,19 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".xmatters"],
-            "examples": [".xmatters"]
+            "enum": [
+              ".xmatters"
+            ],
+            "examples": [
+              ".xmatters"
+            ]
           },
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_xmatters"
@@ -1935,7 +2287,9 @@
         "title": "Connector request properties for an Amazon Bedrock connector",
         "description": "Defines properties for connectors when type is `.bedrock`.",
         "type": "object",
-        "required": ["apiUrl"],
+        "required": [
+          "apiUrl"
+        ],
         "properties": {
           "apiUrl": {
             "type": "string",
@@ -1952,7 +2306,10 @@
         "title": "Connector secrets properties for an Amazon Bedrock connector",
         "description": "Defines secrets for connectors when type is `.bedrock`.",
         "type": "object",
-        "required": ["accessKey", "secret"],
+        "required": [
+          "accessKey",
+          "secret"
+        ],
         "properties": {
           "accessKey": {
             "type": "string",
@@ -1982,18 +2339,26 @@
           "createCommentJson": {
             "type": "string",
             "description": "A JSON payload sent to the create comment URL to create a case comment. You can use variables to add Kibana Cases data to the payload. The required variable is `case.comment`. Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated once the Mustache variables have been placed when the REST method runs. Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.\n",
-            "examples": ["{\"body\": {{{case.comment}}}}"]
+            "examples": [
+              "{\"body\": {{{case.comment}}}}"
+            ]
           },
           "createCommentMethod": {
             "type": "string",
             "description": "The REST API HTTP request method to create a case comment in the third-party system. Valid values are `patch`, `post`, and `put`.\n",
             "default": "put",
-            "enum": ["patch", "post", "put"]
+            "enum": [
+              "patch",
+              "post",
+              "put"
+            ]
           },
           "createCommentUrl": {
             "type": "string",
             "description": "The REST API URL to create a case comment by ID in the third-party system. You can use a variable to add the external system ID to the URL. If you are using the `xpack.actions.allowedHosts setting`, add the hostname to the allowed hosts.\n",
-            "examples": ["https://example.com/issue/{{{external.system.id}}}/comment"]
+            "examples": [
+              "https://example.com/issue/{{{external.system.id}}}/comment"
+            ]
           },
           "createIncidentJson": {
             "type": "string",
@@ -2005,7 +2370,11 @@
           "createIncidentMethod": {
             "type": "string",
             "description": "The REST API HTTP request method to create a case in the third-party system. Valid values are `patch`, `post`, and `put`.\n",
-            "enum": ["patch", "post", "put"],
+            "enum": [
+              "patch",
+              "post",
+              "put"
+            ],
             "default": "post"
           },
           "createIncidentResponseKey": {
@@ -2023,7 +2392,9 @@
           "getIncidentUrl": {
             "type": "string",
             "description": "The REST API URL to get the case by ID from the third-party system. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts. You can use a variable to add the external system ID to the URL. Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.\n",
-            "examples": ["https://example.com/issue/{{{external.system.id}}}"]
+            "examples": [
+              "https://example.com/issue/{{{external.system.id}}}"
+            ]
           },
           "hasAuth": {
             "type": "boolean",
@@ -2045,17 +2416,25 @@
             "type": "string",
             "description": "The REST API HTTP request method to update the case in the third-party system. Valid values are `patch`, `post`, and `put`.\n",
             "default": "put",
-            "enum": ["patch", "post", "put"]
+            "enum": [
+              "patch",
+              "post",
+              "put"
+            ]
           },
           "updateIncidentUrl": {
             "type": "string",
             "description": "The REST API URL to update the case by ID in the third-party system. You can use a variable to add the external system ID to the URL. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.\n",
-            "examples": ["https://example.com/issue/{{{external.system.ID}}}"]
+            "examples": [
+              "https://example.com/issue/{{{external.system.ID}}}"
+            ]
           },
           "viewIncidentUrl": {
             "type": "string",
             "description": "The URL to view the case in the external system. You can use variables to add the external system ID or external system title to the URL.\n",
-            "examples": ["https://testing-jira.atlassian.net/browse/{{{external.system.title}}}"]
+            "examples": [
+              "https://testing-jira.atlassian.net/browse/{{{external.system.title}}}"
+            ]
           }
         }
       },
@@ -2077,7 +2456,9 @@
         "title": "Connector request properties for a D3 Security connector",
         "description": "Defines properties for connectors when type is `.d3security`.",
         "type": "object",
-        "required": ["url"],
+        "required": [
+          "url"
+        ],
         "properties": {
           "url": {
             "type": "string",
@@ -2088,7 +2469,9 @@
       "secrets_properties_d3security": {
         "title": "Connector secrets properties for a D3 Security connector",
         "description": "Defines secrets for connectors when type is `.d3security`.",
-        "required": ["token"],
+        "required": [
+          "token"
+        ],
         "type": "object",
         "properties": {
           "token": {
@@ -2100,12 +2483,17 @@
       "config_properties_email": {
         "title": "Connector request properties for an email connector",
         "description": "Defines properties for connectors when type is `.email`.",
-        "required": ["from"],
+        "required": [
+          "from"
+        ],
         "type": "object",
         "properties": {
           "clientId": {
             "description": "The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.\n",
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "from": {
             "description": "The from address for all emails sent by the connector. It must be specified in `user@host-name` format.\n",
@@ -2121,7 +2509,10 @@
             "type": "string"
           },
           "oauthTokenUrl": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "port": {
             "description": "The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. \n",
@@ -2134,11 +2525,21 @@
           "service": {
             "description": "The name of the email service.\n",
             "type": "string",
-            "enum": ["elastic_cloud", "exchange_server", "gmail", "other", "outlook365", "ses"]
+            "enum": [
+              "elastic_cloud",
+              "exchange_server",
+              "gmail",
+              "other",
+              "outlook365",
+              "ses"
+            ]
           },
           "tenantId": {
             "description": "The tenant identifier, which is part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.\n",
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -2165,12 +2566,17 @@
         "title": "Connector request properties for an OpenAI connector that uses Azure OpenAI",
         "description": "Defines properties for connectors when type is `.gen-ai` and the API provider is `Azure OpenAI'.\n",
         "type": "object",
-        "required": ["apiProvider", "apiUrl"],
+        "required": [
+          "apiProvider",
+          "apiUrl"
+        ],
         "properties": {
           "apiProvider": {
             "type": "string",
             "description": "The OpenAI API provider.",
-            "enum": ["Azure OpenAI"]
+            "enum": [
+              "Azure OpenAI"
+            ]
           },
           "apiUrl": {
             "type": "string",
@@ -2182,12 +2588,17 @@
         "title": "Connector request properties for an OpenAI connector",
         "description": "Defines properties for connectors when type is `.gen-ai` and the API provider is `OpenAI'.\n",
         "type": "object",
-        "required": ["apiProvider", "apiUrl"],
+        "required": [
+          "apiProvider",
+          "apiUrl"
+        ],
         "properties": {
           "apiProvider": {
             "type": "string",
             "description": "The OpenAI API provider.",
-            "enum": ["OpenAI"]
+            "enum": [
+              "OpenAI"
+            ]
           },
           "apiUrl": {
             "type": "string",
@@ -2231,14 +2642,19 @@
       },
       "config_properties_index": {
         "title": "Connector request properties for an index connector",
-        "required": ["index"],
+        "required": [
+          "index"
+        ],
         "description": "Defines properties for connectors when type is `.index`.",
         "type": "object",
         "properties": {
           "executionTimeField": {
             "description": "A field that indicates when the document was indexed.",
             "default": null,
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "index": {
             "description": "The Elasticsearch index to be written to.",
@@ -2253,7 +2669,10 @@
       },
       "config_properties_jira": {
         "title": "Connector request properties for a Jira connector",
-        "required": ["apiUrl", "projectKey"],
+        "required": [
+          "apiUrl",
+          "projectKey"
+        ],
         "description": "Defines properties for connectors when type is `.jira`.",
         "type": "object",
         "properties": {
@@ -2269,7 +2688,10 @@
       },
       "secrets_properties_jira": {
         "title": "Connector secrets properties for a Jira connector",
-        "required": ["apiToken", "email"],
+        "required": [
+          "apiToken",
+          "email"
+        ],
         "description": "Defines secrets for connectors when type is `.jira`.",
         "type": "object",
         "properties": {
@@ -2285,7 +2707,9 @@
       },
       "config_properties_opsgenie": {
         "title": "Connector request properties for an Opsgenie connector",
-        "required": ["apiUrl"],
+        "required": [
+          "apiUrl"
+        ],
         "description": "Defines properties for connectors when type is `.opsgenie`.",
         "type": "object",
         "properties": {
@@ -2297,7 +2721,9 @@
       },
       "secrets_properties_opsgenie": {
         "title": "Connector secrets properties for an Opsgenie connector",
-        "required": ["apiKey"],
+        "required": [
+          "apiKey"
+        ],
         "description": "Defines secrets for connectors when type is `.opsgenie`.",
         "type": "object",
         "properties": {
@@ -2314,8 +2740,13 @@
         "properties": {
           "apiUrl": {
             "description": "The PagerDuty event URL.",
-            "type": ["string", "null"],
-            "examples": ["https://events.pagerduty.com/v2/enqueue"]
+            "type": [
+              "string",
+              "null"
+            ],
+            "examples": [
+              "https://events.pagerduty.com/v2/enqueue"
+            ]
           }
         }
       },
@@ -2323,7 +2754,9 @@
         "title": "Connector secrets properties for a PagerDuty connector",
         "description": "Defines secrets for connectors when type is `.pagerduty`.",
         "type": "object",
-        "required": ["routingKey"],
+        "required": [
+          "routingKey"
+        ],
         "properties": {
           "routingKey": {
             "description": "A 32 character PagerDuty Integration Key for an integration on a service.\n",
@@ -2333,7 +2766,10 @@
       },
       "config_properties_resilient": {
         "title": "Connector request properties for a IBM Resilient connector",
-        "required": ["apiUrl", "orgId"],
+        "required": [
+          "apiUrl",
+          "orgId"
+        ],
         "description": "Defines properties for connectors when type is `.resilient`.",
         "type": "object",
         "properties": {
@@ -2349,7 +2785,10 @@
       },
       "secrets_properties_resilient": {
         "title": "Connector secrets properties for IBM Resilient connector",
-        "required": ["apiKeyId", "apiKeySecret"],
+        "required": [
+          "apiKeyId",
+          "apiKeySecret"
+        ],
         "description": "Defines secrets for connectors when type is `.resilient`.",
         "type": "object",
         "properties": {
@@ -2365,7 +2804,9 @@
       },
       "config_properties_sentinelone": {
         "title": "Connector request properties for a SentinelOne connector",
-        "required": ["url"],
+        "required": [
+          "url"
+        ],
         "description": "Defines properties for connectors when type is `.sentinelone`.",
         "type": "object",
         "properties": {
@@ -2379,7 +2820,9 @@
         "title": "Connector secrets properties for a SentinelOne connector",
         "description": "Defines secrets for connectors when type is `.sentinelone`.",
         "type": "object",
-        "required": ["token"],
+        "required": [
+          "token"
+        ],
         "properties": {
           "token": {
             "description": "The A SentinelOne API token.",
@@ -2389,7 +2832,9 @@
       },
       "config_properties_servicenow": {
         "title": "Connector request properties for a ServiceNow ITSM connector",
-        "required": ["apiUrl"],
+        "required": [
+          "apiUrl"
+        ],
         "description": "Defines properties for connectors when type is `.servicenow`.",
         "type": "object",
         "properties": {
@@ -2450,7 +2895,9 @@
       },
       "config_properties_servicenow_itom": {
         "title": "Connector request properties for a ServiceNow ITSM connector",
-        "required": ["apiUrl"],
+        "required": [
+          "apiUrl"
+        ],
         "description": "Defines properties for connectors when type is `.servicenow`.",
         "type": "object",
         "properties": {
@@ -2487,7 +2934,10 @@
             "description": "A list of valid Slack channels.",
             "items": {
               "type": "object",
-              "required": ["id", "name"],
+              "required": [
+                "id",
+                "name"
+              ],
               "maxItems": 25,
               "properties": {
                 "id": {
@@ -2509,7 +2959,9 @@
       "secrets_properties_slack_api": {
         "title": "Connector secrets properties for a Web API Slack connector",
         "description": "Defines secrets for connectors when type is `.slack`.",
-        "required": ["token"],
+        "required": [
+          "token"
+        ],
         "type": "object",
         "properties": {
           "token": {
@@ -2521,7 +2973,9 @@
       "secrets_properties_slack_webhook": {
         "title": "Connector secrets properties for a Webhook Slack connector",
         "description": "Defines secrets for connectors when type is `.slack`.",
-        "required": ["webhookUrl"],
+        "required": [
+          "webhookUrl"
+        ],
         "type": "object",
         "properties": {
           "webhookUrl": {
@@ -2532,7 +2986,11 @@
       },
       "config_properties_swimlane": {
         "title": "Connector request properties for a Swimlane connector",
-        "required": ["apiUrl", "appId", "connectorType"],
+        "required": [
+          "apiUrl",
+          "appId",
+          "connectorType"
+        ],
         "description": "Defines properties for connectors when type is `.swimlane`.",
         "type": "object",
         "properties": {
@@ -2547,7 +3005,11 @@
           "connectorType": {
             "description": "The type of connector. Valid values are `all`, `alerts`, and `cases`.",
             "type": "string",
-            "enum": ["all", "alerts", "cases"]
+            "enum": [
+              "all",
+              "alerts",
+              "cases"
+            ]
           },
           "mappings": {
             "title": "Connector mappings properties for a Swimlane connector",
@@ -2558,7 +3020,12 @@
                 "title": "Alert identifier mapping",
                 "description": "Mapping for the alert ID.",
                 "type": "object",
-                "required": ["fieldType", "id", "key", "name"],
+                "required": [
+                  "fieldType",
+                  "id",
+                  "key",
+                  "name"
+                ],
                 "properties": {
                   "fieldType": {
                     "type": "string",
@@ -2582,7 +3049,12 @@
                 "title": "Case identifier mapping",
                 "description": "Mapping for the case ID.",
                 "type": "object",
-                "required": ["fieldType", "id", "key", "name"],
+                "required": [
+                  "fieldType",
+                  "id",
+                  "key",
+                  "name"
+                ],
                 "properties": {
                   "fieldType": {
                     "type": "string",
@@ -2606,7 +3078,12 @@
                 "title": "Case name mapping",
                 "description": "Mapping for the case name.",
                 "type": "object",
-                "required": ["fieldType", "id", "key", "name"],
+                "required": [
+                  "fieldType",
+                  "id",
+                  "key",
+                  "name"
+                ],
                 "properties": {
                   "fieldType": {
                     "type": "string",
@@ -2630,7 +3107,12 @@
                 "title": "Case comment mapping",
                 "description": "Mapping for the case comments.",
                 "type": "object",
-                "required": ["fieldType", "id", "key", "name"],
+                "required": [
+                  "fieldType",
+                  "id",
+                  "key",
+                  "name"
+                ],
                 "properties": {
                   "fieldType": {
                     "type": "string",
@@ -2654,7 +3136,12 @@
                 "title": "Case description mapping",
                 "description": "Mapping for the case description.",
                 "type": "object",
-                "required": ["fieldType", "id", "key", "name"],
+                "required": [
+                  "fieldType",
+                  "id",
+                  "key",
+                  "name"
+                ],
                 "properties": {
                   "fieldType": {
                     "type": "string",
@@ -2678,7 +3165,12 @@
                 "title": "Rule name mapping",
                 "description": "Mapping for the name of the alert's rule.",
                 "type": "object",
-                "required": ["fieldType", "id", "key", "name"],
+                "required": [
+                  "fieldType",
+                  "id",
+                  "key",
+                  "name"
+                ],
                 "properties": {
                   "fieldType": {
                     "type": "string",
@@ -2702,7 +3194,12 @@
                 "title": "Severity mapping",
                 "description": "Mapping for the severity.",
                 "type": "object",
-                "required": ["fieldType", "id", "key", "name"],
+                "required": [
+                  "fieldType",
+                  "id",
+                  "key",
+                  "name"
+                ],
                 "properties": {
                   "fieldType": {
                     "type": "string",
@@ -2741,7 +3238,9 @@
         "title": "Connector secrets properties for a Microsoft Teams connector",
         "description": "Defines secrets for connectors when type is `.teams`.",
         "type": "object",
-        "required": ["webhookUrl"],
+        "required": [
+          "webhookUrl"
+        ],
         "properties": {
           "webhookUrl": {
             "type": "string",
@@ -2753,7 +3252,9 @@
         "title": "Connector request properties for a Tines connector",
         "description": "Defines properties for connectors when type is `.tines`.",
         "type": "object",
-        "required": ["url"],
+        "required": [
+          "url"
+        ],
         "properties": {
           "url": {
             "description": "The Tines tenant URL. If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.\n",
@@ -2765,7 +3266,10 @@
         "title": "Connector secrets properties for a Tines connector",
         "description": "Defines secrets for connectors when type is `.tines`.",
         "type": "object",
-        "required": ["email", "token"],
+        "required": [
+          "email",
+          "token"
+        ],
         "properties": {
           "email": {
             "description": "The email used to sign in to Tines.",
@@ -2781,7 +3285,9 @@
         "title": "Connector request properties for a Torq connector",
         "description": "Defines properties for connectors when type is `.torq`.",
         "type": "object",
-        "required": ["webhookIntegrationUrl"],
+        "required": [
+          "webhookIntegrationUrl"
+        ],
         "properties": {
           "webhookIntegrationUrl": {
             "description": "The endpoint URL of the Elastic Security integration in Torq.",
@@ -2793,7 +3299,9 @@
         "title": "Connector secrets properties for a Torq connector",
         "description": "Defines secrets for connectors when type is `.torq`.",
         "type": "object",
-        "required": ["token"],
+        "required": [
+          "token"
+        ],
         "properties": {
           "token": {
             "description": "The secret of the webhook authentication header.",
@@ -2808,7 +3316,11 @@
         "properties": {
           "authType": {
             "type": "string",
-            "enum": ["webhook-authentication-basic", "webhook-authentication-ssl", "null"],
+            "enum": [
+              "webhook-authentication-basic",
+              "webhook-authentication-ssl",
+              "null"
+            ],
             "description": "The type of authentication to use: basic, SSL, or none.\n"
           },
           "ca": {
@@ -2818,20 +3330,29 @@
           "certType": {
             "type": "string",
             "description": "If the `authType` is `webhook-authentication-ssl`, specifies whether the certificate authentication data is in a CRT and key file format or a PFX file format.\n",
-            "enum": ["ssl-crt-key", "ssl-pfx"]
+            "enum": [
+              "ssl-crt-key",
+              "ssl-pfx"
+            ]
           },
           "hasAuth": {
             "type": "boolean",
             "description": "If `true`, a user name and password must be provided for login type authentication.\n"
           },
           "headers": {
-            "type": ["object", "null"],
+            "type": [
+              "object",
+              "null"
+            ],
             "description": "A set of key-value pairs sent as headers with the request."
           },
           "method": {
             "type": "string",
             "default": "post",
-            "enum": ["post", "put"],
+            "enum": [
+              "post",
+              "put"
+            ],
             "description": "The HTTP request method, either `post` or `put`.\n"
           },
           "url": {
@@ -2840,7 +3361,11 @@
           },
           "verificationMode": {
             "type": "string",
-            "enum": ["certificate", "full", "none"],
+            "enum": [
+              "certificate",
+              "full",
+              "none"
+            ],
             "default": "full",
             "description": "Controls the verification of certificates. Use `full` to validate that the certificate has an issue date within the `not_before` and `not_after` dates, chains to a trusted certificate authority (CA), and has a hostname or IP address that matches the names within the certificate. Use `certificate` to validate the certificate and verify that it is signed by a trusted authority; this option does not check the certificate hostname. Use `none` to skip certificate validation.\n"
           }
@@ -2880,7 +3405,10 @@
         "properties": {
           "configUrl": {
             "description": "The request URL for the Elastic Alerts trigger in xMatters. It is applicable only when `usesBasic` is `true`.\n",
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "usesBasic": {
             "description": "Specifies whether the connector uses HTTP basic authentication (`true`) or URL authentication (`false`).",
@@ -3029,7 +3557,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".bedrock"]
+            "enum": [
+              ".bedrock"
+            ]
           },
           "id": {
             "type": "string",
@@ -3056,7 +3586,13 @@
       "connector_response_properties_cases_webhook": {
         "title": "Connector request properties for a Webhook - Case Management connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_cases_webhook"
@@ -3064,7 +3600,9 @@
           "connector_type_id": {
             "description": "The type of connector.",
             "type": "string",
-            "enum": [".cases-webhook"]
+            "enum": [
+              ".cases-webhook"
+            ]
           },
           "id": {
             "type": "string",
@@ -3094,7 +3632,13 @@
       "connector_response_properties_d3security": {
         "title": "Connector response properties for a D3 Security connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_d3security"
@@ -3102,7 +3646,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".d3security"]
+            "enum": [
+              ".d3security"
+            ]
           },
           "id": {
             "type": "string",
@@ -3132,7 +3678,13 @@
       "connector_response_properties_email": {
         "title": "Connector response properties for an email connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_email"
@@ -3140,7 +3692,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".email"]
+            "enum": [
+              ".email"
+            ]
           },
           "id": {
             "type": "string",
@@ -3170,7 +3724,13 @@
       "connector_response_properties_genai": {
         "title": "Connector response properties for an OpenAI connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_genai"
@@ -3178,7 +3738,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".gen-ai"]
+            "enum": [
+              ".gen-ai"
+            ]
           },
           "id": {
             "type": "string",
@@ -3208,7 +3770,13 @@
       "connector_response_properties_index": {
         "title": "Connector response properties for an index connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_index"
@@ -3216,7 +3784,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".index"]
+            "enum": [
+              ".index"
+            ]
           },
           "id": {
             "type": "string",
@@ -3246,7 +3816,13 @@
       "connector_response_properties_jira": {
         "title": "Connector response properties for a Jira connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_jira"
@@ -3254,7 +3830,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".jira"]
+            "enum": [
+              ".jira"
+            ]
           },
           "id": {
             "type": "string",
@@ -3284,7 +3862,13 @@
       "connector_response_properties_opsgenie": {
         "title": "Connector response properties for an Opsgenie connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_opsgenie"
@@ -3292,7 +3876,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".opsgenie"]
+            "enum": [
+              ".opsgenie"
+            ]
           },
           "id": {
             "type": "string",
@@ -3322,7 +3908,13 @@
       "connector_response_properties_pagerduty": {
         "title": "Connector response properties for a PagerDuty connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_pagerduty"
@@ -3330,7 +3922,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".pagerduty"]
+            "enum": [
+              ".pagerduty"
+            ]
           },
           "id": {
             "type": "string",
@@ -3360,7 +3954,13 @@
       "connector_response_properties_resilient": {
         "title": "Connector response properties for a IBM Resilient connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_resilient"
@@ -3368,7 +3968,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".resilient"]
+            "enum": [
+              ".resilient"
+            ]
           },
           "id": {
             "type": "string",
@@ -3398,7 +4000,13 @@
       "connector_response_properties_sentinelone": {
         "title": "Connector response properties for a SentinelOne connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_sentinelone"
@@ -3406,7 +4014,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".sentinelone"]
+            "enum": [
+              ".sentinelone"
+            ]
           },
           "id": {
             "type": "string",
@@ -3436,15 +4046,26 @@
       "connector_response_properties_serverlog": {
         "title": "Connector response properties for a server log connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
-            "type": ["object", "null"]
+            "type": [
+              "object",
+              "null"
+            ]
           },
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".server-log"]
+            "enum": [
+              ".server-log"
+            ]
           },
           "id": {
             "type": "string",
@@ -3474,7 +4095,13 @@
       "connector_response_properties_servicenow": {
         "title": "Connector response properties for a ServiceNow ITSM connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_servicenow"
@@ -3482,7 +4109,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".servicenow"]
+            "enum": [
+              ".servicenow"
+            ]
           },
           "id": {
             "type": "string",
@@ -3512,7 +4141,13 @@
       "connector_response_properties_servicenow_itom": {
         "title": "Connector response properties for a ServiceNow ITOM connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_servicenow_itom"
@@ -3520,7 +4155,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".servicenow-itom"]
+            "enum": [
+              ".servicenow-itom"
+            ]
           },
           "id": {
             "type": "string",
@@ -3550,7 +4187,13 @@
       "connector_response_properties_servicenow_sir": {
         "title": "Connector response properties for a ServiceNow SecOps connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_servicenow"
@@ -3558,7 +4201,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".servicenow-sir"]
+            "enum": [
+              ".servicenow-sir"
+            ]
           },
           "id": {
             "type": "string",
@@ -3588,7 +4233,13 @@
       "connector_response_properties_slack_api": {
         "title": "Connector response properties for a Slack connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_slack_api"
@@ -3596,7 +4247,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".slack_api"]
+            "enum": [
+              ".slack_api"
+            ]
           },
           "id": {
             "type": "string",
@@ -3626,12 +4279,20 @@
       "connector_response_properties_slack_webhook": {
         "title": "Connector response properties for a Slack connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".slack"]
+            "enum": [
+              ".slack"
+            ]
           },
           "id": {
             "type": "string",
@@ -3661,7 +4322,13 @@
       "connector_response_properties_swimlane": {
         "title": "Connector response properties for a Swimlane connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_swimlane"
@@ -3669,7 +4336,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".swimlane"]
+            "enum": [
+              ".swimlane"
+            ]
           },
           "id": {
             "type": "string",
@@ -3699,7 +4368,13 @@
       "connector_response_properties_teams": {
         "title": "Connector response properties for a Microsoft Teams connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "type": "object"
@@ -3707,7 +4382,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".teams"]
+            "enum": [
+              ".teams"
+            ]
           },
           "id": {
             "type": "string",
@@ -3737,7 +4414,13 @@
       "connector_response_properties_tines": {
         "title": "Connector response properties for a Tines connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_tines"
@@ -3745,7 +4428,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".tines"]
+            "enum": [
+              ".tines"
+            ]
           },
           "id": {
             "type": "string",
@@ -3775,7 +4460,13 @@
       "connector_response_properties_torq": {
         "title": "Connector response properties for a Torq connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_torq"
@@ -3783,7 +4474,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".torq"]
+            "enum": [
+              ".torq"
+            ]
           },
           "id": {
             "type": "string",
@@ -3813,7 +4506,13 @@
       "connector_response_properties_webhook": {
         "title": "Connector response properties for a Webhook connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_webhook"
@@ -3821,7 +4520,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".webhook"]
+            "enum": [
+              ".webhook"
+            ]
           },
           "id": {
             "type": "string",
@@ -3851,7 +4552,13 @@
       "connector_response_properties_xmatters": {
         "title": "Connector response properties for an xMatters connector",
         "type": "object",
-        "required": ["connector_type_id", "id", "is_deprecated", "is_preconfigured", "name"],
+        "required": [
+          "connector_type_id",
+          "id",
+          "is_deprecated",
+          "is_preconfigured",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_xmatters"
@@ -3859,7 +4566,9 @@
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
-            "enum": [".xmatters"]
+            "enum": [
+              ".xmatters"
+            ]
           },
           "id": {
             "type": "string",
@@ -3889,27 +4598,37 @@
       "is_deprecated": {
         "type": "boolean",
         "description": "Indicates whether the connector type is deprecated.",
-        "examples": [false]
+        "examples": [
+          false
+        ]
       },
       "is_missing_secrets": {
         "type": "boolean",
         "description": "Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type.",
-        "examples": [false]
+        "examples": [
+          false
+        ]
       },
       "is_preconfigured": {
         "type": "boolean",
         "description": "Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. \n",
-        "examples": [false]
+        "examples": [
+          false
+        ]
       },
       "is_system_action": {
         "type": "boolean",
         "description": "Indicates whether the connector is used for system actions.",
-        "examples": [false]
+        "examples": [
+          false
+        ]
       },
       "referenced_by_count": {
         "type": "integer",
         "description": "Indicates the number of saved objects that reference the connector. If `is_preconfigured` is true, this value is not calculated. This property is returned only by the get all connectors API.\n",
-        "examples": [2]
+        "examples": [
+          2
+        ]
       },
       "connector_response_properties": {
         "title": "Connector response properties",
@@ -4017,7 +4736,10 @@
       "update_connector_request_bedrock": {
         "title": "Update Amazon Bedrock connector request",
         "type": "object",
-        "required": ["config", "name"],
+        "required": [
+          "config",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_bedrock"
@@ -4034,7 +4756,10 @@
       "update_connector_request_cases_webhook": {
         "title": "Update Webhook - Case Managment connector request",
         "type": "object",
-        "required": ["config", "name"],
+        "required": [
+          "config",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_cases_webhook"
@@ -4042,7 +4767,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_cases_webhook"
@@ -4052,7 +4779,11 @@
       "update_connector_request_d3security": {
         "title": "Update D3 Security connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_d3security"
@@ -4069,7 +4800,10 @@
       "update_connector_request_email": {
         "title": "Update email connector request",
         "type": "object",
-        "required": ["config", "name"],
+        "required": [
+          "config",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_email"
@@ -4086,7 +4820,10 @@
       "update_connector_request_index": {
         "title": "Update index connector request",
         "type": "object",
-        "required": ["config", "name"],
+        "required": [
+          "config",
+          "name"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_index"
@@ -4100,7 +4837,11 @@
       "update_connector_request_jira": {
         "title": "Update Jira connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_jira"
@@ -4117,7 +4858,11 @@
       "update_connector_request_opsgenie": {
         "title": "Update Opsgenie connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_opsgenie"
@@ -4134,7 +4879,11 @@
       "update_connector_request_pagerduty": {
         "title": "Update PagerDuty connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_pagerduty"
@@ -4151,7 +4900,11 @@
       "update_connector_request_resilient": {
         "title": "Update IBM Resilient connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_resilient"
@@ -4168,7 +4921,11 @@
       "update_connector_request_sentinelone": {
         "title": "Update SentinelOne connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_sentinelone"
@@ -4185,7 +4942,9 @@
       "update_connector_request_serverlog": {
         "title": "Update server log connector request",
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -4196,7 +4955,11 @@
       "update_connector_request_servicenow": {
         "title": "Update ServiceNow ITSM connector or ServiceNow SecOps request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_servicenow"
@@ -4213,7 +4976,11 @@
       "update_connector_request_servicenow_itom": {
         "title": "Create ServiceNow ITOM connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_servicenow_itom"
@@ -4230,7 +4997,10 @@
       "update_connector_request_slack_api": {
         "title": "Update Slack connector request",
         "type": "object",
-        "required": ["name", "secrets"],
+        "required": [
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_slack_api"
@@ -4247,7 +5017,10 @@
       "update_connector_request_slack_webhook": {
         "title": "Update Slack connector request",
         "type": "object",
-        "required": ["name", "secrets"],
+        "required": [
+          "name",
+          "secrets"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -4261,7 +5034,11 @@
       "update_connector_request_swimlane": {
         "title": "Update Swimlane connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_swimlane"
@@ -4269,7 +5046,9 @@
           "name": {
             "type": "string",
             "description": "The display name for the connector.",
-            "examples": ["my-connector"]
+            "examples": [
+              "my-connector"
+            ]
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_swimlane"
@@ -4279,7 +5058,10 @@
       "update_connector_request_teams": {
         "title": "Update Microsoft Teams connector request",
         "type": "object",
-        "required": ["name", "secrets"],
+        "required": [
+          "name",
+          "secrets"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -4293,7 +5075,11 @@
       "update_connector_request_tines": {
         "title": "Update Tines connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_tines"
@@ -4310,7 +5096,11 @@
       "update_connector_request_torq": {
         "title": "Update Torq connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_torq"
@@ -4327,7 +5117,11 @@
       "update_connector_request_webhook": {
         "title": "Update Webhook connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_webhook"
@@ -4344,7 +5138,11 @@
       "update_connector_request_xmatters": {
         "title": "Update xMatters connector request",
         "type": "object",
-        "required": ["config", "name", "secrets"],
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
         "properties": {
           "config": {
             "$ref": "#/components/schemas/config_properties_xmatters"
@@ -4434,7 +5232,10 @@
         "title": "PagerDuty connector parameters",
         "description": "Test an action that acknowledges or resolves a PagerDuty alert.",
         "type": "object",
-        "required": ["dedupKey", "eventAction"],
+        "required": [
+          "dedupKey",
+          "eventAction"
+        ],
         "properties": {
           "dedupKey": {
             "description": "The deduplication key for the PagerDuty alert.",
@@ -4444,7 +5245,10 @@
           "eventAction": {
             "description": "The type of event.",
             "type": "string",
-            "enum": ["acknowledge", "resolve"]
+            "enum": [
+              "acknowledge",
+              "resolve"
+            ]
           }
         }
       },
@@ -4452,7 +5256,9 @@
         "title": "Index connector parameters",
         "description": "Test an action that indexes a document into Elasticsearch.",
         "type": "object",
-        "required": ["documents"],
+        "required": [
+          "documents"
+        ],
         "properties": {
           "documents": {
             "type": "array",
@@ -4470,13 +5276,25 @@
         "type": "object",
         "anyOf": [
           {
-            "required": ["bcc", "message", "subject"]
+            "required": [
+              "bcc",
+              "message",
+              "subject"
+            ]
           },
           {
-            "required": ["cc", "message", "subject"]
+            "required": [
+              "cc",
+              "message",
+              "subject"
+            ]
           },
           {
-            "required": ["to", "message", "subject"]
+            "required": [
+              "to",
+              "message",
+              "subject"
+            ]
           }
         ],
         "properties": {
@@ -4515,12 +5333,21 @@
         "title": "Server log connector parameters",
         "description": "Test an action that writes an entry to the Kibana server log.",
         "type": "object",
-        "required": ["message"],
+        "required": [
+          "message"
+        ],
         "properties": {
           "level": {
             "type": "string",
             "description": "The log level of the message for server log connectors.",
-            "enum": ["debug", "error", "fatal", "info", "trace", "warn"],
+            "enum": [
+              "debug",
+              "error",
+              "fatal",
+              "info",
+              "trace",
+              "warn"
+            ],
             "default": "info"
           },
           "message": {
@@ -4533,7 +5360,9 @@
         "title": "Slack connector parameters",
         "description": "Test an action that sends a message to Slack. It is applicable only when the connector type is `.slack`.\n",
         "type": "object",
-        "required": ["message"],
+        "required": [
+          "message"
+        ],
         "properties": {
           "message": {
             "type": "string",
@@ -4545,17 +5374,23 @@
         "title": "PagerDuty connector parameters",
         "description": "Test an action that triggers a PagerDuty alert.",
         "type": "object",
-        "required": ["eventAction"],
+        "required": [
+          "eventAction"
+        ],
         "properties": {
           "class": {
             "description": "The class or type of the event.",
             "type": "string",
-            "examples": ["cpu load"]
+            "examples": [
+              "cpu load"
+            ]
           },
           "component": {
             "description": "The component of the source machine that is responsible for the event.",
             "type": "string",
-            "examples": ["eth0"]
+            "examples": [
+              "eth0"
+            ]
           },
           "customDetails": {
             "description": "Additional details to add to the event.",
@@ -4569,12 +5404,16 @@
           "eventAction": {
             "description": "The type of event.",
             "type": "string",
-            "enum": ["trigger"]
+            "enum": [
+              "trigger"
+            ]
           },
           "group": {
             "description": "The logical grouping of components of a service.",
             "type": "string",
-            "examples": ["app-stack"]
+            "examples": [
+              "app-stack"
+            ]
           },
           "links": {
             "description": "A list of links to add to the event.",
@@ -4596,7 +5435,12 @@
           "severity": {
             "description": "The severity of the event on the affected system.",
             "type": "string",
-            "enum": ["critical", "error", "info", "warning"],
+            "enum": [
+              "critical",
+              "error",
+              "info",
+              "warning"
+            ],
             "default": "info"
           },
           "source": {
@@ -4618,13 +5462,17 @@
       "run_connector_subaction_addevent": {
         "title": "The addEvent subaction",
         "type": "object",
-        "required": ["subAction"],
+        "required": [
+          "subAction"
+        ],
         "description": "The `addEvent` subaction for ServiceNow ITOM connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["addEvent"]
+            "enum": [
+              "addEvent"
+            ]
           },
           "subActionParams": {
             "type": "object",
@@ -4681,17 +5529,24 @@
       "run_connector_subaction_closealert": {
         "title": "The closeAlert subaction",
         "type": "object",
-        "required": ["subAction", "subActionParams"],
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
         "description": "The `closeAlert` subaction for Opsgenie connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["closeAlert"]
+            "enum": [
+              "closeAlert"
+            ]
           },
           "subActionParams": {
             "type": "object",
-            "required": ["alias"],
+            "required": [
+              "alias"
+            ],
             "properties": {
               "alias": {
                 "type": "string",
@@ -4716,37 +5571,54 @@
       "run_connector_subaction_closeincident": {
         "title": "The closeIncident subaction",
         "type": "object",
-        "required": ["subAction", "subActionParams"],
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
         "description": "The `closeIncident` subaction for ServiceNow ITSM connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["closeIncident"]
+            "enum": [
+              "closeIncident"
+            ]
           },
           "subActionParams": {
             "type": "object",
-            "required": ["incident"],
+            "required": [
+              "incident"
+            ],
             "properties": {
               "incident": {
                 "type": "object",
                 "anyOf": [
                   {
-                    "required": ["correlation_id"]
+                    "required": [
+                      "correlation_id"
+                    ]
                   },
                   {
-                    "required": ["externalId"]
+                    "required": [
+                      "externalId"
+                    ]
                   }
                 ],
                 "properties": {
                   "correlation_id": {
-                    "type": ["null", "string"],
+                    "type": [
+                      "null",
+                      "string"
+                    ],
                     "description": "An identifier that is assigned to the incident when it is created by the connector. NOTE: If you use the default value and the rule generates multiple alerts that use the same alert IDs, the latest open incident for this correlation ID is closed unless you specify the external ID.\n",
                     "maxLength": 100,
                     "default": "{{rule.id}}:{{alert.id}}"
                   },
                   "externalId": {
-                    "type": ["null", "string"],
+                    "type": [
+                      "null",
+                      "string"
+                    ],
                     "description": "The unique identifier (`incidentId`) for the incident in ServiceNow."
                   }
                 }
@@ -4758,17 +5630,24 @@
       "run_connector_subaction_createalert": {
         "title": "The createAlert subaction",
         "type": "object",
-        "required": ["subAction", "subActionParams"],
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
         "description": "The `createAlert` subaction for Opsgenie connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["createAlert"]
+            "enum": [
+              "createAlert"
+            ]
           },
           "subActionParams": {
             "type": "object",
-            "required": ["message"],
+            "required": [
+              "message"
+            ],
             "properties": {
               "actions": {
                 "type": "array",
@@ -4811,7 +5690,13 @@
               "priority": {
                 "type": "string",
                 "description": "The priority level for the alert.",
-                "enum": ["P1", "P2", "P3", "P4", "P5"]
+                "enum": [
+                  "P1",
+                  "P2",
+                  "P3",
+                  "P4",
+                  "P5"
+                ]
               },
               "responders": {
                 "type": "array",
@@ -4830,7 +5715,12 @@
                     "type": {
                       "type": "string",
                       "description": "The type of responders, in this case `escalation`.",
-                      "enum": ["escalation", "schedule", "team", "user"]
+                      "enum": [
+                        "escalation",
+                        "schedule",
+                        "team",
+                        "user"
+                      ]
                     },
                     "username": {
                       "type": "string",
@@ -4859,7 +5749,9 @@
                 "description": "The teams and users that the alert will be visible to without sending a notification. Only one of `id`, `name`, or `username` is required.",
                 "items": {
                   "type": "object",
-                  "required": ["type"],
+                  "required": [
+                    "type"
+                  ],
                   "properties": {
                     "id": {
                       "type": "string",
@@ -4872,7 +5764,10 @@
                     "type": {
                       "type": "string",
                       "description": "Valid values are `team` and `user`.",
-                      "enum": ["team", "user"]
+                      "enum": [
+                        "team",
+                        "user"
+                      ]
                     },
                     "username": {
                       "type": "string",
@@ -4888,22 +5783,31 @@
       "run_connector_subaction_fieldsbyissuetype": {
         "title": "The fieldsByIssueType subaction",
         "type": "object",
-        "required": ["subAction", "subActionParams"],
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
         "description": "The `fieldsByIssueType` subaction for Jira connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["fieldsByIssueType"]
+            "enum": [
+              "fieldsByIssueType"
+            ]
           },
           "subActionParams": {
             "type": "object",
-            "required": ["id"],
+            "required": [
+              "id"
+            ],
             "properties": {
               "id": {
                 "type": "string",
                 "description": "The Jira issue type identifier.",
-                "examples": [10024]
+                "examples": [
+                  10024
+                ]
               }
             }
           }
@@ -4912,18 +5816,25 @@
       "run_connector_subaction_getchoices": {
         "title": "The getChoices subaction",
         "type": "object",
-        "required": ["subAction", "subActionParams"],
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
         "description": "The `getChoices` subaction for ServiceNow ITOM, ServiceNow ITSM, and ServiceNow SecOps connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["getChoices"]
+            "enum": [
+              "getChoices"
+            ]
           },
           "subActionParams": {
             "type": "object",
             "description": "The set of configuration properties for the action.",
-            "required": ["fields"],
+            "required": [
+              "fields"
+            ],
             "properties": {
               "fields": {
                 "type": "array",
@@ -4939,13 +5850,17 @@
       "run_connector_subaction_getfields": {
         "title": "The getFields subaction",
         "type": "object",
-        "required": ["subAction"],
+        "required": [
+          "subAction"
+        ],
         "description": "The `getFields` subaction for Jira, ServiceNow ITSM, and ServiceNow SecOps connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["getFields"]
+            "enum": [
+              "getFields"
+            ]
           }
         }
       },
@@ -4953,21 +5868,30 @@
         "title": "The getIncident subaction",
         "type": "object",
         "description": "The `getIncident` subaction for Jira, ServiceNow ITSM, and ServiceNow SecOps connectors.",
-        "required": ["subAction", "subActionParams"],
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["getIncident"]
+            "enum": [
+              "getIncident"
+            ]
           },
           "subActionParams": {
             "type": "object",
-            "required": ["externalId"],
+            "required": [
+              "externalId"
+            ],
             "properties": {
               "externalId": {
                 "type": "string",
                 "description": "The Jira, ServiceNow ITSM, or ServiceNow SecOps issue identifier.",
-                "examples": [71778]
+                "examples": [
+                  71778
+                ]
               }
             }
           }
@@ -4976,22 +5900,30 @@
       "run_connector_subaction_issue": {
         "title": "The issue subaction",
         "type": "object",
-        "required": ["subAction"],
+        "required": [
+          "subAction"
+        ],
         "description": "The `issue` subaction for Jira connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["issue"]
+            "enum": [
+              "issue"
+            ]
           },
           "subActionParams": {
             "type": "object",
-            "required": ["id"],
+            "required": [
+              "id"
+            ],
             "properties": {
               "id": {
                 "type": "string",
                 "description": "The Jira issue identifier.",
-                "examples": [71778]
+                "examples": [
+                  71778
+                ]
               }
             }
           }
@@ -5000,17 +5932,24 @@
       "run_connector_subaction_issues": {
         "title": "The issues subaction",
         "type": "object",
-        "required": ["subAction", "subActionParams"],
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
         "description": "The `issues` subaction for Jira connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["issues"]
+            "enum": [
+              "issues"
+            ]
           },
           "subActionParams": {
             "type": "object",
-            "required": ["title"],
+            "required": [
+              "title"
+            ],
             "properties": {
               "title": {
                 "type": "string",
@@ -5023,26 +5962,35 @@
       "run_connector_subaction_issuetypes": {
         "title": "The issueTypes subaction",
         "type": "object",
-        "required": ["subAction"],
+        "required": [
+          "subAction"
+        ],
         "description": "The `issueTypes` subaction for Jira connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["issueTypes"]
+            "enum": [
+              "issueTypes"
+            ]
           }
         }
       },
       "run_connector_subaction_pushtoservice": {
         "title": "The pushToService subaction",
         "type": "object",
-        "required": ["subAction", "subActionParams"],
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
         "description": "The `pushToService` subaction for Jira, ServiceNow ITSM, ServiceNow SecOps, Swimlane, and Webhook - Case Management connectors.",
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["pushToService"]
+            "enum": [
+              "pushToService"
+            ]
           },
           "subActionParams": {
             "type": "object",
@@ -5240,12 +6188,17 @@
         "title": "The postMessage subaction",
         "type": "object",
         "description": "Test an action that sends a message to Slack. It is applicable only when the connector type is `.slack_api`.\n",
-        "required": ["subAction", "subActionParams"],
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["postMessage"]
+            "enum": [
+              "postMessage"
+            ]
           },
           "subActionParams": {
             "type": "object",
@@ -5281,16 +6234,23 @@
         "title": "The validChannelId subaction",
         "type": "object",
         "description": "Retrieves information about a valid Slack channel identifier. It is applicable only when the connector type is `.slack_api`.\n",
-        "required": ["subAction", "subActionParams"],
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
         "properties": {
           "subAction": {
             "type": "string",
             "description": "The action to test.",
-            "enum": ["validChannelId"]
+            "enum": [
+              "validChannelId"
+            ]
           },
           "subActionParams": {
             "type": "object",
-            "required": ["channelId"],
+            "required": [
+              "channelId"
+            ],
             "properties": {
               "channelId": {
                 "type": "string",
@@ -5305,7 +6265,9 @@
         "title": "Run connector request body properties",
         "description": "The properties vary depending on the connector type.",
         "type": "object",
-        "required": ["params"],
+        "required": [
+          "params"
+        ],
         "properties": {
           "params": {
             "oneOf": [
@@ -5399,7 +6361,13 @@
       "features": {
         "type": "string",
         "description": "The feature that uses the connector.\n",
-        "enum": ["alerting", "cases", "generativeAI", "siem", "uptime"]
+        "enum": [
+          "alerting",
+          "cases",
+          "generativeAI",
+          "siem",
+          "uptime"
+        ]
       },
       "connector_types": {
         "title": "Connector types",
@@ -5430,7 +6398,9 @@
           ".webhook",
           ".xmatters"
         ],
-        "examples": [".server-log"]
+        "examples": [
+          ".server-log"
+        ]
       },
       "action_response_properties": {
         "title": "Action response properties",
@@ -5639,7 +6609,10 @@
               "incident": {
                 "title": "Case title",
                 "description": "Description of the incident.",
-                "tags": ["tag1", "tag2"],
+                "tags": [
+                  "tag1",
+                  "tag2"
+                ],
                 "severity": "low",
                 "status": "open",
                 "id": "caseID"
@@ -5652,11 +6625,18 @@
         "summary": "Send an email message from an email connector.",
         "value": {
           "params": {
-            "bcc": ["user1@example.com"],
-            "cc": ["user2@example.com", "user3@example.com"],
+            "bcc": [
+              "user1@example.com"
+            ],
+            "cc": [
+              "user2@example.com",
+              "user3@example.com"
+            ],
             "message": "Test email message.",
             "subject": "Test message subject",
-            "to": ["user4@example.com"]
+            "to": [
+              "user4@example.com"
+            ]
           }
         }
       },
@@ -5715,7 +6695,10 @@
           "params": {
             "subAction": "getChoices",
             "subActionParams": {
-              "fields": ["severity", "urgency"]
+              "fields": [
+                "severity",
+                "urgency"
+              ]
             }
           }
         }
@@ -5726,7 +6709,9 @@
           "params": {
             "subAction": "postMessage",
             "subActionParams": {
-              "channelIds": ["C123ABC456"],
+              "channelIds": [
+                "C123ABC456"
+              ],
               "text": "A test message."
             }
           }
@@ -6053,7 +7038,9 @@
             "enabled_in_config": true,
             "enabled_in_license": true,
             "minimum_license_required": "enterprise",
-            "supported_feature_ids": ["generativeAI"],
+            "supported_feature_ids": [
+              "generativeAI"
+            ],
             "is_system_action_type": false
           },
           {
@@ -6063,7 +7050,9 @@
             "enabled_in_config": true,
             "enabled_in_license": true,
             "minimum_license_required": "enterprise",
-            "supported_feature_ids": ["generativeAI"],
+            "supported_feature_ids": [
+              "generativeAI"
+            ],
             "is_system_action_type": false
           }
         ]
@@ -6078,7 +7067,11 @@
             "enabled_in_config": true,
             "enabled_in_license": true,
             "minimum_license_required": "gold",
-            "supported_feature_ids": ["alerting", "cases", "siem"]
+            "supported_feature_ids": [
+              "alerting",
+              "cases",
+              "siem"
+            ]
           },
           {
             "id": ".index",
@@ -6087,7 +7080,11 @@
             "enabled_in_config": true,
             "enabled_in_license": true,
             "minimum_license_required": "basic",
-            "supported_feature_ids": ["alerting", "uptime", "siem"]
+            "supported_feature_ids": [
+              "alerting",
+              "uptime",
+              "siem"
+            ]
           },
           {
             "id": ".server-log",
@@ -6096,7 +7093,10 @@
             "enabled_in_config": true,
             "enabled_in_license": true,
             "minimum_license_required": "basic",
-            "supported_feature_ids": ["alerting", "uptime"]
+            "supported_feature_ids": [
+              "alerting",
+              "uptime"
+            ]
           }
         ]
       }
@@ -6112,16 +7112,24 @@
               "properties": {
                 "error": {
                   "type": "string",
-                  "examples": ["Unauthorized"],
-                  "enum": ["Unauthorized"]
+                  "examples": [
+                    "Unauthorized"
+                  ],
+                  "enum": [
+                    "Unauthorized"
+                  ]
                 },
                 "message": {
                   "type": "string"
                 },
                 "statusCode": {
                   "type": "integer",
-                  "examples": [401],
-                  "enum": [401]
+                  "examples": [
+                    401
+                  ],
+                  "enum": [
+                    401
+                  ]
                 }
               }
             }
@@ -6138,8 +7146,12 @@
               "properties": {
                 "error": {
                   "type": "string",
-                  "examples": ["Not Found"],
-                  "enum": ["Not Found"]
+                  "examples": [
+                    "Not Found"
+                  ],
+                  "enum": [
+                    "Not Found"
+                  ]
                 },
                 "message": {
                   "type": "string",
@@ -6149,8 +7161,12 @@
                 },
                 "statusCode": {
                   "type": "integer",
-                  "examples": [404],
-                  "enum": [404]
+                  "examples": [
+                    404
+                  ],
+                  "enum": [
+                    404
+                  ]
                 }
               }
             }

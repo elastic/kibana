@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
-import { Conversation } from '../../..';
-import { useAssistantContext } from '../../assistant_context';
 import { AIConnector } from '../../connectorland/connector_selector';
+import { Conversation } from '../../..';
 import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
 import * as i18n from './translations';
+import { useAssistantContext } from '../../assistant_context';
 
 interface Props {
   defaultConnector?: AIConnector;

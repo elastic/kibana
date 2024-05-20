@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import React from 'react';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { waitFor, fireEvent, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from '../../common/translations';
 
 const { emptyField, maxLengthField } = fieldValidators;

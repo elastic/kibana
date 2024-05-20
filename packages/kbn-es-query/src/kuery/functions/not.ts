@@ -7,8 +7,8 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import * as ast from '../ast';
+import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import type { KqlFunctionNode } from '../node_types';
 import type { KqlContext } from '../types';
 

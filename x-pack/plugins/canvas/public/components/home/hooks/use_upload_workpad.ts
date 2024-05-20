@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { useCallback } from 'react';
+import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 import { SavedObject } from '@kbn/core/public';
 import { CANVAS, JSON as JSONString } from '../../../../i18n/constants';
-import type { CanvasWorkpad } from '../../../../types';
-import { getId } from '../../../lib/get_id';
 import { useNotifyService } from '../../../services';
+import { getId } from '../../../lib/get_id';
 import { useImportWorkpad as useImportWorkpadHook } from './use_import_workpad';
+import type { CanvasWorkpad } from '../../../../types';
 
 const isInvalidWorkpad = (workpad: CanvasWorkpad) =>
   !Array.isArray(workpad.pages) || workpad.pages.length === 0 || !workpad.assets;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
-import type { AdvancedJobCreator } from './advanced_job_creator';
-import type { CategorizationJobCreator } from './categorization_job_creator';
-import type { GeoJobCreator } from './geo_job_creator';
+import type { SingleMetricJobCreator } from './single_metric_job_creator';
 import type { MultiMetricJobCreator } from './multi_metric_job_creator';
 import type { PopulationJobCreator } from './population_job_creator';
+import type { AdvancedJobCreator } from './advanced_job_creator';
+import type { CategorizationJobCreator } from './categorization_job_creator';
 import type { RareJobCreator } from './rare_job_creator';
-import type { SingleMetricJobCreator } from './single_metric_job_creator';
+import type { GeoJobCreator } from './geo_job_creator';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export type JobCreatorType =
   | SingleMetricJobCreator

@@ -6,16 +6,16 @@
  */
 
 import type {
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Logger,
   Plugin,
-  PluginInitializerContext,
+  Logger,
 } from '@kbn/core/server';
 
 import { SearchNotebooksConfig } from './config';
 import { defineRoutes } from './routes';
-import { NotebooksCache, SearchNotebooksPluginSetup, SearchNotebooksPluginStart } from './types';
+import { SearchNotebooksPluginSetup, SearchNotebooksPluginStart, NotebooksCache } from './types';
 import { createNotebooksCache } from './utils';
 
 export class SearchNotebooksPlugin

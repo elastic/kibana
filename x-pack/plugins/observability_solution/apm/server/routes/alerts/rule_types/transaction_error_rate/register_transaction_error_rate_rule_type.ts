@@ -5,23 +5,22 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
+  GetViewInAppRelativeUrlFnOpts,
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-  AlertsClientError,
-  GetViewInAppRelativeUrlFnOpts,
-  RuleExecutorOptions,
   RuleTypeState,
+  RuleExecutorOptions,
+  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
-import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  ProcessorEvent,
-  TimeUnitChar,
   formatDurationFromTimeUnitChar,
   getAlertUrl,
   observabilityPaths,
+  ProcessorEvent,
+  TimeUnitChar,
 } from '@kbn/observability-plugin/common';
 import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
 import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/server';
@@ -31,6 +30,7 @@ import {
   ALERT_REASON,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
+import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
@@ -40,20 +40,19 @@ import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-  TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import {
   APM_SERVER_FEATURE_ID,
+  formatTransactionErrorRateReason,
   RULE_TYPES_CONFIG,
   THRESHOLD_MET_GROUP,
-  formatTransactionErrorRateReason,
 } from '../../../../../common/rules/apm_rule_types';
-import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 import {
-  ApmRuleParamsType,
   transactionErrorRateParamsSchema,
+  ApmRuleParamsType,
 } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { asDecimalOrInteger, getAlertUrlTransaction } from '../../../../../common/utils/formatters';
@@ -68,8 +67,9 @@ import {
   getApmAlertSourceFields,
   getApmAlertSourceFieldsAgg,
 } from '../get_apm_alert_source_fields';
-import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
+import { getGroupByActionVariables } from '../utils/get_groupby_action_variables';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
@@ -233,13 +233,10 @@ export function registerTransactionErrorRateRuleType({
       const results = [];
 
       for (const bucket of response.aggregations.series.buckets) {
-        const groupByFields = bucket.key.reduce(
-          (obj, bucketKey, bucketIndex) => {
-            obj[allGroupByFields[bucketIndex]] = bucketKey;
-            return obj;
-          },
-          {} as Record<string, string>
-        );
+        const groupByFields = bucket.key.reduce((obj, bucketKey, bucketIndex) => {
+          obj[allGroupByFields[bucketIndex]] = bucketKey;
+          return obj;
+        }, {} as Record<string, string>);
 
         const bucketKey = bucket.key;
 

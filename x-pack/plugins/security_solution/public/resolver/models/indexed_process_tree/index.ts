@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import * as nodeModel from '../../../../common/endpoint/models/node';
+import { orderByTime } from '../process_event';
+import type { IndexedProcessTree } from '../../types';
 import type { ResolverNode } from '../../../../common/endpoint/types';
 import {
   levelOrder as baseLevelOrder,
   calculateGenerationsAndDescendants,
 } from '../../lib/tree_sequencers';
-import type { IndexedProcessTree } from '../../types';
-import { orderByTime } from '../process_event';
+import * as nodeModel from '../../../../common/endpoint/models/node';
 
 function calculateGenerationsAndDescendantsFromOrigin(
   origin: ResolverNode | undefined,

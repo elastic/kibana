@@ -10,9 +10,9 @@ import { useQuery } from '@tanstack/react-query';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import { useKibana } from '../../lib/kibana';
 import { CURRENT_USER_PROFILE_FAILURE } from './translations';
+import { useKibana } from '../../lib/kibana';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export const getCurrentUserProfile = async ({
   security,

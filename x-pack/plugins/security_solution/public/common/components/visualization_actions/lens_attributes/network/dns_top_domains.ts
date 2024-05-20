@@ -6,7 +6,7 @@
  */
 
 import { TOP_VALUE, UNIQUE_COUNT } from '../../translations';
-import type { GetLensAttributes, LensAttributes } from '../../types';
+import type { LensAttributes, GetLensAttributes } from '../../types';
 
 /* Exported from Kibana Saved Object */
 export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
@@ -167,4 +167,4 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
         name: 'indexpattern-datasource-layer-b1c3efc6-c886-4fba-978f-3b6bb5e7948a',
       },
     ],
-  }) as LensAttributes;
+  } as LensAttributes);

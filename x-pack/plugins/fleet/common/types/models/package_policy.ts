@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExperimentalDataStreamFeature, RegistryRelease } from './epm';
+import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
 import type { PolicySecretReference } from './secret';
 
 export interface PackagePolicyPackage {

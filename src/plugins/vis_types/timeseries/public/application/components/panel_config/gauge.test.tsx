@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
 jest.mock('../lib/get_default_query_language', () => ({
   getDefaultQueryLanguage: () => 'kuery',

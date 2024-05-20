@@ -6,16 +6,27 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "desc": "__flag__",
-      "end": ["-1"],
+      "end": [
+        "-1"
+      ],
       "exclude_interim": "__flag__",
       "influencer_score": "",
       "from": "",
-      "size": ["100"],
+      "size": [
+        "100"
+      ],
       "sort": "",
-      "start": ["-1"]
+      "start": [
+        "-1"
+      ]
     },
-    "methods": ["GET", "POST"],
-    "patterns": ["_ml/anomaly_detectors/{job_id}/results/influencers"],
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/results/influencers"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-influencer.html",
     "availability": {
       "stack": true,

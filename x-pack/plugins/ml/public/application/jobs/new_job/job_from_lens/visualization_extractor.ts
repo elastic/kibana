@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { ChartInfo, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LensPublicStart, ChartInfo } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
-import type { LensApi } from '@kbn/lens-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { ErrorType } from '@kbn/ml-error-utils';
+import type { LensApi } from '@kbn/lens-plugin/public';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import {
-  createDetectors,
-  getJobsItemsFromEmbeddable,
-  getMlFunction,
   getVisTypeFactory,
-  hasIncompatibleProperties,
   isCompatibleLayer,
-  isCompatibleSplitFieldType,
+  hasIncompatibleProperties,
   isTermsField,
+  isCompatibleSplitFieldType,
+  getMlFunction,
+  getJobsItemsFromEmbeddable,
+  createDetectors,
 } from './utils';
 
 type VisualizationType = Awaited<ReturnType<LensPublicStart['getXyVisTypes']>>[number];

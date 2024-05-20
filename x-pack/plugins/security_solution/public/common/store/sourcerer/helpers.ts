@@ -6,11 +6,11 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
-import type { sourcererModel } from '../model';
-import type { SelectedDataViewPayload } from './actions';
 import type { SourcererDataView, SourcererModel, SourcererScopeById } from './model';
 import { SourcererScopeName } from './model';
+import type { SelectedDataViewPayload } from './actions';
+import type { sourcererModel } from '../model';
+import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 const getPatternListFromScope = (
   scope: SourcererScopeName,
@@ -128,7 +128,7 @@ export const checkIfIndicesExist = ({
   scopeId === SourcererScopeName.detections
     ? patternList.includes(`${signalIndexName}`)
     : scopeId === SourcererScopeName.default
-      ? isDefaultDataViewSelected
-        ? patternList.filter((i) => i !== signalIndexName).length > 0
-        : patternList.length > 0
-      : patternList.length > 0;
+    ? isDefaultDataViewSelected
+      ? patternList.filter((i) => i !== signalIndexName).length > 0
+      : patternList.length > 0
+    : patternList.length > 0;

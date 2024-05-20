@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { useMemo, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
-import { urlSearchQuery } from '../../../../../services/data/url_search_query';
+import { useMemo, useState } from 'react';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useUxQuery } from '../../hooks/use_ux_query';
+import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { useDataView } from '../../local_uifilters/use_data_view';
+import { urlSearchQuery } from '../../../../../services/data/url_search_query';
 
 interface Props {
   popoverIsOpen: boolean;

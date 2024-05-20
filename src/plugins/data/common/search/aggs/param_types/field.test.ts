@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../..';
-import { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 import { FieldParamType } from './field';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../..';
+import { IAggConfig } from '../agg_config';
 
 describe('Field', () => {
   const indexPattern = {
@@ -109,7 +109,7 @@ describe('Field', () => {
       const aggParam = new FieldParamType({
         name: 'field',
         type: 'field',
-        filterField: (field: (typeof indexPattern)['fields'][0]) =>
+        filterField: (field: typeof indexPattern['fields'][0]) =>
           field.esTypes?.includes(ES_FIELD_TYPES.TEXT),
       });
 
@@ -123,7 +123,7 @@ describe('Field', () => {
       const aggParam = new FieldParamType({
         name: 'field',
         type: 'field',
-        filterField: (field: (typeof indexPattern)['fields'][0]) =>
+        filterField: (field: typeof indexPattern['fields'][0]) =>
           field.esTypes?.includes(ES_FIELD_TYPES.TEXT),
         filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
       });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { taggableTypes } from '../../common/constants';
 import { tagUsageCollectorSchema } from './schema';
+import { taggableTypes } from '../../common/constants';
 
 describe('usage collector schema', () => {
   // this test is there to assert than when a new type is added to `taggableTypes`,

@@ -20,8 +20,6 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 
 import type { PackageList } from '../../../common';
 
-import { FleetError, FleetUnauthorizedError, PackageNotFoundError } from '../../errors';
-import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
 import type {
   ArchivePackage,
   BundledPackage,
@@ -31,8 +29,10 @@ import type {
   Installation,
   RegistryPackage,
 } from '../../types';
-import { checkSuperuser, doesNotHaveRequiredFleetAuthz, getAuthzFromRequest } from '../security';
 import type { FleetAuthzRouteConfig } from '../security/types';
+import { checkSuperuser, doesNotHaveRequiredFleetAuthz, getAuthzFromRequest } from '../security';
+import { FleetError, FleetUnauthorizedError, PackageNotFoundError } from '../../errors';
+import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
 
 import type { InstallResult } from '../../../common';
 
@@ -40,10 +40,10 @@ import type { FetchFindLatestPackageOptions } from './registry';
 import * as Registry from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 
-import { generatePackageInfoFromArchiveBuffer } from './archive';
-import { getEsPackage } from './archive/storage';
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import { ensureInstalledPackage, getInstallation, getPackages, installPackage } from './packages';
+import { generatePackageInfoFromArchiveBuffer } from './archive';
+import { getEsPackage } from './archive/storage';
 
 export type InstalledAssetType = EsAssetReference;
 

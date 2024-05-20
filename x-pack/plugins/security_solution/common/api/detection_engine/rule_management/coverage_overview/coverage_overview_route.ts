@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NonEmptyArray, NonEmptyString, enumeration } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { enumeration, NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 /**
  * Rule activity (status) filter, which now can filter enabled and disabled rules.

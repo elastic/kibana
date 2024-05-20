@@ -8,9 +8,9 @@
 import { isEmpty } from 'lodash/fp';
 
 import moment from 'moment';
-import type { Note, ResponseTimeline, SavedTimeline } from '../../../../../../common/api/timeline';
+import { timeline as timelineLib, pinnedEvent as pinnedEventLib } from '../../../saved_object';
 import type { FrameworkRequest } from '../../../../framework';
-import { pinnedEvent as pinnedEventLib, timeline as timelineLib } from '../../../saved_object';
+import type { ResponseTimeline, SavedTimeline, Note } from '../../../../../../common/api/timeline';
 import { persistNotes } from '../../../saved_object/notes/persist_notes';
 
 interface CreateTimelineProps {

@@ -8,8 +8,8 @@
 
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import type {
-  FieldFormatEditorFactory,
   FieldFormatEditor as InnerFieldFormatEditor,
+  FieldFormatEditorFactory,
 } from '@kbn/data-view-field-editor-plugin/public';
 import { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';

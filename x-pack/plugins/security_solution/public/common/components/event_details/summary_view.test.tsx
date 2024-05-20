@@ -8,12 +8,12 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TimelineId } from '../../../../common/types';
 import type { BrowserField } from '../../containers/source';
 import { TestProviders } from '../../mock';
-import type { AlertSummaryRow } from './helpers';
-import { SummaryView } from './summary_view';
 import type { EventFieldsData } from './types';
+import { SummaryView } from './summary_view';
+import { TimelineId } from '../../../../common/types';
+import type { AlertSummaryRow } from './helpers';
 
 jest.mock('../../lib/kibana');
 

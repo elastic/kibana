@@ -12,8 +12,8 @@ import type {
 } from '../../../../../../../common/routes/rule/apis/update';
 import type { UpdateRuleData } from '../../../../../../application/rule/methods/update';
 import type {
-  ActionRequest,
   RuleParams,
+  ActionRequest,
   SystemActionRequest,
 } from '../../../../../../application/rule/types';
 

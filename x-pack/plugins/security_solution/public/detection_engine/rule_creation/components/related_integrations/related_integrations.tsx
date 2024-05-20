@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -13,10 +14,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
 import { UseArray, useFormData } from '../../../../shared_imports';
-import { RelatedIntegrationFieldRow } from './related_integration_field_row';
 import { RelatedIntegrationsHelpInfo } from './related_integrations_help_info';
+import { RelatedIntegrationFieldRow } from './related_integration_field_row';
 import * as i18n from './translations';
 
 interface RelatedIntegrationsProps {

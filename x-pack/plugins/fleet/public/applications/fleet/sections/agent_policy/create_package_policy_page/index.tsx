@@ -12,8 +12,8 @@ import { useGetSettings } from '../../../hooks';
 
 import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 
-import { CreatePackagePolicyMultiPage } from './multi_page_layout';
 import { CreatePackagePolicySinglePage } from './single_page_layout';
+import { CreatePackagePolicyMultiPage } from './multi_page_layout';
 
 export const CreatePackagePolicyPage: React.FC<{}> = () => {
   const { search } = useLocation();

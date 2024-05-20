@@ -6,43 +6,43 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useRef, useEffect, RefObject } from 'react';
+import { isEqual } from 'lodash';
 import {
-  EuiButton,
   EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
+  EuiButton,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import {
+  Filter,
+  Query,
+  TimeRange,
+  enableFilter,
+  disableFilter,
+  toggleFilterNegated,
+  pinFilter,
+  unpinFilter,
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
+} from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   KIBANA_USER_QUERY_LANGUAGE_KEY,
   KQL_TELEMETRY_ROUTE_LATEST_VERSION,
   UI_SETTINGS,
 } from '@kbn/data-plugin/common';
-import type { SavedQuery, SavedQueryService, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
-import {
-  COMPARE_ALL_OPTIONS,
-  Filter,
-  Query,
-  TimeRange,
-  compareFilters,
-  disableFilter,
-  enableFilter,
-  pinFilter,
-  toggleFilterNegated,
-  unpinFilter,
-} from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { isEqual } from 'lodash';
-import React, { useState, useRef, useEffect, RefObject } from 'react';
+import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { IUnifiedSearchPluginServices } from '../types';
-import { FilterPanelOption } from '../types';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
+import { FilterPanelOption } from '../types';
 import { PanelTitle } from './panel_title';
 
 const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {

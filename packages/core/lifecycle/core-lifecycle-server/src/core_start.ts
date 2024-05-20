@@ -8,17 +8,17 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import type { CapabilitiesStart } from '@kbn/core-capabilities-server';
-import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-server';
 import type { HttpServiceStart } from '@kbn/core-http-server';
 import type { MetricsServiceStart } from '@kbn/core-metrics-server';
-import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
+import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 
 /**

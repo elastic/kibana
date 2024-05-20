@@ -7,9 +7,9 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { CombinedJob, Detector } from '../../../common/types/anomaly_detection_jobs';
-import type { MlClient } from '../../lib/ml_client';
 import type { ModelMemoryEstimateResponse } from '../calculate_model_memory_limit/calculate_model_memory_limit';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
+import type { MlClient } from '../../lib/ml_client';
 
 describe('ML - validateModelMemoryLimit', () => {
   // mock info endpoint response

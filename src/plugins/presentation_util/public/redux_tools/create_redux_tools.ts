@@ -8,21 +8,21 @@
 
 import {
   AnyAction,
-  CaseReducerActions,
   Middleware,
-  SliceCaseReducers,
-  configureStore,
   createSlice,
+  configureStore,
+  SliceCaseReducers,
+  CaseReducerActions,
 } from '@reduxjs/toolkit';
+import { v4 as uuidv4 } from 'uuid';
 import { createContext } from 'react';
 import { createSelectorHook } from 'react-redux';
-import { v4 as uuidv4 } from 'uuid';
 
 import { ReduxTools, ReduxToolsReducers, ReduxToolsSetters } from './types';
 
 export const createReduxTools = <
   ReduxStateType extends unknown,
-  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>,
+  ReducerType extends ReduxToolsReducers<ReduxStateType> = ReduxToolsReducers<ReduxStateType>
 >({
   reducers,
   additionalMiddleware,

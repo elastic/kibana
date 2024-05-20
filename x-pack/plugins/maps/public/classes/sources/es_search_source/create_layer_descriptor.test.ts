@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { createLayerDescriptor } from './create_layer_descriptor';
+import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
 jest.mock('../../../kibana_services', () => {
   return {

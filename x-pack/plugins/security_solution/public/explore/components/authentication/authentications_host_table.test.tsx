@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { useQueryToggle } from '../../../common/containers/query_toggle';
+import * as i18n from './translations';
+import { AuthenticationsHostTable } from './authentications_host_table';
+import { hostsModel } from '../../hosts/store';
 import { TestProviders } from '../../../common/mock';
 import { useAuthentications } from '../../containers/authentications';
-import { hostsModel } from '../../hosts/store';
-import { AuthenticationsHostTable } from './authentications_host_table';
-import * as i18n from './translations';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 jest.mock('../../../common/containers/query_toggle', () => ({
   useQueryToggle: jest.fn().mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() }),

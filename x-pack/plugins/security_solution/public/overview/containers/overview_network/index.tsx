@@ -9,12 +9,12 @@ import { useEffect, useMemo } from 'react';
 
 import type { NetworkOverviewStrategyResponse } from '../../../../common/search_strategy/security_solution';
 import { NetworkQueries } from '../../../../common/search_strategy/security_solution';
-import type { ESQuery } from '../../../../common/typed_json';
-import { createFilter } from '../../../common/containers/helpers';
-import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import type { inputsModel } from '../../../common/store/inputs';
+import { createFilter } from '../../../common/containers/helpers';
+import type { ESQuery } from '../../../../common/typed_json';
 import type { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 export const ID = 'overviewNetworkQuery';
 

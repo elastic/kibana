@@ -1,7 +1,3 @@
-import { EuiSkeletonText, EuiTreeView } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { find } from 'lodash/fp';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,15 +5,19 @@ import { find } from 'lodash/fp';
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
+import { find } from 'lodash/fp';
+import { EuiTreeView, EuiSkeletonText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
+import { getTreeNodes } from '../utils/analyzer_helpers';
+import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
+import { useRightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import type { StatsNode } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import { isActiveTimeline } from '../../../../helpers';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
 import { getField } from '../../shared/utils';
-import { useRightPanelContext } from '../context';
-import { getTreeNodes } from '../utils/analyzer_helpers';
-import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 
 const CHILD_COUNT_LIMIT = 3;
 const ANCESTOR_LEVEL = 3;

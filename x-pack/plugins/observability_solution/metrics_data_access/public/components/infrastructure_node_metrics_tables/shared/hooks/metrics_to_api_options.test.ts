@@ -7,8 +7,8 @@
 
 import type { MetricsExplorerOptions } from '../../../../../common/metrics_explorer_views/types';
 import {
-  MetricsQueryOptions,
   createMetricByFieldLookup,
+  MetricsQueryOptions,
   metricsToApiOptions,
 } from './metrics_to_api_options';
 

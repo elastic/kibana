@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { get, isNumber } from 'lodash';
-import { createFormatter } from '../../../../../common/formatters';
-import {
-  SnapshotCustomMetricInputRT,
-  SnapshotMetricInput,
-} from '../../../../../common/http_api/snapshot_api';
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { InfraFormatterType } from '../../../../lib/lib';
+import {
+  SnapshotMetricInput,
+  SnapshotCustomMetricInputRT,
+} from '../../../../../common/http_api/snapshot_api';
 import { createFormatterForMetric } from '../../metrics_explorer/components/helpers/create_formatter_for_metric';
+import { createFormatter } from '../../../../../common/formatters';
 
 interface MetricFormatter {
   formatter: InfraFormatterType;

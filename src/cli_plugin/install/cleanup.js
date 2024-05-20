@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
 import del from 'del';
+import fs from 'fs';
 
 export function cleanPrevious(settings, logger) {
   return new Promise(function (resolve, reject) {

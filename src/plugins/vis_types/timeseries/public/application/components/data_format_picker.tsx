@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useMemo, useCallback, useState, ChangeEvent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiCode,
+  htmlIdGenerator,
   EuiComboBox,
   EuiFieldText,
   EuiFlexItem,
@@ -16,14 +19,11 @@ import {
   EuiLink,
   EuiSuperSelect,
   EuiText,
-  htmlIdGenerator,
+  EuiCode,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useCallback, useState, ChangeEvent } from 'react';
 import { DATA_FORMATTERS } from '../../../common/enums';
-import { durationInputOptions, durationOutputOptions, getDurationParams } from './lib/durations';
 import { getFormatterType } from './lib/get_formatter_type';
+import { durationInputOptions, durationOutputOptions, getDurationParams } from './lib/durations';
 
 const DEFAULT_OUTPUT_PRECISION = '2';
 const DEFAULT_CUSTOM_FORMAT_PATTERN = '0,0.[000]';

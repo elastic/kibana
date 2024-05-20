@@ -6,20 +6,20 @@
  */
 
 import {
+  configureStore,
+  getDefaultMiddleware,
+  type PreloadedState,
   type Action,
   type Dispatch,
   type MiddlewareAPI,
-  type PreloadedState,
-  configureStore,
-  getDefaultMiddleware,
 } from '@reduxjs/toolkit';
-import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+import { makeLensReducer, lensActions, getPreloadedState } from './lens_slice';
+import { LensState, LensStoreDeps } from './types';
+import { initMiddleware } from './init_middleware';
+import { optimizingMiddleware } from './optimizing_middleware';
 import { contextMiddleware } from './context_middleware';
 import { fullscreenMiddleware } from './fullscreen_middleware';
-import { initMiddleware } from './init_middleware';
-import { getPreloadedState, lensActions, makeLensReducer } from './lens_slice';
-import { optimizingMiddleware } from './optimizing_middleware';
-import { LensState, LensStoreDeps } from './types';
 export * from './types';
 export * from './selectors';
 

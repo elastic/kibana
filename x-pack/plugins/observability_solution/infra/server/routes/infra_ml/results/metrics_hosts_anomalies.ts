@@ -6,20 +6,20 @@
  */
 
 import Boom from '@hapi/boom';
+import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
-  GetMetricsHostsAnomaliesRequestPayload,
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
-  Pagination,
-  Sort,
-  getMetricsHostsAnomaliesRequestPayloadRT,
   getMetricsHostsAnomaliesSuccessReponsePayloadRT,
+  getMetricsHostsAnomaliesRequestPayloadRT,
+  GetMetricsHostsAnomaliesRequestPayload,
+  Sort,
+  Pagination,
 } from '../../../../common/http_api/infra_ml';
 import { createValidationFunction } from '../../../../common/runtime_types';
-import { InfraBackendLibs } from '../../../lib/infra_types';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
-import { getMetricsHostsAnomalies } from '../../../lib/infra_ml';
 import { isMlPrivilegesError } from '../../../lib/infra_ml/errors';
+import { getMetricsHostsAnomalies } from '../../../lib/infra_ml';
 
 export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute(

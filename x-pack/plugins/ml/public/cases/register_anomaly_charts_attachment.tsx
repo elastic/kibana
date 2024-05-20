@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { PLUGIN_ICON } from '../../common/constants/app';
+import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS } from '../../common/constants/cases';
 import { getEmbeddableComponent } from '../embeddables';
 import type { MlStartDependencies } from '../plugin';
+import { PLUGIN_ICON } from '../../common/constants/app';
 
 export function registerAnomalyChartsCasesAttachment(
   cases: CasesPublicSetup,

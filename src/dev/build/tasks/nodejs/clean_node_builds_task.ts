@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Task, deleteAll } from '../../lib';
+import { deleteAll, Task } from '../../lib';
 
 export const CleanNodeBuilds: Task = {
   description: 'Cleaning npm from node',

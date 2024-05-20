@@ -9,7 +9,7 @@ import type { RulesClientMock } from '@kbn/alerting-plugin/server/rules_client.m
 import { getRuleMock, resolveRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 import { updateRules } from './update_rules';
-import { getUpdateMlRulesOptionsMock, getUpdateRulesOptionsMock } from './update_rules.mock';
+import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
 
 // Failing with rule registry enabled
 describe('updateRules', () => {

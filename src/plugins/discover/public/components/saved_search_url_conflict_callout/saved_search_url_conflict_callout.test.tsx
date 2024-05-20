@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { History } from 'history';
 import React from 'react';
+import type { History } from 'history';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SavedSearchURLConflictCallout } from './saved_search_url_conflict_callout';
 
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 describe('SavedSearchURLConflictCallout', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;

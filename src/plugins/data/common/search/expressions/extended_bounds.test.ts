@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { extendedBoundsFunction } from './extended_bounds';
 import { functionWrapper } from './utils';
+import { extendedBoundsFunction } from './extended_bounds';
 
 describe('interpreter/functions#extendedBounds', () => {
   const fn = functionWrapper(extendedBoundsFunction);

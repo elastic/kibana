@@ -14,11 +14,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { getCalleeFunction } from '@kbn/profiling-utils';
 import React from 'react';
-import { SelectedFrame, getFrameIdentification, isComparisonColumn } from '.';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { getCalleeFunction } from '@kbn/profiling-utils';
+import { getFrameIdentification, isComparisonColumn, SelectedFrame } from '.';
 import { IFunctionRow } from '../topn_functions/utils';
 
 interface Props {

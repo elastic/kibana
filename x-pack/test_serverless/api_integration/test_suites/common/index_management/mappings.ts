@@ -15,9 +15,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('mappings', () => {
     let indexName: string;
-    let getMapping: (typeof indexManagementService)['mappings']['api']['getMapping'];
-    let createIndex: (typeof indexManagementService)['indices']['helpers']['createIndex'];
-    let deleteAllIndices: (typeof indexManagementService)['indices']['helpers']['deleteAllIndices'];
+    let getMapping: typeof indexManagementService['mappings']['api']['getMapping'];
+    let createIndex: typeof indexManagementService['indices']['helpers']['createIndex'];
+    let deleteAllIndices: typeof indexManagementService['indices']['helpers']['deleteAllIndices'];
 
     const mappings = {
       properties: {

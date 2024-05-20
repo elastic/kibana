@@ -5,32 +5,34 @@
  * 2.0.
  */
 
+import React, { useState, useEffect } from 'react';
+import { debounce } from 'lodash';
 import {
+  EuiFormRow,
+  EuiSpacer,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiFormRow,
+  EuiTitle,
   EuiIconTip,
   EuiLink,
-  EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core/public';
-import {
-  HiddenField,
-  SelectField,
-  ToggleField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
   FieldConfig,
-  UseField,
-  VALIDATION_TYPES,
   getFieldValidityAndErrorMessage,
+  UseField,
   useFormContext,
   useFormData,
+  VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { i18n } from '@kbn/i18n';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import {
+  ToggleField,
+  SelectField,
+  HiddenField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   firstFieldOption,
@@ -39,8 +41,6 @@ import {
   getTimeFieldOptions,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { debounce } from 'lodash';
-import React, { useState, useEffect } from 'react';
 import * as translations from './translations';
 
 interface TimeFieldOptions {

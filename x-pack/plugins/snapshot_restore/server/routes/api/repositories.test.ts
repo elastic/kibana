@@ -6,13 +6,13 @@
  */
 
 import {
-  MODULE_REPOSITORY_TYPES,
   ON_PREM_REPOSITORY_TYPES,
+  MODULE_REPOSITORY_TYPES,
   REPOSITORY_PLUGINS_MAP,
 } from '../../../common';
-import { RequestMock, RouterMock, routeDependencies } from '../../test/helpers';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
+import { RouterMock, routeDependencies, RequestMock } from '../../test/helpers';
 
 describe('[Snapshot and Restore API Routes] Repositories', () => {
   const managedRepositoryName = 'myManagedRepository';

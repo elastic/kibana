@@ -6,12 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ThemeContext } from '@emotion/react';
-import { CoreTheme } from '@kbn/core-theme-browser';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { action } from '@storybook/addon-actions';
-import { DecoratorFn, Meta } from '@storybook/react';
 import React, {
   forwardRef,
   useCallback,
@@ -22,6 +16,12 @@ import React, {
   useRef,
 } from 'react';
 import { ReplaySubject } from 'rxjs';
+import { ThemeContext } from '@emotion/react';
+import { DecoratorFn, Meta } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { CoreTheme } from '@kbn/core-theme-browser';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 
 import { CONTEXT_MENU_TRIGGER, EmbeddablePanel, PANEL_BADGE_TRIGGER, ViewMode } from '..';
 import { actions } from '../store';

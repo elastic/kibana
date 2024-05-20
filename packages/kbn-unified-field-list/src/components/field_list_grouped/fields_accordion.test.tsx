@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner, EuiNotificationBadge, EuiText } from '@elastic/eui';
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { FieldListItem, FieldsGroupNames } from '../../types';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { EuiLoadingSpinner, EuiNotificationBadge, EuiText } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FieldsAccordion, FieldsAccordionProps } from './fields_accordion';
+import { FieldListItem, FieldsGroupNames } from '../../types';
 
 describe('UnifiedFieldList <FieldsAccordion />', () => {
   let defaultProps: FieldsAccordionProps<FieldListItem>;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
+import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 
 import { setupEnvironment } from '../../helpers';
-import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
+import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
 
 describe('Kibana deprecations - Deprecation details flyout', () => {
   let testBed: KibanaTestBed;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { FIND_CSP_BENCHMARK_RULE_ROUTE_PATH } from '../../../../common/constants';
 import {
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
@@ -19,6 +18,7 @@ import {
   FindCspBenchmarkRuleRequest as FindCspBenchmarkRuleRequestV2,
   findCspBenchmarkRuleRequestSchema as findCspBenchmarkRuleRequestSchemaV2,
 } from '../../../../common/types/rules/v4';
+import { FIND_CSP_BENCHMARK_RULE_ROUTE_PATH } from '../../../../common/constants';
 import { CspRouter } from '../../../types';
 import { findBenchmarkRuleHandler as findRuleHandlerV1 } from './v1';
 import { findBenchmarkRuleHandler as findRuleHandlerV2 } from './v2';

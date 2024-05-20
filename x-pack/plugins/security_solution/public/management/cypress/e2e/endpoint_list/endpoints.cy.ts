@@ -6,27 +6,27 @@
  */
 
 import type { Agent } from '@kbn/fleet-plugin/common';
+import { AGENT_HOSTNAME_CELL, TABLE_ROW_ACTIONS, TABLE_ROW_ACTIONS_MENU } from '../../screens';
+import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import type { PolicyData } from '../../../../../common/endpoint/types';
-import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
-import { AGENT_HOSTNAME_CELL, TABLE_ROW_ACTIONS, TABLE_ROW_ACTIONS_MENU } from '../../screens';
-import {
-  FLEET_REASSIGN_POLICY_MODAL,
-  FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON,
-} from '../../screens/fleet/agent_details';
-import { loadPage } from '../../tasks/common';
-import { createEndpointHost } from '../../tasks/create_endpoint_host';
-import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
-import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import {
   createAgentPolicyTask,
   getAgentByHostName,
   getEndpointIntegrationVersion,
   reassignAgentPolicy,
 } from '../../tasks/fleet';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { login } from '../../tasks/login';
+import { loadPage } from '../../tasks/common';
+import {
+  FLEET_REASSIGN_POLICY_MODAL,
+  FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON,
+} from '../../screens/fleet/agent_details';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;

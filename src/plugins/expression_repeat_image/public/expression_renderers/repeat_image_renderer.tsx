@@ -17,9 +17,9 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { defaultTheme$, getElasticOutline, isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import { defaultTheme$, getElasticOutline, isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { RepeatImageRendererConfig } from '../../common/types';
 
 const strings = {

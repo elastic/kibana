@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { checkIndexExists } from './api';
 import { getDataViewsService } from './kibana_services';
+import { checkIndexExists } from './api';
 
 export function checkIndexPatternValid(name: string) {
   const byteLength = encodeURI(name).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1;

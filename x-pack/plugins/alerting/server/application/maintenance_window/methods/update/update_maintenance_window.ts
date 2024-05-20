@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { Filter, buildEsQuery } from '@kbn/es-query';
 import moment from 'moment';
+import Boom from '@hapi/boom';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { getScopedQueryErrorMessage } from '../../../../../common';
-import {
-  createMaintenanceWindowSo,
-  getMaintenanceWindowSo,
-} from '../../../../data/maintenance_window';
-import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import type { MaintenanceWindow } from '../../types';
 import {
   generateMaintenanceWindowEvents,
-  mergeEvents,
   shouldRegenerateEvents,
+  mergeEvents,
 } from '../../lib/generate_maintenance_window_events';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import {
   transformMaintenanceWindowAttributesToMaintenanceWindow,
   transformMaintenanceWindowToMaintenanceWindowAttributes,
 } from '../../transforms';
-import type { MaintenanceWindow } from '../../types';
-import { updateMaintenanceWindowParamsSchema } from './schemas';
+import {
+  getMaintenanceWindowSo,
+  createMaintenanceWindowSo,
+} from '../../../../data/maintenance_window';
 import { UpdateMaintenanceWindowParams } from './types';
+import { updateMaintenanceWindowParamsSchema } from './schemas';
 
 export async function updateMaintenanceWindow(
   context: MaintenanceWindowClientContext,

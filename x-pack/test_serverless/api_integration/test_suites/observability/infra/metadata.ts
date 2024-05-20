@@ -13,7 +13,7 @@ import type {
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { ARCHIVE_NAME, DATES } from './constants';
+import { DATES, ARCHIVE_NAME } from './constants';
 
 const timeRange = {
   from: DATES.serverlessTestingHost.min,

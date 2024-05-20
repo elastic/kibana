@@ -8,7 +8,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 
-import { createEsClientForFtrConfig, systemIndicesSuperuser } from '@kbn/test';
+import { systemIndicesSuperuser, createEsClientForFtrConfig } from '@kbn/test';
 import { FtrProviderContext } from './ftr_provider_context';
 
 export function EsProvider({ getService }: FtrProviderContext): Client {

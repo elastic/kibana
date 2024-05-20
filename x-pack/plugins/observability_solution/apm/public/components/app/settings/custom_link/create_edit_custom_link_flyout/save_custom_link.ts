@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { CustomLink, Filter } from '../../../../../../common/custom_link/custom_link_types';
+import { NotificationsStart } from '@kbn/core/public';
+import { Filter, CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
 
 export async function saveCustomLink({

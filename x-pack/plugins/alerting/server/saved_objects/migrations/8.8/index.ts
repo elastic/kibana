@@ -8,10 +8,10 @@
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
+import { createEsoMigration, isDetectionEngineAADRuleType, pipeMigrations } from '../utils';
+import { RawRule } from '../../../types';
 import { transformToAlertThrottle } from '../../../rules_client/lib/siem_legacy_actions/transform_to_alert_throttle';
 import { transformToNotifyWhen } from '../../../rules_client/lib/siem_legacy_actions/transform_to_notify_when';
-import { RawRule } from '../../../types';
-import { createEsoMigration, isDetectionEngineAADRuleType, pipeMigrations } from '../utils';
 
 function addRevision(doc: SavedObjectUnsanitizedDoc<RawRule>): SavedObjectUnsanitizedDoc<RawRule> {
   return {

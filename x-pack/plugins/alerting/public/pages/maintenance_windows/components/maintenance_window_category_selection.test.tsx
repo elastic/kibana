@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import { screen, fireEvent } from '@testing-library/react';
 import { MaintenanceWindowCategorySelection } from './maintenance_window_category_selection';
+import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 
 const mockOnChange = jest.fn();
 

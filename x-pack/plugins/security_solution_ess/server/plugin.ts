@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
-import { DEFAULT_PRODUCT_FEATURES } from './constants';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { getProductProductFeaturesConfigurator } from './product_features';
+import { DEFAULT_PRODUCT_FEATURES } from './constants';
 
 import type {
   SecuritySolutionEssPluginSetup,
-  SecuritySolutionEssPluginSetupDeps,
   SecuritySolutionEssPluginStart,
+  SecuritySolutionEssPluginSetupDeps,
   SecuritySolutionEssPluginStartDeps,
 } from './types';
 

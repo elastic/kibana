@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiCallOut, EuiCopy, EuiFieldText, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiCallOut, EuiButtonIcon, EuiCopy, EuiFieldText } from '@elastic/eui';
 
 interface Props {
   name: string;

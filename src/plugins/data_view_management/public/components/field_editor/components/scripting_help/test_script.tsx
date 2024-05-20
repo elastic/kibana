@@ -10,21 +10,21 @@ import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiCodeBlock,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormRow,
-  EuiSpacer,
   EuiText,
+  EuiSpacer,
   EuiTitle,
+  EuiCallOut,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
+import { Query, buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { Query, buildEsQuery } from '@kbn/es-query';
 import { context as contextType } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';

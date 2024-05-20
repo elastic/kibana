@@ -7,8 +7,8 @@
 
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
 import { AggFieldBucket, PatchableVulnerabilityStat } from '../../../common/types_old';
+import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
 
 interface VulnerabilityBucket {
   key: string | undefined;

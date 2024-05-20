@@ -6,14 +6,14 @@
  */
 
 import { format } from 'url';
+import supertest from 'supertest';
+import request from 'superagent';
 import type {
-  APIClientRequestParamsOf,
   APIReturnType,
+  APIClientRequestParamsOf,
 } from '@kbn/observability-onboarding-plugin/public/services/rest/create_call_api';
 import type { APIEndpoint } from '@kbn/observability-onboarding-plugin/server/routes';
 import { formatRequest } from '@kbn/server-route-repository';
-import request from 'superagent';
-import supertest from 'supertest';
 
 export function createObservabilityOnboardingApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(

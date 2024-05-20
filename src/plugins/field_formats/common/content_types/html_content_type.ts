@@ -7,7 +7,7 @@
  */
 
 import { escape, isFunction } from 'lodash';
-import { FieldFormatsContentType, HtmlContextTypeConvert, IFieldFormat } from '../types';
+import { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
 import { asPrettyString, getHighlightHtml } from '../utils';
 
 export const HTML_CONTEXT_TYPE: FieldFormatsContentType = 'html';

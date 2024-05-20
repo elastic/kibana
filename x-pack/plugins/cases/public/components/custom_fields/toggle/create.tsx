@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React from 'react';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 

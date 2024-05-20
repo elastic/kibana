@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-import type { PartialRule } from '@kbn/alerting-plugin/server';
-import type { RuleAction, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { createPromiseFromStreams } from '@kbn/utils';
 import { partition } from 'lodash/fp';
+import { Readable } from 'stream';
+import { createPromiseFromStreams } from '@kbn/utils';
+import type { RuleAction, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
 
-import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { RuleToImport } from '../../../../../common/api/detection_engine/rule_management';
+import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 import { requestContextMock } from '../../routes/__mocks__';
-import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import { getOutputRuleAlertForRest } from '../../routes/__mocks__/utils';
-import type { BulkError } from '../../routes/utils';
-import { createBulkErrorObject } from '../../routes/utils';
-import type { PartialFilter } from '../../types';
 import {
-  getIdBulkError,
   getIdError,
-  getInvalidConnectors,
+  transformFindAlerts,
+  transform,
+  getIdBulkError,
+  transformAlertsToRules,
   getTupleDuplicateErrorsAndUniqueRules,
+  getInvalidConnectors,
+  swapActionIds,
   migrateLegacyActionsIds,
   migrateLegacyInvestigationFields,
-  swapActionIds,
-  transform,
-  transformAlertsToRules,
-  transformFindAlerts,
 } from './utils';
+import { getRuleMock } from '../../routes/__mocks__/request_responses';
+import type { PartialFilter } from '../../types';
+import type { BulkError } from '../../routes/utils';
+import { createBulkErrorObject } from '../../routes/utils';
 
 import type { RuleAlertType } from '../../rule_schema';
 import { getMlRuleParams, getQueryRuleParams, getThreatRuleParams } from '../../rule_schema/mocks';

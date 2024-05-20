@@ -13,21 +13,7 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { v4 as uuidv4 } from 'uuid';
-import type {
-  EndpointActionLogRequestParams,
-  EndpointActionLogRequestQuery,
-} from '../../../../common/api/endpoint';
-import { EndpointActionLogRequestSchema } from '../../../../common/api/endpoint';
 import { ENDPOINT_ACTION_LOG_ROUTE } from '../../../../common/endpoint/constants';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
-import type {
-  ActivityLog,
-  EndpointAction,
-  EndpointActionResponse,
-} from '../../../../common/endpoint/types';
-import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContext,
@@ -37,8 +23,22 @@ import {
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import { registerActionAuditLogRoutes } from './audit_log';
+import { v4 as uuidv4 } from 'uuid';
 import type { Results } from './mocks';
 import { mockAuditLogSearchResult } from './mocks';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import type {
+  ActivityLog,
+  EndpointAction,
+  EndpointActionResponse,
+} from '../../../../common/endpoint/types';
+import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type {
+  EndpointActionLogRequestParams,
+  EndpointActionLogRequestQuery,
+} from '../../../../common/api/endpoint';
+import { EndpointActionLogRequestSchema } from '../../../../common/api/endpoint';
 
 describe('Action Log API', () => {
   describe('schema', () => {

@@ -10,19 +10,19 @@ import React, { useEffect, useRef } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import {
-  EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiSpacer,
+  EuiFlyoutBody,
   EuiTitle,
+  EuiSpacer,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { WaterfallMetadataEntry } from '../../../common/network_data/types';
-import { MiddleTruncatedText } from '../middle_truncated_text';
-import { OnFlyoutClose } from './use_flyout';
 import { Table } from './waterfall_flyout_table';
+import { MiddleTruncatedText } from '../middle_truncated_text';
+import { WaterfallMetadataEntry } from '../../../common/network_data/types';
+import { OnFlyoutClose } from './use_flyout';
 
 export const DETAILS = i18n.translate('xpack.synthetics.synthetics.waterfall.flyout.details', {
   defaultMessage: 'Details',

@@ -9,10 +9,7 @@
  * Error returned from {@link AssignmentService#updateTagAssignments}
  */
 export class AssignmentError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number
-  ) {
+  constructor(message: string, public readonly status: number) {
     super(message);
     Object.setPrototypeOf(this, AssignmentError.prototype);
   }

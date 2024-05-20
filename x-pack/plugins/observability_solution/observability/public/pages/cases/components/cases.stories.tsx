@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { ComponentStory } from '@storybook/react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { CasesProps, Cases as Component } from './cases';
+import { Cases as Component, CasesProps } from './cases';
 
 export default {
   title: 'app/Cases',

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { CoreSetup } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { CoreSetup } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
+import { createAppContextStartContractMock } from '../../mocks';
 
 import { FleetMetricsTask, TYPE, VERSION } from './fleet_metrics_task';
 

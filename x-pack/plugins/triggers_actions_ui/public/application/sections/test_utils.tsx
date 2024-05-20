@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
+import React, { FC, PropsWithChildren } from 'react';
+import { QueryClient, QueryClientProvider, QueryClientProviderProps } from '@tanstack/react-query';
 // FIXME: adds inefficient boilerplate that should not be required. See https://github.com/elastic/kibana/issues/180725
 import { I18nProvider } from '@kbn/i18n-react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { QueryClient, QueryClientProvider, QueryClientProviderProps } from '@tanstack/react-query';
-import { RenderOptions, RenderResult, render as reactRender } from '@testing-library/react';
-import React, { FC, PropsWithChildren } from 'react';
 
 import { TriggersAndActionsUiServices } from '../..';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';

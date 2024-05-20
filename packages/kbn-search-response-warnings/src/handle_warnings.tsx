@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import React from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
-import type { I18nStart } from '@kbn/core-i18n-browser';
+import { estypes } from '@elastic/elasticsearch';
 import type {
   AnalyticsServiceStart,
   NotificationsStart,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React from 'react';
-import {
-  getWarningsDescription,
-  getWarningsTitle,
-  viewDetailsLabel,
-} from './components/search_response_warnings/i18n_utils';
-import { extractWarnings } from './extract_warnings';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
   SearchResponseIncompleteWarning,
   SearchResponseWarning,
   WarningHandlerCallback,
 } from './types';
+import { extractWarnings } from './extract_warnings';
+import {
+  getWarningsDescription,
+  getWarningsTitle,
+  viewDetailsLabel,
+} from './components/search_response_warnings/i18n_utils';
 
 interface Services {
   analytics: AnalyticsServiceStart;

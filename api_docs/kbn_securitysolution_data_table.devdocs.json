@@ -100,7 +100,11 @@
             "tags": [],
             "label": "setCellProps",
             "description": [],
-            "signature": ["(props: ", "EuiDataGridSetCellProps", ") => void"],
+            "signature": [
+              "(props: ",
+              "EuiDataGridSetCellProps",
+              ") => void"
+            ],
             "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -117,7 +121,11 @@
         "tags": [],
         "label": "DataTableComponent",
         "description": [],
-        "signature": ["React.NamedExoticComponent<", "DataTableProps", ">"],
+        "signature": [
+          "React.NamedExoticComponent<",
+          "DataTableProps",
+          ">"
+        ],
         "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -130,7 +138,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -144,7 +154,9 @@
         "type": "Function",
         "tags": [],
         "label": "dataTableReducer",
-        "description": ["The reducer for all data table actions"],
+        "description": [
+          "The reducer for all data table actions"
+        ],
         "signature": [
           "(state: ",
           {
@@ -175,7 +187,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["PassedS"],
+            "signature": [
+              "PassedS"
+            ],
             "path": "node_modules/typescript-fsa-reducers/dist/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -187,7 +201,9 @@
             "tags": [],
             "label": "action",
             "description": [],
-            "signature": ["{ type: any; }"],
+            "signature": [
+              "{ type: any; }"
+            ],
             "path": "node_modules/typescript-fsa-reducers/dist/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -230,7 +246,10 @@
             "tags": [],
             "label": "headers",
             "description": [],
-            "signature": ["ColumnHeaderOptions", "[]"],
+            "signature": [
+              "ColumnHeaderOptions",
+              "[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -264,7 +283,9 @@
             "tags": [],
             "label": "isEventRenderedView",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -335,7 +356,9 @@
             "tags": [],
             "label": "eventIds",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -348,7 +371,9 @@
             "tags": [],
             "label": "fieldsToKeep",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -361,7 +386,9 @@
             "tags": [],
             "label": "hasAlertsCrud",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -380,7 +407,9 @@
         "description": [
           "\nrowIndex is bigger than `data.length` for pages with page numbers bigger than one.\nFor that reason, we must calculate `rowIndex % itemsPerPage`.\n\nEx:\nGiven `rowIndex` is `13` and `itemsPerPage` is `10`.\nIt means that the `activePage` is `2` and the `pageRowIndex` is `3`\n\n**Warning**:\nBe careful with array out of bounds. `pageRowIndex` can be bigger or equal to `data.length`\n in the scenario where the user changes the event status (Open, Acknowledged, Closed)."
         ],
-        "signature": ["(rowIndex: number, itemsPerPage: number) => number"],
+        "signature": [
+          "(rowIndex: number, itemsPerPage: number) => number"
+        ],
         "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -392,7 +421,9 @@
             "tags": [],
             "label": "rowIndex",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -405,7 +436,9 @@
             "tags": [],
             "label": "itemsPerPage",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -543,7 +576,9 @@
             "type": "Array",
             "tags": [],
             "label": "columns",
-            "description": ["The columns displayed in the data table"],
+            "description": [
+              "The columns displayed in the data table"
+            ],
             "signature": [
               "(Pick<",
               "EuiDataGridColumn",
@@ -571,8 +606,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "dataViewId",
-            "description": ["Kibana data view id"],
-            "signature": ["string | null"],
+            "description": [
+              "Kibana data view id"
+            ],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -583,8 +622,12 @@
             "type": "Array",
             "tags": [],
             "label": "deletedEventIds",
-            "description": ["Events to not be rendered"],
-            "signature": ["string[]"],
+            "description": [
+              "Events to not be rendered"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -598,7 +641,11 @@
             "description": [
               "This holds the view information for the flyout when viewing data in a consuming view (i.e. hosts page) or the side panel in the primary data view"
             ],
-            "signature": ["{ [x: string]: ", "ExpandedDetailType", " | undefined; }"],
+            "signature": [
+              "{ [x: string]: ",
+              "ExpandedDetailType",
+              " | undefined; }"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -630,8 +677,12 @@
             "type": "string",
             "tags": [],
             "label": "graphEventId",
-            "description": ["When non-empty, display a graph view for this event"],
-            "signature": ["string | undefined"],
+            "description": [
+              "When non-empty, display a graph view for this event"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -642,7 +693,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["Uniquely identifies the data table"],
+            "description": [
+              "Uniquely identifies the data table"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -654,7 +707,9 @@
             "tags": [],
             "label": "indexNames",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -676,7 +731,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isSelectAllChecked",
-            "description": ["If selectAll checkbox in header is checked"],
+            "description": [
+              "If selectAll checkbox in header is checked"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -687,7 +744,9 @@
             "type": "number",
             "tags": [],
             "label": "itemsPerPage",
-            "description": ["The number of items to show in a single page of results"],
+            "description": [
+              "The number of items to show in a single page of results"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -701,7 +760,9 @@
             "description": [
               "Displays a series of choices that when selected, become the value of `itemsPerPage`"
             ],
-            "signature": ["number[]"],
+            "signature": [
+              "number[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -712,8 +773,12 @@
             "type": "Array",
             "tags": [],
             "label": "loadingEventIds",
-            "description": ["Events to be rendered as loading"],
-            "signature": ["string[]"],
+            "description": [
+              "Events to be rendered as loading"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -749,7 +814,9 @@
             "tags": [],
             "label": "initialized",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -761,7 +828,10 @@
             "tags": [],
             "label": "sessionViewConfig",
             "description": [],
-            "signature": ["SessionViewConfig", " | null"],
+            "signature": [
+              "SessionViewConfig",
+              " | null"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -772,8 +842,12 @@
             "type": "number",
             "tags": [],
             "label": "updated",
-            "description": ["updated saved object timestamp"],
-            "signature": ["number | undefined"],
+            "description": [
+              "updated saved object timestamp"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -784,7 +858,9 @@
             "type": "number",
             "tags": [],
             "label": "totalCount",
-            "description": ["Total number of fetched events/alerts"],
+            "description": [
+              "Total number of fetched events/alerts"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -796,7 +872,9 @@
             "tags": [],
             "label": "viewMode",
             "description": [],
-            "signature": ["\"gridView\" | \"eventRenderedView\""],
+            "signature": [
+              "\"gridView\" | \"eventRenderedView\""
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -824,7 +902,9 @@
         "type": "Interface",
         "tags": [],
         "label": "DataTableState",
-        "description": ["The state of all timelines is stored here"],
+        "description": [
+          "The state of all timelines is stored here"
+        ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -892,7 +972,9 @@
             "tags": [],
             "label": "esTypes",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -927,7 +1009,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TableById",
-        "description": ["A map of id to data table"],
+        "description": [
+          "A map of id to data table"
+        ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -962,7 +1046,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TableState",
-        "description": ["The state of all data tables is stored here"],
+        "description": [
+          "The state of all data tables is stored here"
+        ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1049,7 +1135,9 @@
         "tags": [],
         "label": "defaultColumnHeaderType",
         "description": [],
-        "signature": ["\"not-filtered\" | \"text-filter\""],
+        "signature": [
+          "\"not-filtered\" | \"text-filter\""
+        ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1062,7 +1150,10 @@
         "tags": [],
         "label": "defaultHeaders",
         "description": [],
-        "signature": ["ColumnHeaderOptions", "[]"],
+        "signature": [
+          "ColumnHeaderOptions",
+          "[]"
+        ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1075,7 +1166,9 @@
         "tags": [],
         "label": "FILTER_OPEN",
         "description": [],
-        "signature": ["\"open\""],
+        "signature": [
+          "\"open\""
+        ],
         "path": "x-pack/packages/security-solution/data_table/common/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1293,7 +1386,9 @@
         "tags": [],
         "label": "ViewSelection",
         "description": [],
-        "signature": ["\"gridView\" | \"eventRenderedView\""],
+        "signature": [
+          "\"gridView\" | \"eventRenderedView\""
+        ],
         "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1319,7 +1414,10 @@
             "tags": [],
             "label": "defaultColumns",
             "description": [],
-            "signature": ["ColumnHeaderOptions", "[]"],
+            "signature": [
+              "ColumnHeaderOptions",
+              "[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1331,7 +1429,9 @@
             "tags": [],
             "label": "dataViewId",
             "description": [],
-            "signature": ["null"],
+            "signature": [
+              "null"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1343,7 +1443,9 @@
             "tags": [],
             "label": "deletedEventIds",
             "description": [],
-            "signature": ["never[]"],
+            "signature": [
+              "never[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1367,7 +1469,9 @@
             "tags": [],
             "label": "filters",
             "description": [],
-            "signature": ["never[]"],
+            "signature": [
+              "never[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1379,7 +1483,9 @@
             "tags": [],
             "label": "indexNames",
             "description": [],
-            "signature": ["never[]"],
+            "signature": [
+              "never[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1391,7 +1497,9 @@
             "tags": [],
             "label": "isSelectAllChecked",
             "description": [],
-            "signature": ["false"],
+            "signature": [
+              "false"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1403,7 +1511,9 @@
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "signature": ["false"],
+            "signature": [
+              "false"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1426,7 +1536,9 @@
             "tags": [],
             "label": "itemsPerPageOptions",
             "description": [],
-            "signature": ["number[]"],
+            "signature": [
+              "number[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1438,7 +1550,9 @@
             "tags": [],
             "label": "loadingEventIds",
             "description": [],
-            "signature": ["never[]"],
+            "signature": [
+              "never[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1462,7 +1576,9 @@
             "tags": [],
             "label": "showCheckboxes",
             "description": [],
-            "signature": ["false"],
+            "signature": [
+              "false"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1488,7 +1604,9 @@
             "tags": [],
             "label": "selectAll",
             "description": [],
-            "signature": ["false"],
+            "signature": [
+              "false"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1511,7 +1629,9 @@
             "tags": [],
             "label": "sessionViewConfig",
             "description": [],
-            "signature": ["null"],
+            "signature": [
+              "null"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1523,7 +1643,10 @@
             "tags": [],
             "label": "columns",
             "description": [],
-            "signature": ["ColumnHeaderOptions", "[]"],
+            "signature": [
+              "ColumnHeaderOptions",
+              "[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1535,7 +1658,9 @@
             "tags": [],
             "label": "queryFields",
             "description": [],
-            "signature": ["never[]"],
+            "signature": [
+              "never[]"
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1569,7 +1694,9 @@
             "tags": [],
             "label": "viewMode",
             "description": [],
-            "signature": ["\"gridView\""],
+            "signature": [
+              "\"gridView\""
+            ],
             "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1592,7 +1719,9 @@
                 "tags": [],
                 "label": "showBuildingBlockAlerts",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1604,7 +1733,9 @@
                 "tags": [],
                 "label": "showOnlyThreatIndicatorAlerts",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false

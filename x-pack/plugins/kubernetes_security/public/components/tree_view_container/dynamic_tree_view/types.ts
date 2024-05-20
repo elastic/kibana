@@ -6,7 +6,7 @@
  */
 
 import { KeyboardEventHandler } from 'react';
-import { DynamicTree, KubernetesCollectionMap, QueryDslQueryContainerBool } from '../../../types';
+import { QueryDslQueryContainerBool, KubernetesCollectionMap, DynamicTree } from '../../../types';
 
 export type DynamicTreeViewProps = {
   tree: DynamicTree[];

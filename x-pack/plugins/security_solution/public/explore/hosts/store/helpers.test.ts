@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { HostsFields } from '../../../../common/api/search_strategy/hosts/model/sort';
-import { Direction, RiskScoreFields } from '../../../../common/search_strategy';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../../common/store/constants';
-import { setHostsQueriesActivePageToZero } from './helpers';
 import type { HostsModel } from './model';
 import { HostsTableType, HostsType } from './model';
+import { setHostsQueriesActivePageToZero } from './helpers';
+import { Direction, RiskScoreFields } from '../../../../common/search_strategy';
+import { HostsFields } from '../../../../common/api/search_strategy/hosts/model/sort';
 
 export const mockHostsState: HostsModel = {
   page: {

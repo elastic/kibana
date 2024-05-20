@@ -10,9 +10,9 @@ import { createTelemetryDetectionRuleListsTaskConfig } from './detection_rule';
 import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
 import { createTelemetryFilterListArtifactTaskConfig } from './filterlists';
-import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_alerts';
-import { createTelemetrySecurityListTaskConfig } from './security_lists';
 import { createTelemetryTimelineTaskConfig } from './timelines';
+import { createTelemetrySecurityListTaskConfig } from './security_lists';
+import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_alerts';
 
 describe('security telemetry - ', () => {
   const stubBatchNumber = 0;

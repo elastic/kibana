@@ -10,7 +10,7 @@ import { Redirect, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
+import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 
 import { Rule, RuleTableItem } from '../../../../types';
 

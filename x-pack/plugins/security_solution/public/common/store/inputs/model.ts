@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SavedQuery } from '@kbn/data-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
 import type { Dispatch } from 'redux';
-import type { URL_PARAM_KEY } from '../../hooks/use_url_state';
+import type { Filter, Query } from '@kbn/es-query';
+import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InputsModelId } from './constants';
+import type { URL_PARAM_KEY } from '../../hooks/use_url_state';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';

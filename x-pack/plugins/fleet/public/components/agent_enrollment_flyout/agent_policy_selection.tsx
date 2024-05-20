@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,10 +18,6 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import styled from 'styled-components';
 
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';

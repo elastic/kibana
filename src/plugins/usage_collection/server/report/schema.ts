@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 const applicationUsageReportSchema = schema.object({
   minutesOnScreen: schema.number(),

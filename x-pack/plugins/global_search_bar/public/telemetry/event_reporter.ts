@@ -13,10 +13,10 @@ import {
   CountMetric,
   EventMetric,
   FieldType,
-  TrackUiMetricFn,
   TrackedApplicationClick,
   TrackedError,
   TrackedSavedObjectClick,
+  TrackUiMetricFn,
 } from '../types';
 
 export class EventReporter {

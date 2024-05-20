@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
-import React from 'react';
 import { Credentials } from './credentials';
 import { ServiceNowConfig, ServiceNowSecrets } from './types';
 

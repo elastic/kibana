@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import type { PolicyData, ResponseActionApiResponse } from '../../../../common/endpoint/types';
-import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
+import { deleteAllLoadedEndpointData } from '../tasks/delete_all_endpoint_data';
 import { getAlertsTableRows, navigateToAlertsList } from '../screens/alerts';
 import { waitForEndpointAlerts } from '../tasks/alerts';
 import { request } from '../tasks/common';
-import { createEndpointHost } from '../tasks/create_endpoint_host';
-import { deleteAllLoadedEndpointData } from '../tasks/delete_all_endpoint_data';
-import { enableAllPolicyProtections } from '../tasks/endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../tasks/fleet';
-import { ROLE, login } from '../tasks/login';
+import { createEndpointHost } from '../tasks/create_endpoint_host';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { enableAllPolicyProtections } from '../tasks/endpoint_policy';
+import type { PolicyData, ResponseActionApiResponse } from '../../../../common/endpoint/types';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
+import { login, ROLE } from '../tasks/login';
+import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
 describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { distinct, map, pluck, scan, take } from 'rxjs';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 const EVENTS: Array<keyof WindowEventMap> = [
   'mousedown',

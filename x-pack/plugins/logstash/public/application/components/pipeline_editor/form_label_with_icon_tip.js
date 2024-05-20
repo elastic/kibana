@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiIconTip } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { EuiIconTip } from '@elastic/eui';
 
 export function FormLabelWithIconTip({ formRowLabelText, formRowTooltipText }) {
   return (

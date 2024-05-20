@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { findMaintenanceWindows } from './find_maintenance_windows';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   MaintenanceWindowClientContext,
+  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
-import { findMaintenanceWindows } from './find_maintenance_windows';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 

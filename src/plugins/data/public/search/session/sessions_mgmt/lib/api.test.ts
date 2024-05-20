@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
+import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import type { MockedKeys } from '@kbn/utility-types-jest';
-import moment from 'moment';
 import { SessionsClient } from '../../..';
 import { SearchSessionStatus } from '../../../../../common';
-import { SearchSessionsConfigSchema } from '../../../../../config';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SearchSessionsMgmtAPI } from './api';
+import { SearchSessionsConfigSchema } from '../../../../../config';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;

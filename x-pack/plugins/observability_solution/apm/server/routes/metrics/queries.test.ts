@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
-import { SearchParamsMock, inspectSearchParams } from '../../utils/test_helpers';
+import { getCPUChartData } from './by_agent/shared/cpu';
+import { getMemoryChartData } from './by_agent/shared/memory';
 import { getHeapMemoryChart } from './by_agent/java/heap_memory';
 import { getNonHeapMemoryChart } from './by_agent/java/non_heap_memory';
 import { getThreadCountChart } from './by_agent/java/thread_count';
-import { getCPUChartData } from './by_agent/shared/cpu';
-import { getMemoryChartData } from './by_agent/shared/memory';
+import { SearchParamsMock, inspectSearchParams } from '../../utils/test_helpers';
+import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('metrics queries', () => {
   let mock: SearchParamsMock;

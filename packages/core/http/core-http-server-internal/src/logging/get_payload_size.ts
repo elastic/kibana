@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { isPlainObject } from 'lodash';
 import { ReadStream } from 'fs';
 import { Zlib } from 'zlib';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
-import { isPlainObject } from 'lodash';
 
 type Response = Request['response'];
 

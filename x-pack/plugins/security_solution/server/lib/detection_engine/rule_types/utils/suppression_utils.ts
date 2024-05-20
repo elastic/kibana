@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import get from 'lodash/get';
 import pick from 'lodash/pick';
+import get from 'lodash/get';
 import sortBy from 'lodash/sortBy';
 
 import {
-  ALERT_INSTANCE_ID,
   ALERT_SUPPRESSION_DOCS_COUNT,
-  ALERT_SUPPRESSION_END,
-  ALERT_SUPPRESSION_START,
+  ALERT_INSTANCE_ID,
   ALERT_SUPPRESSION_TERMS,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_END,
 } from '@kbn/rule-data-utils';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
 interface SuppressionTerm {

@@ -6,9 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { getLicenseFetcher } from './license_fetcher';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 type EsLicense = estypes.XpackInfoMinimalLicenseInformation;
 

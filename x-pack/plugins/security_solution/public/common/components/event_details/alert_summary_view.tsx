@@ -9,9 +9,9 @@ import React, { useMemo } from 'react';
 
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { getSummaryRows } from './get_alert_summary_rows';
 import { SummaryView } from './summary_view';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const AlertSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;

@@ -8,7 +8,7 @@
 
 import { AggConfigs } from '../agg_configs';
 import { AggTypesDependencies } from '../agg_types';
-import { mockAggTypesDependencies, mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 describe('date_range params', () => {

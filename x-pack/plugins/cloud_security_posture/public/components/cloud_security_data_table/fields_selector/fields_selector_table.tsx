@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useCallback, useMemo, useState } from 'react';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   EuiBasicTableColumn,
   EuiButtonEmpty,
@@ -15,14 +23,6 @@ import {
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { useCallback, useMemo, useState } from 'react';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED } from '../../../common/constants';
 const ACTION_COLUMN_WIDTH = '24px';
 const defaultSorting = {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { shallow } from 'enzyme';
 import React from 'react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { AgentMarker } from './agent_marker';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
-import { rgba } from 'polished';
 import React from 'react';
+import { EuiConfirmModal, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { rgba } from 'polished';
 
 const MarkdownContainer = styled.div`
   max-height: 200px;

@@ -7,22 +7,22 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import React, { Component, Fragment } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiButtonEmpty,
   EuiSelectable,
   EuiSelectableOption,
+  EuiButton,
   EuiSpacer,
   EuiTextAlign,
 } from '@elastic/eui';
-import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import React, { Component, Fragment } from 'react';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 
 export type FieldProps = {
   label: string;

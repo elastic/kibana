@@ -7,41 +7,41 @@
  */
 
 import type { Request, ResponseToolkit } from '@hapi/hapi';
+import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
+import {
+  isUnauthorizedError as isElasticsearchUnauthorizedError,
+  UnauthorizedError as EsNotAuthorizedError,
+} from '@kbn/es-errors';
 import type {
-  ErrorHttpResponseOptions,
-  IRouter,
   KibanaRequest,
-  RequestHandler,
-  RequestHandlerContextBase,
+  ErrorHttpResponseOptions,
   RouteConfig,
   RouteMethod,
-  RouteRegistrar,
+  RequestHandlerContextBase,
   RouterRoute,
+  IRouter,
+  RequestHandler,
   VersionedRouter,
+  RouteRegistrar,
 } from '@kbn/core-http-server';
-import { getRequestValidation, validBodyOutput } from '@kbn/core-http-server';
-import {
-  UnauthorizedError as EsNotAuthorizedError,
-  isUnauthorizedError as isElasticsearchUnauthorizedError,
-} from '@kbn/es-errors';
-import type { Logger } from '@kbn/logging';
-import apm from 'elastic-apm-node';
-import { wrapErrors } from './error_wrapper';
+import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
+import { RouteValidator } from './validator';
+import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
-import { prepareRouteConfigValidation } from './util';
-import { RouteValidator } from './validator';
-import { CoreVersionedRouter } from './versioned_router';
+import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
+import { prepareRouteConfigValidation } from './util';
 
 export type ContextEnhancer<
   P,
   Q,
   B,
   Method extends RouteMethod,
-  Context extends RequestHandlerContextBase,
+  Context extends RequestHandlerContextBase
 > = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
 function getRouteFullPath(routerPath: string, routePath: string) {

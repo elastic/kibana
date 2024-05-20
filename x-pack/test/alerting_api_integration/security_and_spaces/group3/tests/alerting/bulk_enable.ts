@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  ObjectRemover,
-  getTestRuleData,
-  getUnauthorizedErrorMessage,
   getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
-import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 
 const defaultSuccessfulResponse = {
   total: 1,

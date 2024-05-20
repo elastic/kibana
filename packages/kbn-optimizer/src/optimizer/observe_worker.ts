@@ -8,11 +8,11 @@
 
 import { inspect } from 'util';
 
-import { type ChildProcess, fork } from 'child_process';
+import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
-import { first, ignoreElements, map, takeUntil } from 'rxjs';
+import { map, takeUntil, first, ignoreElements } from 'rxjs';
 
-import { Bundle, BundleRemotes, WorkerConfig, WorkerMsg, isWorkerMsg } from '../common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRemotes } from '../common';
 
 import { observeStdio$ } from './observe_stdio';
 import { OptimizerConfig } from './optimizer_config';

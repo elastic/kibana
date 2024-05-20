@@ -1,4 +1,3 @@
-import { getInfrastructureKQLFilter } from '.';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { getInfrastructureKQLFilter } from '.';
  * 2.0.
  */
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
+import { getInfrastructureKQLFilter } from '.';
 
 describe('service logs', () => {
   const serviceName = 'opbeans-node';

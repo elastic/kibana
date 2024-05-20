@@ -10,8 +10,8 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { calculateAggRoot } from './calculate_agg_root';
 
-import { createPositiveRate, filter } from '../series/positive_rate';
 import type { TableRequestProcessorsFunction } from './types';
+import { createPositiveRate, filter } from '../series/positive_rate';
 
 export const positiveRate: TableRequestProcessorsFunction =
   ({ req, panel, capabilities, uiSettings, buildSeriesMetaParams }) =>

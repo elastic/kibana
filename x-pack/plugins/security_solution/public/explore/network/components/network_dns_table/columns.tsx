@@ -8,17 +8,17 @@
 import numeral from '@elastic/numeral';
 import React from 'react';
 
-import type { NetworkDnsItem } from '../../../../../common/search_strategy';
-import { NetworkDnsFields } from '../../../../../common/search_strategy';
 import {
-  CellActionsMode,
   SecurityCellActions,
+  CellActionsMode,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
+import type { NetworkDnsItem } from '../../../../../common/search_strategy';
+import { NetworkDnsFields } from '../../../../../common/search_strategy';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../../common/components/empty_value';
-import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 import type { Columns } from '../../../components/paginated_table';
+import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
 
 import * as i18n from './translations';
 
@@ -27,7 +27,7 @@ export type NetworkDnsColumns = [
   Columns<NetworkDnsItem['queryCount']>,
   Columns<NetworkDnsItem['uniqueDomains']>,
   Columns<NetworkDnsItem['dnsBytesIn']>,
-  Columns<NetworkDnsItem['dnsBytesOut']>,
+  Columns<NetworkDnsItem['dnsBytesOut']>
 ];
 
 export const getNetworkDnsColumns = (): NetworkDnsColumns => [

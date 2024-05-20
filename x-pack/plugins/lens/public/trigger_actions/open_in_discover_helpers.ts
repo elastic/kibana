@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { isLensApi } from '../embeddable';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {

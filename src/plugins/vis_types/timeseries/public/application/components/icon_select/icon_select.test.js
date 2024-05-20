@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { ICONS, IconSelect, IconView } from './icon_select';
+import { shallow } from 'enzyme';
+import { IconSelect, IconView, ICONS } from './icon_select';
 
 describe('src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js', () => {
   describe('<IconSelect />', () => {

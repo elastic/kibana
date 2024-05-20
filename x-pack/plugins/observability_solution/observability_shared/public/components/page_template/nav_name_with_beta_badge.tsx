@@ -1,5 +1,3 @@
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
 
 interface Props {
   label?: string;

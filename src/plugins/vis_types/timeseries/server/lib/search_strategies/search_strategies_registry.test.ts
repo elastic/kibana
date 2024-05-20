@@ -7,10 +7,10 @@
  */
 
 import { get } from 'lodash';
-import { VisTypeTimeseriesRequest, VisTypeTimeseriesRequestHandlerContext } from '../../types';
-import { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
 import { SearchStrategyRegistry } from './search_strategy_registry';
 import { AbstractSearchStrategy, DefaultSearchStrategy } from './strategies';
+import { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
+import { VisTypeTimeseriesRequest, VisTypeTimeseriesRequestHandlerContext } from '../../types';
 
 const getPrivateField = <T>(registry: SearchStrategyRegistry, field: string) =>
   get(registry, field) as T;

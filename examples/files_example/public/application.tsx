@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { AppPluginStartDependencies } from './types';
 import { FilesExampleApp } from './components/app';
 import { FilesContext } from './imports';
-import { AppPluginStartDependencies } from './types';
 
 const queryClient = new QueryClient();
 

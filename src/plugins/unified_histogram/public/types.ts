@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   LensEmbeddableOutput,
   LensPublicStart,
-  Suggestion,
   TypedLensByValueInput,
+  Suggestion,
 } from '@kbn/lens-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Observable, Subject } from 'rxjs';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 /**
  * The fetch status of a Unified Histogram request

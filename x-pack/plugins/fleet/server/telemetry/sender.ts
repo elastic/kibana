@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 
 import { cloneDeep } from 'lodash';
 
@@ -16,7 +16,7 @@ import type { InfoResponse, LicenseGetResponse } from '@elastic/elasticsearch/li
 
 import { appContextService } from '../services';
 
-import { Subject, exhaustMap, takeUntil, timer } from 'rxjs';
+import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 
 import { TelemetryQueue } from './queue';
 

@@ -1,30 +1,3 @@
-import {
-  EuiBasicTable,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiLink,
-  EuiScreenReaderOnly,
-  EuiSelectableOption,
-  EuiTableSortingType,
-  EuiText,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-  useEuiTheme,
-} from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import {
-  MONITORING_HISTORY_LIMIT,
-  RuleExecutionStatus,
-  formatDuration,
-  parseDuration,
-} from '@kbn/alerting-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import moment from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -32,38 +5,65 @@ import moment from 'moment';
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import moment from 'moment';
+import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
-  BulkOperationResponse,
-  Pagination,
-  Percentiles,
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiLink,
+  EuiButtonEmpty,
+  EuiText,
+  EuiToolTip,
+  EuiTableSortingType,
+  EuiButtonIcon,
+  EuiSelectableOption,
+  EuiScreenReaderOnly,
+  EuiCheckbox,
+  RIGHT_ALIGNMENT,
+  useEuiTheme,
+} from '@elastic/eui';
+import {
+  RuleExecutionStatus,
+  formatDuration,
+  parseDuration,
+  MONITORING_HISTORY_LIMIT,
+} from '@kbn/alerting-plugin/common';
+
+import {
+  SELECT_ALL_RULES,
+  CLEAR_SELECTION,
+  TOTAL_RULES,
+  SELECT_ALL_ARIA_LABEL,
+  CLEAR_FILTERS,
+} from '../translations';
+import {
   Rule,
   RuleTableItem,
   RuleTypeIndex,
+  Pagination,
+  Percentiles,
+  TriggersActionsUiConfig,
   RuleTypeRegistryContract,
   SnoozeSchedule,
-  TriggersActionsUiConfig,
+  BulkOperationResponse,
 } from '../../../../types';
 import { DEFAULT_NUMBER_FORMAT } from '../../../constants';
-import { hasAllPrivilege } from '../../../lib/capabilities';
-import { checkRuleTypeEnabled } from '../../../lib/check_rule_type_enabled';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
-import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
-import {
-  CLEAR_FILTERS,
-  CLEAR_SELECTION,
-  SELECT_ALL_ARIA_LABEL,
-  SELECT_ALL_RULES,
-  TOTAL_RULES,
-} from '../translations';
-import { RulesListNotifyBadge } from './notify_badge';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
 import { RuleDurationFormat } from './rule_duration_format';
-import { RuleStatusDropdown } from './rule_status_dropdown';
+import { checkRuleTypeEnabled } from '../../../lib/check_rule_type_enabled';
+import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
+import { hasAllPrivilege } from '../../../lib/capabilities';
 import { RuleTagBadge } from './rule_tag_badge';
-import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
+import { RuleStatusDropdown } from './rule_status_dropdown';
+import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
 
 interface RuleTypeState {
   isLoading: boolean;

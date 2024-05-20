@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { buildQueryFromFilters } from './from_filters';
 import { ExistsFilter, Filter, MatchAllFilter } from '../filters';
 import { fields } from '../filters/stubs';
-import { buildQueryFromFilters } from './from_filters';
 import { DataViewBase } from './types';
 
 describe('build query', () => {

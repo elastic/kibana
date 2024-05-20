@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { act, render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
-import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
+import userEvent from '@testing-library/user-event';
+import { render, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
-import type { GroupTableItem } from '@kbn/aiops-components';
 import { finalSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
 import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
+import type { GroupTableItem } from '@kbn/aiops-components';
 
 import { getGroupTableItems } from './get_group_table_items';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';

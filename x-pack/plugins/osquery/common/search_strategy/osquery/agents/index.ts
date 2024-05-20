@@ -7,9 +7,9 @@
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 
+import type { Inspect, Maybe } from '../../common';
 import type { RequestOptionsPaginated } from '../..';
 import type { Agent } from '../../../shared_imports';
-import type { Inspect, Maybe } from '../../common';
 
 export interface AgentsStrategyResponse extends IEsSearchResponse {
   edges: Agent[];

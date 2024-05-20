@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { MockElasticsearchClient } from './core_service.test.mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { errors } from '@elastic/elasticsearch';
 import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
-import { MockElasticsearchClient } from './core_service.test.mocks';
 
 const cookieOptions = {
   name: 'sid',

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/core/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
-import { type ExperimentalFeatures, allowedExperimentalValues } from '../../../common';
+import { allowedExperimentalValues, type ExperimentalFeatures } from '../../../common';
 import { ProductFeaturesService } from './product_features_service';
 
 jest.mock('@kbn/security-solution-features/product_features', () => ({

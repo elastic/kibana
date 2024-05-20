@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPanel, EuiPopover } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
+import { EuiButtonIcon, EuiPopover, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { SetViewForm } from './set_view_form';
 

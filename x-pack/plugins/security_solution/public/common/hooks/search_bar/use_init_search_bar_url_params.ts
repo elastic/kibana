@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Filter, Query } from '@kbn/es-query';
-import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useCallback, useMemo } from 'react';
+import type { Filter, Query } from '@kbn/es-query';
+import { InputsModelId } from '../../store/inputs/constants';
 import { useKibana } from '../../lib/kibana';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/inputs';
-import { InputsModelId } from '../../store/inputs/constants';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../use_url_state';
 

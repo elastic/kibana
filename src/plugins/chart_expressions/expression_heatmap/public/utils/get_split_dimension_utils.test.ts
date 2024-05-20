@@ -1,4 +1,3 @@
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +6,9 @@ import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public'
  * Side Public License, v 1.
  */
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { createSplitPoint, getSplitDimensionAccessor } from './get_split_dimension_utils';
+import { getSplitDimensionAccessor, createSplitPoint } from './get_split_dimension_utils';
 
 const data: Datatable = {
   type: 'datatable',

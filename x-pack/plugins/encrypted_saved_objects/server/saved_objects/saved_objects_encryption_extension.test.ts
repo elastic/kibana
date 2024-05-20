@@ -9,10 +9,10 @@ import { mockGetDescriptorNamespace } from './saved_objects_encryption_extension
 
 import { savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
 
+import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_extension';
 import { EncryptionError } from '../crypto';
 import { encryptedSavedObjectsServiceMock } from '../crypto/encrypted_saved_objects_service.mocks';
 import { EncryptionErrorOperation } from '../crypto/encryption_error';
-import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_extension';
 
 const KNOWN_TYPE = 'known-type';
 const ATTRIBUTE_TO_STRIP = 'attrSecret';

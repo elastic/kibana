@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { EuiLink, EuiCallOut, EuiText } from '@elastic/eui';
 import type { PolicyResponseActionFormatter } from './policy_response_friendly_names';
 
 const StyledEuiCallout = styled(EuiCallOut)`

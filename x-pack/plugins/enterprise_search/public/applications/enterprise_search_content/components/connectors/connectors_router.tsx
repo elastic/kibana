@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   CONNECTORS_PATH,
-  CONNECTOR_DETAIL_PATH,
-  NEW_CONNECTOR_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
+  NEW_CONNECTOR_PATH,
+  CONNECTOR_DETAIL_PATH,
 } from '../../routes';
 import { ConnectorDetailRouter } from '../connector_detail/connector_detail_router';
 import { NewSearchIndexPage } from '../new_index/new_search_index_page';

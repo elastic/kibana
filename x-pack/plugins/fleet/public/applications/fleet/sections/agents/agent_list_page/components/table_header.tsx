@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, SimplifiedAgentStatus } from '../../../../types';
 
-import {} from '@elastic/eui';
-import { AgentsSelectionStatus } from './agents_selection_status';
-import { AgentStatusBadges } from './status_badges';
 import { AgentStatusBar } from './status_bar';
+import { AgentsSelectionStatus } from './agents_selection_status';
+import {} from '@elastic/eui';
+import { AgentStatusBadges } from './status_badges';
 import type { SelectionMode } from './types';
 
 export const AgentTableHeader: React.FunctionComponent<{

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateTagColor, validateTagDescription, validateTagName } from './validation';
+import { validateTagColor, validateTagName, validateTagDescription } from './validation';
 
 describe('Tag attributes validation', () => {
   describe('validateTagName', () => {

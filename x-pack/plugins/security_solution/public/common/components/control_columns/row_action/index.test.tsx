@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { SecurityPageName } from '@kbn/deeplinks-security';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { RowAction } from '.';
+import { defaultHeaders, TestProviders } from '../../../mock';
 import { getDefaultControlColumn } from '../../../../timelines/components/timeline/body/control_columns';
-import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
-import { TestProviders, defaultHeaders } from '../../../mock';
-import type { RouteSpyState } from '../../../utils/route/types';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import type { RouteSpyState } from '../../../utils/route/types';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

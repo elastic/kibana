@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type {
-  ElasticsearchCapabilities,
-  ElasticsearchClient,
-} from '@kbn/core-elasticsearch-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type {
-  IDocumentMigrator,
-  MigrationResult,
-  SavedObjectsMigrationConfigType,
-} from '@kbn/core-saved-objects-base-server-internal';
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import type { Logger } from '@kbn/logging';
-import { migrateIndex } from './migrate_index';
+import type {
+  SavedObjectsMigrationConfigType,
+  MigrationResult,
+  IDocumentMigrator,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { buildMigratorConfigs } from './utils';
+import { migrateIndex } from './migrate_index';
 
 export interface RunZeroDowntimeMigrationOpts {
   /** The current Kibana version */

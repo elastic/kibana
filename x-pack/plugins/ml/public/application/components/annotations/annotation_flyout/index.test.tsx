@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.json';
+import React from 'react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import type { Annotation } from '../../../../../common/types/annotations';
 import { AnnotationUpdatesService } from '../../../services/annotations_service';

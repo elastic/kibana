@@ -7,28 +7,18 @@
 
 import expect from '@kbn/expect';
 
-import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import type {
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
-import {
-  createAlertsIndex,
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-  getRuleForAlertTesting,
-  waitForAlertsToBePresent,
-  waitForRuleSuccess,
-} from '../../../../../../common/utils/security_solution';
 import {
   createLegacyRuleAction,
   createWebHookRuleAction,
-  deleteAllEventLogExecutionEvents,
-  fetchRule,
   getEqlRuleForAlertTesting,
+  fetchRule,
   getRuleWithWebHookAction,
   getSimpleMlRule,
   getSimpleRule,
@@ -37,7 +27,17 @@ import {
   getThresholdRuleForAlertTesting,
   installMockPrebuiltRules,
   updateRule,
+  deleteAllEventLogExecutionEvents,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+} from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

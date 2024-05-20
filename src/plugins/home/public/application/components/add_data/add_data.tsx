@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+import React, { FC, MouseEvent } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,16 +18,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ApplicationStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { FC, MouseEvent } from 'react';
-import { getServices } from '../../kibana_services';
-import { createAppNavigationHandler } from '../app_navigation_handler';
 import { MoveData } from '../move_data';
+import { createAppNavigationHandler } from '../app_navigation_handler';
+import { getServices } from '../../kibana_services';
 
 interface Props {
   addBasePath: (path: string) => string;

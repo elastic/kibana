@@ -14,21 +14,21 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { GroupPanelRenderer, RawBucket, StatRenderer } from '@kbn/securitysolution-grouping/src';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
-import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
-import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import {
-  LoadingGroup,
   NullGroup,
+  LoadingGroup,
   firstNonNullValue,
 } from '../../../components/cloud_security_grouping';
+import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
+import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
-import { FINDINGS_GROUPING_COUNTER } from '../test_subjects';
-import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';
 import { FindingsGroupingAggregation } from './use_grouped_findings';
+import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';
+import { FINDINGS_GROUPING_COUNTER } from '../test_subjects';
 
 export const groupPanelRenderer: GroupPanelRenderer<FindingsGroupingAggregation> = (
   selectedGroup,

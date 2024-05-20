@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import * as React from 'react';
+import { EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
 export interface ButtonEmbeddableComponentProps {
   onClick: () => void;

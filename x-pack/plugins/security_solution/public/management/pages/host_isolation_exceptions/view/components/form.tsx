@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { isValidIPv4OrCIDR } from '../../../../../../common/endpoint/utils/is_valid_ip';
-import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import type {
-  EffectedPolicySelectProps,
   EffectedPolicySelection,
+  EffectedPolicySelectProps,
 } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import {
@@ -30,8 +30,6 @@ import {
   getEffectedPolicySelectionByTags,
   isGlobalPolicyEffected,
 } from '../../../../components/effected_policy_select/utils';
-import { FormattedError } from '../../../../components/formatted_error';
-import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import {
   DESCRIPTION_LABEL,
   DESCRIPTION_PLACEHOLDER,
@@ -42,6 +40,8 @@ import {
   NAME_LABEL,
   NAME_PLACEHOLDER,
 } from './translations';
+import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import { FormattedError } from '../../../../components/formatted_error';
 
 export const testIdPrefix = 'hostIsolationExceptions-form';
 

@@ -8,14 +8,14 @@
 
 import { isEmpty } from 'lodash';
 
-import { CONTROL_GROUP_TYPE, type ControlGroupTelemetry } from '@kbn/controls-plugin/common';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { type ControlGroupTelemetry, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 
 import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
-import { type LatestTaskStateSchema, emptyState } from './task_state';
+import { emptyState, type LatestTaskStateSchema } from './task_state';
 
 // TODO: Merge with LatestTaskStateSchema. Requires a refactor of collectPanelsByType() because
 // LatestTaskStateSchema doesn't allow mutations (uses ReadOnly<..>).

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import type { ReactElement } from 'react';
-import { Decoration, Hunk, getCollapsedLinesCountBetween } from 'react-diff-view';
-import type { DecorationProps, HunkData } from 'react-diff-view';
+import { Hunk, Decoration, getCollapsedLinesCountBetween } from 'react-diff-view';
+import type { HunkData, DecorationProps } from 'react-diff-view';
+import { EuiSpacer, EuiIcon, EuiLink, EuiFlexGroup, EuiText } from '@elastic/eui';
 import * as i18n from './translations';
 
 interface UnfoldButtonProps extends Omit<DecorationProps, 'children'> {

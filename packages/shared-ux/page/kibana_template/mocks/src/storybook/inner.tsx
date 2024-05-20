@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import type { ArgumentParams } from '@kbn/shared-ux-storybook-mock';
-import React from 'react';
 
 import { NoDataConfigPageStorybookMock } from '@kbn/shared-ux-page-no-data-config-mocks';
 import type { NoDataConfigPageStorybookParams } from '@kbn/shared-ux-page-no-data-config-mocks';

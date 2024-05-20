@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 const UNSUPPORTED_COMMAND_INFO = i18n.translate(
   'xpack.securitySolution.endpointConsoleCommands.suspendProcess.unsupportedCommandInfo',

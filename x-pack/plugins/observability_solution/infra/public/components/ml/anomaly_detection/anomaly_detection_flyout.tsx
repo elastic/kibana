@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiHeaderLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, useCallback } from 'react';
+import { EuiHeaderLink, EuiFlyout } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useSourceContext } from '../../../containers/metrics_source';
+import { FlyoutHome } from './flyout_home';
+import { JobSetupScreen } from './job_setup_screen';
 import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
 import { MetricHostsModuleProvider } from '../../../containers/ml/modules/metrics_hosts/module';
 import { MetricK8sModuleProvider } from '../../../containers/ml/modules/metrics_k8s/module';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
-import { FlyoutHome } from './flyout_home';
-import { JobSetupScreen } from './job_setup_screen';
 
 export const AnomalyDetectionFlyout = ({
   hideJobType,

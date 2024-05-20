@@ -7,25 +7,25 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import {
-  CLOUDBEAT_AKS,
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_AZURE,
-  CLOUDBEAT_EKS,
-  CLOUDBEAT_GCP,
-  CLOUDBEAT_GKE,
-  CLOUDBEAT_VANILLA,
-  CLOUDBEAT_VULN_MGMT_AWS,
-  CLOUDBEAT_VULN_MGMT_AZURE,
-  CLOUDBEAT_VULN_MGMT_GCP,
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  VULN_MGMT_POLICY_TEMPLATE,
-} from '../../common/constants';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
+import {
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_VANILLA,
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_GCP,
+  CLOUDBEAT_AZURE,
+  CLOUDBEAT_VULN_MGMT_AWS,
+  KSPM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
+  VULN_MGMT_POLICY_TEMPLATE,
+  CLOUDBEAT_VULN_MGMT_GCP,
+  CLOUDBEAT_VULN_MGMT_AZURE,
+  CLOUDBEAT_AKS,
+  CLOUDBEAT_GKE,
+} from '../../common/constants';
 
-import aksLogo from '../assets/icons/cis_aks_logo.svg';
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
+import aksLogo from '../assets/icons/cis_aks_logo.svg';
 import gkeLogo from '../assets/icons/cis_gke_logo.svg';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 

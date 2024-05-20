@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RotateKeyPairSchema, errorMessage } from './message_signing_service';
+import { errorMessage, RotateKeyPairSchema } from './message_signing_service';
 
 describe('RotateKeyPairSchema', () => {
   it('should throw on `false` values for acknowledge', () => {

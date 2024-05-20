@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
-import { Observable, merge, of } from 'rxjs';
+import { merge, of, Observable } from 'rxjs';
 import { map, scan } from 'rxjs';
+import { set } from '@kbn/safer-lodash-set';
+import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import {
-  isTaskManagerMetricEvent,
   isTaskManagerStatEvent,
+  isTaskManagerMetricEvent,
   isTaskPollingCycleEvent,
   isTaskRunEvent,
 } from '../task_events';
-import { createAggregator } from './create_aggregator';
 import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
-import { TaskManagerMetricsCollector } from './task_metrics_collector';
-import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
+import { createAggregator } from './create_aggregator';
 import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
+import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
+import { TaskManagerMetricsCollector } from './task_metrics_collector';
 export interface Metrics {
   last_update: string;
   metrics: {

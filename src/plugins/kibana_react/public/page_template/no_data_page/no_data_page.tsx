@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CommonProps, EuiCardProps, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { ReactNode, useMemo, FunctionComponent, MouseEventHandler } from 'react';
+import { EuiCardProps, EuiSpacer, EuiText, EuiLink, CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
-import React, { ReactNode, useMemo, FunctionComponent, MouseEventHandler } from 'react';
 
 import { ElasticAgentCard, NoDataCard } from './no_data_card';
 import { NoDataPageBody } from './no_data_page_body/no_data_page_body';

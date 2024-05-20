@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
-import { TestProviders, mockTimelineModel } from '../../../../common/mock';
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
 

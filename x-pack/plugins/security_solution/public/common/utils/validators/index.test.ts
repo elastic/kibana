@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hasValueToDisplay, isUrlInvalid } from '.';
+import { isUrlInvalid, hasValueToDisplay } from '.';
 
 describe('helpers', () => {
   describe('isUrlInvalid', () => {

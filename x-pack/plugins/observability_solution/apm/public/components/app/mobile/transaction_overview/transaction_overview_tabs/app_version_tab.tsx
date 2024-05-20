@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { TabContentProps } from '.';
-import { SERVICE_VERSION } from '../../../../../../common/es_fields/apm';
 import { isPending } from '../../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
+import { SERVICE_VERSION } from '../../../../../../common/es_fields/apm';
 import { useMobileStatisticsFetcher } from './use_mobile_statistics_fetcher';
 
 function AppVersionTab({

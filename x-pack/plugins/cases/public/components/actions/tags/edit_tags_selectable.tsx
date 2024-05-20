@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHighlight,
-  EuiHorizontalRule,
-  EuiIcon,
   EuiSelectable,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiText,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiHighlight,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
 
 import { isEmpty } from 'lodash';
 import type { CasesUI } from '../../../../common';
-import type { ItemSelectableOption, ItemsSelectionState } from '../types';
-import { useItemsState } from '../use_items_state';
 import * as i18n from './translations';
+import { useItemsState } from '../use_items_state';
+import type { ItemSelectableOption, ItemsSelectionState } from '../types';
 
 interface Props {
   selectedCases: CasesUI;

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
-import { EuiSwitch } from '@elastic/eui';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { DurationFormatEditor } from './duration';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { EuiSwitch } from '@elastic/eui';
 
 const fieldType = 'number';
 const format = {

@@ -9,25 +9,25 @@ import { mount } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { TimelineId } from '../../../../common/types/timeline';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
+import { TimelineId } from '../../../../common/types/timeline';
 import {
-  TestProviders,
   createMockStore,
   mockGlobalState,
   mockIndexNames,
   mockIndexPattern,
+  TestProviders,
 } from '../../../common/mock';
 
 import type { Props as StatefulTimelineOwnProps } from '.';
 import { StatefulTimeline } from '.';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useTimelineEvents } from '../../containers';
-import { defaultRowRenderers } from './body/renderers';
 import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
+import { defaultRowRenderers } from './body/renderers';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),

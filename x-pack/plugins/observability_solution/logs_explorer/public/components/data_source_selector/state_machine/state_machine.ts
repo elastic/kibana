@@ -9,12 +9,12 @@ import { actions, assign, createMachine, raise } from 'xstate';
 import {
   AllDatasetSelection,
   DataViewSelection,
-  SingleDatasetSelection,
   isAllDatasetSelection,
   isDataViewSelection,
+  SingleDatasetSelection,
 } from '../../../../common/data_source_selection';
 import { DATA_VIEWS_TAB_ID, INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from '../constants';
-import { DEFAULT_CONTEXT, defaultSearch } from './defaults';
+import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
   DataSourceSelectorContext,
   DataSourceSelectorEvent,

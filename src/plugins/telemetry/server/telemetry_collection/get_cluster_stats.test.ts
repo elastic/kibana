@@ -7,8 +7,8 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { TIMEOUT } from './constants';
 import { getClusterStats } from './get_cluster_stats';
+import { TIMEOUT } from './constants';
 
 describe('get_cluster_stats', () => {
   it('uses the esClient to get the response from the `cluster.stats` API', async () => {

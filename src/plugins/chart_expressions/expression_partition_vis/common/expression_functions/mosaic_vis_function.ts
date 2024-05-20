@@ -7,20 +7,20 @@
  */
 
 import { Position } from '@elastic/charts';
-import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
-import {
-  MOSAIC_VIS_EXPRESSION_NAME,
-  PARTITION_LABELS_FUNCTION,
-  PARTITION_LABELS_VALUE,
-  PARTITION_VIS_RENDERER_NAME,
-} from '../constants';
-import { ChartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import {
   LegendDisplay,
   type PartitionChartProps,
   type PartitionVisParams,
 } from '../types/expression_renderers';
+import { ChartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
+import {
+  PARTITION_LABELS_FUNCTION,
+  PARTITION_LABELS_VALUE,
+  PARTITION_VIS_RENDERER_NAME,
+  MOSAIC_VIS_EXPRESSION_NAME,
+} from '../constants';
 import { errors, strings } from './i18n';
 
 export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({

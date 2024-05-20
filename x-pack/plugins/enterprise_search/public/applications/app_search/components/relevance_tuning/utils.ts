@@ -10,11 +10,11 @@ import { cloneDeep, omit } from 'lodash';
 import { SchemaType } from '../../../shared/schema/types';
 
 import {
-  Boost,
-  BoostType,
   RawBoost,
-  SearchSettings,
+  Boost,
   SearchSettingsRequest,
+  SearchSettings,
+  BoostType,
   ValueBoost,
 } from './types';
 

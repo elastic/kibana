@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { TestPipeline } from '../components/ml_inference/components/test_pipeline';
 import { getInitialState } from '../components/ml_inference/state';
-import { TEST_PIPELINE_MODE } from '../components/ml_inference/types';
 import type { ModelItem } from './models_list';
+import { TEST_PIPELINE_MODE } from '../components/ml_inference/types';
 
 interface Props {
   model: ModelItem;

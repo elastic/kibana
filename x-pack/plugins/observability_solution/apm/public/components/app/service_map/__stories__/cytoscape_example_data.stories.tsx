@@ -15,16 +15,16 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
 import { Meta, Story } from '@storybook/react';
 import React, { useEffect, useState } from 'react';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { CodeEditor } from '@kbn/code-editor';
 import { Cytoscape } from '../cytoscape';
 import { Centerer } from './centerer';
 import exampleResponseHipsterStore from './example_response_hipster_store.json';
 import exampleResponseOpbeansBeats from './example_response_opbeans_beats.json';
 import exampleResponseTodo from './example_response_todo.json';
 import { generateServiceMapElements } from './generate_service_map_elements';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 const STORYBOOK_PATH = 'app/ServiceMap/Example data';
 

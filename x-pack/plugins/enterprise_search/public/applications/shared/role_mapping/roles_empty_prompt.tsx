@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButton, EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/public';
 
@@ -17,12 +17,12 @@ import { KibanaLogic } from '../kibana/kibana_logic';
 import { ProductName } from '../types';
 
 import {
-  ENABLE_ROLES_BUTTON,
-  ENABLE_ROLES_LINK,
   RBAC_BUTTON_DISABLED_LABEL,
+  ROLES_DISABLED_TITLE,
   ROLES_DISABLED_DESCRIPTION,
   ROLES_DISABLED_NOTE,
-  ROLES_DISABLED_TITLE,
+  ENABLE_ROLES_BUTTON,
+  ENABLE_ROLES_LINK,
 } from './constants';
 
 interface Props {

@@ -9,10 +9,10 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { ContainerInput, EmbeddableContainerSettings, isErrorEmbeddable } from '../lib';
 import {
-  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
+  CONTACT_CARD_EMBEDDABLE,
   FilterableEmbeddableFactory,
   HelloWorldContainer,
   SlowContactCardEmbeddableFactory,

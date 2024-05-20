@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { act, screen, render, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import OpsgenieParamFields from './params';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { OpsgenieSubActions } from '../../../common';
 import type { OpsgenieActionParams } from '../../../server/connector_types';
-import OpsgenieParamFields from './params';
 
 describe('OpsgenieParamFields', () => {
   const editAction = jest.fn();

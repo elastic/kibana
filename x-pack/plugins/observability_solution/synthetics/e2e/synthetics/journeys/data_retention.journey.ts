@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Page, expect, journey, step } from '@elastic/synthetics';
+import { journey, step, expect, Page } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { recordVideo } from '../../helpers/record_video';
-import { assertText, byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
+import { byTestId, assertText } from '../../helpers/utils';
 
 let page1: Page;
 journey(`DataRetentionPage`, async ({ page, params }) => {

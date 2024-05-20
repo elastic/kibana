@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CollapseFunction } from '@kbn/visualizations-plugin/common';
-import { getConfiguration } from '.';
 import { AggTypes } from '../../../common';
+import { getConfiguration } from '.';
+import { CollapseFunction } from '@kbn/visualizations-plugin/common';
 
 const params = {
   perPage: 20,

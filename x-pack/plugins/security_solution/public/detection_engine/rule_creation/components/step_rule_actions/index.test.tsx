@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
 
 import { StepRuleActions, stepActionsDefaultValue } from '.';
-import type { ActionsStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   defaultSchedule,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
 } from '../../../../detections/pages/detection_engine/rules/utils';
-import type { FormHook } from '../../../../shared_imports';
 import { useRuleForms } from '../../../rule_creation_ui/pages/form';
+import type { FormHook } from '../../../../shared_imports';
+import type { ActionsStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { FrequencyDescription } from './notification_action';
 
 jest.mock('../../../../common/lib/kibana', () => ({

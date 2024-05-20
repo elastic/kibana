@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/server/mocks';
-import { Subject, of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { mockHandlerArguments } from './_mock_handler_arguments';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { metricsRoute } from './metrics';
+import { mockHandlerArguments } from './_mock_handler_arguments';
 
 describe('metricsRoute', () => {
   beforeEach(() => {

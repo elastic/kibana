@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiButton, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { LoadingOverlay } from '../loading';
 

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { TopNFunctionSortField, TopNFunctions, getCalleeFunction } from '@kbn/profiling-utils';
+import { getCalleeFunction, TopNFunctions, TopNFunctionSortField } from '@kbn/profiling-utils';
 import { last, orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { GridOnScrollProps } from 'react-window';
@@ -25,7 +25,7 @@ import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from './function_row';
-import { IFunctionRow, convertRowToFrame, getFunctionsRows, getTotalCount } from './utils';
+import { convertRowToFrame, getFunctionsRows, getTotalCount, IFunctionRow } from './utils';
 
 interface Props {
   topNFunctions?: TopNFunctions;

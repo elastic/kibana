@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { takeUntil, finalize, map } from 'rxjs';
+import { Observable, timer, switchMap } from 'rxjs';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
-import { finalize, map, takeUntil } from 'rxjs';
-import { Observable, switchMap, timer } from 'rxjs';
 import {
+  MONITOR_EVENT_LOOP_DELAYS_START,
   MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
   MONITOR_EVENT_LOOP_DELAYS_RESET,
-  MONITOR_EVENT_LOOP_DELAYS_START,
 } from './constants';
 import { storeHistogram } from './saved_objects';
 

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { Pagination } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { FC } from 'react';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { Pagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import {
   UtilityBar,
-  UtilityBarGroup,
   UtilityBarSection,
+  UtilityBarGroup,
   UtilityBarText,
 } from '../../../common/components/utility_bar';
 

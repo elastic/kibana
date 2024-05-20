@@ -8,8 +8,8 @@
 import { pick, upperFirst } from 'lodash';
 import moment from 'moment';
 
-import { PIPELINE } from '../../../common/constants';
 import { getSearchValue } from '../../lib/get_search_value';
+import { PIPELINE } from '../../../common/constants';
 
 /**
  * Represents the model for listing pipelines in the UI

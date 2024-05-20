@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { noop } from 'lodash';
 import sinon from 'sinon';
+import expect from '@kbn/expect';
 import { BulkUploader } from './bulk_uploader';
 
 const FETCH_INTERVAL = 300;

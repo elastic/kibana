@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 
 import { getFollowerIndexMock } from './fixtures/follower_index';
 import './mocks';
-import { getRandomString, pageHelpers, setupEnvironment } from './helpers';
+import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.followerIndexList;
 

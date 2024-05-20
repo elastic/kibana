@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { TestProviders } from '../../../common/mock';
 import {
   managedUserDetails,

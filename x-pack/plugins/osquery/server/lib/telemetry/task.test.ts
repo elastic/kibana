@@ -8,13 +8,13 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SuccessfulRunResult } from '@kbn/task-manager-plugin/server/task';
+import { OsqueryTelemetryTask } from './task';
 import {
-  createMockOsqueryTelemetryTask,
   createMockTaskInstance,
   createMockTelemetryEventsSender,
   createMockTelemetryReceiver,
+  createMockOsqueryTelemetryTask,
 } from './__mocks__';
-import { OsqueryTelemetryTask } from './task';
 
 describe('test osquery telemetry task', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

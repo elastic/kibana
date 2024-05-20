@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import {
   AggregationsStringTermsBucket,
   AggregationsStringTermsBucketKeys,
   AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/core/server';
 import { Observable, Subject } from 'rxjs';
-import { asOk } from '../lib/result_type';
-import { ITaskEventEmitter, TaskLifecycleEvent } from '../polling_lifecycle';
+import { TaskStore } from '../task_store';
 import {
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
 } from '../queries/mark_available_tasks_as_claimed';
+import { ITaskEventEmitter, TaskLifecycleEvent } from '../polling_lifecycle';
 import { asTaskManagerMetricEvent } from '../task_events';
-import { TaskStore } from '../task_store';
+import { asOk } from '../lib/result_type';
 
 const DEFAULT_POLL_INTERVAL = 5000; // query every 5 seconds
 interface ConstructorOpts {

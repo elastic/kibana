@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ServiceConnectionNode } from '@kbn/apm-plugin/common/service_map';
 import expect from '@kbn/expect';
 import { first, isEmpty, last, orderBy, uniq } from 'lodash';
+import { ServiceConnectionNode } from '@kbn/apm-plugin/common/service_map';
 import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';

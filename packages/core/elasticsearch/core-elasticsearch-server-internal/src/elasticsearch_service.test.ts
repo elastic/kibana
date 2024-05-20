@@ -18,26 +18,26 @@ jest.mock('./version_check/ensure_es_version', () => ({
 
 import {
   MockClusterClient,
-  getClusterInfoMock,
   isScriptingEnabledMock,
+  getClusterInfoMock,
 } from './elasticsearch_service.test.mocks';
 
+import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { first, concatMap } from 'rxjs';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
-import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { duration } from 'moment';
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
-import { concatMap, first } from 'rxjs';
-import { ElasticsearchConfig, configSchema } from './elasticsearch_config';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService, SetupDeps } from './elasticsearch_service';
+import { duration } from 'moment';
 import { isValidConnection } from './is_valid_connection';
-import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(

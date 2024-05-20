@@ -1,8 +1,3 @@
-import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
-import { FieldDefinition } from '@kbn/management-settings-types';
-import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
-import { action } from '@storybook/addon-actions';
-import { ComponentMeta } from '@storybook/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,10 +6,15 @@ import { ComponentMeta } from '@storybook/react';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { action } from '@storybook/addon-actions';
+import { ComponentMeta } from '@storybook/react';
+import { FieldDefinition } from '@kbn/management-settings-types';
+import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
+import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 
 import { categorizeFields } from '@kbn/management-settings-utilities';
-import { Form as Component } from '../form';
 import { uiSettingsClientMock } from '../mocks';
+import { Form as Component } from '../form';
 import { FormProvider } from '../services';
 
 export default {

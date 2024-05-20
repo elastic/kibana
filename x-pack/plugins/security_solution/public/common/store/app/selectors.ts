@@ -8,10 +8,10 @@
 import { keys, values } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
-import type { TimelineResultNote } from '../../../timelines/components/open_timeline/types';
 import type { Note } from '../../lib/note';
-import type { State } from '../types';
 import type { ErrorModel, NotesById } from './model';
+import type { State } from '../types';
+import type { TimelineResultNote } from '../../../timelines/components/open_timeline/types';
 
 export const selectNotesById = (state: State): NotesById => state.app.notesById;
 

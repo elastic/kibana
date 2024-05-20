@@ -21,10 +21,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { AssetTitleMap } from '../../../constants';
 import type { DisplayedAssetTypes, GetBulkAssetsResponse } from '../../../../../../../../common';
 import { useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
-import { AssetTitleMap } from '../../../constants';
 
 export type DisplayedAssetType = DisplayedAssetTypes[number] | 'view';
 

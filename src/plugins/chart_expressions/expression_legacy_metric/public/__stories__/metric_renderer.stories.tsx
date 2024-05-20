@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { from } from 'rxjs';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable, DatatableColumn, TextAlignment } from '@kbn/expressions-plugin/common';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { storiesOf } from '@storybook/react';
-import React from 'react';
-import { from } from 'rxjs';
-import { LabelPosition } from '../../common/constants';
-import { MetricStyle, MetricVisRenderConfig, visType } from '../../common/types';
+import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getFormatService } from '../__mocks__/format_service';
 import { getPaletteService } from '../__mocks__/palette_service';
-import { getMetricVisRenderer } from '../expression_renderers';
 import { ExpressionMetricVisRendererDependencies } from '../expression_renderers/metric_vis_renderer';
+import { getMetricVisRenderer } from '../expression_renderers';
+import { MetricStyle, MetricVisRenderConfig, visType } from '../../common/types';
+import { LabelPosition } from '../../common/constants';
 import { setFormatService } from '../services/format_service';
 import { setPaletteService } from '../services/palette_service';
 

@@ -7,16 +7,16 @@
 
 /* eslint-disable no-continue */
 
-import { promises as fs } from 'fs';
-import { relative } from 'path';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { RunContext } from '@kbn/dev-cli-runner';
-import del from 'del';
-import { isLeft } from 'fp-ts/lib/Either';
-import globby from 'globby';
-import * as t from 'io-ts';
-import { PathReporter } from 'io-ts/lib/PathReporter';
 import { Builder, parseStringPromise } from 'xml2js';
+import { promises as fs } from 'fs';
+import { relative } from 'path';
+import * as t from 'io-ts';
+import { isLeft } from 'fp-ts/lib/Either';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import globby from 'globby';
+import del from 'del';
 
 /**
  * Updates the `name` and `classname` attributes of each testcase.

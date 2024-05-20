@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
+import styled from 'styled-components';
 import {
-  EuiBadge,
+  EuiToolTip,
   EuiFlexGroup,
+  EuiScreenReaderOnly,
   EuiFlexItem,
   EuiHealth,
-  EuiHighlight,
+  EuiBadge,
   EuiIcon,
-  EuiScreenReaderOnly,
   EuiText,
-  EuiToolTip,
+  EuiHighlight,
 } from '@elastic/eui';
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import type {
   BrowserFieldItem,
   GetFieldTableColumns,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import React, { useCallback } from 'react';
-import styled from 'styled-components';
-import { getIconFromType } from '../../../../common/components/event_details/helpers';
 import * as i18n from './translations';
+import { getIconFromType } from '../../../../common/components/event_details/helpers';
 
-import type { OpenDeleteFieldModal, OpenFieldEditor } from '..';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { EllipsisText } from '../../../../common/components/truncatable_text';
+import type { OpenFieldEditor, OpenDeleteFieldModal } from '..';
 
 export interface UseFieldTableColumnsProps {
   hasFieldEditPermission: boolean;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { CROWDSTRIKE_CONNECTOR_ID } from '../../../public/common';
 import { CrowdstrikeConnector } from './crowdstrike';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { CROWDSTRIKE_CONNECTOR_ID } from '../../../public/common';
 
 const tokenPath = 'https://api.crowdstrike.com/oauth2/token';
 const hostPath = 'https://api.crowdstrike.com/devices/entities/devices/v2';

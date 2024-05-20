@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { CONFIRM_MODAL } from '../screens/navigation';
 import {
+  SETTINGS_SAVE_BTN,
+  SETTINGS_OUTPUTS,
+  SETTINGS_FLEET_SERVER_HOSTS,
   FLEET_SERVER_HOST_FLYOUT,
   FLEET_SERVER_SETUP,
   GENERATE_FLEET_SERVER_POLICY_BUTTON,
-  SETTINGS_FLEET_SERVER_HOSTS,
-  SETTINGS_OUTPUTS,
-  SETTINGS_SAVE_BTN,
 } from '../screens/fleet';
-import { CONFIRM_MODAL } from '../screens/navigation';
 import { login } from '../tasks/login';
 
 describe('Edit settings', () => {

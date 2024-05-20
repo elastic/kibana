@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
 import { SavedObject } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SavedObjectsGetOptions } from '@kbn/core-saved-objects-api-server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RuleAttributes } from '../types';
 

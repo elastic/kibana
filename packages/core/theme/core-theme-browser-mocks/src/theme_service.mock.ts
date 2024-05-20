@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { CoreTheme, ThemeServiceSetup } from '@kbn/core-theme-browser';
-import type { ThemeService } from '@kbn/core-theme-browser-internal';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { of } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ThemeServiceSetup, CoreTheme } from '@kbn/core-theme-browser';
+import type { ThemeService } from '@kbn/core-theme-browser-internal';
 
 const mockTheme: CoreTheme = {
   darkMode: false,

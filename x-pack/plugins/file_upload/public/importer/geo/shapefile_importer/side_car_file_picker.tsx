@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFilePicker, EuiFormRow } from '@elastic/eui';
 
 export function getFileNameWithoutExt(fileName: string) {
   const splits = fileName.split('.');

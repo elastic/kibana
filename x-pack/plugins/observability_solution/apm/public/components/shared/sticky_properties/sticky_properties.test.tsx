@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 import { StickyProperties } from '.';
-import { URL_FULL, USER_ID } from '../../../../common/es_fields/apm';
+import { shallow } from 'enzyme';
+import { USER_ID, URL_FULL } from '../../../../common/es_fields/apm';
 import { mockMoment } from '../../../utils/test_helpers';
 
 describe('StickyProperties', () => {

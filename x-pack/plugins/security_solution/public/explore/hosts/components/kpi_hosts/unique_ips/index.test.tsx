@@ -6,9 +6,9 @@
  */
 
 import { render } from '@testing-library/react';
-import React from 'react';
-import { HostsKpiUniqueIps, uniqueIpsStatItems } from '.';
 import { TestProviders } from '../../../../../common/mock';
+import React from 'react';
+import { uniqueIpsStatItems, HostsKpiUniqueIps } from '.';
 import { KpiBaseComponent } from '../../../../components/kpi';
 
 jest.mock('../../../../components/kpi');

@@ -6,7 +6,7 @@
  */
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../mock';
-import { AnomalyEntity, useAggregatedAnomaliesByJob } from './use_anomalies_search';
+import { useAggregatedAnomaliesByJob, AnomalyEntity } from './use_anomalies_search';
 
 const jobId = 'auth_rare_source_ip_for_a_user';
 const from = 'now-24h';

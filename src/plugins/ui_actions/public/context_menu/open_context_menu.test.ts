@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { fireEvent } from '@testing-library/react';
 import { createInteractionPositionTracker } from './open_context_menu';
+import { fireEvent } from '@testing-library/react';
 
 let targetEl: Element;
 const top = 100;

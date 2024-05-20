@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { Indicator, generateMockFileIndicator } from '../../../../../common/types/indicator';
+import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { TakeAction } from './take_action';
 import { TAKE_ACTION_BUTTON_TEST_ID } from './test_ids';

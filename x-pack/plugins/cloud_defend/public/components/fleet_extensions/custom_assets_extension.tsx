@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CustomAssetsAccordion, type CustomAssetsAccordionProps } from '@kbn/fleet-plugin/public';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { type CustomAssetsAccordionProps, CustomAssetsAccordion } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { cloudDefendPages } from '../../common/navigation/constants';
 

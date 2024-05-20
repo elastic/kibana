@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { SenseEditor } from '../../models/sense_editor';
 import { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
 import { MetricsTracker } from '../../../types';
-import { SenseEditor } from '../../models/sense_editor';
 
 export const track = (
   requests: Array<{ method: string }>,

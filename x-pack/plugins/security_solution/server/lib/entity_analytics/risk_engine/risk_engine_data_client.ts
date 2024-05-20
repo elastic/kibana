@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
 import { MAX_SPACES_COUNT, RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
+import {
+  updateSavedObjectAttribute,
+  getConfiguration,
+  initSavedObjects,
+  getEnabledRiskEngineAmount,
+} from './utils/saved_object_configuration';
 import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
-import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks';
-import { getLegacyTransforms, removeLegacyTransforms } from '../utils/transforms';
 import { RiskEngineAuditActions } from './audit';
-import {
-  getConfiguration,
-  getEnabledRiskEngineAmount,
-  initSavedObjects,
-  updateSavedObjectAttribute,
-} from './utils/saved_object_configuration';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 
 interface InitOpts {
   namespace: string;

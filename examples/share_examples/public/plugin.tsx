@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 
 interface SetupDeps {
   share: SharePluginSetup;

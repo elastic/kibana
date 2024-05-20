@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 import { CategoricalColorMapping, ColorMappingInputData } from './categorical_color_mapping';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from './config/default_color_mapping';
 import { AVAILABLE_PALETTES } from './palettes';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from './config/default_color_mapping';
+import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 
 const ASSIGNMENTS_LIST = '[data-test-subj="lns-colorMapping-assignmentsList"]';
 const ASSIGNMENTS_PROMPT = '[data-test-subj="lns-colorMapping-assignmentsPrompt"]';

@@ -7,13 +7,13 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useListsConfig } from './use_lists_config';
 import { useListsIndex } from './use_lists_index';
-import { getUseListsIndexMock } from './use_lists_index.mock';
 import { useListsPrivileges } from './use_lists_privileges';
+import { getUseListsIndexMock } from './use_lists_index.mock';
 import { getUseListsPrivilegesMock } from './use_lists_privileges.mock';
+import { useListsConfig } from './use_lists_config';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_lists_index');

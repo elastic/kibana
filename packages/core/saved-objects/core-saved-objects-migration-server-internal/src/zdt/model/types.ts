@@ -8,13 +8,13 @@
 
 import { ExcludeRetryableEsError } from '../../model/types';
 import type { MigratorContext } from '../context';
-import type { ResponseType } from '../next';
 import type {
   AllActionStates,
   AllControlStates,
   StateFromActionState,
   StateFromControlState,
 } from '../state';
+import type { ResponseType } from '../next';
 
 /**
  * Utility type used to define the input of stage functions

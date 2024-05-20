@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as t from 'io-ts';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CustomLink, CustomLinkES } from '../../../../common/custom_link/custom_link_types';
+import { fromESFormat } from './helper';
+import { filterOptionsRt } from './custom_link_types';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { APM_CUSTOM_LINK_INDEX } from '../apm_indices/apm_system_index_constants';
-import { filterOptionsRt } from './custom_link_types';
-import { fromESFormat } from './helper';
 
 export async function listCustomLinks({
   internalESClient,

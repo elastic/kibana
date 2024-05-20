@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookParamsFields from './webhook_params';
 
 describe('WebhookParamsFields renders', () => {

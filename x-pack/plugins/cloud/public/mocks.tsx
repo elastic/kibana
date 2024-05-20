@@ -37,7 +37,8 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
 
 const getContextProvider: () => FC<PropsWithChildren<unknown>> =
   () =>
-  ({ children }) => <>{children}</>;
+  ({ children }) =>
+    <>{children}</>;
 
 const createStartMock = (): jest.Mocked<CloudStart> => ({
   CloudContextProvider: jest.fn(getContextProvider()),

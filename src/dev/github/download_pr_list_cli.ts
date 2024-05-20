@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { run, Flags } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import fs from 'fs';
 import Path from 'path';
-import { createFlagError } from '@kbn/dev-cli-errors';
-import { Flags, run } from '@kbn/dev-cli-runner';
 import { savePrsToCsv } from './search_and_save_pr_list';
 
 function getLabelsPath(flags: Flags) {

@@ -15,9 +15,9 @@ import {
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
-import { deleteDataStream } from './delete_data_stream';
 import { deleteIndex } from './delete_index';
 import { cleanSavedObjectIndices } from './kibana_index';
+import { deleteDataStream } from './delete_data_stream';
 
 export function createDeleteIndexStream(client: Client, stats: Stats, log: ToolingLog) {
   // if we detect saved object documents defined in the data.json, we will cleanup their indices

@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { API_BASE_PATH } from '../../../common/constants';
 import { deserializePipelines } from '../../../common/lib';
+import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 
 const paramsSchema = schema.object({

@@ -7,8 +7,8 @@
 
 import type { HostsEdges } from '../../../../../../common/search_strategy/security_solution';
 
-import { mockBuckets } from './__mocks__';
 import { formatHostEdgesData } from './helpers';
+import { mockBuckets } from './__mocks__';
 
 describe('#formatHostsData', () => {
   test('it formats a host with a source of name correctly', () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 
 import type { RuleParams } from '../../rule_schema';

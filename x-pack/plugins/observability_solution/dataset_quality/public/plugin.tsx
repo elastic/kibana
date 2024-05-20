@@ -8,8 +8,8 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityControllerLazyFactory } from './controller/lazy_create_controller';
-import { DataStreamDetailsService } from './services/data_stream_details';
 import { DataStreamsStatsService } from './services/data_streams_stats';
+import { DataStreamDetailsService } from './services/data_stream_details';
 import {
   DatasetQualityPluginSetup,
   DatasetQualityPluginStart,

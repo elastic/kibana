@@ -6,11 +6,11 @@
  */
 
 import {
-  IKibanaResponse,
-  IRouter,
+  RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
-  RequestHandlerContext,
+  IKibanaResponse,
+  IRouter,
 } from '@kbn/core/server';
 
 export function initPlugin(router: IRouter, path: string) {

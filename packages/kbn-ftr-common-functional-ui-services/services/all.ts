@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { BrowserProvider } from './browser';
-import { FindProvider } from './find';
-import { RemoteProvider } from './remote';
 import { RetryOnStaleProvider } from './retry_on_stale';
+import { RemoteProvider } from './remote';
+import { FindProvider } from './find';
 import { TestSubjects } from './test_subjects';
+import { BrowserProvider } from './browser';
 import { ToastsService } from './toasts';
 
 export const services = {

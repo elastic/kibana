@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Meta } from '@storybook/react';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 
 import { action } from '@storybook/addon-actions';
 

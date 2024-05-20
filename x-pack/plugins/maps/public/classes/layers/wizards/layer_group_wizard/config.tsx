@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { WIZARD_ID } from '../../../../../common/constants';
 import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { LayerGroupWizard } from './wizard';
+import { WIZARD_ID } from '../../../../../common/constants';
 
 export const layerGroupWizardConfig: LayerWizard = {
   id: WIZARD_ID.LAYER_GROUP,

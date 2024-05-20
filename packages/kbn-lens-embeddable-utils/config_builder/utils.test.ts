@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import {
+  getAdhocDataviews,
+  buildDatasourceStates,
+  buildReferences,
+  getDatasetIndex,
+  addLayerColumn,
+  isFormulaDataset,
+  mapToFormula,
+} from './utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
-import {
-  addLayerColumn,
-  buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
-  getDatasetIndex,
-  isFormulaDataset,
-  mapToFormula,
-} from './utils';
 
 const dataView = {
   id: 'test-dataview',

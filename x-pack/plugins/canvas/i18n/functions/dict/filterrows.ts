@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { filterrows } from '../../../canvas_plugin_src/functions/common/filterrows';
-import { FunctionFactory } from '../../../types';
-import { BOOLEAN_FALSE, BOOLEAN_TRUE, DATATABLE, TYPE_BOOLEAN } from '../../constants';
 import { FunctionHelp } from '../function_help';
+import { FunctionFactory } from '../../../types';
+import { DATATABLE, TYPE_BOOLEAN, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof filterrows>> = {
   help: i18n.translate('xpack.canvas.functions.filterrowsHelpText', {

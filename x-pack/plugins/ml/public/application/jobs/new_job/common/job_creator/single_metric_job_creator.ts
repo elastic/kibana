@@ -7,24 +7,24 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  type AggFieldPair,
   type Aggregation,
-  DOC_COUNT,
-  ES_AGGREGATION,
+  type AggFieldPair,
   type Field,
+  DOC_COUNT,
   ML_JOB_AGGREGATION,
+  ES_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
-import type {
-  BucketSpan,
-  Datafeed,
-  Detector,
-  Job,
-} from '../../../../../../common/types/anomaly_detection_jobs';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
+import type {
+  Job,
+  Datafeed,
+  Detector,
+  BucketSpan,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
+import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { isSparseDataJob } from './util/general';
 

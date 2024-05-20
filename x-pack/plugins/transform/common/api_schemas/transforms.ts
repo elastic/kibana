@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { type TypeOf, schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { CreateDataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_create_response_schema';
 
 import type { Dictionary } from '../types/common';
 import type { PivotAggDict } from '../types/pivot_aggs';
 import type { PivotGroupByDict } from '../types/pivot_group_by';
-import type { TransformConfigUnion, TransformId } from '../types/transform';
+import type { TransformId, TransformConfigUnion } from '../types/transform';
 
-import { runtimeMappingsSchema, transformStateSchema } from './common';
+import { transformStateSchema, runtimeMappingsSchema } from './common';
 
 // GET transform nodes
 export interface GetTransformNodesResponseSchema {
@@ -90,7 +90,7 @@ export const syncSchema = schema.object({
 });
 
 function transformConfigPayloadValidator<
-  T extends { pivot?: PivotConfig; latest?: LatestFunctionConfig },
+  T extends { pivot?: PivotConfig; latest?: LatestFunctionConfig }
 >(value: T) {
   if (!value.pivot && !value.latest) {
     return 'pivot or latest is required for transform configuration';

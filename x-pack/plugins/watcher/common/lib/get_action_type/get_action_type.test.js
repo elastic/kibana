@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ACTION_TYPES } from '../../constants';
 import { getActionType } from './get_action_type';
+import { ACTION_TYPES } from '../../constants';
 
 describe('get_action_type', () => {
   describe('getActionType', () => {

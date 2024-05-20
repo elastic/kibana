@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React from 'react';
 import {
   ActionConnectorFieldsProps,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import React from 'react';
-import { bedrockConfig, bedrockSecrets } from './constants';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import DashboardLink from './dashboard_link';
 import { BEDROCK } from './translations';
+import { bedrockConfig, bedrockSecrets } from './constants';
 
 const BedrockConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   const [{ id, name }] = useFormData();

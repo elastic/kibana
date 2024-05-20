@@ -10,7 +10,7 @@ import React from 'react';
 import { Connector } from '@kbn/search-connectors';
 
 import { ElasticsearchIndexWithIngestion } from '../../../../../../../common/types/indices';
-import { getIngestionMethod, isConnectorIndex, isCrawlerIndex } from '../../../../utils/indices';
+import { isCrawlerIndex, isConnectorIndex, getIngestionMethod } from '../../../../utils/indices';
 import { CrawlerStatusIndicator } from '../../../shared/crawler_status_indicator/crawler_status_indicator';
 
 import { SearchPlaygroundPopover } from './search_playground_popover';

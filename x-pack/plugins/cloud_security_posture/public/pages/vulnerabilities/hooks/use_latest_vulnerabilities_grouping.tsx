@@ -1,4 +1,3 @@
-import { Filter, buildEsQuery } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,33 +6,34 @@ import { Filter, buildEsQuery } from '@kbn/es-query';
  */
 import { getGroupingQuery } from '@kbn/securitysolution-grouping';
 import {
+  GroupingAggregation,
   GroupPanelRenderer,
   GroupStatsRenderer,
-  GroupingAggregation,
-  NamedAggregation,
   isNoneGroup,
+  NamedAggregation,
   parseGroupingQuery,
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
+import { buildEsQuery, Filter } from '@kbn/es-query';
+import { LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY } from '../../../common/constants';
+import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import {
   LATEST_VULNERABILITIES_RETENTION_POLICY,
   VULNERABILITIES_SEVERITY,
 } from '../../../../common/constants';
-import { LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY } from '../../../common/constants';
-import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
-import {
-  GROUPING_OPTIONS,
-  VULNERABILITY_FIELDS,
-  defaultGroupingOptions,
-  getDefaultQuery,
-} from '../constants';
-import { VULNERABILITIES_GROUPS_UNIT, VULNERABILITIES_UNIT, groupingTitle } from '../translations';
 import {
   VulnerabilitiesGroupingAggregation,
   VulnerabilitiesRootGroupingAggregation,
   useGroupedVulnerabilities,
 } from './use_grouped_vulnerabilities';
+import {
+  defaultGroupingOptions,
+  getDefaultQuery,
+  GROUPING_OPTIONS,
+  VULNERABILITY_FIELDS,
+} from '../constants';
+import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
+import { VULNERABILITIES_UNIT, groupingTitle, VULNERABILITIES_GROUPS_UNIT } from '../translations';
 
 const getTermAggregation = (key: keyof VulnerabilitiesGroupingAggregation, field: string) => ({
   [key]: {

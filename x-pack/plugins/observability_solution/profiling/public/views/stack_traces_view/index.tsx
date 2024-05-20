@@ -10,8 +10,8 @@ import { useProfilingDependencies } from '../../components/contexts/profiling_de
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { StackTraces } from '../../components/stack_traces';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
-import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
+import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import { RouteBreadcrumb } from '../../routing/route_breadcrumb';

@@ -30,21 +30,21 @@ import {
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
+import { sampleDocNoSortIdWithTimestamp } from '../../__mocks__/es_results';
+import { buildAlert, buildParent, buildAncestors, additionalAlertFields } from './build_alert';
+import type { Ancestor, SignalSourceHit } from '../../types';
+import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import { DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../../../../../../common/constants';
 import { EVENT_DATASET } from '../../../../../../common/cti/constants';
-import { getListArrayMock } from '../../../../../../common/detection_engine/schemas/types/lists.mock';
 import {
   ALERT_ANCESTORS,
-  ALERT_BUILDING_BLOCK_TYPE,
+  ALERT_ORIGINAL_TIME,
   ALERT_DEPTH,
   ALERT_ORIGINAL_EVENT,
-  ALERT_ORIGINAL_TIME,
+  ALERT_BUILDING_BLOCK_TYPE,
   ALERT_RULE_INDICES,
 } from '../../../../../../common/field_maps/field_names';
 import { getCompleteRuleMock, getQueryRuleParams } from '../../../rule_schema/mocks';
-import { sampleDocNoSortIdWithTimestamp } from '../../__mocks__/es_results';
-import type { Ancestor, SignalSourceHit } from '../../types';
-import { additionalAlertFields, buildAlert, buildAncestors, buildParent } from './build_alert';
 
 type SignalDoc = SignalSourceHit & {
   _source: Required<SignalSourceHit>['_source'] & { [TIMESTAMP]: string };

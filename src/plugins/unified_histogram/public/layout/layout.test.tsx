@@ -7,20 +7,20 @@
  */
 
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { ResizableLayout, ResizableLayoutMode } from '@kbn/resizable-layout';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { of } from 'rxjs';
-import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
-import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { Chart } from '../chart';
 import {
   UnifiedHistogramChartContext,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
 } from '../types';
+import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from './layout';
+import { ResizableLayout, ResizableLayoutMode } from '@kbn/resizable-layout';
 
 let mockBreakpoint = 'l';
 

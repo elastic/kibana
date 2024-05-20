@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 
 import {
   sendPostDownloadSource,
+  useInput,
+  useSwitchInput,
+  useStartServices,
   sendPutDownloadSource,
   useAuthz,
-  useInput,
-  useStartServices,
-  useSwitchInput,
 } from '../../../../hooks';
 import type { DownloadSource, PostDownloadSourceRequest } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';

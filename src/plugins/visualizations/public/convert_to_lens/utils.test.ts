@@ -18,11 +18,10 @@ import {
 import {
   AvgColumn,
   CountColumn,
-  DateHistogramColumn,
   MaxColumn,
+  DateHistogramColumn,
   Meta,
 } from '../../common/convert_to_lens/lib';
-import { Schemas } from '../vis_schemas';
 import {
   getBucketCollapseFn,
   getBucketColumns,
@@ -34,6 +33,7 @@ import {
   isValidVis,
   sortColumns,
 } from './utils';
+import { Schemas } from '../vis_schemas';
 
 const mockConvertBucketToColumns = jest.fn();
 
@@ -161,9 +161,9 @@ describe('getBucketCollapseFn', () => {
         Array<SchemaConfig<SupportedAggregation>>,
         AggBasedColumn[],
         Record<string, string>,
-        AggBasedColumn[],
+        AggBasedColumn[]
       ],
-      Record<string, string[]>,
+      Record<string, string[]>
     ]
   >([
     [

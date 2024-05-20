@@ -1,6 +1,3 @@
-import { RuleAttributes } from '../../../data/rule/types';
-import { DenormalizedAction } from '../../../rules_client';
-import { getMappedParams } from '../../../rules_client/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import { getMappedParams } from '../../../rules_client/common';
  * 2.0.
  */
 import { RuleDomain } from '../types';
+import { RuleAttributes } from '../../../data/rule/types';
+import { getMappedParams } from '../../../rules_client/common';
+import { DenormalizedAction } from '../../../rules_client';
 
 interface TransformRuleToEsParams {
   legacyId: RuleAttributes['legacyId'];

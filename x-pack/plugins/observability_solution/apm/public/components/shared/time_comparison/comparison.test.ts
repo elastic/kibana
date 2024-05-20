@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
 import { getDateRange } from '../../../context/url_params_context/helpers';
 import { getComparisonOptions } from './get_comparison_options';
+import moment from 'moment-timezone';
 
 function getExpectedTimesAndComparisons({
   rangeFrom,

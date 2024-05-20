@@ -10,8 +10,8 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import { errors } from '@elastic/elasticsearch';
 
-import { fetchConnectorById } from './fetch_connectors';
 import { updateConnectorConfiguration } from './update_connector_configuration';
+import { fetchConnectorById } from './fetch_connectors';
 
 jest.mock('./fetch_connectors', () => ({ fetchConnectorById: jest.fn() }));
 

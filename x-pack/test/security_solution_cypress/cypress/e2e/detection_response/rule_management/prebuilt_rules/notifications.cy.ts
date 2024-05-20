@@ -17,9 +17,9 @@ import {
   deletePrebuiltRulesAssets,
 } from '../../../../tasks/api_calls/common';
 import {
-  createAndInstallMockedPrebuiltRules,
   installAllPrebuiltRulesRequest,
   installPrebuiltRuleAssets,
+  createAndInstallMockedPrebuiltRules,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';

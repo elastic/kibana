@@ -9,8 +9,8 @@ import type { ReactWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../mock/test_providers';
 import { FiltersGlobal } from './filters_global';
+import { TestProviders } from '../../mock/test_providers';
 
 describe('rendering', () => {
   test('renders correctly', () => {

@@ -6,23 +6,23 @@
  */
 
 import {
-  globalRead as globalReadRole,
-  noCasesConnectors as noCasesConnectorRole,
-  noCasesPrivilegesSpace1 as noCasesPrivilegesSpace1Role,
-  noKibanaPrivileges as noKibanaPrivilegesRole,
-  observabilityOnlyAll,
-  observabilityOnlyRead,
-  observabilityOnlyReadAlerts,
-  onlyActions as onlyActionsRole,
   securitySolutionOnlyAll,
+  observabilityOnlyAll,
+  securitySolutionOnlyRead,
+  observabilityOnlyRead,
+  globalRead as globalReadRole,
+  noKibanaPrivileges as noKibanaPrivilegesRole,
+  noCasesPrivilegesSpace1 as noCasesPrivilegesSpace1Role,
   securitySolutionOnlyAllSpacesRole,
+  testDisabledPluginAll,
   securitySolutionOnlyDelete,
   securitySolutionOnlyNoDelete,
-  securitySolutionOnlyRead,
+  observabilityOnlyReadAlerts,
   securitySolutionOnlyReadAlerts,
-  securitySolutionOnlyReadDelete,
   securitySolutionOnlyReadNoIndexAlerts,
-  testDisabledPluginAll,
+  securitySolutionOnlyReadDelete,
+  noCasesConnectors as noCasesConnectorRole,
+  onlyActions as onlyActionsRole,
 } from './roles';
 import { User } from './types';
 

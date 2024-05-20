@@ -9,22 +9,22 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { RouteInitialization } from '../types';
 import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
-  forceQuerySchema,
+  jobIdSchema,
+  getBucketsSchema,
+  getOverallBucketsSchema,
+  getCategoriesSchema,
   forecastAnomalyDetector,
   getBucketParamsSchema,
-  getBucketsSchema,
-  getCategoriesSchema,
   getModelSnapshotsSchema,
-  getOverallBucketsSchema,
-  jobIdSchema,
-  updateModelSnapshotBodySchema,
   updateModelSnapshotsSchema,
+  updateModelSnapshotBodySchema,
+  forceQuerySchema,
 } from './schemas/anomaly_detectors_schema';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 
 /**
  * Routes for the anomaly detectors

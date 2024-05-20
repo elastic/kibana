@@ -28,7 +28,9 @@
             "tags": [],
             "label": "setup",
             "description": [],
-            "signature": ["({ pluginName, logger }: SetupSettings) => void"],
+            "signature": [
+              "({ pluginName, logger }: SetupSettings) => void"
+            ],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -40,7 +42,9 @@
                 "tags": [],
                 "label": "{ pluginName, logger }",
                 "description": [],
-                "signature": ["SetupSettings"],
+                "signature": [
+                  "SetupSettings"
+                ],
                 "path": "x-pack/plugins/license_api_guard/server/license.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -56,7 +60,9 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": ["({ pluginId, minimumLicenseType, licensing }: StartSettings) => void"],
+            "signature": [
+              "({ pluginId, minimumLicenseType, licensing }: StartSettings) => void"
+            ],
             "path": "x-pack/plugins/license_api_guard/server/license.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -68,7 +74,9 @@
                 "tags": [],
                 "label": "{ pluginId, minimumLicenseType, licensing }",
                 "description": [],
-                "signature": ["StartSettings"],
+                "signature": [
+                  "StartSettings"
+                ],
                 "path": "x-pack/plugins/license_api_guard/server/license.ts",
                 "deprecated": false,
                 "trackAdoption": false,

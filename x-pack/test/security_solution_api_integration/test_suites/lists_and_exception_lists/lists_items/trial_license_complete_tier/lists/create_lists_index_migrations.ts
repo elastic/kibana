@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { getIndexTemplateExists, getTemplateExists } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
+import { getTemplateExists, getIndexTemplateExists } from '@kbn/securitysolution-es-utils';
 
 import { createLegacyListsIndices, deleteListsIndex } from '../../../utils';
 

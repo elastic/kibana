@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import React, { PureComponent } from 'react';
+import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import { ScriptedFieldItem } from '../../types';

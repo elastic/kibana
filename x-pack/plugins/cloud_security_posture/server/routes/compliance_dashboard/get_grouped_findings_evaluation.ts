@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import type { ComplianceDashboardData } from '../../../common/types_old';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../common/utils/helpers';
+import type { ComplianceDashboardData } from '../../../common/types_old';
 import { KeyDocCount } from './compliance_dashboard';
 
 export interface FailedFindingsQueryResult {

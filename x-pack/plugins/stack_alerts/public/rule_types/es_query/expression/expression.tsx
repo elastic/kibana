@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import React, { memo, PropsWithChildren, useCallback } from 'react';
+import deepEqual from 'fast-deep-equal';
 import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { ALL_EXPRESSION_ERROR_KEYS } from '../constants';
-import { EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
-import { isEsqlQueryRule, isSearchSourceRule } from '../util';
-import { EsQueryExpression } from './es_query_expression';
-import { EsqlQueryExpression } from './esql_query_expression';
-import { QueryFormTypeChooser } from './query_form_type_chooser';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
+import { EsQueryExpression } from './es_query_expression';
+import { QueryFormTypeChooser } from './query_form_type_chooser';
+import { isEsqlQueryRule, isSearchSourceRule } from '../util';
+import { ALL_EXPRESSION_ERROR_KEYS } from '../constants';
+import { EsqlQueryExpression } from './esql_query_expression';
 
 function areSearchSourceExpressionPropsEqual(
   prevProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>,

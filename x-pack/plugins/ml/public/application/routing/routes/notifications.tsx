@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { useTimefilter } from '@kbn/ml-date-picker';
 import type { FC } from 'react';
 import React, { Suspense } from 'react';
-import type { MlRoute } from '..';
+import { i18n } from '@kbn/i18n';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_PAGES } from '../../../locator';
-import type { NavigateToPath } from '../../contexts/kibana';
+import { createPath, PageLoader } from '../router';
+import { useRouteResolver } from '../use_resolver';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { PageLoader, createPath } from '../router';
-import { useRouteResolver } from '../use_resolver';
+import type { MlRoute } from '..';
+import type { NavigateToPath } from '../../contexts/kibana';
 
 const NotificationsPage = React.lazy(() => import('../../notifications/page'));
 

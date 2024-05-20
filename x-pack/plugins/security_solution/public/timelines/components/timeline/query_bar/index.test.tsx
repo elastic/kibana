@@ -9,19 +9,19 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { FilterStateStore } from '@kbn/es-query';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../common/constants';
-import { QueryBar } from '../../../../common/components/query_bar';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
-import { TestProviders, mockIndexPattern } from '../../../../common/mock';
+import { mockIndexPattern, TestProviders } from '../../../../common/mock';
+import { QueryBar } from '../../../../common/components/query_bar';
+import { FilterStateStore } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { TIMELINE_FILTER_DROP_AREA, buildGlobalQuery } from '../helpers';
 
-import { waitFor } from '@testing-library/react';
 import type { QueryBarTimelineComponentProps } from '.';
 import { QueryBarTimeline, getDataProviderFilter } from '.';
+import { waitFor } from '@testing-library/react';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 

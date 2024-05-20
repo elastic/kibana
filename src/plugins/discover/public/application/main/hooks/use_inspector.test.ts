@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { OverlayRef } from '@kbn/core/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import { useInspector } from './use_inspector';
+import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import { OverlayRef } from '@kbn/core/public';
+import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {

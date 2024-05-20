@@ -7,9 +7,9 @@
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
-import qs from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+import qs from 'query-string';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { useApmParams } from '../../../hooks/use_apm_params';
 

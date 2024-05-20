@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo, useState, useCallback, useEffect } from 'react';
-import { LeftPanelVisualizeTab } from '..';
-import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { ANALYZE_GRAPH_ID, AnalyzeGraph } from '../components/analyze_graph';
-import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
 import { useLeftPanelContext } from '../context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelVisualizeTab } from '..';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
   VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
   VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID,
 } from './test_ids';
+import { ANALYZE_GRAPH_ID, AnalyzeGraph } from '../components/analyze_graph';
+import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
+import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {

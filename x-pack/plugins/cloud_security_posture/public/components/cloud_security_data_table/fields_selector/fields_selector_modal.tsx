@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -7,22 +14,15 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { type DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React from 'react';
+import { type DataView } from '@kbn/data-views-plugin/common';
+import { FieldsSelectorTable } from './fields_selector_table';
 import {
   CSP_FIELDS_SELECTOR_CLOSE_BUTTON,
   CSP_FIELDS_SELECTOR_MODAL,
   CSP_FIELDS_SELECTOR_RESET_BUTTON,
 } from '../../test_subjects';
-import { FieldsSelectorTable } from './fields_selector_table';
 
 interface FieldsSelectorModalProps {
   dataView: DataView;

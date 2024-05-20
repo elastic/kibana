@@ -11,26 +11,26 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   API_VERSIONS,
-  ExecuteConnectorRequestBody,
   INTERNAL_API_ACCESS,
   PostEvaluateBody,
   PostEvaluateRequestQuery,
   PostEvaluateResponse,
+  ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { EVALUATE } from '../../../common/constants';
+import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
-import { AgentExecutorEvaluatorWithMetadata } from '../../lib/langchain/executors/types';
+import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
+import { EVALUATE } from '../../../common/constants';
 import { performEvaluation } from '../../lib/model_evaluator/evaluation';
+import { AgentExecutorEvaluatorWithMetadata } from '../../lib/langchain/executors/types';
 import {
   indexEvaluations,
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
-import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer } from './utils';
+import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
 /**
  * To support additional Agent Executors from the UI, add them to this map

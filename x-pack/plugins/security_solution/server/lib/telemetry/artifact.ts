@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import AdmZip from 'adm-zip';
 import axios from 'axios';
 import { cloneDeep } from 'lodash';
+import AdmZip from 'adm-zip';
 import type { ITelemetryReceiver } from './receiver';
 import type { ESClusterInfo } from './types';
 

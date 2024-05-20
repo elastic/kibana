@@ -8,12 +8,12 @@
 import React, { Component, ReactNode } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { IESAggField } from '../../../../fields/agg';
-import type { IField } from '../../../../fields/field';
-import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
-import { MaskLegend } from '../../../vector/components/legend/mask_legend';
-import { HEATMAP_COLOR_RAMP_LABEL } from '../heatmap_constants';
 import { ColorGradient } from './color_gradient';
+import { RangedStyleLegendRow } from '../../../components/ranged_style_legend_row';
+import { HEATMAP_COLOR_RAMP_LABEL } from '../heatmap_constants';
+import type { IField } from '../../../../fields/field';
+import type { IESAggField } from '../../../../fields/agg';
+import { MaskLegend } from '../../../vector/components/legend/mask_legend';
 
 interface Props {
   colorRampName: string;

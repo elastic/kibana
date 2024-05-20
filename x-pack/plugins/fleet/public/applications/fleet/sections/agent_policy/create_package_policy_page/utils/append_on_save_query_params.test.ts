@@ -6,7 +6,7 @@
  */
 import { parse } from 'query-string';
 
-import type { OnSaveQueryParamKeys, PackagePolicy } from '../../../../types';
+import type { PackagePolicy, OnSaveQueryParamKeys } from '../../../../types';
 
 import { appendOnSaveQueryParamsToPath } from '.';
 

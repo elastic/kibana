@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { renderApp } from './app';
 
 export class CoreAppLinkPlugin implements Plugin<CoreAppLinkPluginSetup, CoreAppLinkPluginStart> {

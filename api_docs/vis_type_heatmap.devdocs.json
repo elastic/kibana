@@ -36,7 +36,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["HeatmapTypeProps"],
+            "signature": [
+              "HeatmapTypeProps"
+            ],
             "path": "src/plugins/vis_types/heatmap/public/vis_type/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -73,7 +75,9 @@
         "tags": [],
         "label": "LEGACY_HEATMAP_CHARTS_LIBRARY",
         "description": [],
-        "signature": ["\"visualization:visualize:legacyHeatmapChartsLibrary\""],
+        "signature": [
+          "\"visualization:visualize:legacyHeatmapChartsLibrary\""
+        ],
         "path": "src/plugins/vis_types/heatmap/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { buildEsQuery } from '@kbn/es-query';
 import type { IEsSearchRequest } from '@kbn/search-types';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '../../../../common/lib/kibana';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { isActiveTimeline } from '../../../../helpers';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { createFetchData } from '../utils/fetch_data';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { isActiveTimeline } from '../../../../helpers';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
 

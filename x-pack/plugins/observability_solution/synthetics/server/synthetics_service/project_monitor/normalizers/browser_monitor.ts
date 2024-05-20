@@ -6,20 +6,20 @@
  */
 
 import {
-  CUSTOM_LABEL,
-  DEFAULT_FIELDS,
-  PROFILES_MAP,
-  PROFILE_VALUES,
-  PROFILE_VALUES_ENUM,
-} from '../../../../common/constants/monitor_defaults';
-import {
   BrowserFields,
   ConfigKey,
-  FormMonitorType,
   MonitorTypeEnum,
+  FormMonitorType,
   ProjectMonitor,
   ThrottlingConfig,
 } from '../../../../common/runtime_types';
+import {
+  PROFILE_VALUES_ENUM,
+  DEFAULT_FIELDS,
+  PROFILES_MAP,
+  PROFILE_VALUES,
+  CUSTOM_LABEL,
+} from '../../../../common/constants/monitor_defaults';
 import {
   NormalizedProjectProps,
   NormalizerResult,

@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { AttachmentPatchRequestRt } from '../../../../common/types/api';
-import type { caseDomainV1 } from '../../../../common/types/domain';
-import { createCaseError } from '../../../common/error';
 import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
+import { CASE_COMMENTS_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { caseDomainV1 } from '../../../../common/types/domain';
 
 export const patchCommentRoute = createCasesRoute({
   method: 'patch',

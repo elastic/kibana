@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { format as formatUrl } from 'url';
 import fetch from 'node-fetch';
+import { format as formatUrl } from 'url';
 
 import expect from '@kbn/expect';
 

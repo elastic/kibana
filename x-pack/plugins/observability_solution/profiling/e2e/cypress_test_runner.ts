@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import path from 'path';
-import Url from 'url';
 import axios from 'axios';
 import cypress from 'cypress';
+import path from 'path';
+import Url from 'url';
 import { FtrProviderContext } from './ftr_provider_context';
 import { loadProfilingData } from './load_profiling_data';
 import { setupProfilingResources } from './setup_profiling_resources';

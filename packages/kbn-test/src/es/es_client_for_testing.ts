@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as Fs from 'fs';
 import * as Url from 'url';
+import * as Fs from 'fs';
 
-import { ClientOptions, Client as EsClient, HttpConnection } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { Client as EsClient, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
 import type { Config } from '../functional_test_runner';
 
 /** options for creating es instances used in functional testing scenarios */

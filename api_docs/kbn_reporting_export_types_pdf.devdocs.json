@@ -111,7 +111,9 @@
             "tags": [],
             "label": "jobContentEncoding",
             "description": [],
-            "signature": ["\"base64\""],
+            "signature": [
+              "\"base64\""
+            ],
             "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -123,7 +125,9 @@
             "tags": [],
             "label": "jobContentExtension",
             "description": [],
-            "signature": ["\"pdf\""],
+            "signature": [
+              "\"pdf\""
+            ],
             "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -149,7 +153,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -278,7 +284,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["jobParams"]
+            "returnComment": [
+              "jobParams"
+            ]
           },
           {
             "parentPluginId": "@kbn/reporting-export-types-pdf",
@@ -286,7 +294,9 @@
             "type": "Function",
             "tags": [],
             "label": "runTask",
-            "description": ["\n"],
+            "description": [
+              "\n"
+            ],
             "signature": [
               "(jobId: string, payload: ",
               {
@@ -323,7 +333,9 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -357,7 +369,9 @@
                 "tags": [],
                 "label": "taskInstanceFields",
                 "description": [],
-                "signature": ["TaskInstanceFields"],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
                 "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -391,7 +405,9 @@
                 "tags": [],
                 "label": "stream",
                 "description": [],
-                "signature": ["Writable"],
+                "signature": [
+                  "Writable"
+                ],
                 "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -407,7 +423,9 @@
         "parentPluginId": "@kbn/reporting-export-types-pdf",
         "id": "def-server.PdfV1ExportType",
         "type": "Class",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "PdfV1ExportType",
         "description": [],
         "signature": [
@@ -514,7 +532,9 @@
             "tags": [],
             "label": "jobContentEncoding",
             "description": [],
-            "signature": ["\"base64\" | undefined"],
+            "signature": [
+              "\"base64\" | undefined"
+            ],
             "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -526,7 +546,9 @@
             "tags": [],
             "label": "jobContentExtension",
             "description": [],
-            "signature": ["\"pdf\""],
+            "signature": [
+              "\"pdf\""
+            ],
             "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -552,7 +574,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -716,7 +740,9 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -750,7 +776,9 @@
                 "tags": [],
                 "label": "taskInstanceFields",
                 "description": [],
-                "signature": ["TaskInstanceFields"],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
                 "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -784,7 +812,9 @@
                 "tags": [],
                 "label": "stream",
                 "description": [],
-                "signature": ["Writable"],
+                "signature": [
+                  "Writable"
+                ],
                 "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
                 "deprecated": false,
                 "trackAdoption": false,

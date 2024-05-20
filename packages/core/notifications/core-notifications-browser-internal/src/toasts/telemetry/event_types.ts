@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type EventTypeOpts, type RootSchema } from '@kbn/analytics-client';
+import { type RootSchema, type EventTypeOpts } from '@kbn/analytics-client';
 
 export enum EventMetric {
   TOAST_DISMISSED = 'global_toast_list_toast_dismissed',

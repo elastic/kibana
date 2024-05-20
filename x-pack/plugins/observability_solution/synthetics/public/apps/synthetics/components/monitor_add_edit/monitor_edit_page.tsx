@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { i18n } from '@kbn/i18n';
-import { useFetcher, useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
+import { useDispatch, useSelector } from 'react-redux';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useTrackPageview, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
-import { getServiceLocations, selectServiceLocationsState } from '../../state';
-import { getDecryptedMonitorAPI } from '../../state/monitor_management/api';
-import { AlertingCallout } from '../common/alerting_callout/alerting_callout';
-import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
-import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { EditMonitorNotFound } from './edit_monitor_not_found';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
+import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
+import { getServiceLocations, selectServiceLocationsState } from '../../state';
+import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
+import { AlertingCallout } from '../common/alerting_callout/alerting_callout';
+import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
-import { useMonitorNotFound } from './hooks/use_monitor_not_found';
 import { LocationsLoadingError } from './locations_loading_error';
 import { MonitorDetailsLinkPortal } from './monitor_details_portal';
-import { MonitorSteps } from './steps';
-import { EDIT_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
+import { getDecryptedMonitorAPI } from '../../state/monitor_management/api';
+import { EDIT_MONITOR_STEPS } from './steps/step_config';
+import { useMonitorNotFound } from './hooks/use_monitor_not_found';
 
 export const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });

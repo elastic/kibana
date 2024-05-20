@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
-import type { SolutionNavLink } from '../../../../common/links';
+import { SecurityPageName, ExternalPageName } from '@kbn/security-solution-navigation';
 import type { LinkItem } from '../../../../common/links/types';
+import type { SolutionNavLink } from '../../../../common/links';
 import * as i18n from './settings_translations';
 
 const ENTITY_ANALYTICS_LINKS = [

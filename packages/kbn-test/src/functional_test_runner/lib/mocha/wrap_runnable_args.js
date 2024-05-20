@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { wrapAsyncFunction, wrapFunction } from './wrap_function';
+import { wrapFunction, wrapAsyncFunction } from './wrap_function';
 
 /**
  *  Wraps a "runnable" defining function (it(), beforeEach(), etc.)

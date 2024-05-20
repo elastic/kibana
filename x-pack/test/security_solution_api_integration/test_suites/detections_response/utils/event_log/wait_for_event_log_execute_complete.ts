@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
 
 import { waitFor } from '../../../../../common/utils/security_solution';
 import { getEventLogExecuteCompleteById } from './get_event_log_execute_complete_by_id';

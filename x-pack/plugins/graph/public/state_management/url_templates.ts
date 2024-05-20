@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { format, parse } from 'url';
-import { i18n } from '@kbn/i18n';
-import rison from '@kbn/rison';
-import { modifyUrl } from '@kbn/std';
-import { takeEvery } from 'redux-saga/effects';
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
+import { i18n } from '@kbn/i18n';
+import { modifyUrl } from '@kbn/std';
+import rison from '@kbn/rison';
+import { takeEvery } from 'redux-saga/effects';
+import { format, parse } from 'url';
+import { GraphState, GraphStoreDependencies } from './store';
+import { UrlTemplate } from '../types';
+import { reset } from './global';
+import { setDatasource, IndexpatternDatasource, requestDatasource } from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';
-import { UrlTemplate } from '../types';
-import { IndexpatternDatasource, requestDatasource, setDatasource } from './datasource';
-import { reset } from './global';
 import { matchesOne } from './helpers';
-import { GraphState, GraphStoreDependencies } from './store';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 

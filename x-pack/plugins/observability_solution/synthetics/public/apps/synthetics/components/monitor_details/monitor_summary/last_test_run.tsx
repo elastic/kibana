@@ -5,44 +5,44 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiSkeletonRectangle,
   EuiSkeletonText,
+  EuiSkeletonRectangle,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 import { useParams } from 'react-router-dom';
-import {
-  ConfigKey,
-  EncryptedSyntheticsSavedMonitor,
-  MonitorTypeEnum,
-  Ping,
-  SyntheticsJourneyApiResponse,
-} from '../../../../../../common/runtime_types';
 import { getTestRunDetailLink } from '../../common/links/test_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  EncryptedSyntheticsSavedMonitor,
+  Ping,
+  SyntheticsJourneyApiResponse,
+} from '../../../../../../common/runtime_types';
 
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
-import { StatusBadge, parseBadgeStatus } from '../../common/monitor_test_result/status_badge';
+import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 
-import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useJourneySteps } from '../hooks/use_journey_steps';
-import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 
 export const LastTestRun = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();

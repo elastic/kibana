@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { IndicatorFieldValue } from './field_value';
 import {
   generateMockIndicator,
   generateMockIndicatorWithTlp,
 } from '../../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../../constants/common';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
-import { IndicatorFieldValue } from './field_value';
 
 const mockIndicator = generateMockIndicator();
 

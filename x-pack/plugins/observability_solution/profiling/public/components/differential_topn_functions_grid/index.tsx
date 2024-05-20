@@ -17,11 +17,11 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
+  getCalleeFunction,
   StackFrameMetadata,
   TopNComparisonFunctionSortField,
-  TopNFunctionSortField,
   TopNFunctions,
-  getCalleeFunction,
+  TopNFunctionSortField,
 } from '@kbn/profiling-utils';
 import { orderBy } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -29,10 +29,10 @@ import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_est
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { FunctionRow } from '../topn_functions/function_row';
 import {
-  IFunctionRow,
   convertRowToFrame,
   getFunctionsRows,
   getTotalCount,
+  IFunctionRow,
 } from '../topn_functions/utils';
 import { getColumns } from './get_columns';
 import { getCompareFrameAction } from './get_compare_frame_action';

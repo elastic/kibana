@@ -19,12 +19,12 @@ import { WaterfallWithSummary } from '../waterfall_with_summary';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 import { DurationDistributionChartWithScrubber } from '../../../shared/charts/duration_distribution_chart_with_scrubber';
 import { ResettingHeightRetainer } from '../../../shared/height_retainer/resetting_height_container';
 import { fromQuery, push, toQuery } from '../../../shared/links/url_helpers';
 import { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
+import { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 
 interface TransactionDistributionProps {
   onChartSelection: (event: XYBrushEvent) => void;

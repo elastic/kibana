@@ -16,7 +16,9 @@
         "schedule": {
           "interval": "3s"
         },
-        "scope": ["testing"],
+        "scope": [
+          "testing"
+        ],
         "startedAt": null,
         "state": "{}",
         "status": "idle",

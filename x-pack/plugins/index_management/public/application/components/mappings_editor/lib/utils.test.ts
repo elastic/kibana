@@ -12,12 +12,12 @@ jest.mock('../constants', () => {
 
 import { Fields, NormalizedFields, State } from '../types';
 import {
-  getAllFieldTypesFromState,
+  stripUndefinedValues,
+  getTypeLabelFromField,
   getFieldMeta,
   getFieldsFromState,
+  getAllFieldTypesFromState,
   getFieldsMatchingFilterFromState,
-  getTypeLabelFromField,
-  stripUndefinedValues,
 } from './utils';
 
 const fieldsWithnestedFields: NormalizedFields = {

@@ -6,9 +6,9 @@
  */
 
 import type { OsqueryTelemetryTaskConfig } from '../task';
-import { createTelemetryConfigsTaskConfig } from './configs';
 import { createTelemetryPacksTaskConfig } from './packs';
 import { createTelemetrySavedQueriesTaskConfig } from './saved_queries';
+import { createTelemetryConfigsTaskConfig } from './configs';
 
 export function createTelemetryTaskConfigs(): OsqueryTelemetryTaskConfig[] {
   return [

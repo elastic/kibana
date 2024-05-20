@@ -7,10 +7,10 @@
  */
 
 import type {
-  CoreSetup,
-  DeprecationsDetails,
-  GetDeprecationsContext,
   Plugin,
+  CoreSetup,
+  GetDeprecationsContext,
+  DeprecationsDetails,
 } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 async function getDeprecations({

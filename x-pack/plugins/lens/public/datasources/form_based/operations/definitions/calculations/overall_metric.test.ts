@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { createMockedIndexPattern } from '../../../mocks';
+import type { FormBasedLayer } from '../../../types';
 import {
   overallAverageOperation,
   overallMaxOperation,
   overallMinOperation,
   overallSumOperation,
 } from '..';
-import { createMockedIndexPattern } from '../../../mocks';
-import type { FormBasedLayer } from '../../../types';
 
 describe('overall_metric', () => {
   const indexPattern = createMockedIndexPattern();

@@ -8,22 +8,22 @@
 
 import { parse as parseUrl } from 'url';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type {
-  ILocatorClient,
-  IShortUrlClient,
-  LocatorPublic,
-  ShortUrl,
-  ShortUrlCreateParams,
-  ShortUrlData,
-} from '../../../common/url_service';
 import {
-  LEGACY_SHORT_URL_LOCATOR_ID,
   LegacyShortUrlLocatorParams,
+  LEGACY_SHORT_URL_LOCATOR_ID,
 } from '../../../common/url_service/locators/legacy_short_url_locator';
 import {
   SHORT_URL_REDIRECT_LOCATOR,
   ShortUrlRedirectLocatorParams,
 } from '../../../common/url_service/locators/short_url_redirect_locator';
+import type {
+  IShortUrlClient,
+  ShortUrl,
+  ShortUrlCreateParams,
+  ILocatorClient,
+  ShortUrlData,
+  LocatorPublic,
+} from '../../../common/url_service';
 
 export interface BrowserShortUrlClientHttp {
   basePath: {
@@ -150,7 +150,7 @@ export class BrowserShortUrlClient implements IShortUrlClient {
 }
 
 export interface ShortUrlCreateResponse<
-  LocatorParams extends SerializableRecord = SerializableRecord,
+  LocatorParams extends SerializableRecord = SerializableRecord
 > extends ShortUrl<LocatorParams> {
   locator: LocatorPublic<ShortUrlRedirectLocatorParams>;
   params: ShortUrlRedirectLocatorParams;

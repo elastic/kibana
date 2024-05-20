@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act as reactAct, render, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { I18nProvider } from '@kbn/i18n-react';
+import userEvent from '@testing-library/user-event';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Props, UpdateConnector } from './update_connector';
+import { act } from 'react-dom/test-utils';
+import { render, act as reactAct, waitFor } from '@testing-library/react';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 

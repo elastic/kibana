@@ -5,17 +5,11 @@
  * 2.0.
  */
 
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Field, NewJobCapsResponse } from '@kbn/ml-anomaly-utils';
 import {
-  DEFAULT_REGRESSION_COLUMNS,
-  type DataFrameAnalyticsConfig,
-  FEATURE_IMPORTANCE,
-  FEATURE_INFLUENCE,
-  OUTLIER_SCORE,
-  TOP_CLASSES,
   getDependentVar,
   getNumTopClasses,
   getNumTopFeatureImportanceValues,
@@ -24,9 +18,15 @@ import {
   isOutlierAnalysis,
   isRegressionAnalysis,
   sortExplorationResultsFields,
+  DEFAULT_REGRESSION_COLUMNS,
+  FEATURE_IMPORTANCE,
+  FEATURE_INFLUENCE,
+  OUTLIER_SCORE,
+  TOP_CLASSES,
+  type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 import { ml } from '../ml_api_service';
-import { NewJobCapabilitiesServiceBase, processTextAndKeywordFields } from './new_job_capabilities';
 
 // Keep top nested field and remove all <nested_field>.* fields
 export function removeNestedFieldChildren(resp: NewJobCapsResponse, indexPatternTitle: string) {

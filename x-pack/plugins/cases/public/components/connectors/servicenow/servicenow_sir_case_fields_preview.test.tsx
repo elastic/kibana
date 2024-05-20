@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
+import { screen } from '@testing-library/react';
 
+import { connector, choices } from '../mock';
+import { useGetChoices } from './use_get_choices';
+import FieldsPreview from './servicenow_sir_case_fields_preview';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import { createQueryWithMarkup } from '../../../common/test_utils';
-import { choices, connector } from '../mock';
-import FieldsPreview from './servicenow_sir_case_fields_preview';
-import { useGetChoices } from './use_get_choices';
 
 jest.mock('./use_get_choices');
 

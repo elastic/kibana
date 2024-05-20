@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ManagementAppLocator } from '@kbn/management-plugin/common';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { PLUGIN } from '../common/constants';
 
 export const LICENSE_MANAGEMENT_LOCATOR_ID = 'LICENSE_MANAGEMENT_LOCATOR';

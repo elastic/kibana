@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactElement } from 'react';
 import React from 'react';
-import type { RightPanelPaths } from '.';
-import { JsonTab } from './tabs/json_tab';
-import { OverviewTab } from './tabs/overview_tab';
-import { TableTab } from './tabs/table_tab';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   JSON_TAB_TEST_ID,
   OVERVIEW_TAB_LABEL_TEST_ID,
   OVERVIEW_TAB_TEST_ID,
   TABLE_TAB_TEST_ID,
 } from './test_ids';
+import type { RightPanelPaths } from '.';
+import { JsonTab } from './tabs/json_tab';
+import { OverviewTab } from './tabs/overview_tab';
+import { TableTab } from './tabs/table_tab';
 
 export interface RightPanelTabType {
   id: RightPanelPaths;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ReactWrapper, shallow } from 'enzyme';
 import React from 'react';
+import { ReactWrapper, shallow } from 'enzyme';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { mountWithTheme } from '../../../utils/test_helpers';
-import stacktracesMock from './__fixtures__/stacktraces.json';
 import { Stackframe as StackframeComponent } from './stackframe';
+import stacktracesMock from './__fixtures__/stacktraces.json';
 
 describe('Stackframe', () => {
   describe('when stackframe has source lines', () => {

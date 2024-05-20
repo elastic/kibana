@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { set } from '@kbn/safer-lodash-set';
+import { pickBy, get, isEmpty, isString, unset, intersection } from 'lodash';
+import satisfies from 'semver/functions/satisfies';
 import {
-  EuiAccordion,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiSpacer,
+  EuiCallOut,
+  EuiLink,
+  EuiAccordion,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { set } from '@kbn/safer-lodash-set';
-import { produce } from 'immer';
-import { get, intersection, isEmpty, isString, pickBy, unset } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { produce } from 'immer';
+import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
-import satisfies from 'semver/functions/satisfies';
 
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
-import { PLUGIN_ID, agentPolicyRouteService, agentRouteService } from '@kbn/fleet-plugin/common';
+import { agentRouteService, agentPolicyRouteService, PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import type {
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
@@ -31,19 +31,19 @@ import type {
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { useKibana } from '../common/lib/kibana';
+import { NavigationButtons } from './navigation_buttons';
+import { DisabledCallout } from './disabled_callout';
+import { ConfigUploader } from './config_uploader';
 import type { ValidationFunc } from '../shared_imports';
 import {
-  FIELD_TYPES,
-  Field,
   Form,
-  fieldValidators,
-  getUseField,
   useForm,
   useFormData,
+  Field,
+  getUseField,
+  FIELD_TYPES,
+  fieldValidators,
 } from '../shared_imports';
-import { ConfigUploader } from './config_uploader';
-import { DisabledCallout } from './disabled_callout';
-import { NavigationButtons } from './navigation_buttons';
 import { useFetchStatus } from './use_fetch_status';
 
 // https://github.com/elastic/beats/blob/master/x-pack/osquerybeat/internal/osqd/args.go#L57

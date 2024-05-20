@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { type TypeOf } from '@kbn/config-schema';
-import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 import { CspFinding } from './schemas/csp_finding';
+import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 
 import { getComplianceDashboardSchema } from './schemas/stats';
 import type { CspBenchmarkRuleMetadata } from './types/latest';
@@ -146,8 +146,8 @@ export type BenchmarkName = CspBenchmarkRuleMetadata['benchmark']['name'];
 export type RuleSection = CspBenchmarkRuleMetadata['section'];
 
 // Fleet Integration types
-export type PostureInput = (typeof SUPPORTED_CLOUDBEAT_INPUTS)[number];
-export type CloudSecurityPolicyTemplate = (typeof SUPPORTED_POLICY_TEMPLATES)[number];
+export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
+export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
 
 export type GetComplianceDashboardRequest = TypeOf<typeof getComplianceDashboardSchema>;

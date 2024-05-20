@@ -14,34 +14,34 @@ import {
   runtimeResolverMock,
 } from './plugins_service.test.mocks';
 
+import { type PluginName, type DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { coreContextMock } from '@kbn/core-base-browser-mocks';
-import { type DiscoveredPlugin, type PluginName, PluginType } from '@kbn/core-base-common';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
 
 import {
   PluginsService,
-  type PluginsServiceSetupDeps,
   type PluginsServiceStartDeps,
+  type PluginsServiceSetupDeps,
 } from './plugins_service';
 
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
-import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
-import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
-import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
-import { securityServiceMock } from '@kbn/core-security-browser-mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
+import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;

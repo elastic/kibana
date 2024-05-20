@@ -26,7 +26,9 @@
         "tags": [],
         "label": "addIdToItem",
         "description": [],
-        "signature": ["<T>(item: NotArray<T>) => T"],
+        "signature": [
+          "<T>(item: NotArray<T>) => T"
+        ],
         "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +40,9 @@
             "tags": [],
             "label": "item",
             "description": [],
-            "signature": ["NotArray<T>"],
+            "signature": [
+              "NotArray<T>"
+            ],
             "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -57,7 +61,9 @@
         "description": [
           "\ncompute if esqlQuery is aggregating/grouping, i.e. using STATS...BY command"
         ],
-        "signature": ["(esqlQuery: string) => boolean"],
+        "signature": [
+          "(esqlQuery: string) => boolean"
+        ],
         "path": "packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -69,14 +75,18 @@
             "tags": [],
             "label": "esqlQuery",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["boolean"],
+        "returnComment": [
+          "boolean"
+        ],
         "initialIsOpen": false
       },
       {
@@ -85,8 +95,12 @@
         "type": "Function",
         "tags": [],
         "label": "getIndexListFromEsqlQuery",
-        "description": ["\nparses ES|QL query and returns array of indices"],
-        "signature": ["(query: string | undefined) => string[]"],
+        "description": [
+          "\nparses ES|QL query and returns array of indices"
+        ],
+        "signature": [
+          "(query: string | undefined) => string[]"
+        ],
         "path": "packages/kbn-securitysolution-utils/src/esql/get_index_list_from_esql_query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -98,7 +112,9 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-securitysolution-utils/src/esql/get_index_list_from_esql_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -117,7 +133,9 @@
         "description": [
           "\ntransforms sting of indices, separated by commas to array\nindex*, index2* => [index*, index2*]"
         ],
-        "signature": ["(indexString: string | undefined) => string[]"],
+        "signature": [
+          "(indexString: string | undefined) => string[]"
+        ],
         "path": "packages/kbn-securitysolution-utils/src/esql/get_index_list_from_esql_query.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -129,7 +147,9 @@
             "tags": [],
             "label": "indexString",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-securitysolution-utils/src/esql/get_index_list_from_esql_query.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -207,7 +227,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"wildcard\" | \"match\" | \"match_any\""],
+                "signature": [
+                  "\"wildcard\" | \"match\" | \"match_any\""
+                ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -334,7 +356,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"wildcard\" | \"match\" | \"match_any\""],
+                "signature": [
+                  "\"wildcard\" | \"match\" | \"match_any\""
+                ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -362,7 +386,9 @@
         "type": "Function",
         "tags": [],
         "label": "removeIdFromItem",
-        "description": ["\nThis is to reverse the id you added to your arrays for ReactJS keys."],
+        "description": [
+          "\nThis is to reverse the id you added to your arrays for ReactJS keys."
+        ],
         "signature": [
           "<T>(item: NotArray<T>) => T | Pick<T & { id?: string | undefined; }, Exclude<keyof T, \"id\">>"
         ],
@@ -376,8 +402,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "item",
-            "description": ["The item to remove the id from."],
-            "signature": ["NotArray<T>"],
+            "description": [
+              "The item to remove the id from."
+            ],
+            "signature": [
+              "NotArray<T>"
+            ],
             "path": "packages/kbn-securitysolution-utils/src/add_remove_id_to_item/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -394,7 +424,9 @@
         "tags": [],
         "label": "transformDataToNdjson",
         "description": [],
-        "signature": ["(data: unknown[]) => string"],
+        "signature": [
+          "(data: unknown[]) => string"
+        ],
         "path": "packages/kbn-securitysolution-utils/src/transform_data_to_ndjson/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -406,7 +438,9 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": ["unknown[]"],
+            "signature": [
+              "unknown[]"
+            ],
             "path": "packages/kbn-securitysolution-utils/src/transform_data_to_ndjson/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -518,7 +552,9 @@
                 "tags": [],
                 "label": "operator",
                 "description": [],
-                "signature": ["\"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\""],
+                "signature": [
+                  "\"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\""
+                ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -580,7 +616,9 @@
                 "tags": [],
                 "label": "field",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -612,7 +650,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -630,7 +670,9 @@
         "tags": [],
         "label": "validateWildcardInput",
         "description": [],
-        "signature": ["(value?: string | undefined) => string | undefined"],
+        "signature": [
+          "(value?: string | undefined) => string | undefined"
+        ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -642,7 +684,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -745,7 +789,9 @@
         "tags": [],
         "label": "EntryTypes",
         "description": [],
-        "signature": ["\"wildcard\" | \"match\" | \"match_any\""],
+        "signature": [
+          "\"wildcard\" | \"match\" | \"match_any\""
+        ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -807,7 +853,9 @@
         "tags": [],
         "label": "TrustedAppEntryTypes",
         "description": [],
-        "signature": ["\"wildcard\" | \"match\""],
+        "signature": [
+          "\"wildcard\" | \"match\""
+        ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
         "trackAdoption": false,

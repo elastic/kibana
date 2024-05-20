@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanel } from '@elastic/eui';
-import { Story } from '@storybook/react';
 import React from 'react';
+import { Story } from '@storybook/react';
+import { EuiContextMenuPanel } from '@elastic/eui';
 import {
   CopyToClipboardButtonEmpty,
   CopyToClipboardButtonIcon,

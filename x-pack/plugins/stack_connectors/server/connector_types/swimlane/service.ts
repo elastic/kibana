@@ -8,14 +8,13 @@
 import { Logger } from '@kbn/logging';
 import axios from 'axios';
 
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import {
   getErrorMessage,
   request,
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { getBodyForEventAction } from './helpers';
-import * as i18n from './translations';
 import {
   CreateCommentParams,
   CreateRecordParams,
@@ -29,6 +28,7 @@ import {
   SwimlaneSecretConfigurationType,
   UpdateRecordParams,
 } from './types';
+import * as i18n from './translations';
 
 const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
   if (errorResponse == null) {

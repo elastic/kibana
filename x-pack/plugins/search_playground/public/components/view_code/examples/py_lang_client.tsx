@@ -7,8 +7,8 @@
 
 import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
-import { Prompt } from '../../../../common/prompt';
 import { ChatForm } from '../../../types';
+import { Prompt } from '../../../../common/prompt';
 import { getESQuery } from './utils';
 
 export const PY_LANG_CLIENT = (formValues: ChatForm, clientDetails: string) => (

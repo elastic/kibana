@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
-import { cloneDeep, set } from 'lodash';
-import React from 'react';
-import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
-import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { exactMatchText, expectIsViewOnly, setMalwareMode } from '../mocks';
+import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import React from 'react';
+import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
+import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import type { ProtectionSettingCardSwitchProps } from './protection_setting_card_switch';
 import { ProtectionSettingCardSwitch } from './protection_setting_card_switch';
+import { exactMatchText, expectIsViewOnly, setMalwareMode } from '../mocks';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import { cloneDeep, set } from 'lodash';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../../../common/hooks/use_license');
 

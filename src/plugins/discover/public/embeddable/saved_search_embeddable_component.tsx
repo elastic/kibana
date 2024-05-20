@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import React from 'react';
-import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
-import { DiscoverDocTableEmbeddable } from '../components/doc_table/create_doc_table_embeddable';
 import { DiscoverGridEmbeddable } from './saved_search_grid';
+import { DiscoverDocTableEmbeddable } from '../components/doc_table/create_doc_table_embeddable';
+import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
 import type { EmbeddableComponentSearchProps } from './types';
 
 interface SavedSearchEmbeddableComponentProps {

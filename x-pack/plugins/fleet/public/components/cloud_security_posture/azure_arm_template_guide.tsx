@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCodeBlock, EuiDescriptionList, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 import type { AgentPolicy } from '../../../common';
 import { useFleetServerHostsForPolicy } from '../../hooks';

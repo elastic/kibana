@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCard, EuiIcon, EuiSpacer } from '@elastic/eui';
-import styled from '@emotion/styled';
-import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
+import { EuiCard, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import styled from '@emotion/styled';
 
 const CARD_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.endpointProtectionUpdates.cardTitle',

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ddToMGRS, ddToUTM, mgrsToDD, utmToDD } from './geo_utils';
+import { ddToMGRS, mgrsToDD, ddToUTM, utmToDD } from './geo_utils';
 
 describe('MGRS', () => {
   test('ddToMGRS should convert lat lon to MGRS', () => {

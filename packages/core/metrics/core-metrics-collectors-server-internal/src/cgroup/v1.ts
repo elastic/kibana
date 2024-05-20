@@ -1,4 +1,3 @@
-import { join as joinPath } from 'path';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { join as joinPath } from 'path';
  * Side Public License, v 1.
  */
 import fs from 'fs/promises';
+import { join as joinPath } from 'path';
 import type { OsCgroupMetrics } from './types';
 
 const CPU_STATS_FILE = 'cpu.stat';

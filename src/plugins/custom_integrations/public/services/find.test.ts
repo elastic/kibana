@@ -13,8 +13,8 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegration } from '../../common';
 import { filterCustomIntegrations } from './find';
+import { CustomIntegration } from '../../common';
 
 describe('Custom Integrations Find Service', () => {
   const integrations: CustomIntegration[] = [

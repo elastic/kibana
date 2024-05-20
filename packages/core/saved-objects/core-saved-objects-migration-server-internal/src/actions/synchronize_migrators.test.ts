@@ -1,4 +1,3 @@
-import { type WaitGroup, waitGroup as createWaitGroup } from '../kibana_migrator_utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { type WaitGroup, waitGroup as createWaitGroup } from '../kibana_migrator
  * Side Public License, v 1.
  */
 import { synchronizeMigrators } from './synchronize_migrators';
+import { type WaitGroup, waitGroup as createWaitGroup } from '../kibana_migrator_utils';
 
 describe('synchronizeMigrators', () => {
   let waitGroups: Array<WaitGroup<void>>;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 import { ExplorerNoInfluencersFound } from './explorer_no_influencers_found';
 
 describe('ExplorerNoInfluencersFound', () => {

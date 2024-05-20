@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { LAYER_WIZARD_CATEGORY } from '@kbn/maps-plugin/common';
 import type { LayerWizard, RenderWizardArguments } from '@kbn/maps-plugin/public';
-import React from 'react';
 import { PLUGIN_ID } from '../../common';
 import { CustomRasterEditor } from './custom_raster_editor';
 

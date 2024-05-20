@@ -9,10 +9,10 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import {
-  mockDeleteLegacyUrlAliases,
-  mockGetCurrentTime,
-  mockGetSearchDsl,
   pointInTimeFinderMock,
+  mockGetCurrentTime,
+  mockDeleteLegacyUrlAliases,
+  mockGetSearchDsl,
 } from '../repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -20,27 +20,27 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { loggerMock } from '@kbn/logging-mocks';
-import { kibanaMigratorMock } from '../../mocks';
 import { SavedObjectsRepository } from '../repository';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { kibanaMigratorMock } from '../../mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
-  HIDDEN_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
-  MULTI_NAMESPACE_TYPE,
   NAMESPACE_AGNOSTIC_TYPE,
-  createBadRequestErrorPayload,
-  createDocumentMigrator,
-  createGenericNotFoundErrorPayload,
+  MULTI_NAMESPACE_TYPE,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  HIDDEN_TYPE,
+  mockVersionProps,
+  mockTimestamp,
+  mappings,
   createRegistry,
+  createDocumentMigrator,
+  getMockGetResponse,
   createSpySerializer,
   deleteSuccess,
-  getMockGetResponse,
-  mappings,
-  mockTimestamp,
-  mockVersionProps,
+  createBadRequestErrorPayload,
+  createGenericNotFoundErrorPayload,
 } from '../../test_helpers/repository.test.common';
 
 describe('#delete', () => {

@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import path from 'path';
 import { i18n } from '@kbn/i18n';
+import path from 'path';
 import {
   ContentText,
   DynamicContent,
-  PredefinedPageSize,
   StyleDictionary,
   TDocumentDefinitions,
+  PredefinedPageSize,
 } from 'pdfmake/interfaces';
+import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
+import { getFont } from './get_font';
+import { TemplateLayout } from './types';
 import {
   headingFontSize,
   headingMarginBottom,
@@ -24,9 +27,6 @@ import {
   subheadingFontSize,
   subheadingMarginBottom,
 } from './constants';
-import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
-import { getFont } from './get_font';
-import { TemplateLayout } from './types';
 
 export function getTemplate(
   layout: TemplateLayout,

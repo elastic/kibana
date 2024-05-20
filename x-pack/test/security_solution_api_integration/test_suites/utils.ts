@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { JsonObject } from '@kbn/utility-types';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
 export async function getSavedObjectFromES<T>(
   es: Client,

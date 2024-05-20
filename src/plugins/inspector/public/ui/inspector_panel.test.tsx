@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { InspectorPanel } from './inspector_panel';
+import { InspectorViewDescription } from '../types';
+import { Adapters } from '../../common';
 import type { ApplicationStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
-import { ThemeServiceStart } from '@kbn/core/public';
-import { applicationServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import React from 'react';
-import { Adapters } from '../../common';
-import { InspectorViewDescription } from '../types';
-import { InspectorPanel } from './inspector_panel';
+import { applicationServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { ThemeServiceStart } from '@kbn/core/public';
 
 describe('InspectorPanel', () => {
   let adapters: Adapters;

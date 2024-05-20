@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Transform } from 'stream';
 import { ApmFields } from '@kbn/apm-synthtrace-client';
+import { Transform } from 'stream';
 import { dedot } from '@kbn/apm-synthtrace-client';
 
 export function getDedotTransform(keepFlattenedFields: boolean = false) {

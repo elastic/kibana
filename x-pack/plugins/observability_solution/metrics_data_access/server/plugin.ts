@@ -7,16 +7,16 @@
 
 import {
   CoreSetup,
-  Plugin,
   PluginInitializerContext,
+  Plugin,
   RequestHandlerContext,
 } from '@kbn/core/server';
-import { MetricsDataClient } from './client';
-import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
-import { initMetricIndicesRoute } from './routes/metric_indices';
-import { initMetricExplorerRoute } from './routes/metrics_explorer';
-import { metricsDataSourceSavedObjectType } from './saved_objects/metrics_data_source';
 import { MetricsDataPluginSetup, MetricsDataPluginStartDeps } from './types';
+import { MetricsDataClient } from './client';
+import { metricsDataSourceSavedObjectType } from './saved_objects/metrics_data_source';
+import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
+import { initMetricExplorerRoute } from './routes/metrics_explorer';
+import { initMetricIndicesRoute } from './routes/metric_indices';
 
 export class MetricsDataPlugin implements Plugin<MetricsDataPluginSetup, {}, {}, {}> {
   private metricsClient: MetricsDataClient | null = null;

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   type ElasticsearchClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
 import { createEsFileClient } from './create_es_file_client';
-import { FileDocument } from './file_metadata_client/adapters/es_index';
 import { FileClient } from './types';
+import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FileDocument } from './file_metadata_client/adapters/es_index';
 
 describe('When initializing file client via createESFileClient()', () => {
   let esClient: ElasticsearchClientMock;

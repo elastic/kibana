@@ -57,7 +57,9 @@
         "tags": [],
         "label": "PLUGIN_ICON",
         "description": [],
-        "signature": ["\"logoKibana\""],
+        "signature": [
+          "\"logoKibana\""
+        ],
         "path": "src/plugins/kibana_overview/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -70,7 +72,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"kibanaOverview\""],
+        "signature": [
+          "\"kibanaOverview\""
+        ],
         "path": "src/plugins/kibana_overview/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -83,7 +87,9 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": ["\"Overview\""],
+        "signature": [
+          "\"Overview\""
+        ],
         "path": "src/plugins/kibana_overview/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -96,7 +102,9 @@
         "tags": [],
         "label": "PLUGIN_PATH",
         "description": [],
-        "signature": ["\"/app/kibana_overview\""],
+        "signature": [
+          "\"/app/kibana_overview\""
+        ],
         "path": "src/plugins/kibana_overview/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

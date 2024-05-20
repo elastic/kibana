@@ -10,13 +10,13 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiContextMenu,
-  EuiContextMenuProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiContextMenu,
+  EuiContextMenuProps,
+  EuiIcon,
   EuiText,
 } from '@elastic/eui';
 

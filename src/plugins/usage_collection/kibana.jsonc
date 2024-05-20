@@ -6,8 +6,14 @@
     "id": "usageCollection",
     "server": true,
     "browser": true,
-    "configPath": ["usageCollection"],
-    "requiredPlugins": ["screenshotMode"],
-    "requiredBundles": ["kibanaUtils"]
+    "configPath": [
+      "usageCollection"
+    ],
+    "requiredPlugins": [
+      "screenshotMode"
+    ],
+    "requiredBundles": [
+      "kibanaUtils"
+    ]
   }
 }

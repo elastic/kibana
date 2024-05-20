@@ -11,12 +11,12 @@ import { Globals } from '../../static_globals';
 import { Cluster, LegacyRequest } from '../../types';
 import { getIndexPatterns } from '../cluster/get_index_patterns';
 import { EnterpriseSearchMetric } from '../metrics';
+import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import {
   entSearchAggFilterPath,
   entSearchAggResponseHandler,
   entSearchUuidsAgg,
 } from './_enterprise_search_stats';
-import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 
 function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
   const stats = entSearchAggResponseHandler(response);

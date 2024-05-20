@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { get } from 'lodash';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Capabilities,
-  DocLinksStart,
+  OverlayStart,
+  NotificationsStart,
+  ScopedHistory,
   HttpSetup,
   IUiSettingsClient,
-  NotificationsStart,
-  OverlayStart,
-  ScopedHistory,
+  DocLinksStart,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { get } from 'lodash';
-import React, { Component } from 'react';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { Header, Inspect, NotFoundErrors } from './components';
 import { bulkDeleteObjects, bulkGetObjects } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
-import { Header, Inspect, NotFoundErrors } from './components';
 import './saved_object_view.scss';
 
 export interface SavedObjectEditionProps {

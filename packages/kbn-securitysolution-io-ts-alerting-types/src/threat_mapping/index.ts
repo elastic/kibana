@@ -8,12 +8,12 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+import * as t from 'io-ts';
 import {
   NonEmptyArray,
   NonEmptyString,
   PositiveIntegerGreaterThanZero,
 } from '@kbn/securitysolution-io-ts-types';
-import * as t from 'io-ts';
 import { language } from '../language';
 
 export const threat_query = t.string;

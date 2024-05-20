@@ -20,23 +20,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  ANALYSIS_CONFIG_TYPE,
-  type DataFrameAnalyticsConfig,
-  type DataFrameTaskStateType,
   getDependentVar,
   getPredictionFieldName,
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+  ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import type { Eval } from '../../../../common';
-import { getValuesFromResponse, loadDocsCount, loadEvalData } from '../../../../common';
+import { getValuesFromResponse, loadEvalData, loadDocsCount } from '../../../../common';
 import {
-  EMPTY_STAT,
-  REGRESSION_STATS,
-  isRegressionEvaluateResponse,
   isResultsSearchBoolQuery,
+  isRegressionEvaluateResponse,
+  REGRESSION_STATS,
+  EMPTY_STAT,
 } from '../../../../common/analytics';
 
 import { ExpandableSection } from '../expandable_section';

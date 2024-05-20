@@ -9,7 +9,7 @@
 import * as Rx from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 
-import { debounceTimeBuffer, maybe, maybeMap, pipeClosure } from './rxjs_helpers';
+import { pipeClosure, debounceTimeBuffer, maybeMap, maybe } from './rxjs_helpers';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 

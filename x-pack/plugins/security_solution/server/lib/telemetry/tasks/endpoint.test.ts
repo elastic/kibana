@@ -6,13 +6,13 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { createTelemetryEndpointTaskConfig } from './endpoint';
 import {
-  createMockTaskMetrics,
   createMockTelemetryEventsSender,
   createMockTelemetryReceiver,
+  createMockTaskMetrics,
 } from '../__mocks__';
-import { createTelemetryEndpointTaskConfig } from './endpoint';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
 const telemetryUsageCounter = usageCountersServiceSetup.createUsageCounter(

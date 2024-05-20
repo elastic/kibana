@@ -6,15 +6,15 @@
  */
 
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { HttpSetup } from '@kbn/core/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
+import { useKibana } from '../../../../../utils/kibana_react';
 import { paths } from '../../../../../../common/locators/paths';
 import { useHasData } from '../../../../../hooks/use_has_data';
-import { useKibana } from '../../../../../utils/kibana_react';
 import { EmptySection, Section } from './empty_section';
 
 export function EmptySections() {

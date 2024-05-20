@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { defaults } from 'lodash';
 import {
   createRootWithCorePlugins,
   createTestServers,
   request,
 } from '@kbn/core-test-helpers-kbn-server';
-import { defaults } from 'lodash';
 import pRetry from 'p-retry';
 import { FileJSON } from '../../common';
 import { getFileKindsRegistry } from '../../common/file_kinds_registry';

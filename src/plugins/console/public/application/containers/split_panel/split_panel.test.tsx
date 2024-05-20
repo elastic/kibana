@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import React from 'react';
 import { spy } from 'sinon';
 
 import { Panel } from './panel';

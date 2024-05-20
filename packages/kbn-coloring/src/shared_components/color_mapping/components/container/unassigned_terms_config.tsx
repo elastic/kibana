@@ -15,19 +15,19 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { ColorMappingInputData } from '../../categorical_color_mapping';
-import { ColorMapping } from '../../config';
+import { css } from '@emotion/react';
+import { updateSpecialAssignmentColor } from '../../state/color_mapping';
+import { getPalette, NeutralPalette } from '../../palettes';
 import {
   DEFAULT_NEUTRAL_PALETTE_INDEX,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '../../config/default_color_mapping';
-import { NeutralPalette, getPalette } from '../../palettes';
-import { updateSpecialAssignmentColor } from '../../state/color_mapping';
-import { selectColorMode, selectPalette, selectSpecialAssignments } from '../../state/selectors';
 import { SpecialAssignment } from '../assignment/special_assignment';
+import { ColorMapping } from '../../config';
+import { selectColorMode, selectPalette, selectSpecialAssignments } from '../../state/selectors';
+import { ColorMappingInputData } from '../../categorical_color_mapping';
 
 export function UnassignedTermsConfig({
   palettes,

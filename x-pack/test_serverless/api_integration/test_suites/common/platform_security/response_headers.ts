@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import cspParser from 'content-security-policy-parser';
 import expect from 'expect';
+import cspParser from 'content-security-policy-parser';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

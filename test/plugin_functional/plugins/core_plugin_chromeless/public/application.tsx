@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageSection,
-  EuiTitle,
-} from '@elastic/eui';
-import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageSection,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { AppMountParameters } from '@kbn/core/public';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect, EuiText } from '@elastic/eui';
 import * as React from 'react';
+import { EuiSuperSelect, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { FancySelectOption } from './types';
 
 export interface FancySelectProps {

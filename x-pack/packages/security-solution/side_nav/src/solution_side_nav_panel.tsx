@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -24,31 +25,30 @@ import {
   useEuiTheme,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  type AccordionLinkCategory,
-  type LinkCategories,
-  type SeparatorLinkCategory,
-  type TitleLinkCategory,
   isAccordionLinkCategory,
-  isSeparatorLinkCategory,
   isTitleLinkCategory,
+  isSeparatorLinkCategory,
+  type LinkCategories,
+  type TitleLinkCategory,
+  type AccordionLinkCategory,
+  type SeparatorLinkCategory,
 } from '@kbn/security-solution-navigation';
-import classNames from 'classnames';
-import React, { useCallback, useMemo } from 'react';
+import type { SolutionSideNavItem } from './types';
 import { BetaBadge } from './beta_badge';
-import {
-  SolutionSideNavCategoryAccordionStyles,
-  SolutionSideNavCategoryTitleStyles,
-  SolutionSideNavPanelLinksGroupStyles,
-  SolutionSideNavPanelStyles,
-  SolutionSideNavTitleStyles,
-  accordionButtonClassName,
-  panelClassName,
-} from './solution_side_nav_panel.styles';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { useTelemetryContext } from './telemetry/telemetry_context';
-import type { SolutionSideNavItem } from './types';
+import {
+  SolutionSideNavPanelStyles,
+  SolutionSideNavCategoryTitleStyles,
+  SolutionSideNavTitleStyles,
+  SolutionSideNavCategoryAccordionStyles,
+  SolutionSideNavPanelLinksGroupStyles,
+  panelClassName,
+  accordionButtonClassName,
+} from './solution_side_nav_panel.styles';
 
 export interface SolutionSideNavPanelContentProps {
   title: string;

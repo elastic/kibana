@@ -5,19 +5,19 @@
  * 2.0.
  */
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import {
-  loggingSystemMock,
-  savedObjectsClientMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
 import {
   MaintenanceWindowClientFactory,
   MaintenanceWindowClientFactoryOpts,
 } from './maintenance_window_client_factory';
+import {
+  savedObjectsClientMock,
+  savedObjectsServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
 
 jest.mock('./maintenance_window_client');
 

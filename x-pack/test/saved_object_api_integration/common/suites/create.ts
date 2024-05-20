@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
+import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
 import {
   expectResponses,
-  getRedactedNamespaces,
-  getTestTitle,
   getUrlPrefix,
+  getTestTitle,
+  getRedactedNamespaces,
 } from '../lib/saved_object_test_utils';
-import { ALL_SPACES_ID, SPACES } from '../lib/spaces';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
 
 const {

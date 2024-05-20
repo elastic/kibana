@@ -6,15 +6,15 @@
  */
 
 import { IdFormat } from '../../../common/http_api/latest';
-import { getJobId, logEntryRateJobType } from '../../../common/log_analysis';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import type { MlSystem } from '../../types';
 import {
-  CompositeTimestampPartitionKey,
-  LogRateModelPlotBucket,
-  createLogEntryRateQuery,
   logRateModelPlotResponseRT,
+  createLogEntryRateQuery,
+  LogRateModelPlotBucket,
+  CompositeTimestampPartitionKey,
 } from './queries';
+import { getJobId, logEntryRateJobType } from '../../../common/log_analysis';
+import type { MlSystem } from '../../types';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 

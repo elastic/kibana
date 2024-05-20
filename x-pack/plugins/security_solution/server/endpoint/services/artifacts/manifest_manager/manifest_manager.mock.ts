@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
-import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
-import { createProductFeaturesServiceMock } from '../../../../lib/product_features_service/mocks';
-import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import {
   createPackagePolicyWithInitialManifestMock,
   createPackagePolicyWithManifestMock,
@@ -30,6 +27,9 @@ import {
 import { createEndpointArtifactClientMock, getManifestClientMock } from '../mocks';
 import type { ManifestManagerContext } from './manifest_manager';
 import { ManifestManager } from './manifest_manager';
+import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
+import { createProductFeaturesServiceMock } from '../../../../lib/product_features_service/mocks';
+import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
   data,

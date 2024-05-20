@@ -7,17 +7,17 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { HttpSetup } from '@kbn/core/public';
 import {
-  AsyncTestBedConfig,
-  TestBed,
-  findTestSubject,
   registerTestBed,
+  findTestSubject,
+  TestBed,
+  AsyncTestBedConfig,
 } from '@kbn/test-jest-helpers';
+import { HttpSetup } from '@kbn/core/public';
 
-import { ROUTES } from '../../../common/constants';
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { WatchStatusPage } from '../../../public/application/sections/watch_status_page';
+import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './jest_constants';
 import { WithAppDependencies } from './setup_environment';
 

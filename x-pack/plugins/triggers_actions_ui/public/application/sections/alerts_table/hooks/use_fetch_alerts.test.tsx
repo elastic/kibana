@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { useState } from 'react';
-import { of, throwError } from 'rxjs';
 import sinon from 'sinon';
+import { of, throwError } from 'rxjs';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { useFetchAlerts, FetchAlertsArgs, FetchAlertResp } from './use_fetch_alerts';
 import { useKibana } from '../../../../common/lib/kibana';
-import { FetchAlertResp, FetchAlertsArgs, useFetchAlerts } from './use_fetch_alerts';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { useState } from 'react';
 
 jest.mock('../../../../common/lib/kibana');
 

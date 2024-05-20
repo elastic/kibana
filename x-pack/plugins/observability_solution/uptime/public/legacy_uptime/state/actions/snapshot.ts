@@ -6,8 +6,8 @@
  */
 
 import { Snapshot } from '../../../../common/runtime_types';
-import { SnapShotQueryParams } from '../api';
 import { createAsyncAction } from './utils';
+import { SnapShotQueryParams } from '../api';
 
 export const getSnapshotCountAction = createAsyncAction<SnapShotQueryParams, Snapshot>(
   'GET_SNAPSHOT_COUNT'

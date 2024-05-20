@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { ImportExceptionListItemSchema, importExceptionListItemSchema } from '.';
-import { getCommentsArrayMock } from '../../common/comment/index.mock';
+import { importExceptionListItemSchema, ImportExceptionListItemSchema } from '.';
 import {
   getImportExceptionsListItemSchemaDecodedMock,
   getImportExceptionsListItemSchemaMock,
 } from './index.mock';
+import { getCommentsArrayMock } from '../../common/comment/index.mock';
 
 describe('import_list_item_schema', () => {
   test('it should validate a typical item request', () => {

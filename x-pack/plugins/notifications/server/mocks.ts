@@ -6,9 +6,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsPlugin } from './plugin';
 import type { EmailService } from './services';
 import type { NotificationsServerStart } from './types';
+import type { NotificationsPlugin } from './plugin';
 
 const emailServiceMock: jest.Mocked<EmailService> = {
   sendPlainTextEmail: jest.fn(),

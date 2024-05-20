@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Entity } from '../entity';
-import { AgentConfig } from './agent_config';
 import { AgentConfigFields } from './agent_config_fields';
+import { AgentConfig } from './agent_config';
+import { Entity } from '../entity';
 
 export class Observer extends Entity<AgentConfigFields> {
   agentConfig() {

@@ -7,13 +7,13 @@
 
 import type { MouseEvent } from 'react';
 
-import { EuiButtonEmpty, EuiPopover, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import * as React from 'react';
+import { EuiButtonEmpty, EuiPopover, EuiText } from '@elastic/eui';
 import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { JourneyStep } from '../../../../../common/runtime_types';
-import { microToSec } from '../../../lib/formatting';
 import { StepFieldTrend } from './step_field_trend';
+import { microToSec } from '../../../lib/formatting';
 
 interface Props {
   showStepDurationTrend?: boolean;

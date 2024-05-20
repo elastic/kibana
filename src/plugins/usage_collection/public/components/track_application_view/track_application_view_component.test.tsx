@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { IApplicationUsageTracker } from '../../plugin';
 import { TrackApplicationViewComponent } from './track_application_view_component';
+import { IApplicationUsageTracker } from '../../plugin';
+import { fireEvent, render } from '@testing-library/react';
 
 describe('TrackApplicationViewComponent', () => {
   test('it renders the internal component even when no tracker is provided', () => {

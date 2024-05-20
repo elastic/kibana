@@ -5,25 +5,26 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
+  EuiInMemoryTable,
   EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiIconTip,
-  EuiInMemoryTable,
-  EuiLink,
   EuiText,
+  EuiIcon,
   EuiToolTip,
+  EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
 
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
 import { pagePathGetters } from '../../../../../../../constants';
+import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../types';
 import {
   EuiButtonWithTooltip,
   PackageIcon,
@@ -31,13 +32,12 @@ import {
 } from '../../../../../components';
 import {
   useAuthz,
-  useIsPackagePolicyUpgradable,
   useLink,
+  useIsPackagePolicyUpgradable,
   usePermissionCheck,
   useStartServices,
 } from '../../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
-import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../types';
 
 interface Props {
   packagePolicies: PackagePolicy[];

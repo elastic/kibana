@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { SavedObjectAttribute, SavedObjectsFindResult } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import type { SavedObjectsFindResult, SavedObjectAttribute } from '@kbn/core/server';
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { Rule } from '../../../types';
 
 import {
+  legacyGetBulkRuleActionsSavedObject,
   LegacyActionsObj,
   formatLegacyActions,
-  legacyGetBulkRuleActionsSavedObject,
 } from './format_legacy_actions';
 import { legacyRuleActionsSavedObjectType } from './types';
 

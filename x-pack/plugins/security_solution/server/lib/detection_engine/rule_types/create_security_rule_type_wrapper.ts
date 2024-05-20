@@ -5,47 +5,47 @@
  * 2.0.
  */
 
-import agent from 'elastic-apm-node';
 import { isEmpty } from 'lodash';
+import agent from 'elastic-apm-node';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
-import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
-import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
-import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
-import { withSecuritySpan } from '../../../utils/with_security_span';
-import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
-// eslint-disable-next-line no-restricted-imports
-import { getNotificationResultsLink } from '../rule_actions_legacy';
-// eslint-disable-next-line no-restricted-imports
-import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
-import { truncateList } from '../rule_monitoring';
-import { TIMESTAMP_RUNTIME_FIELD } from './constants';
-import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
-import { extractReferences, injectReferences } from './saved_object_references';
-import type { CreateSecurityRuleTypeWrapper } from './types';
-import { createResultObject } from './utils';
-import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
-import { getFieldsForWildcard } from './utils/get_fields_for_wildcard';
-import { DataViewError, getInputIndex } from './utils/get_input_output_index';
-import { getListClient } from './utils/get_list_client';
+import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
   getRuleRangeTuples,
   hasReadIndexPrivileges,
   hasTimestampFields,
-  isEsqlParams,
   isMachineLearningParams,
+  isEsqlParams,
 } from './utils/utils';
+import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
+import type { CreateSecurityRuleTypeWrapper } from './types';
+import { getListClient } from './utils/get_list_client';
+// eslint-disable-next-line no-restricted-imports
+import { getNotificationResultsLink } from '../rule_actions_legacy';
+// eslint-disable-next-line no-restricted-imports
+import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
+import { createResultObject } from './utils';
+import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
+import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
+import { truncateList } from '../rule_monitoring';
+import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
+import { extractReferences, injectReferences } from './saved_object_references';
+import { withSecuritySpan } from '../../../utils/with_security_span';
+import { getInputIndex, DataViewError } from './utils/get_input_output_index';
+import { TIMESTAMP_RUNTIME_FIELD } from './constants';
+import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
+import { getFieldsForWildcard } from './utils/get_fields_for_wildcard';
+import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {

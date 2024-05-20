@@ -7,11 +7,11 @@
  */
 
 import type {
-  Refresh,
-  RefreshWithWaitFor,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Type,
+  Refresh,
+  RefreshWithWaitFor,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 // TODO: Replace these with kbn packaged versions once we have those available to us

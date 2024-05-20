@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { each, sortBy } from 'lodash';
+import { sortBy, each } from 'lodash';
 import moment from 'moment-timezone';
 
 import {

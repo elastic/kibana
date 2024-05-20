@@ -9,7 +9,7 @@ import moment from 'moment';
 
 import { ACTION_STATES } from '../../../common/constants';
 import { ActionStatusModelEs } from '../../../common/types';
-import { buildClientActionStatusModel, buildServerActionStatusModel } from './action_status_model';
+import { buildServerActionStatusModel, buildClientActionStatusModel } from './action_status_model';
 
 describe('ActionStatusModel', () => {
   describe('buildServerActionStatusModel', () => {

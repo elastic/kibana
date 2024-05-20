@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { UserActionTypes } from '../../../../common/types/domain';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { addSeverityToCreateUserAction } from './severity';
 
 describe('severity migration', () => {

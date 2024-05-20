@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import { get, sortBy } from 'lodash';
+import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { get, sortBy } from 'lodash';
-import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { lastValueFrom } from 'rxjs';
 
 import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 
-import { parseDuration } from '@kbn/alerting-plugin/common';
-import { CodeEditor } from '@kbn/code-editor';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { RuleTypeParamsExpressionProps, getFields } from '@kbn/triggers-actions-ui-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
+import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
-  BUCKET_SELECTOR_FIELD,
   FieldOption,
   buildAggregation,
-  isCountAggregation,
-  isGroupAggregation,
   parseAggregationResults,
+  isGroupAggregation,
+  isCountAggregation,
+  BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { getComparatorScript } from '../../../../common';
-import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { Comparator } from '../../../../common/comparator_types';
+import { getComparatorScript } from '../../../../common';
+import { hasExpressionValidationErrors } from '../validation';
+import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
+import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
 import { convertRawRuntimeFieldtoFieldOption, useTriggerUiActionServices } from '../util';
-import { hasExpressionValidationErrors } from '../validation';
 
 const { useXJsonMode } = XJson;
 

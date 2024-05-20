@@ -11,13 +11,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { validateTaskEither } from '@kbn/securitysolution-io-ts-utils';
 import { toError, toPromise } from '@kbn/securitysolution-list-api';
-import { getIsoDateString } from './helpers';
 import { signalsMigrationSOClient } from './saved_objects_client';
 import type {
   SignalsMigrationSO,
   SignalsMigrationSOCreateAttributes,
 } from './saved_objects_schema';
 import { signalsMigrationSO, signalsMigrationSOCreateAttributes } from './saved_objects_schema';
+import { getIsoDateString } from './helpers';
 
 const generateAttributes = (username: string) => {
   const now = getIsoDateString();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getGroupFilters, getGroupQueries, getGroups } from './get_group';
+import { getGroupQueries, getGroupFilters, getGroups } from './get_group';
 
 describe('getGroup', () => {
   describe('getGroupQueries', () => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { find, map, partialRight, pick } from 'lodash';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { find, map, partialRight, pick } from 'lodash';
 
 import { run } from '@kbn/dev-cli-runner';
 

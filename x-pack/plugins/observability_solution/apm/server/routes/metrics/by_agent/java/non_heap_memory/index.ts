@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import { APMConfig } from '../../../../..';
-import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
+import { i18n } from '@kbn/i18n';
 import {
-  AGENT_NAME,
-  LABEL_TYPE,
-  METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_NON_HEAP_MEMORY_MAX,
+  METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
   METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED,
   METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT,
-  METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
   VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP,
+  LABEL_TYPE,
+  AGENT_NAME,
 } from '../../../../../../common/es_fields/apm';
-import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
-import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
+import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
+import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
+import { APMConfig } from '../../../../..';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
   nonHeapMemoryUsed: {

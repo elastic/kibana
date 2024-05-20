@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
-import { getInterval } from '../../get_interval';
 import { dateHistogram } from './date_histogram';
+import { getInterval } from '../../get_interval';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 describe('dateHistogram(req, panel, series)', () => {
   let panel;

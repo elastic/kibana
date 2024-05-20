@@ -9,12 +9,12 @@ jest.mock('axios', () => ({
   AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
 }));
 
+import axios from 'axios';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import { ProxySettings } from '@kbn/actions-plugin/server/types';
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import axios from 'axios';
 import { sendEmailGraphApi } from './send_email_graph_api';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;

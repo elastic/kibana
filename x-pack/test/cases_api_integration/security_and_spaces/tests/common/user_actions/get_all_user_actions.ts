@@ -7,32 +7,33 @@
 
 import expect from '@kbn/expect';
 
-import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api';
 import {
-  AttachmentType,
   Case,
-  CaseCustomFields,
   CaseSeverity,
   CaseStatuses,
-  ConnectorTypes,
-  CreateCaseUserAction,
-  CustomFieldTypes,
   UserCommentAttachmentPayload,
+  AttachmentType,
+  CreateCaseUserAction,
+  ConnectorTypes,
+  CustomFieldTypes,
+  CaseCustomFields,
 } from '@kbn/cases-plugin/common/types/domain';
+import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
-  createCase,
-  createComment,
-  createConfiguration,
   deleteAllCaseItems,
+  createCase,
+  updateCase,
+  superUserSpace1Auth,
   deleteCases,
+  createComment,
+  updateComment,
   deleteComment,
   extractWarningValueFromWarningHeader,
   getCaseUserActions,
+  createConfiguration,
   getConfigurationRequest,
-  superUserSpace1Auth,
-  updateCase,
-  updateComment,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -43,7 +44,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export

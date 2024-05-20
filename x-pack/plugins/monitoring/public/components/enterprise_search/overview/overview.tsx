@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiFlexGrid,
-  EuiFlexItem,
   EuiPage,
   EuiPageBody,
   EuiPageSection,
-  EuiPanel,
   EuiScreenReaderOnly,
+  EuiPanel,
   EuiSpacer,
+  EuiFlexGrid,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
 

@@ -1,5 +1,3 @@
-import { EuiLink, EuiPopover, EuiText, EuiTextColor, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +5,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from 'styled-components';
-import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
-import { CellActionsMode, SecurityCellActions, SecurityCellActionsTrigger } from '../cell_actions';
+import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
+import { MoreContainer } from '../../../timelines/components/field_renderers/field_renderers';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};

@@ -6,15 +6,15 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import semverCoerce from 'semver/functions/coerce';
 import semverGte from 'semver/functions/gte';
+import semverCoerce from 'semver/functions/coerce';
 
 import { FLEET_SERVER_SERVERS_INDEX, SO_SEARCH_LIMIT } from '../../constants';
-import { getAgentStatusById, getAgentsByKuery } from '../agents';
+import { getAgentsByKuery, getAgentStatusById } from '../agents';
 
-import { appContextService } from '..';
-import { agentPolicyService } from '../agent_policy';
 import { packagePolicyService } from '../package_policy';
+import { agentPolicyService } from '../agent_policy';
+import { appContextService } from '..';
 
 /**
  * Check if at least one fleet server is connected

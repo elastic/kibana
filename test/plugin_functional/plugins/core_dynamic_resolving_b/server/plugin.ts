@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 
 interface GenericSetupContract {
   someSetupAPI: () => string;

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { IAggConfig } from '@kbn/data-plugin/public';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { aggParamCommonPropsMock } from './test_utils';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import {
   AggregateValueProp,
   TopAggregateParamEditor,
   TopAggregateParamEditorProps,
 } from './top_aggregate';
+import { aggParamCommonPropsMock } from './test_utils';
+import { IAggConfig } from '@kbn/data-plugin/public';
 
 describe('TopAggregateParamEditor', () => {
   let agg: IAggConfig;

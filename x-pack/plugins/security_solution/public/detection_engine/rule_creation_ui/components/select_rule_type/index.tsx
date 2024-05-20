@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 import React, { useCallback, useMemo, memo } from 'react';
+import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import {
+  isThresholdRule,
   isEqlRule,
-  isEsqlRule,
-  isNewTermsRule,
   isQueryRule,
   isThreatMatchRule,
-  isThresholdRule,
+  isNewTermsRule,
+  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { FieldHook } from '../../../../shared_imports';
-import { MlCardDescription } from './ml_card_description';
 import * as i18n from './translations';
+import { MlCardDescription } from './ml_card_description';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];

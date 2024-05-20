@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import type { MlSeverityType } from './anomaly_severity';
 import { ML_ANOMALY_SEVERITY_TYPES } from './anomaly_severity_types';
-import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 
 /**
  * Returns a severity label (one of critical, major, minor, warning or unknown)

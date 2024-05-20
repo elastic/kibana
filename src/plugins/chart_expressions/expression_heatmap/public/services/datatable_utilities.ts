@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 
 export const [getDatatableUtilities, setDatatableUtilities] =
   createGetterSetter<DatatableUtilitiesService>('data.datatableUtilities');

@@ -7,14 +7,14 @@
 import expect from '@kbn/expect';
 import {
   FunctionDefinition,
-  type Message,
   MessageRole,
+  type Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { StreamingChatResponseEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { pick } from 'lodash';
 import type OpenAI from 'openai';
 import { Response } from 'supertest';
-import { LlmProxy, LlmResponseSimulator, createLlmProxy } from '../../common/create_llm_proxy';
+import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

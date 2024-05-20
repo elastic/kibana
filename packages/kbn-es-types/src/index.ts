@@ -7,15 +7,15 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  InferSearchResponseOf,
   AggregateOf as AggregationResultOf,
   AggregateOfMap as AggregationResultOfMap,
-  ChangePointType,
+  SearchHit,
   ESQLColumn,
   ESQLRow,
-  ESQLSearchParams,
   ESQLSearchReponse,
-  InferSearchResponseOf,
-  SearchHit,
+  ESQLSearchParams,
+  ChangePointType,
 } from './search';
 
 export type ESFilter = estypes.QueryDslQueryContainer;
@@ -36,7 +36,7 @@ export interface ESSearchOptions {
 export type ESSearchResponse<
   TDocument = unknown,
   TSearchRequest extends ESSearchRequest = ESSearchRequest,
-  TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false },
+  TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false }
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
 
 export type {

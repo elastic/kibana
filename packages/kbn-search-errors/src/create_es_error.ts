@@ -7,13 +7,13 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { i18n } from '@kbn/i18n';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { IEsError } from './types';
 import { EsError } from './es_error';
 import { PainlessError } from './painless_error';
 import { TsdbError } from './tsdb_error';
-import { IEsError } from './types';
 
 export interface Services {
   application: ApplicationStart;

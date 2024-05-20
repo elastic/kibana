@@ -6,8 +6,8 @@
  */
 
 import {
-  type DeleteTransformsRequestSchema,
   deleteTransformsRequestSchema,
+  type DeleteTransformsRequestSchema,
 } from '../../../../common/api_schemas/delete_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 

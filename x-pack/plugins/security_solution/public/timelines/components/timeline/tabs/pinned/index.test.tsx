@@ -9,21 +9,21 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
+import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock/test_providers';
+import { defaultRowRenderers } from '../../body/renderers';
+import type { Sort } from '../../body/sort';
+import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { useTimelineEvents } from '../../../../containers';
+import { useTimelineEventsDetails } from '../../../../containers/details';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
 import type { Props as PinnedTabContentComponentProps } from '.';
 import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../../common/search_strategy';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
-import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
-import { TestProviders } from '../../../../../common/mock/test_providers';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { useTimelineEvents } from '../../../../containers';
-import { useTimelineEventsDetails } from '../../../../containers/details';
-import { defaultRowRenderers } from '../../body/renderers';
-import type { Sort } from '../../body/sort';
-import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),

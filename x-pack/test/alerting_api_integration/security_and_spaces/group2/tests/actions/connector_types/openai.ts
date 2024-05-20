@@ -13,7 +13,7 @@ import {
 } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { ObjectRemover, getUrlPrefix } from '../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 const connectorTypeId = '.gen-ai';
 const name = 'A genAi action';

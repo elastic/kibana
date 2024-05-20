@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { cloneDeep, set } from 'lodash';
-import React from 'react';
-import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { exactMatchText, expectIsViewOnly } from '../mocks';
+import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import React from 'react';
 import type {
   EventCollectionCardProps,
   SupplementalEventFormOption,
 } from './event_collection_card';
 import { EventCollectionCard } from './event_collection_card';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { expectIsViewOnly, exactMatchText } from '../mocks';
+import userEvent from '@testing-library/user-event';
+import { cloneDeep, set } from 'lodash';
+import { within } from '@testing-library/react';
 
 describe('Policy Event Collection Card common component', () => {
   let formProps: EventCollectionCardProps<OperatingSystem.WINDOWS>;

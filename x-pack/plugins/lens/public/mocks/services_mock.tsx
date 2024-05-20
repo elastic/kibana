@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
-import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import React from 'react';
 import { Subject } from 'rxjs';
+import { coreMock } from '@kbn/core/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
-import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import {
-  createEmbeddableStateTransferMock,
   mockAttributeService,
+  createEmbeddableStateTransferMock,
 } from '@kbn/embeddable-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 
-import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { DOC_TYPE } from '../../common/constants';
-import { LensAppServices } from '../app_plugin/types';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { LensAttributeService } from '../lens_attribute_service';
 import type {
-  LensByReferenceInput,
   LensByValueInput,
+  LensByReferenceInput,
   LensSavedObjectAttributes,
   LensUnwrapMetaInfo,
 } from '../embeddable/embeddable';
-import type { LensAttributeService } from '../lens_attribute_service';
+import { DOC_TYPE } from '../../common/constants';
+import { LensAppServices } from '../app_plugin/types';
+import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
 import { SavedObjectIndexStore } from '../persistence';
-import { mockDataPlugin } from './data_plugin_mock';
 
 const startMock = coreMock.createStart();
 

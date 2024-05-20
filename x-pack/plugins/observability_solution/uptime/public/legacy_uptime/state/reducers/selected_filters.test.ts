@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
+import { selectedFiltersReducer } from './selected_filters';
 import {
-  SelectedFilters,
   getSelectedFilters,
   setSelectedFilters,
+  SelectedFilters,
 } from '../actions/selected_filters';
-import { selectedFiltersReducer } from './selected_filters';
+import { createAction } from 'redux-actions';
 
 describe('selectedFiltersReducer', () => {
   let state: SelectedFilters;

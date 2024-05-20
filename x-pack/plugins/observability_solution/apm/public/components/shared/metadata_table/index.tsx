@@ -15,17 +15,17 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { HeightRetainer } from '../height_retainer';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { filterSectionsByTerm } from './helper';
 import { Section } from './section';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { SectionDescriptor } from './types';
 
 interface Props {

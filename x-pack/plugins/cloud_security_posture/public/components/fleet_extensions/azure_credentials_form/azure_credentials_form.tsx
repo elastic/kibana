@@ -1,21 +1,3 @@
-import {
-  EuiCallOut,
-  EuiFieldText,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -23,19 +5,37 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { Suspense, useEffect } from 'react';
+import {
+  EuiCallOut,
+  EuiFieldText,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
-import semverValid from 'semver/functions/valid';
-import { AzureCredentialsType } from '../../../../common/types_old';
-import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
-import { AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '../../test_subjects';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { NewPackagePolicyPostureInput, findVariableDef, getPosturePolicy } from '../utils';
+import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import {
   AzureOptions,
   getAzureCredentialsFormManualOptions,
 } from './get_azure_credentials_form_options';
+import { AzureCredentialsType } from '../../../../common/types_old';
 import { useAzureCredentialsForm } from './hooks';
+import { findVariableDef, getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
+import { AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
 interface AzureSetupInfoContentProps {
   integrationLink: string;

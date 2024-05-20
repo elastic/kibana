@@ -7,9 +7,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { config, HttpConfig } from './http_config';
 import { cspConfig } from './csp';
 import { ExternalUrlConfig } from './external_url';
-import { HttpConfig, config } from './http_config';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
 const invalidHostnames = ['asdf$%^', '0'];

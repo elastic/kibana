@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { mockIndicatorsFiltersContext } from '../../../../mocks/mock_indicators_filters_context';
+import { IndicatorFieldsTable } from './fields_table';
+import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { IndicatorsFiltersContext } from '../../hooks/use_filters_context';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
-import { IndicatorFieldsTable } from './fields_table';
 
 export default {
   component: IndicatorFieldsTable,

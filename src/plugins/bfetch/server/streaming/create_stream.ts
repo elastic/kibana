@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Stream } from 'stream';
 import { AnalyticsServiceStart, Logger } from '@kbn/core/server';
+import { Stream } from 'stream';
 import { Observable } from 'rxjs';
 import { createCompressedStream } from './create_compressed_stream';
 import { createNDJSONStream } from './create_ndjson_stream';

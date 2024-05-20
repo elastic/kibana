@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CustomBrandingSetupDeps } from '@kbn/core-custom-branding-browser';
 import { take } from 'rxjs';
+import { CustomBrandingSetupDeps } from '@kbn/core-custom-branding-browser';
 import { CustomBrandingService } from './custom_branding_service';
 
 describe('custom branding service', () => {

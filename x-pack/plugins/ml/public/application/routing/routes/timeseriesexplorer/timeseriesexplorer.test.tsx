@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
-import { render } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { TimeSeriesExplorer } from '../../../timeseriesexplorer';
-import { TimeseriesexplorerNoJobsFound } from '../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
-import { TimeSeriesExplorerPage } from '../../../timeseriesexplorer/timeseriesexplorer_page';
+import { render } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { TimeSeriesExplorerUrlStateManager } from './state_manager';
+import { TimeSeriesExplorer } from '../../../timeseriesexplorer';
+import { TimeSeriesExplorerPage } from '../../../timeseriesexplorer/timeseriesexplorer_page';
+import { TimeseriesexplorerNoJobsFound } from '../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 jest.mock('../../../services/toast_notification_service');
 

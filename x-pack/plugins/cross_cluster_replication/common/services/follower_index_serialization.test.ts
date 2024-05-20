@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FollowerIndex, FollowerIndexFromEs, ShardFromEs } from '../types';
+import { ShardFromEs, FollowerIndexFromEs, FollowerIndex } from '../types';
 
 import {
+  deserializeShard,
   deserializeFollowerIndex,
   deserializeListFollowerIndices,
-  deserializeShard,
   serializeFollowerIndex,
 } from './follower_index_serialization';
 

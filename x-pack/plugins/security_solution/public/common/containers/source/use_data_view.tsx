@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { useCallback, useRef } from 'react';
+import type { Subscription } from 'rxjs';
+import { useDispatch } from 'react-redux';
+import memoizeOne from 'memoize-one';
 import type { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
-import memoizeOne from 'memoize-one';
-import { useCallback, useRef } from 'react';
-import { useDispatch } from 'react-redux';
-import type { Subscription } from 'rxjs';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
-import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
 import { sourcererActions } from '../../store/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getSourcererDataView } from '../sourcerer/get_sourcerer_data_view';
 import * as i18n from './translations';
+import { useAppToasts } from '../../hooks/use_app_toasts';
 
 export type IndexFieldSearch = (param: {
   dataViewId: string;

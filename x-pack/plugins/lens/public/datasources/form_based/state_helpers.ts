@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormBasedLayer, FormBasedPrivateState } from './types';
+import { FormBasedPrivateState, FormBasedLayer } from './types';
 
 export function mergeLayer({
   state,

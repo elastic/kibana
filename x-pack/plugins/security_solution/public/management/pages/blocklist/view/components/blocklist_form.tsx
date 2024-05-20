@@ -5,44 +5,32 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
+import React, { useMemo, useState, useCallback, memo, useEffect, useRef } from 'react';
+import type { EuiSuperSelectOption, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiComboBox,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiFieldText,
+  EuiTextArea,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiText,
   EuiSpacer,
   EuiSuperSelect,
-  EuiText,
-  EuiTextArea,
+  EuiComboBox,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { isOneOfOperator } from '@kbn/securitysolution-list-utils';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
+import { isOneOfOperator } from '@kbn/securitysolution-list-utils';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { uniq } from 'lodash';
-import React, { useMemo, useState, useCallback, memo, useEffect, useRef } from 'react';
 
-import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
-import {
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
-  GLOBAL_ARTIFACT_TAG,
-} from '../../../../../../common/endpoint/service/artifacts/constants';
-import { isValidHash } from '../../../../../../common/endpoint/service/artifacts/validations';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { OS_TITLES } from '../../../../common/translations';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
-import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
-import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import {
   CONDITIONS_HEADER,
   CONDITIONS_HEADER_DESCRIPTION,
@@ -51,15 +39,27 @@ import {
   DESCRIPTION_LABEL,
   DETAILS_HEADER,
   DETAILS_HEADER_DESCRIPTION,
-  ERRORS,
   FIELD_LABEL,
   NAME_LABEL,
   OPERATOR_LABEL,
   POLICY_SELECT_DESCRIPTION,
   SELECT_OS_LABEL,
   VALUE_LABEL,
+  ERRORS,
   VALUE_LABEL_HELPER,
 } from '../../translations';
+import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
+import {
+  GLOBAL_ARTIFACT_TAG,
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+} from '../../../../../../common/endpoint/service/artifacts/constants';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { isValidHash } from '../../../../../../common/endpoint/service/artifacts/validations';
+import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
+import type { PolicyData } from '../../../../../../common/endpoint/types';
+import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
 const testIdPrefix = 'blocklist-form';
 

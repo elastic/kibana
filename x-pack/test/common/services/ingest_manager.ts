@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { API_VERSIONS, fleetSetupRouteService } from '@kbn/fleet-plugin/common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IngestManagerProvider({ getService }: FtrProviderContext) {

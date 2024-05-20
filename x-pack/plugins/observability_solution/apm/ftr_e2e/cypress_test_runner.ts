@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { ApmSynthtraceKibanaClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
+import cypress from 'cypress';
 import path from 'path';
 import Url from 'url';
-import { ApmSynthtraceKibanaClient, LogLevel, createLogger } from '@kbn/apm-synthtrace';
-import cypress from 'cypress';
 import { createApmUsers } from '../server/test_helpers/create_apm_users/create_apm_users';
 import { FtrProviderContext } from './ftr_provider_context';
 

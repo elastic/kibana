@@ -9,19 +9,19 @@
 import { i18n } from '@kbn/i18n';
 import { TracksOverlays } from '@kbn/presentation-containers';
 import {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasParentApi,
-  PublishesDataViews,
-  PublishesUnifiedSearch,
-  PublishesWritablePanelDescription,
-  PublishesWritablePanelTitle,
-  PublishesWritableUnifiedSearch,
   apiCanAccessViewMode,
   apiPublishesDataViews,
-  apiPublishesPanelTitle,
   apiPublishesUnifiedSearch,
+  apiPublishesPanelTitle,
+  CanAccessViewMode,
+  EmbeddableApiContext,
   getInheritedViewMode,
+  HasParentApi,
+  PublishesDataViews,
+  PublishesWritableUnifiedSearch,
+  PublishesWritablePanelDescription,
+  PublishesWritablePanelTitle,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openCustomizePanelFlyout } from './open_customize_panel';

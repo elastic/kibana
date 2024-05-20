@@ -7,8 +7,8 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { Index } from '..';
 import { IndexDataEnricher } from '../services';
+import { Index } from '..';
 import { RouteDependencies } from '../types';
 
 async function fetchIndicesCall(

@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useLastPage } from './use_last_page';
+import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
 const userActivityQueryParams: UserActivityParams = {
   type: 'all',

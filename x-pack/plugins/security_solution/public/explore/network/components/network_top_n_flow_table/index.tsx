@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 
-import type { NetworkTopNFlowEdges, SortField } from '../../../../../common/search_strategy';
+import type { SortField, NetworkTopNFlowEdges } from '../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
@@ -19,10 +19,10 @@ import {
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { Criteria, ItemsPerRow } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
-import { getLimitedPaginationTotalCount } from '../../../components/paginated_table/helpers';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import { getNFlowColumnsCurated } from './columns';
 import * as i18n from './translations';
+import { getLimitedPaginationTotalCount } from '../../../components/paginated_table/helpers';
 
 interface NetworkTopNFlowTableProps {
   data: NetworkTopNFlowEdges[];

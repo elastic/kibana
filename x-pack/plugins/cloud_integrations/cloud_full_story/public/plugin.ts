@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type {
   AnalyticsServiceSetup,
-  CoreSetup,
   IBasePath,
-  Plugin,
   PluginInitializerContext,
+  CoreSetup,
+  Plugin,
 } from '@kbn/core/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import { duration } from 'moment';
 
 interface SetupFullStoryDeps {

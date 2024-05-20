@@ -7,8 +7,15 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import { fetchActionResponses } from './utils/fetch_action_responses';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
-import { EndpointError } from '../../../../common/endpoint/errors';
+import {
+  formatEndpointActionResults,
+  categorizeResponseResults,
+  mapToNormalizedActionRequest,
+  getAgentHostNamesWithIds,
+  createActionDetailsRecord,
+} from './utils';
 import type {
   ActionDetails,
   ActivityLogActionResponse,
@@ -16,17 +23,10 @@ import type {
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
 } from '../../../../common/endpoint/types';
-import { NotFoundError } from '../../errors';
 import { catchAndWrapError } from '../../utils';
+import { EndpointError } from '../../../../common/endpoint/errors';
+import { NotFoundError } from '../../errors';
 import type { EndpointMetadataService } from '../metadata';
-import {
-  categorizeResponseResults,
-  createActionDetailsRecord,
-  formatEndpointActionResults,
-  getAgentHostNamesWithIds,
-  mapToNormalizedActionRequest,
-} from './utils';
-import { fetchActionResponses } from './utils/fetch_action_responses';
 
 /**
  * Get Action Details for a single action id

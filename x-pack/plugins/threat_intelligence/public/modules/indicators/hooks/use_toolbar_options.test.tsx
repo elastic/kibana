@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
+import { renderHook } from '@testing-library/react-hooks';
 import { useToolbarOptions } from './use_toolbar_options';
 
 describe('useToolbarOptions()', () => {

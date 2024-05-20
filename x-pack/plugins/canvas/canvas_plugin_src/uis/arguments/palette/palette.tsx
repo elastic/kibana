@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import PropTypes from 'prop-types';
 import React, { FC } from 'react';
-import { ColorPalette } from '../../../../common/lib';
-import { ArgumentStrings } from '../../../../i18n';
-import { CustomColorPalette } from '../../../../public/components/palette_picker';
+import PropTypes from 'prop-types';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
-import { ColorPaletteName, getPaletteType } from './palette_types';
+import { ArgumentStrings } from '../../../../i18n';
+import { ColorPalette } from '../../../../common/lib';
 import { astToPalette } from './utils';
+import { ColorPaletteName, getPaletteType } from './palette_types';
+import { CustomColorPalette } from '../../../../public/components/palette_picker';
 
 const { Palette: strings, StopsPalette: stopsPaletteStrings } = ArgumentStrings;
 

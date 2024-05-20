@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { createReducer } from '@reduxjs/toolkit';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { IHttpSerializedFetchError } from '..';
 import {
   enableDefaultAlertingAction,

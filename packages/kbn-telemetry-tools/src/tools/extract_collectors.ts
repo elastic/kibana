@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as path from 'path';
 import globby from 'globby';
-import { TelemetryRC } from './config';
+import * as path from 'path';
 import { parseUsageCollection } from './ts_parser';
+import { TelemetryRC } from './config';
 import { createKibanaProgram, getAllSourceFiles } from './ts_program';
 
 export async function getProgramPaths({

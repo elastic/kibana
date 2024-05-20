@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { safeLoad } from 'js-yaml';
-import { pick } from 'lodash';
 import { useCallback, useEffect, useState } from 'react';
+import { safeLoad } from 'js-yaml';
+import deepEqual from 'fast-deep-equal';
+import { pick } from 'lodash';
 
 import type {
   GetOnePackagePolicyResponse,
@@ -23,20 +23,20 @@ import {
   sendUpgradePackagePolicyDryRun,
 } from '../../../../hooks';
 import type {
-  AgentPolicy,
-  PackageInfo,
-  PackagePolicy,
   PackagePolicyConfigRecord,
   UpdatePackagePolicy,
+  AgentPolicy,
+  PackagePolicy,
+  PackageInfo,
 } from '../../../../types';
 import {
   type PackagePolicyValidationResults,
   validatePackagePolicy,
   validationHasErrors,
 } from '../../create_package_policy_page/services';
-import { prepareInputPackagePolicyDataset } from '../../create_package_policy_page/services/prepare_input_pkg_policy_dataset';
 import type { PackagePolicyFormState } from '../../create_package_policy_page/types';
 import { fixApmDurationVars, hasUpgradeAvailable } from '../utils';
+import { prepareInputPackagePolicyDataset } from '../../create_package_policy_page/services/prepare_input_pkg_policy_dataset';
 
 function mergeVars(
   packageVars?: PackagePolicyConfigRecord,

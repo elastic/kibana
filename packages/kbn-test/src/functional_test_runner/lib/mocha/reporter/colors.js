@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { bold, cyan, dim, green, red, yellow } from 'chalk';
+import { bold, dim, green, yellow, red, cyan } from 'chalk';
 
 export const suite = bold;
 export const pending = cyan;

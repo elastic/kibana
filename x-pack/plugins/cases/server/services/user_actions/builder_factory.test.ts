@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   AttachmentType,
   CaseSeverity,
@@ -14,10 +13,11 @@ import {
   UserActionActions,
   UserActionTypes,
 } from '../../../common/types/domain';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
-  createPersistableStateAttachmentTypeRegistryMock,
   externalReferenceAttachmentES,
   externalReferenceAttachmentSO,
+  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
 import { BuilderFactory } from './builder_factory';

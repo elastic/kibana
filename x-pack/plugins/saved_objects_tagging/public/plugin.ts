@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kbn/core/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { SavedObjectTaggingOssPluginSetup } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { getTagsCapabilities } from '../common/capabilities';
 import { tagManagementSectionId } from '../common/constants';
-import { SavedObjectsTaggingClientConfig, SavedObjectsTaggingClientConfigRawType } from './config';
-import { TagAssignmentService, TagsCache, TagsClient } from './services';
+import { getTagsCapabilities } from '../common/capabilities';
 import { SavedObjectTaggingPluginStart } from './types';
+import { TagsClient, TagsCache, TagAssignmentService } from './services';
 import { getUiApi } from './ui_api';
+import { SavedObjectsTaggingClientConfig, SavedObjectsTaggingClientConfigRawType } from './config';
 
 interface SetupDeps {
   management: ManagementSetup;

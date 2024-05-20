@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
-import { asyncForEach } from '@kbn/std';
 import { filter } from 'lodash/fp';
+import { asyncForEach } from '@kbn/std';
+import type { IRouter } from '@kbn/core/server';
 
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../../../common';
 import type { GetAssetsStatusRequestParamsSchema } from '../../../common/api';
-import { getAssetsStatusRequestParamsSchema } from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
+import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { getAssetsStatusRequestParamsSchema } from '../../../common/api';
 
 export const getAssetsStatusRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned

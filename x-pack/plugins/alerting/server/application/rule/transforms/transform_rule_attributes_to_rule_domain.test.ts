@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { RecoveredActionGroup } from '../../../../common';
-import { RuleActionAttributes } from '../../../data/rule/types';
-import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { transformRuleAttributesToRuleDomain } from './transform_rule_attributes_to_rule_domain';
+import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
+import { RuleActionAttributes } from '../../../data/rule/types';
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',

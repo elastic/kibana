@@ -1,5 +1,3 @@
-import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +5,11 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
  * 2.0.
  */
 import React, { useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { FAILED_TO_SCHEDULE } from './browser_test_results';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { useSimpleRunOnceMonitors } from '../hooks/use_simple_run_once_monitors';
-import { FAILED_TO_SCHEDULE } from './browser_test_results';
 
 interface Props {
   name: string;

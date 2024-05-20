@@ -6,8 +6,8 @@
  */
 
 import datemath from '@elastic/datemath';
-import moment, { DurationInputArg1, DurationInputArg2 } from 'moment';
 import { useMemo } from 'react';
+import moment, { DurationInputArg1, DurationInputArg2 } from 'moment';
 import { useSyntheticsRefreshContext } from '../contexts';
 import { useGetUrlParams } from './use_url_params';
 

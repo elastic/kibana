@@ -1,4 +1,3 @@
-import { escapeRegExp } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +5,15 @@ import { escapeRegExp } from 'lodash';
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
+import { escapeRegExp } from 'lodash';
+import { sortProcesses } from '../../../common/utils/sort_processes';
 import type {
   AlertStatusEventEntityIdMap,
   Process,
   ProcessEvent,
-  ProcessFields,
   ProcessMap,
+  ProcessFields,
 } from '../../../common';
-import { sortProcesses } from '../../../common/utils/sort_processes';
 import { ProcessImpl } from './hooks';
 
 // Creates an instance of Process, from a nested leader process fieldset

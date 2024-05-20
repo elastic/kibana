@@ -6,16 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { ConfigKey } from '../../../common/constants/monitor_management';
-import { CertResult, GetCertsParams } from '../../../common/runtime_types';
-import { monitorAttributes } from '../../../common/types/saved_objects';
-import { getSyntheticsCerts } from '../../queries/get_certs';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import { monitorAttributes } from '../../../common/types/saved_objects';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { CertResult, GetCertsParams } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/constants/monitor_management';
+import { getSyntheticsCerts } from '../../queries/get_certs';
 
 export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
   { data: CertResult },

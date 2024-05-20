@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
+import { EuiCodeBlock } from '@elastic/eui';
 
 import { NotebookOutputType } from '../types';
-import { combineSource, isDefined, isDefinedAndHasValue } from '../utils';
+import { isDefined, isDefinedAndHasValue, combineSource } from '../utils';
 
 export const NotebookCellOutput = ({ output }: { output: NotebookOutputType }) => {
   if (isDefined(output.text) && output.text.length > 0) {

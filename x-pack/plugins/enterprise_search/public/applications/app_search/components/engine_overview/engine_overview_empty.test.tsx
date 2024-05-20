@@ -10,12 +10,12 @@ import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
 import { docLinks } from '../../../shared/doc_links';
-import { getPageHeaderActions, getPageTitle } from '../../../test_helpers';
+import { getPageTitle, getPageHeaderActions } from '../../../test_helpers';
 
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 

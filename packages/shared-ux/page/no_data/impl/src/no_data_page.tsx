@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
 
-import { EuiLink, EuiPageTemplate, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiPageTemplate, EuiLink, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 

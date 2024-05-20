@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import PropTypes from 'prop-types';
+import { AddDeleteButtons } from '../../add_delete_buttons';
+import { TableSeriesConfig as SeriesConfig } from './config';
+import { SeriesDragHandler } from '../../series_drag_handler';
 import {
-  EuiButtonIcon,
-  EuiFieldText,
+  EuiTabs,
+  EuiTab,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTab,
-  EuiTabs,
+  EuiFieldText,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React from 'react';
-import { AddDeleteButtons } from '../../add_delete_buttons';
-import { Aggs } from '../../aggs/aggs';
 import { createTextHandler } from '../../lib/create_text_handler';
-import { SeriesDragHandler } from '../../series_drag_handler';
-import { TableSeriesConfig as SeriesConfig } from './config';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { Aggs } from '../../aggs/aggs';
 
 function TableSeriesUI(props) {
   const {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { type FC, type PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -20,39 +21,38 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
-import {
-  CHANGE_POINT_DETECTION_VIEW_TYPE,
-  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-} from '@kbn/aiops-change-point-detection/constants';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useTimeRangeUpdates, useTimefilter } from '@kbn/ml-date-picker';
-import { isDefined } from '@kbn/ml-is-defined';
+import { i18n } from '@kbn/i18n';
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
+import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
-import React, { type FC, type PropsWithChildren, useCallback, useMemo, useState } from 'react';
+import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
+import {
+  CHANGE_POINT_DETECTION_VIEW_TYPE,
+  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+} from '@kbn/aiops-change-point-detection/constants';
 import type { ChangePointEmbeddableRuntimeState } from '../../embeddables/change_point_chart/types';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { MaxSeriesControl } from './max_series_control';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useDataSource } from '../../hooks/use_data_source';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { ChangePointsTable } from './change_points_table';
+import { MAX_CHANGE_POINT_CONFIGS, SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
+import { FunctionPicker } from './function_picker';
+import { MetricFieldSelector } from './metric_field_selector';
+import { SplitFieldSelector } from './split_field_selector';
 import type { SelectedChangePoint } from './change_point_detection_context';
 import {
   type ChangePointAnnotation,
   type FieldConfig,
   useChangePointDetectionContext,
 } from './change_point_detection_context';
-import { ChangePointsTable } from './change_points_table';
-import { MAX_CHANGE_POINT_CONFIGS, SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
-import { FunctionPicker } from './function_picker';
-import { MaxSeriesControl } from './max_series_control';
-import { MetricFieldSelector } from './metric_field_selector';
-import { SplitFieldSelector } from './split_field_selector';
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';

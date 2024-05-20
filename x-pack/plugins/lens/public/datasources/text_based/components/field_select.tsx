@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
 import React, { useMemo } from 'react';
-import type { DataType } from '../../../types';
+import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { FieldPicker, FieldOptionValue, FieldOption } from '@kbn/visualization-ui-components';
 import type { TextBasedLayerColumn } from '../types';
+import type { DataType } from '../../../types';
 
 export interface FieldOptionCompatible extends DatatableColumn {
   compatible: boolean;

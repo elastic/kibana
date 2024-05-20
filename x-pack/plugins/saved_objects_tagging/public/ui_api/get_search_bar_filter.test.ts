@@ -6,9 +6,9 @@
  */
 
 import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { createTag } from '../../common/test_utils';
-import { Tag } from '../../common/types';
 import { tagsCacheMock } from '../services/tags/tags_cache.mock';
+import { Tag } from '../../common/types';
+import { createTag } from '../../common/test_utils';
 import { buildGetSearchBarFilter } from './get_search_bar_filter';
 
 const expectTagOption = (tag: Tag, useName: boolean) => ({

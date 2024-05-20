@@ -7,26 +7,26 @@
 
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { compact, filter, map } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+import { compact, filter, map } from 'lodash';
 
 import { ENDPOINT_SEARCH_STRATEGY } from '../../../../common/endpoint/constants';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
+import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
+import type { ResponseActionsSearchHit } from '../../../../common/search_strategy/endpoint/response_actions/types';
+import { SortOrder } from '../../../../common/search_strategy/endpoint/response_actions/types';
+import { ResponseActionsQueries } from '../../../../common/search_strategy/endpoint/response_actions';
+import type {
+  ActionResponsesRequestOptions,
+  ActionRequestOptions,
+  ActionRequestStrategyResponse,
+  ActionResponsesRequestStrategyResponse,
+} from '../../../../common/search_strategy/endpoint/response_actions';
+import { useKibana } from '../../../common/lib/kibana';
 import type {
   EndpointAutomatedActionListRequestQuery,
   EndpointAutomatedActionResponseRequestQuery,
 } from '../../../../common/endpoint/schema/automated_actions';
-import type { ActionDetails, LogsEndpointActionWithHosts } from '../../../../common/endpoint/types';
-import { ResponseActionsQueries } from '../../../../common/search_strategy/endpoint/response_actions';
-import type {
-  ActionRequestOptions,
-  ActionRequestStrategyResponse,
-  ActionResponsesRequestOptions,
-  ActionResponsesRequestStrategyResponse,
-} from '../../../../common/search_strategy/endpoint/response_actions';
-import type { ResponseActionsSearchHit } from '../../../../common/search_strategy/endpoint/response_actions/types';
-import { SortOrder } from '../../../../common/search_strategy/endpoint/response_actions/types';
-import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { useKibana } from '../../../common/lib/kibana';
 
 interface GetAutomatedActionsListOptions {
   enabled: boolean;

@@ -9,13 +9,13 @@
 import { basename, dirname } from 'path';
 import { schema } from '@kbn/config-schema';
 import type { NumericRollingStrategyConfig } from '@kbn/core-logging-server';
-import { RollingFileContext } from '../../rolling_file_context';
 import { RollingStrategy } from '../strategy';
+import { RollingFileContext } from '../../rolling_file_context';
 import {
+  shouldSkipRollout,
   getOrderedRolledFiles,
   rollCurrentFile,
   rollPreviousFilesInOrder,
-  shouldSkipRollout,
 } from './rolling_tasks';
 
 export const numericRollingStrategyConfigSchema = schema.object({

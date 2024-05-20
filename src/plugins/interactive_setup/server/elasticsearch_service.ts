@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import tls from 'tls';
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Duration } from 'moment';
@@ -23,6 +22,7 @@ import {
   takeWhile,
   timer,
 } from 'rxjs';
+import tls from 'tls';
 
 import type {
   ElasticsearchClient,
@@ -33,10 +33,10 @@ import type {
 } from '@kbn/core/server';
 import { pollEsNodesVersion } from '@kbn/core/server';
 
-import { ElasticsearchConnectionStatus } from '../common';
-import type { Certificate, PingResult } from '../common';
 import { CompatibilityError } from './compatibility_error';
 import { getDetailedErrorMessage, getErrorStatusCode } from './errors';
+import { ElasticsearchConnectionStatus } from '../common';
+import type { Certificate, PingResult } from '../common';
 
 export interface EnrollParameters {
   apiKey: string;
@@ -125,10 +125,7 @@ export class ElasticsearchService {
    */
   private connectionStatusClient?: ICustomClusterClient;
 
-  constructor(
-    private readonly logger: Logger,
-    private kibanaVersion: string
-  ) {}
+  constructor(private readonly logger: Logger, private kibanaVersion: string) {}
 
   public setup({
     elasticsearch,

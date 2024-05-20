@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiText, useEuiTheme } from '@elastic/eui';
 import React, { CSSProperties, useMemo } from 'react';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 
-import { getTextColorForMonitorStatus, parseBadgeStatus } from './status_badge';
+import { parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
 
 export const StepDurationText = ({ step }: { step: JourneyStep }) => {
   const { euiTheme } = useEuiTheme();

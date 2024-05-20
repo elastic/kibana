@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
 import React from 'react';
-import { DynamicTreeView } from '.';
+import { waitFor } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
-import { TreeViewContextProvider } from '../contexts';
+import { DynamicTreeView } from '.';
 import { clusterResponseMock, nodeResponseMock } from '../mocks';
+import { TreeViewContextProvider } from '../contexts';
 
 describe('DynamicTreeView component', () => {
   let render: (props?: any) => ReturnType<AppContextTestRender['render']>;

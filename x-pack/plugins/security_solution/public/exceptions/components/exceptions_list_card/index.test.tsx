@@ -8,12 +8,12 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { ExceptionsListCard } from '.';
-import { TestProviders } from '../../../common/mock';
 import { useListDetailsView } from '../../hooks';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { TestProviders } from '../../../common/mock';
 
 jest.mock('../../hooks');
 jest.mock('../../hooks/use_exceptions_list.card');

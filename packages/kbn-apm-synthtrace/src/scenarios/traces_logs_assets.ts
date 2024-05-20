@@ -1,4 +1,3 @@
-import { Readable } from 'stream';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,15 +6,16 @@ import { Readable } from 'stream';
  * Side Public License, v 1.
  */
 import {
-  ApmFields,
-  Instance,
-  Serializable,
   apm,
+  ApmFields,
   generateLongId,
   generateShortId,
   infra,
+  Instance,
   log,
+  Serializable,
 } from '@kbn/apm-synthtrace-client';
+import { Readable } from 'stream';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';

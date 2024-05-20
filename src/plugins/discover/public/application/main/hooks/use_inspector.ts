@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { useCallback, useEffect, useState } from 'react';
 import {
-  Start as InspectorPublicPluginStart,
   InspectorSession,
   RequestAdapter,
+  Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
-import { useCallback, useEffect, useState } from 'react';
 import { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 

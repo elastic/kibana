@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { nodeBuilder } from '@kbn/es-query';
 import { OWNER_FIELD } from '../../common/constants';
+import { nodeBuilder } from '@kbn/es-query';
 import {
   combineFilterWithAuthorizationFilter,
   ensureFieldIsSafeForQuery,
-  getOwnersFilter,
   groupByAuthorization,
+  getOwnersFilter,
   includeFieldsRequiredForAuthentication,
 } from './utils';
 

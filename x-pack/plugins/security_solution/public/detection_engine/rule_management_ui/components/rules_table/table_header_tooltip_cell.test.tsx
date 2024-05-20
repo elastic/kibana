@@ -9,7 +9,7 @@ import React from 'react';
 
 import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 describe('Component TableHeaderTooltipCell', () => {
   it('should render text with icon and tooltip', async () => {

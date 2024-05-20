@@ -9,42 +9,42 @@ import { getTimeline } from '../../../objects/timeline';
 import {
   LOCKED_ICON,
   PIN_EVENT,
-  TIMELINE_DATE_PICKER_CONTAINER,
   TIMELINE_QUERY,
   TIMELINE_TITLE,
+  TIMELINE_DATE_PICKER_CONTAINER,
   TIMELINE_TITLE_BY_ID,
 } from '../../../screens/timeline';
 import { TIMELINES_DESCRIPTION, TIMELINES_USERNAME } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
-import {
-  GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
-  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
-} from '../../../screens/date_picker';
-import { GLOBAL_SEARCH_BAR_FILTER_ITEM_AT } from '../../../screens/search_bar';
-import {
-  setEndDateNow,
-  setStartDate,
-  showStartEndDate,
-  updateTimelineDates,
-} from '../../../tasks/date_picker';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
   addFilter,
-  addNameAndDescriptionToTimeline,
   addNameToTimelineAndSave,
   clickingOnCreateTemplateFromTimelineBtn,
   closeTimeline,
   createTimelineTemplateFromBottomBar,
   expandEventAction,
   openTimelineTemplate,
-  openTimelineTemplatesTab,
   populateTimeline,
+  addNameAndDescriptionToTimeline,
+  openTimelineTemplatesTab,
 } from '../../../tasks/timeline';
+import {
+  updateTimelineDates,
+  showStartEndDate,
+  setStartDate,
+  setEndDateNow,
+} from '../../../tasks/date_picker';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 import { TIMELINES_URL } from '../../../urls/navigation';
+import {
+  GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
+  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
+} from '../../../screens/date_picker';
+import { GLOBAL_SEARCH_BAR_FILTER_ITEM_AT } from '../../../screens/search_bar';
 
 const mockTimeline = getTimeline();
 

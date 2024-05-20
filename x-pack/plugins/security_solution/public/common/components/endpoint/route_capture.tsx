@@ -7,10 +7,10 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { memo, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import type { AppLocation } from '../../../../common/endpoint/types';
+import { useDispatch } from 'react-redux';
 import { TimelineId } from '../../../../common/types';
+import type { AppLocation } from '../../../../common/endpoint/types';
 import { timelineActions } from '../../../timelines/store';
 
 /**

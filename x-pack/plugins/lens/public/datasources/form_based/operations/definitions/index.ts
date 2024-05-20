@@ -5,17 +5,51 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { IUiSettingsClient, HttpSetup, CoreStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DateRange, LayerType } from '../../../../../common/types';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { termsOperation } from './terms';
+import { filtersOperation } from './filters';
+import { cardinalityOperation } from './cardinality';
+import { percentileOperation } from './percentile';
+import { percentileRanksOperation } from './percentile_ranks';
+import {
+  minOperation,
+  averageOperation,
+  sumOperation,
+  maxOperation,
+  medianOperation,
+  standardDeviationOperation,
+} from './metrics';
+import { dateHistogramOperation } from './date_histogram';
+import {
+  cumulativeSumOperation,
+  counterRateOperation,
+  derivativeOperation,
+  movingAverageOperation,
+  overallSumOperation,
+  overallMinOperation,
+  overallMaxOperation,
+  overallAverageOperation,
+  timeScaleOperation,
+} from './calculations';
+import { countOperation } from './count';
+import {
+  mathOperation,
+  formulaOperation,
+  timeRangeOperation,
+  nowOperation,
+  intervalOperation,
+} from './formula';
+import { staticValueOperation } from './static_value';
+import { lastValueOperation } from './last_value';
 import type {
   FramePublicAPI,
   IndexPattern,
@@ -24,52 +58,18 @@ import type {
   ParamEditorCustomProps,
   UserMessage,
 } from '../../../../types';
-import { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
-import { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
-import type { OriginalColumn } from '../../to_expression';
-import { DataViewDragDropOperation, FormBasedLayer } from '../../types';
-import {
-  counterRateOperation,
-  cumulativeSumOperation,
-  derivativeOperation,
-  movingAverageOperation,
-  overallAverageOperation,
-  overallMaxOperation,
-  overallMinOperation,
-  overallSumOperation,
-  timeScaleOperation,
-} from './calculations';
-import { cardinalityOperation } from './cardinality';
 import type {
   BaseIndexPatternColumn,
-  GenericIndexPatternColumn,
   IncompleteColumn,
+  GenericIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import { countOperation } from './count';
-import { dateHistogramOperation } from './date_histogram';
-import { filtersOperation } from './filters';
-import {
-  formulaOperation,
-  intervalOperation,
-  mathOperation,
-  nowOperation,
-  timeRangeOperation,
-} from './formula';
-import { lastValueOperation } from './last_value';
-import {
-  averageOperation,
-  maxOperation,
-  medianOperation,
-  minOperation,
-  standardDeviationOperation,
-  sumOperation,
-} from './metrics';
-import { percentileOperation } from './percentile';
-import { percentileRanksOperation } from './percentile_ranks';
+import { DataViewDragDropOperation, FormBasedLayer } from '../../types';
+import { DateRange, LayerType } from '../../../../../common/types';
 import { rangeOperation } from './ranges';
-import { staticValueOperation } from './static_value';
-import { termsOperation } from './terms';
+import { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
+import type { OriginalColumn } from '../../to_expression';
+import { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
 
 export type {
   IncompleteColumn,
@@ -185,7 +185,7 @@ export { staticValueOperation } from './static_value';
  */
 export interface ParamEditorProps<
   C,
-  U = FormBasedLayer | ((prevLayer: FormBasedLayer) => FormBasedLayer),
+  U = FormBasedLayer | ((prevLayer: FormBasedLayer) => FormBasedLayer)
 > {
   currentColumn: C;
   layer: FormBasedLayer;
@@ -248,7 +248,7 @@ export interface AdvancedOption {
 interface BaseOperationDefinitionProps<
   C extends BaseIndexPatternColumn,
   AR extends boolean,
-  P = {},
+  P = {}
 > {
   type: C['operationType'];
   /**
@@ -718,7 +718,7 @@ export type OperationDefinition<
   C extends BaseIndexPatternColumn,
   Input extends keyof OperationDefinitionMap<C>,
   P = {},
-  AR extends boolean = false,
+  AR extends boolean = false
 > = BaseOperationDefinitionProps<C, AR> & OperationDefinitionMap<C, P>[Input];
 
 /**
@@ -732,7 +732,7 @@ export type OperationType = string;
  * column types.
  */
 export type GenericOperationDefinition<
-  ColumnType extends BaseIndexPatternColumn = BaseIndexPatternColumn,
+  ColumnType extends BaseIndexPatternColumn = BaseIndexPatternColumn
 > =
   | OperationDefinition<ColumnType, 'field'>
   | OperationDefinition<ColumnType, 'none'>

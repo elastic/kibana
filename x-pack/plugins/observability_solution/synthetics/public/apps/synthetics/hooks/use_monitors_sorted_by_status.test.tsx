@@ -1,4 +1,3 @@
-import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { renderHook } from '@testing-library/react-hooks';
  * 2.0.
  */
 import React from 'react';
-import { WrappedHelper } from '../utils/testing';
+import { renderHook } from '@testing-library/react-hooks';
 import { SyntheticsUrlParams } from '../utils/url_params/get_supported_url_params';
 import { useMonitorsSortedByStatus } from './use_monitors_sorted_by_status';
+import { WrappedHelper } from '../utils/testing';
 import * as URL from './use_url_params';
 
 describe('useMonitorsSortedByStatus', () => {

@@ -5,52 +5,52 @@
  * 2.0.
  */
 
+import React, { ReactElement, useMemo } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 import {
+  ScaleType,
   AnnotationDomainType,
+  Position,
   Axis,
   BarSeries,
   Chart,
-  LineAnnotation,
-  Position,
-  RectAnnotation,
-  ScaleType,
   Settings,
+  RectAnnotation,
+  LineAnnotation,
   Tooltip,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
-import React, { ReactElement, useMemo } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
+import { ExecutionTimeRange } from '../../../../types';
 import {
-  Comparator,
-  Criterion,
+  ChartContainer,
+  LoadingState,
+  NoDataState,
+  ErrorState,
+  TIME_LABELS,
+  getDomain,
+  tooltipProps,
+  useDateFormatter,
+  yAxisFormatter,
+  NUM_BUCKETS,
+} from '../../../common/criterion_preview_chart/criterion_preview_chart';
+import {
   PartialRuleParams,
   Threshold,
+  Criterion,
+  Comparator,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { Color, colorTransformer } from '../../../../../common/color_palette';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
 } from '../../../../../common/http_api';
+import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
-import { ExecutionTimeRange } from '../../../../types';
-import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
-import {
-  ChartContainer,
-  ErrorState,
-  LoadingState,
-  NUM_BUCKETS,
-  NoDataState,
-  TIME_LABELS,
-  getDomain,
-  tooltipProps,
-  useDateFormatter,
-  yAxisFormatter,
-} from '../../../common/criterion_preview_chart/criterion_preview_chart';
-import { useChartPreviewData } from './hooks/use_chart_preview_data';
 
 const GROUP_LIMIT = 5;
 
@@ -110,8 +110,8 @@ export const CriterionPreview: React.FC<Props> = ({
         executionTimeRange?.buckets
           ? executionTimeRange.buckets
           : !chartAlertParams.groupBy || chartAlertParams.groupBy.length === 0
-            ? NUM_BUCKETS
-            : NUM_BUCKETS / 4
+          ? NUM_BUCKETS
+          : NUM_BUCKETS / 4
       } // Display less data for groups due to space limitations
       logViewReference={logViewReference}
       threshold={ruleParams.count}

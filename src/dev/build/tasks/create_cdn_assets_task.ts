@@ -9,16 +9,16 @@
 import { readFileSync } from 'fs';
 import { access } from 'fs/promises';
 
-import { dirname, resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { asyncForEach } from '@kbn/std';
+import { Jsonc } from '@kbn/repo-packages';
 import { getKibanaTranslationFiles, supportedLocale } from '@kbn/core-i18n-server-internal';
 import { i18n, i18nLoader } from '@kbn/i18n';
-import { Jsonc } from '@kbn/repo-packages';
-import { asyncForEach } from '@kbn/std';
 
 import del from 'del';
 import globby from 'globby';
 
-import { Task, compressTar, copyAll, mkdirp, write } from '../lib';
+import { mkdirp, compressTar, Task, copyAll, write } from '../lib';
 
 export const CreateCdnAssets: Task = {
   description: 'Creating CDN assets',

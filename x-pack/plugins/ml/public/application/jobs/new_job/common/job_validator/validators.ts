@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { distinctUntilChanged, filter, map, pluck, startWith, switchMap } from 'rxjs';
+import { distinctUntilChanged, filter, map, pluck, switchMap, startWith } from 'rxjs';
 import type { Observable, Subject } from 'rxjs';
 import { combineLatest } from 'rxjs';
-import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import type {
   CardinalityModelPlotHigh,
   CardinalityValidationResult,
 } from '../../../../services/ml_api_service';
 import { ml } from '../../../../services/ml_api_service';
 import type { JobCreator } from '../job_creator';
+import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import type { BasicValidations } from './job_validator';
 
 export enum VALIDATOR_SEVERITY {

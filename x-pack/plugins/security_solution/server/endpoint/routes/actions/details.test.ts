@@ -6,20 +6,20 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
-  httpServerMock,
   savedObjectsClientMock,
+  httpServerMock,
 } from '@kbn/core/server/mocks';
-import type { ActionDetailsRequestSchema } from '../../../../common/api/endpoint';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
-import { NotFoundError } from '../../errors';
+import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import { createMockEndpointAppContext, createRouteHandlerContext } from '../../mocks';
 import { applyActionsEsSearchMock } from '../../services/actions/mocks';
+import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import { getActionDetailsRequestHandler } from './details';
+import { NotFoundError } from '../../errors';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { ActionDetailsRequestSchema } from '../../../../common/api/endpoint';
 
 describe('when calling the Action Details route handler', () => {
   let mockScopedEsClient: ScopedClusterClientMock;

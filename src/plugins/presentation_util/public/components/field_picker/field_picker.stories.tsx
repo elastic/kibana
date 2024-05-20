@@ -9,8 +9,8 @@
 import React from 'react';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { storybookFlightsDataView } from '../../mocks';
 import { FieldPicker } from './field_picker';
+import { storybookFlightsDataView } from '../../mocks';
 
 export default {
   component: FieldPicker,

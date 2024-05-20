@@ -8,8 +8,8 @@
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import type { PolicyConfig, ProtectionModes } from '../../common/endpoint/types';
 import { PolicyOperatingSystem } from '../../common/endpoint/types';
-import type { FeatureUsageService } from '../endpoint/services/feature_usage/service';
 import type { EndpointMetadataService } from '../endpoint/services/metadata';
+import type { FeatureUsageService } from '../endpoint/services/feature_usage/service';
 
 const OS_KEYS = Object.values(PolicyOperatingSystem);
 const PROTECTION_KEYS = ['memory_protection', 'behavior_protection'] as const;

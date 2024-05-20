@@ -6,12 +6,12 @@
  */
 
 import type { EuiSelectableProps } from '@elastic/eui';
-import type { ShallowWrapper } from 'enzyme';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
-import { ORIGINAL_PAGE_SIZE, SelectableTimeline } from '.';
 import { SortFieldTimeline, TimelineType } from '../../../../../common/api/timeline';
+import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 
 const mockFetchAllTimeline = jest.fn();

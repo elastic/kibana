@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
-import { createSLORepositoryMock, createSummaryClientMock } from './mocks';
-import { SloDefinitionClient } from './slo_definition_client';
+import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
 import { SLORepository } from './slo_repository';
 import { SummaryClient } from './summary_client';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SloDefinitionClient } from './slo_definition_client';
 
 describe('GetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;

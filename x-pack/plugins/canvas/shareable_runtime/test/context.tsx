@@ -6,15 +6,15 @@
  */
 
 import React, { CSSProperties, RefObject } from 'react';
-import { WorkpadNames, sharedWorkpads } from '.';
-import { RendererSpec } from '../../types';
 import {
-  CanvasShareableStateProvider,
   initialCanvasShareableState,
+  CanvasShareableStateProvider,
   useCanvasShareableState,
 } from '../context';
 import { renderFunctions } from '../supported_renderers';
 import { CanvasShareableState } from '../types';
+import { RendererSpec } from '../../types';
+import { sharedWorkpads, WorkpadNames } from '.';
 
 const Container = ({
   children,

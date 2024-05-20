@@ -1,5 +1,3 @@
-import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
-import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,11 +5,6 @@ import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
  * 2.0.
  */
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import {
-  UPGRADE_INVESTIGATION_GUIDE,
-  UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
-} from '@kbn/security-solution-upselling/messages';
-import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type {
   MessageUpsellings,
   PageUpsellings,
@@ -19,24 +12,31 @@ import type {
   UpsellingMessageId,
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import React from 'react';
-import type { SecurityProductTypes } from '../../common/config';
-import { getProductProductFeatures } from '../../common/pli/pli_features';
-import type { Services } from '../common/services';
-import { withServicesProvider } from '../common/services';
-import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
-  EndpointExceptionsDetailsUpsellingLazy,
-  EntityAnalyticsUpsellingLazy,
-  OsqueryResponseActionsUpsellingSectionLazy,
-  ThreatIntelligencePaywallLazy,
-} from './lazy_upselling';
+  UPGRADE_INVESTIGATION_GUIDE,
+  UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
+} from '@kbn/security-solution-upselling/messages';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import {
   EndpointAgentTamperProtectionLazy,
   EndpointPolicyProtectionsLazy,
   EndpointProtectionUpdatesLazy,
   RuleDetailsEndpointExceptionsLazy,
 } from './sections/endpoint_management';
+import type { SecurityProductTypes } from '../../common/config';
+import { getProductProductFeatures } from '../../common/pli/pli_features';
+import {
+  EndpointExceptionsDetailsUpsellingLazy,
+  EntityAnalyticsUpsellingLazy,
+  OsqueryResponseActionsUpsellingSectionLazy,
+  ThreatIntelligencePaywallLazy,
+} from './lazy_upselling';
+import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
+import type { Services } from '../common/services';
+import { withServicesProvider } from '../common/services';
 
 interface UpsellingsConfig {
   pli: ProductFeatureKeyType;

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { PublicContract } from '@kbn/utility-types';
 import { HttpSetup } from '@kbn/core/public';
 import type {
   SavedObject,
-  SavedObjectsFindOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
-import { PublicContract } from '@kbn/utility-types';
 import type {
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,

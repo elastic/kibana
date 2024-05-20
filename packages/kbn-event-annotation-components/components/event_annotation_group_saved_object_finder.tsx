@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -15,14 +21,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ContentClient } from '@kbn/content-management-plugin/public';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import React, { useEffect, useState } from 'react';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 export const EventAnnotationGroupSavedObjectFinder = ({
   fixedPageSize = 10,

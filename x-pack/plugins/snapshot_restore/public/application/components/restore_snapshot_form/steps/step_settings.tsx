@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React, { useState, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCode,
   EuiComboBox,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLink,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
+  EuiLink,
+  EuiCallOut,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, Fragment } from 'react';
-import { StepProps } from '.';
 import { RestoreSettings } from '../../../../../common/types';
-import { useCore, useServices } from '../../../app_context';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
+import { useCore, useServices } from '../../../app_context';
+import { StepProps } from '.';
 
 export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
   restoreSettings,

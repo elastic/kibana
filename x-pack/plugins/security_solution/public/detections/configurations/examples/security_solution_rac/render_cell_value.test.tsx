@@ -9,10 +9,10 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import type { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
-import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { TestProviders, defaultHeaders, mockTimelineData } from '../../../../common/mock';
+import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
+import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
 import type { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 

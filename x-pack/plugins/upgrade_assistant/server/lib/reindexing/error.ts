@@ -7,21 +7,18 @@
 
 import {
   AccessForbidden,
-  CannotCreateIndex,
   IndexNotFound,
-  MultipleReindexJobsFound,
-  ReindexAlreadyInProgress,
-  ReindexCannotBeCancelled,
-  ReindexIsNotInQueue,
+  CannotCreateIndex,
   ReindexTaskCannotBeDeleted,
   ReindexTaskFailed,
+  ReindexAlreadyInProgress,
+  MultipleReindexJobsFound,
+  ReindexCannotBeCancelled,
+  ReindexIsNotInQueue,
 } from './error_symbols';
 
 export class ReindexError extends Error {
-  constructor(
-    message: string,
-    public readonly symbol: symbol
-  ) {
+  constructor(message: string, public readonly symbol: symbol) {
     super(message);
   }
 }

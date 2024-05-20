@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { pick } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import { TimelineStatus } from '../../../../common/api/timeline';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { EuiBadge, EuiText } from '@elastic/eui';
+import { pick } from 'lodash/fp';
+import { i18n } from '@kbn/i18n';
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { TimelineStatus } from '../../../../common/api/timeline';
 
 const UNSAVED = i18n.translate('xpack.securitySolution.timeline.saveStatus.unsavedLabel', {
   defaultMessage: 'Unsaved',

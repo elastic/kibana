@@ -7,8 +7,8 @@
 
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { MainScreen } from './screens/main';
-import { EmulatorRunContext } from './services/emulator_run_context';
 import { loadEndpointsIfNoneExist } from './services/endpoint_loader';
+import { EmulatorRunContext } from './services/emulator_run_context';
 
 export const DEFAULT_CHECKIN_INTERVAL = 60_000; // 1m
 export const DEFAULT_ACTION_DELAY = 5_000; // 5s

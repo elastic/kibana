@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as path from 'path';
-import { readFile } from 'fs/promises';
+import { generateMapping } from './manage_schema';
 import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
 import { parsedCollectorWithDescription } from './__fixture__/parsed_working_collector_with_description';
-import { generateMapping } from './manage_schema';
+import * as path from 'path';
+import { readFile } from 'fs/promises';
 
 async function parseJsonFile(relativePath: string) {
   const schemaPath = path.resolve(__dirname, '__fixture__', relativePath);

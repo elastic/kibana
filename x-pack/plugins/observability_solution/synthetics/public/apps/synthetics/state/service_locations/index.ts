@@ -15,8 +15,8 @@ import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import {
   getServiceLocations,
-  getServiceLocationsFailure,
   getServiceLocationsSuccess,
+  getServiceLocationsFailure,
 } from './actions';
 
 export interface ServiceLocationsState {

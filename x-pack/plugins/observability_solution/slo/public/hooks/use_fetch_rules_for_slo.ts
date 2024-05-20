@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AsApiContract, Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule, AsApiContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { BurnRateRuleParams } from '../typings';

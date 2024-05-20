@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import styled from 'styled-components';
 import { EuiBasicTable, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import styled from 'styled-components';
 
 import { useLink } from '../../../../hooks';
 import type { DownloadSource } from '../../../../types';

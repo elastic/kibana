@@ -8,20 +8,20 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { getTimeline } from '../../../objects/timeline';
 
-import { LOADING_INDICATOR } from '../../../screens/security_header';
 import {
   LOCKED_ICON,
   // NOTES_TEXT,
   PIN_EVENT,
+  TIMELINE_FILTER,
+  TIMELINE_FLYOUT_WRAPPER,
+  TIMELINE_QUERY,
+  TIMELINE_PANEL,
+  TIMELINE_STATUS,
   // TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
   SAVE_TIMELINE_ACTION_BTN,
   SAVE_TIMELINE_TOOLTIP,
-  TIMELINE_FILTER,
-  TIMELINE_FLYOUT_WRAPPER,
-  TIMELINE_PANEL,
-  TIMELINE_QUERY,
-  TIMELINE_STATUS,
 } from '../../../screens/timeline';
+import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { ROWS } from '../../../screens/timelines';
 import { createTimelineTemplate, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
@@ -32,8 +32,6 @@ import { selectCustomTemplates } from '../../../tasks/templates';
 import {
   addFilter,
   addNameAndDescriptionToTimeline,
-  addNameToTimelineAndSave,
-  addNameToTimelineAndSaveAsNew,
   // addNotesToTimeline,
   clickingOnCreateTimelineFormTemplateBtn,
   closeTimeline,
@@ -43,10 +41,12 @@ import {
   goToQueryTab,
   pinFirstEvent,
   populateTimeline,
+  addNameToTimelineAndSave,
+  addNameToTimelineAndSaveAsNew,
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
-import { OVERVIEW_URL, TIMELINES_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
+import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
 const mockTimeline = getTimeline();
 

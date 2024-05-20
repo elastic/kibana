@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { calculateAuto } from '@kbn/calculate-auto';
-import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
   APMTransactionErrorRateIndicator,
+  SyntheticsAvailabilityIndicator,
   GetPreviewDataParams,
   GetPreviewDataResponse,
   HistogramIndicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
-  SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { estypes } from '@elastic/elasticsearch';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 
-import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
+import { buildParamValues } from './transform_generators/synthetics_availability';
+import { typedSearch } from '../utils/queries';
 import { APMTransactionDurationIndicator } from '../domain/models';
 import { computeSLIForPreview } from '../domain/services';
-import { typedSearch } from '../utils/queries';
 import {
   GetCustomMetricIndicatorAggregation,
   GetHistogramIndicatorAggregation,
   GetTimesliceMetricIndicatorAggregation,
 } from './aggregations';
-import { buildParamValues } from './transform_generators/synthetics_availability';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 
 interface Options {
   range: {
@@ -46,10 +46,7 @@ interface Options {
   groupings?: Record<string, unknown>;
 }
 export class GetPreviewData {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private spaceId: string
-  ) {}
+  constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
 
   private async getAPMTransactionDurationPreviewData(
     indicator: APMTransactionDurationIndicator,

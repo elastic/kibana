@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { EventContext } from '../events';
-import { schemaToIoTs, validateSchema } from '../schema/validation';
 import type { ContextProviderName, ContextProviderOpts } from './types';
+import { schemaToIoTs, validateSchema } from '../schema/validation';
 
 export class ContextService {
   private readonly contextProvidersRegistry = new Map<ContextProviderName, unknown>();
@@ -86,15 +86,12 @@ export class ContextService {
    */
   private updateGlobalContext() {
     this.context$.next(
-      [...this.contextProvidersRegistry.values()].reduce(
-        (acc: Partial<EventContext>, context) => {
-          return {
-            ...acc,
-            ...this.removeEmptyValues(context),
-          };
-        },
-        {} as Partial<EventContext>
-      )
+      [...this.contextProvidersRegistry.values()].reduce((acc: Partial<EventContext>, context) => {
+        return {
+          ...acc,
+          ...this.removeEmptyValues(context),
+        };
+      }, {} as Partial<EventContext>)
     );
   }
 
@@ -102,15 +99,12 @@ export class ContextService {
     if (!isObject(context)) {
       return {};
     }
-    return Object.keys(context).reduce(
-      (acc, key) => {
-        if (context[key] !== undefined) {
-          acc[key] = context[key];
-        }
-        return acc;
-      },
-      {} as Partial<EventContext>
-    );
+    return Object.keys(context).reduce((acc, key) => {
+      if (context[key] !== undefined) {
+        acc[key] = context[key];
+      }
+      return acc;
+    }, {} as Partial<EventContext>);
   }
 }
 

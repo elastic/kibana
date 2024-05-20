@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { CoreKibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { CoreKibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 
-import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
-import { getReasonFromError } from '../lib/error_with_reason';
-import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { rulesClientMock } from '../rules_client.mock';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { Rule } from '../types';
-import { mockedRawRuleSO, mockedRule } from './fixtures';
 import {
   getDecryptedRule,
   getFakeKibanaRequest,
   validateRuleAndCreateFakeRequest,
 } from './rule_loader';
 import { TaskRunnerContext } from './types';
+import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
+import { rulesClientMock } from '../rules_client.mock';
+import { Rule } from '../types';
+import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
+import { getReasonFromError } from '../lib/error_with_reason';
+import { mockedRawRuleSO, mockedRule } from './fixtures';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 // create mocks
 const rulesClient = rulesClientMock.create();

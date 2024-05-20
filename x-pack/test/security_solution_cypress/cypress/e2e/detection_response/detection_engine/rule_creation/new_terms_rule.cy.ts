@@ -25,13 +25,11 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
-  INTERVAL_ABBR_VALUE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
-  NEW_TERMS_FIELDS_DETAILS,
-  NEW_TERMS_HISTORY_WINDOW_DETAILS,
   REFERENCE_URLS_DETAILS,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
@@ -39,38 +37,40 @@ import {
   RUNS_EVERY_DETAILS,
   SCHEDULE_DETAILS,
   SEVERITY_DETAILS,
+  TAGS_DETAILS,
+  TIMELINE_TEMPLATE_DETAILS,
+  NEW_TERMS_HISTORY_WINDOW_DETAILS,
+  NEW_TERMS_FIELDS_DETAILS,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
-  TAGS_DETAILS,
-  TIMELINE_TEMPLATE_DETAILS,
-  removeExternalLinkText,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
-  continueFromDefineStep,
   createAndEnableRule,
-  createRuleWithoutEnabling,
   fillAboutRuleAndContinue,
-  fillAboutRuleMinimumAndContinue,
-  fillAlertSuppressionFields,
   fillDefineNewTermsRule,
   fillDefineNewTermsRuleAndContinue,
   fillScheduleRuleAndContinue,
-  selectAlertSuppressionPerInterval,
-  selectDoNotSuppressForMissingFields,
   selectNewTermsRuleType,
-  setAlertSuppressionDuration,
-  skipScheduleRuleAction,
   waitForAlertsToPopulate,
+  fillAlertSuppressionFields,
+  fillAboutRuleMinimumAndContinue,
+  createRuleWithoutEnabling,
+  skipScheduleRuleAction,
+  continueFromDefineStep,
+  selectAlertSuppressionPerInterval,
+  setAlertSuppressionDuration,
+  selectDoNotSuppressForMissingFields,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
-import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 
 describe(
   'New Terms rules',

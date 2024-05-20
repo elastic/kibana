@@ -8,10 +8,10 @@
 import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
 
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { useKibana } from '../../lib/kibana';
 import { getLinksWithHiddenTimeline } from '../../links';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { useKibana } from '../../lib/kibana';
 
 const isTimelinePathVisible = (currentPath: string): boolean => {
   const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);

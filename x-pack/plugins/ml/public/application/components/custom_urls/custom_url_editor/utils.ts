@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import url from 'url';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import moment, { type Moment } from 'moment';
+import { cloneDeep } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
+import rison from '@kbn/rison';
+import url from 'url';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { MlKibanaUrlConfig, MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
-  DEFAULT_RESULTS_FIELD,
-  type DataFrameAnalyticsConfig,
   isDataFrameAnalyticsConfigs,
+  type DataFrameAnalyticsConfig,
+  DEFAULT_RESULTS_FIELD,
 } from '@kbn/ml-data-frame-analytics-utils';
-import rison from '@kbn/rison';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { cloneDeep } from 'lodash';
-import moment, { type Moment } from 'moment';
 
 import { isDefined } from '@kbn/ml-is-defined';
-import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import type { DashboardItems } from '../../../services/dashboard_service';
+import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
 import {
-  getFiltersForDSLQuery,
   getPartitioningFieldNames,
+  getFiltersForDSLQuery,
 } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
-import { ml } from '../../../services/ml_api_service';
-import {
-  isValidLabel,
-  replaceTokensInDFAUrlValue,
-  replaceTokensInUrlValue,
-} from '../../../util/custom_url_utils';
 import { replaceStringTokens } from '../../../util/string_utils';
+import {
+  replaceTokensInUrlValue,
+  replaceTokensInDFAUrlValue,
+  isValidLabel,
+} from '../../../util/custom_url_utils';
+import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
 import type { CombinedJob, Job } from '../../../../../common/types/anomaly_detection_jobs';

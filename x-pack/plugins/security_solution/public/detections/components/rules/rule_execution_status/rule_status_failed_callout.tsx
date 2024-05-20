@@ -10,13 +10,13 @@ import React, { useCallback } from 'react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import { NewChat } from '@kbn/elastic-assistant';
+import { FormattedDate } from '../../../../common/components/formatted_date';
 import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
-import { FormattedDate } from '../../../../common/components/formatted_date';
 
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import * as i18nAssistant from '../../../pages/detection_engine/rules/translations';
 import * as i18n from './translations';
+import * as i18nAssistant from '../../../pages/detection_engine/rules/translations';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 
 interface RuleStatusFailedCallOutProps {
   ruleName?: string | undefined;

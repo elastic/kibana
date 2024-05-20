@@ -6,35 +6,35 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { cloneDeep } from 'lodash';
 import type { FC } from 'react';
 import React, { useMemo, useEffect } from 'react';
+import { cloneDeep } from 'lodash';
 
-import { SUPPORTED_PYTORCH_TASKS, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { NerInference } from './models/ner';
 import { QuestionAnsweringInference } from './models/question_answering';
 
 import {
-  FillMaskInference,
-  LangIdentInference,
   TextClassificationInference,
+  FillMaskInference,
   ZeroShotClassificationInference,
+  LangIdentInference,
 } from './models/text_classification';
 
 import { TextEmbeddingInference } from './models/text_embedding';
 
 import { useMlApiContext } from '../../contexts/kibana';
-import {
-  getInferencePropertiesFromPipelineConfig,
-  isMlInferencePipelineInferenceConfig,
-  isMlIngestInferenceProcessor,
-} from '../create_pipeline_for_model/get_inference_properties_from_pipeline_config';
-import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
+import { type TestTrainedModelsContextType } from './test_trained_models_context';
+import { InferenceInputForm } from './models/inference_input_form';
 import type { InferrerType } from './models';
 import type { INPUT_TYPE } from './models/inference_base';
-import { InferenceInputForm } from './models/inference_input_form';
 import { TextExpansionInference } from './models/text_expansion';
-import { type TestTrainedModelsContextType } from './test_trained_models_context';
+import { type InferecePipelineCreationState } from '../create_pipeline_for_model/state';
+import {
+  getInferencePropertiesFromPipelineConfig,
+  isMlIngestInferenceProcessor,
+  isMlInferencePipelineInferenceConfig,
+} from '../create_pipeline_for_model/get_inference_properties_from_pipeline_config';
 
 interface Props {
   model: estypes.MlTrainedModelConfig;

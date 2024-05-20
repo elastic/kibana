@@ -7,9 +7,9 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import {
-  AssignableObject,
-  FindAssignableObjectsOptions,
   UpdateTagAssignmentsOptions,
+  FindAssignableObjectsOptions,
+  AssignableObject,
 } from '../../../common/assignments';
 import {
   FindAssignableObjectResponse,

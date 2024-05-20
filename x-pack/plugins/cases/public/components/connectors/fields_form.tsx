@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import React, { memo, Suspense } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 
-import { getCaseConnectors } from '.';
 import type { CaseActionConnector } from '../types';
+import { getCaseConnectors } from '.';
 
 interface Props {
   connector: CaseActionConnector | null;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { MAX_FILE_SIZE } from '../../common/constants';
 import { createMockFilesSetup } from '@kbn/files-plugin/public/mocks';
 import { registerCaseFileKinds } from '.';
-import { MAX_FILE_SIZE } from '../../common/constants';
 import type { FilesConfig } from './types';
 
 describe('ui files index', () => {

@@ -7,16 +7,16 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { Required } from 'utility-types';
-import type { DataVisualizerTableState } from '../../../../../common/types';
-import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
+import type { FieldStatisticTableEmbeddableProps } from './types';
 import type { ItemIdToExpandedRowMap } from '../../../common/components/stats_table';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
-import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
+import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
+import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
+import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_results';
-import type { FieldStatisticTableEmbeddableProps } from './types';
 
 const restorableDefaults = getDefaultDataVisualizerListState();
 

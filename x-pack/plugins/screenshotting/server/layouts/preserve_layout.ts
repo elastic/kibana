@@ -6,9 +6,9 @@
  */
 import path from 'path';
 import type { CustomPageSize } from 'pdfmake/interfaces';
+import type { LayoutSelectorDictionary, Size } from '../../common/layout';
 import { DEFAULT_SELECTORS } from '.';
 import type { Layout } from '.';
-import type { LayoutSelectorDictionary, Size } from '../../common/layout';
 import { BaseLayout } from './base_layout';
 import type { PageSizeParams } from './base_layout';
 

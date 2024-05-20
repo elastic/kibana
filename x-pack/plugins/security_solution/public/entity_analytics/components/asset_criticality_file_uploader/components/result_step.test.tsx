@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
+import { render } from '@testing-library/react';
 import { AssetCriticalityResultStep } from './result_step';
+import { TestProviders } from '../../../../common/mock';
 
 describe('AssetCriticalityResultStep', () => {
   const mockValidLinesAsText = 'valid lines as text';

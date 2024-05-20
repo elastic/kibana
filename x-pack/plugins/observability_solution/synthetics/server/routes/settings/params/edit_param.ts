@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObject } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 
 const RequestParamsSchema = schema.object({
   id: schema.string(),

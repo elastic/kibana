@@ -37,7 +37,9 @@
         "summary": "Retrieves a list of all data views.",
         "operationId": "getAllDataViews",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -105,7 +107,9 @@
         "summary": "Creates a data view.",
         "operationId": "createDataView",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -158,7 +162,9 @@
         "summary": "Retrieves a single data view by identifier.",
         "operationId": "getDataView",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/view_id"
@@ -199,7 +205,9 @@
         "summary": "Deletes a data view.",
         "operationId": "deleteDataView",
         "description": "WARNING: When you delete a data view, it cannot be recovered. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -231,7 +239,9 @@
         "summary": "Updates a data view.",
         "operationId": "updateDataView",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -287,7 +297,9 @@
         "summary": "Retrieves the default data view identifier.",
         "operationId": "getDefaultDataView",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/space_id"
@@ -330,7 +342,9 @@
         "summary": "Sets the default data view identifier.",
         "operationId": "setDefaultDatailView",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -345,10 +359,15 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["data_view_id"],
+                "required": [
+                  "data_view_id"
+                ],
                 "properties": {
                   "data_view_id": {
-                    "type": ["string", "null"],
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "description": "The data view identifier. NOTE: The API does not validate whether it is a valid identifier. Use `null` to unset the default data view.\n"
                   },
                   "force": {
@@ -400,7 +419,9 @@
         "summary": "Update fields presentation metadata such as count, customLabel and format.",
         "operationId": "updateFieldsMetadata",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You can update multiple fields in one request. Updates are merged with persisted metadata. To remove existing metadata, specify null as the value.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -418,7 +439,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["fields"],
+                "required": [
+                  "fields"
+                ],
                 "properties": {
                   "fields": {
                     "description": "The field object.",
@@ -468,7 +491,9 @@
         "summary": "Creates a runtime field.",
         "operationId": "createRuntimeField",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -486,7 +511,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["name", "runtimeField"],
+                "required": [
+                  "name",
+                  "runtimeField"
+                ],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -511,7 +539,9 @@
         "summary": "Create or update an existing runtime field.",
         "operationId": "createUpdateRuntimeField",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -535,7 +565,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["name", "runtimeField"],
+                "required": [
+                  "name",
+                  "runtimeField"
+                ],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -600,7 +633,9 @@
         "summary": "Retrieves a runtime field.",
         "operationId": "getRuntimeField",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/field_name"
@@ -655,7 +690,9 @@
         "summary": "Delete a runtime field from a data view.",
         "operationId": "deleteRuntimeField",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/field_name"
@@ -687,7 +724,9 @@
         "summary": "Update an existing runtime field.",
         "operationId": "updateRuntimeField",
         "description": "This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-        "tags": ["data views"],
+        "tags": [
+          "data views"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/field_name"
@@ -705,7 +744,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["runtimeField"],
+                "required": [
+                  "runtimeField"
+                ],
                 "properties": {
                   "runtimeField": {
                     "type": "object",
@@ -760,7 +801,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "examples": ["default"]
+          "examples": [
+            "default"
+          ]
         }
       },
       "kbn_xsrf": {
@@ -800,20 +843,26 @@
           "data_view": [
             {
               "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
-              "namespaces": ["default"],
+              "namespaces": [
+                "default"
+              ],
               "title": "kibana_sample_data_ecommerce",
               "typeMeta": {},
               "name": "Kibana Sample Data eCommerce"
             },
             {
               "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
-              "namespaces": ["default"],
+              "namespaces": [
+                "default"
+              ],
               "title": "kibana_sample_data_flights",
               "name": "Kibana Sample Data Flights"
             },
             {
               "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
-              "namespaces": ["default"],
+              "namespaces": [
+                "default"
+              ],
               "title": "kibana_sample_data_logs",
               "name": "Kibana Sample Data Logs"
             }
@@ -851,7 +900,9 @@
                 "count": 0,
                 "name": "_id",
                 "type": "string",
-                "esTypes": ["_id"],
+                "esTypes": [
+                  "_id"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -866,7 +917,9 @@
                 "count": 0,
                 "name": "_index",
                 "type": "string",
-                "esTypes": ["_index"],
+                "esTypes": [
+                  "_index"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -895,7 +948,9 @@
                 "count": 0,
                 "name": "_source",
                 "type": "_source",
-                "esTypes": ["_source"],
+                "esTypes": [
+                  "_source"
+                ],
                 "scripted": false,
                 "searchable": false,
                 "aggregatable": false,
@@ -910,7 +965,9 @@
                 "count": 0,
                 "name": "category",
                 "type": "string",
-                "esTypes": ["text"],
+                "esTypes": [
+                  "text"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -925,7 +982,9 @@
                 "count": 0,
                 "name": "category.keyword",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -945,7 +1004,9 @@
                 "count": 0,
                 "name": "currency",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -960,7 +1021,9 @@
                 "count": 0,
                 "name": "customer_birth_date",
                 "type": "date",
-                "esTypes": ["date"],
+                "esTypes": [
+                  "date"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -975,7 +1038,9 @@
                 "count": 0,
                 "name": "customer_first_name",
                 "type": "string",
-                "esTypes": ["text"],
+                "esTypes": [
+                  "text"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -990,7 +1055,9 @@
                 "count": 0,
                 "name": "customer_first_name.keyword",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1010,7 +1077,9 @@
                 "count": 0,
                 "name": "customer_full_name",
                 "type": "string",
-                "esTypes": ["text"],
+                "esTypes": [
+                  "text"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -1025,7 +1094,9 @@
                 "count": 0,
                 "name": "customer_full_name.keyword",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1045,7 +1116,9 @@
                 "count": 0,
                 "name": "customer_gender",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1060,7 +1133,9 @@
                 "count": 0,
                 "name": "customer_id",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1075,7 +1150,9 @@
                 "count": 0,
                 "name": "customer_last_name",
                 "type": "string",
-                "esTypes": ["text"],
+                "esTypes": [
+                  "text"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -1090,7 +1167,9 @@
                 "count": 0,
                 "name": "customer_last_name.keyword",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1110,7 +1189,9 @@
                 "count": 0,
                 "name": "customer_phone",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1125,7 +1206,9 @@
                 "count": 0,
                 "name": "day_of_week",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1140,7 +1223,9 @@
                 "count": 0,
                 "name": "day_of_week_i",
                 "type": "number",
-                "esTypes": ["integer"],
+                "esTypes": [
+                  "integer"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1155,7 +1240,9 @@
                 "count": 0,
                 "name": "email",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1170,7 +1257,9 @@
                 "count": 0,
                 "name": "event.dataset",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1185,7 +1274,9 @@
                 "count": 0,
                 "name": "geoip.city_name",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1200,7 +1291,9 @@
                 "count": 0,
                 "name": "geoip.continent_name",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1215,7 +1308,9 @@
                 "count": 0,
                 "name": "geoip.country_iso_code",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1230,7 +1325,9 @@
                 "count": 0,
                 "name": "geoip.location",
                 "type": "geo_point",
-                "esTypes": ["geo_point"],
+                "esTypes": [
+                  "geo_point"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1248,7 +1345,9 @@
                 "count": 0,
                 "name": "geoip.region_name",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1263,7 +1362,9 @@
                 "count": 0,
                 "name": "manufacturer",
                 "type": "string",
-                "esTypes": ["text"],
+                "esTypes": [
+                  "text"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -1278,7 +1379,9 @@
                 "count": 0,
                 "name": "manufacturer.keyword",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1298,7 +1401,9 @@
                 "count": 0,
                 "name": "order_date",
                 "type": "date",
-                "esTypes": ["date"],
+                "esTypes": [
+                  "date"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1313,7 +1418,9 @@
                 "count": 0,
                 "name": "order_id",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1328,7 +1435,9 @@
                 "count": 0,
                 "name": "products._id",
                 "type": "string",
-                "esTypes": ["text"],
+                "esTypes": [
+                  "text"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -1343,7 +1452,9 @@
                 "count": 0,
                 "name": "products._id.keyword",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1363,7 +1474,9 @@
                 "count": 0,
                 "name": "products.base_price",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1381,7 +1494,9 @@
                 "count": 0,
                 "name": "products.base_unit_price",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1399,7 +1514,9 @@
                 "count": 0,
                 "name": "products.category",
                 "type": "string",
-                "esTypes": ["text"],
+                "esTypes": [
+                  "text"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -1414,7 +1531,9 @@
                 "count": 0,
                 "name": "products.category.keyword",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1434,7 +1553,9 @@
                 "count": 0,
                 "name": "products.created_on",
                 "type": "date",
-                "esTypes": ["date"],
+                "esTypes": [
+                  "date"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1449,7 +1570,9 @@
                 "count": 0,
                 "name": "products.discount_amount",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1464,7 +1587,9 @@
                 "count": 0,
                 "name": "products.discount_percentage",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1479,7 +1604,9 @@
                 "count": 1,
                 "name": "products.manufacturer",
                 "type": "string",
-                "esTypes": ["text"],
+                "esTypes": [
+                  "text"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -1494,7 +1621,9 @@
                 "count": 0,
                 "name": "products.manufacturer.keyword",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1514,7 +1643,9 @@
                 "count": 0,
                 "name": "products.min_price",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1532,7 +1663,9 @@
                 "count": 1,
                 "name": "products.price",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1550,7 +1683,9 @@
                 "count": 0,
                 "name": "products.product_id",
                 "type": "number",
-                "esTypes": ["long"],
+                "esTypes": [
+                  "long"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1565,7 +1700,9 @@
                 "count": 1,
                 "name": "products.product_name",
                 "type": "string",
-                "esTypes": ["text"],
+                "esTypes": [
+                  "text"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -1580,7 +1717,9 @@
                 "count": 0,
                 "name": "products.product_name.keyword",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1600,7 +1739,9 @@
                 "count": 0,
                 "name": "products.quantity",
                 "type": "number",
-                "esTypes": ["integer"],
+                "esTypes": [
+                  "integer"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1615,7 +1756,9 @@
                 "count": 0,
                 "name": "products.sku",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1630,7 +1773,9 @@
                 "count": 0,
                 "name": "products.tax_amount",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1645,7 +1790,9 @@
                 "count": 0,
                 "name": "products.taxful_price",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1663,7 +1810,9 @@
                 "count": 0,
                 "name": "products.taxless_price",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1681,7 +1830,9 @@
                 "count": 0,
                 "name": "products.unit_discount_amount",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1696,7 +1847,9 @@
                 "count": 0,
                 "name": "sku",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1711,7 +1864,9 @@
                 "count": 0,
                 "name": "taxful_total_price",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1729,7 +1884,9 @@
                 "count": 0,
                 "name": "taxless_total_price",
                 "type": "number",
-                "esTypes": ["half_float"],
+                "esTypes": [
+                  "half_float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1747,7 +1904,9 @@
                 "count": 1,
                 "name": "total_quantity",
                 "type": "number",
-                "esTypes": ["integer"],
+                "esTypes": [
+                  "integer"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1762,7 +1921,9 @@
                 "count": 0,
                 "name": "total_unique_products",
                 "type": "number",
-                "esTypes": ["integer"],
+                "esTypes": [
+                  "integer"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1777,7 +1938,9 @@
                 "count": 0,
                 "name": "type",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1792,7 +1955,9 @@
                 "count": 0,
                 "name": "user",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1872,7 +2037,9 @@
             },
             "allowNoIndex": false,
             "name": "Kibana Sample Data eCommerce",
-            "namespaces": ["default"]
+            "namespaces": [
+              "default"
+            ]
           }
         }
       },
@@ -1929,7 +2096,9 @@
           "data_view": {
             "...": null
           },
-          "fields": ["..."]
+          "fields": [
+            "..."
+          ]
         }
       },
       "get_runtime_field_response": {
@@ -1940,7 +2109,9 @@
               "count": 0,
               "name": "hour_of_day",
               "type": "number",
-              "esTypes": ["long"],
+              "esTypes": [
+                "long"
+              ],
               "scripted": false,
               "searchable": true,
               "aggregatable": true,
@@ -1965,7 +2136,9 @@
                 "count": 0,
                 "name": "hour_of_day",
                 "type": "number",
-                "esTypes": ["long"],
+                "esTypes": [
+                  "long"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -1988,7 +2161,9 @@
                 "count": 0,
                 "name": "AvgTicketPrice",
                 "type": "number",
-                "esTypes": ["float"],
+                "esTypes": [
+                  "float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2006,7 +2181,9 @@
                 "count": 0,
                 "name": "Cancelled",
                 "type": "boolean",
-                "esTypes": ["boolean"],
+                "esTypes": [
+                  "boolean"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2021,7 +2198,9 @@
                 "count": 0,
                 "name": "Carrier",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2036,7 +2215,9 @@
                 "count": 0,
                 "name": "Dest",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2051,7 +2232,9 @@
                 "count": 0,
                 "name": "DestAirportID",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2066,7 +2249,9 @@
                 "count": 0,
                 "name": "DestCityName",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2081,7 +2266,9 @@
                 "count": 0,
                 "name": "DestCountry",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2096,7 +2283,9 @@
                 "count": 0,
                 "name": "DestLocation",
                 "type": "geo_point",
-                "esTypes": ["geo_point"],
+                "esTypes": [
+                  "geo_point"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2114,7 +2303,9 @@
                 "count": 0,
                 "name": "DestRegion",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2129,7 +2320,9 @@
                 "count": 0,
                 "name": "DestWeather",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2144,7 +2337,9 @@
                 "count": 0,
                 "name": "DistanceKilometers",
                 "type": "number",
-                "esTypes": ["float"],
+                "esTypes": [
+                  "float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2159,7 +2354,9 @@
                 "count": 0,
                 "name": "DistanceMiles",
                 "type": "number",
-                "esTypes": ["float"],
+                "esTypes": [
+                  "float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2174,7 +2371,9 @@
                 "count": 0,
                 "name": "FlightDelay",
                 "type": "boolean",
-                "esTypes": ["boolean"],
+                "esTypes": [
+                  "boolean"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2189,7 +2388,9 @@
                 "count": 0,
                 "name": "FlightDelayMin",
                 "type": "number",
-                "esTypes": ["integer"],
+                "esTypes": [
+                  "integer"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2204,7 +2405,9 @@
                 "count": 0,
                 "name": "FlightDelayType",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2219,7 +2422,9 @@
                 "count": 0,
                 "name": "FlightNum",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2234,7 +2439,9 @@
                 "count": 0,
                 "name": "FlightTimeHour",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2249,7 +2456,9 @@
                 "count": 0,
                 "name": "FlightTimeMin",
                 "type": "number",
-                "esTypes": ["float"],
+                "esTypes": [
+                  "float"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2264,7 +2473,9 @@
                 "count": 0,
                 "name": "Origin",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2279,7 +2490,9 @@
                 "count": 0,
                 "name": "OriginAirportID",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2294,7 +2507,9 @@
                 "count": 0,
                 "name": "OriginCityName",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2309,7 +2524,9 @@
                 "count": 0,
                 "name": "OriginCountry",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2324,7 +2541,9 @@
                 "count": 0,
                 "name": "OriginLocation",
                 "type": "geo_point",
-                "esTypes": ["geo_point"],
+                "esTypes": [
+                  "geo_point"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2342,7 +2561,9 @@
                 "count": 0,
                 "name": "OriginRegion",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2357,7 +2578,9 @@
                 "count": 0,
                 "name": "OriginWeather",
                 "type": "string",
-                "esTypes": ["keyword"],
+                "esTypes": [
+                  "keyword"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2372,7 +2595,9 @@
                 "count": 0,
                 "name": "_id",
                 "type": "string",
-                "esTypes": ["_id"],
+                "esTypes": [
+                  "_id"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": false,
@@ -2387,7 +2612,9 @@
                 "count": 0,
                 "name": "_index",
                 "type": "string",
-                "esTypes": ["_index"],
+                "esTypes": [
+                  "_index"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2416,7 +2643,9 @@
                 "count": 0,
                 "name": "_source",
                 "type": "_source",
-                "esTypes": ["_source"],
+                "esTypes": [
+                  "_source"
+                ],
                 "scripted": false,
                 "searchable": false,
                 "aggregatable": false,
@@ -2431,7 +2660,9 @@
                 "count": 0,
                 "name": "dayOfWeek",
                 "type": "number",
-                "esTypes": ["integer"],
+                "esTypes": [
+                  "integer"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2446,7 +2677,9 @@
                 "count": 0,
                 "name": "timestamp",
                 "type": "date",
-                "esTypes": ["date"],
+                "esTypes": [
+                  "date"
+                ],
                 "scripted": false,
                 "searchable": true,
                 "aggregatable": true,
@@ -2501,7 +2734,11 @@
       "400_response": {
         "title": "Bad request",
         "type": "object",
-        "required": ["statusCode", "error", "message"],
+        "required": [
+          "statusCode",
+          "error",
+          "message"
+        ],
         "properties": {
           "statusCode": {
             "type": "number",
@@ -2545,7 +2782,9 @@
         "description": "The array of field names you want to filter out in Discover.",
         "items": {
           "type": "object",
-          "required": ["value"],
+          "required": [
+            "value"
+          ],
           "properties": {
             "value": {
               "type": "string"
@@ -2572,11 +2811,15 @@
       "create_data_view_request_object": {
         "title": "Create data view request",
         "type": "object",
-        "required": ["data_view"],
+        "required": [
+          "data_view"
+        ],
         "properties": {
           "data_view": {
             "type": "object",
-            "required": ["title"],
+            "required": [
+              "title"
+            ],
             "description": "The data view object.",
             "properties": {
               "allowNoIndex": {
@@ -2690,7 +2933,9 @@
           "error": {
             "type": "string",
             "example": "Not Found",
-            "enum": ["Not Found"]
+            "enum": [
+              "Not Found"
+            ]
           },
           "message": {
             "type": "string",
@@ -2699,14 +2944,18 @@
           "statusCode": {
             "type": "integer",
             "example": 404,
-            "enum": [404]
+            "enum": [
+              404
+            ]
           }
         }
       },
       "update_data_view_request_object": {
         "title": "Update data view request",
         "type": "object",
-        "required": ["data_view"],
+        "required": [
+          "data_view"
+        ],
         "properties": {
           "data_view": {
             "type": "object",

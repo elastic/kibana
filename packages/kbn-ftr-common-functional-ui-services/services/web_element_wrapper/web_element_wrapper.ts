@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
+import { PNG } from 'pngjs';
+import cheerio from 'cheerio';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
-import cheerio from 'cheerio';
-import { PNG } from 'pngjs';
-import { By, Key, WebDriver, WebElement } from 'selenium-webdriver';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { Browsers } from '../remote/browsers';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
+import { Browsers } from '../remote/browsers';
 
 interface TypeOptions {
   charByChar: boolean;

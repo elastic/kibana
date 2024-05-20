@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { compact, groupBy } from 'lodash';
 import { ValuesType } from 'utility-types';
-import { SPAN_SUBTYPE, SPAN_TYPE } from '../../../common/es_fields/apm';
+import { SPAN_TYPE, SPAN_SUBTYPE } from '../../../common/es_fields/apm';
 import {
   ConnectionEdge,
   ConnectionElement,
@@ -44,7 +44,7 @@ export interface GroupResourceNodesResponse {
 export function groupResourceNodes(responseData: {
   elements: ConnectionElement[];
 }): GroupResourceNodesResponse {
-  type ElementDefinition = ValuesType<(typeof responseData)['elements']>;
+  type ElementDefinition = ValuesType<typeof responseData['elements']>;
   const isEdge = (el: ElementDefinition) => Boolean(el.data.source && el.data.target);
   const isNode = (el: ElementDefinition) => !isEdge(el);
   const isElligibleGroupNode = (el: ElementDefinition) => {

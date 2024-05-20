@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import React from 'react';
-import { INTEGRATIONS } from '../../constants';
+import { Kpi } from './kpi';
 import {
-  useDockerContainerKpiCharts,
   useK8sContainerKpiCharts,
+  useDockerContainerKpiCharts,
 } from '../../hooks/use_container_metrics_charts';
 import { useIntegrationCheck } from '../../hooks/use_integration_check';
-import { Kpi } from './kpi';
+import { INTEGRATIONS } from '../../constants';
 
 export interface ContainerKpiChartsProps {
   dataView?: DataView;

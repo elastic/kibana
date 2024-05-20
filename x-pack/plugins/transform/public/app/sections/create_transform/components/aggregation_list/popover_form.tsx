@@ -27,7 +27,7 @@ import { dictionaryToArray } from '../../../../../../common/types/common';
 import type { PivotSupportedAggs } from '../../../../../../common/types/pivot_aggs';
 
 import type { PivotAggsConfig, PivotAggsConfigWithUiSupportDict } from '../../../../common';
-import { getEsAggFromAggConfig, isAggName, isPivotAggsConfigWithUiBase } from '../../../../common';
+import { isAggName, isPivotAggsConfigWithUiBase, getEsAggFromAggConfig } from '../../../../common';
 import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { getAggFormConfig } from '../step_define/common/get_agg_form_config';
 

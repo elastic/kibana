@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FetchCustomPipelineApiLogic } from '../../../../api/index/fetch_custom_pipeline_api_logic';
 import { IndexViewLogic } from '../../index_view_logic';

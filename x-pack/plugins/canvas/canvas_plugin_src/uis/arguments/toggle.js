@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React from 'react';
-import { ArgumentStrings } from '../../../i18n';
+import PropTypes from 'prop-types';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../../i18n';
 
 const { Toggle: strings } = ArgumentStrings;
 
@@ -23,7 +23,7 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError, typeInsta
     <div>
       <EuiFormRow display="rowCompressed">
         <EuiSwitch
-          compressed={true}
+          compressed
           id={argId}
           checked={argValue}
           onChange={handleChange}
@@ -31,7 +31,7 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError, typeInsta
           aria-label={typeInstance.displayName}
           resize="none"
           label={typeInstance.options.labelValue}
-          showLabel={true}
+          showLabel
         />
       </EuiFormRow>
     </div>

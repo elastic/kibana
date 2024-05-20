@@ -7,33 +7,33 @@
 
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
+import { useKibana } from '../utils/kibana_react';
+import { AlertsPage } from '../pages/alerts/alerts';
+import { AlertDetails } from '../pages/alert_details/alert_details';
+import { CasesPage } from '../pages/cases/cases';
+import { LandingPage } from '../pages/landing/landing';
+import { OverviewPage } from '../pages/overview/overview';
+import { RulesPage } from '../pages/rules/rules';
+import { RuleDetailsPage } from '../pages/rule_details/rule_details';
 import {
   ALERTS_PATH,
   ALERT_DETAIL_PATH,
   CASES_PATH,
   EXPLORATORY_VIEW_PATH,
   LANDING_PATH,
-  OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
-  OLD_SLOS_PATH,
-  OLD_SLOS_WELCOME_PATH,
-  OLD_SLO_DETAIL_PATH,
-  OLD_SLO_EDIT_PATH,
   OVERVIEW_PATH,
   ROOT_PATH,
   RULES_LOGS_PATH,
   RULES_PATH,
   RULE_DETAIL_PATH,
+  OLD_SLOS_PATH,
+  OLD_SLOS_WELCOME_PATH,
+  OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
+  OLD_SLO_DETAIL_PATH,
+  OLD_SLO_EDIT_PATH,
 } from '../../common/locators/paths';
-import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
-import { AlertDetails } from '../pages/alert_details/alert_details';
-import { AlertsPage } from '../pages/alerts/alerts';
-import { CasesPage } from '../pages/cases/cases';
-import { LandingPage } from '../pages/landing/landing';
-import { OverviewPage } from '../pages/overview/overview';
-import { RuleDetailsPage } from '../pages/rule_details/rule_details';
-import { RulesPage } from '../pages/rules/rules';
-import { useKibana } from '../utils/kibana_react';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.

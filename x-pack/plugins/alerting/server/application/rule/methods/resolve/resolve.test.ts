@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { ConstructorOptions, RulesClient } from '../../../../rules_client/rules_client';
 import {
-  loggingSystemMock,
   savedObjectsClientMock,
+  loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client/rules_client';
-import { getBeforeSetup } from '../../../../rules_client/tests/lib';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { getBeforeSetup } from '../../../../rules_client/tests/lib';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 describe('resolve', () => {
   const taskManager = taskManagerMock.createStart();

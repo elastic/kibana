@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiConfirmModal, EuiCopy } from '@elastic/eui';
+import { EuiBasicTable, EuiCopy, EuiConfirmModal } from '@elastic/eui';
 
 import { HiddenText } from '../../../../shared/hidden_text';
 

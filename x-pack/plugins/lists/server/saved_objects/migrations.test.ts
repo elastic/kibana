@@ -6,11 +6,11 @@
  */
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { v4 as uuidv4 } from 'uuid';
 
 import { ExceptionListSoSchema } from '../schemas/saved_objects';
 

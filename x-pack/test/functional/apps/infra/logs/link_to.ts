@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { URL } from 'url';
 import expect from '@kbn/expect';
+import { URL } from 'url';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ONE_HOUR = 60 * 60 * 1000;

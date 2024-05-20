@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFormRow } from '@elastic/eui';
-import { CodeEditorField } from '@kbn/code-editor';
-import { LangModuleType } from '@kbn/monaco';
 import React, { useState, useEffect, useCallback, FC } from 'react';
+import { EuiFormRow } from '@elastic/eui';
+import { LangModuleType } from '@kbn/monaco';
+import { CodeEditorField } from '@kbn/code-editor';
 import usePrevious from 'react-use/lib/usePrevious';
+import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
 import { withDebounceArg } from '../../../public/components/with_debounce_arg';
-import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
 const { Editor: strings } = ArgumentStrings;
 

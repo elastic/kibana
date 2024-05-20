@@ -8,7 +8,11 @@
     "server": true,
     "browser": true,
     "enabledOnAnonymousPages": true,
-    "requiredPlugins": ["cloud"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredPlugins": [
+      "cloud"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

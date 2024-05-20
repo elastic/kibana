@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
 import readline from 'readline';
+import fs from 'fs';
 import { createUnzip } from 'zlib';
 
 const BULK_INSERT_SIZE = 500;

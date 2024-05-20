@@ -5,18 +5,18 @@
  * 2.0.
  */
 import type {
-  ProductFeatureKeys,
   ProductFeatureKibanaConfig,
   ProductFeaturesCasesConfig,
+  ProductFeatureKeys,
 } from '@kbn/security-solution-features';
-import {
-  createEnabledProductFeaturesConfigMap,
-  getCasesDefaultProductFeaturesConfig,
-} from '@kbn/security-solution-features/config';
 import type {
-  CasesSubFeatureId,
   ProductFeatureCasesKey,
+  CasesSubFeatureId,
 } from '@kbn/security-solution-features/keys';
+import {
+  getCasesDefaultProductFeaturesConfig,
+  createEnabledProductFeaturesConfigMap,
+} from '@kbn/security-solution-features/config';
 
 import {
   CASES_CONNECTORS_CAPABILITY,

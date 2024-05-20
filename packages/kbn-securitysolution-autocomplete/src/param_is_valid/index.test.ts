@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { paramIsValid } from '.';
 import { getField } from '../fields/index.mock';
 import * as i18n from '../translations';
+import moment from 'moment';
 
 describe('params_is_valid', () => {
   beforeEach(() => {

@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiLink,
-  EuiPageSection,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
-import { ScopedHistory } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-
-import { Section } from '../../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
-  APP_WRAPPER_CLASS,
-  Error,
-  PageError,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiText,
+  EuiIconTip,
+  EuiSpacer,
+  EuiPageSection,
+  EuiEmptyPrompt,
+  EuiLink,
+} from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
+
+import {
   PageLoading,
-  attemptToURIDecode,
-  extractQueryParams,
+  PageError,
+  Error,
   reactRouterNavigate,
+  extractQueryParams,
+  attemptToURIDecode,
+  APP_WRAPPER_CLASS,
   useExecutionContext,
 } from '../../../../shared_imports';
+import { Section } from '../../../../../common/constants';
 import { useAppContext } from '../../../app_context';
-import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
 import { useLoadDataStreams } from '../../../services/api';
-import { IndexManagementBreadcrumb, breadcrumbService } from '../../../services/breadcrumbs';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { documentationService } from '../../../services/documentation';
-import { FilterListButton, Filters } from '../components';
-import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { DataStreamTable } from './data_stream_table';
+import { DataStreamDetailPanel } from './data_stream_detail_panel';
+import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
+import { FilterListButton, Filters } from '../components';
 
 export type DataStreamFilterName = 'managed' | 'hidden';
 interface MatchParams {

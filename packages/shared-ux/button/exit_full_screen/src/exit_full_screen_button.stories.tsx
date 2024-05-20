@@ -12,8 +12,8 @@ import {
   type ExitFullScreenButtonStorybookParams,
 } from '../mocks';
 
-import { ExitFullScreenButton as Component } from './exit_full_screen_button';
 import { ExitFullScreenButtonProvider } from './services';
+import { ExitFullScreenButton as Component } from './exit_full_screen_button';
 
 import mdx from '../README.mdx';
 

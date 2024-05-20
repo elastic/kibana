@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
+import { connect } from 'react-redux';
 import { StyleDescriptor } from '../../../common/descriptor_types';
+import { EditLayerPanel } from './edit_layer_panel';
+import { getSelectedLayer } from '../../selectors/map_selectors';
 import { updateLayerStyleForSelectedLayer, updateSourceProps } from '../../actions';
-import { isLayerGroup } from '../../classes/layers/layer_group';
+import { MapStoreState } from '../../reducers/store';
 import type { OnSourceChangeArgs } from '../../classes/sources/source';
 import { hasVectorSourceMethod } from '../../classes/sources/vector_source';
-import { MapStoreState } from '../../reducers/store';
-import { getSelectedLayer } from '../../selectors/map_selectors';
-import { EditLayerPanel } from './edit_layer_panel';
+import { isLayerGroup } from '../../classes/layers/layer_group';
 
 function mapStateToProps(state: MapStoreState) {
   const selectedLayer = getSelectedLayer(state);

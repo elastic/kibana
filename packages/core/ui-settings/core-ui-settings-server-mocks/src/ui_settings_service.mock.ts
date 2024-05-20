@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type {
-  InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
+  InternalUiSettingsServicePreboot,
   UiSettingsService,
 } from '@kbn/core-ui-settings-server-internal';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiStepsProps } from '@elastic/eui';
 import { useEffect, useState } from 'react';
+import { EuiStepsProps } from '@elastic/eui';
 import { type LogsFlowProgressStepId } from '../../common/logs_flow_progress_step_id';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
 import { useKibana } from './use_kibana';

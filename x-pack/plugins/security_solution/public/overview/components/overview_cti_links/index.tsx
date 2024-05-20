@@ -9,8 +9,8 @@ import React from 'react';
 
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import type { TiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
-import { CtiDisabledModule } from './cti_disabled_module';
 import { CtiEnabledModule } from './cti_enabled_module';
+import { CtiDisabledModule } from './cti_disabled_module';
 
 export type ThreatIntelLinkPanelProps = Pick<
   GlobalTimeArgs,

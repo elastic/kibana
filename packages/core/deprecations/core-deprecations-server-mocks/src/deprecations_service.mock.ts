@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { DeprecationsClient, DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DeprecationsServiceSetup, DeprecationsClient } from '@kbn/core-deprecations-server';
 import type {
   DeprecationsService,
   InternalDeprecationsServiceSetup,
   InternalDeprecationsServiceStart,
 } from '@kbn/core-deprecations-server-internal';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 type DeprecationsServiceContract = PublicMethodsOf<DeprecationsService>;
 

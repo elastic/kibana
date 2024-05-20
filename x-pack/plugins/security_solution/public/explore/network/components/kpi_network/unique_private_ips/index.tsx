@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { euiPaletteColorBlind } from '@elastic/eui';
 import React from 'react';
+import { euiPaletteColorBlind } from '@elastic/eui';
 
-import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
-import { kpiUniquePrivateIpsBarLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
-import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
-import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_source_metric';
-import { KpiBaseComponent } from '../../../../components/kpi';
 import type { StatItems } from '../../../../components/stat_items';
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
+import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_source_metric';
+import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
+import { kpiUniquePrivateIpsAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_area';
+import { kpiUniquePrivateIpsBarLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_bar';
+import { KpiBaseComponent } from '../../../../components/kpi';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis2 = euiVisColorPalette[2];

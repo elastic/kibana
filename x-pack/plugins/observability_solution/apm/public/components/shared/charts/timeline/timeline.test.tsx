@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { Timeline } from '.';
 import {
   disableConsoleWarning,
-  mockMoment,
   mountWithTheme,
+  mockMoment,
   toJson,
 } from '../../../../utils/test_helpers';
+import { Timeline } from '.';
 import { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 
 describe('Timeline', () => {

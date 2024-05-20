@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 import d3 from 'd3';
+import type { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
 import { useCurrentThemeVars } from '../../contexts/kibana';

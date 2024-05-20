@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
+import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 
 import * as i18n from './translations';
 

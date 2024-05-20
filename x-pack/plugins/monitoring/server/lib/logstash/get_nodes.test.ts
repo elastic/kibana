@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getNodes } from './get_nodes';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { LegacyRequest } from '../../types';
-import { getNodes } from './get_nodes';
 
 jest.mock('../../static_globals', () => ({
   Globals: {

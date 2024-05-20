@@ -18,30 +18,30 @@ import {
   saveAsMock,
 } from './saved_objects_table.test.mocks';
 
+import React from 'react';
+import { pick } from 'lodash';
 import { Query } from '@elastic/eui';
-import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { ShallowWrapper } from 'enzyme';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import {
-  applicationServiceMock,
   httpServiceMock,
-  notificationServiceMock,
   overlayServiceMock,
+  notificationServiceMock,
+  applicationServiceMock,
 } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
-import { ShallowWrapper } from 'enzyme';
-import { pick } from 'lodash';
-import React from 'react';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
-import { SavedObjectWithMetadata } from '../../types';
-import { Flyout, Relationships } from './components';
 import {
   SavedObjectsTable,
   SavedObjectsTableProps,
   SavedObjectsTableState,
 } from './saved_objects_table';
+import { Flyout, Relationships } from './components';
+import { SavedObjectWithMetadata } from '../../types';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 
 const convertType = (type: string): SavedObjectManagementTypeInfo => ({
   name: type,

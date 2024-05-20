@@ -5,36 +5,36 @@
  * 2.0.
  */
 
+import React, { useEffect, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
   EuiTitle,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiLink,
+  EuiCode,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { DataRetention } from '../../../../../common';
-import { allowAutoCreateRadios } from '../../../../../common/constants';
 import {
-  Field,
+  useForm,
+  useFormData,
   Form,
+  getUseField,
+  getFormRow,
+  Field,
   Forms,
   JsonEditorField,
   NumericField,
   RadioGroupField,
-  getFormRow,
-  getUseField,
-  useForm,
-  useFormData,
 } from '../../../../shared_imports';
-import { documentationService } from '../../../services/documentation';
 import { UnitField, timeUnits } from '../../shared';
-import { nameConfig, nameConfigWithoutValidations, schemas } from '../template_form_schemas';
+import { DataRetention } from '../../../../../common';
+import { documentationService } from '../../../services/documentation';
+import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
+import { allowAutoCreateRadios } from '../../../../../common/constants';
 
 // Create or Form components with partial props that are common to all instances
 const UseField = getUseField({ component: Field });

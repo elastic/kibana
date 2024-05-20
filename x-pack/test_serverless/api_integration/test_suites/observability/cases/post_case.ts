@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 

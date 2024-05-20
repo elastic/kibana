@@ -7,8 +7,8 @@
 
 import { Matcher, SelectorMatcherOptions, within } from '@testing-library/react';
 import React from 'react';
+import { render, WrappedHelper } from '../../../utils/testing';
 import { JourneyStep } from '../../../../../../common/runtime_types';
-import { WrappedHelper, render } from '../../../utils/testing';
 import { BrowserStepsList } from './browser_steps_list';
 
 describe('<BrowserStepsList />', () => {

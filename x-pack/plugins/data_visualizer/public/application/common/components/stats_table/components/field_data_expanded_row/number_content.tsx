@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { HorizontalAlignment } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexItem, EuiText, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
 import type { FC, ReactNode } from 'react';
 import React, { useMemo } from 'react';
+import type { HorizontalAlignment } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexItem, EuiText, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
-import { TopValues } from '../../../top_values';
-import { kibanaFieldFormat, numberAsOrdinal } from '../../../utils';
 import type { FieldDataRowProps } from '../../types/field_data_row';
-import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+import { kibanaFieldFormat, numberAsOrdinal } from '../../../utils';
 import { MetricDistributionChart, buildChartDataFromStats } from '../metric_distribution_chart';
+import { TopValues } from '../../../top_values';
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 import { ExpandedRowPanel } from './expanded_row_panel';

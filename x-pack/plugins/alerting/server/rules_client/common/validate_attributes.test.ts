@@ -7,9 +7,9 @@
 
 import * as esKuery from '@kbn/es-query';
 import {
-  validateFilterKueryNode,
-  validateSearchFields,
   validateSortField,
+  validateSearchFields,
+  validateFilterKueryNode,
 } from './validate_attributes';
 
 describe('Validate attributes', () => {

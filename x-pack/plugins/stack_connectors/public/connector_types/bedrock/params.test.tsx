@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { DEFAULT_BEDROCK_URL, SUB_ACTION } from '../../../common/bedrock/constants';
+import { fireEvent, render } from '@testing-library/react';
 import BedrockParamsFields from './params';
+import { DEFAULT_BEDROCK_URL, SUB_ACTION } from '../../../common/bedrock/constants';
+import { I18nProvider } from '@kbn/i18n-react';
 
 const messageVariables = [
   {

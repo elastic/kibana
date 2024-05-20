@@ -10,8 +10,8 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 import {
-  CrawlerCustomScheduleMappingClient,
   CrawlerCustomScheduleMappingServer,
+  CrawlerCustomScheduleMappingClient,
   CrawlerCustomScheduleServer,
 } from '../../../common/types/crawler';
 

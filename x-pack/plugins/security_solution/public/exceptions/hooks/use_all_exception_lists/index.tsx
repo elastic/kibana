@@ -8,8 +8,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { fetchRules } from '../../../detection_engine/rule_management/api/api';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
+import { fetchRules } from '../../../detection_engine/rule_management/api/api';
 export interface ExceptionListInfo extends ExceptionListSchema {
   rules: Rule[];
 }
@@ -17,7 +17,7 @@ export interface ExceptionListInfo extends ExceptionListSchema {
 export type UseAllExceptionListsReturn = [
   boolean,
   ExceptionListInfo[],
-  Record<string, ExceptionListInfo>,
+  Record<string, ExceptionListInfo>
 ];
 
 /**

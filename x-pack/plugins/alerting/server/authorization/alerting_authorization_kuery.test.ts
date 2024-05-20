@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
 import { RecoveredActionGroup } from '../../common';
 import {
   AlertingAuthorizationFilterType,
   asFiltersByRuleTypeAndConsumer,
-  asFiltersBySpaceId,
   ensureFieldIsSafeForQuery,
+  asFiltersBySpaceId,
 } from './alerting_authorization_kuery';
+import { fromKueryExpression } from '@kbn/es-query';
 
 describe('asKqlFiltersByRuleTypeAndConsumer', () => {
   test('constructs KQL filter for single rule type with single authorized consumer', async () => {

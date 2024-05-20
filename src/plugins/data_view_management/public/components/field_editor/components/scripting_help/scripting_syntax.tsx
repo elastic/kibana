@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiCode, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Fragment } from 'react';
+import { EuiCode, EuiIcon, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';

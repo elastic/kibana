@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
 
 import { SecurityPageName } from '../../../../../../common';
 
-import { useKibana } from '../../../../lib/kibana';
-import type { SecurityProductTypes } from '../configs';
-import { ALL_PRODUCT_LINES, ProductLine } from '../configs';
-import { findCardSectionByStepId } from '../helpers';
+import { OnboardingStorage } from '../storage';
 import {
-  getActiveProductsInitialStates,
   getActiveSectionsInitialStates,
+  getActiveProductsInitialStates,
   getFinishedStepsInitialStates,
   reducer,
 } from '../reducer';
-import { OnboardingStorage } from '../storage';
 import type {
   Card,
   ExpandedCardSteps,
+  ToggleTaskCompleteStatus,
   OnStepClicked,
   Step,
-  StepId,
   Switch,
-  ToggleTaskCompleteStatus,
+  StepId,
 } from '../types';
 import { OnboardingActions } from '../types';
+import { findCardSectionByStepId } from '../helpers';
+import type { SecurityProductTypes } from '../configs';
+import { ALL_PRODUCT_LINES, ProductLine } from '../configs';
+import { useKibana } from '../../../../lib/kibana';
 
 const syncExpandedCardStepsToStorageFromURL = (
   onboardingStorage: OnboardingStorage,
@@ -112,8 +112,8 @@ export const useTogglePanel = ({
     return activeProductsFromStorage.size > 0
       ? activeProductsFromStorage
       : productTypes && productTypes.length > 0
-        ? new Set(productTypes.map(({ product_line: productLine }) => ProductLine[productLine]))
-        : new Set(ALL_PRODUCT_LINES);
+      ? new Set(productTypes.map(({ product_line: productLine }) => ProductLine[productLine]))
+      : new Set(ALL_PRODUCT_LINES);
   }, [getActiveProductsFromStorage, productTypes]);
 
   const {

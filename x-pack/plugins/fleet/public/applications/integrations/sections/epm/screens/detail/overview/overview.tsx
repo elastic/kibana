@@ -7,18 +7,18 @@
 import React, { memo, useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import type { MouseEventHandler } from 'react';
 
+import styled from 'styled-components';
 import {
-  EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiSideNav,
   EuiSpacer,
+  EuiLink,
+  EuiButton,
+  EuiSideNav,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 
 import {
   isIntegrationPolicyTemplate,
@@ -27,18 +27,18 @@ import {
 } from '../../../../../../../../common/services';
 
 import {
-  sendGetFileByPath,
   useGetPackageVerificationKeyId,
   useLink,
   useStartServices,
+  sendGetFileByPath,
 } from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
-import { Details } from './details';
-import { Readme } from './readme';
-import { Requirements } from './requirements';
 import { Screenshots } from './screenshots';
+import { Readme } from './readme';
+import { Details } from './details';
+import { Requirements } from './requirements';
 
 interface Props {
   packageInfo: PackageInfo;

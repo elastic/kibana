@@ -7,11 +7,11 @@
 
 import http from 'http';
 import {
-  IKibanaResponse,
-  IRouter,
+  RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
-  RequestHandlerContext,
+  IKibanaResponse,
+  IRouter,
 } from '@kbn/core/server';
 import { ProxyArgs, Simulator } from './simulator';
 

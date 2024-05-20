@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { NumberInputOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
 
 import { ValueAxis } from '../../../../types';
-import { SetScale } from './value_axis_options';
 import { YExtents } from './y_extents';
+import { SetScale } from './value_axis_options';
 
 export interface CustomExtentsOptionsProps {
   axisScale: ValueAxis['scale'];

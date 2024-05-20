@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   SEARCH_APPLICATIONS_PATH,

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/es-query';
-import { tinymathFunctions } from '@kbn/lens-formula-docs';
+import { groupBy, isObject } from 'lodash';
 import type {
   TinymathAST,
   TinymathFunction,
   TinymathNamedArgument,
   TinymathVariable,
 } from '@kbn/tinymath';
-import { groupBy, isObject } from 'lodash';
+import type { Query } from '@kbn/es-query';
+import { tinymathFunctions } from '@kbn/lens-formula-docs';
+import { nonNullable } from '../../../../../utils';
 import type {
+  OperationDefinition,
   GenericIndexPatternColumn,
   GenericOperationDefinition,
-  OperationDefinition,
 } from '..';
-import { nonNullable } from '../../../../../utils';
 import type { GroupedNodes } from './types';
 
 export const unquotedStringRegex = /[^0-9A-Za-z._@\[\]/]/;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { FieldSelect } from '../field_select';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export function DynamicOrientationForm({
   fields,

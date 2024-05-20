@@ -27,8 +27,8 @@ import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
-import type { ReportingConfigType } from '.';
 import type { CreateJobFn, RunTaskFn } from './types';
+import type { ReportingConfigType } from '.';
 
 export interface BaseExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
@@ -46,7 +46,7 @@ export abstract class ExportType<
   JobParamsType extends object = any,
   TaskPayloadType extends object = any,
   SetupDepsType extends BaseExportTypeSetupDeps = BaseExportTypeSetupDeps,
-  StartDepsType extends BaseExportTypeStartDeps = BaseExportTypeStartDeps,
+  StartDepsType extends BaseExportTypeStartDeps = BaseExportTypeStartDeps
 > {
   abstract id: string; // ID for exportTypesRegistry.getById()
   abstract name: string; // user-facing string

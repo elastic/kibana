@@ -14,14 +14,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import {
   ActionMenuDivider,
   Section,
   SectionSubtitle,
   SectionTitle,
 } from '@kbn/observability-shared-plugin/public';
-import { isEmpty } from 'lodash';
-import React, { useMemo, useState } from 'react';
 import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
 import { CustomLink, Filter } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
@@ -29,8 +29,8 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { convertFiltersToQuery } from '../../../app/settings/custom_link/create_edit_custom_link_flyout/helper';
 import { LoadingStatePrompt } from '../../loading_state_prompt';
-import { CustomLinkList } from './custom_link_list';
 import { CustomLinkToolbar } from './custom_link_toolbar';
+import { CustomLinkList } from './custom_link_list';
 
 const DEFAULT_LINKS_TO_SHOW = 3;
 

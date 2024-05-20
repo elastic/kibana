@@ -7,7 +7,7 @@
 
 import { mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { deleteAll, deleteComment } from './delete';
+import { deleteComment, deleteAll } from './delete';
 
 describe('delete', () => {
   describe('deleteComment', () => {

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
-import type { TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
-import { createMergedEsQuery } from '../../application/utils/search_utils';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { Query, Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
+import { createMergedEsQuery } from '../../application/utils/search_utils';
 interface Props {
   searchString: Query['query'];
   searchQuery: Query['query'];

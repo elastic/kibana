@@ -7,11 +7,11 @@
  */
 
 import {
-  IconChartGaugeArc,
-  IconChartGaugeCircle,
-  IconChartGaugeSemiCircle,
   IconChartHorizontalBullet,
   IconChartVerticalBullet,
+  IconChartGaugeSemiCircle,
+  IconChartGaugeArc,
+  IconChartGaugeCircle,
 } from '@kbn/chart-icons';
 import { GaugeShape, GaugeShapes } from '../../../common';
 
@@ -22,4 +22,4 @@ export const getGaugeIconByType = (type: GaugeShape) =>
     [GaugeShapes.SEMI_CIRCLE]: IconChartGaugeSemiCircle,
     [GaugeShapes.ARC]: IconChartGaugeArc,
     [GaugeShapes.CIRCLE]: IconChartGaugeCircle,
-  })[type];
+  }[type]);

@@ -6,41 +6,41 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+  httpServerMock,
+  httpServiceMock,
+} from '@kbn/core/server/mocks';
 import type {
   KibanaResponseFactory,
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
-import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
-import { dataPluginMock } from '@kbn/unified-search-plugin/server/mocks';
 import type { Observable } from 'rxjs';
-import {
-  getEndpointSuggestionsRequestHandler,
-  getLogger,
-  registerEndpointSuggestionsRoutes,
-} from '.';
-import type { EndpointSuggestionsSchema } from '../../../../common/api/endpoint';
-import { SUGGESTIONS_ROUTE, eventsIndexPattern } from '../../../../common/endpoint/constants';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
-import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { dataPluginMock } from '@kbn/unified-search-plugin/server/mocks';
+import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
 import {
   createMockEndpointAppContext,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
+import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import { applyActionsEsSearchMock } from '../../services/actions/mocks';
+import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
+import type { EndpointSuggestionsSchema } from '../../../../common/api/endpoint';
+import {
+  getEndpointSuggestionsRequestHandler,
+  registerEndpointSuggestionsRoutes,
+  getLogger,
+} from '.';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { eventsIndexPattern, SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
   return {

@@ -1,6 +1,3 @@
-import { EuiSuperSelect } from '@elastic/eui';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { syntheticsThrottlingEnabled } from '@kbn/observability-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,12 +5,15 @@ import { syntheticsThrottlingEnabled } from '@kbn/observability-plugin/public';
  * 2.0.
  */
 import React from 'react';
-import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
-import { CUSTOM_LABEL, PROFILES_MAP, PROFILE_VALUES, PROFILE_VALUES_ENUM } from '../../constants';
-import { ConnectionProfile } from './connection_profile';
-import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
-import { ThrottlingFields } from './throttling_fields';
+import { EuiSuperSelect } from '@elastic/eui';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { syntheticsThrottlingEnabled } from '@kbn/observability-plugin/public';
 import { useConnectionProfiles } from './use_connection_profiles';
+import { ThrottlingDisabledCallout } from './throttling_disabled_callout';
+import { ThrottlingConfig } from '../../../../../../../common/runtime_types';
+import { ThrottlingFields } from './throttling_fields';
+import { PROFILE_VALUES_ENUM, PROFILE_VALUES, PROFILES_MAP, CUSTOM_LABEL } from '../../constants';
+import { ConnectionProfile } from './connection_profile';
 
 export interface ThrottlingConfigFieldProps {
   ariaLabel: string;

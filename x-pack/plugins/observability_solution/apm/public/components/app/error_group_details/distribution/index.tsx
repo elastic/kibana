@@ -9,13 +9,13 @@ import {
   Axis,
   BarSeries,
   Chart,
-  DARK_THEME,
-  LIGHT_THEME,
+  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
   Tooltip,
-  niceTimeFormatter,
+  LIGHT_THEME,
+  DARK_THEME,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

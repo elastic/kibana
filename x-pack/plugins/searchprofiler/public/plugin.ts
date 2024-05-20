@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { firstValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { Plugin, CoreSetup } from '@kbn/core/public';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import { PLUGIN } from '../common';
-import { SearchProfilerLocatorDefinition } from './locator';
 import { AppPublicPluginDependencies } from './types';
+import { SearchProfilerLocatorDefinition } from './locator';
 
 const checkLicenseStatus = (license: ILicense) => {
   const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);

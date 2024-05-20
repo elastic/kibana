@@ -5,37 +5,37 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiProgress,
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
+  EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  getAnalysisType,
   type DataFrameAnalyticsId,
   type DataFrameAnalyticsStats,
-  getAnalysisType,
 } from '@kbn/ml-data-frame-analytics-utils';
-import React, { Fragment } from 'react';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
-import { useMlLink } from '../../../../../contexts/kibana';
 import type { DataFrameAnalyticsListRow } from './common';
 import {
-  DataFrameAnalyticsListColumn,
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStopped,
+  DataFrameAnalyticsListColumn,
 } from './common';
 import { useActions } from './use_actions';
+import { useMlLink } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 const TRUNCATE_TEXT_LINES = 3;
 

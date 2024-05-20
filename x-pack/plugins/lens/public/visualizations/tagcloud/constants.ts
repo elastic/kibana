@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
+import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 
 export const TAGCLOUD_LABEL = i18n.translate('xpack.lens.tagcloud.label', {
   defaultMessage: 'Tag cloud',

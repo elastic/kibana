@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getType } from '@kbn/interpreter';
 import { includes } from 'lodash';
+import { getType } from '@kbn/interpreter';
 
 /*
 

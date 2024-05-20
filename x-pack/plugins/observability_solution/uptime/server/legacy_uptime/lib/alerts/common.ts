@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { AlertInstanceState } from '@kbn/alerting-plugin/server';
-import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
-import { ObservabilityUptimeAlert, legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import { IBasePath } from '@kbn/core/server';
-import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
-import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../../../common/constants/synthetics_alerts';
+import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { legacyExperimentalFieldMap, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { IBasePath } from '@kbn/core/server';
+import type { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { AlertInstanceState } from '@kbn/alerting-plugin/server';
+import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
+import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../../../common/constants/synthetics_alerts';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../../common/runtime_types';
 import { ALERT_DETAILS_URL } from './action_variables';
 

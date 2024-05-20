@@ -6,14 +6,6 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { SearchSource } from '@kbn/data-plugin/public';
-import {
-  APP_ID,
-  ES_GEO_FIELD_TYPE,
-  GRID_RESOLUTION,
-  RENDER_AS,
-  SOURCE_TYPES,
-} from '../../../../common/constants';
 import { MapExtent, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import {
   getExecutionContextService,
@@ -21,8 +13,16 @@ import {
   getIndexPatternService,
   getSearchService,
 } from '../../../kibana_services';
-import { LICENSED_FEATURES } from '../../../licensed_features';
 import { ESGeoGridSource } from './es_geo_grid_source';
+import {
+  APP_ID,
+  ES_GEO_FIELD_TYPE,
+  GRID_RESOLUTION,
+  RENDER_AS,
+  SOURCE_TYPES,
+} from '../../../../common/constants';
+import { SearchSource } from '@kbn/data-plugin/public';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
 jest.mock('../../../kibana_services');
 

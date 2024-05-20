@@ -9,8 +9,8 @@
 import Path from 'path';
 import Fsp from 'fs/promises';
 
-import { isDirectory, isFile, maybeRealpath } from '../../lib/fs.mjs';
 import { REPO_ROOT } from '../../lib/paths.mjs';
+import { maybeRealpath, isFile, isDirectory } from '../../lib/fs.mjs';
 
 // yarn integrity file checker
 export async function removeYarnIntegrityFileIfExists() {

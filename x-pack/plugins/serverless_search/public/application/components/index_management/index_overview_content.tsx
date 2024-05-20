@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { Suspense, lazy } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import React, { Suspense, lazy } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { IndexContent } from '@kbn/index-management';
 

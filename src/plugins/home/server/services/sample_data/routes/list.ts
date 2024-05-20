@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { sortBy } from 'lodash';
+import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { AppLinkData, SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import type { FindSampleObjectsResponseObject } from '../lib/find_sample_objects';
 import { findSampleObjects } from '../lib/find_sample_objects';
-import type { AppLinkData, SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { getUniqueObjectTypes } from '../lib/utils';
 import { getSavedObjectsClient } from './utils';
 

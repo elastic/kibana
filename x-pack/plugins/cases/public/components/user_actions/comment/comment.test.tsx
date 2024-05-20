@@ -5,20 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { RenderResult } from '@testing-library/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { UserActionActions } from '../../../../common/types/domain';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
-import { AttachmentActionType } from '../../../client/attachment_framework/types';
-import type { AppMockRenderer } from '../../../common/mock';
-import { TestProviders, createAppMockRenderer } from '../../../common/mock';
-import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
 import {
   alertComment,
   basicCase,
@@ -34,9 +28,15 @@ import {
   hostIsolationComment,
   persistableStateAttachment,
 } from '../../../containers/mock';
-import { userProfiles } from '../../../containers/user_profiles/api.mock';
-import { getMockBuilderArgs } from '../mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../../common/mock';
 import { createCommentUserActionBuilder } from './comment';
+import { getMockBuilderArgs } from '../mock';
+import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
+import { userProfiles } from '../../../containers/user_profiles/api.mock';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');

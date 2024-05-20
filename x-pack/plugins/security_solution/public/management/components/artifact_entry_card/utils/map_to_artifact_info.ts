@@ -6,9 +6,9 @@
  */
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { tagsToEffectScope } from '../../../../../common/endpoint/service/trusted_apps/mapping';
-import type { EffectScope, MaybeImmutable } from '../../../../../common/endpoint/types';
 import type { AnyArtifact, ArtifactInfo } from '../types';
+import type { EffectScope, MaybeImmutable } from '../../../../../common/endpoint/types';
+import { tagsToEffectScope } from '../../../../../common/endpoint/service/trusted_apps/mapping';
 import { isTrustedApp } from './is_trusted_app';
 
 export const mapToArtifactInfo = (_item: MaybeImmutable<AnyArtifact>): ArtifactInfo => {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type {
-  AlertSuppressionDuration,
-  AlertSuppressionMissingFieldsStrategy,
-  PatchRuleRequestBody,
-} from '../../../../../common/api/detection_engine';
+import {
+  commonParamsCamelToSnake,
+  patchTypeSpecificSnakeToCamel,
+  typeSpecificCamelToSnake,
+} from './rule_converters';
 import {
   getBaseRuleParams,
   getEqlRuleParams,
@@ -20,11 +20,11 @@ import {
   getThreatRuleParams,
   getThresholdRuleParams,
 } from '../../rule_schema/mocks';
-import {
-  commonParamsCamelToSnake,
-  patchTypeSpecificSnakeToCamel,
-  typeSpecificCamelToSnake,
-} from './rule_converters';
+import type {
+  AlertSuppressionDuration,
+  PatchRuleRequestBody,
+  AlertSuppressionMissingFieldsStrategy,
+} from '../../../../../common/api/detection_engine';
 
 describe('rule_converters', () => {
   describe('patchTypeSpecificSnakeToCamel', () => {

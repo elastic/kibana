@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ApplicationStart, NavigateToAppOptions } from '@kbn/core/public';
 import type { MouseEventHandler } from 'react';
 import { useCallback } from 'react';
+import type { ApplicationStart, NavigateToAppOptions } from '@kbn/core/public';
 import { useKibana } from '../../lib/kibana';
 
 type NavigateToAppHandlerOptions<S = unknown> = NavigateToAppOptions & {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { isValidFeatureId } from '@kbn/rule-data-utils';
 import { useQuery } from '@tanstack/react-query';
+import { isValidFeatureId } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
-import { useCasesToast } from '../common/use_cases_toast';
 import type { ServerError } from '../types';
+import { useCasesToast } from '../common/use_cases_toast';
+import * as i18n from './translations';
 import { getFeatureIds } from './api';
 import { casesQueriesKeys } from './constants';
-import * as i18n from './translations';
 import type { FeatureIdsResponse } from './types';
 
 interface UseGetFeatureIdsResponse {

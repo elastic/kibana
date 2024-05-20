@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiButton, EuiCard, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexItem, EuiCard, EuiLink, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
 

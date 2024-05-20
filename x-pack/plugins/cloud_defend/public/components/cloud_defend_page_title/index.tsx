@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 export const CloudDefendPageTitle = ({ title }: { title: string }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">

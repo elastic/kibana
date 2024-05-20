@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 describe('getWellKnownEmailServiceRoute', () => {
   it('returns config for well known email service', async () => {

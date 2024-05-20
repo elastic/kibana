@@ -8,31 +8,31 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { safeLoad } from 'js-yaml';
+import { loggerMock } from '@kbn/logging-mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
 import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
 
-import { appContextService } from '../../..';
-import {
-  FLEET_COMPONENT_TEMPLATES,
-  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
-  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
-  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
-} from '../../../../constants';
 import { createAppContextStartContractMock } from '../../../../mocks';
+import { appContextService } from '../../..';
 import type { RegistryDataStream } from '../../../../types';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
+import {
+  FLEET_COMPONENT_TEMPLATES,
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+  FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+} from '../../../../constants';
 
 import {
   generateMappings,
-  generateTemplateIndexPattern,
   getTemplate,
   getTemplatePriority,
+  generateTemplateIndexPattern,
   updateCurrentWriteIndices,
 } from './template';
 

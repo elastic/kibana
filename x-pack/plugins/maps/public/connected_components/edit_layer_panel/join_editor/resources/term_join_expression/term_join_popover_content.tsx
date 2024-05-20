@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
+  EuiPopoverTitle,
+  EuiFormRow,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormHelpText,
-  EuiFormRow,
-  EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getDataViewSelectPlaceholder } from '../../../../../../common/i18n_getters';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../../common/constants';
 import {
   ESTermSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
-import { getDataViewSelectPlaceholder } from '../../../../../../common/i18n_getters';
 import { SingleFieldSelect } from '../../../../../components/single_field_select';
 import { ValidatedNumberInput } from '../../../../../components/validated_number_input';
 
 import { getTermsFields } from '../../../../../index_pattern_util';
 import { getIndexPatternSelectComponent } from '../../../../../kibana_services';
-import { inputStrings } from '../../../../input_strings';
 import type { JoinField } from '../../join_editor';
+import { inputStrings } from '../../../../input_strings';
 
 interface Props {
   // Left source props (static - can not change)

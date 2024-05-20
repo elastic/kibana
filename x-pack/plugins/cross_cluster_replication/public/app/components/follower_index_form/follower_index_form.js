@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { PureComponent, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce } from 'lodash';
-import PropTypes from 'prop-types';
-import React, { PureComponent, Fragment } from 'react';
 
 import {
   EuiButton,
@@ -30,20 +30,20 @@ import {
 } from '@elastic/eui';
 
 import { extractQueryParams, indices } from '../../../shared_imports';
-import { API_STATUS } from '../../constants';
+import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
+import { routing } from '../../services/routing';
+import { getFatalErrors } from '../../services/notifications';
 import { loadIndices } from '../../services/api';
 import { documentationLinks } from '../../services/documentation_links';
+import { API_STATUS } from '../../constants';
 import { getRemoteClusterName } from '../../services/get_remote_cluster_name';
-import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
-import { getFatalErrors } from '../../services/notifications';
-import { routing } from '../../services/routing';
-import { FormEntryRow } from '../form_entry_row';
 import { RemoteClustersFormField } from '../remote_clusters_form_field';
 import { SectionError } from '../section_error';
+import { FormEntryRow } from '../form_entry_row';
 import {
-  areAdvancedSettingsEdited,
   getAdvancedSettingsFields,
   getEmptyAdvancedSettings,
+  areAdvancedSettingsEdited,
 } from './advanced_settings_fields';
 
 import { FollowerIndexRequestFlyout } from './follower_index_request_flyout';
@@ -128,8 +128,8 @@ export class FollowerIndexForm extends PureComponent {
     const areAdvancedSettingsVisible = isNew
       ? false
       : areAdvancedSettingsEdited(followerIndex, documentationLinks)
-        ? true
-        : false;
+      ? true
+      : false;
 
     const fieldsErrors = this.getFieldsErrors(followerIndex);
 

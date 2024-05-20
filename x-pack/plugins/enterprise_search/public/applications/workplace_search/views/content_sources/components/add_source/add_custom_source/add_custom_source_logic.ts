@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { HttpError, Status } from '../../../../../../../../common/types/api';
 import { CustomSource } from '../../../../../types';

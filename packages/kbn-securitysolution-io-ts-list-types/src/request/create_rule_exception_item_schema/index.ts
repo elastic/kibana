@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { DefaultUuid } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { DefaultUuid } from '@kbn/securitysolution-io-ts-types';
 
 import {
   CreateCommentsArray,
   DefaultCreateCommentsArray,
-  EntriesArray,
-  ExpireTimeOrUndefined,
-  ItemId,
-  NamespaceType,
-  OsTypeArray,
-  Tags,
   description,
+  EntriesArray,
   exceptionListItemType,
-  expireTimeOrUndefined,
+  ItemId,
   meta,
-  name,
+  NamespaceType,
   namespaceType,
   nonEmptyEntriesArray,
+  OsTypeArray,
   osTypeArrayOrUndefined,
+  Tags,
   tags,
+  name,
+  ExpireTimeOrUndefined,
+  expireTimeOrUndefined,
 } from '../../common';
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 

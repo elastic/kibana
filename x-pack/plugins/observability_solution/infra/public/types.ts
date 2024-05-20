@@ -5,29 +5,24 @@
  * 2.0.
  */
 
-import type { EuiDragDropContext, EuiDraggable } from '@elastic/eui';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import {
-  LogsSharedClientSetupExports,
-  LogsSharedClientStartExports,
-} from '@kbn/logs-shared-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
+import type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -36,24 +31,29 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type {
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type {
-  UsageCollectionSetup,
-  UsageCollectionStart,
-} from '@kbn/usage-collection-plugin/public';
-import type { InfraLocators } from '../common/locators';
+import {
+  LogsSharedClientSetupExports,
+  LogsSharedClientStartExports,
+} from '@kbn/logs-shared-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import { InventoryViewsServiceStart } from './services/inventory_views';
 import { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import { ITelemetryClient } from './services/telemetry';
+import type { InfraLocators } from '../common/locators';
 
 // Our own setup and start contract values
 export interface InfraClientSetupExports {

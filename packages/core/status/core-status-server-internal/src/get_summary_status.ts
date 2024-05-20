@@ -9,9 +9,9 @@
 import { PluginName } from '@kbn/core-base-common';
 import {
   type CoreStatus,
+  ServiceStatusLevels,
   type ServiceStatus,
   type ServiceStatusLevel,
-  ServiceStatusLevels,
 } from '@kbn/core-status-common';
 import type { NamedPluginStatus, NamedServiceStatus, PluginStatus } from './types';
 
@@ -39,8 +39,8 @@ export const getSummaryStatus = ({
         serviceStatuses && pluginStatuses
           ? 'All services and plugins are available'
           : serviceStatuses
-            ? 'All services are available'
-            : 'All plugins are available',
+          ? 'All services are available'
+          : 'All plugins are available',
     };
   } else {
     const failingPlugins = highestLevelPlugins?.filter(({ reported }) => reported);

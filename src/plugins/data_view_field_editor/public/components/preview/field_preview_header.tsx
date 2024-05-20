@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiTitle, EuiText, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useStateSelector } from '../../state_utils';
 import { PreviewState } from './types';
 

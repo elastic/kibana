@@ -10,10 +10,10 @@ import { EuiScreenReaderOnly, withEuiTheme } from '@elastic/eui';
 import type { WithEuiThemeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
+import { createReadOnlyAceEditor, CustomAceEditor } from '../models/sense_editor';
 // @ts-ignore
 import { Mode as InputMode } from '../models/legacy_core_editor/mode/input';
 import { Mode as OutputMode } from '../models/legacy_core_editor/mode/output';
-import { CustomAceEditor, createReadOnlyAceEditor } from '../models/sense_editor';
 
 interface EditorExampleProps {
   panel: string;

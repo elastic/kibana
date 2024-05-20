@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
 import { captureBodyRt } from './capture_body_rt';
+import { isRight } from 'fp-ts/lib/Either';
 
 describe('captureBodyRt', () => {
   describe('it should not accept', () => {

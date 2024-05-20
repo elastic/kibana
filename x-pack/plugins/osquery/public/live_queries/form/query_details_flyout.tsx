@@ -6,18 +6,18 @@
  */
 
 import {
-  EuiCodeBlock,
-  EuiFlexItem,
   EuiFlyout,
+  EuiTitle,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiPortal,
+  EuiFlexItem,
+  EuiCodeBlock,
   EuiSpacer,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface QueryDetailsFlyoutProps {
   action: {

@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  AlertConsumers,
   ES_QUERY_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
 export {
   BASE_ALERTING_API_PATH,

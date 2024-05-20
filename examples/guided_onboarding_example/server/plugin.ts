@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
 import { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
+import { testGuideId, testGuideConfig } from '@kbn/guided-onboarding';
 
 interface PluginsSetup {
   guidedOnboarding?: GuidedOnboardingPluginSetup;

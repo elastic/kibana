@@ -8,10 +8,10 @@
 import { AppMountParameters, CoreStart, CoreTheme, MountPoint } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Observable } from 'rxjs';
 import {
   CODE_PATH_APM,
@@ -39,9 +39,9 @@ import { ElasticsearchIndexAdvancedPage } from './pages/elasticsearch/index_adva
 import { ElasticsearchIndexPage } from './pages/elasticsearch/index_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
 import { ElasticsearchMLJobsPage } from './pages/elasticsearch/ml_jobs_page';
+import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchNodeAdvancedPage } from './pages/elasticsearch/node_advanced_page';
 import { ElasticsearchNodePage } from './pages/elasticsearch/node_page';
-import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchOverviewPage } from './pages/elasticsearch/overview';
 import { EntSearchOverviewPage } from './pages/enterprise_search/overview';
 import { ClusterListing } from './pages/home/cluster_listing';
@@ -53,8 +53,8 @@ import { LoadingPage } from './pages/loading_page';
 import { LogStashNodeAdvancedPage } from './pages/logstash/advanced';
 // import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
 import { LogStashNodePage } from './pages/logstash/node';
-import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
 import { LogStashNodesPage } from './pages/logstash/nodes';
+import { LogStashNodePipelinesPage } from './pages/logstash/node_pipelines';
 import { LogStashOverviewPage } from './pages/logstash/overview';
 import { LogStashPipelinePage } from './pages/logstash/pipeline';
 import { LogStashPipelinesPage } from './pages/logstash/pipelines';

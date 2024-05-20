@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { Link } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';

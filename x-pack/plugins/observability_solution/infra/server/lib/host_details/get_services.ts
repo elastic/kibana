@@ -9,12 +9,12 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { PROCESSOR_EVENT } from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
-import { HOST_NAME_FIELD } from '../../../common/constants';
-import {
-  ServicesAPIQueryAggregation,
-  ServicesAPIRequest,
-} from '../../../common/http_api/host_details';
 import { ESSearchClient } from '../metrics/types';
+import {
+  ServicesAPIRequest,
+  ServicesAPIQueryAggregation,
+} from '../../../common/http_api/host_details';
+import { HOST_NAME_FIELD } from '../../../common/constants';
 
 export const getServices = async (
   client: ESSearchClient,

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Type, isConfigSchema, metaFields } from '@kbn/config-schema';
 import joi from 'joi';
+import { isConfigSchema, Type, metaFields } from '@kbn/config-schema';
 import { get } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { KnownParameters } from '../../type';
 import { isReferenceObject } from '../common';
 import { parse } from './parse';
 
-import { IContext, createCtx } from './post_process_mutations';
+import { createCtx, IContext } from './post_process_mutations';
 
 export const getSharedComponentId = (schema: OpenAPIV3.SchemaObject) => {
   if (metaFields.META_FIELD_X_OAS_REF_ID in schema) {

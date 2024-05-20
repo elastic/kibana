@@ -8,9 +8,9 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   getDeprecationLoggingStatus,
-  isDeprecationLogIndexingEnabled,
   isDeprecationLoggingEnabled,
   setDeprecationLogging,
+  isDeprecationLogIndexingEnabled,
 } from './es_deprecation_logging_apis';
 
 describe('getDeprecationLoggingStatus', () => {

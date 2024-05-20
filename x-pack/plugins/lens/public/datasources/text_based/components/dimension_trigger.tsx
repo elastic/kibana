@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
-import React, { useEffect, useState } from 'react';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DatasourceDimensionTriggerProps } from '../../../types';
+import type { TextBasedPrivateState } from '../types';
 import {
-  addColumnsToCache,
   getColumnsFromCache,
+  addColumnsToCache,
   retrieveLayerColumnsFromCache,
 } from '../fieldlist_cache';
-import type { TextBasedPrivateState } from '../types';
 
 export type TextBasedDimensionTrigger = DatasourceDimensionTriggerProps<TextBasedPrivateState> & {
   columnLabelMap: Record<string, string>;

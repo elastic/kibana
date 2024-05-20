@@ -7,18 +7,18 @@
  */
 
 import { join } from 'path';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { readFile, writeFile } from 'fs/promises';
-import { camelCase } from 'lodash';
-import capitalize from 'lodash/capitalize';
-import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import { writeFile, readFile } from 'fs/promises';
+import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { FunctionDefinition } from '../definitions/types';
+import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import capitalize from 'lodash/capitalize';
+import { camelCase } from 'lodash';
+import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
-import { ignoreErrorsMap, validateQuery } from './validation';
 
 const fieldTypes = [
   'number',

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import React, { PureComponent, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React, { PureComponent, Fragment } from 'react';
-import { connect } from 'react-redux';
+import { EuiConfirmModal } from '@elastic/eui';
 
-import { arrify } from '../../../../common/services/utils';
 import { unfollowLeaderIndex } from '../../store/actions';
+import { arrify } from '../../../../common/services/utils';
 
 class FollowerIndexUnfollowProviderUi extends PureComponent {
   static propTypes = {

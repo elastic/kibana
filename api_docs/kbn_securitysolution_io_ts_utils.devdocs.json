@@ -49,8 +49,12 @@
             "type": "Unknown",
             "tags": [],
             "label": "original",
-            "description": ["The original to check if it has additional keys"],
-            "signature": ["unknown"],
+            "description": [
+              "The original to check if it has additional keys"
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/exact_check/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -65,7 +69,12 @@
             "description": [
               "The decoded either which has either an existing error or the\ndecoded object which could have additional keys stripped from it."
             ],
-            "signature": ["Either", "<", "Errors", ", T>"],
+            "signature": [
+              "Either",
+              "<",
+              "Errors",
+              ", T>"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/exact_check/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -82,7 +91,9 @@
         "tags": [],
         "label": "findDifferencesRecursive",
         "description": [],
-        "signature": ["<T>(original: unknown, decodedValue: T) => string[]"],
+        "signature": [
+          "<T>(original: unknown, decodedValue: T) => string[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-utils/src/exact_check/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -94,7 +105,9 @@
             "tags": [],
             "label": "original",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/exact_check/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -107,7 +120,9 @@
             "tags": [],
             "label": "decodedValue",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/exact_check/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -124,7 +139,13 @@
         "tags": [],
         "label": "foldLeftRight",
         "description": [],
-        "signature": ["<T>(ma: ", "Either", "<", "Errors", ", unknown>) => Message<unknown>"],
+        "signature": [
+          "<T>(ma: ",
+          "Either",
+          "<",
+          "Errors",
+          ", unknown>) => Message<unknown>"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -137,7 +158,12 @@
             "tags": [],
             "label": "ma",
             "description": [],
-            "signature": ["Left", "<E> | ", "Right", "<A>"],
+            "signature": [
+              "Left",
+              "<E> | ",
+              "Right",
+              "<A>"
+            ],
             "path": "node_modules/fp-ts/lib/Either.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -152,7 +178,11 @@
         "tags": [],
         "label": "formatErrors",
         "description": [],
-        "signature": ["(errors: ", "Errors", ") => string[]"],
+        "signature": [
+          "(errors: ",
+          "Errors",
+          ") => string[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-utils/src/format_errors/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -164,7 +194,9 @@
             "tags": [],
             "label": "errors",
             "description": [],
-            "signature": ["Errors"],
+            "signature": [
+              "Errors"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/format_errors/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -183,7 +215,11 @@
         "description": [
           "\nConvenience utility to keep the error message handling within tests to be\nvery concise."
         ],
-        "signature": ["<A>(validation: ", "Validation", "<A>) => string[]"],
+        "signature": [
+          "<A>(validation: ",
+          "Validation",
+          "<A>) => string[]"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -194,8 +230,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "validation",
-            "description": ["The validation to get the errors from"],
-            "signature": ["Validation", "<A>"],
+            "description": [
+              "The validation to get the errors from"
+            ],
+            "signature": [
+              "Validation",
+              "<A>"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -212,7 +253,9 @@
         "tags": [],
         "label": "parseScheduleDates",
         "description": [],
-        "signature": ["(time: string) => moment.Moment | null"],
+        "signature": [
+          "(time: string) => moment.Moment | null"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-utils/src/parse_schedule_dates/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -224,7 +267,9 @@
             "tags": [],
             "label": "time",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/parse_schedule_dates/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -240,8 +285,12 @@
         "type": "Function",
         "tags": [],
         "label": "removeExternalLinkText",
-        "description": ["\nConvenience utility to remove text appended to links by EUI"],
-        "signature": ["(str: string) => string"],
+        "description": [
+          "\nConvenience utility to remove text appended to links by EUI"
+        ],
+        "signature": [
+          "(str: string) => string"
+        ],
         "path": "packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -253,7 +302,9 @@
             "tags": [],
             "label": "str",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/test_utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -288,7 +339,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["object"],
+            "signature": [
+              "object"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/validate/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -301,7 +354,9 @@
             "tags": [],
             "label": "schema",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/validate/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -336,7 +391,9 @@
             "tags": [],
             "label": "schema",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/validate/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -349,7 +406,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["A"],
+            "signature": [
+              "A"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/validate/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -384,7 +443,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/validate/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -397,7 +458,9 @@
             "tags": [],
             "label": "schema",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/validate/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -432,7 +495,9 @@
             "tags": [],
             "label": "schema",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/validate/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -445,7 +510,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["A"],
+            "signature": [
+              "A"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-utils/src/validate/index.ts",
             "deprecated": false,
             "trackAdoption": false,

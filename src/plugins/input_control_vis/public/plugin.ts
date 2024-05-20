@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
-  UnifiedSearchPluginSetup,
   UnifiedSearchPublicPluginStart,
+  UnifiedSearchPluginSetup,
 } from '@kbn/unified-search-plugin/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
-import { InputControlPublicConfig } from '../config';
-import { InputControlDeprecationBadge } from './deprecation_badge';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
+import { InputControlPublicConfig } from '../config';
+import { InputControlDeprecationBadge } from './deprecation_badge';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSkeletonText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { useAssetsStatus } from '../../../assets/use_assets_status';
 import { WithHeaderLayout } from '../../../components/layouts';
-import { AddPackButton } from '../../../packs/add_pack_button';
 import { PacksTable } from '../../../packs/packs_table';
-import { usePacks } from '../../../packs/use_packs';
-import { PacksTableEmptyState } from './empty_state';
+import { AddPackButton } from '../../../packs/add_pack_button';
 import { LoadIntegrationAssetsButton } from './load_integration_assets';
+import { PacksTableEmptyState } from './empty_state';
+import { useAssetsStatus } from '../../../assets/use_assets_status';
+import { usePacks } from '../../../packs/use_packs';
 
 const PacksPageComponent = () => {
   const { data: assetsData, isLoading: isLoadingAssetsStatus } = useAssetsStatus();

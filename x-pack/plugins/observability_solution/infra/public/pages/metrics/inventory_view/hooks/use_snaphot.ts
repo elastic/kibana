@@ -9,13 +9,13 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
+import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
   InfraTimerangeInput,
   SnapshotNodeResponseRT,
   SnapshotRequest,
 } from '../../../../../common/http_api/snapshot_api';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
-import { useHTTPRequest } from '../../../../hooks/use_http_request';
 
 export interface UseSnapshotRequest
   extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {

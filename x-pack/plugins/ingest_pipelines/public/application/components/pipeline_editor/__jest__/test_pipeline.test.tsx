@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { API_BASE_PATH } from '../../../../../common/constants';
 import { Pipeline } from '../../../../../common/types';
+import { API_BASE_PATH } from '../../../../../common/constants';
 
-import { Document, VerboseTestOutput } from '../types';
-import { DOCUMENTS, PROCESSORS, SIMULATE_RESPONSE } from './constants';
-import { SetupResult, setup, setupEnvironment } from './test_pipeline.helpers';
+import { VerboseTestOutput, Document } from '../types';
+import { setup, SetupResult, setupEnvironment } from './test_pipeline.helpers';
+import { DOCUMENTS, SIMULATE_RESPONSE, PROCESSORS } from './constants';
 
 interface ReqBody {
   documents: Document[];

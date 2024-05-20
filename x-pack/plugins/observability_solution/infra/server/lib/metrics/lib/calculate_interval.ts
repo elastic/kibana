@@ -7,8 +7,8 @@
 
 import { isArray, isNumber } from 'lodash';
 import { MetricsAPIRequest } from '../../../../common/http_api';
-import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { ESSearchClient } from '../types';
+import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 
 export const calculatedInterval = async (search: ESSearchClient, options: MetricsAPIRequest) => {
   const useModuleInterval =

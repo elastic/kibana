@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import { findListRequestQuery, findListResponse } from '../../../common/api';
-import { decodeCursor } from '../../services/utils';
 import type { ListsPluginRouter } from '../../types';
+import { decodeCursor } from '../../services/utils';
+import { findListRequestQuery, findListResponse } from '../../../common/api';
 import { buildRouteValidation, buildSiemResponse, getListClient } from '../utils';
 
 export const findListRoute = (router: ListsPluginRouter): void => {

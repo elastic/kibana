@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../../cases_api_integration/common/lib/authentication';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { casesAllUser, casesAllUser2, roles, users } from '../common';
+import { users, roles, casesAllUser, casesAllUser2 } from '../common';
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
   describe('Create case', function () {

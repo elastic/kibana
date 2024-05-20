@@ -7,14 +7,14 @@
  */
 
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
+import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React, { Fragment } from 'react';
-import { IClickActionDescriptor } from '..';
+import { CodeEditor } from '@kbn/code-editor';
 import { UISession } from '../../types';
+import { IClickActionDescriptor } from '..';
 import './inspect_button.scss';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 

@@ -8,9 +8,9 @@
 
 import Path from 'path';
 
-import External from '../lib/external_packages.js';
 import { REPO_ROOT } from '../lib/paths.mjs';
 import { run, spawnStreaming } from '../lib/spawn.mjs';
+import External from '../lib/external_packages.js';
 
 /** @type {import('../lib/command').Command} */
 export const command = {

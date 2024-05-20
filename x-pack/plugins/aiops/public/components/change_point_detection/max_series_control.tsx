@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { type FC } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldNumber, EuiFormRow, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { type NumberValidationResult, numberValidator } from '@kbn/ml-agg-utils';
-import React, { type FC } from 'react';
 import { MAX_SERIES } from '../../embeddables/change_point_chart/const';
 
 const maxSeriesValidator = numberValidator({ min: 1, max: MAX_SERIES, integerOnly: true });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiSelectable, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { EuiTitle, EuiSelectable } from '@elastic/eui';
 
 export interface TimeRangeOption {
   'aria-label': string;

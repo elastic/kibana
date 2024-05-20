@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import callsites from 'callsites';
 import { castArray, groupBy } from 'lodash';
-import { ObservabilityOnboardingFtrConfigName } from '../configs';
+import callsites from 'callsites';
 import { FtrProviderContext } from './ftr_provider_context';
-import { joinByKey } from './utils/join_by_key';
+import { ObservabilityOnboardingFtrConfigName } from '../configs';
 import { maybe } from './utils/maybe';
+import { joinByKey } from './utils/join_by_key';
 
 interface RunCondition {
   config: ObservabilityOnboardingFtrConfigName;

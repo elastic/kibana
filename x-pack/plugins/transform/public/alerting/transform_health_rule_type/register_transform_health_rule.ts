@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { lazy } from 'react';
 import { TRANSFORM_RULE_TYPE } from '../../../common';
 import type { TransformHealthRuleParams } from '../../../common/types/alerting';
 import { getResultTestConfig } from '../../../common/utils/alerts';

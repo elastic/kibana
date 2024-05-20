@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
 import { Position } from '@elastic/charts';
 
 import { TextInputOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { ScaleType, ValueAxis } from '../../../../types';
+import { ValueAxis, ScaleType } from '../../../../types';
 import { LabelOptions } from './label_options';
-import { valueAxis } from './mocks';
 import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
+import { valueAxis } from './mocks';
 
 const POSITION = 'position';
 

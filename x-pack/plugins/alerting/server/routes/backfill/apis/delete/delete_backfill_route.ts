@@ -6,12 +6,12 @@
  */
 import { IRouter } from '@kbn/core/server';
 import {
-  DeleteBackfillRequestParamsV1,
   deleteParamsSchemaV1,
+  DeleteBackfillRequestParamsV1,
 } from '../../../../../common/routes/backfill/apis/delete';
 import { ILicenseState } from '../../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 
 export const deleteBackfillRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

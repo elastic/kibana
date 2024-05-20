@@ -7,9 +7,9 @@
  */
 
 import { fromRoot } from '@kbn/repo-info';
+import { list } from './list';
 import { Logger } from '../../cli/logger';
 import { logWarnings } from '../lib/log_warnings';
-import { list } from './list';
 
 function processCommand() {
   const logger = new Logger();

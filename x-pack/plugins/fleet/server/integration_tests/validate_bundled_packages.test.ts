@@ -8,11 +8,11 @@
 import path from 'path';
 import fs from 'fs/promises';
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import JSON5 from 'json5';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-import { generatePackageInfoFromArchiveBuffer } from '../services/epm/archive';
 import * as Registry from '../services/epm/registry';
+import { generatePackageInfoFromArchiveBuffer } from '../services/epm/archive';
 
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';

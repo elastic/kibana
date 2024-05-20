@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createPath } from 'history';
-import { isEqual } from 'lodash';
 import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import { isEqual } from 'lodash';
+import { createPath } from 'history';
+import { encode, decode } from '../route_state';
 import { State } from '../../../../types';
-import { decode, encode } from '../route_state';
 
 export const useWorkpadHistory = () => {
   const history = useHistory<string>();

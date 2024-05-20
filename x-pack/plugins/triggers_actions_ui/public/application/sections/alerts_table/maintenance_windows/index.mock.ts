@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MaintenanceWindow, MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
+import { MaintenanceWindowStatus, MaintenanceWindow } from '@kbn/alerting-plugin/common';
 
 const mockMaintenanceWindow = {
   id: 'test-id',

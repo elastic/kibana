@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiCode } from '@elastic/eui';
 import React from 'react';
+import { EuiCode } from '@elastic/eui';
 import './debug.scss';
 
 const LimitRows = (key: string, value: any) => {

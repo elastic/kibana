@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import { HttpStart, NotificationsStart, OverlayStart } from '@kbn/core/public';
-import { ChromeStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { AnyAction, applyMiddleware, createStore } from 'redux';
+import { NotificationsStart, HttpStart, OverlayStart } from '@kbn/core/public';
 import createSagaMiddleware from 'redux-saga';
+import { createStore, applyMiddleware, AnyAction } from 'redux';
+import { ChromeStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
+import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
 import { Workspace } from '../types';
-import { GraphState, GraphStore, GraphStoreDependencies, createRootReducer } from './store';
 
 export interface MockedGraphEnvironment {
   store: GraphStore;

@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
-import { RangeFilter, TimeRange, isRangeFilter } from '@kbn/es-query';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { IEsSearchResponse, ISearchOptions } from '@kbn/search-types';
-import type { Assign } from '@kbn/utility-types';
-import _, { cloneDeep } from 'lodash';
 import moment from 'moment-timezone';
-import { AggTypesDependencies, GetConfigFn, getUserTimeZone } from '../..';
-import { calculateBounds, getTime } from '../..';
+import _, { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import type { Assign } from '@kbn/utility-types';
+import { isRangeFilter, TimeRange, RangeFilter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';
 import type { ISearchSource } from '../../../public';
 import type { EsaggsExpressionFunctionDefinition } from '../expressions';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
-import { AggGroupNames } from './agg_groups';
 import type { IAggType } from './agg_type';
 import type { AggTypesRegistryStart } from './agg_types_registry';
+import { AggGroupNames } from './agg_groups';
+import { AggTypesDependencies, GetConfigFn, getUserTimeZone } from '../..';
+import { getTime, calculateBounds } from '../..';
 import type { IBucketAggConfig } from './buckets';
-import { createSamplerAgg, isSamplingEnabled } from './utils/sampler';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
+import { createSamplerAgg, isSamplingEnabled } from './utils/sampler';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {

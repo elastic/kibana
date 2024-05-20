@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Action, handleActions } from 'redux-actions';
+import { handleActions, Action } from 'redux-actions';
 import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../common/runtime_types';
 import { pruneJourneyState } from '../actions/journey';
 import {

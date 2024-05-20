@@ -9,9 +9,9 @@
 import moment from 'moment';
 import { UI_SETTINGS } from '../../../constants';
 import { TimeRange } from '../../../query';
-import { autoInterval } from '../buckets/_interval_options';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
 import { toAbsoluteDates } from './date_interval_utils';
+import { autoInterval } from '../buckets/_interval_options';
 
 export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) {
   return function calculateAutoTimeExpression(range: TimeRange) {

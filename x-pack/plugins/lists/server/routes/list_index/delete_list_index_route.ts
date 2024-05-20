@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 
-import { getListClient } from '..';
-import { deleteListIndexResponse } from '../../../common/api';
 import { ListClient } from '../../services/lists/list_client';
 import type { ListsPluginRouter } from '../../types';
+import { deleteListIndexResponse } from '../../../common/api';
 import { buildSiemResponse } from '../utils';
+import { getListClient } from '..';
 
 /**
  * Deletes all of the indexes, template, ilm policies, and aliases. You can check

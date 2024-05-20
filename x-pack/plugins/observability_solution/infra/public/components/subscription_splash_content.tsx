@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import React, { useEffect } from 'react';
-import { useLicenseUrl } from '../hooks/use_license';
 import { useTrialStatus } from '../hooks/use_trial_status';
 import { LoadingPrompt } from './loading_page';
 import { PageTemplate } from './page_template';
+import { useLicenseUrl } from '../hooks/use_license';
 
 const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
   defaultMessage: 'Checking license...',

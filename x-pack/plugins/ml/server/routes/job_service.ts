@@ -12,28 +12,28 @@ import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {
-  basicChartSchema,
-  bulkCreateSchema,
   categorizationFieldValidationSchema,
+  basicChartSchema,
+  populationChartSchema,
   datafeedIdsSchema,
-  datafeedPreviewSchema,
-  deleteJobsSchema,
   forceStartDatafeedSchema,
   jobIdsSchema,
-  jobsExistSchema,
-  lookBackProgressSchema,
   optionalJobIdsSchema,
-  populationChartSchema,
-  revertModelSnapshotSchema,
+  lookBackProgressSchema,
   topCategoriesSchema,
   updateGroupsSchema,
+  revertModelSnapshotSchema,
+  jobsExistSchema,
+  datafeedPreviewSchema,
+  bulkCreateSchema,
+  deleteJobsSchema,
 } from './schemas/job_service_schema';
 
 import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
 
-import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
-import { getAuthorizationHeader } from '../lib/request_authorization';
 import { jobServiceProvider } from '../models/job_service';
+import { getAuthorizationHeader } from '../lib/request_authorization';
+import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for job service

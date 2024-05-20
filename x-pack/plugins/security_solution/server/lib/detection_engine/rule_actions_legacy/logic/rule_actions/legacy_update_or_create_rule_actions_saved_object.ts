@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import type { Logger } from '@kbn/core/server';
 
 // eslint-disable-next-line no-restricted-imports
-import { legacyCreateRuleActionsSavedObject } from './legacy_create_rule_actions_saved_object';
-// eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActionsSavedObject } from './legacy_get_rule_actions_saved_object';
+// eslint-disable-next-line no-restricted-imports
+import { legacyCreateRuleActionsSavedObject } from './legacy_create_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
 import { legacyUpdateRuleActionsSavedObject } from './legacy_update_rule_actions_saved_object';
 

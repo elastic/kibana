@@ -6,9 +6,9 @@
  */
 
 import {
-  ControlPanels,
   availableControlsPanels,
   controlPanelConfigs,
+  ControlPanels,
   hydrateDataSourceSelection,
 } from '../../common';
 import {

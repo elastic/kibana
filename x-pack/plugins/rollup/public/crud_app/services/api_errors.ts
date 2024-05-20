@@ -6,7 +6,7 @@
  */
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { getFatalErrors, getNotifications } from '../../kibana_services';
+import { getNotifications, getFatalErrors } from '../../kibana_services';
 
 function createToastConfig(
   error: IHttpFetchError<{

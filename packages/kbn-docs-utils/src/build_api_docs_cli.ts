@@ -7,32 +7,32 @@
  */
 
 import Fs from 'fs';
-import Path from 'path';
 import Fsp from 'fs/promises';
+import Path from 'path';
 
 import apm, { type Transaction } from 'elastic-apm-node';
 import { Project } from 'ts-morph';
 
-import { initApm } from '@kbn/apm-config-loader';
-import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { initApm } from '@kbn/apm-config-loader';
 
-import { pathsOutsideScopes } from './build_api_declarations/utils';
-import { EslintDisableCounts, countEslintDisableLines } from './count_eslint_disable';
+import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
+import { ApiDeclaration, ApiStats, PluginMetaInfo } from './types';
 import { findPlugins } from './find_plugins';
-import { getPathsByPackage } from './get_paths_by_package';
+import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
-import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';
 import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
 import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
-import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
 import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
-import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
 import { collectApiStatsForPlugin } from './stats';
+import { countEslintDisableLines, EslintDisableCounts } from './count_eslint_disable';
+import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
 import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
-import { ApiDeclaration, ApiStats, PluginMetaInfo } from './types';
+import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';
+import { getPathsByPackage } from './get_paths_by_package';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');

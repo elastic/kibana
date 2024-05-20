@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import React, { useCallback, useMemo, useState } from 'react';
 import type { CaseUI } from '../../../common/ui/types';
-import { useAssignees } from '../../containers/user_profiles/use_assignees';
 import { getEmptyCellValue } from '../empty_value';
+import { UserToolTip } from '../user_profiles/user_tooltip';
+import { useAssignees } from '../../containers/user_profiles/use_assignees';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
-import { UserToolTip } from '../user_profiles/user_tooltip';
 import * as i18n from './translations';
 
 const COMPRESSED_AVATAR_LIMIT = 3;

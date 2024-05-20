@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React from 'react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import React from 'react';
 import { TriggersAndActionsUiServices } from '../../../application/rules_app';
 import {
+  RuleTypeRegistryContract,
   ActionTypeRegistryContract,
   AlertsTableConfigurationRegistryContract,
-  RuleTypeRegistryContract,
 } from '../../../types';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();

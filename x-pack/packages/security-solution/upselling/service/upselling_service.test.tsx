@@ -1,4 +1,3 @@
-import { SecurityPageName } from '@kbn/security-solution-navigation';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
  */
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { UpsellingService } from './upselling_service';
 
 const TestComponent = () => <div>{'TEST component'}</div>;

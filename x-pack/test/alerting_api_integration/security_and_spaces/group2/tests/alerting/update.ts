@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { RULE_SAVED_OBJECT_TYPE, RuleNotifyWhen } from '@kbn/alerting-plugin/server';
-import { RawRule } from '@kbn/alerting-plugin/server/types';
-import { SavedObject } from '@kbn/core-saved-objects-api-server';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { RuleNotifyWhen, RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { RawRule } from '@kbn/alerting-plugin/server/types';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { SavedObject } from '@kbn/core-saved-objects-api-server';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
-  ObjectRemover,
   checkAAD,
-  ensureDatetimeIsWithinRange,
-  getTestRuleData,
-  getUnauthorizedErrorMessage,
   getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+  ensureDatetimeIsWithinRange,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
-import { SuperuserAtSpace1, UserAtSpaceScenarios, systemActionScenario } from '../../../scenarios';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {

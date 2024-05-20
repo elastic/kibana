@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { EuiButton } from '@elastic/eui';
 import { TestProviders } from '../../../common/mock';
 import { InnerLinkPanel } from './inner_link_panel';
 

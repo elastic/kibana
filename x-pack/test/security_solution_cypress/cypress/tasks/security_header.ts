@@ -6,7 +6,7 @@
  */
 
 import { TOASTER } from '../screens/alerts_detection_rules';
-import { KQL_INPUT, REFRESH_BUTTON, openNavigationPanelFor } from '../screens/security_header';
+import { KQL_INPUT, openNavigationPanelFor, REFRESH_BUTTON } from '../screens/security_header';
 import { openNavigationPanelFor as openServerlessNavigationPanelFor } from '../screens/serverless_security_header';
 
 export const clearSearchBar = () => {

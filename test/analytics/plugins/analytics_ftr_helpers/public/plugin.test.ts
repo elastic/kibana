@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { ReplaySubject } from 'rxjs';
 import type { AnalyticsServiceSetup, Event } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ReplaySubject } from 'rxjs';
 
 // Importing types to have the window properties defined
 import './types';
-import { withTimeout } from '@kbn/std';
 import { AnalyticsFTRHelpers } from './plugin';
+import { withTimeout } from '@kbn/std';
 
 describe('AnalyticsFTRHelpers', () => {
   let plugin: AnalyticsFTRHelpers;

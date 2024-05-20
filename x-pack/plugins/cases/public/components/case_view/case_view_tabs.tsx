@@ -15,15 +15,15 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
-import type { CaseUI } from '../../../common';
+import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation } from '../../common/navigation';
-import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translations';
 import { ACTIVITY_TAB, ALERTS_TAB, FILES_TAB } from './translations';
+import type { CaseUI } from '../../../common';
+import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 
 const TabTitle = ({ title }: { title: string }) => (
   <EuiTitle size="xxs">

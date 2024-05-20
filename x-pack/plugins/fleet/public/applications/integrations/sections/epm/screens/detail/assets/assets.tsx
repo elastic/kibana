@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
 
 import type {
-  AssetSOObject,
   EsAssetReference,
+  AssetSOObject,
   KibanaAssetReference,
   SimpleSOAssetType,
 } from '../../../../../../../../common';
@@ -24,12 +24,12 @@ import type { PackageInfo } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 
 import {
-  useAuthz,
-  useFleetStatus,
   useGetPackageInstallStatus,
   useLink,
   useStartServices,
   useUIExtension,
+  useAuthz,
+  useFleetStatus,
 } from '../../../../../hooks';
 
 import { sendGetBulkAssets } from '../../../../../hooks';
@@ -81,16 +81,13 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   );
   const pkgAssetsByType = useMemo(
     () =>
-      pkgAssets.reduce(
-        (acc, asset) => {
-          if (!acc[asset.type] && displayedAssetTypes.includes(asset.type)) {
-            acc[asset.type] = [];
-          }
-          acc[asset.type].push(asset);
-          return acc;
-        },
-        {} as Record<string, Array<EsAssetReference | KibanaAssetReference>>
-      ),
+      pkgAssets.reduce((acc, asset) => {
+        if (!acc[asset.type] && displayedAssetTypes.includes(asset.type)) {
+          acc[asset.type] = [];
+        }
+        acc[asset.type].push(asset);
+        return acc;
+      }, {} as Record<string, Array<EsAssetReference | KibanaAssetReference>>),
     [pkgAssets]
   );
   const [fetchError, setFetchError] = useState<undefined | Error>();
@@ -132,16 +129,13 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
           setFetchError(error);
         } else {
           setAssetsSavedObjectsByType(
-            (data?.items || []).reduce(
-              (acc, asset) => {
-                if (!acc[asset.type]) {
-                  acc[asset.type] = {};
-                }
-                acc[asset.type][asset.id] = asset;
-                return acc;
-              },
-              {} as typeof assetSavedObjectsByType
-            )
+            (data?.items || []).reduce((acc, asset) => {
+              if (!acc[asset.type]) {
+                acc[asset.type] = {};
+              }
+              acc[asset.type][asset.id] = asset;
+              return acc;
+            }, {} as typeof assetSavedObjectsByType)
           );
         }
       } catch (e) {

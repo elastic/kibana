@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FormProvider } from 'react-hook-form';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiFlyout,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { FormProvider } from 'react-hook-form';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
-import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
-import { useSyntheticsSettingsContext } from '../../../contexts';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
+import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
+import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { LocationForm } from './location_form';
 import { ManageEmptyState } from './manage_empty_state';
 

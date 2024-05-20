@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiLink } from '@elastic/eui';
 import React from 'react';
-import { InPortal } from 'react-reverse-portal';
 import { useHistory } from 'react-router-dom';
+import { EuiLink, EuiIcon } from '@elastic/eui';
+import { InPortal } from 'react-reverse-portal';
 import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
 import { MonitorDetailsLinkPortalNode } from './portals';
 

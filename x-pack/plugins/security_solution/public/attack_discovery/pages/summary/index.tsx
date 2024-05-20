@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 
 import { SummaryCount } from '../summary_count';
-import { SHOW_ANONYMIZED_LABEL, SHOW_REAL_VALUES } from '../translations';
+import { SHOW_REAL_VALUES, SHOW_ANONYMIZED_LABEL } from '../translations';
 
 interface Props {
   alertsCount: number;

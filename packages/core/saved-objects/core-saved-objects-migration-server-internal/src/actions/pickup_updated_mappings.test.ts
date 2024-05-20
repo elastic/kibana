@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
 
 jest.mock('./catch_retryable_es_client_errors');

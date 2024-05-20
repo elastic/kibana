@@ -1,10 +1,3 @@
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  Collector,
-  createCollectorFetchContextMock,
-  createUsageCollectionSetupMock,
-} from '@kbn/usage-collection-plugin/server/mocks';
-import { merge } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,15 +5,22 @@ import { merge } from 'lodash';
  * 2.0.
  */
 import { Subject } from 'rxjs';
+import { merge } from 'lodash';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  Collector,
+  createCollectorFetchContextMock,
+  createUsageCollectionSetupMock,
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { HealthStatus } from '../monitoring';
-import { BackgroundTaskUtilizationStat } from '../monitoring/background_task_utilization_statistics';
-import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
-import { MonitoredUtilization } from '../routes/background_task_utilization';
 import { MonitoredHealth } from '../routes/health';
 import { TaskPersistence } from '../task_events';
-import { sleep } from '../test_utils';
 import { registerTaskManagerUsageCollector } from './task_manager_usage_collector';
+import { sleep } from '../test_utils';
 import { TaskManagerUsage } from './types';
+import { MonitoredUtilization } from '../routes/background_task_utilization';
+import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
+import { BackgroundTaskUtilizationStat } from '../monitoring/background_task_utilization_statistics';
 
 describe('registerTaskManagerUsageCollector', () => {
   let collector: Collector<unknown>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first, isFinite, max, min } from 'lodash';
+import { first, min, max, isFinite } from 'lodash';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { InfraWaffleMapBounds } from '../../../../lib/lib';
 

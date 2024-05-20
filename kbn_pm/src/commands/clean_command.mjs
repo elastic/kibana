@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as Bazel from '../lib/bazel.mjs';
-import { cleanPaths } from '../lib/clean.mjs';
-import { findPluginCleanPaths } from '../lib/find_clean_paths.mjs';
 import { dedent } from '../lib/indent.mjs';
+import { cleanPaths } from '../lib/clean.mjs';
+import * as Bazel from '../lib/bazel.mjs';
+import { findPluginCleanPaths } from '../lib/find_clean_paths.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {

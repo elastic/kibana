@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import crypto from 'crypto';
 import chalk from 'chalk';
+import crypto from 'crypto';
 
 import type { Logger } from '@kbn/core/server';
 import { unsafeConsole } from '@kbn/security-hardening';

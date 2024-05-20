@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiBetaBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiComboBox,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
   EuiForm,
   EuiFormRow,
+  EuiFieldText,
   EuiLink,
-  EuiSpacer,
   EuiSwitch,
-  EuiTitle,
+  EuiSpacer,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
 
-import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import type { DownloadSource, FleetProxy } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
+import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 
 import { useDowloadSourceFlyoutForm } from './use_download_source_flyout_form';
 

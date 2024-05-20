@@ -6,8 +6,8 @@
  */
 
 import {
-  CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
+  CoverageOverviewRuleActivity,
 } from './coverage_overview_route';
 
 export const getCoverageOverviewFilterMock = () => ({

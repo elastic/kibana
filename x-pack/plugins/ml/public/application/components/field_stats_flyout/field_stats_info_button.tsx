@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type Field } from '@kbn/ml-anomaly-utils';
-import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
-import { getKbnFieldIconType } from '../../../../common/util/get_field_icon_types';
+import { FieldIcon } from '@kbn/react-field';
+import { type Field } from '@kbn/ml-anomaly-utils';
 import { useCurrentThemeVars } from '../../contexts/kibana';
+import { getKbnFieldIconType } from '../../../../common/util/get_field_icon_types';
 
 export type FieldForStats = Pick<Field, 'id' | 'type'>;
 export const FieldStatsInfoButton = ({

@@ -17,16 +17,16 @@ import {
 import { AGENT_POLICY_INDEX } from '../../common';
 import type {
   AgentPolicySOAttributes,
-  OutputSOAttributes,
   PackagePolicySOAttributes,
+  OutputSOAttributes,
 } from '../types';
 
+import { useDockerRegistry, waitForFleetSetup } from './helpers';
 import {
   CLOUD_KIBANA_CONFIG,
   CLOUD_KIBANA_CONFIG_WITHOUT_APM,
   CLOUD_KIBANA_WITHOUT_PACKAGE_POLICY_ID_CONFIG,
 } from './fixtures';
-import { useDockerRegistry, waitForFleetSetup } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 

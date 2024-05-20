@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { SPACES, ALL_SPACES_ID } from '../../common/lib/spaces';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { getTestScenarios, testCaseFailures } from '../../common/lib/saved_object_test_utils';
-import { ALL_SPACES_ID, SPACES } from '../../common/lib/spaces';
-import { TEST_CASES as CASES, createTestSuiteFactory } from '../../common/suites/create';
+import { createTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/create';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

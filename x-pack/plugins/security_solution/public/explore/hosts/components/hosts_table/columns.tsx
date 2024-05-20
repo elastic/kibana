@@ -7,21 +7,21 @@
 
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import type { HostsTableColumns } from '.';
-import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import {
-  CellActionsMode,
   SecurityCellActions,
+  CellActionsMode,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { HostDetailsLink } from '../../../../common/components/links';
-import { VIEW_HOSTS_BY_SEVERITY } from '../../../../entity_analytics/components/host_risk_score_table/translations';
-import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
-import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import type { HostsTableColumns } from '.';
 import * as i18n from './translations';
+import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { VIEW_HOSTS_BY_SEVERITY } from '../../../../entity_analytics/components/host_risk_score_table/translations';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
+import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,

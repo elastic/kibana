@@ -9,12 +9,12 @@ import { RULES_ADD_PATH, RULES_UPDATES } from '@kbn/security-solution-plugin/com
 import {
   ADD_ELASTIC_RULES_BTN,
   ADD_ELASTIC_RULES_TABLE,
+  getInstallSingleRuleLoadingSpinnerByRuleId,
+  getUpgradeSingleRuleLoadingSpinnerByRuleId,
   RULES_MANAGEMENT_TABLE,
   RULES_UPDATES_TAB,
   RULES_UPDATES_TABLE,
   TOASTER,
-  getInstallSingleRuleLoadingSpinnerByRuleId,
-  getUpgradeSingleRuleLoadingSpinnerByRuleId,
 } from '../screens/alerts_detection_rules';
 import type { SAMPLE_PREBUILT_RULE } from './api_calls/prebuilt_rules';
 

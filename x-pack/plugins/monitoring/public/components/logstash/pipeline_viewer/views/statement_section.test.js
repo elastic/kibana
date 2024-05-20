@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 import { StatementSection } from './statement_section';
+import { shallow } from 'enzyme';
 
 describe('StatementSection component', () => {
   let props;

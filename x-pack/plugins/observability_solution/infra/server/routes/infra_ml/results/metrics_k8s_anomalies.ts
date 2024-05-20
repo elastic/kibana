@@ -6,19 +6,19 @@
  */
 
 import Boom from '@hapi/boom';
+import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
-  GetMetricsK8sAnomaliesRequestPayload,
   INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH,
-  Pagination,
-  Sort,
-  getMetricsK8sAnomaliesRequestPayloadRT,
   getMetricsK8sAnomaliesSuccessReponsePayloadRT,
+  getMetricsK8sAnomaliesRequestPayloadRT,
+  GetMetricsK8sAnomaliesRequestPayload,
+  Sort,
+  Pagination,
 } from '../../../../common/http_api/infra_ml';
 import { createValidationFunction } from '../../../../common/runtime_types';
+import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { getMetricK8sAnomalies } from '../../../lib/infra_ml';
 import { isMlPrivilegesError } from '../../../lib/infra_ml/errors';
-import { InfraBackendLibs } from '../../../lib/infra_types';
-import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
 export const initGetK8sAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute(

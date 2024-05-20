@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { BBox } from 'rbush';
 import type React from 'react';
+import type { Store, Middleware, Dispatch, AnyAction } from 'redux';
+import type { BBox } from 'rbush';
 import type { Provider } from 'react-redux';
-import type { AnyAction, Dispatch, Middleware, Store } from 'redux';
-import type { Tree } from '../../common/endpoint/generate_data';
 import type {
-  NewResolverTree,
-  ResolverEntityIndex,
   ResolverNode,
-  ResolverPaginatedEvents,
   ResolverRelatedEvents,
-  ResolverSchema,
+  ResolverEntityIndex,
   SafeResolverEvent,
+  ResolverPaginatedEvents,
+  NewResolverTree,
+  ResolverSchema,
 } from '../../common/endpoint/types';
+import type { Tree } from '../../common/endpoint/generate_data';
 import type { State } from '../common/store/types';
 
 export interface AnalyzerState {
@@ -416,7 +416,7 @@ export type Matrix3 = readonly [
   number,
   number,
   number,
-  number,
+  number
 ];
 
 type EventSubtypeFull =

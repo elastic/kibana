@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlTableService } from './common_table_service';
 import { MlCommonUI } from './common_ui';
+import { MlTableService } from './common_table_service';
 
 export function NotificationsProvider(
   { getService }: FtrProviderContext,

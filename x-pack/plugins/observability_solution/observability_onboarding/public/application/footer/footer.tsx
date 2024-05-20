@@ -6,17 +6,17 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { URL_DEMO_ENV } from '@kbn/home-sample-data-tab/src/constants';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import type { FunctionComponent } from 'react';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiAvatar, EuiText, EuiLink } from '@elastic/eui';
+import { URL_DEMO_ENV } from '@kbn/home-sample-data-tab/src/constants';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { ObservabilityOnboardingAppServices } from '../..';
+import supportIconUrl from './support_icon.svg';
 import demoIconUrl from './demo_icon.svg';
 import docsIconUrl from './docs_icon.svg';
 import forumIconUrl from './forum_icon.svg';
-import supportIconUrl from './support_icon.svg';
+import { ObservabilityOnboardingAppServices } from '../..';
 
 const URL_FORUM = 'https://discuss.elastic.co/';
 

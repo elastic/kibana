@@ -7,38 +7,38 @@
 
 import { TypeOf } from '@kbn/config-schema';
 
-import {
-  AlertingConnectorFeatureId,
-  CasesConnectorFeatureId,
-  SecurityConnectorFeatureId,
-  UptimeConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import { api } from './api';
 import {
-  ExecutorParamsSchema,
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
+import { validate } from './validators';
+import {
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
+  ExecutorParamsSchema,
 } from './schema';
 import { createExternalService } from './service';
-import * as i18n from './translations';
+import { api } from './api';
 import {
   ExecutorParams,
-  ExecutorSubActionCommonFieldsParams,
-  ExecutorSubActionGetFieldsByIssueTypeParams,
-  ExecutorSubActionGetIncidentParams,
-  ExecutorSubActionGetIssueParams,
-  ExecutorSubActionGetIssuesParams,
   ExecutorSubActionPushParams,
-  JiraExecutorResultData,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
+  JiraExecutorResultData,
+  ExecutorSubActionGetFieldsByIssueTypeParams,
+  ExecutorSubActionCommonFieldsParams,
+  ExecutorSubActionGetIssuesParams,
+  ExecutorSubActionGetIssueParams,
+  ExecutorSubActionGetIncidentParams,
 } from './types';
-import { validate } from './validators';
+import * as i18n from './translations';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 

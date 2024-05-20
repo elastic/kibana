@@ -13,10 +13,10 @@ import type {
   MetricElementEvent,
   PartialTheme,
   PartitionElementEvent,
-  PartitionLayer,
   Theme,
   WordCloudElementEvent,
   XYChartElementEvent,
+  PartitionLayer,
 } from '@elastic/charts';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import {
@@ -31,16 +31,16 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
+import { ChartLegend } from './chart_legend';
 import {
   getFillColor,
   getNodeLabel,
   getSummaryData,
   getTabId,
 } from '../data_quality_panel/tabs/summary_tab/helpers';
-import type { PartitionedFieldMetadata } from '../types';
-import { ChartLegend } from './chart_legend';
 import { allMetadataIsEmpty } from './helpers';
 import * as translations from './translations';
+import type { PartitionedFieldMetadata } from '../types';
 
 export const DEFAULT_HEIGHT = 180; // px
 

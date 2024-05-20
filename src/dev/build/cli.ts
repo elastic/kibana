@@ -8,12 +8,12 @@
 
 import { resolve } from 'path';
 
-import chalk from 'chalk';
 import dedent from 'dedent';
+import chalk from 'chalk';
 
-import { readCliArgs } from './args';
 import { buildDistributables } from './build_distributables';
 import { isErrorLogged } from './lib';
+import { readCliArgs } from './args';
 
 // ensure the cwd() is always the repo root
 process.chdir(resolve(__dirname, '../../../'));

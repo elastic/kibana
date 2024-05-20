@@ -8,12 +8,12 @@
 
 import Path from 'path';
 
-import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  type LegacyKibanaPlatformPlugin,
   parseLegacyKibanaPlatformPlugin,
+  type LegacyKibanaPlatformPlugin,
 } from '@kbn/repo-packages/legacy';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 export type Plugin = LegacyKibanaPlatformPlugin;
 

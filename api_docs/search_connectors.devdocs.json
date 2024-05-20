@@ -13,7 +13,11 @@
         "tags": [],
         "label": "ConnectorDefinition",
         "description": [],
-        "signature": ["ConnectorClientSideDefinition", " & ", "ConnectorServerSideDefinition"],
+        "signature": [
+          "ConnectorClientSideDefinition",
+          " & ",
+          "ConnectorServerSideDefinition"
+        ],
         "path": "x-pack/plugins/search_connectors/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -39,7 +43,11 @@
           "tags": [],
           "label": "getConnectorTypes",
           "description": [],
-          "signature": ["() => ", "ConnectorServerSideDefinition", "[]"],
+          "signature": [
+            "() => ",
+            "ConnectorServerSideDefinition",
+            "[]"
+          ],
           "path": "x-pack/plugins/search_connectors/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -68,7 +76,11 @@
           "tags": [],
           "label": "getConnectorTypes",
           "description": [],
-          "signature": ["() => ", "ConnectorDefinition", "[]"],
+          "signature": [
+            "() => ",
+            "ConnectorDefinition",
+            "[]"
+          ],
           "path": "x-pack/plugins/search_connectors/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -102,7 +114,9 @@
             "tags": [],
             "label": "categories",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/search_connectors/common/connectors.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -114,7 +128,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/search_connectors/common/connectors.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -159,7 +175,9 @@
             "tags": [],
             "label": "isTechPreview",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/search_connectors/common/connectors.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -171,7 +189,9 @@
             "tags": [],
             "label": "keywords",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/search_connectors/common/connectors.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -211,7 +231,10 @@
         "tags": [],
         "label": "CONNECTOR_DEFINITIONS",
         "description": [],
-        "signature": ["ConnectorServerSideDefinition", "[]"],
+        "signature": [
+          "ConnectorServerSideDefinition",
+          "[]"
+        ],
         "path": "x-pack/plugins/search_connectors/common/connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -237,7 +260,11 @@
           "tags": [],
           "label": "getConnectorTypes",
           "description": [],
-          "signature": ["() => ", "ConnectorServerSideDefinition", "[]"],
+          "signature": [
+            "() => ",
+            "ConnectorServerSideDefinition",
+            "[]"
+          ],
           "path": "x-pack/plugins/search_connectors/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,

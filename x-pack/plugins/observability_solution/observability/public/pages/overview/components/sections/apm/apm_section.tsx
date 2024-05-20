@@ -8,29 +8,29 @@
 import {
   Axis,
   BarSeries,
+  niceTimeFormatter,
   Position,
   ScaleType,
   Settings,
   XYBrushEvent,
-  niceTimeFormatter,
 } from '@elastic/charts';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { FETCH_STATUS, useChartThemes, useFetcher } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
+import { useChartThemes, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
+import { SectionContainer } from '../section_container';
+import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
-import type { BucketSize } from '../../../helpers/calculate_bucket_size';
-import { onBrushEnd } from '../../../helpers/on_brush_end';
 import { ChartContainer } from '../../chart_container/chart_container';
 import { StyledStat } from '../../styled_stat/styled_stat';
-import { SectionContainer } from '../section_container';
+import { onBrushEnd } from '../../../helpers/on_brush_end';
+import type { BucketSize } from '../../../helpers/calculate_bucket_size';
 
 interface Props {
   bucketSize: BucketSize;

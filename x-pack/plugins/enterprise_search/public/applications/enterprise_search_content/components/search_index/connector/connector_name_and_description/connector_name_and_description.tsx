@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { DESCRIPTION_LABEL, EDIT_BUTTON_LABEL, NAME_LABEL } from '../../../../../shared/constants';
+import { NAME_LABEL, DESCRIPTION_LABEL, EDIT_BUTTON_LABEL } from '../../../../../shared/constants';
 
 import { isConnectorIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Filter, Query } from '@kbn/es-query';
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../mock';
 import { useGlobalFilterQuery } from './use_global_filter_query';
+import type { Filter, Query } from '@kbn/es-query';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 

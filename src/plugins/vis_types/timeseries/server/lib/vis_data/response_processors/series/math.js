@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { SERIES_SEPARATOR } from '../../../../../common/constants';
-import { getLastMetric } from '../../helpers/get_last_metric';
 import { convertIntervalToUnit } from '../../helpers/unit_to_seconds';
+import { getLastMetric } from '../../helpers/get_last_metric';
+import { SERIES_SEPARATOR } from '../../../../../common/constants';
 
 const percentileValueMatch = /\[([0-9\.]+)\]$/;
-import { evaluate } from '@kbn/tinymath';
-import { first, flatten, last, startsWith, values } from 'lodash';
-import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
+import { startsWith, flatten, values, first, last } from 'lodash';
 import { getDefaultDecoration, getSiblingAggValue, getSplits, mapEmptyToZero } from '../../helpers';
+import { evaluate } from '@kbn/tinymath';
+import { TSVB_METRIC_TYPES } from '../../../../../common/enums';
 
 export function mathAgg(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {

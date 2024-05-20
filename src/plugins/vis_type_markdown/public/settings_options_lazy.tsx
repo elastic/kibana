@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 // @ts-ignore
 const SettingsOptionsComponent = lazy(() => import('./settings_options'));

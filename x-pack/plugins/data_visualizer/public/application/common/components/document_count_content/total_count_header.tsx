@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiIconTip, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexItem, EuiText, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { getDataTestSubject } from '../../util/get_data_test_subject';
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 

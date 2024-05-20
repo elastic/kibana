@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
 import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
 import type { ShardsArray } from '../../../../common/utils/converters';
-import { overflowCss } from '../../utils';
-import { ShardsPercentageField } from './shards_percentage_field';
 import { ShardsPolicyField } from './shards_policy_field';
+import { ShardsPercentageField } from './shards_percentage_field';
+import { overflowCss } from '../../utils';
 
 export type ShardsFormReturn = UseFormReturn<{ shardsArray: ShardsArray }>;
 

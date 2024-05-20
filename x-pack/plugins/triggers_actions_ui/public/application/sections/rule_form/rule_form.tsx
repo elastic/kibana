@@ -5,54 +5,6 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiComboBox,
-  EuiEmptyPrompt,
-  EuiErrorBoundary,
-  EuiFieldNumber,
-  EuiFieldSearch,
-  EuiFieldText,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiIconTip,
-  EuiLink,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiNotificationBadge,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
-import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
-import {
-  ALERTING_FEATURE_ID,
-  RecoveredActionGroup,
-  RuleActionAlertsFilterProperty,
-  RuleActionKey,
-  RuleActionParam,
-  isActionGroupDisabledForActionTypeId,
-} from '@kbn/alerting-plugin/common';
-import {
-  formatDuration,
-  getDurationNumberInItsUnit,
-  getDurationUnitValue,
-  parseDuration,
-} from '@kbn/alerting-plugin/common/parse_duration';
-import { KibanaFeature } from '@kbn/features-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { capitalize } from 'lodash';
 import React, {
   Fragment,
   useState,
@@ -62,38 +14,86 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { getTimeOptions } from '../../../common/lib/get_time_options';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  ActionTypeRegistryContract,
-  IErrorObject,
-  Rule,
-  RuleCreationValidConsumer,
-  RuleType,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextColor,
+  EuiTitle,
+  EuiForm,
+  EuiSpacer,
+  EuiFieldText,
+  EuiFieldSearch,
+  EuiFlexGrid,
+  EuiFormRow,
+  EuiComboBox,
+  EuiFieldNumber,
+  EuiSelect,
+  EuiIconTip,
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiEmptyPrompt,
+  EuiListGroupItem,
+  EuiListGroup,
+  EuiLink,
+  EuiText,
+  EuiNotificationBadge,
+  EuiErrorBoundary,
+  EuiToolTip,
+  EuiCallOut,
+  EuiAccordion,
+} from '@elastic/eui';
+import { capitalize } from 'lodash';
+import { KibanaFeature } from '@kbn/features-plugin/public';
+import {
+  formatDuration,
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+  parseDuration,
+} from '@kbn/alerting-plugin/common/parse_duration';
+import {
+  RuleActionParam,
+  ALERTING_FEATURE_ID,
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+  RuleActionAlertsFilterProperty,
+  RuleActionKey,
+} from '@kbn/alerting-plugin/common';
+import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { RuleReducerAction, InitialRule } from './rule_reducer';
+import {
   RuleTypeModel,
+  Rule,
+  IErrorObject,
+  RuleType,
   RuleTypeRegistryContract,
-  RuleUiAction,
+  ActionTypeRegistryContract,
   TriggersActionsUiConfig,
+  RuleCreationValidConsumer,
+  RuleUiAction,
 } from '../../../types';
-import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
+import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
-import { InitialRule, RuleReducerAction } from './rule_reducer';
+import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
-import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { SectionLoading } from '../../components/section_loading';
 import { recoveredActionGroupMessage, summaryMessage } from '../../constants';
-import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
-import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
-import { IsDisabledResult, IsEnabledResult } from '../../lib/check_rule_type_enabled';
+import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import {
   ruleTypeCompare,
   ruleTypeGroupCompare,
   ruleTypeUngroupedCompare,
 } from '../../lib/rule_type_compare';
-import { getInitialInterval } from './get_initial_interval';
+import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
+import { SectionLoading } from '../../components/section_loading';
 import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer_selection';
+import { getInitialInterval } from './get_initial_interval';
+import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
 const ENTER_KEY = 13;
 

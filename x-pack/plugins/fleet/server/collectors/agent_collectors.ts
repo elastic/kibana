@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
 
 import { AGENTS_INDEX } from '../../common';
-import { appContextService } from '../services';
 import * as AgentService from '../services/agents';
+import { appContextService } from '../services';
 import { getAgentStatusForAgentPolicy } from '../services/agents';
 
 export interface AgentStatus {

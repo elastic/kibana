@@ -13,8 +13,8 @@ import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { LogEntryCategory } from '../../../../../../common/log_analysis';
 import { TimeRange } from '../../../../../../common/time';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
-import { ChangeSortOptions, SortOptions } from '../../use_log_entry_categories_results';
 import { TopCategoriesTable } from './top_categories_table';
+import { SortOptions, ChangeSortOptions } from '../../use_log_entry_categories_results';
 
 export const TopCategoriesSection: React.FunctionComponent<{
   isLoadingTopCategories?: boolean;

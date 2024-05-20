@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiCode, EuiEmptyPrompt, EuiSkeletonText } from '@elastic/eui';
+import { EuiSkeletonText, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../common/lib/kibana';
-import { OsqueryIcon } from '../../components/osquery_icon';
-import { LiveQuery } from '../../live_queries';
 import { OsqueryEmptyPrompt, OsqueryNotAvailablePrompt } from '../prompts';
-import { useIsOsqueryAvailable } from '../use_is_osquery_available';
 import { AGENT_STATUS_ERROR, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
+import { useKibana } from '../../common/lib/kibana';
+import { LiveQuery } from '../../live_queries';
+import { OsqueryIcon } from '../../components/osquery_icon';
+import { useIsOsqueryAvailable } from '../use_is_osquery_available';
 
 export interface OsqueryActionProps {
   agentId?: string;

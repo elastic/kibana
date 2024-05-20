@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { SavedObjectReference, SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { SavedObject, SavedObjectReference } from '@kbn/core/server';
-import { createRuleSo, deleteRuleSo, updateRuleSo } from '../../data/rule';
+import { Rule, RuleWithLegacyId, RawRule, RuleTypeParams } from '../../types';
 import { RuleAttributes } from '../../data/rule/types';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { RawRule, Rule, RuleTypeParams, RuleWithLegacyId } from '../../types';
-import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { SavedObjectOptions } from '../types';
 import { RulesClientContext } from '../types';
-import { getAlertFromRaw } from './get_alert_from_raw';
-import { scheduleTask } from './schedule_task';
 import { updateMeta } from './update_meta';
+import { scheduleTask } from './schedule_task';
+import { getAlertFromRaw } from './get_alert_from_raw';
+import { createRuleSo, deleteRuleSo, updateRuleSo } from '../../data/rule';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 interface CreateRuleSavedObjectParams {
   intervalInMs: number;

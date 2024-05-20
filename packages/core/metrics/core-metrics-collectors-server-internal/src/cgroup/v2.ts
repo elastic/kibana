@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { join as joinPath } from 'path';
 import fs from 'fs/promises';
+import { join as joinPath } from 'path';
 import type { OsCgroupMetrics } from './types';
 
 const PROC_CGROUP2_DIR = '/sys/fs/cgroup';

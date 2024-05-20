@@ -17,15 +17,15 @@
 //
 // See all cli options in https://facebook.github.io/jest/docs/cli.html
 
+import { resolve, relative, sep as osSep } from 'path';
 import { existsSync } from 'fs';
-import { sep as osSep, relative, resolve } from 'path';
+import { run } from 'jest';
+import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
-import getopts from 'getopts';
-import { run } from 'jest';
 import { map } from 'lodash';
+import getopts from 'getopts';
 import jestFlags from './jest_flags.json';
 
 // yarn test:jest src/core/server/saved_objects

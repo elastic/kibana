@@ -9,10 +9,10 @@
 import { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { DiscoverServerPluginLocatorService, DiscoverServerPluginStartDeps } from '..';
 import { columnsFromLocatorFactory } from './columns_from_locator';
-import { filtersFromLocatorFactory } from './filters_from_locator';
-import { queryFromLocatorFactory } from './query_from_locator';
 import { searchSourceFromLocatorFactory } from './searchsource_from_locator';
 import { titleFromLocatorFactory } from './title_from_locator';
+import { queryFromLocatorFactory } from './query_from_locator';
+import { filtersFromLocatorFactory } from './filters_from_locator';
 
 export const getScopedClient = (
   core: CoreStart,

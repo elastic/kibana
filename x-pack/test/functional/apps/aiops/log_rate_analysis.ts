@@ -10,8 +10,8 @@ import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { isTestDataExpectedWithSampleProbability, type TestData } from './types';
 import { logRateAnalysisTestData } from './log_rate_analysis_test_data';
-import { type TestData, isTestDataExpectedWithSampleProbability } from './types';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header', 'home', 'security']);
@@ -96,8 +96,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await aiops.logRateAnalysisPage.assertRerunAnalysisButtonExists(false);
 
         // Get the current width of the deviation brush for later comparison.
-        const brushSelectionWidthBefore =
-          await aiops.logRateAnalysisPage.getBrushSelectionWidth('aiopsBrushDeviation');
+        const brushSelectionWidthBefore = await aiops.logRateAnalysisPage.getBrushSelectionWidth(
+          'aiopsBrushDeviation'
+        );
 
         // Get the px values for the timestamp we want to move the brush to.
         const { targetPx, intervalPx } = await aiops.logRateAnalysisPage.getPxForTimestamp(
@@ -140,8 +141,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
 
         // Get the new brush selection width for later comparison.
-        const brushSelectionWidthAfter =
-          await aiops.logRateAnalysisPage.getBrushSelectionWidth('aiopsBrushDeviation');
+        const brushSelectionWidthAfter = await aiops.logRateAnalysisPage.getBrushSelectionWidth(
+          'aiopsBrushDeviation'
+        );
 
         // Assert the adjusted brush: The selection width should have changed and
         // we test if the selection is smaller than two bucket intervals.

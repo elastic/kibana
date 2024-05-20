@@ -5,45 +5,45 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiBadge, EuiSkeletonText, EuiTabs, EuiTab } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
-import type { ComponentType, Dispatch, ReactElement, Ref, SetStateAction } from 'react';
+import type { Ref, ReactElement, ComponentType, Dispatch, SetStateAction } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../../common/api/timeline';
+import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
-import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useLicense } from '../../../../common/hooks/use_license';
+import { TimelineType } from '../../../../../common/api/timeline';
 import {
-  useDeepEqualSelector,
   useShallowEqualSelector,
+  useDeepEqualSelector,
 } from '../../../../common/hooks/use_selector';
 import {
   EqlEventsCountBadge,
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store';
-import { initializeTimelineSettings } from '../../../store/actions';
-import { selectTimelineESQLSavedSearchId } from '../../../store/selectors';
 import type { CellValueElementProps } from '../cell_rendering';
 import {
   getActiveTabSelector,
-  getEventIdToNoteIdsSelector,
   getNoteIdsSelector,
   getNotesSelector,
   getPinnedEventSelector,
   getShowTimelineSelector,
+  getEventIdToNoteIdsSelector,
 } from './selectors';
 import * as i18n from './translations';
+import { useLicense } from '../../../../common/hooks/use_license';
+import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
+import { initializeTimelineSettings } from '../../../store/actions';
+import { selectTimelineESQLSavedSearchId } from '../../../store/selectors';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({

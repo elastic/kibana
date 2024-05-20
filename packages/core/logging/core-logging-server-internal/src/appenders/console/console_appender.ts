@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { DisposableAppender, Layout, LogRecord } from '@kbn/logging';
+import type { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
 import { unsafeConsole } from '@kbn/security-hardening';
 import { Layouts } from '../../layouts/layouts';
 

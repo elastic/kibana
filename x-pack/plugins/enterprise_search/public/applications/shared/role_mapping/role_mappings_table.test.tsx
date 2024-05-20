@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { asRoleMapping, wsRoleMapping } from './__mocks__/roles';
+import { wsRoleMapping, asRoleMapping } from './__mocks__/roles';
 
 import React from 'react';
 

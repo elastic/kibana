@@ -13,7 +13,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerServices } from './services/register_services';
-import { LogsDataAccessPluginSetupDeps, LogsDataAccessPluginStartDeps } from './types';
+import { LogsDataAccessPluginStartDeps, LogsDataAccessPluginSetupDeps } from './types';
 
 export type LogsDataAccessPluginSetup = ReturnType<LogsDataAccessPlugin['setup']>;
 export type LogsDataAccessPluginStart = ReturnType<LogsDataAccessPlugin['start']>;

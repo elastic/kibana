@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Router } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
-import { Router } from 'react-router-dom';
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 const location = {

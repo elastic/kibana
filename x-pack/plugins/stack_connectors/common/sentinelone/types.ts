@@ -7,16 +7,9 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  SentinelOneActionParamsSchema,
   SentinelOneBaseApiResponseSchema,
   SentinelOneConfigSchema,
-  SentinelOneDownloadAgentFileParamsSchema,
   SentinelOneExecuteScriptParamsSchema,
-  SentinelOneExecuteScriptResponseSchema,
-  SentinelOneFetchAgentFilesParamsSchema,
-  SentinelOneFetchAgentFilesResponseSchema,
-  SentinelOneGetActivitiesParamsSchema,
-  SentinelOneGetActivitiesResponseSchema,
   SentinelOneGetAgentsParamsSchema,
   SentinelOneGetAgentsResponseSchema,
   SentinelOneGetRemoteScriptsParamsSchema,
@@ -24,6 +17,13 @@ import {
   SentinelOneGetRemoteScriptsStatusParams,
   SentinelOneIsolateHostParamsSchema,
   SentinelOneSecretsSchema,
+  SentinelOneActionParamsSchema,
+  SentinelOneFetchAgentFilesParamsSchema,
+  SentinelOneFetchAgentFilesResponseSchema,
+  SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneGetActivitiesParamsSchema,
+  SentinelOneGetActivitiesResponseSchema,
+  SentinelOneExecuteScriptResponseSchema,
 } from './schema';
 
 export type SentinelOneConfig = TypeOf<typeof SentinelOneConfigSchema>;

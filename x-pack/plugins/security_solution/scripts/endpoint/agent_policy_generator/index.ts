@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createFailError } from '@kbn/dev-cli-errors';
+import pMap from 'p-map';
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
-import pMap from 'p-map';
-import { createAgentPolicy } from '../common/fleet_services';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { createKbnClient } from '../common/stack_services';
+import { createAgentPolicy } from '../common/fleet_services';
 
 export const cli = () => {
   run(

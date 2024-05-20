@@ -7,21 +7,21 @@
 
 import expect from '@kbn/expect';
 
-import { PassThrough } from 'stream';
 import {
   BedrockSimulator,
   bedrockClaude2SuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
+import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { PassThrough } from 'stream';
+import { EventStreamCodec } from '@smithy/eventstream-codec';
+import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { EventStreamCodec } from '@smithy/eventstream-codec';
-import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { ObjectRemover, getUrlPrefix } from '../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 const connectorTypeId = '.bedrock';
 const name = 'A bedrock action';

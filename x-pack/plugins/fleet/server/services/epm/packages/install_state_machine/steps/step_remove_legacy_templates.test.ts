@@ -5,14 +5,14 @@
  * 2.0.
  */
 import type {
+  SavedObjectsClientContract,
   ElasticsearchClient,
   SavedObject,
-  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import {
+  savedObjectsClientMock,
   elasticsearchServiceMock,
   loggingSystemMock,
-  savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -20,8 +20,8 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common/constants';
 import { ElasticsearchAssetType } from '../../../../../types';
 
 import type { EsAssetReference, Installation } from '../../../../../../common';
-import { createAppContextStartContractMock } from '../../../../../mocks';
 import { appContextService } from '../../../../app_context';
+import { createAppContextStartContractMock } from '../../../../../mocks';
 import { removeLegacyTemplates } from '../../../elasticsearch/template/remove_legacy';
 
 import { stepRemoveLegacyTemplates } from './step_remove_legacy_templates';

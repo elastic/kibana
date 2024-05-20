@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { useCallback } from 'react';
-import { useSelector } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
-import { POLICIES_PATH } from '../../../../../common/constants';
+import type { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
 import type { State } from '../../../../common/store';
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
@@ -26,7 +26,7 @@ import {
   getPolicyHostIsolationExceptionsPath,
 } from '../../../common/routing';
 import { getCurrentArtifactsLocation, policyIdFromParams } from '../store/policy_details/selectors';
-import type { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
+import { POLICIES_PATH } from '../../../../../common/constants';
 
 /**
  * Narrows global state down to the PolicyDetailsState before calling the provided Policy Details Selector

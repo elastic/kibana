@@ -9,9 +9,9 @@ import * as rt from 'io-ts';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
   createJobIdsFilters,
-  createLogTimeRangeFilters,
   createResultTypeFilters,
   defaultRequestParameters,
+  createLogTimeRangeFilters,
 } from './common';
 
 export const createLatestLogEntryCategoriesDatasetsStatsQuery = (

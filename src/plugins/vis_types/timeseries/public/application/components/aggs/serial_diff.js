@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
+import PropTypes from 'prop-types';
+import React from 'react';
+import { AggSelect } from './agg_select';
+import { MetricSelect } from './metric_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { createNumberHandler } from '../lib/create_number_handler';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import {
-  EuiFieldNumber,
+  htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
   EuiFormRow,
-  EuiIconTip,
   EuiSpacer,
-  htmlIdGenerator,
+  EuiFieldNumber,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React from 'react';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
-import { createChangeHandler } from '../lib/create_change_handler';
-import { createNumberHandler } from '../lib/create_number_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
-import { AggRow } from './agg_row';
-import { AggSelect } from './agg_select';
-import { MetricSelect } from './metric_select';
 
 const SERIAL_DIFF_DEFAULT_VALUE = 1;
 

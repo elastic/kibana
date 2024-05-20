@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { MockedLogger } from '@kbn/logging-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 // eslint-disable-next-line max-classes-per-file
 import { Subject, lastValueFrom, take, toArray } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
-import type { TelemetryCounter } from '../events';
-import { shippersMock } from '../shippers/mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { AnalyticsClient } from './analytics_client';
+import { shippersMock } from '../shippers/mocks';
+import type { TelemetryCounter } from '../events';
 import { ContextService } from './context_service';
 
 describe('AnalyticsClient', () => {

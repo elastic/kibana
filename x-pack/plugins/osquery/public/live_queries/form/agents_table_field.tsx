@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import React from 'react';
 import { useController } from 'react-hook-form';
+import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { AgentsTable } from '../../agents/agents_table';
 import type { AgentSelection } from '../../agents/types';
 

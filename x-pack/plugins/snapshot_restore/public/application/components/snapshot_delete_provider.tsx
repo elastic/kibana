@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { Fragment, useRef, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiCallOut,
   EuiConfirmModal,
+  EuiCallOut,
+  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useRef, useState } from 'react';
 
 import { useServices, useToastNotifications } from '../app_context';
 import { deleteSnapshots } from '../services/http';

@@ -6,10 +6,10 @@
  */
 
 import {
-  TRANSFORM_HEALTH_DESCRIPTION,
-  TRANSFORM_HEALTH_LABEL,
-  TRANSFORM_HEALTH_STATUS,
   TRANSFORM_STATE,
+  TRANSFORM_HEALTH_STATUS,
+  TRANSFORM_HEALTH_LABEL,
+  TRANSFORM_HEALTH_DESCRIPTION,
 } from '@kbn/transform-plugin/common/constants';
 import {
   TransformLatestConfig,

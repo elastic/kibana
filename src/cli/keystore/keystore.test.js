@@ -50,8 +50,8 @@ jest.mock('fs', () => ({
   writeFileSync: jest.fn(),
 }));
 
-import { readFileSync } from 'fs';
 import sinon from 'sinon';
+import { readFileSync } from 'fs';
 
 import { Keystore } from './keystore';
 

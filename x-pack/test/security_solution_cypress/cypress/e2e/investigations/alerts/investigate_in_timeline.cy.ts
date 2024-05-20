@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { getNewRule } from '../../../objects/rule';
 import {
   PROVIDER_BADGE,
@@ -12,7 +13,6 @@ import {
   TIMELINE_FILTER_BADGE,
   TIMELINE_TITLE,
 } from '../../../screens/timeline';
-import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 
 import { expandFirstAlert, investigateFirstAlertInTimeline } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -20,6 +20,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
+import { ALERTS_URL } from '../../../urls/navigation';
 import {
   ALERT_FLYOUT,
   INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON,
@@ -30,7 +31,6 @@ import {
 } from '../../../screens/alerts_details';
 import { verifyInsightCount } from '../../../tasks/alerts_details';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
-import { ALERTS_URL } from '../../../urls/navigation';
 
 describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

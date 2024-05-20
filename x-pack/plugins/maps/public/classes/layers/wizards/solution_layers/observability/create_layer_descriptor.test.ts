@@ -31,9 +31,9 @@ jest.mock('uuid', () => ({
 }));
 
 import { createLayerDescriptor } from './create_layer_descriptor';
-import { DISPLAY } from './display_select';
 import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { OBSERVABILITY_METRIC_TYPE } from './metric_select';
+import { DISPLAY } from './display_select';
 
 describe('createLayerDescriptor', () => {
   test('Should create vector layer descriptor with join when displayed as choropleth', () => {

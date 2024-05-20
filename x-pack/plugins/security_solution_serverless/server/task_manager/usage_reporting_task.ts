@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { Response } from 'node-fetch';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
-import type { Response } from 'node-fetch';
 
 import { usageReportingService } from '../common/services';
-import type { ServerlessSecurityConfig } from '../config';
 import type {
   MeteringCallback,
-  SecurityUsageReportingTaskSetupContract,
   SecurityUsageReportingTaskStartContract,
+  SecurityUsageReportingTaskSetupContract,
   UsageRecord,
 } from '../types';
+import type { ServerlessSecurityConfig } from '../config';
 
-import { emptyState, stateSchemaByVersion } from './task_state';
+import { stateSchemaByVersion, emptyState } from './task_state';
 
 const SCOPE = ['serverlessSecurity'];
 const TIMEOUT = '1m';

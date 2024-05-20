@@ -11,15 +11,15 @@ import React, { useCallback, useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 
+import { useUrlState } from '@kbn/ml-url-state';
+import { useStorage } from '@kbn/ml-local-storage';
 import {
+  useTimefilter,
   DatePickerWrapper,
-  FROZEN_TIER_PREFERENCE,
   FullTimeRangeSelector,
   type FullTimeRangeSelectorProps,
-  useTimefilter,
+  FROZEN_TIER_PREFERENCE,
 } from '@kbn/ml-date-picker';
-import { useStorage } from '@kbn/ml-local-storage';
-import { useUrlState } from '@kbn/ml-url-state';
 
 import moment from 'moment';
 import { useDataSource } from '../../hooks/use_data_source';

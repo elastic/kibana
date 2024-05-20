@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiPage, EuiPageBody, EuiPageSection, EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 import { DetailDrawer } from './detail_drawer';
 import { Queue } from './queue';
 import { StatementSection } from './statement_section';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiPage, EuiPageSection, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class PipelineViewer extends React.Component {
   constructor() {

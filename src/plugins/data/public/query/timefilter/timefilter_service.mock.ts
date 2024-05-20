@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { TimeRange } from '@kbn/es-query';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { TimeRange } from '@kbn/es-query';
+import { TimefilterService, TimeHistoryContract, TimefilterContract } from '.';
 import { Observable } from 'rxjs';
-import { TimeHistoryContract, TimefilterContract, TimefilterService } from '.';
 
 export type TimefilterServiceClientContract = PublicMethodsOf<TimefilterService>;
 

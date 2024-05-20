@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,9 +14,8 @@ import {
   EuiPageTemplate,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
-import { useKibana } from '../../../utils/kibana_react';
 import * as i18n from '../translations';
+import { useKibana } from '../../../utils/kibana_react';
 
 const title = <h2 data-test-subj="license-prompt-title">{i18n.UPGRADE_TO_PLATINUM}</h2>;
 

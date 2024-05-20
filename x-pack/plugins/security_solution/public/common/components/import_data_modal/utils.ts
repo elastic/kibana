@@ -10,10 +10,10 @@ import type { ErrorToastOptions, Toast, ToastInput, ToastOptions } from '@kbn/co
 import * as i18n from './translations';
 
 import type {
-  ExceptionsImportError,
   ImportDataResponse,
   ImportResponseError,
   ImportRulesResponseError,
+  ExceptionsImportError,
 } from '../../../detection_engine/rule_management/logic';
 
 export const formatError = (

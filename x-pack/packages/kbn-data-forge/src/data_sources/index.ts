@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { GeneratorFunction, Dataset, IndexTemplateDef } from '../types';
 import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK } from '../constants';
-import { Dataset, GeneratorFunction, IndexTemplateDef } from '../types';
 
-import * as fakeHosts from './fake_hosts';
 import * as fakeLogs from './fake_logs';
+import * as fakeHosts from './fake_hosts';
 import * as fakeStack from './fake_stack';
 
 export const indexTemplates: Record<Dataset, IndexTemplateDef[]> = {

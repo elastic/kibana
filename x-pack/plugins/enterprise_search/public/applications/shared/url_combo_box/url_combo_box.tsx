@@ -6,9 +6,9 @@
  */
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiComboBox, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { UrlComboBoxLogic } from './url_combo_box_logic';

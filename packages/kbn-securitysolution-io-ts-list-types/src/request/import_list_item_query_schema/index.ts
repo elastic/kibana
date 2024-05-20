@@ -8,12 +8,12 @@
 
 import * as t from 'io-ts';
 
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { deserializer } from '../../common/deserializer';
 import { list_id } from '../../common/list_id';
-import { refreshWithWaitFor } from '../../common/refresh';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import { serializer } from '../../common/serializer';
 import { type } from '../../common/type';
+import { serializer } from '../../common/serializer';
+import { refreshWithWaitFor } from '../../common/refresh';
 
 export const importListItemQuerySchema = t.exact(
   t.partial({ deserializer, list_id, serializer, type, refresh: refreshWithWaitFor })

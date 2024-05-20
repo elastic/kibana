@@ -8,12 +8,12 @@
 import React, { useState } from 'react';
 
 import {
+  EuiCopy,
   EuiButton,
   EuiButtonIcon,
-  EuiCodeBlock,
-  EuiCopy,
-  EuiPopover,
   EuiSpacer,
+  EuiCodeBlock,
+  EuiPopover,
 } from '@elastic/eui';
 
 import { COPY_TEXT, STATUS_POPOVER_TOOLTIP } from '../../../constants';

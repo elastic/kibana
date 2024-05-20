@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
+  EuiButtonEmpty,
   EuiSuperSelect,
+  EuiFieldText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import _ from 'lodash';
-import React, { ChangeEvent, Component, Fragment } from 'react';
-import { MVT_FIELD_TYPE } from '../../../../common/constants';
 import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
+import { MVT_FIELD_TYPE } from '../../../../common/constants';
 
 function makeOption({
   value,

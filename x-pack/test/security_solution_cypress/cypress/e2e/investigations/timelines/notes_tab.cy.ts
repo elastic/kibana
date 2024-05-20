@@ -7,17 +7,17 @@
 
 import { getTimelineNonValidQuery } from '../../../objects/timeline';
 
-import { MODAL_CONFIRMATION_BTN } from '../../../screens/alerts_detection_rules';
 import {
   DELETE_NOTE,
-  MARKDOWN_INVESTIGATE_BUTTON,
   NOTES_AUTHOR,
   NOTES_CODE_BLOCK,
+  NOTE_DESCRIPTION,
   NOTES_LINK,
   NOTES_TEXT,
   NOTES_TEXT_AREA,
-  NOTE_DESCRIPTION,
+  MARKDOWN_INVESTIGATE_BUTTON,
 } from '../../../screens/timeline';
+import { MODAL_CONFIRMATION_BTN } from '../../../screens/alerts_detection_rules';
 import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';

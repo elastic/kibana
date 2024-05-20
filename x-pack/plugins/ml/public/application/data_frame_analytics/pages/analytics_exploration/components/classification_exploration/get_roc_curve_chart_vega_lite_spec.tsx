@@ -11,9 +11,9 @@ import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
 import { euiPaletteColorBlind, euiPaletteGray } from '@elastic/eui';
 
+import type { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { RocCurveItem } from '@kbn/ml-data-frame-analytics-utils';
-import type { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
 import { LEGEND_TYPES } from '../../../../../components/vega_chart/common';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { EagerGlobalOrdinalsParameter, RelationsParameter } from '../../field_parameters';
-import { AdvancedParametersSection, BasicParametersSection } from '../edit_field';
+import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
+import { RelationsParameter, EagerGlobalOrdinalsParameter } from '../../field_parameters';
 
 const i18nTexts = {
   eagerGlobalOrdinalsDescription: i18n.translate(

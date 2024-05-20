@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AllSeries } from '../../../..';
 import { createExploratoryViewUrl } from './exploratory_view_url';
+import type { AllSeries } from '../../../..';
 
 describe('createExploratoryViewUrl', () => {
   const testAllSeries = [

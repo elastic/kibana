@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { darkMode, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars, darkMode } from '@kbn/ui-theme';
 import { themeRuleGroupBuilderFactory } from '../../common/theme';
-import { monaco } from '../../monaco_imports';
 import { ESQL_TOKEN_POSTFIX } from './constants';
+import { monaco } from '../../monaco_imports';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory(ESQL_TOKEN_POSTFIX);
 const COMMANDS_COLORS = {

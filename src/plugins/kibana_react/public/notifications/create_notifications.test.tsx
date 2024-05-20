@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { notificationServiceMock } from '@kbn/core/public/mocks';
 import * as React from 'react';
 import { createNotifications } from './create_notifications';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 test('throws if no overlays service provided', () => {
   const notifications = createNotifications({});

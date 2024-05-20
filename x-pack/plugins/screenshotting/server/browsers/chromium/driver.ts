@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { parse as parseUrl } from 'url';
 import { Headers, Logger } from '@kbn/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
@@ -13,8 +12,9 @@ import {
 } from '@kbn/screenshot-mode-plugin/server';
 import { truncate } from 'lodash';
 import open from 'opn';
-import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
+import { ElementHandle, Page, EvaluateFunc, HTTPResponse } from 'puppeteer';
 import { Subject } from 'rxjs';
+import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
 import { ConfigType } from '../../config';
 import { Layout } from '../../layouts';

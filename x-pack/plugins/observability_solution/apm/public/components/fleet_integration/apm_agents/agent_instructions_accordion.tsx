@@ -6,33 +6,33 @@
  */
 
 import {
-  EuiAccordion,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiAccordion,
   EuiSpacer,
-  EuiTabbedContent,
   EuiText,
+  EuiCodeBlock,
+  EuiTabbedContent,
 } from '@elastic/eui';
-import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Markdown } from '@kbn/shared-ux-markdown';
 import React, { ComponentType } from 'react';
 import styled from 'styled-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
+import { AgentIcon } from '@kbn/custom-icons';
+import {
+  AgentRuntimeAttachmentProps,
+  CreateAgentInstructions,
+} from './agent_instructions_mappings';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { AgentConfigInstructions } from '../../../tutorial/config_agent/agent_config_instructions';
-import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,
 } from '../apm_policy_form/typings';
-import {
-  AgentRuntimeAttachmentProps,
-  CreateAgentInstructions,
-} from './agent_instructions_mappings';
+import { AgentConfigInstructions } from '../../../tutorial/config_agent/agent_config_instructions';
 import { renderMustache } from './render_mustache';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 
 function AccordionButtonContent({ agentName, title }: { agentName: AgentName; title: string }) {
   return (

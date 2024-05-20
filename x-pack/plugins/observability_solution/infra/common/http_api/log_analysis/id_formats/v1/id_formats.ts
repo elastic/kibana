@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { logEntryCategoriesJobTypeRT, logEntryRateJobTypeRT } from '../../../../log_analysis';
+import { logEntryRateJobTypeRT, logEntryCategoriesJobTypeRT } from '../../../../log_analysis';
 
 export const idFormatRT = rt.union([rt.literal('legacy'), rt.literal('hashed')]);
 export type IdFormat = rt.TypeOf<typeof idFormatRT>;

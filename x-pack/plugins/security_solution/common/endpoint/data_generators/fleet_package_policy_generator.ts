@@ -6,9 +6,9 @@
  */
 
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { BaseDataGenerator } from './base_data_generator';
 import { policyFactory } from '../models/policy_config';
 import type { PolicyData } from '../types';
-import { BaseDataGenerator } from './base_data_generator';
 
 type PartialPackagePolicy = Partial<Omit<PackagePolicy, 'inputs'>> & {
   inputs?: PackagePolicy['inputs'];

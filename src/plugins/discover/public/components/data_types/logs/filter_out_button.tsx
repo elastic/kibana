@@ -7,8 +7,8 @@
  */
 
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
-import { generateFilters } from '@kbn/data-plugin/public';
 import React from 'react';
+import { generateFilters } from '@kbn/data-plugin/public';
 import { useVirtualColumnServiceContext } from '../../../application/main/hooks/grid_customisations/use_virtual_column_services';
 import { actionFilterOutText, filterOutText } from './translations';
 

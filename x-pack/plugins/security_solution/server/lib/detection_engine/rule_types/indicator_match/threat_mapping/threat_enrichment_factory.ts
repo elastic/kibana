@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { CreateEventSignalOptions, GetThreatListOptions } from './types';
 import type { SignalSourceHit } from '../../types';
+import { getThreatList } from './get_threat_list';
 import { enrichSignalThreatMatchesFromSignalsMap } from './enrich_signal_threat_matches';
 import { type SignalsQueryMap } from './get_signals_map_from_threat_index';
-import { getThreatList } from './get_threat_list';
-import type { CreateEventSignalOptions, GetThreatListOptions } from './types';
 
 interface ThreatEnrichmentFactoryOptions {
   threatIndicatorPath: CreateEventSignalOptions['threatIndicatorPath'];

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { useDynamicDataViewTitle } from '../../../../hooks/use_dynamic_data_view';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 

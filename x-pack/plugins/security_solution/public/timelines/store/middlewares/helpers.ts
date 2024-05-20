@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { AnyAction, Dispatch, MiddlewareAPI } from 'redux';
-import { TimelineStatus } from '../../../../common/api/timeline';
-import type { inputsModel } from '../../../common/store/inputs';
-import { inputsSelectors } from '../../../common/store/inputs';
+import type { MiddlewareAPI, Dispatch, AnyAction } from 'redux';
 import type { State } from '../../../common/store/types';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
-import { saveTimeline, updateTimeline } from '../actions';
+import type { inputsModel } from '../../../common/store/inputs';
+import { inputsSelectors } from '../../../common/store/inputs';
 import type { TimelineModel } from '../model';
+import { saveTimeline, updateTimeline } from '../actions';
+import { TimelineStatus } from '../../../../common/api/timeline';
 import { selectTimelineById } from '../selectors';
 
 /**

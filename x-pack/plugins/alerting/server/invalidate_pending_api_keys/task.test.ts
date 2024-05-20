@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import sinon from 'sinon';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {
-  getApiKeyIdsToInvalidate,
   getFindFilter,
+  getApiKeyIdsToInvalidate,
   invalidateApiKeysAndDeletePendingApiKeySavedObject,
   runInvalidate,
 } from './task';

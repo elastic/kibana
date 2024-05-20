@@ -6,8 +6,8 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourceConfigurationSettings } from './settings/source_configuration_settings';
 
 export const MetricsSettingsPage = () => {

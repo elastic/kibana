@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { EuiText } from '@elastic/eui';
 
-import type { CaseDetailsLinkProps, ConfigureCaseButtonProps } from '.';
-import { CaseDetailsLink, ConfigureCaseButton } from '.';
+import type { ConfigureCaseButtonProps, CaseDetailsLinkProps } from '.';
+import { ConfigureCaseButton, CaseDetailsLink } from '.';
 import { TestProviders } from '../../common/mock';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
-import { SavedObjectsManagementPlugin } from './plugin';
 import { registerRoutesMock } from './plugin.test.mocks';
+import { SavedObjectsManagementPlugin } from './plugin';
+import { coreMock } from '@kbn/core/server/mocks';
 
 describe('SavedObjectsManagementPlugin', () => {
   let plugin: SavedObjectsManagementPlugin;

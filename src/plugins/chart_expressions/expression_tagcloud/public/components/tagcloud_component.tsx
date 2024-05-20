@@ -6,36 +6,36 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { throttle } from 'lodash';
+import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
+import { IconChartTagcloud } from '@kbn/chart-icons';
 import {
   Chart,
-  LEGACY_LIGHT_THEME,
-  RenderChangeListener,
   Settings,
   Wordcloud,
+  RenderChangeListener,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
-import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
-import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
-import { IconChartTagcloud } from '@kbn/chart-icons';
-import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import {
-  AVAILABLE_PALETTES,
-  NeutralPalette,
-  PaletteOutput,
   PaletteRegistry,
+  PaletteOutput,
   getColorFactory,
   getPalette,
+  AVAILABLE_PALETTES,
+  NeutralPalette,
 } from '@kbn/coloring';
-import { isMultiFieldKey } from '@kbn/data-plugin/common';
-import { DatatableRow, IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
+import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
+import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { throttle } from 'lodash';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { Orientation, ScaleOptions } from '../../common/constants';
-import { TagcloudRendererConfig } from '../../common/types';
+import { isMultiFieldKey } from '@kbn/data-plugin/common';
 import { getFormatService } from '../format_service';
+import { TagcloudRendererConfig } from '../../common/types';
+import { ScaleOptions, Orientation } from '../../common/constants';
 
 import './tag_cloud.scss';
 

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useRef, useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 
 import type {

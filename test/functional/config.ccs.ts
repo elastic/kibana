@@ -7,8 +7,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { RemoteEsProvider } from './services/remote_es/remote_es';
 import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
+import { RemoteEsProvider } from './services/remote_es/remote_es';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

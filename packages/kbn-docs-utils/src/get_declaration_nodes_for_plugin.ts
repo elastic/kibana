@@ -8,9 +8,9 @@
 
 import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { Node, Project, SourceFile } from 'ts-morph';
-import { getSourceFileMatching, isNamedNode } from './tsmorph_utils';
+import { Project, SourceFile, Node } from 'ts-morph';
 import { ApiScope, PluginOrPackage } from './types';
+import { isNamedNode, getSourceFileMatching } from './tsmorph_utils';
 
 /**
  * Determines which file in the project to grab nodes from, depending on the plugin and scope, then returns those nodes.

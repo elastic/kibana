@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
-import type {
-  DataView,
-  DataViewSpec,
-  DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
-import { RuntimeField } from '@kbn/data-views-plugin/public';
 import type { FieldFormat as IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { apmFieldFormats } from '../../components/shared/exploratory_view/configurations/apm/field_formats';
-import { infraMetricsFieldFormats } from '../../components/shared/exploratory_view/configurations/infra_metrics/field_formats';
+import type {
+  DataViewsPublicPluginStart,
+  DataView,
+  DataViewSpec,
+} from '@kbn/data-views-plugin/public';
+import { RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
+import { getDataHandler } from '../../data_handler';
+import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
+import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
+import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
 import { rumFieldFormats } from '../../components/shared/exploratory_view/configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../../components/shared/exploratory_view/configurations/synthetics/field_formats';
-import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
-import { DataTypesLabels } from '../../components/shared/exploratory_view/labels';
 import {
   AppDataType,
   FieldFormat,
   FieldFormatParams,
 } from '../../components/shared/exploratory_view/types';
-import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
-import { getDataHandler } from '../../data_handler';
+import { apmFieldFormats } from '../../components/shared/exploratory_view/configurations/apm/field_formats';
+import { infraMetricsFieldFormats } from '../../components/shared/exploratory_view/configurations/infra_metrics/field_formats';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_logs: null,

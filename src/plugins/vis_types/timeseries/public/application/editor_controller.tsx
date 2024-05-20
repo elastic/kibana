@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { EventEmitter } from 'events';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type {
-  EditorRenderProps,
-  IEditorController,
-  Vis,
-  VisualizeEmbeddableContract,
-} from '@kbn/visualizations-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { getCoreStart, getDataViewsStart, getUISettings } from '../services';
-import type { TimeseriesVisParams } from '../types';
+import type { EventEmitter } from 'events';
+import type {
+  Vis,
+  VisualizeEmbeddableContract,
+  IEditorController,
+  EditorRenderProps,
+} from '@kbn/visualizations-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { getUISettings, getCoreStart, getDataViewsStart } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
+import type { TimeseriesVisParams } from '../types';
 
 export const TSVB_EDITOR_NAME = 'tsvbEditor';
 

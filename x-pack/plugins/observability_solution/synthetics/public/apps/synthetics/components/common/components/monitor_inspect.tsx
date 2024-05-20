@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCodeBlock,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiSwitch,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlyout,
+  EuiButton,
+  EuiCodeBlock,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutFooter,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiFlyoutBody,
+  EuiToolTip,
+  EuiSwitch,
+} from '@elastic/eui';
 
-import { MonitorFields, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { MonitorInspectResponse, inspectMonitorAPI } from '../../../state/monitor_management/api';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
+import { MonitorTypeEnum, MonitorFields } from '../../../../../../common/runtime_types';
+import { inspectMonitorAPI, MonitorInspectResponse } from '../../../state/monitor_management/api';
 
 interface InspectorProps {
   isValid: boolean;

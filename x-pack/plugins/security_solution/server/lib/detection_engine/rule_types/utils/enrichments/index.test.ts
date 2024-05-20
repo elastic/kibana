@@ -8,9 +8,9 @@
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { enrichEvents } from '.';
+import { searchEnrichments } from './search_enrichments';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
 import { createAlert } from './__mocks__/alerts';
-import { searchEnrichments } from './search_enrichments';
 
 import { isIndexExist } from './utils/is_index_exist';
 

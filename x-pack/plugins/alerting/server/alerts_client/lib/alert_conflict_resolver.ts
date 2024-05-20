@@ -6,23 +6,23 @@
  */
 
 import {
-  BulkOperationContainer,
   BulkRequest,
   BulkResponse,
+  BulkOperationContainer,
   MgetResponseItem,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
-  ALERT_CASE_IDS,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 
-import { get, zip } from 'lodash';
+import { zip, get } from 'lodash';
 import { sanitizeBulkErrorResponse } from '../..';
 
 // these fields are the one's we'll refresh from the fresh mget'd docs

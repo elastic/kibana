@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
 export function formatHttpError(
   error: IHttpFetchError<ResponseErrorBody & { status: number; statusText: string }>

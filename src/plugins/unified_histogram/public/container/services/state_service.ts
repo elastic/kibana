@@ -10,8 +10,7 @@ import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
-import type { UnifiedHistogramChartLoadEvent, UnifiedHistogramServices } from '../../types';
-import type { UnifiedHistogramSuggestionContext } from '../../types';
+import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
   getBreakdownField,
   getChartHidden,
@@ -20,6 +19,7 @@ import {
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
+import type { UnifiedHistogramSuggestionContext } from '../../types';
 
 /**
  * The current state of the container

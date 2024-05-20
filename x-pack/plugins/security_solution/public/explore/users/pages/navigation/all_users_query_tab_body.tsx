@@ -10,16 +10,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import type { UsersComponentsQueryProps } from './types';
 
-import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
-import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import { UsersTable } from '../../components/all_users';
-import { usersSelectors } from '../../store';
+import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
 import * as i18n from './translations';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { usersSelectors } from '../../store';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 const UsersTableManage = manageQuery(UsersTable);
 

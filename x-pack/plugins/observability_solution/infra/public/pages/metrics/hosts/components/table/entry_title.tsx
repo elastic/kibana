@@ -1,5 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
-import { CloudProviderIcon } from '@kbn/custom-icons';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { CloudProviderIcon } from '@kbn/custom-icons';
  * 2.0.
  */
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
+import { CloudProviderIcon } from '@kbn/custom-icons';
 import { useNodeDetailsRedirect } from '../../../../link_to/use_node_details_redirect';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';

@@ -7,32 +7,32 @@
 
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
+  getInstallSingleRuleButtonByRuleId,
+  getUpgradeSingleRuleButtonByRuleId,
   INSTALL_ALL_RULES_BUTTON,
   INSTALL_SELECTED_RULES_BUTTON,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
   UPGRADE_SELECTED_RULES_BUTTON,
-  getInstallSingleRuleButtonByRuleId,
-  getUpgradeSingleRuleButtonByRuleId,
 } from '../../../../screens/alerts_detection_rules';
 import { selectRulesByName } from '../../../../tasks/alerts_detection_rules';
 import {
-  createAndInstallMockedPrebuiltRules,
   installPrebuiltRuleAssets,
+  createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { login } from '../../../../tasks/login';
 import {
-  assertInstallationRequestIsComplete,
-  assertRuleInstallationFailureToastShown,
-  assertRuleUpgradeFailureToastShown,
-  assertRulesPresentInAddPrebuiltRulesTable,
-  assertRulesPresentInRuleUpdatesTable,
-  assertUpgradeRequestIsComplete,
   clickAddElasticRulesButton,
-  clickRuleUpdatesTab,
+  assertInstallationRequestIsComplete,
   interceptInstallationRequestToFail,
   interceptUpgradeRequestToFail,
+  clickRuleUpdatesTab,
+  assertUpgradeRequestIsComplete,
+  assertRuleInstallationFailureToastShown,
+  assertRulesPresentInAddPrebuiltRulesTable,
+  assertRuleUpgradeFailureToastShown,
+  assertRulesPresentInRuleUpdatesTable,
 } from '../../../../tasks/prebuilt_rules';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 

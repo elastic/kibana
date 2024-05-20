@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
 import {
   CLOUD_SECURITY_POSTURE_BASE_PATH,
   type CspSecuritySolutionContext,
 } from '@kbn/cloud-security-posture-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import React from 'react';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
-import { FiltersGlobal } from '../common/components/filters_global';
-import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { useKibana } from '../common/lib/kibana';
+import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
+import { FiltersGlobal } from '../common/components/filters_global';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 // This exists only for the type signature cast
 const CloudPostureSpyRoute = ({ pageName, ...rest }: { pageName?: CloudSecurityPosturePageId }) => (

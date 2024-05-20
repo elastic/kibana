@@ -13,24 +13,24 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case, CustomFieldsConfiguration, User } from '../../../common/types/domain';
 import { CaseSeverity, UserActionTypes } from '../../../common/types/domain';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
+import { Operations } from '../../authorization';
+import { createCaseError, isSODecoratedError, isSOError } from '../../common/error';
+import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
   CasePostRequest,
 } from '../../../common/types/api';
-import { BulkCreateCasesRequestRt, BulkCreateCasesResponseRt } from '../../../common/types/api';
-import { Operations } from '../../authorization';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
-import { createCaseError, isSODecoratedError, isSOError } from '../../common/error';
-import type { CaseTransformedAttributes } from '../../common/types/case';
-import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
+import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
+import { validateCustomFields } from './validators';
+import { normalizeCreateCaseRequest } from './utils';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
-import { normalizeCreateCaseRequest } from './utils';
-import { validateCustomFields } from './validators';
+import type { CaseTransformedAttributes } from '../../common/types/case';
 
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,

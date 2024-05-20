@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiBadge } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';

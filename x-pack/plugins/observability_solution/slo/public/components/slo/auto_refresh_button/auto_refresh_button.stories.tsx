@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ComponentStory } from '@storybook/react';
 import React, { useState } from 'react';
+import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
 import { AutoRefreshButton as Component } from './auto_refresh_button';

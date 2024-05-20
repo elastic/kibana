@@ -7,8 +7,8 @@
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { UI_SETTINGS, useKibanaUISettings } from '../../../../hooks/use_kibana_ui_settings';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 
 export interface TimePickerQuickRange {
   from: string;

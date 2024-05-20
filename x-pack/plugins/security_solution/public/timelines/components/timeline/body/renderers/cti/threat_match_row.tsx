@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { get, getOr } from 'lodash/fp';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import type { Fields } from '../../../../../../../common/search_strategy';
 import {
-  FEED_NAME,
   MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_TYPE,
   REFERENCE,
+  FEED_NAME,
 } from '../../../../../../../common/cti/constants';
-import type { Fields } from '../../../../../../../common/search_strategy';
-import { IndicatorDetails } from './indicator_details';
 import { MatchDetails } from './match_details';
+import { IndicatorDetails } from './indicator_details';
 
 export interface ThreatMatchRowProps {
   contextId: string;

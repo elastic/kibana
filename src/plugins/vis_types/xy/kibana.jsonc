@@ -7,8 +7,19 @@
     "id": "visTypeXy",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["charts", "visualizations", "data", "expressions", "dataViews"],
-    "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
-    "extraPublicDirs": ["common"]
+    "requiredPlugins": [
+      "charts",
+      "visualizations",
+      "data",
+      "expressions",
+      "dataViews"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "visDefaultEditor"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

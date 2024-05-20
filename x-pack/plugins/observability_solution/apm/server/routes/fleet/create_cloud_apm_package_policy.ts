@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   ElasticsearchClient,
-  KibanaRequest,
-  Logger,
   SavedObjectsClientContract,
+  Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
-  APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
+  APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
 } from '../../../common/apm_saved_object_constants';
-import { ELASTIC_CLOUD_APM_AGENT_POLICY_ID } from '../../../common/fleet';
-import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicyDefinition } from './get_apm_package_policy_definition';
 import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
+import { ELASTIC_CLOUD_APM_AGENT_POLICY_ID } from '../../../common/fleet';
+import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function createCloudApmPackgePolicy({
   cloudPluginSetup,

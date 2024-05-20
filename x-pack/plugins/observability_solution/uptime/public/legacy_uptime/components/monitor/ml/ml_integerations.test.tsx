@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import * as redux from 'react-redux';
-import { renderWithRouter, shallowWithRouter } from '../../../lib';
 import { MLIntegrationComponent } from './ml_integeration';
+import { renderWithRouter, shallowWithRouter } from '../../../lib';
+import * as redux from 'react-redux';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const core = coreMock.createStart();
 describe('ML Integrations', () => {

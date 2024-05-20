@@ -8,8 +8,8 @@
 
 import { NodeColorAccessor, PATH_KEY } from '@elastic/charts';
 import { lightenColor } from '@kbn/charts-plugin/public';
-import { getColorFactory } from '@kbn/coloring';
 import { MultiFieldKey } from '@kbn/data-plugin/common';
+import { getColorFactory } from '@kbn/coloring';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
 import { ChartTypes } from '../../../common/types';
 

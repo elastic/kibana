@@ -1,5 +1,3 @@
-import { Route, Routes } from '@kbn/shared-ux-router';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,14 +6,16 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
  */
 import React from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
-import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { DataViewContext } from '../../common/contexts/data_view_context';
-import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
-import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { NoFindingsStates } from '../../components/no_findings_states';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
+import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
+import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
+import { DataViewContext } from '../../common/contexts/data_view_context';
 
 export const Configurations = () => {
   const location = useLocation();

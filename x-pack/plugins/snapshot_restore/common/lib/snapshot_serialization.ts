@@ -6,13 +6,13 @@
  */
 
 import { sortBy } from 'lodash';
-import { flatten, flow, map, uniq } from 'lodash/fp';
+import { flow, map, flatten, uniq } from 'lodash/fp';
 
 import {
-  SnapshotConfig,
-  SnapshotConfigEs,
   SnapshotDetails,
   SnapshotDetailsEs,
+  SnapshotConfig,
+  SnapshotConfigEs,
   SnapshotRetention,
   SnapshotRetentionEs,
 } from '../types';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetSLOSuggestionsResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
+import { GetSLOSuggestionsResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
 
 export function useFetchSLOSuggestions() {

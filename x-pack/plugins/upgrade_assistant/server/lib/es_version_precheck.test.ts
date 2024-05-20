@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { SemVer } from 'semver';
 import { IScopedClusterClient, kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { SemVer } from 'semver';
 import { getMockVersionInfo } from './__fixtures__/version';
 
 import {

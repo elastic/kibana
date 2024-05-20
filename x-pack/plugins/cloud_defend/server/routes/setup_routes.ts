@@ -7,12 +7,12 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { PLUGIN_ID } from '../../common/constants';
 import type {
+  CloudDefendRequestHandlerContext,
   CloudDefendPluginStart,
   CloudDefendPluginStartDeps,
-  CloudDefendRequestHandlerContext,
 } from '../types';
+import { PLUGIN_ID } from '../../common/constants';
 import { defineGetPoliciesRoute } from './policies/policies';
 import { defineGetCloudDefendStatusRoute } from './status/status';
 

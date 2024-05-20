@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { get } from 'lodash';
-import { bucketTransform, overwrite } from '../../helpers';
+import { overwrite, bucketTransform } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
 import type { TableRequestProcessorsFunction } from './types';
 

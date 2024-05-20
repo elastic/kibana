@@ -8,11 +8,11 @@
 import { act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BLOCKLIST_PATH } from '../../../../../common/constants';
-import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { Blocklist } from './blocklist';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 
 jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;

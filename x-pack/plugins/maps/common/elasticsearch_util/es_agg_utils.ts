@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { AGG_TYPE, JOIN_FIELD_NAME_PREFIX, TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
 
 export type BucketProperties = Record<string | number, unknown>;

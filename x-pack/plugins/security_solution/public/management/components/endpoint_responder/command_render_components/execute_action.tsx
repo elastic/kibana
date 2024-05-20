@@ -10,15 +10,15 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExecuteActionRequestBody } from '../../../../../common/api/endpoint';
+import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
   ResponseActionExecuteOutputContent,
   ResponseActionsExecuteParameters,
 } from '../../../../../common/endpoint/types';
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
-import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
-import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
-import { parsedExecuteTimeout } from '../lib/utils';
 import type { ActionRequestComponentProps } from '../types';
+import { parsedExecuteTimeout } from '../lib/utils';
+import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 
 export const ExecuteActionResult = memo<
   ActionRequestComponentProps<

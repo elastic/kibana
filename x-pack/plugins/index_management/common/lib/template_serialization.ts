@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { allowAutoCreateRadioIds, allowAutoCreateRadioValues } from '../constants';
 import {
-  LegacyTemplateSerialized,
   TemplateDeserialized,
-  TemplateListItem,
+  LegacyTemplateSerialized,
   TemplateSerialized,
+  TemplateListItem,
   TemplateType,
 } from '../types';
 import { deserializeESLifecycle } from './data_stream_serialization';
+import { allowAutoCreateRadioValues, allowAutoCreateRadioIds } from '../constants';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -88,8 +88,8 @@ export function deserializeTemplate(
       allowAutoCreate === true
         ? allowAutoCreateRadioIds.TRUE_RADIO_OPTION
         : allowAutoCreate === false
-          ? allowAutoCreateRadioIds.FALSE_RADIO_OPTION
-          : allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
+        ? allowAutoCreateRadioIds.FALSE_RADIO_OPTION
+        : allowAutoCreateRadioIds.NO_OVERWRITE_RADIO_OPTION,
     _meta,
     deprecated,
     _kbnMeta: {
@@ -106,10 +106,8 @@ export function deserializeTemplateList(
   cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return indexTemplates.map(({ name, index_template: templateSerialized }) => {
-    const {
-      template: { mappings, settings, aliases } = {},
-      ...deserializedTemplate
-    } = deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
+    const { template: { mappings, settings, aliases } = {}, ...deserializedTemplate } =
+      deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,
@@ -170,10 +168,8 @@ export function deserializeLegacyTemplateList(
   cloudManagedTemplatePrefix?: string
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
-    const {
-      template: { mappings, settings, aliases } = {},
-      ...deserializedTemplate
-    } = deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
+    const { template: { mappings, settings, aliases } = {}, ...deserializedTemplate } =
+      deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
     return {
       ...deserializedTemplate,

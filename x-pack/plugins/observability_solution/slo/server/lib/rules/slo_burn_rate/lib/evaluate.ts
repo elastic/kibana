@@ -7,17 +7,17 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
 import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
 import { BurnRateRuleParams } from '../types';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
 import {
-  EvaluationAfterKey,
-  LONG_WINDOW,
-  SHORT_WINDOW,
   buildQuery,
+  EvaluationAfterKey,
   generateAboveThresholdKey,
   generateBurnRateKey,
   generateWindowId,
+  LONG_WINDOW,
+  SHORT_WINDOW,
 } from './build_query';
 
 export interface EvaluationWindowStats {

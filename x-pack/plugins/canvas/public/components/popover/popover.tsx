@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiToolTip } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { EuiPopover, EuiToolTip } from '@elastic/eui';
 
 interface Props {
   button: (handleClick: React.MouseEventHandler<HTMLButtonElement>) => React.ReactElement;

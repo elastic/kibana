@@ -7,9 +7,9 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { waitForIndexStatus } from './wait_for_index_status';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
-import { waitForIndexStatus } from './wait_for_index_status';
 
 jest.mock('./catch_retryable_es_client_errors');
 

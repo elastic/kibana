@@ -8,8 +8,8 @@
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 import * as t from 'io-ts';
-import { RuleActionFrequency } from '../frequency';
 import { saved_object_attributes } from '../saved_object_attributes';
+import { RuleActionFrequency } from '../frequency';
 
 export type RuleActionGroup = t.TypeOf<typeof RuleActionGroup>;
 export const RuleActionGroup = t.string;

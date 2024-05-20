@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { useMemo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
 
 const getI18nTexts = () => ({
   title: i18n.translate('contentManagement.contentEditor.flyoutWarningsTitle', {

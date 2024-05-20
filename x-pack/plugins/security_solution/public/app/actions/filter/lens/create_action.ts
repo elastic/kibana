@@ -7,21 +7,21 @@
 
 import { addExistsFilter, addFilterIn, addFilterOut } from '@kbn/cell-actions/actions';
 import {
-  filterOutNullableValues,
   isValueSupportedByDefaultActions,
+  filterOutNullableValues,
   valueToArray,
 } from '@kbn/cell-actions/actions/utils';
-import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { CellValueContext, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import { TimelineId } from '../../../../../common/types';
-import type { SecurityAppStore } from '../../../../common/store';
+import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
+import { i18n } from '@kbn/i18n';
 import { timelineSelectors } from '../../../../timelines/store';
-import type { StartServices } from '../../../../types';
-import { DefaultCellActionTypes } from '../../constants';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
+import { TimelineId } from '../../../../../common/types';
+import { DefaultCellActionTypes } from '../../constants';
+import type { SecurityAppStore } from '../../../../common/store';
+import type { StartServices } from '../../../../types';
 
 function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   return (

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { cloneDeep, isEqual } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-import { APP_UI_ID } from '../../../../../../common';
+import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { useFetchAgentByAgentPolicySummary } from '../../../../hooks/policy/use_fetch_endpoint_policy_agent_summary';
+import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
+import type { PolicySettingsFormProps } from '../policy_settings_form/policy_settings_form';
+import { PolicySettingsForm } from '../policy_settings_form';
 import type {
   MaybeImmutable,
   PolicyConfig,
   PolicyData,
   PolicyDetailsRouteState,
 } from '../../../../../../common/endpoint/types';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../../../common';
 import { getPoliciesPath } from '../../../../common/routing';
-import { useFetchAgentByAgentPolicySummary } from '../../../../hooks/policy/use_fetch_endpoint_policy_agent_summary';
-import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
-import { PolicySettingsForm } from '../policy_settings_form';
-import type { PolicySettingsFormProps } from '../policy_settings_form/policy_settings_form';
+import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { ConfirmUpdate } from './components/policy_form_confirm_update';
 
 export interface PolicySettingsLayoutProps {

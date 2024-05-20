@@ -7,28 +7,28 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { omit } from 'lodash';
 import React, { useEffect } from 'react';
+import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
-import {
-  getKueryWithMobileErrorFilter,
-  getKueryWithMobileFilters,
-} from '../../../../../../common/utils/get_kuery_with_mobile_filters';
-import { maybe } from '../../../../../../common/utils/maybe';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../../context/breadcrumbs/use_breadcrumb';
-import { ChartPointerEventContextProvider } from '../../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { useErrorGroupDistributionFetcher } from '../../../../../hooks/use_error_group_distribution_fetcher';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { ErrorSampler } from '../../../error_group_details/error_sampler';
-import { MobileErrorsAndCrashesTreemap } from '../../charts/mobile_errors_and_crashes_treemap';
 import { ErrorDistribution } from '../shared/distribution';
+import { ChartPointerEventContextProvider } from '../../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { MobileErrorsAndCrashesTreemap } from '../../charts/mobile_errors_and_crashes_treemap';
+import { maybe } from '../../../../../../common/utils/maybe';
+import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
+import {
+  getKueryWithMobileFilters,
+  getKueryWithMobileErrorFilter,
+} from '../../../../../../common/utils/get_kuery_with_mobile_filters';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;

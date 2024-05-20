@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -21,8 +21,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { flattenPanelTree } from '../../../services';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
+import { flattenPanelTree } from '../../../services';
 
 export class JobActionMenuUi extends Component {
   static propTypes = {

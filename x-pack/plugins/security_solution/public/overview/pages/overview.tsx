@@ -8,37 +8,37 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiScreenReaderOnly,
-  EuiShowFor,
   EuiSpacer,
+  EuiShowFor,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 
 import { OVERVIEW } from '../../app/translations';
-import { FiltersGlobal } from '../../common/components/filters_global';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { SiemSearchBar } from '../../common/components/search_bar';
-import { useFetchIndex } from '../../common/containers/source';
-import { useGlobalTime } from '../../common/containers/use_global_time';
 import { InputsModelId } from '../../common/store/inputs/constants';
+import { FiltersGlobal } from '../../common/components/filters_global';
+import { SiemSearchBar } from '../../common/components/search_bar';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { useGlobalTime } from '../../common/containers/use_global_time';
+import { useFetchIndex } from '../../common/containers/source';
 
-import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
-import { SecurityPageName } from '../../app/types';
-import { EmptyPrompt } from '../../common/components/empty_prompt';
-import { useUserPrivileges } from '../../common/components/user_privileges';
-import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { inputsSelectors } from '../../common/store';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { EndpointNotice } from '../components/endpoint_notice';
-import { EventCounts } from '../components/event_counts';
 import { EventsByDataset } from '../components/events_by_dataset';
-import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
+import { EventCounts } from '../components/event_counts';
 import { StatefulSidebar } from '../components/sidebar';
 import { SignalsByCategory } from '../components/signals_by_category';
+import { inputsSelectors } from '../../common/store';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { SecurityPageName } from '../../app/types';
+import { EndpointNotice } from '../components/endpoint_notice';
+import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
+import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(

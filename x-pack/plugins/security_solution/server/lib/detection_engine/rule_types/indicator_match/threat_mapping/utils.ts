@@ -10,20 +10,20 @@ import moment from 'moment';
 import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { get, isEmpty } from 'lodash';
 
-import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { TelemetryChannel } from '../../../../telemetry/types';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
 import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../../types';
 import { parseInterval } from '../../utils/utils';
 import { ThreatMatchQueryType } from './types';
 import type {
-  DecodedThreatNamedQuery,
-  GetSignalValuesMap,
-  SignalValuesMap,
   ThreatListItem,
-  ThreatMatchNamedQuery,
   ThreatMatchedFields,
   ThreatTermNamedQuery,
+  DecodedThreatNamedQuery,
+  SignalValuesMap,
+  GetSignalValuesMap,
+  ThreatMatchNamedQuery,
 } from './types';
 
 export const MANY_NESTED_CLAUSES_ERR =

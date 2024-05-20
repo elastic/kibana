@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import type { SinonFakeTimers } from 'sinon';
 import { useFakeTimers } from 'sinon';
-import { ml } from '../../../../../services/ml_api_service';
-import type { JobValidator } from '../../job_validator';
-import type { JobCreator } from '../job_creator';
 import type { CalculatePayload } from './model_memory_estimator';
 import { modelMemoryEstimatorProvider } from './model_memory_estimator';
+import type { JobValidator } from '../../job_validator';
+import { ml } from '../../../../../services/ml_api_service';
+import type { JobCreator } from '../job_creator';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../../../../services/ml_api_service', () => {
   return {

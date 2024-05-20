@@ -1,4 +1,3 @@
-import { fireEvent, render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { SerializableRecord, Serializable } from '@kbn/utility-types';
 import { SavedObjectReference } from '@kbn/core/types';
-import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 
 /**
  * Versioned state is a POJO JavaScript object that can be serialized to JSON,
@@ -95,7 +95,7 @@ export type GetMigrationFunctionObjectFn = () => MigrateFunctionsObject;
 export type MigrateFunctionsObject = { [semver: string]: MigrateFunction<any, any> };
 export type MigrateFunction<
   FromVersion extends Serializable = SerializableRecord,
-  ToVersion extends Serializable = SerializableRecord,
+  ToVersion extends Serializable = SerializableRecord
 > = (state: FromVersion) => ToVersion;
 
 /**

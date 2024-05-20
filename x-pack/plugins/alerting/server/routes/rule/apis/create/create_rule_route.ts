@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import { RuleTypeDisabledError } from '../../../../lib';
+import {
+  handleDisabledApiKeysError,
+  verifyAccessAndContext,
+  countUsageOfPredefinedIds,
+} from '../../../lib';
+import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { RouteOptions } from '../../..';
 import type {
   CreateRuleRequestBodyV1,
@@ -17,16 +24,9 @@ import {
 } from '../../../../../common/routes/rule/apis/create';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
-import { RuleTypeDisabledError } from '../../../../lib';
-import { BASE_ALERTING_API_PATH } from '../../../../types';
-import {
-  countUsageOfPredefinedIds,
-  handleDisabledApiKeysError,
-  verifyAccessAndContext,
-} from '../../../lib';
+import { transformCreateBodyV1 } from './transforms';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
-import { transformCreateBodyV1 } from './transforms';
 
 export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
   router.post(

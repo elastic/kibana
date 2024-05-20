@@ -6,25 +6,25 @@
  */
 
 import {
-  DropResult,
-  EuiButton,
   EuiCallOut,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiDragDropContext,
+  EuiDroppable,
+  EuiDraggable,
+  EuiIcon,
+  DropResult,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
-import { IDiscoveryRuleList, Operation, RuntimeAttachmentSettings } from '.';
-import { DefaultDiscoveryRule } from './default_discovery_rule';
+import { i18n } from '@kbn/i18n';
 import { DiscoveryRule } from './discovery_rule';
+import { DefaultDiscoveryRule } from './default_discovery_rule';
 import { EditDiscoveryRule } from './edit_discovery_rule';
+import { IDiscoveryRuleList, Operation, RuntimeAttachmentSettings } from '.';
 import { JavaAgentVersionInput } from './java_agent_version_input';
 
 const DEFAULT_AGENT_VERSION = 'latest';

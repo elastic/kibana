@@ -6,8 +6,8 @@
  */
 
 import os from 'os';
-import { getChromiumPackage } from '../../../utils';
 import { args } from './args';
+import { getChromiumPackage } from '../../../utils';
 
 // Since chromium v111 headless mode in arm based macs is not working with `--disable-gpu`
 // This is a known issue: headless uses swiftshader by default and swiftshader's support for WebGL is currently disabled on Arm pending the resolution of https://issuetracker.google.com/issues/165000222.

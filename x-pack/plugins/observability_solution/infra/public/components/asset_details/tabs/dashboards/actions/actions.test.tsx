@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { EditDashboard, LinkDashboard, UnlinkDashboard } from '.';
+import { render, screen } from '@testing-library/react';
+import { EditDashboard, UnlinkDashboard, LinkDashboard } from '.';
 import * as hooks from '../../../hooks/use_saved_objects_permissions';
 
 const TEST_CURRENT_DASHBOARD = {

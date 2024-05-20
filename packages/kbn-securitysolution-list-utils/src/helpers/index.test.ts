@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fieldSupportsMatches, getMappingConflictsInfo } from '.';
+import { getMappingConflictsInfo, fieldSupportsMatches } from '.';
 
 describe('Helpers', () => {
   describe('getMappingConflictsInfo', () => {

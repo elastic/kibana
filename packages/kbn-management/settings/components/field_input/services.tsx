@@ -7,7 +7,7 @@
  */
 
 import React, { FC, PropsWithChildren, useContext } from 'react';
-import type { FieldInputKibanaDependencies, FieldInputServices } from './types';
+import type { FieldInputServices, FieldInputKibanaDependencies } from './types';
 
 const FieldInputContext = React.createContext<FieldInputServices | null>(null);
 

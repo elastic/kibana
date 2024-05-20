@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useMemo, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { MonitorFiltersResult } from '../../../../../../../common/runtime_types';
-import { useSyntheticsRefreshContext } from '../../../../contexts';
-import { useUrlParams } from '../../../../hooks';
 import {
   MonitorFilterState,
-  fetchMonitorFiltersAction,
-  selectMonitorFilterOptions,
   selectMonitorFiltersAndQueryState,
   setOverviewPageStateAction,
   updateManagementPageStateAction,
+  fetchMonitorFiltersAction,
+  selectMonitorFilterOptions,
 } from '../../../../state';
+import { useSyntheticsRefreshContext } from '../../../../contexts';
+import { SyntheticsUrlParams } from '../../../../utils/url_params';
+import { useUrlParams } from '../../../../hooks';
 import {
-  SyntheticsMonitorFilterChangeHandler,
-  SyntheticsMonitorFilterField,
   getMonitorFilterFields,
   getSyntheticsFilterKeyForLabel,
+  SyntheticsMonitorFilterChangeHandler,
+  SyntheticsMonitorFilterField,
 } from '../../../../utils/filters/filter_fields';
-import { SyntheticsUrlParams } from '../../../../utils/url_params';
 
 export const useFilters = (): MonitorFiltersResult | null => {
   const dispatch = useDispatch();

@@ -8,7 +8,9 @@
     "datafeed_id": "datafeed-ffb-rare-by-response-code-0942",
     "job_id": "ffb-rare-by-response-code-0942",
     "query_delay": "66615ms",
-    "indices": ["filebeat-6.0.0-2017-nginx-elasticco-anon"],
+    "indices": [
+      "filebeat-6.0.0-2017-nginx-elasticco-anon"
+    ],
     "query": {
       "match_all": {
         "boost": 1

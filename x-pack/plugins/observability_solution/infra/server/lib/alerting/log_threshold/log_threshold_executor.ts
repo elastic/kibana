@@ -6,21 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  ActionGroup,
-  ActionGroupIdsOf,
-  AlertInstanceContext as AlertContext,
-  AlertInstanceState as AlertState,
-  AlertsClientError,
-  RuleExecutorOptions,
-  RuleTypeState,
-} from '@kbn/alerting-plugin/server';
-import {
-  PublicAlertsClient,
-  RecoveredAlertData,
-} from '@kbn/alerting-plugin/server/alerts_client/types';
-import { ObservabilityLogsAlert } from '@kbn/alerts-as-data-utils';
-import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
@@ -29,46 +14,56 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
+import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
+import {
+  ActionGroup,
+  ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  RuleTypeState,
+  RuleExecutorOptions,
+  AlertsClientError,
+} from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { ObservabilityLogsAlert } from '@kbn/alerts-as-data-utils';
+import {
+  PublicAlertsClient,
+  RecoveredAlertData,
+} from '@kbn/alerting-plugin/server/alerts_client/types';
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import {
+  RuleParams,
+  ruleParamsRT,
   AlertStates,
   Comparator,
-  CountCriteria,
   CountRuleParams,
-  Criterion,
-  ExecutionTimeRange,
-  GroupedSearchQueryResponse,
-  GroupedSearchQueryResponseRT,
-  RatioRuleParams,
-  RuleParams,
-  UngroupedSearchQueryResponse,
-  UngroupedSearchQueryResponseRT,
+  CountCriteria,
   getDenominator,
   getNumerator,
+  GroupedSearchQueryResponse,
+  GroupedSearchQueryResponseRT,
   hasGroupBy,
   isOptimizableGroupedThreshold,
   isOptimizedGroupedSearchQueryResponse,
   isRatioRuleParams,
-  ruleParamsRT,
+  RatioRuleParams,
+  UngroupedSearchQueryResponse,
+  UngroupedSearchQueryResponseRT,
+  ExecutionTimeRange,
+  Criterion,
 } from '../../../../common/alerting/logs/log_threshold';
-import {
-  LogThresholdRuleTypeParams,
-  buildFiltersFromCriteria,
-  positiveComparators,
-} from '../../../../common/alerting/logs/log_threshold/query_helpers';
-import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { decodeOrThrow } from '../../../../common/runtime_types';
-import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
+import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   AdditionalContext,
-  UNGROUPED_FACTORY_KEY,
   flattenAdditionalContext,
   getContextForRecoveredAlerts,
   getGroupByObject,
   unflattenObject,
+  UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
 import {
   getReasonMessageForGroupedCountAlert,
@@ -76,6 +71,11 @@ import {
   getReasonMessageForUngroupedCountAlert,
   getReasonMessageForUngroupedRatioAlert,
 } from './reason_formatters';
+import {
+  buildFiltersFromCriteria,
+  LogThresholdRuleTypeParams,
+  positiveComparators,
+} from '../../../../common/alerting/logs/log_threshold/query_helpers';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used

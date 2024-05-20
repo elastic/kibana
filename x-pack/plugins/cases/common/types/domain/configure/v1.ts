@@ -7,8 +7,8 @@
 
 import * as rt from 'io-ts';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
-import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
 import { UserRt } from '../user/v1';
+import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
 
 export const ClosureTypeRt = rt.union([
   rt.literal('close-by-user'),

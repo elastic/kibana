@@ -1,6 +1,3 @@
-import { EuiPanel, type EuiPanelProps, EuiToolTip } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { Action } from '@kbn/ui-actions-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,11 +5,14 @@ import { Action } from '@kbn/ui-actions-plugin/public';
  * 2.0.
  */
 import React from 'react';
-import { type UseLensAttributesParams, useLensAttributes } from '../../hooks/use_lens_attributes';
-import { ChartLoadError } from './chart_load_error';
-import { LensWrapper } from './lens_wrapper';
-import type { TooltipContentProps } from './metric_explanation/tooltip_content';
+import { EuiPanel, EuiToolTip, type EuiPanelProps } from '@elastic/eui';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { css } from '@emotion/react';
+import { useLensAttributes, type UseLensAttributesParams } from '../../hooks/use_lens_attributes';
 import type { BaseChartProps } from './types';
+import type { TooltipContentProps } from './metric_explanation/tooltip_content';
+import { LensWrapper } from './lens_wrapper';
+import { ChartLoadError } from './chart_load_error';
 
 const MIN_HEIGHT = 300;
 

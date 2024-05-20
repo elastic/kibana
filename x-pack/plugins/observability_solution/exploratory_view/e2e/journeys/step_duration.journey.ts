@@ -7,9 +7,9 @@
 
 import { journey, step } from '@elastic/synthetics';
 import moment from 'moment';
-import { createExploratoryViewUrl } from '../../public/components/shared/exploratory_view/configurations/exploratory_view_url';
 import { recordVideo } from '../record_video';
-import { TIMEOUT_60_SEC, byTestId, loginToKibana, waitForLoadingToFinish } from '../utils';
+import { createExploratoryViewUrl } from '../../public/components/shared/exploratory_view/configurations/exploratory_view_url';
+import { byTestId, loginToKibana, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../utils';
 
 journey('Step Duration series', async ({ page, params }) => {
   recordVideo(page);

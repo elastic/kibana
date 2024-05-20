@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
+import classNames from 'classnames';
 import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import classNames from 'classnames';
-import React from 'react';
 import { DRAW_SHAPE } from '../../../../../common/constants';
 import { VectorCircleIcon } from './vector_circle_icon';
 import { VectorLineIcon } from './vector_line_icon';

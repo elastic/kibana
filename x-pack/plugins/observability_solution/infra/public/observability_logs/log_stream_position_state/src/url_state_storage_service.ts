@@ -1,7 +1,3 @@
-import { IToasts } from '@kbn/core-notifications-browser';
-import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import * as Either from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/function';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,9 +5,13 @@ import { pipe } from 'fp-ts/lib/function';
  * 2.0.
  */
 import * as rt from 'io-ts';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import * as Either from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/function';
 import { InvokeCreator } from 'xstate';
-import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import { minimalTimeKeyRT, pickTimeKey } from '../../../../common/time';
+import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import type { LogStreamPositionContext, LogStreamPositionEvent } from './types';
 interface LogStreamPositionUrlStateDependencies {
   positionStateKey?: string;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { loadPage } from '../tasks/common';
-import { ROLE, login } from '../tasks/login';
 import { closeAllToasts } from '../tasks/toasts';
+import { login, ROLE } from '../tasks/login';
+import { loadPage } from '../tasks/common';
 
 describe('When defining a kibana role for Endpoint security access', { tags: '@ess' }, () => {
   const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {

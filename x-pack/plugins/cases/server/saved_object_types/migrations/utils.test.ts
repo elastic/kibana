@@ -11,9 +11,9 @@ import { mockCaseComments } from '../../mocks';
 import { MIN_COMMENTS_DEFERRED_KIBANA_VERSION } from './constants';
 import {
   isDeferredMigration,
-  isPersistableStateAttachmentSO,
   isUserCommentSO,
   logError,
+  isPersistableStateAttachmentSO,
 } from './utils';
 
 describe('migration utils', () => {

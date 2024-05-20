@@ -9,7 +9,7 @@
 import Net from 'net';
 
 import * as Rx from 'rxjs';
-import { map, take, takeUntil } from 'rxjs';
+import { map, takeUntil, take } from 'rxjs';
 
 export async function createStdoutSocket() {
   const chunk$ = new Rx.Subject<Buffer>();

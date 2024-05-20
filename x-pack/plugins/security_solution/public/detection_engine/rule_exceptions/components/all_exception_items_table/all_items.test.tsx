@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { mount } from 'enzyme';
 
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
+import { ExceptionsViewerItems } from './all_items';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../../common/mock';
-import { ExceptionsViewerItems } from './all_items';
 
 const mockTheme = getMockTheme({
   eui: {

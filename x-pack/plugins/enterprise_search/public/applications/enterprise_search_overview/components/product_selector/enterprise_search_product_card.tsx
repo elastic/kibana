@@ -10,8 +10,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_PRODUCT_NAME,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
 } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
 import { ProductCard } from '../product_card';

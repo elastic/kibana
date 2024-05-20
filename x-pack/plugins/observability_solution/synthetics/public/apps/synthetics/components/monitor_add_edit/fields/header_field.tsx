@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
-import { CodeEditorMode, ContentType } from '../types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ContentType, CodeEditorMode } from '../types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';
 

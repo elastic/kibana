@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import {
-  IconChartGaugeArc,
-  IconChartGaugeCircle,
-  IconChartGaugeSemiCircle,
-  IconChartHorizontalBullet,
-  IconChartVerticalBullet,
-} from '@kbn/chart-icons';
-import { CUSTOM_PALETTE, CustomPaletteParams, PaletteRegistry } from '@kbn/coloring';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { ThemeServiceStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Ast } from '@kbn/interpreter';
+import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
+import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
 import type {
   GaugeExpressionFunctionDefinition,
   GaugeShape,
@@ -25,15 +23,15 @@ import {
   getMinValue,
   getValueFromAccessor,
 } from '@kbn/expression-gauge-plugin/public';
+import {
+  IconChartGaugeSemiCircle,
+  IconChartGaugeCircle,
+  IconChartGaugeArc,
+  IconChartHorizontalBullet,
+  IconChartVerticalBullet,
+} from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { DatatableRow, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Ast } from '@kbn/interpreter';
-import React from 'react';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import { generateId } from '../../id_generator';
-import { applyPaletteParams } from '../../shared_components';
 import type {
   DatasourceLayers,
   FramePublicAPI,
@@ -43,10 +41,12 @@ import type {
   Visualization,
   VisualizationType,
 } from '../../types';
-import { GROUP_ID, GaugeVisualizationState, LENS_GAUGE_ID, gaugeTitlesByType } from './constants';
-import { GaugeDimensionEditor } from './dimension_editor';
 import { getSuggestions } from './suggestions';
+import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState, gaugeTitlesByType } from './constants';
 import { GaugeToolbar } from './toolbar_component';
+import { applyPaletteParams } from '../../shared_components';
+import { GaugeDimensionEditor } from './dimension_editor';
+import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
 
 const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {

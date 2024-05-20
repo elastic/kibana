@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import SlackParamsFields from './slack_params';
+import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
-import SlackParamsFields from './slack_params';
 
 interface Result {
   isLoading: boolean;

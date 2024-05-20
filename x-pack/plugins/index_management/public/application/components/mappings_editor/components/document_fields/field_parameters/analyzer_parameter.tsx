@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 
-import { useConfig } from '../../../config_context';
-import { INDEX_DEFAULT, PARAMETERS_OPTIONS, getSuperSelectOption } from '../../../constants';
+import { UseField, TextField, FieldConfig, FieldHook } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
-import { FieldConfig, FieldHook, TextField, UseField } from '../../../shared_imports';
+import { PARAMETERS_OPTIONS, getSuperSelectOption, INDEX_DEFAULT } from '../../../constants';
 import {
   IndexSettings,
   IndexSettingsInterface,
   SelectOption,
   SuperSelectOption,
 } from '../../../types';
+import { useConfig } from '../../../config_context';
 import { AnalyzerParameterSelects } from './analyzer_parameter_selects';
 
 interface Props {

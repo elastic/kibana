@@ -10,27 +10,27 @@ import {
   generateEvent as generateAdminConsole,
   kibanaAssets as kibanaAssetsAdminConsole,
 } from './admin_console';
-import {
-  generateEvent as generateHeartbeat,
-  kibanaAssets as kibanaAssetsHeartbeat,
-} from './heartbeat';
+import { generateEvent as generateMongoDB, kibanaAssets as kibanaAssetsMongoDB } from './mongodb';
 import {
   generateEvent as generateMessageProcessor,
   kibanaAssets as kibanaAssetsMessageProcessor,
 } from './message_processor';
-import { generateEvent as generateMongoDB, kibanaAssets as kibanaAssetsMongoDB } from './mongodb';
 import {
   generateEvent as generateNginxProxy,
   kibanaAssets as kibanaAssetsNginxProxy,
 } from './nginx_proxy';
+import {
+  generateEvent as generateHeartbeat,
+  kibanaAssets as kibanaAssetsHeartbeat,
+} from './heartbeat';
 
 import { GeneratorFunction } from '../../types';
 
 import { indexTemplate as adminConsoleIndexTemplate } from './admin_console/ecs';
-import { indexTemplate as heartbeatIndexTemplate } from './heartbeat/ecs';
 import { indexTemplate as messageProcessorIndexTemplate } from './message_processor/ecs';
 import { indexTemplate as mongodbIndexTemplate } from './mongodb/ecs';
 import { indexTemplate as nginxProxyIndexTemplate } from './nginx_proxy/ecs';
+import { indexTemplate as heartbeatIndexTemplate } from './heartbeat/ecs';
 
 export const indexTemplate = [
   adminConsoleIndexTemplate,

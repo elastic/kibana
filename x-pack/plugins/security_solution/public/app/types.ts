@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { AppMountParameters } from '@kbn/core/public';
-import type { TableState } from '@kbn/securitysolution-data-table';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { RouteProps } from 'react-router-dom';
 import type {
-  Action,
-  AnyAction,
-  CombinedState,
-  Dispatch,
-  Middleware,
   Reducer,
-  StateFromReducersMapObject,
+  AnyAction,
+  Middleware,
+  Action,
   Store,
+  Dispatch,
+  StateFromReducersMapObject,
+  CombinedState,
 } from 'redux';
+import type { RouteProps } from 'react-router-dom';
+import type { AppMountParameters } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { TableState } from '@kbn/securitysolution-data-table';
 import type { ExploreReducer, ExploreState } from '../explore';
 import type { StartServices } from '../types';
 
@@ -34,8 +34,8 @@ export interface RenderAppProps
   children?: React.ReactNode;
 }
 
-import type { Immutable } from '../../common/endpoint/types';
 import type { State, SubPluginsInitReducer } from '../common/store';
+import type { Immutable } from '../../common/endpoint/types';
 import type { AppAction } from '../common/store/actions';
 import type { GroupModel } from '../common/store/grouping';
 

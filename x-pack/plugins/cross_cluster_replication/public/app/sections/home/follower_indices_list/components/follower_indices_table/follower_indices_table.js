@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButton,
   EuiHealth,
+  EuiButton,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingLogo,
   EuiOverlayMask,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React, { PureComponent } from 'react';
 
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { FollowerIndexActionsProvider } from '../../../../../components';
 import { API_STATUS, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK } from '../../../../../constants';
+import { FollowerIndexActionsProvider } from '../../../../../components';
 import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 const actionI18nTexts = {
   pause: i18n.translate(

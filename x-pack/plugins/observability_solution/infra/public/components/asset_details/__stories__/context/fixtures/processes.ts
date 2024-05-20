@@ -6,8 +6,8 @@
  */
 
 import {
-  ProcessListAPIChartResponse,
   ProcessListAPIResponse,
+  ProcessListAPIChartResponse,
 } from '../../../../../../common/http_api';
 
 const processChart: ProcessListAPIChartResponse = {

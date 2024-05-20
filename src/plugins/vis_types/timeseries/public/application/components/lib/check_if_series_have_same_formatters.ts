@@ -7,8 +7,8 @@
  */
 
 import type { FieldFormatMap } from '@kbn/data-views-plugin/common';
-import { aggs } from '../../../../common/agg_utils';
 import { DATA_FORMATTERS } from '../../../../common/enums';
+import { aggs } from '../../../../common/agg_utils';
 import type { Series } from '../../../../common/types';
 
 export const checkIfSeriesHaveSameFormatters = (

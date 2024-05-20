@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectReference } from '@kbn/core/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
 import type { LensSavedObjectAttributes, LensSearchQuery } from '../../common/content_management';
 import { getLensClient } from './lens_client';

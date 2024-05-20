@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { pointseries } from '../../../canvas_plugin_src/functions/server/pointseries';
+import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { DATATABLE, TINYMATH, TINYMATH_URL } from '../../constants';
-import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof pointseries>> = {
   help: i18n.translate('xpack.canvas.functions.pointseriesHelpText', {

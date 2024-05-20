@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 import { transformFromLegacyActions } from './transform_legacy_actions';
 import { transformToNotifyWhen } from './transform_to_notify_when';

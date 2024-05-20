@@ -6,13 +6,13 @@
  */
 
 import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
+import { login, ROLE } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
-import { ROLE, login } from '../../tasks/login';
 
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';
-import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { performUserActions } from '../../tasks/perform_user_actions';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../types';
 
 const loginWithWriteAccess = (url: string) => {

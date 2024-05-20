@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { TIME_SERIES_LABEL, TERMS_LABEL } from './i18n_constants';
 import { MAX_TERMS_TRACKS } from '../constants';
-import { TERMS_LABEL, TIME_SERIES_LABEL } from './i18n_constants';
 
 export function GroupByLabel() {
   return (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 import { Observable, Subscription } from 'rxjs';
 
 import { ILicense } from '@kbn/licensing-plugin/public';

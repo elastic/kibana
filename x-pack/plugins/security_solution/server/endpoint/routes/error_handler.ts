@@ -9,7 +9,7 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 import { FleetFileNotFound } from '@kbn/fleet-plugin/server/errors';
 import { CustomHttpRequestError } from '../../utils/custom_http_request_error';
 import { NotFoundError } from '../errors';
-import { EndpointHostNotFoundError, EndpointHostUnEnrolledError } from '../services/metadata';
+import { EndpointHostUnEnrolledError, EndpointHostNotFoundError } from '../services/metadata';
 
 /**
  * Default Endpoint Routes error handler

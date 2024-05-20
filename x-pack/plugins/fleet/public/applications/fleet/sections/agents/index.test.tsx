@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { useAuthz } from '../../../../hooks/use_authz';
-import { useFleetStatus } from '../../../../hooks/use_fleet_status';
 import { createFleetTestRendererMock } from '../../../../mock';
+import { useFleetStatus } from '../../../../hooks/use_fleet_status';
+import { useAuthz } from '../../../../hooks/use_authz';
 
 import { AgentsApp } from '.';
 

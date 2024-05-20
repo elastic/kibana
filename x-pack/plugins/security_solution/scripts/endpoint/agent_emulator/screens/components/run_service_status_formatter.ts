@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { bgCyan, dim, red } from 'chalk';
+import { bgCyan, red, dim } from 'chalk';
 import type { BaseRunningService } from '../../../common/base_running_service';
 import { DataFormatter } from '../../../common/screen';
 

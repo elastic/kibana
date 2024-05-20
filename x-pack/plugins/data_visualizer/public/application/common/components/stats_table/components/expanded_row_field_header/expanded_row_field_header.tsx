@@ -6,9 +6,9 @@
  */
 
 import { EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
 
 export const ExpandedRowFieldHeader: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { euiTheme } = useEuiTheme();

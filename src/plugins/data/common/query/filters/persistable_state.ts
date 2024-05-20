@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
-import { MigrateFunctionsObject, VersionedState } from '@kbn/kibana-utils-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
+import { Filter } from '@kbn/es-query';
+import { SavedObjectReference } from '@kbn/core/types';
+import { MigrateFunctionsObject, VersionedState } from '@kbn/kibana-utils-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 
 export const extract = (filters: Filter[]) => {
   const references: SavedObjectReference[] = [];

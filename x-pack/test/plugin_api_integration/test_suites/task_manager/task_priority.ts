@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;

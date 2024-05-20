@@ -7,18 +7,18 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type {
-  AggGroupName,
   AggGroupNames,
   AggParam,
+  AggGroupName,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Adapters } from '@kbn/inspector-plugin/common';
-import type { ReactNode } from 'react';
-import { NavigateToLensContext } from '../../common';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
+import { NavigateToLensContext } from '../../common';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;

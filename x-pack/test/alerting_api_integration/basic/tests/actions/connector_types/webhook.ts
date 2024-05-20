@@ -6,8 +6,8 @@
  */
 
 import http from 'http';
-import { getWebhookServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import getPort from 'get-port';
+import { getWebhookServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

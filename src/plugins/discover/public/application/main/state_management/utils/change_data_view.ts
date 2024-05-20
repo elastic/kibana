@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
-  DEFAULT_COLUMNS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
   SORT_DEFAULT_ORDER_SETTING,
+  DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
-import { SortOrder } from '@kbn/saved-search-plugin/public';
-import { DiscoverServices } from '../../../../build_services';
-import { addLog } from '../../../../utils/add_log';
-import { DiscoverAppStateContainer } from '../discover_app_state_container';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
+import { DiscoverAppStateContainer } from '../discover_app_state_container';
+import { addLog } from '../../../../utils/add_log';
+import { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from './get_switch_data_view_app_state';
 
 /**

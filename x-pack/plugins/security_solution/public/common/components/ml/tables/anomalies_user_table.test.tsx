@@ -1,13 +1,3 @@
-import { useMlHref } from '@kbn/ml-plugin/public';
-import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
-import { UsersType } from '../../../../explore/users/store/model';
-import { useQueryToggle } from '../../../containers/query_toggle';
-import { TestProviders } from '../../../mock';
-import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
-import { mockAnomalies } from '../mock';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,6 +5,16 @@ import { mockAnomalies } from '../mock';
  * 2.0.
  */
 import { AnomaliesUserTable } from './anomalies_user_table';
+import { TestProviders } from '../../../mock';
+import React from 'react';
+import { useQueryToggle } from '../../../containers/query_toggle';
+import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
+import { UsersType } from '../../../../explore/users/store/model';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { fireEvent, render } from '@testing-library/react';
+import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
+import { mockAnomalies } from '../mock';
+import { useMlHref } from '@kbn/ml-plugin/public';
 
 jest.mock('../../../containers/query_toggle');
 jest.mock('../anomaly/use_anomalies_table_data');

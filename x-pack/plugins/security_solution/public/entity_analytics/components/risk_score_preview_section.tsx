@@ -5,40 +5,40 @@
  * 2.0.
  */
 
+import React, { useState, useCallback, useMemo } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiAccordion,
-  EuiButton,
-  EuiCallOut,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiCallOut,
+  EuiButton,
+  EuiIcon,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCode,
 } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { BoolQuery, Query, TimeRange } from '@kbn/es-query';
+import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useCallback, useMemo } from 'react';
 import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import {
-  RISK_SCORE_INDEX_PATTERN,
   RiskScoreEntity,
+  RISK_SCORE_INDEX_PATTERN,
 } from '../../../common/entity_analytics/risk_engine';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { RiskScorePreviewTable } from './risk_score_preview_table';
+import * as i18n from '../translations';
+import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
 import { useKibana } from '../../common/lib/kibana';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
-import { userHasRiskEngineReadPermissions } from '../common';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
-import * as i18n from '../translations';
-import { RiskScorePreviewTable } from './risk_score_preview_table';
+import { userHasRiskEngineReadPermissions } from '../common';
 interface IRiskScorePreviewPanel {
   showMessage: string;
   hideMessage: string;

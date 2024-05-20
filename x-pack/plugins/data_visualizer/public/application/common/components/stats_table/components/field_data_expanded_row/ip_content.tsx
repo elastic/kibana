@@ -7,8 +7,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { TopValues } from '../../../top_values';
 import type { FieldDataRowProps } from '../../types/field_data_row';
+import { TopValues } from '../../../top_values';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 

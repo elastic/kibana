@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiDescriptionListDescription,
-  EuiIconTip,
   EuiPopover,
   EuiPopoverTitle,
+  EuiIconTip,
+  EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import type { State } from '../../../common/store/types';
 import * as selectors from '../../store/selectors';
-import { GeneratedText } from '../generated_text';
-import { StyledDescriptionList } from '../panels/styles';
 import { useColors } from '../use_colors';
-import { COLUMN_WIDTH, StyledEuiButtonIcon, StyledEuiDescriptionListTitle } from './styles';
+import { StyledDescriptionList } from '../panels/styles';
+import { GeneratedText } from '../generated_text';
+import type { State } from '../../../common/store/types';
+import { StyledEuiDescriptionListTitle, StyledEuiButtonIcon, COLUMN_WIDTH } from './styles';
 
 export const SchemaInformation = ({
   id,

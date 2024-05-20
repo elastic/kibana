@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { SERVICE_NAME, TRANSACTION_DURATION } from '@kbn/observability-shared-plugin/common';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
-import { ObservabilityPublicPluginsStart } from '../../../../..';
 import { UX_APP } from '../../../../../context/constants';
-import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
-import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
-import { useHasData } from '../../../../../hooks/use_has_data';
+import { ObservabilityPublicPluginsStart } from '../../../../..';
 import { SectionContainer } from '../section_container';
+import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
+import { useHasData } from '../../../../../hooks/use_has_data';
+import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import CoreVitals from './core_web_vitals/core_vitals';
 
 import type { BucketSize } from '../../../helpers/calculate_bucket_size';

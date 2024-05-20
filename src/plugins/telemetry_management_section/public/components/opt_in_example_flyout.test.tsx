@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
 
 describe('OptInDetailsComponent', () => {

@@ -6,9 +6,9 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { ID, useNetworkHttp } from '.';
-import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { TestProviders } from '../../../../common/mock';
+import { useNetworkHttp, ID } from '.';
+import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { networkModel } from '../../store';
 
 jest.mock('../../../../common/containers/use_search_strategy', () => ({

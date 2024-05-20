@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { EuiRangeProps } from '@elastic/eui';
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRange } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { FC } from 'react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { EuiRangeProps } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRange } from '@elastic/eui';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 
 export interface SeveritySelectorProps {
   value: number | undefined;

@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { pluginServices } from '../services';
-import { getDefaultFlyouts, getDefaultSidebar, getDefaultWorkpad } from './defaults';
+import { getDefaultWorkpad, getDefaultSidebar, getDefaultFlyouts } from './defaults';
 
 export const getInitialState = (path) => {
   const platformService = pluginServices.getServices().platform;

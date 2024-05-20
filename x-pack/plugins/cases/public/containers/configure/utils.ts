@@ -1,4 +1,3 @@
-import { ConnectorTypes } from '../../../common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { ConnectorTypes } from '../../../common';
  * 2.0.
  */
 import type { CasesConfigurationUI } from '../types';
+import { ConnectorTypes } from '../../../common';
 
 export const initialConfiguration: CasesConfigurationUI = {
   closureType: 'close-by-user',

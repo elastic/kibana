@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 
 export function findPluginDir(
   from = process.cwd()

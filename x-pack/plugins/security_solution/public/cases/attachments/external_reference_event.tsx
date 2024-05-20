@@ -9,9 +9,9 @@ import { EuiLink } from '@elastic/eui';
 import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
 import React, { useCallback, useMemo } from 'react';
 
-import { getEndpointDetailsPath } from '../../management/common/routing';
-import { ISOLATED_HOST, OTHER_ENDPOINTS, RELEASED_HOST } from '../pages/translations';
+import { ISOLATED_HOST, RELEASED_HOST, OTHER_ENDPOINTS } from '../pages/translations';
 import type { IExternalReferenceMetaDataProps } from './types';
+import { getEndpointDetailsPath } from '../../management/common/routing';
 
 const AttachmentContentEvent = ({
   externalReferenceMetadata: { command, targets },

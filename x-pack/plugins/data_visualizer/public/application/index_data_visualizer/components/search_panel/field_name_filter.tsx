@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { Option } from '../../../common/components/multi_select_picker';
 import { MultiSelectPicker } from '../../../common/components/multi_select_picker';
 import type { OverallStats } from '../../types/overall_stats';

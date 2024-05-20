@@ -7,7 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX, Connector } from '@kbn/search-connectors';
+import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 import { updateHtmlExtraction } from './put_html_extraction';
 

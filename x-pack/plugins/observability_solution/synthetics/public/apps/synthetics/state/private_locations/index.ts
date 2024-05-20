@@ -6,13 +6,13 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { IHttpSerializedFetchError } from '..';
 import { SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
 import { AgentPolicyInfo } from '../../../../../common/types';
+import { IHttpSerializedFetchError } from '..';
 import {
   getAgentPoliciesAction,
-  getPrivateLocationsAction,
   setAddingNewPrivateLocation,
+  getPrivateLocationsAction,
 } from './actions';
 
 export interface AgentPoliciesState {

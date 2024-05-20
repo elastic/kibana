@@ -6,14 +6,14 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { AlertHistoryEsIndexConnectorId } from '../../common';
-import { ActionResult, InMemoryConnector } from '../types';
+import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   AvgActionRunOutcomeByConnectorTypeBucket,
   parseActionRunOutcomeByConnectorTypesBucket,
 } from './lib/parse_connector_type_bucket';
+import { AlertHistoryEsIndexConnectorId } from '../../common';
+import { ActionResult, InMemoryConnector } from '../types';
 
 interface InMemoryAggRes {
   total: number;

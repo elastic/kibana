@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, BUCKET_TYPES, METRIC_TYPES } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { TabbedAggResponseWriter } from './response_writer';
 import type { TabbedResponseWriterOptions } from './types';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('TabbedAggResponseWriter class', () => {
   let responseWriter: TabbedAggResponseWriter;

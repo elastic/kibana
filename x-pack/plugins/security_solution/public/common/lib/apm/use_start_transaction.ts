@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TransactionOptions } from '@elastic/apm-rum';
 import { useCallback } from 'react';
+import type { TransactionOptions } from '@elastic/apm-rum';
 import { useKibana } from '../kibana';
 import type { ApmSearchRequestName } from './types';
 

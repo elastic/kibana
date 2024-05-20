@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { GuideConfig, GuideId, GuideState } from '@kbn/guided-onboarding';
+import type { GuideId, GuideState, GuideConfig } from '@kbn/guided-onboarding';
 
 /**
  * Guided onboarding overall status:

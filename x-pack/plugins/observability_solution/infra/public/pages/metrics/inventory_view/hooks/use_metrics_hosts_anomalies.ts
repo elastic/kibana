@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { useState, useCallback, useEffect, useReducer, useRef } from 'react';
 import { HttpHandler } from '@kbn/core/public';
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,
   Metric,
-  MetricsHostsAnomaly,
+  Sort,
   Pagination,
   PaginationCursor,
-  Sort,
   getMetricsHostsAnomaliesRequestPayloadRT,
+  MetricsHostsAnomaly,
   getMetricsHostsAnomaliesSuccessReponsePayloadRT,
 } from '../../../../../common/http_api/infra_ml';
+import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 
 export type SortOptions = Sort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;

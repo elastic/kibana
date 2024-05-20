@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiBadge } from '@elastic/eui';
 import { useTheme } from '../../../hooks/use_theme';
 
 interface Props {

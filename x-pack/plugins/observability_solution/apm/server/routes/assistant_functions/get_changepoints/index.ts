@@ -7,7 +7,7 @@
 
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { ApmTimeseriesType, TimeseriesChangePoint, getApmTimeseries } from '../get_apm_timeseries';
+import { ApmTimeseriesType, getApmTimeseries, TimeseriesChangePoint } from '../get_apm_timeseries';
 
 export interface ChangePointGrouping {
   title: string;

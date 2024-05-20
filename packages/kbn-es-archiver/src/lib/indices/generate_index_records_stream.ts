@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Transform } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { Transform } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
-import { getIndexTemplate } from '..';
-import { ES_CLIENT_HEADERS } from '../../client_headers';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
+import { getIndexTemplate } from '..';
 
 const headers = {
   headers: ES_CLIENT_HEADERS,

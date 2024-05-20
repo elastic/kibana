@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-  MaintenanceWindowClientContext,
-} from '../../../../../common';
 import { deleteMaintenanceWindow } from './delete_maintenance_window';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  MaintenanceWindowClientContext,
+  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+} from '../../../../../common';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 

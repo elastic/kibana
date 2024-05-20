@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { httpServiceMock } from '@kbn/core/public/mocks';
 import { v1 } from '../../common';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getRelationships } from './get_relationships';
 
 describe('getRelationships', () => {

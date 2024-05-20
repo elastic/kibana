@@ -23,7 +23,7 @@ export type UiSetting<T> = PublicUiSettingsParams & UserProvidedValues<T>;
  */
 export interface UiSettingMetadata<
   T extends SettingType = SettingType,
-  V = KnownTypeToValue<T> | null,
+  V = KnownTypeToValue<T> | null
 > extends UiSetting<V> {
   /**
    * The type of setting being represented.
@@ -102,24 +102,15 @@ export type UndefinedUiSettingMetadata = UiSettingMetadata<'undefined'>;
  * type based on a given {@link SettingType}.
  * @public
  */
-export type KnownTypeToMetadata<T extends SettingType> = T extends 'array'
-  ? ArrayUiSettingMetadata
-  : T extends 'boolean'
-    ? BooleanUiSettingMetadata
-    : T extends 'color'
-      ? ColorUiSettingMetadata
-      : T extends 'image'
-        ? ImageUiSettingMetadata
-        : T extends 'json'
-          ? JsonUiSettingMetadata
-          : T extends 'markdown'
-            ? MarkdownUiSettingMetadata
-            : T extends 'number'
-              ? NumberUiSettingMetadata
-              : T extends 'select'
-                ? SelectUiSettingMetadata
-                : T extends 'string'
-                  ? StringUiSettingMetadata
-                  : T extends 'undefined'
-                    ? UndefinedUiSettingMetadata
-                    : never;
+export type KnownTypeToMetadata<T extends SettingType> =
+  T extends 'array' ? ArrayUiSettingMetadata
+  : T extends 'boolean' ? BooleanUiSettingMetadata
+  : T extends 'color' ? ColorUiSettingMetadata
+  : T extends 'image' ? ImageUiSettingMetadata
+  : T extends 'json' ? JsonUiSettingMetadata
+  : T extends 'markdown' ? MarkdownUiSettingMetadata
+  : T extends 'number' ? NumberUiSettingMetadata
+  : T extends 'select' ? SelectUiSettingMetadata
+  : T extends 'string' ? StringUiSettingMetadata
+  : T extends 'undefined' ? UndefinedUiSettingMetadata
+  : never;

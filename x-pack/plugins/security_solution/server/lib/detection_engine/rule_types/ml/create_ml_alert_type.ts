@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { ML_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { MachineLearningRuleParams } from '../../rule_schema';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { mlExecutor } from './ml';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
 
 export const createMlAlertType = (
   createOptions: CreateRuleOptions

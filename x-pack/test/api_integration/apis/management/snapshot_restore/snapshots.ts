@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { SnapshotDetails } from '@kbn/snapshot-restore-plugin/common/types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { SlmPolicy, registerEsHelpers } from './lib';
+import { registerEsHelpers, SlmPolicy } from './lib';
 
 const REPO_NAME_1 = 'test_repo_1';
 const REPO_NAME_2 = 'test_another_repo_2';

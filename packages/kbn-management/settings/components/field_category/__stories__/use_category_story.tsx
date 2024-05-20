@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
-import { useArgs } from '@storybook/client-api';
 import React from 'react';
+import { useArgs } from '@storybook/client-api';
+import { action } from '@storybook/addon-actions';
 
-import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
-import { OnFieldChangeFn, UnsavedFieldChanges } from '@kbn/management-settings-types';
-import { categorizeFields } from '@kbn/management-settings-utilities';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
+import { categorizeFields } from '@kbn/management-settings-utilities';
+import { UnsavedFieldChanges, OnFieldChangeFn } from '@kbn/management-settings-types';
 
 export interface Params {
   isFiltered: boolean;

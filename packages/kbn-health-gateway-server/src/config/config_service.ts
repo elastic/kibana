@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CliArgs, Env, ConfigService as KbnConfigService, RawConfigService } from '@kbn/config';
+import { fromRoot, REPO_ROOT } from '@kbn/repo-info';
 import type { LoggerFactory } from '@kbn/logging';
-import { REPO_ROOT, fromRoot } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
+import { ConfigService as KbnConfigService, CliArgs, Env, RawConfigService } from '@kbn/config';
 import { getArgValues } from './read_argv';
 
 const CONFIG_CLI_FLAGS = ['-c', '--config'];

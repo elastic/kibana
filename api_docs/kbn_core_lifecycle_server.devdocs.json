@@ -26,7 +26,9 @@
         "type": "Interface",
         "tags": [],
         "label": "CorePreboot",
-        "description": ["\nContext passed to the `setup` method of `preboot` plugins."],
+        "description": [
+          "\nContext passed to the `setup` method of `preboot` plugins."
+        ],
         "path": "packages/core/lifecycle/core-lifecycle-server/src/core_preboot.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -37,7 +39,9 @@
             "type": "Object",
             "tags": [],
             "label": "analytics",
-            "description": ["{@link AnalyticsServicePreboot}"],
+            "description": [
+              "{@link AnalyticsServicePreboot}"
+            ],
             "signature": [
               "{ optIn: (optInConfig: ",
               {
@@ -109,7 +113,9 @@
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
-            "description": ["{@link ElasticsearchServicePreboot}"],
+            "description": [
+              "{@link ElasticsearchServicePreboot}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
@@ -129,7 +135,9 @@
             "type": "Object",
             "tags": [],
             "label": "http",
-            "description": ["{@link HttpServicePreboot}"],
+            "description": [
+              "{@link HttpServicePreboot}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -158,7 +166,9 @@
             "type": "Object",
             "tags": [],
             "label": "preboot",
-            "description": ["{@link PrebootServicePreboot}"],
+            "description": [
+              "{@link PrebootServicePreboot}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-preboot-server",
@@ -181,7 +191,9 @@
         "type": "Interface",
         "tags": [],
         "label": "CoreSetup",
-        "description": ["\nContext passed to the `setup` method of `standard` plugins.\n"],
+        "description": [
+          "\nContext passed to the `setup` method of `standard` plugins.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-lifecycle-server",
@@ -202,7 +214,9 @@
             "type": "Object",
             "tags": [],
             "label": "analytics",
-            "description": ["{@link AnalyticsServiceSetup}"],
+            "description": [
+              "{@link AnalyticsServiceSetup}"
+            ],
             "signature": [
               "{ optIn: (optInConfig: ",
               {
@@ -274,7 +288,9 @@
             "type": "Object",
             "tags": [],
             "label": "capabilities",
-            "description": ["{@link CapabilitiesSetup}"],
+            "description": [
+              "{@link CapabilitiesSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-capabilities-server",
@@ -294,7 +310,9 @@
             "type": "Object",
             "tags": [],
             "label": "customBranding",
-            "description": ["{@link CustomBrandingSetup}"],
+            "description": [
+              "{@link CustomBrandingSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-custom-branding-server",
@@ -314,7 +332,9 @@
             "type": "Object",
             "tags": [],
             "label": "docLinks",
-            "description": ["{@link DocLinksServiceSetup}"],
+            "description": [
+              "{@link DocLinksServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-doc-links-server",
@@ -334,7 +354,9 @@
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
-            "description": ["{@link ElasticsearchServiceSetup}"],
+            "description": [
+              "{@link ElasticsearchServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
@@ -354,7 +376,9 @@
             "type": "Object",
             "tags": [],
             "label": "executionContext",
-            "description": ["{@link ExecutionContextSetup}"],
+            "description": [
+              "{@link ExecutionContextSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-execution-context-server",
@@ -374,7 +398,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "http",
-            "description": ["{@link HttpServiceSetup}"],
+            "description": [
+              "{@link HttpServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -411,7 +437,9 @@
             "type": "Object",
             "tags": [],
             "label": "i18n",
-            "description": ["{@link I18nServiceSetup}"],
+            "description": [
+              "{@link I18nServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-i18n-server",
@@ -431,7 +459,9 @@
             "type": "Object",
             "tags": [],
             "label": "logging",
-            "description": ["{@link LoggingServiceSetup}"],
+            "description": [
+              "{@link LoggingServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-logging-server",
@@ -451,7 +481,9 @@
             "type": "Object",
             "tags": [],
             "label": "metrics",
-            "description": ["{@link MetricsServiceSetup}"],
+            "description": [
+              "{@link MetricsServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-metrics-server",
@@ -471,7 +503,9 @@
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
-            "description": ["{@link SavedObjectsServiceSetup}"],
+            "description": [
+              "{@link SavedObjectsServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -491,7 +525,9 @@
             "type": "Object",
             "tags": [],
             "label": "status",
-            "description": ["{@link StatusServiceSetup}"],
+            "description": [
+              "{@link StatusServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-status-server",
@@ -511,7 +547,9 @@
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
-            "description": ["{@link UiSettingsServiceSetup}"],
+            "description": [
+              "{@link UiSettingsServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
@@ -531,7 +569,9 @@
             "type": "Object",
             "tags": [],
             "label": "userSettings",
-            "description": ["{@link UserSettingsServiceSetup}"],
+            "description": [
+              "{@link UserSettingsServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-user-settings-server",
@@ -551,7 +591,9 @@
             "type": "Object",
             "tags": [],
             "label": "deprecations",
-            "description": ["{@link DeprecationsServiceSetup}"],
+            "description": [
+              "{@link DeprecationsServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-deprecations-server",
@@ -571,7 +613,9 @@
             "type": "Function",
             "tags": [],
             "label": "getStartServices",
-            "description": ["{@link StartServicesAccessor}"],
+            "description": [
+              "{@link StartServicesAccessor}"
+            ],
             "signature": [
               "() => Promise<[",
               {
@@ -595,7 +639,9 @@
             "type": "Object",
             "tags": [],
             "label": "plugins",
-            "description": ["{@link PluginsServiceSetup}"],
+            "description": [
+              "{@link PluginsServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-plugins-contracts-server",
@@ -615,7 +661,9 @@
             "type": "Object",
             "tags": [],
             "label": "security",
-            "description": ["{@link SecurityServiceSetup}"],
+            "description": [
+              "{@link SecurityServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
@@ -635,7 +683,9 @@
             "type": "Object",
             "tags": [],
             "label": "userProfile",
-            "description": ["{@link UserProfileServiceSetup}"],
+            "description": [
+              "{@link UserProfileServiceSetup}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-server",
@@ -658,7 +708,9 @@
         "type": "Interface",
         "tags": [],
         "label": "CoreStart",
-        "description": ["\nContext passed to the plugins `start` method.\n"],
+        "description": [
+          "\nContext passed to the plugins `start` method.\n"
+        ],
         "path": "packages/core/lifecycle/core-lifecycle-server/src/core_start.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -669,7 +721,9 @@
             "type": "Object",
             "tags": [],
             "label": "analytics",
-            "description": ["{@link AnalyticsServiceStart}"],
+            "description": [
+              "{@link AnalyticsServiceStart}"
+            ],
             "signature": [
               "{ optIn: (optInConfig: ",
               {
@@ -701,7 +755,9 @@
             "type": "Object",
             "tags": [],
             "label": "capabilities",
-            "description": ["{@link CapabilitiesStart}"],
+            "description": [
+              "{@link CapabilitiesStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-capabilities-server",
@@ -721,7 +777,9 @@
             "type": "Object",
             "tags": [],
             "label": "customBranding",
-            "description": ["{@link CustomBrandingStart}"],
+            "description": [
+              "{@link CustomBrandingStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-custom-branding-server",
@@ -741,7 +799,9 @@
             "type": "Object",
             "tags": [],
             "label": "docLinks",
-            "description": ["{@link DocLinksServiceStart}"],
+            "description": [
+              "{@link DocLinksServiceStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-doc-links-server",
@@ -761,7 +821,9 @@
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
-            "description": ["{@link ElasticsearchServiceStart}"],
+            "description": [
+              "{@link ElasticsearchServiceStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-elasticsearch-server",
@@ -781,7 +843,9 @@
             "type": "Object",
             "tags": [],
             "label": "executionContext",
-            "description": ["{@link ExecutionContextStart}"],
+            "description": [
+              "{@link ExecutionContextStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-execution-context-server",
@@ -801,7 +865,9 @@
             "type": "Object",
             "tags": [],
             "label": "http",
-            "description": ["{@link HttpServiceStart}"],
+            "description": [
+              "{@link HttpServiceStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -821,7 +887,9 @@
             "type": "Object",
             "tags": [],
             "label": "metrics",
-            "description": ["{@link MetricsServiceStart}"],
+            "description": [
+              "{@link MetricsServiceStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-metrics-server",
@@ -841,7 +909,9 @@
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
-            "description": ["{@link SavedObjectsServiceStart}"],
+            "description": [
+              "{@link SavedObjectsServiceStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
@@ -861,7 +931,9 @@
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
-            "description": ["{@link UiSettingsServiceStart}"],
+            "description": [
+              "{@link UiSettingsServiceStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-ui-settings-server",
@@ -881,7 +953,9 @@
             "type": "Object",
             "tags": [],
             "label": "plugins",
-            "description": ["{@link PluginsServiceStart}"],
+            "description": [
+              "{@link PluginsServiceStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-plugins-contracts-server",
@@ -901,7 +975,9 @@
             "type": "Object",
             "tags": [],
             "label": "security",
-            "description": ["{@link SecurityServiceStart}"],
+            "description": [
+              "{@link SecurityServiceStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-security-server",
@@ -921,7 +997,9 @@
             "type": "Object",
             "tags": [],
             "label": "userProfile",
-            "description": ["{@link UserProfileServiceStart}"],
+            "description": [
+              "{@link UserProfileServiceStart}"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-user-profile-server",

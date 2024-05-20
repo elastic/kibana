@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteInitializerDeps } from '..';
-import { API_ROUTE_WORKPAD, CANVAS_TYPE } from '../../../common/lib/constants';
-import { catchErrorHandler } from '../catch_error_handler';
+import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 import { okResponse } from '../ok_response';
+import { catchErrorHandler } from '../catch_error_handler';
 
 export function initializeDeleteWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;

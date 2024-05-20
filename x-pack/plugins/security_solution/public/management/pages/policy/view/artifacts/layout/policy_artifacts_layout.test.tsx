@@ -1,4 +1,3 @@
-import { act, waitFor } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +5,7 @@ import { act, waitFor } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
+import { act, waitFor } from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import {
@@ -14,17 +13,18 @@ import {
   getPolicyDetailsArtifactsListPath,
   getPolicyEventFiltersPath,
 } from '../../../../../common/routing';
+import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
-import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
-import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { parsePoliciesAndFilterToKql } from '../../../../../common/utils';
-import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
-import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
-import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
-import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from '../../tabs/event_filters_translations';
 import { PolicyArtifactsLayout } from './policy_artifacts_layout';
+import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
+import { parsePoliciesAndFilterToKql } from '../../../../../common/utils';
+import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
+import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from '../../tabs/event_filters_translations';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
+import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 jest.mock('../../../../../../common/components/user_privileges');
 

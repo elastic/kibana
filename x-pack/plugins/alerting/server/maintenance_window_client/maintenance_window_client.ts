@@ -6,30 +6,30 @@
  */
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import {
-  MaintenanceWindowClientContext,
-  MaintenanceWindowModificationMetadata,
-} from '../../common';
+import { createMaintenanceWindow } from '../application/maintenance_window/methods/create/create_maintenance_window';
+import type { CreateMaintenanceWindowParams } from '../application/maintenance_window/methods/create/types';
+import { getMaintenanceWindow } from '../application/maintenance_window/methods/get/get_maintenance_window';
+import type { GetMaintenanceWindowParams } from '../application/maintenance_window/methods/get/types';
+import { updateMaintenanceWindow } from '../application/maintenance_window/methods/update/update_maintenance_window';
+import type { UpdateMaintenanceWindowParams } from '../application/maintenance_window/methods/update/types';
+import { findMaintenanceWindows } from '../application/maintenance_window/methods/find/find_maintenance_windows';
+import type { FindMaintenanceWindowsResult } from '../application/maintenance_window/methods/find/types';
+import { deleteMaintenanceWindow } from '../application/maintenance_window/methods/delete/delete_maintenance_window';
+import type { DeleteMaintenanceWindowParams } from '../application/maintenance_window/methods/delete/types';
 import { archiveMaintenanceWindow } from '../application/maintenance_window/methods/archive/archive_maintenance_window';
 import type { ArchiveMaintenanceWindowParams } from '../application/maintenance_window/methods/archive/types';
+import { getActiveMaintenanceWindows } from '../application/maintenance_window/methods/get_active/get_active_maintenance_windows';
+import { finishMaintenanceWindow } from '../application/maintenance_window/methods/finish/finish_maintenance_window';
+import type { FinishMaintenanceWindowParams } from '../application/maintenance_window/methods/finish/types';
 import { bulkGetMaintenanceWindows } from '../application/maintenance_window/methods/bulk_get/bulk_get_maintenance_windows';
 import type {
   BulkGetMaintenanceWindowsParams,
   BulkGetMaintenanceWindowsResult,
 } from '../application/maintenance_window/methods/bulk_get/types';
-import { createMaintenanceWindow } from '../application/maintenance_window/methods/create/create_maintenance_window';
-import type { CreateMaintenanceWindowParams } from '../application/maintenance_window/methods/create/types';
-import { deleteMaintenanceWindow } from '../application/maintenance_window/methods/delete/delete_maintenance_window';
-import type { DeleteMaintenanceWindowParams } from '../application/maintenance_window/methods/delete/types';
-import { findMaintenanceWindows } from '../application/maintenance_window/methods/find/find_maintenance_windows';
-import type { FindMaintenanceWindowsResult } from '../application/maintenance_window/methods/find/types';
-import { finishMaintenanceWindow } from '../application/maintenance_window/methods/finish/finish_maintenance_window';
-import type { FinishMaintenanceWindowParams } from '../application/maintenance_window/methods/finish/types';
-import { getMaintenanceWindow } from '../application/maintenance_window/methods/get/get_maintenance_window';
-import type { GetMaintenanceWindowParams } from '../application/maintenance_window/methods/get/types';
-import { getActiveMaintenanceWindows } from '../application/maintenance_window/methods/get_active/get_active_maintenance_windows';
-import type { UpdateMaintenanceWindowParams } from '../application/maintenance_window/methods/update/types';
-import { updateMaintenanceWindow } from '../application/maintenance_window/methods/update/update_maintenance_window';
+import {
+  MaintenanceWindowModificationMetadata,
+  MaintenanceWindowClientContext,
+} from '../../common';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface MaintenanceWindowClientConstructorOptions {

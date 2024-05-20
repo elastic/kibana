@@ -7,12 +7,12 @@
 
 import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
 import type { CoverageOverviewResponse } from '../../../../../common/api/detection_engine';
+import { buildCoverageOverviewDashboardModel } from './build_coverage_overview_dashboard_model';
 import {
   getMockCoverageOverviewSubtechniques,
   getMockCoverageOverviewTactics,
   getMockCoverageOverviewTechniques,
 } from '../../model/coverage_overview/__mocks__';
-import { buildCoverageOverviewDashboardModel } from './build_coverage_overview_dashboard_model';
 
 const mockTactics = getMockCoverageOverviewTactics();
 const mockTechniques = getMockCoverageOverviewTechniques();

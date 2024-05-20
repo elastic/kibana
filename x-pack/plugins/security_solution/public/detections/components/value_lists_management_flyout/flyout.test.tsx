@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
 import { getListResponseMock } from '@kbn/lists-plugin/common/schemas/response/list_schema.mock';
-import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { exportList } from '@kbn/securitysolution-list-api';
 import { useDeleteList, useFindLists } from '@kbn/securitysolution-list-hooks';
+import { exportList } from '@kbn/securitysolution-list-api';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { TestProviders } from '../../../common/mock';
 import { ValueListsFlyout } from './flyout';

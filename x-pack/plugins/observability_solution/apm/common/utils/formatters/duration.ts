@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { memoize } from 'lodash';
 import moment from 'moment';
-import { Maybe } from '../../../typings/common';
+import { memoize } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../i18n';
-import { isFiniteNumber } from '../is_finite_number';
+import { asDecimalOrInteger, asInteger, asDecimal } from './formatters';
 import { TimeUnit } from './datetime';
-import { asDecimal, asDecimalOrInteger, asInteger } from './formatters';
+import { Maybe } from '../../../typings/common';
+import { isFiniteNumber } from '../is_finite_number';
 
 interface FormatterOptions {
   defaultValue?: string;

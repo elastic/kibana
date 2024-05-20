@@ -13,21 +13,21 @@ import type {
 } from '@kbn/core/server';
 
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
-import { decodeOrThrow } from '../../common/runtime_types';
-import type {
-  ConnectorMappingsAttributesTransformed,
-  ConnectorMappingsPersistedAttributes,
-  ConnectorMappingsSavedObjectTransformed,
-} from '../../common/types/connector_mappings';
-import {
-  ConnectorMappingsAttributesPartialRt,
-  ConnectorMappingsAttributesTransformedRt,
-} from '../../common/types/connector_mappings';
 import type {
   FindConnectorMappingsArgs,
   PostConnectorMappingsArgs,
   UpdateConnectorMappingsArgs,
 } from './types';
+import type {
+  ConnectorMappingsPersistedAttributes,
+  ConnectorMappingsSavedObjectTransformed,
+  ConnectorMappingsAttributesTransformed,
+} from '../../common/types/connector_mappings';
+import {
+  ConnectorMappingsAttributesPartialRt,
+  ConnectorMappingsAttributesTransformedRt,
+} from '../../common/types/connector_mappings';
+import { decodeOrThrow } from '../../common/runtime_types';
 
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}

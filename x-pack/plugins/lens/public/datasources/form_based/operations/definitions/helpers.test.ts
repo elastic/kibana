@@ -20,7 +20,7 @@ describe('helpers', () => {
       columns: {
         [columnId]: column,
       },
-    }) as FormBasedLayer;
+    } as FormBasedLayer);
 
   describe('getInvalidFieldMessage', () => {
     it('return an error if a field was removed', () => {

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiRangeTick, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
-import { TimeSlice } from '../../../common/types';
-import { useTimeSlider } from '../embeddable/time_slider_embeddable';
 import { getIsAnchored } from '../time_slider_selectors';
+import { TimeSliderStrings } from './time_slider_strings';
+import { useTimeSlider } from '../embeddable/time_slider_embeddable';
 import { TimeSliderAnchoredRange } from './time_slider_anchored_range';
 import { TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
-import { TimeSliderStrings } from './time_slider_strings';
+import { TimeSlice } from '../../../common/types';
 
 interface Props {
   value: TimeSlice;

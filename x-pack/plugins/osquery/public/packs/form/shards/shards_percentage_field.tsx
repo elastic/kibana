@@ -1,6 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRange } from '@elastic/eui';
-import type { EuiRangeProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import { i18n } from '@kbn/i18n';
  */
 import React, { useCallback, useMemo } from 'react';
 import { useController } from 'react-hook-form';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRange } from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ShardsFormReturn } from './shards_form';
 
 interface ShardsPercentageFieldComponent {

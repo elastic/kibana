@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SingleEventLogStatusMetric } from '../../detections/rules/types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   getElasticLogCustomRules,
@@ -14,7 +15,6 @@ import {
   getEventLogElasticRules,
   getEventLogElasticRulesResult,
 } from '../../detections/rules/get_metrics.mocks';
-import type { SingleEventLogStatusMetric } from '../../detections/rules/types';
 import { transformEventLogTypeStatus } from './transform_event_log_type_status';
 
 describe('transform_event_log_type_status', () => {

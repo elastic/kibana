@@ -20,18 +20,18 @@ export default function ({ getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/182791
   describe.skip('component templates', () => {
     // Api methods
-    let getAllComponentTemplates: (typeof indexManagementService)['componentTemplates']['api']['getAllComponentTemplates'];
-    let getOneComponentTemplate: (typeof indexManagementService)['componentTemplates']['api']['getOneComponentTemplate'];
-    let updateComponentTemplate: (typeof indexManagementService)['componentTemplates']['api']['updateComponentTemplate'];
-    let deleteComponentTemplate: (typeof indexManagementService)['componentTemplates']['api']['deleteComponentTemplate'];
-    let getComponentTemplateDatastreams: (typeof indexManagementService)['componentTemplates']['api']['getComponentTemplateDatastreams'];
+    let getAllComponentTemplates: typeof indexManagementService['componentTemplates']['api']['getAllComponentTemplates'];
+    let getOneComponentTemplate: typeof indexManagementService['componentTemplates']['api']['getOneComponentTemplate'];
+    let updateComponentTemplate: typeof indexManagementService['componentTemplates']['api']['updateComponentTemplate'];
+    let deleteComponentTemplate: typeof indexManagementService['componentTemplates']['api']['deleteComponentTemplate'];
+    let getComponentTemplateDatastreams: typeof indexManagementService['componentTemplates']['api']['getComponentTemplateDatastreams'];
     // Helpers
-    let addDatastream: (typeof indexManagementService)['componentTemplates']['helpers']['addDatastream'];
-    let addIndexTemplate: (typeof indexManagementService)['componentTemplates']['helpers']['addIndexTemplate'];
-    let addComponentTemplate: (typeof indexManagementService)['componentTemplates']['helpers']['addComponentTemplate'];
-    let cleanupDatastreams: (typeof indexManagementService)['componentTemplates']['helpers']['cleanupDatastreams'];
-    let cleanUpIndexTemplates: (typeof indexManagementService)['componentTemplates']['helpers']['cleanUpIndexTemplates'];
-    let cleanUpComponentTemplates: (typeof indexManagementService)['componentTemplates']['helpers']['cleanUpComponentTemplates'];
+    let addDatastream: typeof indexManagementService['componentTemplates']['helpers']['addDatastream'];
+    let addIndexTemplate: typeof indexManagementService['componentTemplates']['helpers']['addIndexTemplate'];
+    let addComponentTemplate: typeof indexManagementService['componentTemplates']['helpers']['addComponentTemplate'];
+    let cleanupDatastreams: typeof indexManagementService['componentTemplates']['helpers']['cleanupDatastreams'];
+    let cleanUpIndexTemplates: typeof indexManagementService['componentTemplates']['helpers']['cleanUpIndexTemplates'];
+    let cleanUpComponentTemplates: typeof indexManagementService['componentTemplates']['helpers']['cleanUpComponentTemplates'];
 
     before(async () => {
       ({

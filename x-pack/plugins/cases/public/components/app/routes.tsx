@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { lazy, Suspense, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { AllCases } from '../all_cases';
+import { CreateCase } from '../create';
+import { ConfigureCases } from '../configure_cases';
+import type { CasesRoutesProps } from './types';
+import { useCasesContext } from '../cases_context/use_cases_context';
 import {
-  getCaseViewPath,
-  getCaseViewWithCommentPath,
   getCasesConfigurePath,
   getCreateCasePath,
+  getCaseViewPath,
+  getCaseViewWithCommentPath,
   useAllCasesNavigation,
   useCaseViewNavigation,
 } from '../../common/navigation';
-import { AllCases } from '../all_cases';
-import type { CaseViewProps } from '../case_view/types';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { ConfigureCases } from '../configure_cases';
-import { CreateCase } from '../create';
 import { NoPrivilegesPage } from '../no_privileges';
 import * as i18n from './translations';
-import type { CasesRoutesProps } from './types';
 import { useReadonlyHeader } from './use_readonly_header';
+import type { CaseViewProps } from '../case_view/types';
 
 const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
 

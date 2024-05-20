@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { discoverServiceMock } from '../../__mocks__/services';
+import { render, waitFor } from '@testing-library/react';
 import type { DiscoverServices } from '../../build_services';
 import {
   DiscoverContainerInternal,
   type DiscoverContainerInternalProps,
 } from './discover_container';
+import { discoverServiceMock } from '../../__mocks__/services';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const mockOverrideService = {};
 const getDiscoverServicesMock = jest.fn(() => discoverServiceMock);

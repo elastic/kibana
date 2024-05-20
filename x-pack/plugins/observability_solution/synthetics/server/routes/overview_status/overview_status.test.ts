@@ -6,21 +6,21 @@
  */
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import times from 'lodash/times';
-import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
-import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
-import { queryMonitorStatus } from '../../queries/query_monitor_status';
-import * as monitorsFns from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { RouteContext } from '../types';
 import { periodToMs } from './overview_status';
+import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { getStatus } from './overview_status';
+import times from 'lodash/times';
+import * as monitorsFns from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import { RouteContext } from '../types';
+import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
 
+import * as commonLibs from '../common';
+import { SyntheticsServerSetup } from '../../types';
+import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import * as allLocationsFn from '../../synthetics_service/get_all_locations';
-import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
-import { SyntheticsServerSetup } from '../../types';
-import * as commonLibs from '../common';
 const allLocations: any = [
   {
     id: 'us_central_qa',

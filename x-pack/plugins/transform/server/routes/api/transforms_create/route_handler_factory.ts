@@ -7,8 +7,8 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
-import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import type { DataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
+import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { TransformIdParamSchema } from '../../../../common/api_schemas/common';
@@ -18,8 +18,8 @@ import type {
 } from '../../../../common/api_schemas/transforms';
 import { isLatestTransform } from '../../../../common/types/transform';
 
-import type { TransformRequestHandlerContext } from '../../../services/license';
 import type { RouteDependencies } from '../../../types';
+import type { TransformRequestHandlerContext } from '../../../services/license';
 
 import { wrapEsError } from '../../utils/error_utils';
 

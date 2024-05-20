@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ASSISTANT_FEATURE_ID } from '../../../common/constants';
 import { useLicense } from '../../common/hooks/use_license';
 import { useKibana } from '../../common/lib/kibana';
+import { ASSISTANT_FEATURE_ID } from '../../../common/constants';
 
 export interface UseAssistantAvailability {
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
+import { SavedObject, SavedObjectKibanaServices, SavedObjectConfig } from '../../types';
 
 export interface SavedObjectDecorator<T extends SavedObject = SavedObject> {
   /**

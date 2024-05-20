@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BulkErrorSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { has } from 'lodash/fp';
+import { BulkErrorSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { ImportResponse } from '../../import_exception_list_and_items';
 

@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isEqual, orderBy } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { orderBy, isEqual } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
+  useEuiBackgroundColor,
   EuiBadge,
   EuiBasicTable,
   EuiCode,
   EuiIconTip,
   EuiText,
-  useEuiBackgroundColor,
 } from '@elastic/eui';
 
+import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
+import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
 import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useDataSource } from '../../hooks/use_data_source';
 import { MiniHistogram } from '../mini_histogram';
+import { useDataSource } from '../../hooks/use_data_source';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
-import { FieldStatsPopover } from '../field_stats_popover';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
+import { FieldStatsPopover } from '../field_stats_popover';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { useViewInDiscoverAction } from './use_view_in_discover_action';
 import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';

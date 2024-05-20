@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as path from 'path';
-import { createFailError } from '@kbn/dev-cli-errors';
 import ts from 'typescript';
-import { Descriptor, getDescriptor } from './serializer';
+import { createFailError } from '@kbn/dev-cli-errors';
+import * as path from 'path';
 import { getProperty, getPropertyValue } from './utils';
+import { getDescriptor, Descriptor } from './serializer';
 
 export function* traverseNodes(maybeNodes: ts.Node | ts.Node[]): Generator<ts.Node> {
   const nodes: ts.Node[] = Array.isArray(maybeNodes) ? maybeNodes : [maybeNodes];

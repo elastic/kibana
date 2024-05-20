@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleType,
-  RuleTypeParams,
-  RuleTypeState,
-} from '@kbn/alerting-plugin/server';
 import { Query } from '@kbn/data-plugin/common/query';
+import {
+  RuleType,
+  RuleTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  RuleTypeParams,
+} from '@kbn/alerting-plugin/server';
 import { ActionGroupId, RecoveryActionGroupId } from './constants';
 
 export interface BoundariesRequestMeta {

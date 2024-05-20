@@ -1,7 +1,3 @@
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
-import type { CreateAndEnrollEndpointHostResponse } from '../../../../../../scripts/endpoint/common/endpoint_host_services';
-import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../tasks/fleet';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +5,8 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../t
  * 2.0.
  */
 import { login } from '../../../tasks/login';
+import type { PolicyData } from '../../../../../../common/endpoint/types';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
   inputConsoleCommand,
   openResponseConsoleFromEndpointList,
@@ -16,10 +14,12 @@ import {
   waitForCommandToBeExecuted,
   waitForEndpointListPageToBeLoaded,
 } from '../../../tasks/response_console';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../tasks/fleet';
 
+import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
-import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 
 describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

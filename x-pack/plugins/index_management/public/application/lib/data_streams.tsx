@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
-import { DataStream, splitSizeAndUnits } from '../../../common';
-import { extraTimeUnits, timeUnits } from '../constants/time_units';
+import { splitSizeAndUnits, DataStream } from '../../../common';
+import { timeUnits, extraTimeUnits } from '../constants/time_units';
 
 export const isManaged = (dataStream: DataStream): boolean => {
   return Boolean(dataStream._meta?.managed);

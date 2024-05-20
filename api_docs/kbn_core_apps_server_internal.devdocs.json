@@ -132,7 +132,9 @@
                 "tags": [],
                 "label": "fileHashCache",
                 "description": [],
-                "signature": ["FileHashCache"],
+                "signature": [
+                  "FileHashCache"
+                ],
                 "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -165,7 +167,9 @@
         "tags": [],
         "label": "CoreAppConfigType",
         "description": [],
-        "signature": ["{ readonly allowDynamicConfigOverrides: boolean; }"],
+        "signature": [
+          "{ readonly allowDynamicConfigOverrides: boolean; }"
+        ],
         "path": "packages/core/apps/core-apps-server-internal/src/core_app_config.ts",
         "deprecated": false,
         "trackAdoption": false,

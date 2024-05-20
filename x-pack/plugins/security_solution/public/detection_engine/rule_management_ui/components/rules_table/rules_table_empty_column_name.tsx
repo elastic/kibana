@@ -1,4 +1,3 @@
-import { EuiScreenReaderOnly } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { EuiScreenReaderOnly } from '@elastic/eui';
  * 2.0.
  */
 import React, { type FC } from 'react';
+import { EuiScreenReaderOnly } from '@elastic/eui';
 
 interface RulesTableEmptyColumnNameProps {
   name: string;

@@ -12,9 +12,9 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import type { Tier } from '../../types';
 import { ProductTier } from '../../../common/product';
 import { NLP_CLEANUP_TASK_EVENT } from '../../telemetry/event_based_telemetry';
-import type { Tier } from '../../types';
 
 export const NLPCleanupTaskConstants = {
   TITLE: 'Serverless NLP Cleanup Task',

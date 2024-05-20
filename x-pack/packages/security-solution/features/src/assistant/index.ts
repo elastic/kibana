@@ -8,8 +8,8 @@ import type { AssistantSubFeatureId } from '../product_features_keys';
 import type { ProductFeatureParams } from '../types';
 import { getAssistantBaseKibanaFeature } from './kibana_features';
 import {
-  assistantSubFeaturesMap,
   getAssistantBaseKibanaSubFeatureIds,
+  assistantSubFeaturesMap,
 } from './kibana_sub_features';
 
 export const getAssistantFeature = (): ProductFeatureParams<AssistantSubFeatureId> => ({

@@ -1,5 +1,3 @@
-import { type CellActionTemplate, createCellActionFactory } from '@kbn/cell-actions/actions';
-import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +5,14 @@ import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions/actions';
+import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 import { first } from 'lodash/fp';
-import { isLensSupportedType } from '../../../../common/utils/lens';
-import type { StartServices } from '../../../../types';
-import { SecurityCellActionType } from '../../constants';
-import type { SecurityCellAction } from '../../types';
 import { fieldHasCellActions } from '../../utils';
+import type { StartServices } from '../../../../types';
+import type { SecurityCellAction } from '../../types';
+import { SecurityCellActionType } from '../../constants';
+import { isLensSupportedType } from '../../../../common/utils/lens';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.actions.showTopTooltip', {

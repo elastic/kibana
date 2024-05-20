@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { UrlObject, format } from 'url';
-import type { EBTHelpersContract } from '@kbn/analytics-ftr-helpers-plugin/common/types';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { merge } from 'lodash';
 import supertest from 'supertest';
+import { format, UrlObject } from 'url';
+import type { EBTHelpersContract } from '@kbn/analytics-ftr-helpers-plugin/common/types';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   KibanaEBTServerProvider,
   KibanaEBTUIProvider,
 } from '../../../../test/analytics/services/kibana_ebt';
 import {
-  CreateTest as CreateTestAPI,
   ObservabilityAIAssistantFtrConfig,
+  CreateTest as CreateTestAPI,
   createObservabilityAIAssistantAPIConfig,
 } from '../../observability_ai_assistant_api_integration/common/config';
 import {
-  ObservabilityAIAssistantAPIClient,
   createObservabilityAIAssistantApiClient,
+  ObservabilityAIAssistantAPIClient,
 } from '../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
 import { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
 import { ObservabilityAIAssistantUIProvider, ObservabilityAIAssistantUIService } from './ui';

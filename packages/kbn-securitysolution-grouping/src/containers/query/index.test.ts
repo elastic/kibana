@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { GroupingQueryArgs } from './types';
 import { getGroupingQuery, parseGroupingQuery } from '.';
+import { getEmptyValue } from './helpers';
 import { GroupingAggregation } from '../../..';
 import { groupingBucket } from '../../mocks';
-import { getEmptyValue } from './helpers';
-import type { GroupingQueryArgs } from './types';
 
 const testProps: GroupingQueryArgs = {
   additionalFilters: [],

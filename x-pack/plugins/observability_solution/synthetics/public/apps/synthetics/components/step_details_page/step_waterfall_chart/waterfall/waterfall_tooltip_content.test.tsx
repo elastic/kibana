@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render } from '../../../../utils/testing';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
+import { render } from '../../../../utils/testing';
 
 jest.mock('./context/waterfall_context', () => ({
   useWaterfallContext: jest.fn().mockReturnValue({

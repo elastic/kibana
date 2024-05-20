@@ -5,8 +5,6 @@
  * 2.0.
  */
 import moment from 'moment';
-import { mockMoment } from '../../../../../lib/helper/test_helpers';
-import { WaterfallDataEntry } from '../../waterfall/types';
 import {
   colourPalette,
   formatTooltipHeading,
@@ -15,13 +13,15 @@ import {
   getSidebarItems,
 } from './data_formatting';
 import {
+  NetworkItems,
+  MimeType,
   FriendlyFlyoutLabels,
   FriendlyTimingLabels,
-  Metadata,
-  MimeType,
-  NetworkItems,
   Timings,
+  Metadata,
 } from './types';
+import { mockMoment } from '../../../../../lib/helper/test_helpers';
+import { WaterfallDataEntry } from '../../waterfall/types';
 
 export const networkItems: NetworkItems = [
   {

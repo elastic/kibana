@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import React from 'react';
+import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
 import { useTestFlyoutOpen } from '../../test_now_mode/hooks/use_test_flyout_open';
 
-import { useMonitorRangeFrom } from '../hooks/use_monitor_range_from';
-import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
-import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { useMonitorDetailsPage } from '../use_monitor_details_page';
-import { AvailabilityPanel } from './availability_panel';
-import { AvailabilitySparklines } from './availability_sparklines';
-import { DurationPanel } from './duration_panel';
+import { useMonitorRangeFrom } from '../hooks/use_monitor_range_from';
+import { MonitorAlerts } from './monitor_alerts';
+import { MonitorErrorSparklines } from './monitor_error_sparklines';
+import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { DurationSparklines } from './duration_sparklines';
 import { MonitorDurationTrend } from './duration_trend';
-import { LastTestRun } from './last_test_run';
-import { MonitorAlerts } from './monitor_alerts';
-import { MonitorDetailsPanelContainer } from './monitor_details_panel_container';
-import { MonitorErrorSparklines } from './monitor_error_sparklines';
-import { MonitorErrorsCount } from './monitor_errors_count';
 import { StepDurationPanel } from './step_duration_panel';
+import { AvailabilityPanel } from './availability_panel';
+import { DurationPanel } from './duration_panel';
+import { MonitorDetailsPanelContainer } from './monitor_details_panel_container';
+import { AvailabilitySparklines } from './availability_sparklines';
+import { LastTestRun } from './last_test_run';
 import { LAST_10_TEST_RUNS, TestRunsTable } from './test_runs_table';
+import { MonitorErrorsCount } from './monitor_errors_count';
+import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
 
 export const MonitorSummary = () => {
   const { from, to } = useMonitorRangeFrom();

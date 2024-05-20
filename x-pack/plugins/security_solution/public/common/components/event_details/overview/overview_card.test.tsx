@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { createAction } from '@kbn/ui-actions-plugin/public';
-import { act, render } from '@testing-library/react';
 import React from 'react';
-import { TimelineId } from '../../../../../common/types';
-import { TestProviders, createMockStore, mockGlobalState } from '../../../mock';
-import type { State } from '../../../store';
-import { SeverityBadge } from '../../severity_badge';
+import { act, render } from '@testing-library/react';
 import { OverviewCardWithActions } from './overview_card';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../mock';
+import { SeverityBadge } from '../../severity_badge';
+import type { State } from '../../../store';
+import { TimelineId } from '../../../../../common/types';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 
 const state: State = {
   ...mockGlobalState,

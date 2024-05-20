@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-import { API_BASE_PATH } from '../../../../common/constants';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../../helpers';
+import {
+  GeneralNodeAllocationTestBed,
+  setupGeneralNodeAllocation,
+} from './general_behavior.helpers';
 import {
   POLICY_WITH_MIGRATE_OFF,
   POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,
   POLICY_WITH_NODE_ROLE_ALLOCATION,
 } from '../../constants';
-import {
-  GeneralNodeAllocationTestBed,
-  setupGeneralNodeAllocation,
-} from './general_behavior.helpers';
+import { API_BASE_PATH } from '../../../../common/constants';
 
 describe('<EditPolicy /> node allocation general behavior', () => {
   let testBed: GeneralNodeAllocationTestBed;

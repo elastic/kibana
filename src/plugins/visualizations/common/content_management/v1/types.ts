@@ -7,15 +7,15 @@
  */
 
 import {
+  GetIn,
   CreateIn,
-  CreateResult,
+  SearchIn,
+  UpdateIn,
   DeleteIn,
   DeleteResult,
-  GetIn,
-  GetResult,
-  SearchIn,
   SearchResult,
-  UpdateIn,
+  GetResult,
+  CreateResult,
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
 import { ContentManagementCrudTypes } from '@kbn/content-management-utils';

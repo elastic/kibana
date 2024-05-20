@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import {
+  WaffleVisConfig,
+  LabelPositions,
+  ValueFormats,
+  LegendDisplay,
+} from '../types/expression_renderers';
 import {
   ExpressionValueVisDimension,
   PartitionLegendValue,
 } from '@kbn/visualizations-plugin/common';
-import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
-import {
-  LabelPositions,
-  LegendDisplay,
-  ValueFormats,
-  WaffleVisConfig,
-} from '../types/expression_renderers';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { waffleVisFunction } from './waffle_vis_function';
+import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 
 describe('interpreter/functions#waffleVis', () => {
   const fn = functionWrapper(waffleVisFunction());

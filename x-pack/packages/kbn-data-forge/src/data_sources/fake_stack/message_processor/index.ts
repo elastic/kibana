@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { weightedSample } from '../common/weighted_sample';
+import { createStartupEvents } from './lib/events/startup';
+import { good } from './lib/events/good';
 import { bad } from './lib/events/bad';
 import { badHost } from './lib/events/bad_host';
-import { good } from './lib/events/good';
-import { createStartupEvents } from './lib/events/startup';
+import { weightedSample } from '../common/weighted_sample';
 
+import { Doc, GeneratorFunction, EventFunction, EventTemplate } from '../../../types';
 import { addEphemeralProjectId } from '../../../lib/add_ephemeral_project_id';
-import { Doc, EventFunction, EventTemplate, GeneratorFunction } from '../../../types';
 
 let firstRun = true;
 

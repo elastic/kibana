@@ -8,10 +8,10 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { memo, useCallback, useMemo } from 'react';
 
-import { useConfigureCasesNavigation } from '../../../common/navigation';
 import { CallOut } from './callout';
-import { createCalloutId } from './helpers';
 import type { ErrorMessage } from './types';
+import { createCalloutId } from './helpers';
+import { useConfigureCasesNavigation } from '../../../common/navigation';
 
 export * from './helpers';
 

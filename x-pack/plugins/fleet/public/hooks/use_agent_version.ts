@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
-import semverLt from 'semver/functions/lt';
 import semverRcompare from 'semver/functions/rcompare';
+import semverLt from 'semver/functions/lt';
 
 import { differsOnlyInPatch } from '../../common/services';
 

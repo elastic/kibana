@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-import { CreateCommentsArray, createComment } from '../create_comment';
+import { Either } from 'fp-ts/lib/Either';
+import { createComment, CreateCommentsArray } from '../create_comment';
 
 /**
  * Types the DefaultCreateComments as:

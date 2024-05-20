@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { useCasesFeatures } from '../../../common/use_cases_features';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { useGetCaseMetrics } from '../../../containers/use_get_case_metrics';
-import { CaseStatusMetrics } from './status';
 import { CaseViewMetricItems } from './totals';
+import { CaseStatusMetrics } from './status';
+import { useCasesFeatures } from '../../../common/use_cases_features';
 
 export const CaseViewMetrics = React.memo(({ caseId }: { caseId: string }) => {
   const { metricsFeatures } = useCasesFeatures();

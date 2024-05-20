@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useMemo, useState } from 'react';
 
 import { sendPostLogstashApiKeys, useStartServices } from '../../../../hooks';
 

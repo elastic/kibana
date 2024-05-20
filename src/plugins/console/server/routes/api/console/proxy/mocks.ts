@@ -11,11 +11,11 @@ jest.mock('../../../../lib/proxy_request', () => ({
   proxyRequest: jest.fn(),
 }));
 
-import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { duration } from 'moment';
-import { ProxyDependencies, RouteDependencies } from '../../..';
+import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { MAJOR_VERSION } from '../../../../../common/constants';
 import { ProxyConfigCollection } from '../../../../lib';
+import { RouteDependencies, ProxyDependencies } from '../../..';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../../../../services';
 import { handleEsError } from '../../../../shared_imports';
 

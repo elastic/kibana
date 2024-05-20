@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useCallback, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { MONITOR_TYPES } from '../../../../../common/constants';
-import { GetPingsParams, Ping } from '../../../../../common/runtime_types/ping';
-import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
-import { useGetUrlParams, useMonitorId } from '../../../hooks';
-import { useSelectedFilters } from '../../../hooks/use_selected_filters';
-import { getPings as getPingsAction } from '../../../state/actions';
-import { fetchJourneysFailedSteps } from '../../../state/api/journey';
+import { useCallback, useContext, useEffect } from 'react';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { selectPingList } from '../../../state/selectors';
+import { GetPingsParams, Ping } from '../../../../../common/runtime_types/ping';
+import { getPings as getPingsAction } from '../../../state/actions';
+import { useGetUrlParams, useMonitorId } from '../../../hooks';
+import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
+import { fetchJourneysFailedSteps } from '../../../state/api/journey';
+import { useSelectedFilters } from '../../../hooks/use_selected_filters';
+import { MONITOR_TYPES } from '../../../../../common/constants';
 
 interface Props {
   pageSize: number;

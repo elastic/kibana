@@ -6,15 +6,15 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { v4 as uuidv4 } from 'uuid';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_NAME,
 } from '@kbn/securitysolution-list-constants';
-import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
-import { v4 as uuidv4 } from 'uuid';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 

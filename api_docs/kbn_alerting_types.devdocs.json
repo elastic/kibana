@@ -48,7 +48,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["ActionGroupIds"],
+            "signature": [
+              "ActionGroupIds"
+            ],
             "path": "packages/kbn-alerting-types/action_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -107,7 +109,9 @@
             "tags": [],
             "label": "deprecated",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -119,7 +123,9 @@
             "tags": [],
             "label": "useWithTripleBracesInTemplates",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -131,7 +137,9 @@
             "tags": [],
             "label": "usesPublicBaseUrl",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -305,7 +313,9 @@
             "tags": [],
             "label": "defaultActionGroupId",
             "description": [],
-            "signature": ["ActionGroupIds"],
+            "signature": [
+              "ActionGroupIds"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -364,7 +374,9 @@
             "tags": [],
             "label": "ruleTaskTimeout",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -376,7 +388,9 @@
             "tags": [],
             "label": "defaultScheduleInterval",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -388,7 +402,9 @@
             "tags": [],
             "label": "doesSetRecoveryContext",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -411,7 +427,9 @@
             "tags": [],
             "label": "authorizedConsumers",
             "description": [],
-            "signature": ["{ [x: string]: ConsumerPrivileges; }"],
+            "signature": [
+              "{ [x: string]: ConsumerPrivileges; }"
+            ],
             "path": "packages/kbn-alerting-types/rule_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -482,7 +500,9 @@
         "tags": [],
         "label": "DefaultActionGroupId",
         "description": [],
-        "signature": ["\"default\""],
+        "signature": [
+          "\"default\""
+        ],
         "path": "packages/kbn-alerting-types/builtin_action_groups_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -495,7 +515,9 @@
         "tags": [],
         "label": "RecoveredActionGroupId",
         "description": [],
-        "signature": ["\"recovered\""],
+        "signature": [
+          "\"recovered\""
+        ],
         "path": "packages/kbn-alerting-types/builtin_action_groups_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -510,7 +532,9 @@
         "tags": [],
         "label": "RecoveredActionGroup",
         "description": [],
-        "signature": ["{ readonly id: \"recovered\"; readonly name: string; }"],
+        "signature": [
+          "{ readonly id: \"recovered\"; readonly name: string; }"
+        ],
         "path": "packages/kbn-alerting-types/builtin_action_groups_types.ts",
         "deprecated": false,
         "trackAdoption": false,

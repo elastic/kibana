@@ -6,23 +6,20 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { TimelineStatus, TimelineType } from '../../../common/api/timeline';
-import { Direction } from '../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
-import { defaultHeaders } from '../../common/mock';
+import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
+import type {
+  DataProvider,
+  DataProvidersAnd,
+} from '../components/timeline/data_providers/data_provider';
+import { IS_OPERATOR, DataProviderType } from '../components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   RESIZED_COLUMN_MIN_WITH,
 } from '../components/timeline/body/constants';
-import type {
-  DataProvider,
-  DataProvidersAnd,
-} from '../components/timeline/data_providers/data_provider';
-import { DataProviderType, IS_OPERATOR } from '../components/timeline/data_providers/data_provider';
-import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
-import { timelineDefaults } from './defaults';
+import { defaultHeaders } from '../../common/mock';
 import {
   addNewTimeline,
   addTimelineProviders,
@@ -30,9 +27,7 @@ import {
   applyDeltaToTimelineColumnWidth,
   removeTimelineColumn,
   removeTimelineProvider,
-  updateTimelineColumnWidth,
   updateTimelineColumns,
-  updateTimelineGraphEventId,
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
@@ -44,9 +39,14 @@ import {
   updateTimelineSort,
   updateTimelineTitleAndDescription,
   upsertTimelineColumn,
+  updateTimelineGraphEventId,
+  updateTimelineColumnWidth,
 } from './helpers';
 import type { TimelineModel } from './model';
+import { timelineDefaults } from './defaults';
 import type { TimelineById } from './types';
+import { Direction } from '../../../common/search_strategy';
+import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 jest.mock('../../common/utils/normalize_time_range');
 jest.mock('../../common/utils/default_date_settings', () => {

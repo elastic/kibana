@@ -8,7 +8,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiButtonIcon, EuiFieldNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NumberListRange } from './range';
 

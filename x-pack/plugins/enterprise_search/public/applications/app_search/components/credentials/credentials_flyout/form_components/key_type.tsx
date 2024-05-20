@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiFormRow, EuiLink, EuiSelect, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AppLogic } from '../../../../app_logic';
-import { DOCS_HREF, TOKEN_TYPE_DESCRIPTION, TOKEN_TYPE_INFO } from '../../constants';
+import { TOKEN_TYPE_DESCRIPTION, TOKEN_TYPE_INFO, DOCS_HREF } from '../../constants';
 import { CredentialsLogic } from '../../credentials_logic';
 
 export const FormKeyType: React.FC = () => {

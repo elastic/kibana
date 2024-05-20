@@ -5,19 +5,18 @@
  * 2.0.
  */
 
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { IBasePath, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   PluginSetupContract as AlertingPluginSetupContract,
   type IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
-import { ObservabilityApmAlert, legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { IBasePath, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { APMConfig } from '../..';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { legacyExperimentalFieldMap, ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   AGENT_NAME,
   CONTAINER_ID,
@@ -31,9 +30,10 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
+import { registerTransactionDurationRuleType } from './rule_types/transaction_duration/register_transaction_duration_rule_type';
 import { registerAnomalyRuleType } from './rule_types/anomaly/register_anomaly_rule_type';
 import { registerErrorCountRuleType } from './rule_types/error_count/register_error_count_rule_type';
-import { registerTransactionDurationRuleType } from './rule_types/transaction_duration/register_transaction_duration_rule_type';
+import { APMConfig } from '../..';
 import { registerTransactionErrorRateRuleType } from './rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
 
 export const APM_RULE_TYPE_ALERT_CONTEXT = 'observability.apm';

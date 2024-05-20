@@ -12,20 +12,20 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiLink,
-  EuiPortal,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import {
+  EuiCallOut,
+  EuiLink,
+  EuiFlyout,
+  EuiCodeBlock,
+  EuiPortal,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import styled from 'styled-components';
 
 import type {

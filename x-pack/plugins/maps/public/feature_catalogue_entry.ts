@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { APP_ICON, APP_ID, APP_NAME } from '../common/constants';
+import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import { APP_ID, APP_ICON, APP_NAME } from '../common/constants';
 
 export const featureCatalogueEntry = {
   id: APP_ID,

@@ -6,6 +6,8 @@
     "id": "telemetryCollectionXpack",
     "server": true,
     "browser": false,
-    "requiredPlugins": ["telemetryCollectionManager"]
+    "requiredPlugins": [
+      "telemetryCollectionManager"
+    ]
   }
 }

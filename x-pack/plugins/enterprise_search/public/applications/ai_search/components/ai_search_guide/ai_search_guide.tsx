@@ -8,13 +8,13 @@
 import React from 'react';
 
 import {
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiImage,
   EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiText,
+  EuiHorizontalRule,
+  EuiFlexGrid,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

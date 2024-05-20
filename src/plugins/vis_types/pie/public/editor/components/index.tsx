@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import React, { lazy } from 'react';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import { PieTypeProps } from '../../types';
 
 const PieOptionsLazy = lazy(() => import('./pie'));
 
 export const getPieOptions =
   ({ showElasticChartsOptions, palettes }: PieTypeProps) =>
-  (props: VisEditorOptionsProps<PartitionVisParams>) => (
-    <PieOptionsLazy
-      {...props}
-      palettes={palettes}
-      showElasticChartsOptions={showElasticChartsOptions}
-    />
-  );
+  (props: VisEditorOptionsProps<PartitionVisParams>) =>
+    (
+      <PieOptionsLazy
+        {...props}
+        palettes={palettes}
+        showElasticChartsOptions={showElasticChartsOptions}
+      />
+    );

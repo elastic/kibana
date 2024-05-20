@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../common/constants';
-import { getFileUpload } from '../../../../kibana_services';
-import { DrawLayerIcon } from '../icons/draw_layer_icon';
 import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { NewVectorLayerEditor } from './wizard';
+import { DrawLayerIcon } from '../icons/draw_layer_icon';
+import { getFileUpload } from '../../../../kibana_services';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../common/constants';
 
 const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 

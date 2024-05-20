@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiPageBody, EuiPageSection } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPageSection, EuiPageBody } from '@elastic/eui';
 
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';

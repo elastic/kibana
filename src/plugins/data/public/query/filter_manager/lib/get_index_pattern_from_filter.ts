@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewBase, Filter } from '@kbn/es-query';
+import { Filter, DataViewBase } from '@kbn/es-query';
 
 export function getIndexPatternFromFilter<T extends DataViewBase = DataViewBase>(
   filter: Filter,

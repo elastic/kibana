@@ -8,13 +8,13 @@
 import React, { ComponentType, MemoExoticComponent } from 'react';
 import SemVer from 'semver/classes/semver';
 
-import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
+import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { MAJOR_VERSION } from '../../../../../../../common';
-import { AppContextProvider } from '../../../../../app_context';
-import { Props as MappingsEditorProps } from '../../../mappings_editor';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
+import { AppContextProvider } from '../../../../../app_context';
+import { Props as MappingsEditorProps } from '../../../mappings_editor';
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
@@ -85,14 +85,15 @@ const defaultProps: MappingsEditorProps = {
 
 export const WithAppDependencies =
   (Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>, appDependencies?: any) =>
-  (props: Partial<MappingsEditorProps>) => (
-    <KibanaReactContextProvider>
-      <AppContextProvider value={appDependencies}>
-        <MappingsEditorProvider>
-          <GlobalFlyoutProvider>
-            <Comp {...defaultProps} {...props} />
-          </GlobalFlyoutProvider>
-        </MappingsEditorProvider>
-      </AppContextProvider>
-    </KibanaReactContextProvider>
-  );
+  (props: Partial<MappingsEditorProps>) =>
+    (
+      <KibanaReactContextProvider>
+        <AppContextProvider value={appDependencies}>
+          <MappingsEditorProvider>
+            <GlobalFlyoutProvider>
+              <Comp {...defaultProps} {...props} />
+            </GlobalFlyoutProvider>
+          </MappingsEditorProvider>
+        </AppContextProvider>
+      </KibanaReactContextProvider>
+    );

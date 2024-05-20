@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL } from '../../../../common/constants';
 import type { userActionApiV1 } from '../../../../common/types/api';
+import { INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 

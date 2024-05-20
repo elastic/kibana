@@ -1,7 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer, EuiText } from '@elastic/eui';
-import { CodeEditor, YamlLang } from '@kbn/code-editor';
-import { monaco } from '@kbn/monaco';
-import { uniq } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,21 +5,25 @@ import { uniq } from 'lodash';
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { SelectorCondition } from '../../../common';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
+import { CodeEditor, YamlLang } from '@kbn/code-editor';
+import { monaco } from '@kbn/monaco';
+import { uniq } from 'lodash';
 import { INPUT_CONTROL } from '../../../common/constants';
+import { useStyles } from './styles';
+import { useConfigModel } from './hooks/use_config_model';
+import {
+  validateStringValuesForCondition,
+  validateMaxSelectorsAndResponses,
+  validateBlockRestrictions,
+} from '../../common/utils';
 import {
   getInputFromPolicy,
   getSelectorsAndResponsesFromYaml,
 } from '../../../common/utils/helpers';
-import {
-  validateBlockRestrictions,
-  validateMaxSelectorsAndResponses,
-  validateStringValuesForCondition,
-} from '../../common/utils';
-import { SelectorConditionsMap, ViewDeps } from '../../types';
-import { useConfigModel } from './hooks/use_config_model';
-import { useStyles } from './styles';
 import * as i18n from './translations';
+import { ViewDeps, SelectorConditionsMap } from '../../types';
+import { SelectorCondition } from '../../../common';
 
 const { editor } = monaco;
 

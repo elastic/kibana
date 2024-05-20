@@ -6,45 +6,45 @@
  */
 
 import { set } from '@kbn/safer-lodash-set/fp';
-import deepMerge from 'deepmerge';
 import { getOr } from 'lodash/fp';
-import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  ColumnHeaderResult,
-  DataProviderResult,
-  FilterTimelineResult,
-  Note,
-  PinnedEvent,
-  SingleTimelineResolveResponse,
-  TimelineResult,
-} from '../../../../common/api/timeline';
-import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import deepMerge from 'deepmerge';
+import { useDispatch } from 'react-redux';
+import { useCallback } from 'react';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
+import type {
+  TimelineResult,
+  SingleTimelineResolveResponse,
+  ColumnHeaderResult,
+  FilterTimelineResult,
+  DataProviderResult,
+  PinnedEvent,
+  Note,
+} from '../../../../common/api/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import { useUpdateTimeline } from './use_update_timeline';
 
-import { timelineDefaults } from '../../store/defaults';
 import type { TimelineModel } from '../../store/model';
+import { timelineDefaults } from '../../store/defaults';
 
 import {
   defaultColumnHeaderType,
   defaultHeaders,
 } from '../timeline/body/column_headers/default_headers';
 
-import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
-import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import type { OpenTimelineResult, TimelineErrorCallback } from './types';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
-import { timelineActions } from '../../store';
 import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { timelineActions } from '../../store';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -125,14 +125,14 @@ const setEventIdToNoteIds = (duplicate: boolean, eventIdToNoteIds: Note[] | null
   duplicate
     ? {}
     : eventIdToNoteIds != null
-      ? eventIdToNoteIds.reduce((acc, note) => {
-          if (note.eventId != null) {
-            const eventNotes = getOr([], note.eventId, acc);
-            return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
-          }
-          return acc;
-        }, {})
-      : {};
+    ? eventIdToNoteIds.reduce((acc, note) => {
+        if (note.eventId != null) {
+          const eventNotes = getOr([], note.eventId, acc);
+          return { ...acc, [note.eventId]: [...eventNotes, note.noteId] };
+        }
+        return acc;
+      }, {})
+    : {};
 
 const setPinnedEventsSaveObject = (
   duplicate: boolean,
@@ -141,21 +141,21 @@ const setPinnedEventsSaveObject = (
   duplicate
     ? {}
     : pinnedEventsSaveObject != null
-      ? pinnedEventsSaveObject.reduce(
-          (acc, pinnedEvent) => ({
-            ...acc,
-            ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
-          }),
-          {}
-        )
-      : {};
+    ? pinnedEventsSaveObject.reduce(
+        (acc, pinnedEvent) => ({
+          ...acc,
+          ...(pinnedEvent.eventId != null ? { [pinnedEvent.eventId]: pinnedEvent } : {}),
+        }),
+        {}
+      )
+    : {};
 
 const setPinnedEventIds = (duplicate: boolean, pinnedEventIds: string[] | null | undefined) =>
   duplicate
     ? {}
     : pinnedEventIds != null
-      ? pinnedEventIds.reduce((acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }), {})
-      : {};
+    ? pinnedEventIds.reduce((acc, pinnedEventId) => ({ ...acc, [pinnedEventId]: true }), {})
+    : {};
 
 const getTemplateTimelineId = (
   timeline: TimelineResult,
@@ -261,8 +261,8 @@ export const defaultTimelineToTimelineModel = (
     isFavorite: duplicate
       ? false
       : timeline.favorite != null
-        ? timeline.favorite.length > 0
-        : false,
+      ? timeline.favorite.length > 0
+      : false,
     noteIds: duplicate ? [] : timeline.noteIds != null ? timeline.noteIds : [],
     pinnedEventIds: setPinnedEventIds(duplicate, timeline.pinnedEventIds),
     pinnedEventsSaveObject: setPinnedEventsSaveObject(duplicate, timeline.pinnedEventsSaveObject),

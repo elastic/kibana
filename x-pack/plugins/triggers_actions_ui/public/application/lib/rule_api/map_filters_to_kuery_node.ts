@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KueryNode, fromKueryExpression, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { fromKueryExpression, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { RuleStatus } from '../../../types';
 

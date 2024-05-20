@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
+import { FieldPath, useFormContext } from 'react-hook-form';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { getElasticsearchQueryOrThrow } from '@kbn/observability-plugin/public';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { QuerySchema } from '@kbn/slo-schema';
-import { FieldPath, useFormContext } from 'react-hook-form';
+import { getElasticsearchQueryOrThrow } from '@kbn/observability-plugin/public';
 import { CreateSLOForm } from '../../types';
 
 export const useTableDocs = ({

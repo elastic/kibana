@@ -10,10 +10,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { AnonymizedStat } from '.';
-import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { getTooltipContent } from './helpers';
 import * as i18n from './translations';
+import { AnonymizedStat } from '.';
+import { TestProviders } from '../../../mock/test_providers/test_providers';
 
 const defaultProps = {
   anonymized: 0,

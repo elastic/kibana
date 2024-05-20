@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexItem, EuiFormRow, EuiComboBox } from '@elastic/eui';
 
-import { TYPE_DEFINITION } from '../../../constants';
+import { UseField } from '../../../shared_imports';
+import { DataType, MainType, SubType, ComboBoxOption } from '../../../types';
 import {
+  getFieldConfig,
   filterTypesForMultiField,
   filterTypesForNonRootFields,
-  getFieldConfig,
 } from '../../../lib';
-import { UseField } from '../../../shared_imports';
-import { ComboBoxOption, DataType, MainType, SubType } from '../../../types';
+import { TYPE_DEFINITION } from '../../../constants';
 import { OtherTypeNameParameter } from './other_type_name_parameter';
 
 interface Props {
@@ -83,8 +83,8 @@ export const SubTypeParameter = ({
                   isMultiField
                     ? filterTypesForMultiField(subTypeOptions!)
                     : isRootLevelField
-                      ? subTypeOptions
-                      : filterTypesForNonRootFields(subTypeOptions!)
+                    ? subTypeOptions
+                    : filterTypesForNonRootFields(subTypeOptions!)
                 }
                 selectedOptions={subTypeField.value as ComboBoxOption[]}
                 onChange={subTypeField.setValue}

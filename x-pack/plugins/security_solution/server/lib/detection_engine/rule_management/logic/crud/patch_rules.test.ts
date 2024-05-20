@@ -7,13 +7,13 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 
+import { patchRules } from './patch_rules';
+import { getRuleMock } from '../../../routes/__mocks__/request_responses';
+import { getMlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { getRuleMock } from '../../../routes/__mocks__/request_responses';
-import { getMlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
-import { patchRules } from './patch_rules';
 
 describe('patchRules', () => {
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {

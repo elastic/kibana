@@ -14,15 +14,15 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
-import { GroupedIndexDetails } from './grouped_index_details';
 import { GroupedIndexDetailsChart } from './grouped_index_details_chart';
+import { GroupedIndexDetails } from './grouped_index_details';
 import { StorageDetailsTable } from './storage_details_table';
+import { useProfilingParams } from '../../../hooks/use_profiling_params';
 
 export function DataBreakdown() {
   const theme = useEuiTheme();

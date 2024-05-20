@@ -1,12 +1,3 @@
-import expect from '@kbn/expect';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import {
-  EncryptedSyntheticsSavedMonitor,
-  HTTPFields,
-  MonitorFields,
-} from '@kbn/synthetics-plugin/common/runtime_types';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,6 +5,15 @@ import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
+import {
+  EncryptedSyntheticsSavedMonitor,
+  HTTPFields,
+  MonitorFields,
+} from '@kbn/synthetics-plugin/common/runtime_types';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import expect from '@kbn/expect';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';

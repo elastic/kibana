@@ -6,8 +6,8 @@
  */
 
 import { createAction } from 'redux-actions';
-import { Ping } from '../../../../common/runtime_types';
 import { QueryParams } from './types';
+import { Ping } from '../../../../common/runtime_types';
 
 export const getMonitorStatusAction = createAction<QueryParams>('GET_MONITOR_STATUS');
 export const getMonitorStatusActionSuccess = createAction<Ping>('GET_MONITOR_STATUS_SUCCESS');

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { createAppContextStartContractMock } from '../../../../../mocks';
 import { appContextService } from '../../../../app_context';
+import { createAppContextStartContractMock } from '../../../../../mocks';
 import { installKibanaAssetsAndReferences } from '../../../kibana/assets/install';
 
 jest.mock('../../../kibana/assets/install');

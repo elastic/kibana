@@ -8,8 +8,8 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useAuthentications } from '.';
 import { AuthStackByField } from '../../../../common/search_strategy';
-import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { TestProviders } from '../../../common/mock';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),

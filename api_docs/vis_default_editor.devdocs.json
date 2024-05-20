@@ -37,7 +37,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -49,7 +51,9 @@
                 "tags": [],
                 "label": "el",
                 "description": [],
-                "signature": ["HTMLElement"],
+                "signature": [
+                  "HTMLElement"
+                ],
                 "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -92,7 +96,9 @@
                 "tags": [],
                 "label": "eventEmitter",
                 "description": [],
-                "signature": ["events"],
+                "signature": [
+                  "events"
+                ],
                 "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -175,7 +181,9 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -256,7 +264,9 @@
             "tags": [],
             "label": "{\n  'data-test-subj': dataTestSubj,\n  colorsRange,\n  setValue,\n  setValidity,\n  setTouched,\n}",
             "description": [],
-            "signature": ["ColorRangesProps"],
+            "signature": [
+              "ColorRangesProps"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/color_ranges.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -287,7 +297,9 @@
             "tags": [],
             "label": "{\n  disabled,\n  colorSchema,\n  colorSchemas,\n  invertColors,\n  uiState,\n  setValue,\n  showHelpText = true,\n}",
             "description": [],
-            "signature": ["ColorSchemaOptionsProps"],
+            "signature": [
+              "ColorSchemaOptionsProps"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -321,8 +333,12 @@
             "type": "Array",
             "tags": [],
             "label": "objects",
-            "description": ["An array of objects that will be grouped."],
-            "signature": ["T[]"],
+            "description": [
+              "An array of objects that will be grouped."
+            ],
+            "signature": [
+              "T[]"
+            ],
             "path": "src/plugins/vis_default_editor/public/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -334,8 +350,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "groupBy",
-            "description": ["A field name which objects are grouped by."],
-            "signature": ["TGroupBy"],
+            "description": [
+              "A field name which objects are grouped by."
+            ],
+            "signature": [
+              "TGroupBy"
+            ],
             "path": "src/plugins/vis_default_editor/public/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -347,8 +367,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "labelName",
-            "description": ["A name of a property which value will be displayed."],
-            "signature": ["TLabelName"],
+            "description": [
+              "A name of a property which value will be displayed."
+            ],
+            "signature": [
+              "TLabelName"
+            ],
             "path": "src/plugins/vis_default_editor/public/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -361,7 +385,9 @@
             "tags": [],
             "label": "keyName",
             "description": [],
-            "signature": ["TKeyName | undefined"],
+            "signature": [
+              "TKeyName | undefined"
+            ],
             "path": "src/plugins/vis_default_editor/public/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -394,7 +420,9 @@
             "tags": [],
             "label": "{\n  legendSize,\n  onLegendSizeChange,\n  isVerticalLegend,\n  showAutoOption,\n}",
             "description": [],
-            "signature": ["LegendSizeSettingsProps"],
+            "signature": [
+              "LegendSizeSettingsProps"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/legend_size_settings.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -427,7 +455,9 @@
             "tags": [],
             "label": "{\n  'data-test-subj': dataTestSubj,\n  setValue,\n  truncateLegend,\n  maxLegendLines,\n}",
             "description": [],
-            "signature": ["LongLegendOptionsProps"],
+            "signature": [
+              "LongLegendOptionsProps"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/long_legend_options.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -460,7 +490,9 @@
             "tags": [],
             "label": "{\n  disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value = '',\n  setValue,\n  'data-test-subj': dataTestSubj,\n}",
             "description": [],
-            "signature": ["NumberInputOptionProps<ParamName>"],
+            "signature": [
+              "NumberInputOptionProps<ParamName>"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/number_input.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -493,7 +525,10 @@
             "tags": [],
             "label": "{\n  activePalette,\n  palettes,\n  paramName,\n  setPalette,\n}",
             "description": [],
-            "signature": ["PalettePickerProps", "<ParamName>"],
+            "signature": [
+              "PalettePickerProps",
+              "<ParamName>"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/controls/palette_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -526,7 +561,9 @@
             "tags": [],
             "label": "{\n  'data-test-subj': dataTestSubj,\n  setValue,\n  percentageMode,\n  formatPattern,\n  disabled,\n}",
             "description": [],
-            "signature": ["PercentageModeOptionProps"],
+            "signature": [
+              "PercentageModeOptionProps"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/percentage_mode.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -557,7 +594,9 @@
             "tags": [],
             "label": "{\n  label,\n  max,\n  min,\n  showInput,\n  showLabels,\n  showValue = true,\n  step,\n  paramName,\n  value,\n  setValue,\n}",
             "description": [],
-            "signature": ["RangeOptionProps<ParamName>"],
+            "signature": [
+              "RangeOptionProps<ParamName>"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/range.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -588,7 +627,9 @@
             "tags": [],
             "label": "{\n  'data-test-subj': dataTestSubj = 'range',\n  addRangeValues,\n  error,\n  value = [],\n  hidePlaceholders,\n  setValue,\n  setTouched,\n  setValidity,\n  validateRange,\n}",
             "description": [],
-            "signature": ["RangesParamEditorProps"],
+            "signature": [
+              "RangesParamEditorProps"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -621,7 +662,9 @@
             "tags": [],
             "label": "{\n  disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}",
             "description": [],
-            "signature": ["NumberInputOptionProps<ParamName>"],
+            "signature": [
+              "NumberInputOptionProps<ParamName>"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/required_number_input.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -652,7 +695,9 @@
             "tags": [],
             "label": "{\n  disabled,\n  helpText,\n  id,\n  label,\n  labelAppend,\n  options,\n  paramName,\n  value,\n  setValue,\n  'data-test-subj': dataTestSubj,\n}",
             "description": [],
-            "signature": ["SelectOptionProps<ParamName, ValidParamValues>"],
+            "signature": [
+              "SelectOptionProps<ParamName, ValidParamValues>"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/select.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -683,7 +728,9 @@
             "tags": [],
             "label": "{\n  'data-test-subj': dataTestSubj,\n  tooltip,\n  label,\n  disabled,\n  paramName,\n  value = false,\n  setValue,\n}",
             "description": [],
-            "signature": ["SwitchOptionProps<ParamName>"],
+            "signature": [
+              "SwitchOptionProps<ParamName>"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/switch.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -714,7 +761,9 @@
             "tags": [],
             "label": "{\n  'data-test-subj': dataTestSubj,\n  disabled,\n  helpText,\n  label,\n  paramName,\n  value = '',\n  setValue,\n}",
             "description": [],
-            "signature": ["TextInputOptionProps<ParamName>"],
+            "signature": [
+              "TextInputOptionProps<ParamName>"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/text_input.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -733,7 +782,9 @@
         "description": [
           "\nthe effect is used to set up the editor form validity\nand reset it if a param has been removed"
         ],
-        "signature": ["(setValidity: (isValid: boolean) => void, isValid: boolean) => void"],
+        "signature": [
+          "(setValidity: (isValid: boolean) => void, isValid: boolean) => void"
+        ],
         "path": "src/plugins/vis_default_editor/public/components/controls/utils/agg_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -745,7 +796,9 @@
             "tags": [],
             "label": "setValidity",
             "description": [],
-            "signature": ["(isValid: boolean) => void"],
+            "signature": [
+              "(isValid: boolean) => void"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/controls/utils/agg_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -758,7 +811,9 @@
             "tags": [],
             "label": "isValid",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/controls/utils/agg_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -788,7 +843,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"range\" | undefined"],
+            "signature": [
+              "\"range\" | undefined"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -800,7 +857,9 @@
             "tags": [],
             "label": "from",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -812,7 +871,9 @@
             "tags": [],
             "label": "to",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -932,7 +993,9 @@
             "tags": [],
             "label": "paramName",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
             "deprecated": false,
             "trackAdoption": false

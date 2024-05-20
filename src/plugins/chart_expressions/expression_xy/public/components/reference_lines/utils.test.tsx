@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { AxisTypeId, computeInputCombinations, PosType } from './_mocks';
+import { computeChartMargins, getLineAnnotationProps } from './utils';
+import { AxesMap, AxisConfiguration, Marker, MarkerBody } from '../../helpers';
+import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 import { Position } from '@elastic/charts';
 import React from 'react';
-import { AxesMap, AxisConfiguration, Marker, MarkerBody } from '../../helpers';
-import { AxisTypeId, PosType, computeInputCombinations } from './_mocks';
-import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
-import { computeChartMargins, getLineAnnotationProps } from './utils';
 
 describe('reference lines helpers', () => {
   describe('computeChartMargins', () => {

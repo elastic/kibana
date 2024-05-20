@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import './setup_jest_mocks';
-import type {
-  ChromeProjectNavigationNode,
-  NavigationTreeDefinitionUI,
-} from '@kbn/core-chrome-browser';
 import { of } from 'rxjs';
+import type {
+  NavigationTreeDefinitionUI,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 
 import { renderNavigation } from './utils';
 

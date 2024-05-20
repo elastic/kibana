@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { getColorAssignments } from './color_assignment';
 import type { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
-import { getColorAssignments } from './color_assignment';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { LayersFieldFormats } from './layers';
 
 describe('color_assignment', () => {

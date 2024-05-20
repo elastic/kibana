@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
+import { ESPewPewSource, sourceTitle } from './es_pew_pew_source';
+import { VectorStyle } from '../../styles/vector/vector_style';
 import {
-  COUNT_PROP_NAME,
   FIELD_ORIGIN,
+  COUNT_PROP_NAME,
   LAYER_WIZARD_CATEGORY,
-  STYLE_TYPE,
   VECTOR_STYLES,
+  STYLE_TYPE,
   WIZARD_ID,
 } from '../../../../common/constants';
+import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
+// @ts-ignore
+import { CreateSourceEditor } from './create_source_editor';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import {
   ColorDynamicOptions,
   ESPewPewSourceDescriptor,
   SizeDynamicOptions,
 } from '../../../../common/descriptor_types';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
-import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import { Point2PointLayerIcon } from '../../layers/wizards/icons/point_2_point_layer_icon';
-import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
-import { VectorStyle } from '../../styles/vector/vector_style';
-import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
-// @ts-ignore
-import { CreateSourceEditor } from './create_source_editor';
-import { ESPewPewSource, sourceTitle } from './es_pew_pew_source';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.POINT_2_POINT,

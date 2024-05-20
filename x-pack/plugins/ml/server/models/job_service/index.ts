@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { MlClient } from '../../lib/ml_client';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { datafeedsProvider } from './datafeeds';
-import { groupsProvider } from './groups';
 import { jobsProvider } from './jobs';
-import { modelSnapshotProvider } from './model_snapshots';
-import { newJobChartsProvider, topCategoriesProvider } from './new_job';
+import { groupsProvider } from './groups';
 import { newJobCapsProvider } from './new_job_caps';
+import { newJobChartsProvider, topCategoriesProvider } from './new_job';
+import { modelSnapshotProvider } from './model_snapshots';
+import type { MlClient } from '../../lib/ml_client';
 
 export function jobServiceProvider(
   client: IScopedClusterClient,

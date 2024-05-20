@@ -6,8 +6,17 @@
     "id": "grokdebugger",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "grokdebugger"],
-    "requiredPlugins": ["licensing", "home", "devTools"],
-    "requiredBundles": ["kibanaReact"]
+    "configPath": [
+      "xpack",
+      "grokdebugger"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "home",
+      "devTools"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

@@ -7,16 +7,16 @@
 
 // handlers that handle agent actions request
 
-import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 
+import type {
+  PostNewAgentActionRequestSchema,
+  PostCancelActionRequestSchema,
+} from '../../types/rest_spec';
+import type { ActionsService } from '../../services/agents';
 import type { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
 import { defaultFleetErrorHandler } from '../../errors';
-import type { ActionsService } from '../../services/agents';
-import type {
-  PostCancelActionRequestSchema,
-  PostNewAgentActionRequestSchema,
-} from '../../types/rest_spec';
 
 export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService

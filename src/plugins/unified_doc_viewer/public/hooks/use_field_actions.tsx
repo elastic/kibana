@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IconType, copyToClipboard } from '@elastic/eui';
+import { useMemo } from 'react';
+import createContainer from 'constate';
+import { copyToClipboard, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import createContainer from 'constate';
-import { useMemo } from 'react';
 
 interface WithFieldParam {
   field: string;

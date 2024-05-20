@@ -7,13 +7,13 @@
 import React, { useEffect, useState, useMemo } from 'react';
 
 import {
-  EuiCallOut,
+  EuiSpacer,
+  EuiText,
+  EuiSuperSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCallOut,
   EuiHealth,
-  EuiSpacer,
-  EuiSuperSelect,
-  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -56,7 +56,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"control_group\""],
+            "signature": [
+              "\"control_group\""
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -68,7 +70,10 @@
             "tags": [],
             "label": "anyControlOutputConsumerLoading$",
             "description": [],
-            "signature": ["Subject", "<boolean>"],
+            "signature": [
+              "Subject",
+              "<boolean>"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -80,7 +85,9 @@
             "tags": [],
             "label": "diffingSubscription",
             "description": [],
-            "signature": ["Subscription"],
+            "signature": [
+              "Subscription"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -109,7 +116,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["(state: ReduxStateType) => Selected"],
+                "signature": [
+                  "(state: ReduxStateType) => Selected"
+                ],
                 "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -122,7 +131,9 @@
                     "tags": [],
                     "label": "state",
                     "description": [],
-                    "signature": ["ReduxStateType"],
+                    "signature": [
+                      "ReduxStateType"
+                    ],
                     "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -136,7 +147,9 @@
                 "tags": [],
                 "label": "equalityFn",
                 "description": [],
-                "signature": ["((previous: Selected, next: Selected) => boolean) | undefined"],
+                "signature": [
+                  "((previous: Selected, next: Selected) => boolean) | undefined"
+                ],
                 "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -150,7 +163,10 @@
             "tags": [],
             "label": "getState",
             "description": [],
-            "signature": ["() => ", "ControlGroupReduxState"],
+            "signature": [
+              "() => ",
+              "ControlGroupReduxState"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -210,7 +226,10 @@
             "tags": [],
             "label": "onStateChange",
             "description": [],
-            "signature": ["(listener: () => void) => ", "Unsubscribe"],
+            "signature": [
+              "(listener: () => void) => ",
+              "Unsubscribe"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -223,7 +242,9 @@
                 "tags": [],
                 "label": "listener",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "node_modules/redux/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -262,7 +283,10 @@
             "tags": [],
             "label": "onControlRemoved$",
             "description": [],
-            "signature": ["Subject", "<string>"],
+            "signature": [
+              "Subject",
+              "<string>"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -299,7 +323,10 @@
             "tags": [],
             "label": "fieldFilterPredicate",
             "description": [],
-            "signature": ["FieldFilterPredicate", " | undefined"],
+            "signature": [
+              "FieldFilterPredicate",
+              " | undefined"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -311,7 +338,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -403,7 +432,10 @@
                 "tags": [],
                 "label": "initialComponentState",
                 "description": [],
-                "signature": ["ControlGroupComponentState", " | undefined"],
+                "signature": [
+                  "ControlGroupComponentState",
+                  " | undefined"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -416,7 +448,10 @@
                 "tags": [],
                 "label": "fieldFilterPredicate",
                 "description": [],
-                "signature": ["FieldFilterPredicate", " | undefined"],
+                "signature": [
+                  "FieldFilterPredicate",
+                  " | undefined"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -432,7 +467,9 @@
             "tags": [],
             "label": "canShowInvalidSelectionsWarning",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -446,7 +483,9 @@
             "tags": [],
             "label": "suppressInvalidSelectionsWarning",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -559,7 +598,9 @@
             "tags": [],
             "label": "resetToLastSavedState",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -573,7 +614,9 @@
             "tags": [],
             "label": "reload",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -659,7 +702,9 @@
             "tags": [],
             "label": "setLastUsedDataViewId",
             "description": [],
-            "signature": ["(lastUsedDataViewId: string) => void"],
+            "signature": [
+              "(lastUsedDataViewId: string) => void"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -671,7 +716,9 @@
                 "tags": [],
                 "label": "lastUsedDataViewId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -687,7 +734,9 @@
             "tags": [],
             "label": "setRelevantDataViewId",
             "description": [],
-            "signature": ["(newRelevantDataViewId: string) => void"],
+            "signature": [
+              "(newRelevantDataViewId: string) => void"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -699,7 +748,9 @@
                 "tags": [],
                 "label": "newRelevantDataViewId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -715,7 +766,9 @@
             "tags": [],
             "label": "getMostRelevantDataViewId",
             "description": [],
-            "signature": ["() => string | undefined"],
+            "signature": [
+              "() => string | undefined"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -729,7 +782,9 @@
             "tags": [],
             "label": "closeAllFlyouts",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1104,7 +1159,9 @@
             "tags": [],
             "label": "getPanelCount",
             "description": [],
-            "signature": ["() => number"],
+            "signature": [
+              "() => number"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1165,7 +1222,11 @@
             "tags": [],
             "label": "publishFilters",
             "description": [],
-            "signature": ["({ filters, timeslice }: ", "ControlGroupFilterOutput", ") => void"],
+            "signature": [
+              "({ filters, timeslice }: ",
+              "ControlGroupFilterOutput",
+              ") => void"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1177,7 +1238,9 @@
                 "tags": [],
                 "label": "{ filters, timeslice }",
                 "description": [],
-                "signature": ["ControlGroupFilterOutput"],
+                "signature": [
+                  "ControlGroupFilterOutput"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1337,7 +1400,9 @@
                 "tags": [],
                 "label": "partial",
                 "description": [],
-                "signature": ["Partial<TEmbeddableInput>"],
+                "signature": [
+                  "Partial<TEmbeddableInput>"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1395,7 +1460,9 @@
                 "tags": [],
                 "label": "idToRemove",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1411,7 +1478,10 @@
             "tags": [],
             "label": "getInheritedInput",
             "description": [],
-            "signature": ["(id: string) => ", "ControlInput"],
+            "signature": [
+              "(id: string) => ",
+              "ControlInput"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1423,7 +1493,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1439,7 +1511,9 @@
             "tags": [],
             "label": "untilAllChildrenReady",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1453,7 +1527,9 @@
             "tags": [],
             "label": "untilInitialized",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1467,7 +1543,9 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": ["(dom: HTMLElement) => void"],
+            "signature": [
+              "(dom: HTMLElement) => void"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1479,7 +1557,9 @@
                 "tags": [],
                 "label": "dom",
                 "description": [],
-                "signature": ["HTMLElement"],
+                "signature": [
+                  "HTMLElement"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1495,7 +1575,9 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1589,7 +1671,9 @@
             "tags": [],
             "label": "isContainerType",
             "description": [],
-            "signature": ["true"],
+            "signature": [
+              "true"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1601,7 +1685,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"control_group\""],
+            "signature": [
+              "\"control_group\""
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1651,7 +1737,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1725,7 +1813,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1739,7 +1829,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1775,7 +1867,9 @@
             "tags": [],
             "label": "isEditable",
             "description": [],
-            "signature": ["() => Promise<boolean>"],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1789,7 +1883,9 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1944,7 +2040,10 @@
                 "tags": [],
                 "label": "initialComponentState",
                 "description": [],
-                "signature": ["ControlGroupComponentState", " | undefined"],
+                "signature": [
+                  "ControlGroupComponentState",
+                  " | undefined"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1957,7 +2056,10 @@
                 "tags": [],
                 "label": "fieldFilterPredicate",
                 "description": [],
-                "signature": ["FieldFilterPredicate", " | undefined"],
+                "signature": [
+                  "FieldFilterPredicate",
+                  " | undefined"
+                ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2025,7 +2127,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"optionsListControl\""],
+            "signature": [
+              "\"optionsListControl\""
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -2085,7 +2189,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["(state: ReduxStateType) => Selected"],
+                "signature": [
+                  "(state: ReduxStateType) => Selected"
+                ],
                 "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2098,7 +2204,9 @@
                     "tags": [],
                     "label": "state",
                     "description": [],
-                    "signature": ["ReduxStateType"],
+                    "signature": [
+                      "ReduxStateType"
+                    ],
                     "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2112,7 +2220,9 @@
                 "tags": [],
                 "label": "equalityFn",
                 "description": [],
-                "signature": ["((previous: Selected, next: Selected) => boolean) | undefined"],
+                "signature": [
+                  "((previous: Selected, next: Selected) => boolean) | undefined"
+                ],
                 "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2126,7 +2236,10 @@
             "tags": [],
             "label": "getState",
             "description": [],
-            "signature": ["() => ", "OptionsListReduxState"],
+            "signature": [
+              "() => ",
+              "OptionsListReduxState"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2174,7 +2287,10 @@
             "tags": [],
             "label": "onStateChange",
             "description": [],
-            "signature": ["(listener: () => void) => ", "Unsubscribe"],
+            "signature": [
+              "(listener: () => void) => ",
+              "Unsubscribe"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2187,7 +2303,9 @@
                 "tags": [],
                 "label": "listener",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "node_modules/redux/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2203,7 +2321,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2369,7 +2489,9 @@
             "tags": [],
             "label": "clearSelections",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2383,7 +2505,9 @@
             "tags": [],
             "label": "reload",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2397,7 +2521,9 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2411,7 +2537,9 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": ["(node: HTMLElement) => void"],
+            "signature": [
+              "(node: HTMLElement) => void"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2423,7 +2551,9 @@
                 "tags": [],
                 "label": "node",
                 "description": [],
-                "signature": ["HTMLElement"],
+                "signature": [
+                  "HTMLElement"
+                ],
                 "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2439,7 +2569,9 @@
             "tags": [],
             "label": "isChained",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2560,7 +2692,9 @@
             "tags": [],
             "label": "canCreateNew",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2574,7 +2708,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2930,7 +3066,9 @@
             "tags": [],
             "label": "isEditable",
             "description": [],
-            "signature": ["() => Promise<boolean>"],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2944,7 +3082,9 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2958,7 +3098,9 @@
             "tags": [],
             "label": "getIconType",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -2972,7 +3114,9 @@
             "tags": [],
             "label": "getDescription",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3024,7 +3168,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3098,7 +3244,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3164,7 +3312,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"rangeSliderControl\""],
+            "signature": [
+              "\"rangeSliderControl\""
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -3224,7 +3374,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["(state: ReduxStateType) => Selected"],
+                "signature": [
+                  "(state: ReduxStateType) => Selected"
+                ],
                 "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3237,7 +3389,9 @@
                     "tags": [],
                     "label": "state",
                     "description": [],
-                    "signature": ["ReduxStateType"],
+                    "signature": [
+                      "ReduxStateType"
+                    ],
                     "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -3251,7 +3405,9 @@
                 "tags": [],
                 "label": "equalityFn",
                 "description": [],
-                "signature": ["((previous: Selected, next: Selected) => boolean) | undefined"],
+                "signature": [
+                  "((previous: Selected, next: Selected) => boolean) | undefined"
+                ],
                 "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3265,7 +3421,10 @@
             "tags": [],
             "label": "getState",
             "description": [],
-            "signature": ["() => ", "RangeSliderReduxState"],
+            "signature": [
+              "() => ",
+              "RangeSliderReduxState"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3311,7 +3470,10 @@
             "tags": [],
             "label": "onStateChange",
             "description": [],
-            "signature": ["(listener: () => void) => ", "Unsubscribe"],
+            "signature": [
+              "(listener: () => void) => ",
+              "Unsubscribe"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3324,7 +3486,9 @@
                 "tags": [],
                 "label": "listener",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "node_modules/redux/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3340,7 +3504,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3506,7 +3672,9 @@
             "tags": [],
             "label": "clearSelections",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3520,7 +3688,9 @@
             "tags": [],
             "label": "reload",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3534,7 +3704,9 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3548,7 +3720,9 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": ["(node: HTMLElement) => void"],
+            "signature": [
+              "(node: HTMLElement) => void"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3560,7 +3734,9 @@
                 "tags": [],
                 "label": "node",
                 "description": [],
-                "signature": ["HTMLElement"],
+                "signature": [
+                  "HTMLElement"
+                ],
                 "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3576,7 +3752,9 @@
             "tags": [],
             "label": "isChained",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3697,7 +3875,9 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3711,7 +3891,9 @@
             "tags": [],
             "label": "getDescription",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3725,7 +3907,9 @@
             "tags": [],
             "label": "getIconType",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3739,7 +3923,9 @@
             "tags": [],
             "label": "canCreateNew",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -3753,7 +3939,9 @@
             "tags": [],
             "label": "isEditable",
             "description": [],
-            "signature": ["() => Promise<boolean>"],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -4147,7 +4335,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4221,7 +4411,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["P"],
+                "signature": [
+                  "P"
+                ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4271,7 +4463,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4299,7 +4493,9 @@
             "tags": [],
             "label": "controlId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/controls/public/control_group/external_api/control_group_input_builder.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4333,7 +4529,9 @@
             "tags": [],
             "label": "grow",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/public/control_group/external_api/control_group_input_builder.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4345,7 +4543,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/controls/public/control_group/external_api/control_group_input_builder.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4402,7 +4602,9 @@
             "tags": [],
             "label": "initialInput",
             "description": [],
-            "signature": ["Partial<T> | undefined"],
+            "signature": [
+              "Partial<T> | undefined"
+            ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4425,7 +4627,9 @@
             "tags": [],
             "label": "onChange",
             "description": [],
-            "signature": ["(partial: Partial<T>) => void"],
+            "signature": [
+              "(partial: Partial<T>) => void"
+            ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4437,7 +4641,9 @@
                 "tags": [],
                 "label": "partial",
                 "description": [],
-                "signature": ["Partial<T>"],
+                "signature": [
+                  "Partial<T>"
+                ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4453,7 +4659,9 @@
             "tags": [],
             "label": "setControlEditorValid",
             "description": [],
-            "signature": ["(isValid: boolean) => void"],
+            "signature": [
+              "(isValid: boolean) => void"
+            ],
             "path": "src/plugins/controls/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4465,7 +4673,9 @@
                 "tags": [],
                 "label": "isValid",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4514,7 +4724,9 @@
             "tags": [],
             "label": "chainingSystem",
             "description": [],
-            "signature": ["\"HIERARCHICAL\" | \"NONE\""],
+            "signature": [
+              "\"HIERARCHICAL\" | \"NONE\""
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4547,7 +4759,9 @@
             "tags": [],
             "label": "defaultControlGrow",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4559,7 +4773,9 @@
             "tags": [],
             "label": "controlStyle",
             "description": [],
-            "signature": ["\"twoLine\" | \"oneLine\""],
+            "signature": [
+              "\"twoLine\" | \"oneLine\""
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4591,7 +4807,9 @@
             "tags": [],
             "label": "showApplySelections",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4859,7 +5077,9 @@
         "type": "Interface",
         "tags": [],
         "label": "IEditableControlFactory",
-        "description": ["\nControl embeddable editor types"],
+        "description": [
+          "\nControl embeddable editor types"
+        ],
         "signature": [
           {
             "pluginId": "controls",
@@ -5014,7 +5234,9 @@
                 "tags": [],
                 "label": "newState",
                 "description": [],
-                "signature": ["Partial<T>"],
+                "signature": [
+                  "Partial<T>"
+                ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5131,7 +5353,10 @@
             "tags": [],
             "label": "searchTechnique",
             "description": [],
-            "signature": ["OptionsListSearchTechnique", " | undefined"],
+            "signature": [
+              "OptionsListSearchTechnique",
+              " | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5143,7 +5368,10 @@
             "tags": [],
             "label": "sort",
             "description": [],
-            "signature": ["OptionsListSortingType", " | undefined"],
+            "signature": [
+              "OptionsListSortingType",
+              " | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5155,7 +5383,9 @@
             "tags": [],
             "label": "selectedOptions",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5167,7 +5397,9 @@
             "tags": [],
             "label": "existsSelected",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5179,7 +5411,9 @@
             "tags": [],
             "label": "runPastTimeout",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5191,7 +5425,9 @@
             "tags": [],
             "label": "singleSelect",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5203,7 +5439,9 @@
             "tags": [],
             "label": "hideActionBar",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5215,7 +5453,9 @@
             "tags": [],
             "label": "hideExclude",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5227,7 +5467,9 @@
             "tags": [],
             "label": "hideExists",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5239,7 +5481,9 @@
             "tags": [],
             "label": "placeholder",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5251,7 +5495,9 @@
             "tags": [],
             "label": "hideSort",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5263,7 +5509,9 @@
             "tags": [],
             "label": "exclude",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5289,7 +5537,9 @@
             "tags": [],
             "label": "ignoreFilters",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5301,7 +5551,9 @@
             "tags": [],
             "label": "ignoreQuery",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5313,7 +5565,9 @@
             "tags": [],
             "label": "ignoreTimerange",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5325,7 +5579,9 @@
             "tags": [],
             "label": "ignoreValidations",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5362,7 +5618,10 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["RangeValue", " | undefined"],
+            "signature": [
+              "RangeValue",
+              " | undefined"
+            ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5374,7 +5633,9 @@
             "tags": [],
             "label": "step",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5392,7 +5653,9 @@
         "tags": [],
         "label": "ACTION_DELETE_CONTROL",
         "description": [],
-        "signature": ["\"deleteControl\""],
+        "signature": [
+          "\"deleteControl\""
+        ],
         "path": "src/plugins/controls/public/control_group/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5405,7 +5668,9 @@
         "tags": [],
         "label": "ACTION_EDIT_CONTROL",
         "description": [],
-        "signature": ["\"editControl\""],
+        "signature": [
+          "\"editControl\""
+        ],
         "path": "src/plugins/controls/public/control_group/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5512,7 +5777,9 @@
         "tags": [],
         "label": "CONTROL_GROUP_TYPE",
         "description": [],
-        "signature": ["\"control_group\""],
+        "signature": [
+          "\"control_group\""
+        ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5803,7 +6070,9 @@
         "tags": [],
         "label": "ControlStyle",
         "description": [],
-        "signature": ["\"twoLine\" | \"oneLine\""],
+        "signature": [
+          "\"twoLine\" | \"oneLine\""
+        ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5816,7 +6085,9 @@
         "tags": [],
         "label": "ControlWidth",
         "description": [],
-        "signature": ["\"small\" | \"medium\" | \"large\""],
+        "signature": [
+          "\"small\" | \"medium\" | \"large\""
+        ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5881,7 +6152,9 @@
         "tags": [],
         "label": "OPTIONS_LIST_CONTROL",
         "description": [],
-        "signature": ["\"optionsListControl\""],
+        "signature": [
+          "\"optionsListControl\""
+        ],
         "path": "src/plugins/controls/common/options_list/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5894,7 +6167,9 @@
         "tags": [],
         "label": "RANGE_SLIDER_CONTROL",
         "description": [],
-        "signature": ["\"rangeSliderControl\""],
+        "signature": [
+          "\"rangeSliderControl\""
+        ],
         "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5907,7 +6182,9 @@
         "tags": [],
         "label": "TIME_SLIDER_CONTROL",
         "description": [],
-        "signature": ["\"timeSlider\""],
+        "signature": [
+          "\"timeSlider\""
+        ],
         "path": "src/plugins/controls/common/time_slider/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6241,7 +6518,9 @@
             "tags": [],
             "label": "statsSoFar",
             "description": [],
-            "signature": ["Record<string, unknown>"],
+            "signature": [
+              "Record<string, unknown>"
+            ],
             "path": "src/plugins/controls/server/control_group/control_group_telemetry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6508,7 +6787,9 @@
             "tags": [],
             "label": "compareSelections",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6723,7 +7004,9 @@
             "tags": [],
             "label": "chainingSystem",
             "description": [],
-            "signature": ["\"HIERARCHICAL\" | \"NONE\""],
+            "signature": [
+              "\"HIERARCHICAL\" | \"NONE\""
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6756,7 +7039,9 @@
             "tags": [],
             "label": "defaultControlGrow",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6768,7 +7053,9 @@
             "tags": [],
             "label": "controlStyle",
             "description": [],
-            "signature": ["\"twoLine\" | \"oneLine\""],
+            "signature": [
+              "\"twoLine\" | \"oneLine\""
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6800,7 +7087,9 @@
             "tags": [],
             "label": "showApplySelections",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6837,7 +7126,9 @@
             "tags": [],
             "label": "chaining_system",
             "description": [],
-            "signature": ["{ [key: string]: number; }"],
+            "signature": [
+              "{ [key: string]: number; }"
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6849,7 +7140,9 @@
             "tags": [],
             "label": "label_position",
             "description": [],
-            "signature": ["{ [key: string]: number; }"],
+            "signature": [
+              "{ [key: string]: number; }"
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6861,7 +7154,9 @@
             "tags": [],
             "label": "ignore_settings",
             "description": [],
-            "signature": ["{ [key: string]: number; }"],
+            "signature": [
+              "{ [key: string]: number; }"
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6930,7 +7225,9 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "signature": ["\"small\" | \"medium\" | \"large\""],
+            "signature": [
+              "\"small\" | \"medium\" | \"large\""
+            ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7016,7 +7313,10 @@
             "tags": [],
             "label": "searchTechnique",
             "description": [],
-            "signature": ["OptionsListSearchTechnique", " | undefined"],
+            "signature": [
+              "OptionsListSearchTechnique",
+              " | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7028,7 +7328,10 @@
             "tags": [],
             "label": "sort",
             "description": [],
-            "signature": ["OptionsListSortingType", " | undefined"],
+            "signature": [
+              "OptionsListSortingType",
+              " | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7040,7 +7343,9 @@
             "tags": [],
             "label": "selectedOptions",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7052,7 +7357,9 @@
             "tags": [],
             "label": "existsSelected",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7064,7 +7371,9 @@
             "tags": [],
             "label": "runPastTimeout",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7076,7 +7385,9 @@
             "tags": [],
             "label": "singleSelect",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7088,7 +7399,9 @@
             "tags": [],
             "label": "hideActionBar",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7100,7 +7413,9 @@
             "tags": [],
             "label": "hideExclude",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7112,7 +7427,9 @@
             "tags": [],
             "label": "hideExists",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7124,7 +7441,9 @@
             "tags": [],
             "label": "placeholder",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7136,7 +7455,9 @@
             "tags": [],
             "label": "hideSort",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7148,7 +7469,9 @@
             "tags": [],
             "label": "exclude",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7185,7 +7508,10 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["RangeValue", " | undefined"],
+            "signature": [
+              "RangeValue",
+              " | undefined"
+            ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7197,7 +7523,9 @@
             "tags": [],
             "label": "step",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7215,7 +7543,9 @@
         "tags": [],
         "label": "CONTROL_GROUP_TYPE",
         "description": [],
-        "signature": ["\"control_group\""],
+        "signature": [
+          "\"control_group\""
+        ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7329,7 +7659,9 @@
         "tags": [],
         "label": "ControlWidth",
         "description": [],
-        "signature": ["\"small\" | \"medium\" | \"large\""],
+        "signature": [
+          "\"small\" | \"medium\" | \"large\""
+        ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7342,7 +7674,9 @@
         "tags": [],
         "label": "DEFAULT_CONTROL_STYLE",
         "description": [],
-        "signature": ["\"twoLine\" | \"oneLine\""],
+        "signature": [
+          "\"twoLine\" | \"oneLine\""
+        ],
         "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7355,7 +7689,9 @@
         "tags": [],
         "label": "DEFAULT_CONTROL_WIDTH",
         "description": [],
-        "signature": ["\"small\" | \"medium\" | \"large\""],
+        "signature": [
+          "\"small\" | \"medium\" | \"large\""
+        ],
         "path": "src/plugins/controls/common/control_group/control_group_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7368,7 +7704,9 @@
         "tags": [],
         "label": "OPTIONS_LIST_CONTROL",
         "description": [],
-        "signature": ["\"optionsListControl\""],
+        "signature": [
+          "\"optionsListControl\""
+        ],
         "path": "src/plugins/controls/common/options_list/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7409,7 +7747,9 @@
         "type": "Array",
         "tags": [],
         "label": "persistableControlGroupInputKeys",
-        "description": ["\nOnly parts of the Control Group Input should be persisted"],
+        "description": [
+          "\nOnly parts of the Control Group Input should be persisted"
+        ],
         "signature": [
           "(\"controlStyle\" | \"ignoreParentSettings\" | \"panels\" | \"chainingSystem\" | \"showApplySelections\")[]"
         ],
@@ -7425,7 +7765,9 @@
         "tags": [],
         "label": "RANGE_SLIDER_CONTROL",
         "description": [],
-        "signature": ["\"rangeSliderControl\""],
+        "signature": [
+          "\"rangeSliderControl\""
+        ],
         "path": "src/plugins/controls/common/range_slider/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7512,7 +7854,9 @@
         "tags": [],
         "label": "TIME_SLIDER_CONTROL",
         "description": [],
-        "signature": ["\"timeSlider\""],
+        "signature": [
+          "\"timeSlider\""
+        ],
         "path": "src/plugins/controls/common/time_slider/types.ts",
         "deprecated": false,
         "trackAdoption": false,

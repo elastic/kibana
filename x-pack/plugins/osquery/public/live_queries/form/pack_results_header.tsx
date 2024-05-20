@@ -1,6 +1,3 @@
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,8 +5,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { AddToCaseWrapper } from '../../cases/add_to_cases';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
+import { AddToCaseWrapper } from '../../cases/add_to_cases';
 
 interface PackResultsHeadersProps {
   actionId?: string;

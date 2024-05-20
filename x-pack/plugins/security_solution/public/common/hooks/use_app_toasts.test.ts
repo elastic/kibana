@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { renderHook } from '@testing-library/react-hooks';
 import type { IEsError } from '@kbn/search-errors';
 import type { KibanaError, SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { renderHook } from '@testing-library/react-hooks';
 
 import { useToasts } from '../lib/kibana';
 

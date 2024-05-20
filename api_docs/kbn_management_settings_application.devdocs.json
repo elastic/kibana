@@ -72,8 +72,12 @@
         "type": "Function",
         "tags": [],
         "label": "SettingsApplication",
-        "description": ["\nComponent for displaying the {@link SettingsApplication} component."],
-        "signature": ["() => JSX.Element"],
+        "description": [
+          "\nComponent for displaying the {@link SettingsApplication} component."
+        ],
+        "signature": [
+          "() => JSX.Element"
+        ],
         "path": "packages/kbn-management/settings/application/application.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -87,7 +91,9 @@
         "type": "Function",
         "tags": [],
         "label": "SettingsApplicationKibanaProvider",
-        "description": ["\nKibana-specific Provider that maps dependencies to services."],
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           {

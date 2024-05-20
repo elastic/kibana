@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/logging';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { last } from 'lodash';
 import { APMConfig } from '../..';
-import { ApmDocumentType } from '../../../common/document_type';
 import {
   AGENT_NAME,
   CHILD_ID,
@@ -46,7 +45,6 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { RollupInterval } from '../../../common/rollup';
 import {
   WaterfallError,
   WaterfallSpan,
@@ -54,6 +52,8 @@ import {
 } from '../../../common/waterfall/typings';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 export interface TraceItems {
   exceedsMax: boolean;

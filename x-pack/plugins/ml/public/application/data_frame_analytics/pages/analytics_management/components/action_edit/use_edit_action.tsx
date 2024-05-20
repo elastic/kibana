@@ -12,7 +12,7 @@ import type {
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
 
-import { EditActionName, editActionNameText } from './edit_action_name';
+import { editActionNameText, EditActionName } from './edit_action_name';
 
 export const isEditActionFlyoutVisible = (editAction: any): editAction is Required<EditAction> => {
   return editAction.isFlyoutVisible === true && editAction.item !== undefined;

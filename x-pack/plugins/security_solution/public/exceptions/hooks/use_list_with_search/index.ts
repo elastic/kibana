@@ -16,8 +16,8 @@ import type {
 import type { GetExceptionItemProps } from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
-import { useListExceptionItems } from '..';
 import * as i18n from '../../translations';
+import { useListExceptionItems } from '..';
 
 export const useListWithSearchComponent = (
   list: ExceptionListSchema,

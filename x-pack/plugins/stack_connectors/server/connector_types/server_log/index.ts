@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-import {
-  AlertingConnectorFeatureId,
-  SecurityConnectorFeatureId,
-  UptimeConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
+import { Logger, LogMeta } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import { LogMeta, Logger } from '@kbn/core/server';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/connector_feature_config';
 import { withoutControlCharacters } from '../lib/string_utils';
 
 export type ServerLogConnectorType = ConnectorType<{}, {}, ActionParamsType>;

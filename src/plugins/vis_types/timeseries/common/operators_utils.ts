@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { gt, gte, isNull, lt, lte } from 'lodash';
+import { gt, gte, lt, lte, isNull } from 'lodash';
 
 export enum Operator {
   Gte = 'gte',

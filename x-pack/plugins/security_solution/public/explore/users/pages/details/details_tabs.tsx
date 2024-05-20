@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TableId } from '@kbn/securitysolution-data-table';
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { EventsQueryTabBody } from '../../../../common/components/events_tab';
-import { AnomaliesUserTable } from '../../../../common/components/ml/tables/anomalies_user_table';
-import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { RiskDetailsTabBody } from '../../../../entity_analytics/components/risk_details_tab_body';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { UsersTableType } from '../../store/model';
-import { usersDetailsPagePath } from '../constants';
-import { AuthenticationsQueryTabBody } from '../navigation';
+import { AnomaliesUserTable } from '../../../../common/components/ml/tables/anomalies_user_table';
 import type { UsersDetailsTabsProps } from './types';
+import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/anomalies_query_tab_body';
+import { usersDetailsPagePath } from '../constants';
+import { EventsQueryTabBody } from '../../../../common/components/events_tab';
+import { AuthenticationsQueryTabBody } from '../navigation';
 
 export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
   ({

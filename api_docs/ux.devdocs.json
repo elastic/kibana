@@ -14,7 +14,9 @@
       "tags": [],
       "label": "UxPluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "x-pack/plugins/observability_solution/ux/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,

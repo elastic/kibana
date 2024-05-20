@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
+import { i18n } from '@kbn/i18n';
 import { useCurrentEuiTheme } from '../../../hooks/use_current_eui_theme';
 
 /**

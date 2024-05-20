@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
-import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
+import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
-import { environmentMock, registryMock, tutorialMock } from './plugin.test.mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 const mockInitializerContext = coreMock.createPluginInitializerContext();
 const mockShare = {} as SharePluginSetup;

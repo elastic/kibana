@@ -7,8 +7,8 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
-import { APIRoutes, ChatFormFields } from '../types';
 import { useKibana } from './use_kibana';
+import { APIRoutes, ChatFormFields } from '../types';
 
 interface UseApiKeyQueryParams {
   name: string;

@@ -1,12 +1,3 @@
-import {
-  ApplicationStart,
-  type CoreStart,
-  IUiSettingsClient,
-  NotificationsStart,
-} from '@kbn/core/public';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { Filter } from '@kbn/es-query';
-import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,11 +5,20 @@ import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
  * 2.0.
  */
 import {
-  PublishesPanelTitle,
-  PublishesWritablePanelTitle,
   SerializedTitles,
+  PublishesWritablePanelTitle,
+  PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { Filter } from '@kbn/es-query';
+import {
+  type CoreStart,
+  IUiSettingsClient,
+  ApplicationStart,
+  NotificationsStart,
+} from '@kbn/core/public';
+import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export type OverviewMode = 'single' | 'groups';

@@ -6,39 +6,39 @@
  */
 import React from 'react';
 
-import * as i18n from './translations';
 import type { Step, StepId } from './types';
 import {
-  AddAndValidateYourDataCardsId,
+  SectionId,
+  QuickStartSectionCardsId,
+  OverviewSteps,
+  type Section,
   AddIntegrationsSteps,
+  ViewDashboardSteps,
+  AddAndValidateYourDataCardsId,
+  GetStartedWithAlertsCardsId,
   CreateProjectSteps,
   EnablePrebuiltRulesSteps,
-  GetStartedWithAlertsCardsId,
-  OverviewSteps,
-  QuickStartSectionCardsId,
-  type Section,
-  SectionId,
   ViewAlertsSteps,
-  ViewDashboardSteps,
 } from './types';
+import * as i18n from './translations';
 
-import { AddIntegrationsImage } from './card_step/content/add_integration_image';
-import { CreateProjectImage } from './card_step/content/create_project_step_image';
-import { EnableRuleImage } from './card_step/content/enable_rule_image';
-import { OverviewVideoDescription } from './card_step/content/overview_video_description';
+import { AddIntegrationButtons } from './step_links/add_integration_buttons';
+import { AlertsButton } from './step_links/alerts_link';
+import { AddElasticRulesButton } from './step_links/add_elastic_rules_button';
+import { DashboardButton } from './step_links/dashboard_button';
+import overviewVideo from './images/overview_video.svg';
 import { Video } from './card_step/content/video';
-import { ViewAlertsImage } from './card_step/content/view_alerts_image';
-import { ViewDashboardImage } from './card_step/content/view_dashboard_image';
+import { OverviewVideoDescription } from './card_step/content/overview_video_description';
+import { ManageProjectsButton } from './step_links/manage_projects_button';
+import { EnableRuleImage } from './card_step/content/enable_rule_image';
 import {
   autoCheckAddIntegrationsStepCompleted,
   autoCheckPrebuildRuleStepCompleted,
 } from './card_step/helpers';
-import overviewVideo from './images/overview_video.svg';
-import { AddElasticRulesButton } from './step_links/add_elastic_rules_button';
-import { AddIntegrationButtons } from './step_links/add_integration_buttons';
-import { AlertsButton } from './step_links/alerts_link';
-import { DashboardButton } from './step_links/dashboard_button';
-import { ManageProjectsButton } from './step_links/manage_projects_button';
+import { ViewDashboardImage } from './card_step/content/view_dashboard_image';
+import { AddIntegrationsImage } from './card_step/content/add_integration_image';
+import { CreateProjectImage } from './card_step/content/create_project_step_image';
+import { ViewAlertsImage } from './card_step/content/view_alerts_image';
 
 export const createProjectSteps = [
   {

@@ -6,7 +6,7 @@
  */
 
 import type { PolicyConfig } from '../types';
-import { AntivirusRegistrationModes, ProtectionModes } from '../types';
+import { ProtectionModes, AntivirusRegistrationModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses

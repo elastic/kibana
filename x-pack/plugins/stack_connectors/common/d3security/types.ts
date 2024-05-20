@@ -8,9 +8,9 @@
 import { TypeOf } from '@kbn/config-schema';
 import {
   D3SecurityConfigSchema,
+  D3SecuritySecretsSchema,
   D3SecurityRunActionParamsSchema,
   D3SecurityRunActionResponseSchema,
-  D3SecuritySecretsSchema,
 } from './schema';
 
 export type D3SecurityConfig = TypeOf<typeof D3SecurityConfigSchema>;

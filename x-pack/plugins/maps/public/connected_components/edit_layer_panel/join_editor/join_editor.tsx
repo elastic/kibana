@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiSkeletonText, EuiTextAlign, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { JoinDescriptor } from '../../../../common/descriptor_types';
-import { IVectorLayer } from '../../../classes/layers/vector_layer';
-import { isESSource } from '../../../classes/sources/es_source';
-import { AddJoinButton } from './add_join_button';
+import { i18n } from '@kbn/i18n';
+import { EuiSkeletonText, EuiTextAlign, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Join } from './resources/join';
 import { JoinDocumentationPopover } from './resources/join_documentation_popover';
+import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import { isESSource } from '../../../classes/sources/es_source';
+import { JoinDescriptor } from '../../../../common/descriptor_types';
+import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { AddJoinButton } from './add_join_button';
 
 export interface JoinField {
   label: string;

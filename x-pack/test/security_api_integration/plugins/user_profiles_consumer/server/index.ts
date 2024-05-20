@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin, PluginInitializer } from '@kbn/core/server';
+import type { PluginInitializer, Plugin, CoreSetup } from '@kbn/core/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,

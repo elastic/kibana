@@ -6,6 +6,9 @@
     "id": "fecAlertsTestPlugin",
     "server": true,
     "browser": false,
-    "requiredPlugins": ["features", "alerting"]
+    "requiredPlugins": [
+      "features",
+      "alerting"
+    ]
   }
 }

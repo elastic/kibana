@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import Mustache from 'mustache';
 import { Transaction } from '../../typings/es_schemas/ui/transaction';
 

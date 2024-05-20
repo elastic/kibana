@@ -6,8 +6,8 @@
  */
 
 import {
-  deletePreviousPipelines,
   isTopLevelPipeline,
+  deletePreviousPipelines,
 } from '../../../elasticsearch/ingest_pipeline';
 
 import { withPackageSpan } from '../../utils';

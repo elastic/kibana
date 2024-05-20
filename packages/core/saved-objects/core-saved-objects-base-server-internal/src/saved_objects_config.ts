@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import buffer from 'buffer';
-import { TypeOf, schema } from '@kbn/config-schema';
-import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { valid } from 'semver';
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import buffer from 'buffer';
 
 const migrationSchema = schema.object({
   algorithm: schema.oneOf([schema.literal('v2'), schema.literal('zdt')], {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
 import React from 'react';
+import { EuiBadge } from '@elastic/eui';
 
 import classnames from 'classnames';
+import { PRODUCT_TIER_ESSENTIAL, PRODUCT_TIER_COMPLETE } from './translations';
 import { ProductTier } from '../configs';
 import { useCurrentPlanBadgeStyles } from '../styles/current_plan_badge.styles';
-import { PRODUCT_TIER_COMPLETE, PRODUCT_TIER_ESSENTIAL } from './translations';
 
 const PRODUCT_TIER_TRANSLATES: { [key: string]: string } = {
   [ProductTier.essentials]: PRODUCT_TIER_ESSENTIAL,

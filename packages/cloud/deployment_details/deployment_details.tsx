@@ -8,17 +8,17 @@
 import React from 'react';
 
 import {
-  EuiButtonEmpty,
+  EuiForm,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiLink,
+  EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DeploymentDetailsCloudIdInput } from './deployment_details_cloudid_input';
-import { DeploymentDetailsEsInput } from './deployment_details_es_input';
 import { useDeploymentDetails } from './services';
+import { DeploymentDetailsEsInput } from './deployment_details_es_input';
+import { DeploymentDetailsCloudIdInput } from './deployment_details_cloudid_input';
 
 const hasActiveModifierKey = (event: React.MouseEvent): boolean => {
   return event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;

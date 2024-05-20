@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import type { IToasts } from '@kbn/core-notifications-browser';
-import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
 import { deleteKnowledgeBase } from '../assistant/api';
 import { useInvalidateKnowledgeBaseStatus } from './use_knowledge_base_status';
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { useState, useEffect } from 'react';
+import { Subscription } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { useEffect, useState } from 'react';
-import { Subscription } from 'rxjs';
 
 interface UseFilterManagerProps {
   filters?: Filter[];

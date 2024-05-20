@@ -5,40 +5,40 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCodeBlock,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiNotificationBadge,
-  EuiPanel,
   EuiSpacer,
-  EuiToolTip,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedRelative, FormattedTime } from '@kbn/i18n-react';
+import { FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
-import { FilterStateStore } from '@kbn/es-query';
-import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import type {
+  TypedLensByValueInput,
   PersistedIndexPatternLayer,
   PieVisualizationState,
   TermsIndexPatternColumn,
-  TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
+import { FilterStateStore } from '@kbn/es-query';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
+import { useKibana } from '../common/lib/kibana';
+import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
+import { usePackQueryLastResults } from './use_pack_query_last_results';
+import { usePackQueryErrors } from './use_pack_query_errors';
+import type { PackQueryFormData } from './queries/use_pack_query_form';
 import type { LogsDataView } from '../common/hooks/use_logs_data_view';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
-import { useKibana } from '../common/lib/kibana';
-import type { PackQueryFormData } from './queries/use_pack_query_form';
-import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
-import { usePackQueryErrors } from './use_pack_query_errors';
-import { usePackQueryLastResults } from './use_pack_query_last_results';
 
 const VIEW_IN_DISCOVER = i18n.translate(
   'xpack.osquery.pack.queriesTable.viewDiscoverResultsActionAriaLabel',

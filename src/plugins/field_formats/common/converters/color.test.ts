@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { HTML_CONTEXT_TYPE } from '../content_types';
 import { ColorFormat } from './color';
+import { HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('Color Format', () => {
   describe('field is a number', () => {

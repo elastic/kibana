@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { VectorTile, VectorTileFeature, VectorTileLayer } from '@mapbox/vector-tile';
+import { VectorTile, VectorTileLayer, VectorTileFeature } from '@mapbox/vector-tile';
 
 interface MapboxVectorTileJson {
   [key: string]: {};

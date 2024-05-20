@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { OverlayStart, SavedObjectAttributes, SavedObjectsCreateOptions } from '@kbn/core/public';
+import { SavedObjectAttributes, SavedObjectsCreateOptions, OverlayStart } from '@kbn/core/public';
 import { SavedObjectsClientContract } from '@kbn/core/public';
 import { analyticsServiceMock, i18nServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { OVERWRITE_REJECTED } from '../../constants';
-import * as deps from './confirm_modal_promise';
 import { saveWithConfirmation } from './save_with_confirmation';
+import * as deps from './confirm_modal_promise';
+import { OVERWRITE_REJECTED } from '../../constants';
 
 describe('saveWithConfirmation', () => {
   const savedObjectsClient: SavedObjectsClientContract = {} as SavedObjectsClientContract;

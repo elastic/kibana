@@ -17,14 +17,14 @@ import { z } from 'zod';
  */
 
 import {
-  AfterKeys,
   DataViewId,
-  DateRange,
-  EntityRiskScoreRecord,
+  AfterKeys,
   Filter,
-  IdentifierType,
   PageSize,
+  IdentifierType,
+  DateRange,
   RiskScoreWeights,
+  EntityRiskScoreRecord,
 } from '../common/common.gen';
 
 export type RiskScoresPreviewRequest = z.infer<typeof RiskScoresPreviewRequest>;

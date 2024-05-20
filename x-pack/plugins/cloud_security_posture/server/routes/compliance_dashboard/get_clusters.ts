@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
-  AggregationsTopHitsAggregate,
   QueryDslQueryContainer,
-  SearchHit,
   SearchRequest,
+  AggregationsTopHitsAggregate,
+  SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import { getIdentifierRuntimeMapping } from '../../../common/runtime_mappings/get_identifier_runtime_mapping';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { CspFinding } from '../../../common/schemas/csp_finding';
 import type { Cluster } from '../../../common/types_old';
-import { KeyDocCount } from './compliance_dashboard';
-import { failedFindingsAggQuery, getPostureStatsFromAggs } from './get_grouped_findings_evaluation';
+import { getPostureStatsFromAggs, failedFindingsAggQuery } from './get_grouped_findings_evaluation';
 import type { FailedFindingsQueryResult } from './get_grouped_findings_evaluation';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
+import { KeyDocCount } from './compliance_dashboard';
+import { getIdentifierRuntimeMapping } from '../../../common/runtime_mappings/get_identifier_runtime_mapping';
 
 export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
   failed_findings: {

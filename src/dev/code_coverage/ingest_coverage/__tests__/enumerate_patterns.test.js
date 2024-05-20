@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
 import { enumeratePatterns } from '../team_assignment/enumerate_patterns';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const log = new ToolingLog({
   level: 'info',

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   ElasticsearchAssetType,
   type PackageInstallContext,
 } from '../../../../../common/types/models';
 import type { EsAssetReference } from '../../../../../common/types/models';
-import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 
 import { retryTransientEsErrors } from '../retry';
 

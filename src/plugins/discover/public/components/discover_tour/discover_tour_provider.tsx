@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
+import React, { ReactElement, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiI18n,
-  EuiIcon,
-  EuiImage,
-  EuiSpacer,
-  EuiText,
+  useEuiTour,
   EuiTourState,
   EuiTourStep,
   EuiTourStepProps,
-  useEuiTour,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiButtonProps,
+  EuiImage,
+  EuiSpacer,
+  EuiI18n,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ReactElement, useCallback, useMemo } from 'react';
 import { PLUGIN_ID } from '../../../common';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
 import { DiscoverTourContext, DiscoverTourContextProps } from './discover_tour_context';
+import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
 
 const MAX_WIDTH = 350;
 

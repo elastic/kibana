@@ -10,8 +10,8 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { FactoryQueryType } from '../../../../common/constants';
 import { Indicator } from '../../../../common/types/indicator';
-import { search } from '../../../utils/search';
 import { getIndicatorQueryParams } from '../utils/get_indicator_query_params';
+import { search } from '../../../utils/search';
 
 export interface RawIndicatorsResponse {
   hits: {

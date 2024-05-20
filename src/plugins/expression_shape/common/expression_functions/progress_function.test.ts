@@ -7,8 +7,8 @@
  */
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { fontStyle, functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
-import { errors, progressFunction } from './progress_function';
+import { functionWrapper, fontStyle } from '@kbn/presentation-util-plugin/test_helpers';
+import { progressFunction, errors } from './progress_function';
 
 describe('progress', () => {
   const fn = functionWrapper(progressFunction);

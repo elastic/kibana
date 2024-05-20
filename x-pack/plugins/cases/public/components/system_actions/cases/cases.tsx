@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type {
-  ActionTypeModel as ConnectorTypeModel,
-  GenericValidationResult,
-} from '@kbn/triggers-actions-ui-plugin/public';
 import { lazy } from 'react';
+import type {
+  GenericValidationResult,
+  ActionTypeModel as ConnectorTypeModel,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 import {
   CASES_CONNECTOR_ID,
-  CASES_CONNECTOR_TIME_WINDOW_REGEX,
   CASES_CONNECTOR_TITLE,
+  CASES_CONNECTOR_TIME_WINDOW_REGEX,
 } from '../../../../common/constants';
-import * as i18n from './translations';
 import type { CasesActionParams } from './types';
+import * as i18n from './translations';
 
 interface ValidationErrors {
   timeWindow: string[];

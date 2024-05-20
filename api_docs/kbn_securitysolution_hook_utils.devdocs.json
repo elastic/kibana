@@ -49,8 +49,12 @@
             "type": "Function",
             "tags": [],
             "label": "fn",
-            "description": ["a function returning a promise."],
-            "signature": ["(...args: Args) => Promise<Result>"],
+            "description": [
+              "a function returning a promise."
+            ],
+            "signature": [
+              "(...args: Args) => Promise<Result>"
+            ],
             "path": "packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -68,8 +72,12 @@
         "type": "Function",
         "tags": [],
         "label": "useIsMounted",
-        "description": ["\n"],
-        "signature": ["() => GetIsMounted"],
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "() => GetIsMounted"
+        ],
         "path": "packages/kbn-securitysolution-hook-utils/src/use_is_mounted/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -85,7 +93,9 @@
         "type": "Function",
         "tags": [],
         "label": "useObservable",
-        "description": ["\n"],
+        "description": [
+          "\n"
+        ],
         "signature": [
           "<Args extends unknown[], Result>(fn: (...args: Args) => ",
           "Observable",
@@ -109,8 +119,14 @@
             "type": "Function",
             "tags": [],
             "label": "fn",
-            "description": ["function returning an observable"],
-            "signature": ["(...args: Args) => ", "Observable", "<Result>"],
+            "description": [
+              "function returning an observable"
+            ],
+            "signature": [
+              "(...args: Args) => ",
+              "Observable",
+              "<Result>"
+            ],
             "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -128,7 +144,9 @@
         "type": "Function",
         "tags": [],
         "label": "withOptionalSignal",
-        "description": ["\n"],
+        "description": [
+          "\n"
+        ],
         "signature": [
           "<Args extends SignalArgs, Result>(fn: (args: Args) => Result) => (args: ",
           {
@@ -150,15 +168,21 @@
             "type": "Function",
             "tags": [],
             "label": "fn",
-            "description": ["an async function receiving an AbortSignal argument"],
-            "signature": ["(args: Args) => Result"],
+            "description": [
+              "an async function receiving an AbortSignal argument"
+            ],
+            "signature": [
+              "(args: Args) => Result"
+            ],
             "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["An async function where the AbortSignal argument is optional"],
+        "returnComment": [
+          "An async function where the AbortSignal argument is optional"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -204,7 +228,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["unknown"],
+            "signature": [
+              "unknown"
+            ],
             "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -216,7 +242,9 @@
             "tags": [],
             "label": "result",
             "description": [],
-            "signature": ["Result | undefined"],
+            "signature": [
+              "Result | undefined"
+            ],
             "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -228,7 +256,9 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": ["(...args: Args) => void"],
+            "signature": [
+              "(...args: Args) => void"
+            ],
             "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -240,7 +270,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["Args"],
+                "signature": [
+                  "Args"
+                ],
                 "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -277,7 +309,9 @@
         "tags": [],
         "label": "OptionalSignalArgs",
         "description": [],
-        "signature": ["Omit<Args, \"signal\"> & Partial<SignalArgs>"],
+        "signature": [
+          "Omit<Args, \"signal\"> & Partial<SignalArgs>"
+        ],
         "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
         "deprecated": false,
         "trackAdoption": false,

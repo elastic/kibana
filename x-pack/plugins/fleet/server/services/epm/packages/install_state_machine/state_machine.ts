@@ -7,8 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 
-import type { LatestExecutedState, StateContext } from '../../../../../common/types';
 import { appContextService } from '../../../app_context';
+import type { StateContext, LatestExecutedState } from '../../../../../common/types';
 export interface State {
   onTransition: any;
   nextState?: string;

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { StartDeps } from './plugin';
 
 export const renderApp = (

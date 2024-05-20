@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 
 import { CreateExceptionListRequestDecoded, createExceptionListResponse } from '../../common/api';
 import { SiemResponseFactory, getExceptionListClient } from '../routes';

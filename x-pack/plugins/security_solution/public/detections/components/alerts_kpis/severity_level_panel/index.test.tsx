@@ -6,8 +6,8 @@
  */
 import { act, render } from '@testing-library/react';
 import React from 'react';
-import { SeverityLevelPanel } from '.';
 import { TestProviders } from '../../../../common/mock';
+import { SeverityLevelPanel } from '.';
 
 jest.mock('../../../../common/lib/kibana');
 

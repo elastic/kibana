@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../../objects/rule';
-import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB } from '../../../../screens/expandable_flyout/alert_details_left_panel';
 import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
@@ -16,16 +14,18 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_RIGHT_SECTION,
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS_TITLE,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
+import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB } from '../../../../screens/expandable_flyout/alert_details_left_panel';
 import { openEntitiesTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_entities_tab';
+import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
 describe(
   'Alert details expandable flyout left panel entities',

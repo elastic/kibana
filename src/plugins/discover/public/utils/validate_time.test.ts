@@ -7,7 +7,7 @@
  */
 
 import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { isRefreshIntervalValid, isTimeRangeValid } from './validate_time';
+import { isTimeRangeValid, isRefreshIntervalValid } from './validate_time';
 
 describe('discover validate time', () => {
   test('should validate time ranges correctly', async () => {

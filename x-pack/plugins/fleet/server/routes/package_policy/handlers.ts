@@ -16,49 +16,49 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
 
-import { inputsFormat, installationStatuses } from '../../../common/constants';
-import {
-  packagePolicyToSimplifiedPackagePolicy,
-  simplifiedPackagePolicytoNewPackagePolicy,
-} from '../../../common/services/simplified_package_policy_helper';
-import type {
-  NewPackagePolicy,
-  PostDeletePackagePoliciesResponse,
-  UpgradePackagePolicyDryRunResponse,
-  UpgradePackagePolicyResponse,
-} from '../../../common/types';
-import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
-import {
-  PackagePolicyNotFoundError,
-  PackagePolicyRequestError,
-  defaultFleetErrorHandler,
-} from '../../errors';
 import {
   agentPolicyService,
   appContextService,
   checkAllowedPackages,
   packagePolicyService,
 } from '../../services';
+import type {
+  GetPackagePoliciesRequestSchema,
+  GetOnePackagePolicyRequestSchema,
+  CreatePackagePolicyRequestSchema,
+  UpdatePackagePolicyRequestSchema,
+  DeletePackagePoliciesRequestSchema,
+  UpgradePackagePoliciesRequestSchema,
+  DryRunPackagePoliciesRequestSchema,
+  FleetRequestHandler,
+  PackagePolicy,
+  DeleteOnePackagePolicyRequestSchema,
+  BulkGetPackagePoliciesRequestSchema,
+  UpdatePackagePolicyRequestBodySchema,
+} from '../../types';
+import type {
+  PostDeletePackagePoliciesResponse,
+  NewPackagePolicy,
+  UpgradePackagePolicyDryRunResponse,
+  UpgradePackagePolicyResponse,
+} from '../../../common/types';
+import { installationStatuses, inputsFormat } from '../../../common/constants';
+import {
+  defaultFleetErrorHandler,
+  PackagePolicyNotFoundError,
+  PackagePolicyRequestError,
+} from '../../errors';
 import {
   getInstallation,
   getInstallations,
   getPackageInfo,
   removeInstallation,
 } from '../../services/epm/packages';
-import type {
-  BulkGetPackagePoliciesRequestSchema,
-  CreatePackagePolicyRequestSchema,
-  DeleteOnePackagePolicyRequestSchema,
-  DeletePackagePoliciesRequestSchema,
-  DryRunPackagePoliciesRequestSchema,
-  FleetRequestHandler,
-  GetOnePackagePolicyRequestSchema,
-  GetPackagePoliciesRequestSchema,
-  PackagePolicy,
-  UpdatePackagePolicyRequestBodySchema,
-  UpdatePackagePolicyRequestSchema,
-  UpgradePackagePoliciesRequestSchema,
-} from '../../types';
+import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import {
+  simplifiedPackagePolicytoNewPackagePolicy,
+  packagePolicyToSimplifiedPackagePolicy,
+} from '../../../common/services/simplified_package_policy_helper';
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 

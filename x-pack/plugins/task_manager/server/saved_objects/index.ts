@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
-import { TaskManagerConfig } from '../config';
-import { TASK_MANAGER_INDEX } from '../constants';
-import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { taskModelVersions } from './task_model_versions';
 import { taskMappings } from './mappings';
 import { getMigrations } from './migrations';
-import { taskModelVersions } from './task_model_versions';
+import { TaskManagerConfig } from '../config';
+import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
+import { TASK_MANAGER_INDEX } from '../constants';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,

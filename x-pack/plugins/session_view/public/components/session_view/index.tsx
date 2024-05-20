@@ -1,18 +1,3 @@
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiResizableContainer,
-  EuiToolTip,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import byteSize from 'byte-size';
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -20,7 +5,37 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import {
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiFlexItem,
+  EuiResizableContainer,
+  EuiPanel,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import byteSize from 'byte-size';
+import { SectionLoading } from '../../shared_imports';
+import { ProcessTree } from '../process_tree';
 import type { AlertStatusEventEntityIdMap, Process, ProcessEvent } from '../../../common';
+import type { DisplayOptionsState } from '../session_view_display_options';
+import type { SessionViewDeps, SessionViewIndices, SessionViewTelemetryKey } from '../../types';
+import { SessionViewDetailPanel } from '../session_view_detail_panel';
+import { SessionViewSearchBar } from '../session_view_search_bar';
+import { SessionViewDisplayOptions } from '../session_view_display_options';
+import { TTYPlayer } from '../tty_player';
+import { useStyles } from './styles';
+import {
+  useFetchAlertStatus,
+  useFetchSessionViewProcessEvents,
+  useFetchSessionViewAlerts,
+  useFetchGetTotalIOBytes,
+} from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 import {
   AUDITBEAT_DATA_SOURCE,
@@ -30,22 +45,7 @@ import {
   ELASTIC_DEFEND_DATA_SOURCE,
   ENDPOINT_INDEX,
 } from '../../methods';
-import { SectionLoading } from '../../shared_imports';
-import type { SessionViewDeps, SessionViewIndices, SessionViewTelemetryKey } from '../../types';
-import { ProcessTree } from '../process_tree';
-import { SessionViewDetailPanel } from '../session_view_detail_panel';
-import type { DisplayOptionsState } from '../session_view_display_options';
-import { SessionViewDisplayOptions } from '../session_view_display_options';
-import { SessionViewSearchBar } from '../session_view_search_bar';
-import { TTYPlayer } from '../tty_player';
-import {
-  useFetchAlertStatus,
-  useFetchGetTotalIOBytes,
-  useFetchSessionViewAlerts,
-  useFetchSessionViewProcessEvents,
-} from './hooks';
-import { useStyles } from './styles';
-import { DETAIL_PANEL, REFRESH_SESSION, TOGGLE_TTY_PLAYER } from './translations';
+import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
 
 /**
  * The main wrapper component for the session view.

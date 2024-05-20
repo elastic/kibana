@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { identity } from 'lodash';
+import type { MethodKeysOf } from '@kbn/utility-types';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
-import type { MethodKeysOf } from '@kbn/utility-types';
-import { identity } from 'lodash';
-import { AlertsHealth, RuleType } from '../../common';
+import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
+import { rulesSettingsClientMock, RulesSettingsClientMock } from '../rules_settings_client.mock';
 import {
-  MaintenanceWindowClientMock,
   maintenanceWindowClientMock,
+  MaintenanceWindowClientMock,
 } from '../maintenance_window_client.mock';
-import { RulesClientMock, rulesClientMock } from '../rules_client.mock';
-import { RulesSettingsClientMock, rulesSettingsClientMock } from '../rules_settings_client.mock';
+import { AlertsHealth, RuleType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(
@@ -44,7 +44,7 @@ export function mockHandlerArguments(
 ): [
   AlertingRequestHandlerContext,
   KibanaRequest<unknown, unknown, unknown>,
-  KibanaResponseFactory,
+  KibanaResponseFactory
 ] {
   const listTypes = jest.fn(() => listTypesRes);
   const actionsClientMocked = actionsClient || actionsClientMock.create();

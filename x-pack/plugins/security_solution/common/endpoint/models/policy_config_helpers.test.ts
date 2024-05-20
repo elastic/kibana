@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
 import type { PolicyConfig } from '../types';
-import { AntivirusRegistrationModes, PolicyOperatingSystem, ProtectionModes } from '../types';
+import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
 import { policyFactory } from './policy_config';
 import {
   disableProtections,
-  ensureOnlyEventCollectionIsAllowed,
   isPolicySetToEventCollectionOnly,
+  ensureOnlyEventCollectionIsAllowed,
 } from './policy_config_helpers';
+import { set } from 'lodash';
 
 describe('Policy Config helpers', () => {
   describe('disableProtections', () => {

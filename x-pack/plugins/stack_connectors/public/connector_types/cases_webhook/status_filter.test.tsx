@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { CaseStatuses } from '@kbn/cases-components';
 import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
-import { StatusFilter, caseStatuses, statuses } from './status_filter';
+import { caseStatuses, statuses, StatusFilter } from './status_filter';
 const onStatusChanged = jest.fn();
 const defaultProps = {
   selectedStatus: CaseStatuses.open,

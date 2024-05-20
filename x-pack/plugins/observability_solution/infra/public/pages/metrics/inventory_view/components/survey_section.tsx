@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';

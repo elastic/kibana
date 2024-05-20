@@ -1,5 +1,3 @@
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { Suggestion } from './types';
 
 export const getLensAttributesFromSuggestion = ({

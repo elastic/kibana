@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import type {
   Description,
   DeserializerOrUndefined,
@@ -19,7 +19,7 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
-import { v4 as uuidv4 } from 'uuid';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
 import { IndexEsListSchema } from '../../schemas/elastic_query';
 

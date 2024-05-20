@@ -25,8 +25,8 @@ import { optionsListServiceFactory } from './options_list/options_list.story';
 import { overlaysServiceFactory } from './overlays/overlays.stub';
 import { registry as stubRegistry } from './plugin_services.story';
 import { settingsServiceFactory } from './settings/settings.story';
-import { storageServiceFactory } from './storage/storage_service.stub';
 import { unifiedSearchServiceFactory } from './unified_search/unified_search.story';
+import { storageServiceFactory } from './storage/storage_service.stub';
 
 export const providers: PluginServiceProviders<ControlsServices> = {
   embeddable: new PluginServiceProvider(embeddableServiceFactory),

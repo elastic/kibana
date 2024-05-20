@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { NotificationChannel, createNotificationChannel } from '@kbn/xstate-utils';
+import { createNotificationChannel, NotificationChannel } from '@kbn/xstate-utils';
 import { CreateCustomIntegrationNotificationEvent } from '../create/notifications';
 import { CustomIntegrationsContext, CustomIntegrationsEvent } from './types';
 

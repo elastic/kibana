@@ -13,10 +13,10 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { Router } from '@kbn/shared-ux-router';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import React from 'react';
 import ReactDOM from 'react-dom';
+import React from 'react';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Router } from '@kbn/shared-ux-router';
 import { ServerlessSearchContext } from './hooks/use_kibana';
 
 export async function renderApp(

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { EndpointUploadActionResult } from './endpoint_upload_action_result';
 import type {
   ActionDetails,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
 } from '../../../../common/endpoint/types';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { EndpointUploadActionResult } from './endpoint_upload_action_result';
+import React from 'react';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 describe('Endpoint Upload Action Result component', () => {
   let appTestContext: AppContextTestRender;

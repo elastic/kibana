@@ -7,15 +7,15 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { useKibana } from '../../../../common/lib/kibana';
 import {
   ANCESTOR_INDEX,
   ENTRY_LEADER_ENTITY_ID,
   ENTRY_LEADER_START,
 } from '../../shared/constants/field_names';
 import { getField } from '../../shared/utils';
-import { useLeftPanelContext } from '../context';
 import { SESSION_VIEW_TEST_ID } from './test_ids';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useLeftPanelContext } from '../context';
 
 export const SESSION_VIEW_ID = 'session-view';
 

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import versionCompare from 'compare-versions';
-import ipaddr, { type IPv4, type IPv6 } from 'ipaddr.js';
-import moment from 'moment';
 import valid from 'semver/functions/valid';
+import ipaddr, { type IPv4, type IPv6 } from 'ipaddr.js';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import moment from 'moment';
 
 type CompareFn<T extends unknown> = (
   v1: T | undefined,

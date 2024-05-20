@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { find, isEmpty, uniqBy } from 'lodash/fp';
+import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
-import { EventCategory, EventCode } from '@kbn/securitysolution-ecs';
-import {
-  ALERT_NEW_TERMS,
-  ALERT_NEW_TERMS_FIELDS,
-  ALERT_THRESHOLD_RESULT,
-} from '../../../../common/field_maps/field_names';
+import { EventCode, EventCategory } from '@kbn/securitysolution-ecs';
+import * as i18n from './translations';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import {
-  ALERTS_HEADERS_NEW_TERMS,
-  ALERTS_HEADERS_NEW_TERMS_FIELDS,
-  ALERTS_HEADERS_RULE_DESCRIPTION,
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
+  ALERTS_HEADERS_RULE_DESCRIPTION,
+  ALERTS_HEADERS_NEW_TERMS,
+  ALERTS_HEADERS_NEW_TERMS_FIELDS,
 } from '../../../detections/components/alerts_table/translations';
+import {
+  ALERT_NEW_TERMS_FIELDS,
+  ALERT_NEW_TERMS,
+  ALERT_THRESHOLD_RESULT,
+} from '../../../../common/field_maps/field_names';
 import {
   AGENT_STATUS_FIELD_NAME,
   QUARANTINED_PATH_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import type { AlertSummaryRow } from './helpers';
 import { getEnrichedFieldInfo } from './helpers';
-import * as i18n from './translations';
-import type { EnrichedFieldInfo, EventSummaryField } from './types';
+import type { EventSummaryField, EnrichedFieldInfo } from './types';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import {

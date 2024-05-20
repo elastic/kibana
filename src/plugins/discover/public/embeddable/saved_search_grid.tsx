@@ -1,13 +1,3 @@
-import { MAX_DOC_FIELDS_DISPLAYED, ROW_HEIGHT_OPTION, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { AggregateQuery, Query } from '@kbn/es-query';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import {
-  type DataTableColumnsMeta,
-  DataLoadingState as DiscoverGridLoadingState,
-  type UnifiedDataTableProps,
-  getRenderCustomToolbarWithElements,
-} from '@kbn/unified-data-table';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -16,11 +6,21 @@ import {
  * Side Public License, v 1.
  */
 import React, { useCallback, useMemo, useState } from 'react';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { MAX_DOC_FIELDS_DISPLAYED, ROW_HEIGHT_OPTION, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
+import {
+  type UnifiedDataTableProps,
+  type DataTableColumnsMeta,
+  DataLoadingState as DiscoverGridLoadingState,
+  getRenderCustomToolbarWithElements,
+} from '@kbn/unified-data-table';
 import { DiscoverGrid } from '../components/discover_grid';
 import './saved_search_grid.scss';
-import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import { DiscoverGridFlyout } from '../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
+import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 
 export interface DiscoverGridEmbeddableProps
   extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {

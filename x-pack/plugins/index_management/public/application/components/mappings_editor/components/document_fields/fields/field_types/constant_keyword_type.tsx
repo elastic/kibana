@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
 
+import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
-import { Field, UseField } from '../../../../shared_imports';
-import { Field as FieldType, NormalizedField, ParameterName } from '../../../../types';
+import { NormalizedField, Field as FieldType, ParameterName } from '../../../../types';
 import { MetaParameter } from '../../field_parameters';
-import { AdvancedParametersSection, BasicParametersSection, EditFieldFormRow } from '../edit_field';
+import { AdvancedParametersSection, EditFieldFormRow, BasicParametersSection } from '../edit_field';
 
 interface Props {
   field: NormalizedField;

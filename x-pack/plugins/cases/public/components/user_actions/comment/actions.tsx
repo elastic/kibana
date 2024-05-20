@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
 
-import type { SnakeToCamelCase } from '../../../../common/types';
 import type { ActionsAttachment } from '../../../../common/types/domain';
-import { ScrollableMarkdown } from '../../markdown_editor';
-import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
-import { UserActionCopyLink } from '../copy_link';
-import { UserActionTimestamp } from '../timestamp';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import { UserActionTimestamp } from '../timestamp';
+import type { SnakeToCamelCase } from '../../../../common/types';
+import { UserActionCopyLink } from '../copy_link';
+import { ScrollableMarkdown } from '../../markdown_editor';
 import { HostIsolationCommentEvent } from './host_isolation_event';
+import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,

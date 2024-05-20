@@ -33,7 +33,9 @@
             "tags": [],
             "label": "dataViewTitle",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -45,7 +47,9 @@
             "tags": [],
             "label": "globalState",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -112,7 +116,9 @@
             "tags": [],
             "label": "currentSessionId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -170,7 +176,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"index\" | \"file\""],
+            "signature": [
+              "\"index\" | \"file\""
+            ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -215,7 +223,9 @@
             "tags": [],
             "label": "getUrl",
             "description": [],
-            "signature": ["(params?: any) => Promise<string>"],
+            "signature": [
+              "(params?: any) => Promise<string>"
+            ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -227,7 +237,9 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -243,7 +255,9 @@
             "tags": [],
             "label": "canDisplay",
             "description": [],
-            "signature": ["(params?: any) => Promise<boolean>"],
+            "signature": [
+              "(params?: any) => Promise<boolean>"
+            ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -255,7 +269,9 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -271,7 +287,9 @@
             "tags": [],
             "label": "'data-test-subj'",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -289,7 +307,11 @@
         "tags": [],
         "label": "DataDriftSpec",
         "description": [],
-        "signature": ["React.FunctionComponent<", "DataDriftDetectionAppStateProps", ">"],
+        "signature": [
+          "React.FunctionComponent<",
+          "DataDriftDetectionAppStateProps",
+          ">"
+        ],
         "path": "x-pack/plugins/data_visualizer/public/application/data_drift/data_drift_app_state.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -302,7 +324,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P & { children?: React.ReactNode; }"],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -314,7 +338,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -329,7 +355,11 @@
         "tags": [],
         "label": "FileDataVisualizerSpec",
         "description": [],
-        "signature": ["React.FunctionComponent<", "Props", ">"],
+        "signature": [
+          "React.FunctionComponent<",
+          "Props",
+          ">"
+        ],
         "path": "x-pack/plugins/data_visualizer/public/application/file_data_visualizer/file_data_visualizer.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -342,7 +372,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P & { children?: React.ReactNode; }"],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -354,7 +386,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -400,7 +434,11 @@
         "tags": [],
         "label": "IndexDataVisualizerSpec",
         "description": [],
-        "signature": ["React.FunctionComponent<", "Props", ">"],
+        "signature": [
+          "React.FunctionComponent<",
+          "Props",
+          ">"
+        ],
         "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -413,7 +451,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P & { children?: React.ReactNode; }"],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -425,7 +465,9 @@
             "tags": [],
             "label": "context",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false

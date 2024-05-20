@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { Component } from 'react';
 import {
   EuiIcon,
   EuiIconTip,
@@ -15,7 +16,6 @@ import {
   EuiTableRowCell,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
 import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
 import { DetailViewProps } from './types';
 
@@ -63,7 +63,7 @@ export class RequestDetailsStats extends Component<DetailViewProps> {
 
     const sortedStats = Object.keys(stats)
       .sort()
-      .map((id) => ({ id, ...stats[id] }) as RequestDetailsStatRow);
+      .map((id) => ({ id, ...stats[id] } as RequestDetailsStatRow));
 
     return (
       <EuiTable responsiveBreakpoint={false}>

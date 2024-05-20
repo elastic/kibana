@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IfStatement } from './if_statement';
 import { PluginStatement } from './plugin_statement';
+import { IfStatement } from './if_statement';
 import { Queue } from './queue';
 
 export function makeStatement(pipelineGraphVertex, pipelineStage) {

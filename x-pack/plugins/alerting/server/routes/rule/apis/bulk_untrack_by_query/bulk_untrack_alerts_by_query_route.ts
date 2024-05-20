@@ -11,8 +11,8 @@ import {
   bulkUntrackByQueryBodySchemaV1,
 } from '../../../../../common/routes/rule/apis/bulk_untrack_by_query';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformBulkUntrackAlertsByQueryBodyV1 } from './transforms';
 
 export const bulkUntrackAlertsByQueryRoute = (

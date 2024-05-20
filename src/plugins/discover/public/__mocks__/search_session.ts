@@ -1,5 +1,3 @@
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
  * Side Public License, v 1.
  */
 import { createMemoryHistory } from 'history';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
 
 export function createSearchSessionMock(

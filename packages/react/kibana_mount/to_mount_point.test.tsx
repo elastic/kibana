@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import type { CoreTheme } from '@kbn/core/public';
 import React, { FC, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject, of } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
+import { useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import type { CoreTheme } from '@kbn/core/public';
 import { toMountPoint } from './to_mount_point';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 
 describe('toMountPoint', () => {
   let euiTheme: UseEuiTheme;

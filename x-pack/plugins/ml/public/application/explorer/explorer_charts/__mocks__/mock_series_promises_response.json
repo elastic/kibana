@@ -136,16 +136,24 @@
           "partition_field_value": "AAL",
           "function": "mean",
           "function_description": "mean",
-          "typical": [99.81123207526203],
-          "actual": [242.3568918440077],
+          "typical": [
+            99.81123207526203
+          ],
+          "actual": [
+            242.3568918440077
+          ],
           "field_name": "responsetime",
           "influencers": [
             {
               "influencer_field_name": "airline",
-              "influencer_field_values": ["AAL"]
+              "influencer_field_values": [
+                "AAL"
+              ]
             }
           ],
-          "airline": ["AAL"]
+          "airline": [
+            "AAL"
+          ]
         },
         {
           "job_id": "mock-job-id",
@@ -161,16 +169,24 @@
           "partition_field_value": "AAL",
           "function": "mean",
           "function_description": "mean",
-          "typical": [100.02884159032787],
-          "actual": [282.02533259111306],
+          "typical": [
+            100.02884159032787
+          ],
+          "actual": [
+            282.02533259111306
+          ],
           "field_name": "responsetime",
           "influencers": [
             {
               "influencer_field_name": "airline",
-              "influencer_field_values": ["AAL"]
+              "influencer_field_values": [
+                "AAL"
+              ]
             }
           ],
-          "airline": ["AAL"]
+          "airline": [
+            "AAL"
+          ]
         },
         {
           "job_id": "mock-job-id",
@@ -186,16 +202,24 @@
           "partition_field_value": "AAL",
           "function": "mean",
           "function_description": "mean",
-          "typical": [99.79426367092864],
-          "actual": [84.60266517190372],
+          "typical": [
+            99.79426367092864
+          ],
+          "actual": [
+            84.60266517190372
+          ],
           "field_name": "responsetime",
           "influencers": [
             {
               "influencer_field_name": "airline",
-              "influencer_field_values": ["AAL"]
+              "influencer_field_values": [
+                "AAL"
+              ]
             }
           ],
-          "airline": ["AAL"]
+          "airline": [
+            "AAL"
+          ]
         }
       ]
     },

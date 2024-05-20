@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { DefinedUseQueryResult } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react-hooks';
+import { DefinedUseQueryResult } from '@tanstack/react-query';
 
-import { waitFor } from '@testing-library/react';
 import { useAssistantOverlay } from '.';
-import { Conversation } from '../../assistant_context/types';
+import { waitFor } from '@testing-library/react';
 import { useFetchCurrentUserConversations } from '../api';
+import { Conversation } from '../../assistant_context/types';
 
 const mockUseAssistantContext = {
   registerPromptContext: jest.fn(),

@@ -69,7 +69,9 @@
                     "tags": [],
                     "label": "ignore",
                     "description": [],
-                    "signature": ["string[]"],
+                    "signature": [
+                      "string[]"
+                    ],
                     "path": "packages/kbn-ts-projects/ts_project.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -81,7 +83,9 @@
                     "tags": [],
                     "label": "disableTypeCheck",
                     "description": [],
-                    "signature": ["string[]"],
+                    "signature": [
+                      "string[]"
+                    ],
                     "path": "packages/kbn-ts-projects/ts_project.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -93,7 +97,9 @@
                     "tags": [],
                     "label": "noTsconfigPathsRefresh",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "packages/kbn-ts-projects/ts_project.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -109,7 +115,9 @@
             "type": "Object",
             "tags": [],
             "label": "config",
-            "description": ["\nThe parsed config file from disk"],
+            "description": [
+              "\nThe parsed config file from disk"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ts-projects",
@@ -129,7 +137,9 @@
             "type": "string",
             "tags": [],
             "label": "path",
-            "description": ["absolute path to the tsconfig file defininig this project"],
+            "description": [
+              "absolute path to the tsconfig file defininig this project"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -140,7 +150,9 @@
             "type": "string",
             "tags": [],
             "label": "repoRel",
-            "description": ["repo relative path to the tsconfig file defininig this project"],
+            "description": [
+              "repo relative path to the tsconfig file defininig this project"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -151,7 +163,9 @@
             "type": "string",
             "tags": [],
             "label": "repoRelDir",
-            "description": ["repo relative path to the directory containing this ts project"],
+            "description": [
+              "repo relative path to the directory containing this ts project"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -162,7 +176,9 @@
             "type": "string",
             "tags": [],
             "label": "dir",
-            "description": ["The directory containing this ts project"],
+            "description": [
+              "The directory containing this ts project"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -173,7 +189,9 @@
             "type": "string",
             "tags": [],
             "label": "directory",
-            "description": ["The directory containing this ts project"],
+            "description": [
+              "The directory containing this ts project"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -184,8 +202,13 @@
             "type": "Object",
             "tags": [],
             "label": "pkg",
-            "description": ["the package this tsconfig file is within, if any"],
-            "signature": ["Package", " | undefined"],
+            "description": [
+              "the package this tsconfig file is within, if any"
+            ],
+            "signature": [
+              "Package",
+              " | undefined"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -199,7 +222,9 @@
             "description": [
               "\nif this project is within a package then this will\nbe set to the import request that maps to the root of this project"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -224,7 +249,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -259,7 +286,9 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -272,7 +301,10 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": ["TsProjectOptions", " | undefined"],
+                "signature": [
+                  "TsProjectOptions",
+                  " | undefined"
+                ],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -287,7 +319,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["name of this project"],
+            "description": [
+              "name of this project"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -299,7 +333,9 @@
             "tags": [],
             "label": "isTypeCheckDisabled",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -315,7 +351,9 @@
             "description": [
               "\nResolve a path relative to the directory containing this tsconfig.json file"
             ],
-            "signature": ["(projectRel: string) => string"],
+            "signature": [
+              "(projectRel: string) => string"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -327,7 +365,9 @@
                 "tags": [],
                 "label": "projectRel",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -345,7 +385,9 @@
             "description": [
               "\nupdates the project so that the tsconfig file will be\nread from disk the next time that this.config is accessed"
             ],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -359,7 +401,9 @@
             "tags": [],
             "label": "overrideConfig",
             "description": [],
-            "signature": ["(jsonc: string) => void"],
+            "signature": [
+              "(jsonc: string) => void"
+            ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -371,7 +415,9 @@
                 "tags": [],
                 "label": "jsonc",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -435,7 +481,9 @@
             "type": "Function",
             "tags": [],
             "label": "getKbnRefs",
-            "description": ["\nGet the kbnRefs for this project"],
+            "description": [
+              "\nGet the kbnRefs for this project"
+            ],
             "signature": [
               "(tsProjects: ",
               {
@@ -508,7 +556,9 @@
             "tags": [],
             "label": "extends",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -520,7 +570,9 @@
             "tags": [],
             "label": "compilerOptions",
             "description": [],
-            "signature": ["{ [key: string]: unknown; types?: string[] | undefined; } | undefined"],
+            "signature": [
+              "{ [key: string]: unknown; types?: string[] | undefined; } | undefined"
+            ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -532,7 +584,9 @@
             "tags": [],
             "label": "include",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -544,7 +598,9 @@
             "tags": [],
             "label": "exclude",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -570,7 +626,9 @@
             "tags": [],
             "label": "[key: string]: unknown",
             "description": [],
-            "signature": ["[key: string]:  unknown"],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
             "deprecated": false,
             "trackAdoption": false

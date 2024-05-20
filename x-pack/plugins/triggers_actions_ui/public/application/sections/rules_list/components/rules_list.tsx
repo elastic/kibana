@@ -7,22 +7,13 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import {
-  EuiButtonIcon,
-  EuiDescriptionList,
-  EuiPageTemplate,
-  EuiSelectableOption,
-  EuiSpacer,
-  EuiTableSortingType,
-} from '@elastic/eui';
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import { RuleTypeModal } from '@kbn/alerts-ui-shared';
-import { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
+import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
+import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
+import { RuleTypeModal } from '@kbn/alerts-ui-shared';
 import React, {
   lazy,
   useEffect,
@@ -33,30 +24,39 @@ import React, {
   useRef,
   Suspense,
 } from 'react';
+import {
+  EuiSpacer,
+  EuiPageTemplate,
+  EuiTableSortingType,
+  EuiButtonIcon,
+  EuiSelectableOption,
+  EuiDescriptionList,
+} from '@elastic/eui';
+import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useHistory } from 'react-router-dom';
 
 import {
-  ALERTING_FEATURE_ID,
   RuleExecutionStatus,
+  ALERTING_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
-import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import {
   RuleCreationValidConsumer,
-  STACK_ALERTS_FEATURE_ID,
   ruleDetailsRoute as commonRuleDetailsRoute,
+  STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
+import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import {
-  BulkEditActions,
-  Pagination,
-  Percentiles,
   Rule,
-  RuleStatus,
   RuleTableItem,
   RuleType,
+  RuleStatus,
+  Pagination,
+  Percentiles,
   SnoozeSchedule,
   UpdateFiltersProps,
+  BulkEditActions,
   UpdateRulesToBulkEditProps,
 } from '../../../../types';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -64,49 +64,49 @@ import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../commo
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { RulesListFiltersBar } from './rules_list_filters_bar';
 
-import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
-import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
-import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
-import { cloneRule } from '../../../lib/rule_api/clone';
 import { snoozeRule } from '../../../lib/rule_api/snooze';
 import { unsnoozeRule } from '../../../lib/rule_api/unsnooze';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
+import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
+import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
+import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
+import { cloneRule } from '../../../lib/rule_api/clone';
 
-import { useKibana } from '../../../../common/lib/kibana';
-import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
-import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
+import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { RulesListPrompts } from './rules_list_prompts';
+import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
+import { useKibana } from '../../../../common/lib/kibana';
 import './rules_list.scss';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
-import { runRule } from '../../../lib/run_rule';
-import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
-import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
 import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
-import { RulesListDocLink } from './rules_list_doc_link';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
+import { RulesListDocLink } from './rules_list_doc_link';
+import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
+import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
+import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
+import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
+import { runRule } from '../../../lib/run_rule';
 
-import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_query';
-import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
+import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
+import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
-import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
-import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 import {
-  MULTIPLE_RULE_TITLE,
-  SINGLE_RULE_TITLE,
   getConfirmDeletionButtonText,
   getConfirmDeletionModalText,
+  SINGLE_RULE_TITLE,
+  MULTIPLE_RULE_TITLE,
 } from '../translations';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
+import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 import { useRulesListFilterStore } from './hooks/use_rules_list_filter_store';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component

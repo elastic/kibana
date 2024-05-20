@@ -6,17 +6,14 @@
  */
 
 export enum SessionErrorReason {
-  SESSION_MISSING = 'SESSION_MISSING',
-  SESSION_EXPIRED = 'SESSION_EXPIRED',
-  CONCURRENCY_LIMIT = 'CONCURRENCY_LIMIT',
-  UNEXPECTED_SESSION_ERROR = 'UNEXPECTED_SESSION_ERROR',
+  'SESSION_MISSING' = 'SESSION_MISSING',
+  'SESSION_EXPIRED' = 'SESSION_EXPIRED',
+  'CONCURRENCY_LIMIT' = 'CONCURRENCY_LIMIT',
+  'UNEXPECTED_SESSION_ERROR' = 'UNEXPECTED_SESSION_ERROR',
 }
 
 export class SessionError extends Error {
-  constructor(
-    message: string,
-    public readonly code: string
-  ) {
+  constructor(message: string, public readonly code: string) {
     super(message);
   }
 }

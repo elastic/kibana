@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer, EuiText, euiPaletteColorBlind } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import { isDefined } from '@kbn/ml-is-defined';
+import type { FC } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import type {
   FieldStatsProps,
   FieldStatsServices,
@@ -20,9 +17,12 @@ import {
   FieldStats,
   FieldTopValuesBucket,
 } from '@kbn/unified-field-list/src/components/field_stats';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import moment from 'moment';
-import type { FC } from 'react';
-import React, { useMemo, useState, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiHorizontalRule, euiPaletteColorBlind, EuiSpacer, EuiText } from '@elastic/eui';
 
 const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 const HIGHLIGHTED_FIELD_PROPS = {

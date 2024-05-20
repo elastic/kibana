@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { GroupBy, Predicate, SmallMultiples } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import React, { useCallback } from 'react';
+import { GroupBy, SmallMultiples, Predicate } from '@elastic/charts';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import React, { useCallback } from 'react';
+import { Datatable } from '@kbn/expressions-plugin/public';
 
 interface SplitChartProps {
   splitColumnAccessor?: ExpressionValueVisDimension | string;

@@ -7,8 +7,8 @@
 
 import { getOr } from 'lodash/fp';
 import { createSelector } from 'reselect';
-import { getDataTableManageDefaults, tableDefaults } from './defaults';
-import type { DataTableModel, DataTableState, TableById } from './types';
+import { tableDefaults, getDataTableManageDefaults } from './defaults';
+import type { DataTableState, TableById, DataTableModel } from './types';
 
 const selectTableById = (state: DataTableState): TableById => state.dataTable.tableById;
 

@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import type { MouseEvent, CSSProperties } from 'react';
+import React, { useMemo } from 'react';
 import type { EuiSelectableProps } from '@elastic/eui';
 import {
-  EuiButton,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiButton,
+  EuiSteps,
+  EuiTitle,
   EuiSelectable,
   EuiSelectableMessage,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiLink,
   EuiSkeletonText,
-  EuiSpacer,
-  EuiSteps,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CSSProperties, MouseEvent } from 'react';
-import React, { useMemo } from 'react';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { useKibana } from '../../common/lib/kibana';
 import onboardingLogo from '../images/security_administration_onboarding.svg';
+import { useKibana } from '../../common/lib/kibana';
 
 const TEXT_ALIGN_CENTER: CSSProperties = Object.freeze({
   textAlign: 'center',

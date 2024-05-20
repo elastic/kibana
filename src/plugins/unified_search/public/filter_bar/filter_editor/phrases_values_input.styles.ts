@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UseEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { euiScrollBarStyles, UseEuiTheme } from '@elastic/eui';
 
 export const phrasesValuesComboboxCss = (theme: UseEuiTheme) => css`
   .euiComboBox__inputWrap {

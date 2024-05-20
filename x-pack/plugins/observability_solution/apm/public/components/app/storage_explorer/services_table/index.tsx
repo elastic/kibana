@@ -5,44 +5,44 @@
  * 2.0.
  */
 
+import React, { useState, ReactNode } from 'react';
 import {
+  EuiInMemoryTable,
   EuiBasicTableColumn,
-  EuiButton,
   EuiButtonIcon,
+  EuiScreenReaderOnly,
+  RIGHT_ALIGNMENT,
+  EuiToolTip,
+  EuiIcon,
+  EuiProgress,
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiPanel,
-  EuiProgress,
-  EuiScreenReaderOnly,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
-import { isEmpty } from 'lodash';
 import moment from 'moment';
-import React, { useState, ReactNode } from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { asPercent, asTransactionRate } from '../../../../../common/utils/formatters';
-import { asDynamicBytes } from '../../../../../common/utils/formatters';
-import { joinByKey } from '../../../../../common/utils/join_by_key';
+import { isEmpty } from 'lodash';
+import { downloadJson } from '../../../../utils/download_json';
 import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
+import { EnvironmentBadge } from '../../../shared/environment_badge';
+import { asPercent, asTransactionRate } from '../../../../../common/utils/formatters';
+import { ServiceLink } from '../../../shared/links/apm/service_link';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { StorageDetailsPerService } from './storage_details_per_service';
+import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { asDynamicBytes } from '../../../../../common/utils/formatters';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { downloadJson } from '../../../../utils/download_json';
-import { EnvironmentBadge } from '../../../shared/environment_badge';
-import { ServiceLink } from '../../../shared/links/apm/service_link';
-import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { SizeLabel } from './size_label';
-import { StorageDetailsPerService } from './storage_details_per_service';
+import { joinByKey } from '../../../../../common/utils/join_by_key';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface StorageExplorerItem {
   serviceName: string;

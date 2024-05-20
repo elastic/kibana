@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Dataset, PartialConfig, cleanup, generate } from '@kbn/data-forge';
+import { omit } from 'lodash';
 import expect from '@kbn/expect';
+import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
   Comparator,
@@ -14,15 +15,14 @@ import {
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
-import { omit } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
+import { createDataView, deleteDataView } from '../helpers/data_view';
 import {
   waitForAlertInIndex,
   waitForDocumentInIndex,
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
-import { createDataView, deleteDataView } from '../helpers/data_view';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ISO_DATE_REGEX } from './constants';
 import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
 

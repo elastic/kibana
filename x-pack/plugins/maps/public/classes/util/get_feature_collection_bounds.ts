@@ -7,8 +7,8 @@
 
 import turfBbox from '@turf/bbox';
 import { FeatureCollection } from 'geojson';
-import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../common/constants';
 import { MapExtent } from '../../../common/descriptor_types';
+import { FEATURE_VISIBLE_PROPERTY_NAME } from '../../../common/constants';
 
 export function getFeatureCollectionBounds(
   featureCollection: FeatureCollection | null,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
-import React from 'react';
+import dfaImage from './data_frame_analytics_kibana.png';
+import { mlNodesAvailable } from '../../../../../ml_nodes_check';
+import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
-import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
-import { mlNodesAvailable } from '../../../../../ml_nodes_check';
-import dfaImage from './data_frame_analytics_kibana.png';
 
 export const AnalyticsEmptyPrompt: FC = () => {
   const {

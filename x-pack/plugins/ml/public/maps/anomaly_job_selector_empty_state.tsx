@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 interface Props {
   jobsManagementPath: string;

@@ -26,7 +26,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -56,7 +58,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_ID",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_BLOCKLISTS_LIST_ID",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -142,7 +146,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_BLOCKLISTS_LIST_NAME",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_BLOCKLISTS_LIST_NAME",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -172,7 +178,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -210,7 +218,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_ID",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_EVENT_FILTERS_LIST_ID",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -360,7 +370,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_EVENT_FILTERS_LIST_NAME",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_EVENT_FILTERS_LIST_NAME",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -398,7 +410,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -428,7 +442,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -522,7 +538,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -554,8 +572,12 @@
         "type": "string",
         "tags": [],
         "label": "ENDPOINT_LIST_DESCRIPTION",
-        "description": ["The description of the single global space agnostic endpoint list"],
-        "signature": ["\"Endpoint Security Exception List\""],
+        "description": [
+          "The description of the single global space agnostic endpoint list"
+        ],
+        "signature": [
+          "\"Endpoint Security Exception List\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -570,7 +592,9 @@
         "description": [
           "\nThis ID is used for _both_ the Saved Object ID and for the list_id\nfor the single global space agnostic endpoint list"
         ],
-        "signature": ["\"endpoint_list\""],
+        "signature": [
+          "\"endpoint_list\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -585,7 +609,9 @@
         "description": [
           "\nSpecific routes for the single global space agnostic endpoint list. These are convenience\nroutes where they are going to try and create the global space agnostic endpoint list if it\ndoes not exist yet or if it was deleted at some point and re-create it before adding items to\nthe list"
         ],
-        "signature": ["\"/api/endpoint_list/items\""],
+        "signature": [
+          "\"/api/endpoint_list/items\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -597,8 +623,12 @@
         "type": "string",
         "tags": [],
         "label": "ENDPOINT_LIST_NAME",
-        "description": ["The name of the single global space agnostic endpoint list"],
-        "signature": ["\"Endpoint Security Exception List\""],
+        "description": [
+          "The name of the single global space agnostic endpoint list"
+        ],
+        "signature": [
+          "\"Endpoint Security Exception List\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -610,8 +640,12 @@
         "type": "string",
         "tags": [],
         "label": "ENDPOINT_LIST_URL",
-        "description": ["\nSpecific routes for the single global space agnostic endpoint list"],
-        "signature": ["\"/api/endpoint_list\""],
+        "description": [
+          "\nSpecific routes for the single global space agnostic endpoint list"
+        ],
+        "signature": [
+          "\"/api/endpoint_list\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -621,7 +655,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -675,7 +711,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_TRUSTED_APPS_LIST_ID",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_TRUSTED_APPS_LIST_ID",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -905,7 +943,9 @@
         "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.ENDPOINT_TRUSTED_APPS_LIST_NAME",
         "type": "string",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "ENDPOINT_TRUSTED_APPS_LIST_NAME",
         "description": [],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
@@ -962,7 +1002,9 @@
         "tags": [],
         "label": "EXCEPTION_LIST_ITEM_URL",
         "description": [],
-        "signature": ["\"/api/exception_lists/items\""],
+        "signature": [
+          "\"/api/exception_lists/items\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -975,7 +1017,9 @@
         "tags": [],
         "label": "EXCEPTION_LIST_NAMESPACE",
         "description": [],
-        "signature": ["\"exception-list\""],
+        "signature": [
+          "\"exception-list\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -987,8 +1031,12 @@
         "type": "string",
         "tags": [],
         "label": "EXCEPTION_LIST_NAMESPACE_AGNOSTIC",
-        "description": ["\nException list spaces"],
-        "signature": ["\"exception-list-agnostic\""],
+        "description": [
+          "\nException list spaces"
+        ],
+        "signature": [
+          "\"exception-list-agnostic\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1000,8 +1048,12 @@
         "type": "string",
         "tags": [],
         "label": "EXCEPTION_LIST_URL",
-        "description": ["\nException list routes"],
-        "signature": ["\"/api/exception_lists\""],
+        "description": [
+          "\nException list routes"
+        ],
+        "signature": [
+          "\"/api/exception_lists\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1014,7 +1066,9 @@
         "tags": [],
         "label": "INTERNAL_EXCEPTION_FILTER",
         "description": [],
-        "signature": ["\"/internal/lists/_create_filter\""],
+        "signature": [
+          "\"/internal/lists/_create_filter\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1026,7 +1080,9 @@
         "type": "string",
         "tags": [],
         "label": "INTERNAL_EXCEPTION_LIST_URL",
-        "description": ["\nInternal exception list routes"],
+        "description": [
+          "\nInternal exception list routes"
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1051,7 +1107,9 @@
         "tags": [],
         "label": "INTERNAL_FIND_LISTS_BY_SIZE",
         "description": [],
-        "signature": ["\"/internal/lists/_find_lists_by_size\""],
+        "signature": [
+          "\"/internal/lists/_find_lists_by_size\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1063,8 +1121,12 @@
         "type": "string",
         "tags": [],
         "label": "INTERNAL_LIST_URL",
-        "description": ["\nInternal value list routes"],
-        "signature": ["\"/internal/lists\""],
+        "description": [
+          "\nInternal value list routes"
+        ],
+        "signature": [
+          "\"/internal/lists\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1112,8 +1174,12 @@
         "type": "string",
         "tags": [],
         "label": "LIST_URL",
-        "description": ["\nValue list routes"],
-        "signature": ["\"/api/lists\""],
+        "description": [
+          "\nValue list routes"
+        ],
+        "signature": [
+          "\"/api/lists\""
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1126,7 +1192,9 @@
         "tags": [],
         "label": "MAX_EXCEPTION_LIST_SIZE",
         "description": [],
-        "signature": ["10000"],
+        "signature": [
+          "10000"
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1139,7 +1207,9 @@
         "tags": [],
         "label": "MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE",
         "description": [],
-        "signature": ["200"],
+        "signature": [
+          "200"
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1152,7 +1222,9 @@
         "tags": [],
         "label": "MAXIMUM_SMALL_VALUE_LIST_SIZE",
         "description": [],
-        "signature": ["65536"],
+        "signature": [
+          "65536"
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1166,8 +1238,12 @@
         "type": "Object",
         "tags": [],
         "label": "ENDPOINT_ARTIFACT_LIST_IDS",
-        "description": ["\nThe IDs of all Endpoint artifact lists"],
-        "signature": ["readonly string[]"],
+        "description": [
+          "\nThe IDs of all Endpoint artifact lists"
+        ],
+        "signature": [
+          "readonly string[]"
+        ],
         "path": "packages/kbn-securitysolution-list-constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1179,7 +1255,9 @@
         "type": "Object",
         "tags": [],
         "label": "ENDPOINT_ARTIFACT_LISTS",
-        "description": ["\nList definitions for Endpoint Artifact"],
+        "description": [
+          "\nList definitions for Endpoint Artifact"
+        ],
         "signature": [
           "{ readonly trustedApps: Readonly<{ id: string; name: string; description: string; }>; readonly eventFilters: Readonly<{ id: string; name: string; description: string; }>; readonly hostIsolationExceptions: Readonly<{ id: string; name: string; description: string; }>; readonly blocklists: Readonly<{ id: string; name: string; description: string; }>; }"
         ],

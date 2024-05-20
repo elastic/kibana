@@ -14,7 +14,7 @@ import {
 import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
-import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';

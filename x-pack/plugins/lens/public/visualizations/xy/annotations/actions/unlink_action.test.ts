@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import {
+  XYByValueAnnotationLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
+  XYState,
+} from '../../types';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { cloneDeep } from 'lodash';
-import {
-  XYByReferenceAnnotationLayerConfig,
-  XYByValueAnnotationLayerConfig,
-  XYState,
-} from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
 
 describe('annotation group unlink actions', () => {

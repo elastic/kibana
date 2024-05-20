@@ -12,9 +12,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
 
-import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
+import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 
 import { OnboardingCard } from './onboarding_card';
 

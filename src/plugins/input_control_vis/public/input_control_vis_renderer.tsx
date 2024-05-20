@@ -7,8 +7,8 @@
  */
 
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
-import { InputControlRenderValue } from './input_control_fn';
 import { InputControlVisDependencies } from './plugin';
+import { InputControlRenderValue } from './input_control_fn';
 import type { InputControlVisControllerType } from './vis_controller';
 
 const inputControlVisRegistry = new Map<HTMLElement, InputControlVisControllerType>();

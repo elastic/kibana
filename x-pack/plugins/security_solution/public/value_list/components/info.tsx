@@ -1,6 +1,3 @@
-import { EuiText } from '@elastic/eui';
-import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
  * 2.0.
  */
 import React from 'react';
+import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 const info = css`
   margin-right: ${euiThemeVars.euiSizeS};

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
-import React from 'react';
 import { useParams } from 'react-router-dom';
+import { CreateMonitorButton } from '../monitors_page/create_monitor_button';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 import { ClientPluginsStart } from '../../../../plugin';
-import { CreateMonitorButton } from '../monitors_page/create_monitor_button';
 
 export const MonitorNotFoundPage: React.FC = () => {
   const { application } = useKibana<ClientPluginsStart>().services;

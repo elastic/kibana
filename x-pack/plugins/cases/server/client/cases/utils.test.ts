@@ -8,43 +8,43 @@
 import { omit } from 'lodash';
 
 import {
+  comment as commentObj,
+  userActions,
   commentAlert,
   commentAlertMultipleIds,
-  commentExternalReference,
-  comment as commentObj,
-  commentPersistableState,
   isolateCommentActions,
-  isolateCommentActionsMultipleTargets,
   releaseCommentActions,
-  userActions,
+  isolateCommentActionsMultipleTargets,
+  commentExternalReference,
+  commentPersistableState,
 } from './mock';
 
-import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
 import {
-  CaseSeverity,
-  CaseStatuses,
-  ConnectorTypes,
-  CustomFieldTypes,
-  UserActionActions,
-} from '../../../common/types/domain';
-import { flattenCaseSavedObject } from '../../common/utils';
-import { casesConnectors } from '../../connectors';
-import { mappings, mockCases } from '../../mocks';
-import { userProfiles, userProfilesMap } from '../user_profiles.mock';
-import {
-  addKibanaInformationToDescription,
   createIncident,
   dedupAssignees,
-  fillMissingCustomFields,
-  formatComments,
   getClosedInfoForUpdate,
   getDurationForUpdate,
   getEntity,
   getLatestPushInfo,
   mapCaseFieldsToExternalSystemFields,
+  formatComments,
+  addKibanaInformationToDescription,
+  fillMissingCustomFields,
   normalizeCreateCaseRequest,
 } from './utils';
+import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
+import {
+  CaseStatuses,
+  CustomFieldTypes,
+  UserActionActions,
+  CaseSeverity,
+  ConnectorTypes,
+} from '../../../common/types/domain';
+import { flattenCaseSavedObject } from '../../common/utils';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { casesConnectors } from '../../connectors';
+import { userProfiles, userProfilesMap } from '../user_profiles.mock';
+import { mappings, mockCases } from '../../mocks';
 
 const allComments = [
   commentObj,

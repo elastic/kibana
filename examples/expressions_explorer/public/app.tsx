@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
 import {
-  EuiLink,
   EuiPage,
-  EuiPageBody,
   EuiPageHeader,
-  EuiPageSection,
+  EuiPageBody,
   EuiPageTemplate,
+  EuiPageSection,
   EuiSpacer,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { AppMountParameters, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { RunExpressionsExample } from './run_expressions';
+import { RenderExpressionsExample } from './render_expressions';
 import { ActionsExpressionsExample } from './actions_and_expressions';
 import { ActionsExpressionsExample2 } from './actions_and_expressions2';
-import { RenderExpressionsExample } from './render_expressions';
-import { RunExpressionsExample } from './run_expressions';
 
 interface Props {
   expressions: ExpressionsStart;

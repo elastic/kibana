@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { KibanaContext, adaptToExpressionValueFilter } from '@kbn/data-plugin/common';
 import { ExpressionValueFilter } from '@kbn/expressions-plugin/common';
+import { adaptToExpressionValueFilter, KibanaContext } from '@kbn/data-plugin/common';
 
 export const kibanaContext = {
   name: 'kibana_context',

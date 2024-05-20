@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
+import { Subject } from 'rxjs';
+import React, { useEffect } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { DecoratorFn } from '@storybook/react';
-import React, { useEffect } from 'react';
-import { Subject } from 'rxjs';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import 'core_styles';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { I18nStart } from '@kbn/core-i18n-browser';
-import { CoreTheme } from '@kbn/core-theme-browser';
-import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { BehaviorSubject } from 'rxjs';
+import { CoreTheme } from '@kbn/core-theme-browser';
+import { I18nStart } from '@kbn/core-i18n-browser';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 
 const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
 

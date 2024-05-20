@@ -6,31 +6,31 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
-import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import { kibanaPackageJson } from '@kbn/repo-info';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { dump } from '../../../../../scripts/endpoint/common/utils';
 import { STARTED_TRANSFORM_STATES } from '../../../../../common/constants';
-import {
-  METADATA_CURRENT_TRANSFORM_V2,
-  METADATA_DATASTREAM,
-  METADATA_UNITED_INDEX,
-  METADATA_UNITED_TRANSFORM,
-  METADATA_UNITED_TRANSFORM_V2,
-  POLICY_RESPONSE_INDEX,
-  metadataCurrentIndexPattern,
-  metadataTransformPrefix,
-} from '../../../../../common/endpoint/constants';
-import type { GetCustomEndpointMetadataGeneratorOptions } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
-import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
-import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { indexHostsAndAlerts } from '../../../../../common/endpoint/index_data';
-import type { IndexedHostsAndAlertsResponse } from '../../../../../common/endpoint/index_data';
 import {
   ENDPOINT_ALERTS_INDEX,
   ENDPOINT_EVENTS_INDEX,
 } from '../../../../../scripts/endpoint/common/constants';
-import { dump } from '../../../../../scripts/endpoint/common/utils';
+import {
+  METADATA_DATASTREAM,
+  METADATA_UNITED_INDEX,
+  METADATA_UNITED_TRANSFORM,
+  metadataCurrentIndexPattern,
+  metadataTransformPrefix,
+  METADATA_CURRENT_TRANSFORM_V2,
+  METADATA_UNITED_TRANSFORM_V2,
+  POLICY_RESPONSE_INDEX,
+} from '../../../../../common/endpoint/constants';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import type { GetCustomEndpointMetadataGeneratorOptions } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { indexHostsAndAlerts } from '../../../../../common/endpoint/index_data';
+import type { IndexedHostsAndAlertsResponse } from '../../../../../common/endpoint/index_data';
 
 export interface CyLoadEndpointDataOptions
   extends Pick<GetCustomEndpointMetadataGeneratorOptions, 'version' | 'os'> {

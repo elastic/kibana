@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RenderOptions, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { FieldSelect, FieldSelectProps } from './field_select';
+import { RenderOptions, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('Layer Data Panel', () => {
   let defaultProps: FieldSelectProps;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { extractTimeFields } from './extract_time_fields';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('extractTimeFields', () => {
   it('should handle no date fields', () => {

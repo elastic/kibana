@@ -7,30 +7,30 @@
  */
 
 import {
-  addTranslation,
   formats,
-  getDefaultLocale,
-  getFormats,
-  getLocale,
-  getRegisteredLocales,
+  addTranslation,
   getTranslation,
-  init,
-  isPseudoLocale,
-  load,
-  setDefaultLocale,
-  setFormats,
   setLocale,
+  getLocale,
+  setDefaultLocale,
+  getDefaultLocale,
+  setFormats,
+  getFormats,
+  getRegisteredLocales,
   translate,
+  init,
+  load,
+  isPseudoLocale,
   translateUsingPseudoLocale,
 } from './src/core';
 
 import {
+  registerTranslationFile,
+  registerTranslationFiles,
+  getTranslationsByLocale,
   getAllTranslations,
   getAllTranslationsFromPaths,
   getRegisteredLocales as getRegisteredLocalesForLoader,
-  getTranslationsByLocale,
-  registerTranslationFile,
-  registerTranslationFiles,
 } from './src/loader';
 
 const i18n = {

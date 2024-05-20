@@ -14,6 +14,12 @@
       "dataViews",
       "usageCollection"
     ],
-    "requiredBundles": ["data", "kibanaUtils", "kibanaReact", "share", "visDefaultEditor"]
+    "requiredBundles": [
+      "data",
+      "kibanaUtils",
+      "kibanaReact",
+      "share",
+      "visDefaultEditor"
+    ]
   }
 }

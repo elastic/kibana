@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiPanel, EuiStat, useEuiTheme } from '@elastic/eui';
-import type { EuiStatProps } from '@elastic/eui';
 import React, { ReactNode } from 'react';
+import { EuiPanel, EuiStat, useEuiTheme, EuiHorizontalRule } from '@elastic/eui';
+import type { EuiStatProps } from '@elastic/eui';
 
 export interface CspCounterCardProps {
   id: string;

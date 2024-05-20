@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiPopover, EuiPopoverProps, EuiPopoverTitle } from '@elastic/eui';
 import React from 'react';
+import { EuiPopover, EuiPopoverProps, EuiPopoverTitle } from '@elastic/eui';
 import './field_popover.scss';
 
 export interface FieldPopoverProps extends EuiPopoverProps {

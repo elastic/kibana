@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { UptimeEsClient } from './lib';
+import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('UptimeEsClient', () => {
   let uptimeEsClient: UptimeEsClient;

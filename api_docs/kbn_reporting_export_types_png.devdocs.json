@@ -111,7 +111,9 @@
             "tags": [],
             "label": "jobContentEncoding",
             "description": [],
-            "signature": ["\"base64\""],
+            "signature": [
+              "\"base64\""
+            ],
             "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -123,7 +125,9 @@
             "tags": [],
             "label": "jobContentExtension",
             "description": [],
-            "signature": ["\"png\""],
+            "signature": [
+              "\"png\""
+            ],
             "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -149,7 +153,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -216,7 +222,9 @@
             "parentPluginId": "@kbn/reporting-export-types-png",
             "id": "def-server.PngExportType.createJob",
             "type": "Function",
-            "tags": ["params"],
+            "tags": [
+              "params"
+            ],
             "label": "createJob",
             "description": [],
             "signature": [
@@ -278,7 +286,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["jobParams"]
+            "returnComment": [
+              "jobParams"
+            ]
           },
           {
             "parentPluginId": "@kbn/reporting-export-types-png",
@@ -286,7 +296,9 @@
             "type": "Function",
             "tags": [],
             "label": "runTask",
-            "description": ["\n"],
+            "description": [
+              "\n"
+            ],
             "signature": [
               "(jobId: string, payload: ",
               {
@@ -323,7 +335,9 @@
                 "tags": [],
                 "label": "jobId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -357,7 +371,9 @@
                 "tags": [],
                 "label": "taskInstanceFields",
                 "description": [],
-                "signature": ["TaskInstanceFields"],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
                 "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -391,7 +407,9 @@
                 "tags": [],
                 "label": "stream",
                 "description": [],
-                "signature": ["Writable"],
+                "signature": [
+                  "Writable"
+                ],
                 "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,
                 "trackAdoption": false,

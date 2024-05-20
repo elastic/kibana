@@ -12,8 +12,8 @@ import { EuiBasicTable, EuiBasicTableColumn, EuiCode } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringPolicy, FilteringRule, FilteringRuleRule } from '../..';
 import { filteringPolicyToText, filteringRuleToText } from '../../utils/filtering_rule_helpers';
+import { FilteringRule, FilteringPolicy, FilteringRuleRule } from '../..';
 
 interface FilteringRulesTableProps {
   filteringRules: FilteringRule[];

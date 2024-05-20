@@ -9,7 +9,7 @@
  * Copyright (c) 2017 The xterm.js authors. All rights reserved.
  * @license MIT
  */
-import { IBufferRange, IDisposable, ITerminalAddon, Terminal } from 'xterm';
+import { Terminal, IDisposable, ITerminalAddon, IBufferRange } from 'xterm';
 
 export interface ISearchOptions {
   regex?: boolean;
@@ -40,7 +40,7 @@ type LineCacheEntry = [
   /**
    * The offsets where each line starts when the entry describes a wrapped line.
    */
-  lineOffsets: number[],
+  lineOffsets: number[]
 ];
 
 const LINES_CACHE_TIME_TO_LIVE = 15 * 1000; // 15 secs

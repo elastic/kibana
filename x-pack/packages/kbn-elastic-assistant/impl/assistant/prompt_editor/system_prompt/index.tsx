@@ -10,10 +10,10 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
-import { Conversation } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
-import { SelectSystemPrompt } from './select_system_prompt';
+import { Conversation } from '../../../..';
 import * as i18n from './translations';
+import { SelectSystemPrompt } from './select_system_prompt';
 
 interface Props {
   conversation: Conversation | undefined;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import assert from 'assert';
 import type { Client, estypes } from '@elastic/elasticsearch';
+import assert from 'assert';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createEsClient, isServerlessKibanaFlavor } from './stack_services';
 import type { CreatedSecuritySuperuser } from './security_user_services';
 import { createSecuritySuperuser } from './security_user_services';
-import { createEsClient, isServerlessKibanaFlavor } from './stack_services';
 
 export interface DeleteAllEndpointDataResponse {
   count: number;

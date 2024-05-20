@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
-import { useQueryIndices } from '../../hooks/use_query_indices';
-import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
+import { render, screen } from '@testing-library/react';
 import { SourcesPanelSidebar } from './sources_panel_sidebar';
+import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
+import { useQueryIndices } from '../../hooks/use_query_indices';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../../hooks/use_source_indices_field', () => ({
   useSourceIndicesFields: jest.fn(),

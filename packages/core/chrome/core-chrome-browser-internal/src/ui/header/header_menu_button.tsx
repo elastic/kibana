@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { forwardRef, Ref } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { EuiHeaderSectionItemButtonRef } from '@elastic/eui/src/components/header/header_section/header_section_item_button';
-import React, { forwardRef, Ref } from 'react';
 
 interface HeaderMenuButtonProps {
   'aria-controls': string;

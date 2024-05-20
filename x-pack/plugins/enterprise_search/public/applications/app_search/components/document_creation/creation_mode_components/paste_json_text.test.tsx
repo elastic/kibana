@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton, EuiButtonEmpty, EuiTextArea } from '@elastic/eui';
+import { EuiTextArea, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 
 import { rerender } from '../../../../test_helpers';
 
-import { PasteJsonTextFooterContent, PasteJsonTextTabContent } from './paste_json_text';
+import { PasteJsonTextTabContent, PasteJsonTextFooterContent } from './paste_json_text';
 
 describe('PasteJsonText', () => {
   const values = {

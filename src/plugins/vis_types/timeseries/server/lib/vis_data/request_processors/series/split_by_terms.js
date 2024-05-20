@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { basicAggs } from '../../../../../common/basic_aggs';
-import { getFieldsForTerms, validateField } from '../../../../../common/fields_utils';
 import { overwrite } from '../../helpers';
-import { bucketTransform } from '../../helpers/bucket_transform';
+import { basicAggs } from '../../../../../common/basic_aggs';
 import { getBucketsPath } from '../../helpers/get_buckets_path';
+import { bucketTransform } from '../../helpers/bucket_transform';
+import { getFieldsForTerms, validateField } from '../../../../../common/fields_utils';
 
 export function splitByTerms(req, panel, series, esQueryConfig, seriesIndex) {
   return (next) => (doc) => {

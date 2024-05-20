@@ -1,7 +1,3 @@
-import { toNumberRt } from '@kbn/io-ts-utils';
-import { createMemoryHistory } from 'history';
-import * as t from 'io-ts';
-import { last } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,7 +6,11 @@ import { last } from 'lodash';
  * Side Public License, v 1.
  */
 import React from 'react';
+import * as t from 'io-ts';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter } from './create_router';
+import { createMemoryHistory } from 'history';
+import { last } from 'lodash';
 
 describe('createRouter', () => {
   const routes = {

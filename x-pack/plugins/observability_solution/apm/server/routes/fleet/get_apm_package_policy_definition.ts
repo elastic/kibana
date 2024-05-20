@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import yaml from 'js-yaml';
 import { KibanaRequest } from '@kbn/core/server';
 import { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
-import yaml from 'js-yaml';
 import {
-  INPUT_VAR_NAME_TO_SCHEMA_PATH,
   POLICY_ELASTIC_AGENT_ON_CLOUD,
+  INPUT_VAR_NAME_TO_SCHEMA_PATH,
 } from '../../../common/fleet';
 import { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getLatestApmPackage } from './get_latest_apm_package';

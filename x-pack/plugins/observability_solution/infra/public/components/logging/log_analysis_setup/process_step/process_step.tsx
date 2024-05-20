@@ -7,13 +7,13 @@
 
 import {
   EuiButton,
-  EuiCallOut,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
@@ -40,10 +40,10 @@ export const createProcessStep = (props: ProcessStepProps): EuiContainedStepProp
     props.setupStatus.type === 'pending'
       ? 'incomplete'
       : props.setupStatus.type === 'failed'
-        ? 'danger'
-        : props.setupStatus.type === 'succeeded'
-          ? 'complete'
-          : undefined,
+      ? 'danger'
+      : props.setupStatus.type === 'succeeded'
+      ? 'complete'
+      : undefined,
 });
 
 export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({

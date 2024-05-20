@@ -9,11 +9,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent } from 'react';
 
 import {
-  NotAuthorizedSection,
-  PageError,
   PageLoading,
-  WithPrivileges,
+  PageError,
   useAuthorizationContext,
+  WithPrivileges,
+  NotAuthorizedSection,
 } from '../../../shared_imports';
 import { ENRICH_POLICIES_REQUIRED_PRIVILEGES } from '../../constants';
 

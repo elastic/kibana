@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { OTHER_CATEGORY } from '../constants';
-import type { GeoContainmentRuleParams } from '../types';
 import { getQueryDsl } from './get_query_dsl';
+import type { GeoContainmentRuleParams } from '../types';
 
 const MAX_BUCKETS_LIMIT = 65535;
 

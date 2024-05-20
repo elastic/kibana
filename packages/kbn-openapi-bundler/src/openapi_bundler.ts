@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { basename, dirname, resolve } from 'path';
 import chalk from 'chalk';
-import globby from 'globby';
 import { isUndefined, omitBy } from 'lodash';
 import { OpenAPIV3 } from 'openapi-types';
-import { BundledDocument, SkipException, bundleDocument } from './bundler/bundle_document';
+import globby from 'globby';
+import { basename, dirname, resolve } from 'path';
+import { BundledDocument, bundleDocument, SkipException } from './bundler/bundle_document';
 import { mergeDocuments } from './bundler/merge_documents';
-import { createBlankOpenApiDocument } from './bundler/merge_documents/create_blank_oas_document';
-import { logger } from './logger';
 import { removeFilesByGlob } from './utils/remove_files_by_glob';
+import { logger } from './logger';
 import { writeYamlDocument } from './utils/write_yaml_document';
+import { createBlankOpenApiDocument } from './bundler/merge_documents/create_blank_oas_document';
 
 export interface BundlerConfig {
   sourceGlob: string;

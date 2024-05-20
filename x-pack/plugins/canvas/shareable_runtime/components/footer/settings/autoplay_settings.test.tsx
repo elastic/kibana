@@ -9,8 +9,8 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { JestContext } from '../../../test/context_jest';
 import {
-  getAutoplayCheckbox as checkbox,
   getAutoplayTextField as input,
+  getAutoplayCheckbox as checkbox,
   getAutoplaySubmit as submit,
 } from '../../../test/selectors';
 import { AutoplaySettings } from './autoplay_settings';

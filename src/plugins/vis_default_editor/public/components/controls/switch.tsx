@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
 import { AggParamEditorProps } from '../agg_param_props';
 

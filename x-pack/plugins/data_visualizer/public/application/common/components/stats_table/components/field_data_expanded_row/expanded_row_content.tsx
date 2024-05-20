@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 
 interface Props {
   dataTestSubj: string;

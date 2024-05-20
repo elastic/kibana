@@ -7,16 +7,16 @@
 import Boom from '@hapi/boom';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { getRuleCircuitBreakerErrorMessage } from '../../../common';
-import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
-import { AlertingAuthorizationEntity, WriteOperations } from '../../authorization';
-import { getNextRun, resetMonitoringLastRun } from '../../lib';
+import { RawRule, IntervalSchedule } from '../../types';
+import { resetMonitoringLastRun, getNextRun } from '../../lib';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { IntervalSchedule, RawRule } from '../../types';
-import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
-import { createNewAPIKeySet, migrateLegacyActions, scheduleTask, updateMeta } from '../lib';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
+import { updateMeta, createNewAPIKeySet, scheduleTask, migrateLegacyActions } from '../lib';
+import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
+import { getRuleCircuitBreakerErrorMessage } from '../../../common';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export async function enable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(

@@ -12,12 +12,12 @@ import { CanvasStartDeps } from '../../plugin';
 import { CanvasWorkpadService, ResolveWorkpadResponse } from '../workpad';
 
 import {
-  API_ROUTE_SHAREABLE_ZIP,
-  API_ROUTE_TEMPLATES,
   API_ROUTE_WORKPAD,
+  DEFAULT_WORKPAD_CSS,
+  API_ROUTE_TEMPLATES,
   API_ROUTE_WORKPAD_ASSETS,
   API_ROUTE_WORKPAD_STRUCTURES,
-  DEFAULT_WORKPAD_CSS,
+  API_ROUTE_SHAREABLE_ZIP,
 } from '../../../common/lib/constants';
 import { CanvasWorkpad } from '../../../types';
 

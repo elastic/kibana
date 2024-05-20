@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,32 +6,33 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { createBrowserHistory } from 'history';
 import {
   Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createBrowserHistory } from 'history';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
 
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import {
-  ApplicationStart,
   type CoreStart,
   IUiSettingsClient,
+  ApplicationStart,
   NotificationsStart,
 } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
-import { Router } from '@kbn/shared-ux-router';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import { Subject, Subscription } from 'rxjs';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';

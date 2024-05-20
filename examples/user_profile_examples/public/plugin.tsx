@@ -1,7 +1,3 @@
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,6 +7,10 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AvatarDemo } from './avatar_demo';
 import { PopoverDemo } from './popover_demo';
 import { SelectableDemo } from './selectable_demo';

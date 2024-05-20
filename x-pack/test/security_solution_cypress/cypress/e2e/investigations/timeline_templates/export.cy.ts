@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { expectedExportedTimelineTemplate } from '../../../objects/timeline';
+import { exportTimeline } from '../../../tasks/timelines';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { exportTimeline } from '../../../tasks/timelines';
+import { expectedExportedTimelineTemplate } from '../../../objects/timeline';
 
+import { TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 import { createTimelineTemplate, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { searchByTitle } from '../../../tasks/table_pagination';
-import { TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 
 describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

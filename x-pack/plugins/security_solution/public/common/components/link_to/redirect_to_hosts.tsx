@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HOSTS_PATH } from '../../../../common/constants';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
+import { HOSTS_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
 
 export const getHostsUrl = (search?: string) => `${HOSTS_PATH}${appendSearch(search)}`;

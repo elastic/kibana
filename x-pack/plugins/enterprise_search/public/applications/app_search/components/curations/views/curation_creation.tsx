@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions } from 'kea';
 
-import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CurationsLogic } from '..';

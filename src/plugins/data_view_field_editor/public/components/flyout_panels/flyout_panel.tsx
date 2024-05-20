@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
-import classnames from 'classnames';
 import React, {
   CSSProperties,
   useState,
@@ -17,6 +15,8 @@ import React, {
   useContext,
   useMemo,
 } from 'react';
+import classnames from 'classnames';
+import { EuiFlexItem } from '@elastic/eui';
 
 import { useFlyoutPanelsContext } from './flyout_panels';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
+import Boom from '@hapi/boom';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { throwErrors } from '../../../common/runtime_types';
 import { InfraBackendLibs } from '../../lib/infra_types';
+import { throwErrors } from '../../../common/runtime_types';
 
 import {
   InventoryMetaRequestRT,

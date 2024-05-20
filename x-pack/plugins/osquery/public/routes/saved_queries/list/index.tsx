@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiInMemoryTable,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import deepEqual from 'fast-deep-equal';
-import moment from 'moment-timezone';
-import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import deepEqual from 'fast-deep-equal';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QUERY_TIMEOUT } from '../../../../common/constants';
 import { Direction } from '../../../../common/search_strategy';
+import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
-import { WithHeaderLayout } from '../../../components/layouts';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
 
 export interface SavedQuerySO {

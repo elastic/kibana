@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import path from 'path';
 import expect from '@kbn/expect';
 import fs from 'fs/promises';
+import path from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { BUNDLED_PACKAGE_DIR } from '../../config.base';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 

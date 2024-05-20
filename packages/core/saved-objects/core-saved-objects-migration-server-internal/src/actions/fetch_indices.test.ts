@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { fetchIndices } from './fetch_indices';
 
 // Create a mock powered by the actual implementation

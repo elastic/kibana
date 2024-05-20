@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { createHashHistory } from 'history';
 import React from 'react';
+import { createHashHistory } from 'history';
 import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
-import { GraphServices } from './application';
 import { ListingRoute } from './apps/listing_route';
+import { GraphServices } from './application';
 import { WorkspaceRoute } from './apps/workspace_route';
 
 export const graphRouter = (deps: GraphServices) => {

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { hapiMocks } from '@kbn/hapi-mocks';
 import type {
   LifecycleResponseFactory,
-  OnPostAuthToolkit,
   OnPreResponseToolkit,
+  OnPostAuthToolkit,
   OnPreRoutingToolkit,
 } from '@kbn/core-http-server';
-import { hapiMocks } from '@kbn/hapi-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFactory> => ({
   redirected: jest.fn(),

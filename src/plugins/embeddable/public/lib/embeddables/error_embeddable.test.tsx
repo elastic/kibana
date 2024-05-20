@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
-import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { EmbeddableRoot } from './embeddable_root';
+import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
+import { waitFor, render } from '@testing-library/react';
 import { ErrorEmbeddable } from './error_embeddable';
+import { EmbeddableRoot } from './embeddable_root';
 
 test('ErrorEmbeddable renders an embeddable', async () => {
   setPresentationPanelMocks();

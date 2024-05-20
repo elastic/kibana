@@ -7,23 +7,23 @@
 
 import { Action } from 'redux-actions';
 import { all, call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
+import { serializeHttpFetchError } from '../utils/http_error';
+import { FetchNetworkEventsParams } from '../network_events/actions';
 import {
-  ScreenshotBlockCache,
   ScreenshotBlockDoc,
+  ScreenshotBlockCache,
   SyntheticsJourneyApiResponse,
 } from '../../../../../common/runtime_types';
-import { FetchNetworkEventsParams } from '../network_events/actions';
-import { serializeHttpFetchError } from '../utils/http_error';
 import { fetchBrowserJourney, fetchScreenshotBlockSet } from './api';
 
 import {
   fetchBlocksAction,
-  fetchJourneyAction,
+  setBlockLoadingAction,
   pruneCacheAction,
   putBlocksAction,
   putCacheSize,
-  setBlockLoadingAction,
   updateHitCountsAction,
+  fetchJourneyAction,
 } from './actions';
 
 import { isPendingBlock } from './models';

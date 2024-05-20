@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiNotificationBadge } from '@elastic/eui';
 import React from 'react';
 
 export const CoverageOverviewRuleListHeader = ({

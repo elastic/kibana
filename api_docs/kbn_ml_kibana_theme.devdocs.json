@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "useCurrentEuiThemeVars",
-        "description": ["\nReturns an EUI theme definition based on the currently applied theme."],
+        "description": [
+          "\nReturns an EUI theme definition based on the currently applied theme."
+        ],
         "signature": [
           "(theme: ",
           {
@@ -70,9 +72,13 @@
         "parentPluginId": "@kbn/ml-kibana-theme",
         "id": "def-common.useIsDarkTheme",
         "type": "Function",
-        "tags": ["return"],
+        "tags": [
+          "return"
+        ],
         "label": "useIsDarkTheme",
-        "description": ["\nIndicates if the currently applied theme is either dark or light."],
+        "description": [
+          "\nIndicates if the currently applied theme is either dark or light."
+        ],
         "signature": [
           "(theme: ",
           {
@@ -110,7 +116,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["- Returns true if the currently applied theme is dark."],
+        "returnComment": [
+          "- Returns true if the currently applied theme is dark."
+        ],
         "initialIsOpen": false
       }
     ],

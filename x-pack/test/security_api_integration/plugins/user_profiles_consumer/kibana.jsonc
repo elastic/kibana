@@ -6,6 +6,10 @@
     "id": "userProfilesConsumerPlugin",
     "server": true,
     "browser": false,
-    "requiredPlugins": ["security", "spaces", "features"]
+    "requiredPlugins": [
+      "security",
+      "spaces",
+      "features"
+    ]
   }
 }

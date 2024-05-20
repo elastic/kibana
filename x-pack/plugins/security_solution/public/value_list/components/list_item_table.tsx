@@ -5,23 +5,23 @@
  * 2.0.
  */
 import { EuiBasicTable } from '@elastic/eui';
-import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React from 'react';
+import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { InlineEditListItemValue } from './inline_edit_list_item_value';
+import { DeleteListItem } from './delete_list_item';
 import { FormattedDate } from '../../common/components/formatted_date';
+import { LIST_ITEM_FIELDS } from '../types';
+import type { ListItemTableProps, ListItemTableColumns } from '../types';
 import {
-  COLUMN_ACTIONS,
+  COLUMN_VALUE,
   COLUMN_UPDATED_AT,
   COLUMN_UPDATED_BY,
-  COLUMN_VALUE,
+  COLUMN_ACTIONS,
+  FAILED_TO_FETCH_LIST_ITEM,
   DELETE_LIST_ITEM,
   DELETE_LIST_ITEM_DESCRIPTION,
-  FAILED_TO_FETCH_LIST_ITEM,
   NOT_FOUND_ITEMS,
 } from '../translations';
-import { LIST_ITEM_FIELDS } from '../types';
-import type { ListItemTableColumns, ListItemTableProps } from '../types';
-import { DeleteListItem } from './delete_list_item';
-import { InlineEditListItemValue } from './inline_edit_list_item_value';
 
 export const ListItemTable = ({
   canWriteIndex,

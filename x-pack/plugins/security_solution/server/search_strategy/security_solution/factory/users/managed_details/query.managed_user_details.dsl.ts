@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ISearchRequestParams } from '@kbn/search-types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
-import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 
 export const buildManagedUserDetailsQuery = ({
   userEmail,

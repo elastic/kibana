@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["PUT"],
-    "patterns": ["_enrich/policy/{name}"],
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_enrich/policy/{name}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/put-enrich-policy-api.html",
     "availability": {
       "stack": true,

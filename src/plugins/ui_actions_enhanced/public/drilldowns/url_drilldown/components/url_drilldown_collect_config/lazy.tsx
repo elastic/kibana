@@ -7,8 +7,8 @@
  */
 
 import * as React from 'react';
-import type { UrlDrilldownCollectConfigProps } from './url_drilldown_collect_config';
 import { UrlDrilldownOptionsProps } from './url_drilldown_options';
+import type { UrlDrilldownCollectConfigProps } from './url_drilldown_collect_config';
 
 const UrlDrilldownCollectConfigLazy = React.lazy(() =>
   import('./url_drilldown_collect_config').then(({ UrlDrilldownCollectConfig }) => ({

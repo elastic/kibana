@@ -8,11 +8,11 @@
 import { fontStyle, functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { testPlot } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
 import {
-  defaultStyle,
   grayscalePalette,
-  seriesStyle,
-  xAxisConfig,
   yAxisConfig,
+  xAxisConfig,
+  seriesStyle,
+  defaultStyle,
 } from '../../canvas_plugin_src/functions/common/__fixtures__/test_styles';
 import { plotFunctionFactory } from './plot';
 

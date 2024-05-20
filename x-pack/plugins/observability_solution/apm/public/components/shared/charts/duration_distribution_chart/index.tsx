@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { flatten } from 'lodash';
 import React, { useMemo } from 'react';
+import { flatten } from 'lodash';
 
 import {
   AnnotationDomainType,
@@ -32,9 +32,9 @@ import { i18n } from '@kbn/i18n';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
-import type { HistogramItem } from '../../../../../common/correlations/types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import type { HistogramItem } from '../../../../../common/correlations/types';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';

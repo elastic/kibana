@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export const DataSourceContext = createContext<DataViewAndSavedSearch>({

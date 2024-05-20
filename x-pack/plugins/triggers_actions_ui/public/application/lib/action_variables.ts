@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { pick } from 'lodash';
-import { ActionVariables, CONTEXT_ACTION_VARIABLES, REQUIRED_ACTION_VARIABLES } from '../../types';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
+import { ActionVariables, REQUIRED_ACTION_VARIABLES, CONTEXT_ACTION_VARIABLES } from '../../types';
 
 export type OmitMessageVariablesType = 'all' | 'keepContext';
 

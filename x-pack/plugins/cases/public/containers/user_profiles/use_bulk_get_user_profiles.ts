@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { ServerError } from '../../types';
 import { casesQueriesKeys } from '../constants';
-import * as i18n from '../translations';
 import { bulkGetUserProfiles } from './api';
 
 const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfileWithAvatar> =>

@@ -7,13 +7,13 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useMemo } from 'react';
-import type { ColumnHeaderOptions } from '../../../../../../common/types';
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { defaultHeaders } from '../../body/column_headers/default_headers';
+import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { memoizedGetTimelineColumnHeaders } from './utils';
 
 export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {

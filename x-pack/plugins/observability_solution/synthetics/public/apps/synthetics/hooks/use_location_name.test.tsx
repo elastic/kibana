@@ -1,4 +1,3 @@
-import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { renderHook } from '@testing-library/react-hooks';
  * 2.0.
  */
 import React from 'react';
-import { MonitorOverviewItem } from '../../../../common/runtime_types';
-import { WrappedHelper } from '../utils/testing';
+import { renderHook } from '@testing-library/react-hooks';
 import { useLocationName } from './use_location_name';
+import { WrappedHelper } from '../utils/testing';
+import { MonitorOverviewItem } from '../../../../common/runtime_types';
 
 describe('useLocationName', () => {
   beforeEach(() => {

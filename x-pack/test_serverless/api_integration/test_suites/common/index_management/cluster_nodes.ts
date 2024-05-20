@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const indexManagementService = getService('indexManagement');
 
   describe('nodes', () => {
-    let getNodesPlugins: (typeof indexManagementService)['clusterNodes']['api']['getNodesPlugins'];
+    let getNodesPlugins: typeof indexManagementService['clusterNodes']['api']['getNodesPlugins'];
 
     before(async () => {
       ({

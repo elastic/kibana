@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
+import React from 'react';
+import { mount } from 'enzyme';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { mount } from 'enzyme';
-import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';

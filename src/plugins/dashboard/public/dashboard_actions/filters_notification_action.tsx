@@ -13,22 +13,22 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import {
+  apiCanAccessViewMode,
+  apiPublishesPartialUnifiedSearch,
+  apiHasUniqueId,
   CanAccessViewMode,
   EmbeddableApiContext,
-  HasParentApi,
-  HasUniqueId,
-  PublishesUnifiedSearch,
-  apiCanAccessViewMode,
-  apiHasUniqueId,
-  apiPublishesPartialUnifiedSearch,
   getInheritedViewMode,
   getViewModeSubject,
+  HasParentApi,
+  PublishesUnifiedSearch,
+  HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
 import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
 import { pluginServices } from '../services/plugin_services';
-import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 import { FiltersNotificationPopover } from './filters_notification_popover';
+import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 

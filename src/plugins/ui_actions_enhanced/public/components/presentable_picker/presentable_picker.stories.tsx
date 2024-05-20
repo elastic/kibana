@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { PresentablePicker } from './presentable_picker';
 
 storiesOf('components/PresentablePicker', module)

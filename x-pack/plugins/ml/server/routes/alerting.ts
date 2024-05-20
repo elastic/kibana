@@ -6,10 +6,10 @@
  */
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { wrapError } from '../client/error_wrapper';
-import type { SharedServices } from '../shared_services';
 import type { RouteInitialization } from '../types';
+import { wrapError } from '../client/error_wrapper';
 import { mlAnomalyDetectionAlertPreviewRequest } from './schemas/alerting_schema';
+import type { SharedServices } from '../shared_services';
 
 export function alertingRoutes(
   { router, routeGuard }: RouteInitialization,

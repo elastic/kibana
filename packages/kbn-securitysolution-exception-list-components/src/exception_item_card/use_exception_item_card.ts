@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiCommentProps } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
+import { EuiCommentProps } from '@elastic/eui';
 
 import {
   CommentsArray,
   ExceptionListItemSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListItemIdentifiers } from '../types';
 import * as i18n from './translations';
+import { ExceptionListItemIdentifiers } from '../types';
 
 interface UseExceptionItemCardProps {
   exceptionItem: ExceptionListItemSchema;

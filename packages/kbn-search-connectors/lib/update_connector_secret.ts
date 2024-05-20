@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Result } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Result } from '@elastic/elasticsearch/lib/api/types';
 
 export const updateConnectorSecret = async (
   client: ElasticsearchClient,

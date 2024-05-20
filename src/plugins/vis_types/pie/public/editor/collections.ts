@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
-  EmptySizeRatios,
   LabelPositions,
   ValueFormats,
+  EmptySizeRatios,
 } from '@kbn/expression-partition-vis-plugin/common';
-import { i18n } from '@kbn/i18n';
 
 export const getLabelPositions = [
   {

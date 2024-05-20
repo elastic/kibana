@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { addBasePath } from '..';
 import { TemplateDeserialized } from '../../../../common';
 import { RouteDependencies } from '../../../types';
-import { doesTemplateExist, saveTemplate } from './lib';
+import { addBasePath } from '..';
 import { templateSchema } from './validate_schemas';
+import { saveTemplate, doesTemplateExist } from './lib';
 
 const bodySchema = templateSchema;
 

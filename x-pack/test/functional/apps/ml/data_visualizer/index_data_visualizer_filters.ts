@@ -7,9 +7,9 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
-  farequoteDataViewTestData,
   farequoteKQLFiltersSearchTestData,
   farequoteLuceneFiltersSearchTestData,
+  farequoteDataViewTestData,
 } from './index_test_data';
 import { TestData } from './types';
 

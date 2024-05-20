@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { Case } from '@kbn/cases-plugin/common';
+import type {
+  RuleCreateProps,
+  RuleResponse,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type {
   AgentPolicy,
   CreatePackagePolicyResponse,
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
-import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { Case } from '@kbn/cases-plugin/common';
 import { API_VERSIONS } from '../../common/constants';
-import type { LiveQueryDetailsItem } from '../../public/actions/use_live_query_details';
-import type { PackItem, PackSavedObject } from '../../public/packs/types';
-import type { SavedQuerySO } from '../../public/routes/saved_queries/list';
 import type { SavedQuerySOFormData } from '../../public/saved_queries/form/use_saved_query_form';
-import { ServerlessRoleName } from '../support/roles';
-import { request } from './common';
+import type { LiveQueryDetailsItem } from '../../public/actions/use_live_query_details';
+import type { PackSavedObject, PackItem } from '../../public/packs/types';
+import type { SavedQuerySO } from '../../public/routes/saved_queries/list';
 import { generateRandomStringName } from './integrations';
+import { request } from './common';
+import { ServerlessRoleName } from '../support/roles';
 
 export const savedQueryFixture = {
   id: generateRandomStringName(1)[0],

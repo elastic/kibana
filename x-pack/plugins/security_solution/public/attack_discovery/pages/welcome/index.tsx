@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { useConnectorSetup } from '@kbn/elastic-assistant/impl/connectorland/connector_setup';
-import { noop } from 'lodash/fp';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { noop } from 'lodash/fp';
 
 import * as i18n from './translations';
 

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
-import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
-import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
+import type { CasesPublicStartDependencies, CasesPublicSetupDependencies } from './types';
 import { CasesUiPlugin } from './plugin';
-import type { CasesPublicSetupDependencies, CasesPublicStartDependencies } from './types';
+import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 
 function getConfig(overrides = {}) {
   return {

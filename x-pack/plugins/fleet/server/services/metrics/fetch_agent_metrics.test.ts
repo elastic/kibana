@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import type { CoreSetup } from '@kbn/core/server';
 
 import { fetchAgentMetrics } from './fetch_agent_metrics';
 

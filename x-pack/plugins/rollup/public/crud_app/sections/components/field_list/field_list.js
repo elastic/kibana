@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import { EuiEmptyPrompt, EuiInMemoryTable } from '@elastic/eui';
+import { EuiInMemoryTable, EuiEmptyPrompt } from '@elastic/eui';
 
 export const FieldList = ({
   columns,

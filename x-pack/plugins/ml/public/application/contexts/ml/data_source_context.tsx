@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { parse } from 'query-string';
 import type { PropsWithChildren } from 'react';
 import React, { type FC, useCallback, useContext, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
-import { createSearchItems } from '../../jobs/new_job/utils/new_job_utils';
+import { parse } from 'query-string';
+import { i18n } from '@kbn/i18n';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import type { DataViewAndSavedSearch } from '../../util/index_utils';
 import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 import { useMlKibana } from '../kibana';
+import { createSearchItems } from '../../jobs/new_job/utils/new_job_utils';
 
 export interface DataSourceContextValue {
   combinedQuery: any;

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { EuiCallOutProps, EuiListGroupItemProps } from '@elastic/eui';
-import { EuiAccordion, EuiCallOut, EuiListGroup, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
+import type { EuiCallOutProps, EuiListGroupItemProps } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiAccordion, EuiListGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { VALIDATION_RESULT } from '@kbn/ml-category-validator';
 import {
-  CATEGORY_EXAMPLES_VALIDATION_STATUS,
   type CategorizationAnalyzer,
   type FieldExampleCheck,
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
   VALIDATION_CHECK_DESCRIPTION,
 } from '@kbn/ml-category-validator';
 

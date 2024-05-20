@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { RequestHandler } from '@kbn/core/server';
 
-import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mocks';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';

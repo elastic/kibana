@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '../../../../common/locators/paths';
-import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import { useKibana } from '../../../utils/kibana_react';
+import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import {
   ALERTS_TAB_ID,
   HISTORY_TAB_ID,

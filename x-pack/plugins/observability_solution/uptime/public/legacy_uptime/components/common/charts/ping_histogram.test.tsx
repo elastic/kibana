@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import DateMath from '@kbn/datemath';
 import React from 'react';
+import DateMath from '@kbn/datemath';
+import { PingHistogramComponent, PingHistogramComponentProps } from './ping_histogram';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { mockDataPlugin, mockMoment, mockMomentTimezone } from '../../../lib/helper/test_helpers';
-import { PingHistogramComponent, PingHistogramComponentProps } from './ping_histogram';
 
 describe('PingHistogram component', () => {
   let dateMathSpy: any;

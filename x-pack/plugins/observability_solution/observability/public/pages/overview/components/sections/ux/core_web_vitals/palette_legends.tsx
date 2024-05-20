@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  euiPaletteForStatus,
   EuiText,
   EuiToolTip,
-  euiPaletteForStatus,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useDarkMode } from '@kbn/kibana-react-plugin/public';
-import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
-import React from 'react';
 import styled from 'styled-components';
-import { Thresholds, getCoreVitalTooltipMessage } from './core_vital_item';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
+import { useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { getCoreVitalTooltipMessage, Thresholds } from './core_vital_item';
 import {
-  LEGEND_GOOD_LABEL,
   LEGEND_NEEDS_IMPROVEMENT_LABEL,
+  LEGEND_GOOD_LABEL,
   LEGEND_POOR_LABEL,
 } from './translations';
 

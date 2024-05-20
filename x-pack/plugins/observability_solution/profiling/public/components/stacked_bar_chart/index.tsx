@@ -13,15 +13,15 @@ import {
   ScaleType,
   Settings,
   StackMode,
-  Tooltip,
-  TooltipContainer,
-  XYChartElementEvent,
   timeFormatter,
+  Tooltip,
+  XYChartElementEvent,
+  TooltipContainer,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { TopNSample, TopNSubchart } from '../../../common/topn';
 import { useKibanaTimeZoneSetting } from '../../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';

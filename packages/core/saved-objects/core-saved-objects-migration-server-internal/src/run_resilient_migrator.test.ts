@@ -17,7 +17,7 @@ import { createInitialState } from './initial_state';
 import { waitGroup } from './kibana_migrator_utils';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { next } from './next';
-import { type RunResilientMigratorParams, runResilientMigrator } from './run_resilient_migrator';
+import { runResilientMigrator, type RunResilientMigratorParams } from './run_resilient_migrator';
 import {
   hashToVersionMapMock,
   indexTypesMapMock,

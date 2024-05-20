@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { uniq, pick, isEqual } from 'lodash';
 import { group } from 'd3-array';
-import { isEqual, pick, uniq } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -15,8 +15,8 @@ import type { Logger } from '@kbn/logging';
 import type { ItemSet, SignificantItem } from '@kbn/ml-agg-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
-import { LOG_RATE_ANALYSIS_SETTINGS, RANDOM_SAMPLER_SEED } from '../constants';
-import type { FetchFrequentItemSetsResponse, SignificantItemDuplicateGroup } from '../types';
+import { RANDOM_SAMPLER_SEED, LOG_RATE_ANALYSIS_SETTINGS } from '../constants';
+import type { SignificantItemDuplicateGroup, FetchFrequentItemSetsResponse } from '../types';
 
 interface FrequentItemSetsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {

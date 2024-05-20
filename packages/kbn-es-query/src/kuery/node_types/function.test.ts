@@ -8,18 +8,18 @@
 
 import { nodeTypes } from '.';
 
-import { DataViewBase } from '../../es_query';
-import { fields } from '../../filters/stubs/fields.mocks';
-import {
-  KqlIsFunctionNode,
-  toElasticsearchQuery as isFunctionToElasticsearchQuery,
-} from '../functions/is';
 import {
   buildNode,
   buildNodeWithArgumentNodes,
   toElasticsearchQuery,
   toKqlExpression,
 } from './function';
+import {
+  KqlIsFunctionNode,
+  toElasticsearchQuery as isFunctionToElasticsearchQuery,
+} from '../functions/is';
+import { DataViewBase } from '../../es_query';
+import { fields } from '../../filters/stubs/fields.mocks';
 
 describe('kuery node types', () => {
   describe('function', () => {

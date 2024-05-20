@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 import { batch } from 'react-redux';
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
 import { UI_SETTINGS } from '../../../common';
+import { useDashboardAPI } from '../dashboard_app';
+import { topNavStrings } from '../_dashboard_app_strings';
+import { ShowShareModal } from './share/show_share_modal';
+import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { DashboardRedirect } from '../../dashboard_container/types';
-import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
-import { pluginServices } from '../../services/plugin_services';
-import { topNavStrings } from '../_dashboard_app_strings';
-import { useDashboardAPI } from '../dashboard_app';
-import { ShowShareModal } from './share/show_share_modal';
+import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 
 export const useDashboardMenuItems = ({
   redirectTo,

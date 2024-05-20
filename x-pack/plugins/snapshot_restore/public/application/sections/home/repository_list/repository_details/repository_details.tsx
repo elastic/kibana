@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import React, { Fragment, useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -19,35 +20,34 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiCodeBlock,
+  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useState, useEffect } from 'react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { Error, SectionError } from '../../../../../shared_imports';
+import { SectionError, Error } from '../../../../../shared_imports';
 
 import { useCore, useServices } from '../../../../app_context';
 import {
-  cleanupRepository as cleanupRepositoryRequest,
   useLoadRepository,
   verifyRepository as verifyRepositoryRequest,
+  cleanupRepository as cleanupRepositoryRequest,
 } from '../../../../services/http';
-import { linkToEditRepository, linkToSnapshots } from '../../../../services/navigation';
 import { textService } from '../../../../services/text';
+import { linkToSnapshots, linkToEditRepository } from '../../../../services/navigation';
 
 import { REPOSITORY_TYPES } from '../../../../../../common';
 
 import {
   Repository,
-  RepositoryCleanup,
   RepositoryVerification,
+  RepositoryCleanup,
 } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
-  RepositoryVerificationBadge,
   SectionLoading,
+  RepositoryVerificationBadge,
 } from '../../../../components';
 import { TypeDetails } from './type_details';
 

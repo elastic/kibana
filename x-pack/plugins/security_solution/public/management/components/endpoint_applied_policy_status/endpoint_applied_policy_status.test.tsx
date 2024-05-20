@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { POLICY_STATUS_TO_TEXT } from '../../pages/endpoint_hosts/view/host_constants';
 import type { EndpointAppliedPolicyStatusProps } from './endpoint_applied_policy_status';
 import { EndpointAppliedPolicyStatus } from './endpoint_applied_policy_status';
+import React from 'react';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { POLICY_STATUS_TO_TEXT } from '../../pages/endpoint_hosts/view/host_constants';
 
 describe('when using EndpointPolicyStatus component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

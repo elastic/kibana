@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import React, { FunctionComponent, ReactElement, useState } from 'react';
 import {
-  EuiBasicTableColumn,
-  EuiButtonIcon,
-  EuiIcon,
   EuiInMemoryTable,
+  EuiIcon,
+  EuiButtonIcon,
+  EuiBasicTableColumn,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, ReactElement, useState } from 'react';
 import { FormattedStatus, getLevelSortValue } from '../lib';
 import { StatusExpandedRow } from './status_expanded_row';
 

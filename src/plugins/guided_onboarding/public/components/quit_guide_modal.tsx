@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 
 import {
+  EuiText,
   EuiButton,
   EuiButtonEmpty,
   EuiModal,
@@ -15,11 +16,10 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiText,
 } from '@elastic/eui';
-import { NotificationsStart } from '@kbn/core/public';
-import type { GuideState } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
+import type { GuideState } from '@kbn/guided-onboarding';
+import { NotificationsStart } from '@kbn/core/public';
 import { apiService } from '../services/api.service';
 
 interface QuitGuideModalProps {

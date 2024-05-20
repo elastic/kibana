@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import {
-  Aggregators,
   Comparator,
+  Aggregators,
   CustomMetricExpressionParams,
   SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';

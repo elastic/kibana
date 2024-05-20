@@ -13,12 +13,12 @@ import {
   logicalCSS,
   logicalCSSWithFallback,
 } from '@elastic/eui';
-import { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
 import { css } from '@emotion/react';
-import panelBgBottom from '../../assets/panel_bg_bottom.svg';
-import panelBgBottomDark from '../../assets/panel_bg_bottom_dark.svg';
+import { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
 import panelBgTop from '../../assets/panel_bg_top.svg';
 import panelBgTopDark from '../../assets/panel_bg_top_dark.svg';
+import panelBgBottom from '../../assets/panel_bg_bottom.svg';
+import panelBgBottomDark from '../../assets/panel_bg_bottom_dark.svg';
 
 /**
  *

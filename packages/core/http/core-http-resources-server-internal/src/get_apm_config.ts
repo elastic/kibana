@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getConfiguration, shouldInstrumentClient } from '@kbn/apm-config-loader';
 import agent, { AgentConfigOptions } from 'elastic-apm-node';
+import { getConfiguration, shouldInstrumentClient } from '@kbn/apm-config-loader';
 
 const OMIT_APM_CONFIG: Array<keyof AgentConfigOptions> = [
   'secretToken',

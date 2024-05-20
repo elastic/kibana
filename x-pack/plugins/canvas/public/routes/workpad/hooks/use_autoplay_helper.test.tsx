@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, PropsWithChildren } from 'react';
-import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
+import { renderHook } from '@testing-library/react-hooks';
 import { useAutoplayHelper } from './use_autoplay_helper';
+import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
 
 const getMockedContext = (context: any) =>
   ({
@@ -17,13 +17,12 @@ const getMockedContext = (context: any) =>
     autoplayInterval: 0,
     isAutoplayPaused: false,
     ...context,
-  }) as WorkpadRoutingContextType;
+  } as WorkpadRoutingContextType);
 
 const getContextWrapper: (context: WorkpadRoutingContextType) => FC<PropsWithChildren<unknown>> =
   (context) =>
-  ({ children }) => (
-    <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>
-  );
+  ({ children }) =>
+    <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;
 
 describe('useAutoplayHelper', () => {
   beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));

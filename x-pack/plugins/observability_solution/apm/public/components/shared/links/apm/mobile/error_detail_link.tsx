@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
-import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { TypeOf } from '@kbn/typed-react-router-config';
+import { EuiLink } from '@elastic/eui';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { mobileServiceDetailRoute } from '../../../../routing/mobile_service_detail';
 

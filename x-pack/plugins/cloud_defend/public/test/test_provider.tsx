@@ -6,14 +6,14 @@
  */
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import React, { useMemo, FC, PropsWithChildren } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { useMemo, FC, PropsWithChildren } from 'react';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import type { CloudDefendPluginStartDeps } from '../types';
 import './__mocks__/worker';
 import '@kbn/code-editor-mock/jest_helper';

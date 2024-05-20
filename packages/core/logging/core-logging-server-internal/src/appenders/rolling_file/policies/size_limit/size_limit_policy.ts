@@ -7,8 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { SizeLimitTriggeringPolicyConfig } from '@kbn/core-logging-server';
 import { LogRecord } from '@kbn/logging';
+import type { SizeLimitTriggeringPolicyConfig } from '@kbn/core-logging-server';
 import { RollingFileContext } from '../../rolling_file_context';
 import { TriggeringPolicy } from '../policy';
 

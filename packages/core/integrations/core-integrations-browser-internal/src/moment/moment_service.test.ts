@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { momentMock } from './moment_service.test.mocks';
+import { MomentService } from './moment_service';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { BehaviorSubject } from 'rxjs';
-import { MomentService } from './moment_service';
-import { momentMock } from './moment_service.test.mocks';
 
 describe('MomentService', () => {
   let service: MomentService;

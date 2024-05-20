@@ -6,12 +6,12 @@
  */
 
 import { API_URLS } from '../../../../common/constants';
+import { apiService } from './utils';
 import {
   FetchMonitorStatesQueryArgs,
   MonitorSummariesResult,
   MonitorSummariesResultType,
 } from '../../../../common/runtime_types';
-import { apiService } from './utils';
 
 export const fetchMonitorList = async (
   params: FetchMonitorStatesQueryArgs

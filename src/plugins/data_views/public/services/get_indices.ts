@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { sortBy } from 'lodash';
 import { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { sortBy } from 'lodash';
-import { INDEX_PATTERN_TYPE, Tag } from '../types';
+import { Tag, INDEX_PATTERN_TYPE } from '../types';
 import { MatchedItem, ResolveIndexResponse, ResolveIndexResponseItemIndexAttrs } from '../types';
 
 const aliasLabel = i18n.translate('dataViews.aliasLabel', { defaultMessage: 'Alias' });

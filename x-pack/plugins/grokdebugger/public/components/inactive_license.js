@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiCallOut,
-  EuiCode,
+  EuiText,
   EuiLink,
+  EuiCode,
   EuiPage,
   EuiPageBody,
   EuiPageSection,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 export const InactiveLicenseSlate = () => {
   const registerLicenseLinkLabel = i18n.translate('xpack.grokDebugger.registerLicenseLinkLabel', {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AuthHeaders } from './lifecycle';
 import type { KibanaRequest } from './router';
+import type { AuthHeaders } from './lifecycle';
 
 /**
  * Get headers to authenticate a user against Elasticsearch.

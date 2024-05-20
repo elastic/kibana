@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFlyoutFooter,
+  EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import React from 'react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 const SEARCH_OBJECT_TYPE = 'search';

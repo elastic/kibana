@@ -7,9 +7,9 @@
  */
 
 import RowParser from '../../../lib/row_parser';
-import { formatRequestBodyDoc } from '../../../lib/utils';
 import { ESRequest } from '../../../types';
 import { SenseEditor } from '../../models/sense_editor';
+import { formatRequestBodyDoc } from '../../../lib/utils';
 
 export function restoreRequestFromHistory(editor: SenseEditor, req: ESRequest) {
   const coreEditor = editor.getCoreEditor();

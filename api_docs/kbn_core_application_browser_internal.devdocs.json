@@ -26,7 +26,9 @@
         "tags": [],
         "label": "appendAppPath",
         "description": [],
-        "signature": ["(appBasePath?: string, path?: string) => string"],
+        "signature": [
+          "(appBasePath?: string, path?: string) => string"
+        ],
         "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +40,9 @@
             "tags": [],
             "label": "appBasePath",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -51,7 +55,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/append_app_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -157,7 +163,9 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -214,7 +222,9 @@
             "tags": [],
             "label": "currentUrl",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -233,7 +243,9 @@
         "description": [
           "\nConverts a relative path to an absolute url.\nImplementation is based on a specified behavior of the browser to automatically convert\na relative url to an absolute one when setting the `href` attribute of a `<a>` html element.\n"
         ],
-        "signature": ["(url: string) => string"],
+        "signature": [
+          "(url: string) => string"
+        ],
         "path": "packages/core/application/core-application-browser-internal/src/utils/relative_to_absolute.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -245,7 +257,9 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/relative_to_absolute.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -278,7 +292,9 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -302,7 +318,9 @@
                 "tags": [],
                 "label": "trailing",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -314,7 +332,9 @@
                 "tags": [],
                 "label": "leading",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -326,7 +346,9 @@
                 "tags": [],
                 "label": "duplicates",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/core/application/core-application-browser-internal/src/utils/remove_slashes.ts",
                 "deprecated": false,
                 "trackAdoption": false

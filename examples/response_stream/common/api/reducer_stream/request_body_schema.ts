@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 export const reducerStreamRequestBodySchema = schema.object({
   /** Boolean flag to enable/disable simulation of response errors. */

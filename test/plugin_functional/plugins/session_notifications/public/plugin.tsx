@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { AppPluginDependenciesSetup, AppPluginDependenciesStart } from './types';
+import { AppPluginDependenciesStart, AppPluginDependenciesSetup } from './types';
 
 export class SessionNotificationsPlugin implements Plugin {
   private sessionIds: Array<string | undefined> = [];

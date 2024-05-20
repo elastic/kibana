@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { TestProviders } from '../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
 import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import type { SeverityCount } from '../severity/types';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
-import { TestProviders } from '../../../common/mock';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
-import type { SeverityCount } from '../severity/types';
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockedUseKibana = mockUseKibana();

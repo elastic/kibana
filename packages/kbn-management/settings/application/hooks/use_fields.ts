@@ -7,9 +7,9 @@
  */
 
 import { Query } from '@elastic/eui';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { FieldDefinition } from '@kbn/management-settings-types';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { useServices } from '../services';
 import { useSettings } from './use_settings';
 

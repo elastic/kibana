@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import React, { useState } from 'react';
+import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import { EXPAND_TAGS_LABEL } from './labels';
 
 interface Props {

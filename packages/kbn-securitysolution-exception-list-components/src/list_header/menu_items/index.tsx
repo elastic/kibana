@@ -7,11 +7,11 @@
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import React, { FC, useMemo } from 'react';
-import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
 import { HeaderMenu } from '../../header_menu';
+import { headerMenuCss, noLinkedRulesCss } from '../list_header.styles';
 import * as i18n from '../../translations';
 import { Rule } from '../../types';
-import { headerMenuCss, noLinkedRulesCss } from '../list_header.styles';
+import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
 interface MenuItemsProps {
   isReadonly: boolean;
   dataTestSubj?: string;

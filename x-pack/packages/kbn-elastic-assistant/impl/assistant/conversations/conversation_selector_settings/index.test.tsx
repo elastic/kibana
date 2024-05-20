@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render } from '@testing-library/react';
 import { ConversationSelectorSettings } from '.';
 import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversation';
 

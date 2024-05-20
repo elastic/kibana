@@ -10,10 +10,10 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   CodeBox,
-  LanguageDefinition,
-  LanguageDefinitionSnippetArguments,
   getConsoleRequest,
   getLanguageDefinitionCodeSnippet,
+  LanguageDefinition,
+  LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 
 import { KibanaDeps } from '../../../../../common/types';

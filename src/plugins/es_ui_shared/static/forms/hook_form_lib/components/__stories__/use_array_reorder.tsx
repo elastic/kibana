@@ -1,16 +1,3 @@
-import {
-  DropResult,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -19,12 +6,25 @@ import {
  * Side Public License, v 1.
  */
 import React from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiDragDropContext,
+  EuiDroppable,
+  EuiDraggable,
+  EuiTitle,
+  DropResult,
+  EuiIcon,
+} from '@elastic/eui';
 
 import { TextField } from '../../../components';
 import { fieldValidators } from '../../../helpers';
 import { FormConfig } from '../../types';
-import { UseArray } from '../use_array';
 import { UseField } from '../use_field';
+import { UseArray } from '../use_array';
 import { FormWrapper } from './form_utils';
 
 const { emptyField } = fieldValidators;

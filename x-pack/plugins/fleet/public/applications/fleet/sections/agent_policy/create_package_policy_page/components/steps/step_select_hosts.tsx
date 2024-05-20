@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { SO_SEARCH_LIMIT } from '../../../../../constants';
 import { useGetAgentPolicies } from '../../../../../hooks';
 import type { AgentPolicy, NewAgentPolicy, PackageInfo } from '../../../../../types';
 import { AgentPolicyIntegrationForm } from '../../../components';
+import { SO_SEARCH_LIMIT } from '../../../../../constants';
 import type { ValidationResults } from '../../../components/agent_policy_validation';
 
 import { incrementPolicyName } from '../../../../../services';

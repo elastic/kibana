@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { ServiceNowSIRFieldsType } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorCard } from '../card';
 import type { ConnectorFieldsPreviewProps } from '../types';
-import { choicesToEuiOptions } from './helpers';
-import type { Fields } from './types';
+import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
+import type { Fields } from './types';
+import { choicesToEuiOptions } from './helpers';
 
-import { DeprecatedCallout } from '../deprecated_callout';
 import * as i18n from './translations';
+import { DeprecatedCallout } from '../deprecated_callout';
 
 const choicesToGet = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {

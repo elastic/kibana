@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import type Boom from '@hapi/boom';
+import { Observable } from 'rxjs';
 import type {
-  ActionsApiRequestHandlerContext,
-  PluginStartContract as ActionsPluginsStartContact,
-} from '@kbn/actions-plugin/server';
-import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import {
-  PluginSetupContract as AlertingPluginSetupContract,
-  PluginStartContract as AlertingPluginStartContract,
-} from '@kbn/alerting-plugin/server';
-import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { TypeOf } from '@kbn/config-schema';
-import type {
-  CustomRequestHandlerContext,
-  ElasticsearchClient,
-  ICustomClusterClient,
   IRouter,
   Logger,
+  ICustomClusterClient,
+  CustomRequestHandlerContext,
+  ElasticsearchClient,
 } from '@kbn/core/server';
-import { Headers, RouteConfig, RouteMethod } from '@kbn/core/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
-import { InfraPluginSetup, InfraRequestHandlerContext } from '@kbn/infra-plugin/server';
-import { ILicense, LicenseFeature } from '@kbn/licensing-plugin/server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
-import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import type Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { Observable } from 'rxjs';
-import { RulesByType } from '../common/types/alerts';
+import { TypeOf } from '@kbn/config-schema';
+import { LicenseFeature, ILicense } from '@kbn/licensing-plugin/server';
+import type {
+  PluginStartContract as ActionsPluginsStartContact,
+  ActionsApiRequestHandlerContext,
+} from '@kbn/actions-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import {
+  PluginStartContract as AlertingPluginStartContract,
+  PluginSetupContract as AlertingPluginSetupContract,
+} from '@kbn/alerting-plugin/server';
+import { InfraPluginSetup, InfraRequestHandlerContext } from '@kbn/infra-plugin/server';
+import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { RouteConfig, RouteMethod, Headers } from '@kbn/core/server';
+import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
-import { MonitoringConfig, configSchema } from './config';
+import { RulesByType } from '../common/types/alerts';
+import { configSchema, MonitoringConfig } from './config';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;

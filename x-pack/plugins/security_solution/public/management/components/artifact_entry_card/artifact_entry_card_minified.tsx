@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React, { memo, useCallback, useState, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import {
+  EuiPanel,
   EuiAccordion,
-  EuiButtonEmpty,
+  EuiTitle,
   EuiCheckbox,
+  EuiSplitPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiSplitPanel,
-  EuiTitle,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { memo, useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { CriteriaConditionsProps } from './components/criteria_conditions';
 import { CriteriaConditions } from './components/criteria_conditions';
-import { DescriptionField } from './components/description_field';
-import { DESCRIPTION_LABEL } from './components/translations';
-import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import type { AnyArtifact } from './types';
+import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { DESCRIPTION_LABEL } from './components/translations';
+import { DescriptionField } from './components/description_field';
 
 const CardContainerPanel = styled(EuiSplitPanel.Outer)`
   &.artifactEntryCardMinified + &.artifactEntryCardMinified {

@@ -18,8 +18,7 @@ export const SEARCH_QUERY_LANGUAGE = {
 /**
  * Type for SearchQueryLanguage
  */
-export type SearchQueryLanguage =
-  (typeof SEARCH_QUERY_LANGUAGE)[keyof typeof SEARCH_QUERY_LANGUAGE];
+export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
 
 /**
  * Placeholder for the structure for a saved search query.

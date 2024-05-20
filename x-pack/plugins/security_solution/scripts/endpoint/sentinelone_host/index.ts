@@ -5,23 +5,28 @@
  * 2.0.
  */
 
-import { ok } from 'assert';
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
-import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
+import { ok } from 'assert';
 import {
   isFleetServerRunning,
   startFleetServer,
 } from '../common/fleet_server/fleet_server_services';
+import type { HostVm } from '../common/types';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import {
-  DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
   addSentinelOneIntegrationToAgentPolicy,
+  DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
   enrollHostVmWithFleet,
   fetchAgentPolicy,
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
-import { createKbnClient } from '../common/stack_services';
-import type { HostVm } from '../common/types';
+import {
+  createDetectionEngineSentinelOneRuleIfNeeded,
+  createSentinelOneStackConnectorIfNeeded,
+  installSentinelOneAgent,
+  S1Client,
+} from './common';
 import {
   createMultipassHostVmClient,
   createVm,
@@ -29,12 +34,7 @@ import {
   generateVmName,
   getMultipassVmCountNotice,
 } from '../common/vm_services';
-import {
-  S1Client,
-  createDetectionEngineSentinelOneRuleIfNeeded,
-  createSentinelOneStackConnectorIfNeeded,
-  installSentinelOneAgent,
-} from './common';
+import { createKbnClient } from '../common/stack_services';
 
 export const cli = async () => {
   // TODO:PT add support for CPU, Disk and Memory input args

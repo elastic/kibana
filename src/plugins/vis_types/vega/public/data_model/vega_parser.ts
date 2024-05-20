@@ -6,36 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { euiPaletteColorBlind } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
-import versionCompare from 'compare-versions';
-import hjson from 'hjson';
 import _ from 'lodash';
 import schemaParser from 'vega-schema-url-parser';
+import versionCompare from 'compare-versions';
+import hjson from 'hjson';
+import { euiPaletteColorBlind } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 
-import { None, Warn, logger, version as vegaVersion } from 'vega';
-import { TopLevelSpec, compile, version as vegaLiteVersion } from 'vega-lite';
-import type { IServiceSettings } from '../vega_view/vega_map_view/service_settings/service_settings_types';
-import { EmsFileParser } from './ems_file_parser';
+import { logger, Warn, None, version as vegaVersion } from 'vega';
+import { compile, TopLevelSpec, version as vegaLiteVersion } from 'vega-lite';
 import { EsQueryParser } from './es_query_parser';
+import { Utils } from './utils';
+import { EmsFileParser } from './ems_file_parser';
+import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
+import type { IServiceSettings } from '../vega_view/vega_map_view/service_settings/service_settings_types';
 import {
   Bool,
-  ControlsDirection,
-  ControlsLocation,
   Data,
-  DstObj,
-  KibanaConfig,
-  PendingType,
-  TooltipConfig,
-  UrlParserConfig,
-  VegaConfig,
   VegaSpec,
+  VegaConfig,
+  TooltipConfig,
+  DstObj,
+  UrlParserConfig,
+  PendingType,
+  ControlsLocation,
+  ControlsDirection,
+  KibanaConfig,
 } from './types';
-import { UrlParser } from './url_parser';
-import { Utils } from './utils';
 
 // Set default single color to match other Kibana visualizations
 const defaultColor: string = euiPaletteColorBlind()[0];

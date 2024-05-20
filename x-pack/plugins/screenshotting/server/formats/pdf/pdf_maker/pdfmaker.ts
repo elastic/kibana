@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import path from 'path';
 import type { Logger, PackageInfo } from '@kbn/core/server';
 import { SerializableRecord } from '@kbn/utility-types';
+import path from 'path';
 import { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
 import { MessageChannel, MessagePort, Worker } from 'worker_threads';
-import { errors } from '../../../../common';
 import type { Layout } from '../../../layouts';
+import { errors } from '../../../../common';
 import {
   headingHeight,
   pageMarginBottom,

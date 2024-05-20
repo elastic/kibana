@@ -16,6 +16,16 @@ import { createRule } from '../../../../../../tasks/api_calls/rules';
 import { login } from '../../../../../../tasks/login';
 import { visit } from '../../../../../../tasks/navigation';
 
+import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
+import {
+  assertNumberLinkedRules,
+  createSharedExceptionList,
+  deleteExceptionListWithoutRuleReferenceByListId,
+  deleteExceptionListWithRuleReferenceByListId,
+  exportExceptionList,
+  linkRulesToExceptionList,
+  waitForExceptionsTableToBeLoaded,
+} from '../../../../../../tasks/exceptions_table';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
@@ -24,16 +34,6 @@ import {
   createExceptionList,
   deleteExceptionLists,
 } from '../../../../../../tasks/api_calls/exceptions';
-import {
-  assertNumberLinkedRules,
-  createSharedExceptionList,
-  deleteExceptionListWithRuleReferenceByListId,
-  deleteExceptionListWithoutRuleReferenceByListId,
-  exportExceptionList,
-  linkRulesToExceptionList,
-  waitForExceptionsTableToBeLoaded,
-} from '../../../../../../tasks/exceptions_table';
-import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 
 import { TOASTER } from '../../../../../../screens/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';

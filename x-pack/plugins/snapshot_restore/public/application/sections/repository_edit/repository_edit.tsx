@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiCallOut, EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
-import { EmptyRepository, Repository } from '../../../../common/types';
+import { EuiCallOut, EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { Repository, EmptyRepository } from '../../../../common/types';
 
-import { Error, PageError, SectionError } from '../../../shared_imports';
-import { useServices } from '../../app_context';
-import { PageLoading, RepositoryForm } from '../../components';
+import { PageError, SectionError, Error } from '../../../shared_imports';
+import { RepositoryForm, PageLoading } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
-import { useDecodedParams } from '../../lib';
-import { editRepository, useLoadRepository } from '../../services/http';
+import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
+import { editRepository, useLoadRepository } from '../../services/http';
+import { useDecodedParams } from '../../lib';
 
 interface MatchParams {
   name: string;

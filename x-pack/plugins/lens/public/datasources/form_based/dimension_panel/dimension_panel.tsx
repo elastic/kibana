@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { HttpSetup, IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import React, { memo } from 'react';
-import { DateRange } from '../../../../common/types';
-import { DatasourceDimensionEditorProps, DatasourceDimensionTriggerProps } from '../../../types';
+import type { IUiSettingsClient, HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../../types';
 import { GenericIndexPatternColumn } from '../form_based';
 import { FormBasedPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';
+import { DateRange } from '../../../../common/types';
 import { getOperationSupportMatrix } from './operation_support';
 
 export type FormBasedDimensionTriggerProps =

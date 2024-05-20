@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React, { CSSProperties, useCallback, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
-import React, { CSSProperties, useCallback, useMemo, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { ConsoleMenu } from '../../../components';
 import {
+  useServicesContext,
   useEditorReadContext,
   useRequestActionContext,
-  useServicesContext,
 } from '../../../contexts';
 import {
-  useResizeCheckerUtils,
   useSetInitialValue,
   useSetupAutocompletePolling,
   useSetupAutosave,
+  useResizeCheckerUtils,
 } from './hooks';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectOverviewState } from '../../../state';
 
 export const useCanUsePublicLocById = (configId: string) => {

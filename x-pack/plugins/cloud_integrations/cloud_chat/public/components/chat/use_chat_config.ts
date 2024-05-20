@@ -8,8 +8,8 @@
 import React, { useEffect, useRef, useState, CSSProperties } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useChat } from '../../services';
-import { Props as ChatProps } from './chat';
 import { getChatContext } from './get_chat_context';
+import { Props as ChatProps } from './chat';
 
 type UseChatType =
   | { enabled: false }
@@ -139,13 +139,10 @@ export const useChatConfig = ({
           const styles = message.data.styles || ({} as CSSProperties);
           // camelize to avoid style warnings from react
           const camelize = (s: string) => s.replace(/-./g, (x) => x[1].toUpperCase());
-          const camelStyles = Object.keys(styles).reduce(
-            (acc, key) => {
-              acc[camelize(key)] = styles[key];
-              return acc;
-            },
-            {} as Record<string, string>
-          ) as CSSProperties;
+          const camelStyles = Object.keys(styles).reduce((acc, key) => {
+            acc[camelize(key)] = styles[key];
+            return acc;
+          }, {} as Record<string, string>) as CSSProperties;
           setStyle({ ...style, ...camelStyles });
 
           if (!isResized) {

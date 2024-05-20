@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { useGlobalTime } from '../../../../../common/containers/use_global_time';
-import { TestProviders } from '../../../../../common/mock';
-import * as i18n from '../translations';
 import { useSocTrends } from './use_soc_trends';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { TestProviders } from '../../../../../common/mock';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import * as i18n from '../translations';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

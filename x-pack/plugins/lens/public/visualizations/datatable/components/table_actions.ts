@@ -10,14 +10,15 @@ import type {
   EuiDataGridSchemaDetector,
   EuiDataGridSorting,
 } from '@elastic/eui';
-import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import type {
   Datatable,
   DatatableColumn,
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { getSortingCriteria } from '@kbn/sort-predicates';
+import { i18n } from '@kbn/i18n';
+import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
 import type {
   ColumnConfig,
   ColumnConfigArg,
@@ -26,7 +27,6 @@ import type {
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { FormatFactory } from '../../../../common/types';
 import { buildColumnsMetaLookup } from './helpers';
-import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
 
 export const createGridResizeHandler =
   (

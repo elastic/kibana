@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
-import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { isEmpty, reduce } from 'lodash';
 import type { DefaultValues } from 'react-hook-form';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
 
 export type ECSMappingArray = Array<{
   key: string;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { BehaviorSubject, of } from 'rxjs';
-import { allowedExperimentalValues } from '../common/experimental_features';
-import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
-import type { ContractStartServices, PluginSetup, PluginStart } from './types';
+import { allowedExperimentalValues } from '../common/experimental_features';
+import type { PluginStart, PluginSetup, ContractStartServices } from './types';
+import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 
 const upselling = new UpsellingService();
 const onboardingPageService = new OnboardingPageService();

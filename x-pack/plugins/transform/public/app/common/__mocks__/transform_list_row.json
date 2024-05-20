@@ -2,9 +2,11 @@
   "config": {
     "id": "fq_date_histogram_1m_1441",
     "source": {
-      "index": ["farequote-2019"],
+      "index": [
+        "farequote-2019"
+      ],
       "query": {
-        "match_all": {}
+        "match_all": { }
       }
     },
     "dest": {

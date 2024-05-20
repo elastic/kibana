@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { call, cps, put, select, takeLatest } from 'redux-saga/effects';
 import actionCreatorFactory, { Action } from 'typescript-fsa';
-import { GraphState, GraphStoreDependencies, submitSearch } from '.';
-import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
+import { i18n } from '@kbn/i18n';
+import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import { GraphWorkspaceSavedObject, Workspace } from '../types';
+import { GraphStoreDependencies, GraphState, submitSearch } from '.';
+import { datasourceSelector } from './datasource';
+import { setDatasource, IndexpatternDatasource } from './datasource';
+import { loadFields, selectedFieldsSelector } from './fields';
+import { updateSettings, settingsSelector } from './advanced_settings';
+import { loadTemplates, templatesSelector } from './url_templates';
 import {
-  appStateToSavedWorkspace,
-  lookupIndexPatternId,
   migrateLegacyIndexPatternRef,
   savedWorkspaceToAppState,
+  appStateToSavedWorkspace,
+  lookupIndexPatternId,
 } from '../services/persistence';
-import { SaveWorkspaceHandler, openSaveModal } from '../services/save_modal';
+import { updateMetaData, metaDataSelector } from './meta_data';
+import { openSaveModal, SaveWorkspaceHandler } from '../services/save_modal';
 import { getEditPath } from '../services/url';
-import { GraphWorkspaceSavedObject, Workspace } from '../types';
-import { settingsSelector, updateSettings } from './advanced_settings';
-import { datasourceSelector } from './datasource';
-import { IndexpatternDatasource, setDatasource } from './datasource';
-import { loadFields, selectedFieldsSelector } from './fields';
-import { metaDataSelector, updateMetaData } from './meta_data';
-import { loadTemplates, templatesSelector } from './url_templates';
+import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
 
 export interface LoadSavedWorkspacePayload {
   dataViews: DataViewListItem[];

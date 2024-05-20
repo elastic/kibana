@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { NumberRowModel } from './number_row';
-import { NumberListRange } from './range';
 import {
   getInitModelList,
-  getNextModel,
-  getRange,
-  getValidatedModels,
   hasInvalidValues,
   parse,
   validateValue,
+  getNextModel,
+  getRange,
+  getValidatedModels,
 } from './utils';
+import { NumberListRange } from './range';
+import { NumberRowModel } from './number_row';
 
 describe('NumberList utils', () => {
   let modelList: NumberRowModel[];

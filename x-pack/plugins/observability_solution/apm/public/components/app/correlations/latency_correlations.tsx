@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { orderBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { orderBy } from 'lodash';
 
 import {
-  EuiBadge,
+  EuiIcon,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
-import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
+import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { i18n } from '@kbn/i18n';
 
@@ -28,9 +28,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
-import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
+import { asPreciseDecimal } from '../../../../common/utils/formatters';
+import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -39,19 +39,19 @@ import { DurationDistributionChart } from '../../shared/charts/duration_distribu
 import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
 import { push } from '../../shared/links/url_helpers';
 
-import { useTheme } from '../../../hooks/use_theme';
-import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
-import { ChartTitleToolTip } from './chart_title_tool_tip';
-import { OnAddFilter } from './context_popover/field_stats_popover';
 import { CorrelationsTable } from './correlations_table';
-import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
-import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
-import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
-import { CorrelationsProgressControls } from './progress_controls';
-import { useLatencyCorrelations } from './use_latency_correlations';
-import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { getOverallHistogram } from './utils/get_overall_histogram';
+import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
+import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
+import { CorrelationsProgressControls } from './progress_controls';
+import { OnAddFilter } from './context_popover/field_stats_popover';
+import { useLatencyCorrelations } from './use_latency_correlations';
+import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
+import { useTheme } from '../../../hooks/use_theme';
+import { ChartTitleToolTip } from './chart_title_tool_tip';
+import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
+import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 
 export function FallbackCorrelationBadge() {
   return (

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
-import * as t from 'io-ts';
 
 import type {
   HealthInterval,

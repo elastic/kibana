@@ -8,8 +8,12 @@
       "from": "",
       "size": ""
     },
-    "methods": ["GET"],
-    "patterns": ["_query_rules"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_query_rules"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-query-rulesets.html",
     "availability": {
       "stack": true,

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as t from 'io-ts';
+import { fold } from 'fp-ts/lib/Either';
+import { exactCheck, formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   NamespaceType,
   NonEmptyEntriesArray,
   foundExceptionListItemSchema,
   nonEmptyEndpointEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { exactCheck, formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as t from 'io-ts';
 
 import { ExceptionListClient } from '../services/exception_lists/exception_list_client';
 

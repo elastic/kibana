@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React from 'react';
+import { isEmpty } from 'lodash/fp';
 import {
   EuiDescriptionList,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
   EuiText,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
+import type {
+  Type,
+  ThreatMapping as ThreatMappingType,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldIcon } from '@kbn/react-field';
-import type {
-  ThreatMapping as ThreatMappingType,
-  Type,
-} from '@kbn/securitysolution-io-ts-alerting-types';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { isEmpty } from 'lodash/fp';
-import React from 'react';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   RequiredFieldArray,
@@ -35,29 +35,29 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
-import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import * as descriptionStepI18n from '../../../rule_creation_ui/components/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
-import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/description_step/alert_suppression_label';
+import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import * as threatMatchI18n from '../../../../common/components/threat_match/translations';
+import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
+import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import type { Duration } from '../../../../detections/pages/detection_engine/rules/types';
-import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
-import * as timelinesI18n from '../../../../timelines/components/timeline/translations';
-import { MlJobLink } from '../../../rule_creation/components/ml_job_link/ml_job_link';
+import { convertHistoryStartToSize } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { MlJobsDescription } from '../../../rule_creation/components/ml_jobs_description/ml_jobs_description';
-import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/description_step/alert_suppression_label';
-import * as descriptionStepI18n from '../../../rule_creation_ui/components/description_step/translations';
-import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
-import { useAlertSuppression } from '../../logic/use_alert_suppression';
+import { MlJobLink } from '../../../rule_creation/components/ml_job_link/ml_job_link';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
+import * as i18n from './translations';
+import { useAlertSuppression } from '../../logic/use_alert_suppression';
 import {
   filtersStyles,
   queryStyles,
   useRequiredFieldsStyles,
 } from './rule_definition_section.styles';
-import * as i18n from './translations';
 
 interface SavedQueryNameProps {
   savedQueryName: string;

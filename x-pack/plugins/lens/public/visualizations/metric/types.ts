@@ -6,7 +6,7 @@
  */
 
 import type { LayoutDirection } from '@elastic/charts';
-import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import type { LayerType } from '../../../common/types';
 

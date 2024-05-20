@@ -6,7 +6,7 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 import { KueryNode } from '@kbn/es-query';
-import { BulkEditResponse, SnoozeSchedule } from '../../../types';
+import { SnoozeSchedule, BulkEditResponse } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 function rewriteSnoozeSchedule({ id, duration, rRule }: SnoozeSchedule) {

@@ -7,17 +7,17 @@
 
 import React, { useMemo } from 'react';
 
-import type { GroupTableItem, TableItemAction } from '@kbn/aiops-components';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { SIGNIFICANT_ITEM_TYPE, type SignificantItem, isSignificantItem } from '@kbn/ml-agg-utils';
-import type { SerializableRecord } from '@kbn/utility-types';
+import { isSignificantItem, type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
+import type { GroupTableItem, TableItemAction } from '@kbn/aiops-components';
 
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
-import { getTableItemAsKQL } from './get_table_item_as_kql';
 import { TableActionButton } from './table_action_button';
+import { getTableItemAsKQL } from './get_table_item_as_kql';
 
 const isLogPattern = (tableItem: SignificantItem | GroupTableItem) =>
   isSignificantItem(tableItem) && tableItem.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN;

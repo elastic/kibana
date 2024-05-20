@@ -8,7 +8,7 @@
 
 import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import { getBaseMappings } from './build_active_mappings';
-import { getUpdatedRootFields, getUpdatedTypes } from './compare_mappings';
+import { getUpdatedTypes, getUpdatedRootFields } from './compare_mappings';
 
 describe('getUpdatedTypes', () => {
   test('returns all types if _meta is missing in indexMappings', () => {

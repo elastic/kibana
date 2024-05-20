@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiIcon, EuiToolTip, IconSize } from '@elastic/eui';
 import { CSSInterpolation } from '@emotion/serialize';
-import React from 'react';
 import { getCloudProviderNameFromAbbreviation } from '../../common/utils/helpers';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { httpServiceMock } from '@kbn/core/public/mocks';
 import { RuleType } from '../../../types';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRuleTypes } from './rule_types';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 const http = httpServiceMock.createStartContract();
 

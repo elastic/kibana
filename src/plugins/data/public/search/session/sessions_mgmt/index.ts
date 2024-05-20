@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from '@kbn/core/public';
 import { CoreSetup } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ISessionsClient, SearchUsageCollector } from '../../..';
-import { SearchSessionsConfigSchema } from '../../../../config';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
+import { SearchSessionsConfigSchema } from '../../../../config';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFormContext } from 'react-hook-form';
 import { QUERY_TIMEOUT } from '../../../common/constants';

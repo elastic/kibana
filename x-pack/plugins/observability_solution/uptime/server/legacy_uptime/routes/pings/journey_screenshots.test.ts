@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { IKibanaResponse } from '@kbn/core-http-server';
+import { createJourneyScreenshotRoute, ClientContract } from './journey_screenshots';
 import { UMServerLibs } from '../../uptime_server';
-import { ClientContract, createJourneyScreenshotRoute } from './journey_screenshots';
 
 describe('journey screenshot route', () => {
   let handlerContext: any;

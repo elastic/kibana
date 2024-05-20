@@ -8,10 +8,10 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { ContainerMetricTypes } from '../charts/types';
 import {
-  useDockerContainerKpiCharts,
-  useDockerContainerPageViewMetricsCharts,
-  useK8sContainerKpiCharts,
   useK8sContainerPageViewMetricsCharts,
+  useDockerContainerPageViewMetricsCharts,
+  useDockerContainerKpiCharts,
+  useK8sContainerKpiCharts,
 } from './use_container_metrics_charts';
 
 const metricsDataViewId = 'metricsDataViewId';

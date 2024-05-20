@@ -7,11 +7,11 @@
 
 import {
   Chart,
+  isMetricElementEvent,
   LEGACY_DARK_THEME,
   Metric,
   MetricTrendShape,
   Settings,
-  isMetricElementEvent,
 } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { css } from '@emotion/react';

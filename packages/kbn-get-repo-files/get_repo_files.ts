@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { RepoPath } from '@kbn/repo-path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getRepoRels } from '@kbn/repo-packages';
-import { RepoPath } from '@kbn/repo-path';
 
 /**
  * List the files in the repo, only including files which are manged by version

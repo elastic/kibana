@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { fetchStreaming } from './fetch_streaming';
+import { mockXMLHttpRequest } from '../test_helpers/xhr';
 import { promisify } from 'util';
 import { deflate } from 'zlib';
-import { mockXMLHttpRequest } from '../test_helpers/xhr';
-import { fetchStreaming } from './fetch_streaming';
 const pDeflate = promisify(deflate);
 
 const compressResponse = async (resp: any) => {

@@ -9,8 +9,8 @@
 import React from 'react';
 
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 
 export const DashboardAppNoDataPage = ({
   onDataViewCreated,

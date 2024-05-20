@@ -7,30 +7,30 @@
 
 import type { Readable } from 'stream';
 import type {
-  BaseActionRequestBody,
-  ExecuteActionRequestBody,
-  GetProcessesRequestBody,
-  IsolationRouteRequestBody,
-  ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
-} from '../../../../../../common/api/endpoint';
-import type {
   ActionDetails,
-  EndpointActionData,
-  GetProcessesActionOutputContent,
   KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
-  LogsEndpointActionResponse,
-  ResponseActionExecuteOutputContent,
+  ResponseActionParametersWithPidOrEntityId,
+  SuspendProcessActionOutputContent,
+  GetProcessesActionOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionExecuteOutputContent,
+  ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
-  ResponseActionsExecuteParameters,
-  SuspendProcessActionOutputContent,
+  EndpointActionData,
+  LogsEndpointActionResponse,
   UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
+import type {
+  IsolationRouteRequestBody,
+  GetProcessesRequestBody,
+  ResponseActionGetFileRequestBody,
+  ExecuteActionRequestBody,
+  UploadActionApiRequestBody,
+  BaseActionRequestBody,
+} from '../../../../../../common/api/endpoint';
 
 type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
   T,

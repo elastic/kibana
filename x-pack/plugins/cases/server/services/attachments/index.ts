@@ -15,33 +15,22 @@ import type {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression } from '@kbn/es-query';
+import { AttachmentAttributesRt, AttachmentType } from '../../../common/types/domain';
+import { decodeOrThrow } from '../../common/runtime_types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   FILE_ATTACHMENT_TYPE,
 } from '../../../common/constants';
-import { AttachmentAttributesRt, AttachmentType } from '../../../common/types/domain';
-import type { AggregationResponse } from '../../client/metrics/types';
 import { buildFilter, combineFilters } from '../../client/utils';
-import { isSOError } from '../../common/error';
-import { decodeOrThrow } from '../../common/runtime_types';
-import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
-import type {
-  AttachmentPersistedAttributes,
-  AttachmentSavedObjectTransformed,
-  AttachmentTransformedAttributes,
-} from '../../common/types/attachments';
-import {
-  AttachmentPartialAttributesRt,
-  AttachmentTransformedAttributesRt,
-} from '../../common/types/attachments';
 import { defaultSortField } from '../../common/utils';
+import type { AggregationResponse } from '../../client/metrics/types';
 import {
   extractAttachmentSORefsFromAttributes,
   injectAttachmentSOAttributesFromRefs,
   injectAttachmentSOAttributesFromRefsForPatch,
 } from '../so_references';
-import { AttachmentGetter } from './operations/get';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import type {
   AlertsAttachedToCaseArgs,
   AttachmentsAttachedToCaseArgs,
@@ -51,9 +40,20 @@ import type {
   CreateAttachmentArgs,
   DeleteAttachmentArgs,
   ServiceContext,
-  UpdateArgs,
   UpdateAttachmentArgs,
+  UpdateArgs,
 } from './types';
+import { AttachmentGetter } from './operations/get';
+import type {
+  AttachmentPersistedAttributes,
+  AttachmentTransformedAttributes,
+  AttachmentSavedObjectTransformed,
+} from '../../common/types/attachments';
+import {
+  AttachmentTransformedAttributesRt,
+  AttachmentPartialAttributesRt,
+} from '../../common/types/attachments';
+import { isSOError } from '../../common/error';
 
 export class AttachmentService {
   private readonly _getter: AttachmentGetter;

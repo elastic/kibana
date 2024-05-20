@@ -135,7 +135,9 @@
       "tags": [],
       "label": "ExpressionRevealImagePluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "src/plugins/expression_reveal_image/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -157,7 +159,9 @@
       "tags": [],
       "label": "ExpressionRevealImagePluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "src/plugins/expression_reveal_image/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -200,7 +204,9 @@
         "tags": [],
         "label": "BASE64",
         "description": [],
-        "signature": ["\"`base64`\""],
+        "signature": [
+          "\"`base64`\""
+        ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -213,7 +219,10 @@
         "tags": [],
         "label": "functions",
         "description": [],
-        "signature": ["ExpressionRevealImageFunction", "[]"],
+        "signature": [
+          "ExpressionRevealImageFunction",
+          "[]"
+        ],
         "path": "src/plugins/expression_reveal_image/common/expression_functions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -226,7 +235,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"expressionRevealImage\""],
+        "signature": [
+          "\"expressionRevealImage\""
+        ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -239,7 +250,9 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": ["\"expressionRevealImage\""],
+        "signature": [
+          "\"expressionRevealImage\""
+        ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -252,7 +265,9 @@
         "tags": [],
         "label": "URL",
         "description": [],
-        "signature": ["\"URL\""],
+        "signature": [
+          "\"URL\""
+        ],
         "path": "src/plugins/expression_reveal_image/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

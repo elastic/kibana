@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 import * as rt from 'io-ts';
+import { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 
 export type { JsonArray, JsonObject, JsonValue };
 

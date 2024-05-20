@@ -1,13 +1,3 @@
-import {
-  EuiButtonGroup,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -16,17 +6,27 @@ import {
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import {
-  TREE_NAVIGATION_COLLAPSE,
-  TREE_NAVIGATION_EXPAND,
+  EuiButtonGroup,
+  useGeneratedHtmlId,
+  EuiText,
+  EuiSpacer,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
+import {
   TREE_VIEW_INFRASTRUCTURE_VIEW,
   TREE_VIEW_LOGICAL_VIEW,
   TREE_VIEW_SWITCHER_LEGEND,
+  TREE_NAVIGATION_COLLAPSE,
+  TREE_NAVIGATION_EXPAND,
 } from '../../../../common/translations';
-import { useTreeViewContext } from '../contexts';
+import { useStyles } from './styles';
 import { DynamicTreeView } from '../dynamic_tree_view';
 import { INFRASTRUCTURE, LOGICAL, TREE_VIEW } from './constants';
-import { useStyles } from './styles';
 import { TreeViewKind, TreeViewOptionsGroup } from './types';
+import { useTreeViewContext } from '../contexts';
 
 export const TreeNav = () => {
   const styles = useStyles();

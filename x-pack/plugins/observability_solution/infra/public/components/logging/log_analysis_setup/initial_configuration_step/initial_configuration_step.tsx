@@ -16,10 +16,10 @@ import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
 import {
   AvailableIndex,
   TimeRangeValidationError,
-  ValidationIndicesError,
-  ValidationUIError,
   timeRangeValidationErrorRT,
+  ValidationIndicesError,
   validationIndicesErrorRT,
+  ValidationUIError,
 } from './validation';
 
 interface InitialConfigurationStepProps {

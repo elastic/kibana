@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
-import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import { DiscoverGrid } from '../../../../components/discover_grid';
+import { FetchStatus } from '../../../types';
+import { DiscoverDocuments, onResize } from './discover_documents';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverAppState } from '../../state_management/discover_app_state_container';
 import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
-import { FetchStatus } from '../../../types';
-import { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import { DataDocuments$ } from '../../state_management/discover_data_state_container';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import { DiscoverDocuments, onResize } from './discover_documents';
+import { DiscoverGrid } from '../../../../components/discover_grid';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 const customisationService = createCustomizationService();
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 
 import { CaseStatuses, UserActionActions } from '../../../common/types/domain';
-import { TestProviders } from '../../common/mock';
 import { getUserAction } from '../../containers/mock';
-import { getMockBuilderArgs } from './mock';
+import { TestProviders } from '../../common/mock';
 import { createStatusUserActionBuilder } from './status';
+import { getMockBuilderArgs } from './mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { APP_WRAPPER_CLASS, AppMountParameters, CoreStart } from '@kbn/core/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 
 import { i18n } from '@kbn/i18n';
-import { PluginContext } from './context/plugin_context';
 import { usePluginContext } from './hooks/use_plugin_context';
+import { PluginContext } from './context/plugin_context';
 
-import { ExperimentalFeatures } from '../common/config';
-import { getRoutes } from './routes/routes';
 import { SloPublicPluginsStart } from './types';
+import { getRoutes } from './routes/routes';
+import { ExperimentalFeatures } from '../common/config';
 
 function App() {
   const { isServerless } = usePluginContext();

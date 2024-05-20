@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { TreeNav } from '.';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../test';
-import { TreeViewContextProvider } from '../contexts';
 import { clusterResponseMock } from '../mocks';
+import { TreeNav } from '.';
+import { TreeViewContextProvider } from '../contexts';
 
 describe('TreeNav component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

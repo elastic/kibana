@@ -6,8 +6,13 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["GET", "POST"],
-    "patterns": ["_scripts/painless/_execute"],
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_scripts/painless/_execute"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/painless/master/painless-execute-api.html",
     "availability": {
       "stack": true,

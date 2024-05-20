@@ -5,38 +5,38 @@
  * 2.0.
  */
 
+import { uniqBy } from 'lodash/fp';
 import {
   EuiAvatar,
   EuiButtonIcon,
   EuiCommentList,
-  EuiConfirmModal,
   EuiScreenReaderOnly,
   EuiText,
+  EuiConfirmModal,
 } from '@elastic/eui';
 import type { EuiConfirmModalProps } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { uniqBy } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
-import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useDispatch } from 'react-redux';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
+import type { TimelineResultNote } from '../types';
+import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
+import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { timelineActions, timelineSelectors } from '../../../store';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
-import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
-import type { TimelineResultNote } from '../types';
-import { useDeleteNote } from './hooks/use_delete_note';
 import * as i18n from './translations';
+import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useDeleteNote } from './hooks/use_delete_note';
+import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};

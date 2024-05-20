@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { compressToEncodedURIComponent } from 'lz-string';
 import qs from 'query-string';
+import { compressToEncodedURIComponent } from 'lz-string';
 
 function getBaseUrl() {
   return `${window.location.protocol}//${window.location.host}${window.location.pathname}`;

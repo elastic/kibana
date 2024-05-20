@@ -1,5 +1,3 @@
-import { css } from '@emotion/react';
-import { Filter } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,7 +6,9 @@ import { Filter } from '@kbn/es-query';
  */
 import { useGrouping } from '@kbn/securitysolution-grouping';
 import { ParsedGroupingAggregation } from '@kbn/securitysolution-grouping/src';
+import { Filter } from '@kbn/es-query';
 import React from 'react';
+import { css } from '@emotion/react';
 import { CSP_GROUPING, CSP_GROUPING_LOADING } from '../test_subjects';
 
 interface CloudSecurityGroupingProps {

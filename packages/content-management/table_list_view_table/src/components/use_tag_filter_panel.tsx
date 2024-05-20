@@ -1,5 +1,3 @@
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText, Query } from '@elastic/eui';
-import type { FieldValueOptionType } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +7,8 @@ import type { FieldValueOptionType } from '@elastic/eui';
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import type { MouseEvent } from 'react';
+import { Query, EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
+import type { FieldValueOptionType } from '@elastic/eui';
 
 import type { Tag } from '../types';
 

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   ALERT_GROUP_FIELD,
@@ -17,18 +16,19 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import { lazy } from 'react';
-import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_app_url';
-import { getGroups } from '../../common/custom_threshold_rule/helpers/get_group';
+import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
   CustomThresholdSearchSourceFields,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../common/custom_threshold_rule/types';
-import { validateCustomThreshold } from '../components/custom_threshold/components/validation';
 import type { MetricExpression } from '../components/custom_threshold/types';
+import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_app_url';
+import { getGroups } from '../../common/custom_threshold_rule/helpers/get_group';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
+import { validateCustomThreshold } from '../components/custom_threshold/components/validation';
 
 const thresholdDefaultActionMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultActionMessage',

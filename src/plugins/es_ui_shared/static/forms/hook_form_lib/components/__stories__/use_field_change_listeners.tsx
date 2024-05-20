@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
-import { action } from '@storybook/addon-actions';
 import React, { useEffect } from 'react';
+import { action } from '@storybook/addon-actions';
+import { EuiText, EuiTextColor, EuiSpacer } from '@elastic/eui';
 
 import { TextField } from '../../../components';
 import { useFormData } from '../../hooks/use_form_data';

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { PivotAggsConfigBase } from '../../../../../../common';
-import {
-  PERCENTILES_AGG_DEFAULT_PERCENTS,
-  isPivotAggsConfigWithUiBase,
-} from '../../../../../../common';
-import type { PivotAggsConfigWithUiBase } from '../../../../../../common/pivot_aggs';
 import { PercentilesAggForm } from './percentiles_form_component';
 import type { IPivotAggsConfigPercentiles } from './types';
+import type { PivotAggsConfigBase } from '../../../../../../common';
+import {
+  isPivotAggsConfigWithUiBase,
+  PERCENTILES_AGG_DEFAULT_PERCENTS,
+} from '../../../../../../common';
+import type { PivotAggsConfigWithUiBase } from '../../../../../../common/pivot_aggs';
 
 /**
  * TODO this callback has been moved.

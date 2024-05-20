@@ -6,10 +6,10 @@
  */
 
 import fs from 'fs';
+import mustache from 'mustache';
 import { join } from 'path';
 import { assertNever } from '@elastic/eui';
-import mustache from 'mustache';
-import { CaseSeverity, CaseStatuses } from '../../../../../common/types/domain';
+import { CaseStatuses, CaseSeverity } from '../../../../../common/types/domain';
 import type { CaseSavedObjectTransformed } from '../../../../common/types/case';
 import { getTemplateFilePath } from '../utils';
 

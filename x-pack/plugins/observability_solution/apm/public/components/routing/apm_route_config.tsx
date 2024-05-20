@@ -6,24 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toBooleanRt } from '@kbn/io-ts-utils';
-import { Outlet, createRouter } from '@kbn/typed-react-router-config';
+import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { offsetRt } from '../../../common/comparison_rt';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { Breadcrumb } from '../app/breadcrumb';
-import { diagnosticsRoute } from '../app/diagnostics';
-import { ServiceGroupsList } from '../app/service_groups';
 import { TraceLink } from '../app/trace_link';
-import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
 import { TransactionLink } from '../app/transaction_link';
 import { homeRoute } from './home';
+import { serviceDetailRoute } from './service_detail';
 import { mobileServiceDetailRoute } from './mobile_service_detail';
+import { settingsRoute } from './settings';
 import { onboarding } from './onboarding';
 import { tutorialRedirectRoute } from './onboarding/redirect';
-import { serviceDetailRoute } from './service_detail';
-import { settingsRoute } from './settings';
 import { ApmMainTemplate } from './templates/apm_main_template';
+import { ServiceGroupsList } from '../app/service_groups';
+import { offsetRt } from '../../../common/comparison_rt';
+import { diagnosticsRoute } from '../app/diagnostics';
+import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
 
 const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
   defaultMessage: 'Services',

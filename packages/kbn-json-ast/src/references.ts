@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { getAst } from './ast';
 import { T } from './babel';
+import { getAst } from './ast';
 import { getEnds, getExpandedEnds } from './ends';
-import { getEndOfLastProp, getProp } from './props';
+import { getProp, getEndOfLastProp } from './props';
 import { snip } from './snip';
 
 const PROP = 'kbn_references';

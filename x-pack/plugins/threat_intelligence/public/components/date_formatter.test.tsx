@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import moment from 'moment-timezone';
 import React from 'react';
-import { useDateFormat, useTimeZone } from '../hooks/use_kibana_ui_settings';
+import { render } from '@testing-library/react';
 import { DateFormatter } from './date_formatter';
+import { useDateFormat, useTimeZone } from '../hooks/use_kibana_ui_settings';
 
 const mockValidStringDate = '1 Jan 2022 00:00:00 GMT';
 const mockInvalidStringDate = 'invalid date';

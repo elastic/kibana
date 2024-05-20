@@ -7,8 +7,16 @@
     "id": "cloudFullStory",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "cloud_integrations", "full_story"],
-    "requiredPlugins": ["cloud"],
-    "optionalPlugins": ["security"]
+    "configPath": [
+      "xpack",
+      "cloud_integrations",
+      "full_story"
+    ],
+    "requiredPlugins": [
+      "cloud"
+    ],
+    "optionalPlugins": [
+      "security"
+    ]
   }
 }

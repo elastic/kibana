@@ -1,6 +1,3 @@
-import { EuiButton } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,9 +5,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { LeftPanelResponseTab } from '../../left';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { EuiButton } from '@elastic/eui';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useRightPanelContext } from '../context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelResponseTab } from '../../left';
 import { RESPONSE_BUTTON_TEST_ID } from './test_ids';
 
 /**

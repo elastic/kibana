@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 
+import type { GuideId, GuideConfig } from '@kbn/guided-onboarding';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { GuideConfig, GuideId } from '@kbn/guided-onboarding';
-import type { GuidesConfig } from '../common';
 import { GUIDED_ONBOARDING_FEATURE } from './feature';
+import { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
 import { defineRoutes } from './routes';
 import { guideStateSavedObjects, pluginStateSavedObjects } from './saved_objects';
-import { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
+import type { GuidesConfig } from '../common';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>

@@ -7,16 +7,16 @@
  */
 
 import { transparentize } from '@elastic/eui';
+import { pick } from 'lodash';
+import { euiLightVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
+import chroma from 'chroma-js';
 import type {
   EventAnnotationConfig,
+  RangeEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
-  RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { i18n } from '@kbn/i18n';
-import { euiLightVars } from '@kbn/ui-theme';
-import chroma from 'chroma-js';
-import { pick } from 'lodash';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;

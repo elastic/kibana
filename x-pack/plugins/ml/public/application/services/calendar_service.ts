@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
-import type { Calendar, CalendarId } from '../../../common/types/calendars';
 import { ml } from './ml_api_service';
+import type { Calendar, CalendarId } from '../../../common/types/calendars';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 class CalendarService {
   /**
    * Assigns a job id to the calendar.

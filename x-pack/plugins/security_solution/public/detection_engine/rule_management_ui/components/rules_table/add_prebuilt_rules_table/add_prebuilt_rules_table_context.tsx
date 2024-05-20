@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import { invariant } from '../../../../../../common/utils/invariant';
+import { EuiButton } from '@elastic/eui';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
-import { RuleDetailsFlyout } from '../../../../rule_management/components/rule_details/rule_details_flyout';
-import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
+import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
+import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformInstallAllRules,
   usePerformInstallSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
-import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
-import * as i18n from './translations';
 import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
 import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
+import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import { RuleDetailsFlyout } from '../../../../rule_management/components/rule_details/rule_details_flyout';
+import * as i18n from './translations';
+import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 
 export interface AddPrebuiltRulesTableState {
   /**
@@ -113,10 +113,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const {
-    data: {
-      rules,
-      stats: { tags },
-    } = {
+    data: { rules, stats: { tags } } = {
       rules: [],
       stats: { tags: [] },
     },

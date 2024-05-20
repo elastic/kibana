@@ -7,10 +7,10 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
 
 describe('SavedObjectsManagementPlugin', () => {

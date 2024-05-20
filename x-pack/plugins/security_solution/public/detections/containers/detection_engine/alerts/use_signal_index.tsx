@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useEffect, useState } from 'react';
+import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useSelector } from 'react-redux';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { sourcererSelectors } from '../../../../common/store';
-import type { State } from '../../../../common/store';
 import { createSignalIndex, getSignalIndex } from './api';
 import * as i18n from './translations';
 import { useAlertsPrivileges } from './use_alerts_privileges';
+import { sourcererSelectors } from '../../../../common/store';
+import type { State } from '../../../../common/store';
 
 type Func = () => Promise<void>;
 

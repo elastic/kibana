@@ -12,17 +12,17 @@ import { shallow } from 'enzyme';
 import { EuiLink } from '@elastic/eui';
 
 import {
-  GROUPS_PATH,
-  PRIVATE_SOURCES_PATH,
-  SOURCES_PATH,
-  SOURCE_DETAILS_PATH,
-  getAddPath,
   getContentSourcePath,
-  getEditPath,
   getGroupPath,
   getGroupSourcePrioritizationPath,
   getReindexJobRoute,
   getSourcesPath,
+  GROUPS_PATH,
+  SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
+  SOURCE_DETAILS_PATH,
+  getAddPath,
+  getEditPath,
 } from './routes';
 
 const TestComponent = ({ id, isOrg }: { id: string; isOrg?: boolean }) => {

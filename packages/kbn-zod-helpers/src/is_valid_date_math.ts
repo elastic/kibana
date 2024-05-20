@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@kbn/datemath';
 import * as z from 'zod';
+import dateMath from '@kbn/datemath';
 
 function validateDateMath(time: string): boolean {
   const isValidDateString = !isNaN(Date.parse(time));

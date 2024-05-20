@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import DateMath from '@kbn/datemath';
-import type { AbsoluteTimeRange, RelativeTimeRange, URLTimeRange } from '../store/inputs/model';
-import { isAbsoluteTimeRange, isRelativeTimeRange } from '../store/inputs/model';
-import { getTimeRangeSettings } from './default_date_settings';
 import { normalizeTimeRange } from './normalize_time_range';
+import type { URLTimeRange, AbsoluteTimeRange, RelativeTimeRange } from '../store/inputs/model';
+import { isAbsoluteTimeRange, isRelativeTimeRange } from '../store/inputs/model';
+import DateMath from '@kbn/datemath';
+import { getTimeRangeSettings } from './default_date_settings';
 
 const getTimeRangeSettingsMock = getTimeRangeSettings as jest.Mock;
 

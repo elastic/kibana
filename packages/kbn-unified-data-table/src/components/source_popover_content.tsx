@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import JsonCodeEditor from './json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from '../constants';
 import { getInnerColumns } from '../utils/columns';
-import JsonCodeEditor from './json_code_editor/json_code_editor';
 
 export const SourcePopoverContent = ({
   closeButton,

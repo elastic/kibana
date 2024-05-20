@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
-  EuiButton,
-  EuiComboBox,
-  EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiFlexGroup,
+  EuiComboBox,
+  EuiFlexItem,
+  EuiButton,
+  EuiConfirmModal,
 } from '@elastic/eui';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { queryClient } from '..';
 import {
   sendDeletePackagePolicy,
   sendGetOrphanedIntegrationPolicies,
   useStartServices,
 } from '../../../hooks';
+import { queryClient } from '..';
 
 import { CodeBlock } from './code_block';
 

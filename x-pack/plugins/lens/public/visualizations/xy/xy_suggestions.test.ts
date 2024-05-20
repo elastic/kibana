@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { DEFAULT_COLOR_MAPPING_CONFIG, type PaletteOutput } from '@kbn/coloring';
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { generateId } from '../../id_generator';
-import type { TableSuggestion, TableSuggestionColumn, VisualizationSuggestion } from '../../types';
+import { getSuggestions } from './xy_suggestions';
+import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../../types';
 import {
   State,
-  XYAnnotationLayerConfig,
-  XYDataLayerConfig,
   XYState,
   visualizationTypes,
+  XYAnnotationLayerConfig,
+  XYDataLayerConfig,
 } from './types';
-import { getSuggestions } from './xy_suggestions';
+import { generateId } from '../../id_generator';
 import { getXyVisualization } from './xy_visualization';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { type PaletteOutput, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 jest.mock('../../id_generator');
 

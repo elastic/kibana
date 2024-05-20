@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { useStartServices } from '../../../../hooks';
 import type { Agent } from '../../../../types';
+import { useStartServices } from '../../../../hooks';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
+import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
 
 import {
   GET_RULE_EXECUTION_EVENTS_URL,

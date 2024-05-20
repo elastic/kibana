@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { FirstUseCallout } from '../log_analysis_results';
 import { JobConfigurationOutdatedCallout } from './job_configuration_outdated_callout';
 import { JobDefinitionOutdatedCallout } from './job_definition_outdated_callout';
 import { JobStoppedCallout } from './job_stopped_callout';
+import { FirstUseCallout } from '../log_analysis_results';
 
 export const LogAnalysisJobProblemIndicator: React.FC<{
   hasOutdatedJobConfigurations: boolean;

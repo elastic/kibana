@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import React from 'react';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { ILayer } from '../../../../../classes/layers/layer';
 
 interface Props {

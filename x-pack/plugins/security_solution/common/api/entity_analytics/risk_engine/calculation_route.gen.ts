@@ -19,12 +19,12 @@ import { z } from 'zod';
 import {
   AfterKeys,
   DataViewId,
-  DateRange,
-  EntityRiskScoreRecord,
   Filter,
-  IdentifierType,
   PageSize,
+  IdentifierType,
+  DateRange,
   RiskScoreWeights,
+  EntityRiskScoreRecord,
 } from '../common/common.gen';
 
 export type RiskScoresCalculationRequest = z.infer<typeof RiskScoresCalculationRequest>;

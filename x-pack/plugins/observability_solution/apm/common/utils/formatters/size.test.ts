@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { asDynamicBytes, getFixedByteFormatter } from './size';
+import { getFixedByteFormatter, asDynamicBytes } from './size';
 
 describe('size formatters', () => {
   describe('byte formatting', () => {

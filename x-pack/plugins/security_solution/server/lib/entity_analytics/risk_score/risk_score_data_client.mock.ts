@@ -13,6 +13,6 @@ const createRiskScoreDataClientMock = () =>
     init: jest.fn(),
     getRiskInputsIndex: jest.fn(),
     upgradeIfNeeded: jest.fn(),
-  }) as unknown as jest.Mocked<RiskScoreDataClient>;
+  } as unknown as jest.Mocked<RiskScoreDataClient>);
 
 export const riskScoreDataClientMock = { create: createRiskScoreDataClientMock };

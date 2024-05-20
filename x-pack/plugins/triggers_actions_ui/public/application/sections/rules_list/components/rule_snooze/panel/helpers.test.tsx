@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { RRuleFrequency } from '../../../../../../types';
-import { durationToTextString, futureTimeToInterval, scheduleSummary } from './helpers';
+import { futureTimeToInterval, durationToTextString, scheduleSummary } from './helpers';
 
 const NOW = '2021-01-01T12:00:00.000Z';
 const TEN_MINUTES_FROM_NOW = '2021-01-01T12:10:00.000Z';

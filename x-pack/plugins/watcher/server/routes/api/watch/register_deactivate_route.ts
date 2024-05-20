@@ -8,11 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import {
-  buildClientWatchStatusModel,
-  buildServerWatchStatusModel,
-} from '../../../models/watch_status_model';
 import { RouteDependencies } from '../../../types';
+import {
+  buildServerWatchStatusModel,
+  buildClientWatchStatusModel,
+} from '../../../models/watch_status_model';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),

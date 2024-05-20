@@ -58,7 +58,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -168,7 +170,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["SetupPlugins"],
+                "signature": [
+                  "SetupPlugins"
+                ],
                 "path": "x-pack/plugins/security_solution/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -236,7 +240,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["StartPlugins"],
+                "signature": [
+                  "StartPlugins"
+                ],
                 "path": "x-pack/plugins/security_solution/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -252,7 +258,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -265,7 +273,9 @@
             "type": "Function",
             "tags": [],
             "label": "registerAppLinks",
-            "description": ["\nRegisters deepLinks and appUpdater for appLinks using license."],
+            "description": [
+              "\nRegisters deepLinks and appUpdater for appLinks using license."
+            ],
             "signature": [
               "(core: ",
               {
@@ -311,7 +321,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["StartPlugins"],
+                "signature": [
+                  "StartPlugins"
+                ],
                 "path": "x-pack/plugins/security_solution/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -407,7 +419,10 @@
             "description": [
               "\nCapabilities strings (using object dot notation) to enable the link.\n\nThe format of defining features supports OR and AND mechanism. To specify features in an OR fashion\nthey can be defined in a single level array like: [requiredFeature1, requiredFeature2]. If either of these features\nis satisfied the link would be included. To require that the features be AND'd together a second level array\ncan be specified: [feature1, [feature2, feature3]] this would result in feature1 || (feature2 && feature3). To specify\nfeatures that all must be and'd together an example would be: [[feature1, feature2]], this would result in the boolean\noperation feature1 && feature2.\n\nThe final format is to specify a single feature, this would be like: features: feature1, which is the same as\nfeatures: [feature1]"
             ],
-            "signature": ["RequiredCapabilities", " | undefined"],
+            "signature": [
+              "RequiredCapabilities",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -418,7 +433,9 @@
             "type": "Object",
             "tags": [],
             "label": "categories",
-            "description": ["\nCategories to display in the navigation"],
+            "description": [
+              "\nCategories to display in the navigation"
+            ],
             "signature": [
               "readonly ",
               {
@@ -448,8 +465,12 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["\nThe description of the link content"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe description of the link content"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -460,7 +481,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "experimentalKey",
-            "description": ["\nExperimental flag needed to enable the link"],
+            "description": [
+              "\nExperimental flag needed to enable the link"
+            ],
             "signature": [
               "\"assistantModelEvaluation\" | \"tGridEnabled\" | \"tGridEventRenderedViewEnabled\" | \"excludePoliciesInFilterEnabled\" | \"kubernetesEnabled\" | \"donutChartEmbeddablesEnabled\" | \"previewTelemetryUrlEnabled\" | \"insightsRelatedAlertsByProcessAncestry\" | \"extendedRuleExecutionLoggingEnabled\" | \"socTrendsEnabled\" | \"responseActionsEnabled\" | \"endpointResponseActionsEnabled\" | \"responseActionUploadEnabled\" | \"automatedProcessActionsEnabled\" | \"responseActionsSentinelOneV1Enabled\" | \"responseActionsSentinelOneV2Enabled\" | \"responseActionsSentinelOneGetFileEnabled\" | \"agentStatusClientEnabled\" | \"responseActionsCrowdstrikeManualHostIsolationEnabled\" | \"alertsPageChartsEnabled\" | \"alertTypeEnabled\" | \"expandableFlyoutInCreateRuleEnabled\" | \"expandableEventFlyoutEnabled\" | \"expandableTimelineFlyoutEnabled\" | \"alertsPageFiltersEnabled\" | \"newUserDetailsFlyout\" | \"newUserDetailsFlyoutManagedUser\" | \"newHostDetailsFlyout\" | \"riskScoringPersistence\" | \"riskScoringRoutesEnabled\" | \"esqlRulesDisabled\" | \"protectionUpdatesEnabled\" | \"disableTimelineSaveTour\" | \"riskEnginePrivilegesRouteEnabled\" | \"sentinelOneDataInAnalyzerEnabled\" | \"sentinelOneManualHostActionsEnabled\" | \"crowdstrikeDataInAnalyzerEnabled\" | \"jamfDataInAnalyzerEnabled\" | \"jsonPrebuiltRulesDiffingEnabled\" | \"timelineEsqlTabDisabled\" | \"unifiedComponentsInTimelineEnabled\" | \"analyzerDatePickersAndSourcererDisabled\" | \"perFieldPrebuiltRulesDiffingEnabled\" | \"malwareOnWriteScanOptionAvailable\" | \"aiAssistantFlyoutMode\" | \"valueListItemsModalEnabled\" | \"bulkCustomHighlightedFieldsEnabled\" | undefined"
             ],
@@ -477,7 +500,9 @@
             "description": [
               "\nGlobal navigation position number.\nDefine this property only if the link needs to be visible within\nthe Security section of the Kibana collapsible global navigation"
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -488,8 +513,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "globalSearchDisabled",
-            "description": ["\nDisables link in the global search. Defaults to false."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nDisables link in the global search. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -500,8 +529,12 @@
             "type": "Array",
             "tags": [],
             "label": "globalSearchKeywords",
-            "description": ["\nKeywords for the global search to search."],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "\nKeywords for the global search to search."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -515,7 +548,9 @@
             "description": [
               "\nDisables the timeline call to action on the bottom of the page. Defaults to false."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -542,7 +577,9 @@
             "type": "Enum",
             "tags": [],
             "label": "id",
-            "description": ["\nLink id. Refers to a SecurityPageName"],
+            "description": [
+              "\nLink id. Refers to a SecurityPageName"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/deeplinks-security",
@@ -562,8 +599,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isBeta",
-            "description": ["\nDisplays the \"Beta\" badge. Defaults to false."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nDisplays the \"Beta\" badge. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -574,8 +615,12 @@
             "type": "Object",
             "tags": [],
             "label": "betaOptions",
-            "description": ["\nCustomize the \"Beta\" badge content."],
-            "signature": ["{ text: string; } | undefined"],
+            "description": [
+              "\nCustomize the \"Beta\" badge content."
+            ],
+            "signature": [
+              "{ text: string; } | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -589,7 +634,10 @@
             "description": [
               "\nIcon that is displayed on menu navigation landing page.\nOnly required for pages that are displayed inside a landing page."
             ],
-            "signature": ["IconType", " | undefined"],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -603,7 +651,9 @@
             "description": [
               "\nImage that is displayed on menu navigation landing page.\nOnly required for pages that are displayed inside a landing page."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -614,7 +664,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "licenseType",
-            "description": ["\nMinimum license required to enable the link"],
+            "description": [
+              "\nMinimum license required to enable the link"
+            ],
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
@@ -628,7 +680,9 @@
             "type": "Array",
             "tags": [],
             "label": "links",
-            "description": ["\nNested links"],
+            "description": [
+              "\nNested links"
+            ],
             "signature": [
               {
                 "pluginId": "securitySolution",
@@ -649,7 +703,9 @@
             "type": "string",
             "tags": [],
             "label": "path",
-            "description": ["\nLink path relative to security root"],
+            "description": [
+              "\nLink path relative to security root"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -663,7 +719,9 @@
             "description": [
               "\nDisplays the link in the footer of the side navigation. Defaults to false."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -674,8 +732,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "sideNavDisabled",
-            "description": ["\nDisables link in the side navigation. Defaults to false."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nDisables link in the side navigation. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -686,8 +748,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "sideNavIcon",
-            "description": ["\nIcon that is displayed on the side navigation menu."],
-            "signature": ["IconType", " | undefined"],
+            "description": [
+              "\nIcon that is displayed on the side navigation menu."
+            ],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -698,8 +765,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "skipUrlState",
-            "description": ["\nDisables the state query string in the URL. Defaults to false."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nDisables the state query string in the URL. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -710,7 +781,9 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["\nTitle of the link"],
+            "description": [
+              "\nTitle of the link"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -721,8 +794,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "unauthorized",
-            "description": ["\nReserved for links management, this property is set automatically"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nReserved for links management, this property is set automatically"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -733,7 +810,9 @@
             "type": "Array",
             "tags": [],
             "label": "visibleIn",
-            "description": ["\nLocations where the link is visible in the UI"],
+            "description": [
+              "\nLocations where the link is visible in the UI"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
@@ -757,7 +836,9 @@
             "description": [
               "\nRequired UI setting to enable a link.\nTo enable a link when a boolean UiSetting is true, pass the key as a string.\nTo enable a link when a specific value is set for a UiSetting, pass an object with key and value."
             ],
-            "signature": ["string | { key: string; value: unknown; } | undefined"],
+            "signature": [
+              "string | { key: string; value: unknown; } | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -782,8 +863,12 @@
             "type": "Enum",
             "tags": [],
             "label": "activeTab",
-            "description": ["The selected tab to displayed in the timeline"],
-            "signature": ["TimelineTabs"],
+            "description": [
+              "The selected tab to displayed in the timeline"
+            ],
+            "signature": [
+              "TimelineTabs"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -795,7 +880,9 @@
             "tags": [],
             "label": "prevActiveTab",
             "description": [],
-            "signature": ["TimelineTabs"],
+            "signature": [
+              "TimelineTabs"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -809,7 +896,10 @@
             "description": [
               "Used for scrolling to top when swiching tabs. It includes the timestamp of when the event happened"
             ],
-            "signature": ["ScrollToTopEvent", " | undefined"],
+            "signature": [
+              "ScrollToTopEvent",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -820,8 +910,12 @@
             "type": "string",
             "tags": [],
             "label": "createdBy",
-            "description": ["Timeline saved object owner"],
-            "signature": ["string | undefined"],
+            "description": [
+              "Timeline saved object owner"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -832,7 +926,9 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["A summary of the events and notes in this timeline"],
+            "description": [
+              "A summary of the events and notes in this timeline"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -863,8 +959,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "eventType",
-            "description": ["Type of event you want to see in this timeline"],
-            "signature": ["TimelineEventsType", " | undefined"],
+            "description": [
+              "Type of event you want to see in this timeline"
+            ],
+            "signature": [
+              "TimelineEventsType",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -878,7 +979,9 @@
             "description": [
               "A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event"
             ],
-            "signature": ["{ [x: string]: string[]; }"],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -889,8 +992,12 @@
             "type": "Array",
             "tags": [],
             "label": "historyIds",
-            "description": ["The chronological history of actions related to this timeline"],
-            "signature": ["string[]"],
+            "description": [
+              "The chronological history of actions related to this timeline"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -901,7 +1008,9 @@
             "type": "string",
             "tags": [],
             "label": "highlightedDropAndProviderId",
-            "description": ["The chronological history of actions related to this timeline"],
+            "description": [
+              "The chronological history of actions related to this timeline"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -912,7 +1021,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isFavorite",
-            "description": ["When true, this timeline was marked as \"favorite\" by the user"],
+            "description": [
+              "When true, this timeline was marked as \"favorite\" by the user"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -923,7 +1034,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isLive",
-            "description": ["When true, the timeline will update as new data arrives"],
+            "description": [
+              "When true, the timeline will update as new data arrives"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -934,8 +1047,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "kqlMode",
-            "description": ["determines the behavior of the KQL bar"],
-            "signature": ["\"filter\" | \"search\""],
+            "description": [
+              "determines the behavior of the KQL bar"
+            ],
+            "signature": [
+              "\"filter\" | \"search\""
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -946,7 +1063,9 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["Title"],
+            "description": [
+              "Title"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -957,8 +1076,12 @@
             "type": "Enum",
             "tags": [],
             "label": "timelineType",
-            "description": ["timelineType: default | template"],
-            "signature": ["TimelineType"],
+            "description": [
+              "timelineType: default | template"
+            ],
+            "signature": [
+              "TimelineType"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -969,8 +1092,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "templateTimelineId",
-            "description": ["an unique id for timeline template"],
-            "signature": ["string | null"],
+            "description": [
+              "an unique id for timeline template"
+            ],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -981,8 +1108,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "templateTimelineVersion",
-            "description": ["null for default timeline, number for timeline template"],
-            "signature": ["number | null"],
+            "description": [
+              "null for default timeline, number for timeline template"
+            ],
+            "signature": [
+              "number | null"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -996,7 +1127,9 @@
             "description": [
               "Notes added to the timeline itself. Notes added to events are stored (separately) in `eventIdToNote`"
             ],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1007,8 +1140,12 @@
             "type": "Object",
             "tags": [],
             "label": "pinnedEventIds",
-            "description": ["Events pinned to this timeline"],
-            "signature": ["{ [x: string]: boolean; }"],
+            "description": [
+              "Events pinned to this timeline"
+            ],
+            "signature": [
+              "{ [x: string]: boolean; }"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1020,7 +1157,11 @@
             "tags": [],
             "label": "pinnedEventsSaveObject",
             "description": [],
-            "signature": ["{ [x: string]: ", "PinnedEvent", "; }"],
+            "signature": [
+              "{ [x: string]: ",
+              "PinnedEvent",
+              "; }"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1032,7 +1173,10 @@
             "tags": [],
             "label": "resolveTimelineConfig",
             "description": [],
-            "signature": ["ResolveTimelineConfig", " | undefined"],
+            "signature": [
+              "ResolveTimelineConfig",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1044,7 +1188,9 @@
             "tags": [],
             "label": "showSaveModal",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1056,7 +1202,9 @@
             "tags": [],
             "label": "savedQueryId",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1068,7 +1216,10 @@
             "tags": [],
             "label": "sessionViewConfig",
             "description": [],
-            "signature": ["SessionViewConfig", " | null"],
+            "signature": [
+              "SessionViewConfig",
+              " | null"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1079,7 +1230,9 @@
             "type": "boolean",
             "tags": [],
             "label": "show",
-            "description": ["When true, show the timeline flyover"],
+            "description": [
+              "When true, show the timeline flyover"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1090,8 +1243,12 @@
             "type": "Enum",
             "tags": [],
             "label": "status",
-            "description": ["status: active | draft"],
-            "signature": ["TimelineStatus"],
+            "description": [
+              "status: active | draft"
+            ],
+            "signature": [
+              "TimelineStatus"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1102,8 +1259,12 @@
             "type": "number",
             "tags": [],
             "label": "updated",
-            "description": ["updated saved object timestamp"],
-            "signature": ["number | undefined"],
+            "description": [
+              "updated saved object timestamp"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1114,8 +1275,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "updatedBy",
-            "description": ["updated saved object user"],
-            "signature": ["string | null | undefined"],
+            "description": [
+              "updated saved object user"
+            ],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1126,7 +1291,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isSaving",
-            "description": ["timeline is saving"],
+            "description": [
+              "timeline is saving"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1138,7 +1305,9 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1150,7 +1319,9 @@
             "tags": [],
             "label": "initialized",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1162,7 +1333,9 @@
             "tags": [],
             "label": "savedObjectId",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1176,7 +1349,10 @@
             "description": [
               " Specifies which column the timeline is sorted on, and the direction (ascending / descending)"
             ],
-            "signature": ["SortColumnTimeline", "[]"],
+            "signature": [
+              "SortColumnTimeline",
+              "[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1187,8 +1363,13 @@
             "type": "Array",
             "tags": [],
             "label": "columns",
-            "description": ["The columns displayed in the data table"],
-            "signature": ["ColumnHeaderOptions", "[]"],
+            "description": [
+              "The columns displayed in the data table"
+            ],
+            "signature": [
+              "ColumnHeaderOptions",
+              "[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1200,7 +1381,10 @@
             "tags": [],
             "label": "defaultColumns",
             "description": [],
-            "signature": ["ColumnHeaderOptions", "[]"],
+            "signature": [
+              "ColumnHeaderOptions",
+              "[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1211,7 +1395,9 @@
             "type": "Array",
             "tags": [],
             "label": "dataProviders",
-            "description": ["The sources of the event data shown in the data table"],
+            "description": [
+              "The sources of the event data shown in the data table"
+            ],
             "signature": [
               {
                 "pluginId": "timelines",
@@ -1232,8 +1418,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "dataViewId",
-            "description": ["Kibana data view id"],
-            "signature": ["string | null"],
+            "description": [
+              "Kibana data view id"
+            ],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1244,8 +1434,12 @@
             "type": "Array",
             "tags": [],
             "label": "deletedEventIds",
-            "description": ["Events to not be rendered"],
-            "signature": ["string[]"],
+            "description": [
+              "Events to not be rendered"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1268,7 +1462,10 @@
             "tags": [],
             "label": "excludedRowRendererIds",
             "description": [],
-            "signature": ["RowRendererId", "[]"],
+            "signature": [
+              "RowRendererId",
+              "[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1329,7 +1526,9 @@
             "tags": [],
             "label": "queryFields",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1372,8 +1571,12 @@
             "type": "string",
             "tags": [],
             "label": "graphEventId",
-            "description": ["When non-empty, display a graph view for this event"],
-            "signature": ["string | undefined"],
+            "description": [
+              "When non-empty, display a graph view for this event"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1385,7 +1588,9 @@
             "tags": [],
             "label": "indexNames",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1396,7 +1601,9 @@
             "type": "number",
             "tags": [],
             "label": "itemsPerPage",
-            "description": ["The number of items to show in a single page of results"],
+            "description": [
+              "The number of items to show in a single page of results"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1410,7 +1617,9 @@
             "description": [
               "Displays a series of choices that when selected, become the value of `itemsPerPage`"
             ],
-            "signature": ["number[]"],
+            "signature": [
+              "number[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1421,8 +1630,14 @@
             "type": "Object",
             "tags": [],
             "label": "kqlQuery",
-            "description": ["the KQL query in the KQL bar"],
-            "signature": ["{ filterQuery: ", "SerializedFilterQuery", " | null; }"],
+            "description": [
+              "the KQL query in the KQL bar"
+            ],
+            "signature": [
+              "{ filterQuery: ",
+              "SerializedFilterQuery",
+              " | null; }"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1433,8 +1648,12 @@
             "type": "Array",
             "tags": [],
             "label": "loadingEventIds",
-            "description": ["Events to be rendered as loading"],
-            "signature": ["string[]"],
+            "description": [
+              "Events to be rendered as loading"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1448,7 +1667,9 @@
             "description": [
               "Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map"
             ],
-            "signature": ["{ start: string; end: string; }"],
+            "signature": [
+              "{ start: string; end: string; }"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1459,7 +1680,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["Uniquely identifies the timeline"],
+            "description": [
+              "Uniquely identifies the timeline"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1492,7 +1715,9 @@
             "type": "boolean",
             "tags": [],
             "label": "isSelectAllChecked",
-            "description": ["If selectAll checkbox in header is checked"],
+            "description": [
+              "If selectAll checkbox in header is checked"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1526,7 +1751,9 @@
             "tags": [],
             "label": "savedSearchId",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1569,8 +1796,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "changed",
-            "description": ["used to mark the timeline as unsaved in the UI"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "used to mark the timeline as unsaved in the UI"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1582,7 +1813,9 @@
             "tags": [],
             "label": "rowHeight",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1604,8 +1837,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "confirmingNoteId",
-            "description": ["the note id pending deletion"],
-            "signature": ["string | null | undefined"],
+            "description": [
+              "the note id pending deletion"
+            ],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1708,7 +1945,11 @@
           "tags": [],
           "label": "resolver",
           "description": [],
-          "signature": ["() => Promise<", "ResolverPluginSetup", ">"],
+          "signature": [
+            "() => Promise<",
+            "ResolverPluginSetup",
+            ">"
+          ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1751,7 +1992,13 @@
           "tags": [],
           "label": "getNavLinks$",
           "description": [],
-          "signature": ["() => ", "Observable", "<", "NavigationLink", "[]>"],
+          "signature": [
+            "() => ",
+            "Observable",
+            "<",
+            "NavigationLink",
+            "[]>"
+          ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1796,7 +2043,13 @@
           "tags": [],
           "label": "getBreadcrumbsNav$",
           "description": [],
-          "signature": ["() => ", "Observable", "<", "BreadcrumbsNav", ">"],
+          "signature": [
+            "() => ",
+            "Observable",
+            "<",
+            "BreadcrumbsNav",
+            ">"
+          ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1810,7 +2063,10 @@
           "tags": [],
           "label": "getUpselling",
           "description": [],
-          "signature": ["() => ", "UpsellingService"],
+          "signature": [
+            "() => ",
+            "UpsellingService"
+          ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1824,7 +2080,9 @@
           "tags": [],
           "label": "setOnboardingPageSettings",
           "description": [],
-          "signature": ["OnboardingPageService"],
+          "signature": [
+            "OnboardingPageService"
+          ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -1836,7 +2094,9 @@
           "tags": [],
           "label": "setIsSolutionNavigationEnabled",
           "description": [],
-          "signature": ["(isSolutionNavigationEnabled: boolean) => void"],
+          "signature": [
+            "(isSolutionNavigationEnabled: boolean) => void"
+          ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1848,7 +2108,9 @@
               "tags": [],
               "label": "isSolutionNavigationEnabled",
               "description": [],
-              "signature": ["boolean"],
+              "signature": [
+                "boolean"
+              ],
               "path": "x-pack/plugins/security_solution/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1864,7 +2126,11 @@
           "tags": [],
           "label": "getSolutionNavigation",
           "description": [],
-          "signature": ["() => Promise<", "SolutionNavigation", ">"],
+          "signature": [
+            "() => Promise<",
+            "SolutionNavigation",
+            ">"
+          ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1896,7 +2162,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1908,7 +2176,9 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/security_solution/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1942,7 +2212,9 @@
                 "tags": [],
                 "label": "kibanaVersion",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/security_solution/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1955,7 +2227,9 @@
                 "tags": [],
                 "label": "kibanaBranch",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/security_solution/server/client/client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1971,7 +2245,9 @@
             "tags": [],
             "label": "getAlertsIndex",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1985,7 +2261,9 @@
             "tags": [],
             "label": "getSignalsIndex",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1999,7 +2277,9 @@
             "tags": [],
             "label": "getPreviewIndex",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2013,7 +2293,9 @@
             "tags": [],
             "label": "getSourcererDataViewId",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2027,7 +2309,9 @@
             "tags": [],
             "label": "getSpaceId",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2041,7 +2325,9 @@
             "tags": [],
             "label": "getKibanaVersion",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2055,7 +2341,9 @@
             "tags": [],
             "label": "getKibanaBranch",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/security_solution/server/client/client.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2121,7 +2409,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/security_solution/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2183,7 +2473,9 @@
                 "tags": [],
                 "label": "core",
                 "description": [],
-                "signature": ["SecuritySolutionPluginCoreSetupDependencies"],
+                "signature": [
+                  "SecuritySolutionPluginCoreSetupDependencies"
+                ],
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2196,7 +2488,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["SecuritySolutionPluginSetupDependencies"],
+                "signature": [
+                  "SecuritySolutionPluginSetupDependencies"
+                ],
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2264,7 +2558,9 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
-                "signature": ["SecuritySolutionPluginStartDependencies"],
+                "signature": [
+                  "SecuritySolutionPluginStartDependencies"
+                ],
                 "path": "x-pack/plugins/security_solution/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2280,7 +2576,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/security_solution/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2331,7 +2629,9 @@
             "tags": [],
             "label": "getServerBasePath",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2345,7 +2645,13 @@
             "tags": [],
             "label": "getEndpointAuthz",
             "description": [],
-            "signature": ["() => Promise<", "ImmutableObject", "<", "EndpointAuthz", ">>"],
+            "signature": [
+              "() => Promise<",
+              "ImmutableObject",
+              "<",
+              "EndpointAuthz",
+              ">>"
+            ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2382,7 +2688,10 @@
             "tags": [],
             "label": "getFrameworkRequest",
             "description": [],
-            "signature": ["() => ", "FrameworkRequest"],
+            "signature": [
+              "() => ",
+              "FrameworkRequest"
+            ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2419,7 +2728,9 @@
             "tags": [],
             "label": "getSpaceId",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2456,7 +2767,10 @@
             "tags": [],
             "label": "getDetectionEngineHealthClient",
             "description": [],
-            "signature": ["() => ", "IDetectionEngineHealthClient"],
+            "signature": [
+              "() => ",
+              "IDetectionEngineHealthClient"
+            ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2470,7 +2784,10 @@
             "tags": [],
             "label": "getRuleExecutionLog",
             "description": [],
-            "signature": ["() => ", "IRuleExecutionLogForRoutes"],
+            "signature": [
+              "() => ",
+              "IRuleExecutionLogForRoutes"
+            ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2587,7 +2904,10 @@
             "tags": [],
             "label": "getInternalFleetServices",
             "description": [],
-            "signature": ["() => ", "EndpointInternalFleetServicesInterface"],
+            "signature": [
+              "() => ",
+              "EndpointInternalFleetServicesInterface"
+            ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2601,7 +2921,10 @@
             "tags": [],
             "label": "getRiskEngineDataClient",
             "description": [],
-            "signature": ["() => ", "RiskEngineDataClient"],
+            "signature": [
+              "() => ",
+              "RiskEngineDataClient"
+            ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2615,7 +2938,10 @@
             "tags": [],
             "label": "getRiskScoreDataClient",
             "description": [],
-            "signature": ["() => ", "RiskScoreDataClient"],
+            "signature": [
+              "() => ",
+              "RiskScoreDataClient"
+            ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2629,7 +2955,10 @@
             "tags": [],
             "label": "getAssetCriticalityDataClient",
             "description": [],
-            "signature": ["() => ", "AssetCriticalityDataClient"],
+            "signature": [
+              "() => ",
+              "AssetCriticalityDataClient"
+            ],
             "path": "x-pack/plugins/security_solution/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2689,7 +3018,11 @@
           "description": [
             "\nSets the configurations for app features that are available to the Security Solution"
           ],
-          "signature": ["(configurator: ", "ProductFeaturesConfigurator", ") => void"],
+          "signature": [
+            "(configurator: ",
+            "ProductFeaturesConfigurator",
+            ") => void"
+          ],
           "path": "x-pack/plugins/security_solution/server/plugin_contract.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -2702,7 +3035,9 @@
               "tags": [],
               "label": "configurator",
               "description": [],
-              "signature": ["ProductFeaturesConfigurator"],
+              "signature": [
+                "ProductFeaturesConfigurator"
+              ],
               "path": "x-pack/plugins/security_solution/server/lib/product_features_service/product_features_service.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -2715,7 +3050,9 @@
           "type": "Object",
           "tags": [],
           "label": "experimentalFeatures",
-          "description": ["\nThe security solution generic experimental features"],
+          "description": [
+            "\nThe security solution generic experimental features"
+          ],
           "signature": [
             "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly automatedProcessActionsEnabled: boolean; readonly responseActionsSentinelOneV1Enabled: boolean; readonly responseActionsSentinelOneV2Enabled: boolean; readonly responseActionsSentinelOneGetFileEnabled: boolean; readonly agentStatusClientEnabled: boolean; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly expandableFlyoutInCreateRuleEnabled: boolean; readonly expandableEventFlyoutEnabled: boolean; readonly expandableTimelineFlyoutEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly assistantModelEvaluation: boolean; readonly newUserDetailsFlyout: boolean; readonly newUserDetailsFlyoutManagedUser: boolean; readonly newHostDetailsFlyout: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; readonly esqlRulesDisabled: boolean; readonly protectionUpdatesEnabled: boolean; readonly disableTimelineSaveTour: boolean; readonly riskEnginePrivilegesRouteEnabled: boolean; readonly sentinelOneDataInAnalyzerEnabled: boolean; readonly sentinelOneManualHostActionsEnabled: boolean; readonly crowdstrikeDataInAnalyzerEnabled: boolean; readonly jamfDataInAnalyzerEnabled: boolean; readonly jsonPrebuiltRulesDiffingEnabled: boolean; readonly timelineEsqlTabDisabled: boolean; readonly unifiedComponentsInTimelineEnabled: boolean; readonly analyzerDatePickersAndSourcererDisabled: boolean; readonly perFieldPrebuiltRulesDiffingEnabled: boolean; readonly malwareOnWriteScanOptionAvailable: boolean; readonly aiAssistantFlyoutMode: boolean; readonly valueListItemsModalEnabled: boolean; readonly bulkCustomHighlightedFieldsEnabled: boolean; }"
           ],
@@ -2768,7 +3105,9 @@
         "tags": [],
         "label": "ADD_DATA_PATH",
         "description": [],
-        "signature": ["\"/app/integrations/browse/security\""],
+        "signature": [
+          "\"/app/integrations/browse/security\""
+        ],
         "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2783,7 +3122,9 @@
         "description": [
           "\nas const\n\nThe const assertion ensures that type widening does not occur\nhttps://mariusschulz.com/blog/literal-type-widening-in-typescript\nPlease follow this convention when adding to this file"
         ],
-        "signature": ["\"securitySolution\""],
+        "signature": [
+          "\"securitySolution\""
+        ],
         "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2796,7 +3137,9 @@
         "tags": [],
         "label": "APP_PATH",
         "description": [],
-        "signature": ["\"/app/security\""],
+        "signature": [
+          "\"/app/security\""
+        ],
         "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2809,7 +3152,9 @@
         "tags": [],
         "label": "APP_UI_ID",
         "description": [],
-        "signature": ["\"securitySolutionUI\""],
+        "signature": [
+          "\"securitySolutionUI\""
+        ],
         "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2822,7 +3167,9 @@
         "tags": [],
         "label": "CASES_FEATURE_ID",
         "description": [],
-        "signature": ["\"securitySolutionCases\""],
+        "signature": [
+          "\"securitySolutionCases\""
+        ],
         "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2835,7 +3182,9 @@
         "tags": [],
         "label": "DETECTION_ENGINE_RULES_URL_FIND",
         "description": [],
-        "signature": ["\"/api/detection_engine/rules/_find\""],
+        "signature": [
+          "\"/api/detection_engine/rules/_find\""
+        ],
         "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2850,7 +3199,9 @@
         "description": [
           "\nRule signature id (`rule.rule_id`) of the prebuilt \"Endpoint Security\" rule."
         ],
-        "signature": ["\"9a1a2dae-0b5f-4c3d-8305-a268d404c306\""],
+        "signature": [
+          "\"9a1a2dae-0b5f-4c3d-8305-a268d404c306\""
+        ],
         "path": "x-pack/plugins/security_solution/common/detection_engine/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2863,7 +3214,9 @@
         "tags": [],
         "label": "ENABLED_FIELD",
         "description": [],
-        "signature": ["\"alert.attributes.enabled\""],
+        "signature": [
+          "\"alert.attributes.enabled\""
+        ],
         "path": "x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2891,7 +3244,9 @@
         "tags": [],
         "label": "MANAGE_PATH",
         "description": [],
-        "signature": ["\"/manage\""],
+        "signature": [
+          "\"/manage\""
+        ],
         "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2906,7 +3261,9 @@
         "description": [
           "\nIndex pattern where the SentinelOne activity log is written to by the SentinelOne integration"
         ],
-        "signature": ["\"logs-sentinel_one.activity-*\""],
+        "signature": [
+          "\"logs-sentinel_one.activity-*\""
+        ],
         "path": "x-pack/plugins/security_solution/common/endpoint/service/response_actions/sentinel_one.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2919,7 +3276,9 @@
         "tags": [],
         "label": "SERVER_APP_ID",
         "description": [],
-        "signature": ["\"siem\""],
+        "signature": [
+          "\"siem\""
+        ],
         "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

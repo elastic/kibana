@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BaseAggParams } from '../types';
 import { BucketAggType } from './bucket_agg_type';
+import { BaseAggParams } from '../types';
 import { aggSamplerFnName } from './sampler_fn';
 
 export const SAMPLER_AGG_NAME = 'sampler';

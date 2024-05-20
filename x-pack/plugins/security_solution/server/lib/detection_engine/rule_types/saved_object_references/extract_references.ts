@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 import type { Logger } from '@kbn/core/server';
+import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 
 import type { RuleParams } from '../../rule_schema';
 
-import { isEsqlParams, isMachineLearningParams } from '../utils/utils';
+import { isMachineLearningParams, isEsqlParams } from '../utils/utils';
 
-import { extractDataView } from './extract_data_view';
 import { extractExceptionsList } from './extract_exceptions_list';
+import { extractDataView } from './extract_data_view';
 
 /**
  * Extracts references and returns the saved object references.

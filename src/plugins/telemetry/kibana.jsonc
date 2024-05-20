@@ -7,9 +7,20 @@
     "server": true,
     "browser": true,
     "enabledOnAnonymousPages": true,
-    "requiredPlugins": ["telemetryCollectionManager", "usageCollection", "screenshotMode"],
-    "optionalPlugins": ["home", "security"],
-    "requiredBundles": ["kibanaUtils"],
-    "extraPublicDirs": ["common/constants"]
+    "requiredPlugins": [
+      "telemetryCollectionManager",
+      "usageCollection",
+      "screenshotMode"
+    ],
+    "optionalPlugins": [
+      "home",
+      "security"
+    ],
+    "requiredBundles": [
+      "kibanaUtils"
+    ],
+    "extraPublicDirs": [
+      "common/constants"
+    ]
   }
 }

@@ -24,7 +24,9 @@
         "type": "Class",
         "tags": [],
         "label": "MarkdownStorybookMock",
-        "description": ["\nStorybook mock for the `Markdown` component"],
+        "description": [
+          "\nStorybook mock for the `Markdown` component"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-markdown-mocks",
@@ -336,7 +338,9 @@
                         "tags": [],
                         "label": "options",
                         "description": [],
-                        "signature": ["(string | number)[]"],
+                        "signature": [
+                          "(string | number)[]"
+                        ],
                         "path": "packages/shared-ux/markdown/mocks/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
@@ -471,7 +475,9 @@
             "tags": [],
             "label": "dependencies",
             "description": [],
-            "signature": ["never[]"],
+            "signature": [
+              "never[]"
+            ],
             "path": "packages/shared-ux/markdown/mocks/storybook.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -531,7 +537,10 @@
             "tags": [],
             "label": "getServices",
             "description": [],
-            "signature": ["() => ", "MarkdownProps"],
+            "signature": [
+              "() => ",
+              "MarkdownProps"
+            ],
             "path": "packages/shared-ux/markdown/mocks/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,

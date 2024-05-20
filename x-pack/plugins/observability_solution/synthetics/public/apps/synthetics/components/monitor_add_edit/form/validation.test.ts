@@ -6,11 +6,11 @@
  */
 
 import {
-  BrowserFields,
   ConfigKey,
-  HTTPFields,
-  MonitorFields,
   MonitorTypeEnum,
+  HTTPFields,
+  BrowserFields,
+  MonitorFields,
   ScheduleUnit,
 } from '../types';
 import { validate } from './validation';

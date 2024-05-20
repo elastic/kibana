@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { TimeRange } from '@kbn/data-plugin/common';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import {
   MetricVisConfiguration,
   NavigateToLensContext,
-  TableVisConfiguration,
   XYConfiguration,
+  TableVisConfiguration,
 } from '@kbn/visualizations-plugin/common';
-import { Vis } from '@kbn/visualizations-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/common';
 import type { Panel } from '../../common/types';
 
 export type ConvertTsvbToLensVisualization = (

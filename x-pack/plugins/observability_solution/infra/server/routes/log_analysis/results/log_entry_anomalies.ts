@@ -11,9 +11,9 @@ import { InfraBackendLibs } from '../../../lib/infra_types';
 
 import { AnomaliesSort, Pagination } from '../../../../common/log_analysis';
 import { createValidationFunction } from '../../../../common/runtime_types';
+import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { getLogEntryAnomalies } from '../../../lib/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
-import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
 export const initGetLogEntryAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
   if (!framework.config.featureFlags.logsUIEnabled) {

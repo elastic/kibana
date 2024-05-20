@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { isEqual, omit } from 'lodash';
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewFieldBase } from '@kbn/es-query';
-import { isEqual, omit } from 'lodash';
 import { SchemaConfig } from '../../types';
-import { convertToSchemaConfig } from '../../vis_schemas';
-import { ColumnWithMeta } from '../types';
 import {
   AggBasedColumn,
   MetricsWithoutSpecialParams,
   ParentPipelineMetric,
   SiblingPipelineMetric,
 } from './convert';
+import { ColumnWithMeta } from '../types';
+import { convertToSchemaConfig } from '../../vis_schemas';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 

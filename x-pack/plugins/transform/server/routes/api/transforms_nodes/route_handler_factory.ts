@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 import type { RequestHandler } from '@kbn/core/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { NODES_INFO_PRIVILEGES } from '../../../../common/constants';
 import type { License } from '../../../services';
+import { NODES_INFO_PRIVILEGES } from '../../../../common/constants';
 
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 

@@ -6,8 +6,8 @@
  */
 
 import { TimesliceMetricIndicator, timesliceMetricMetricDef } from '@kbn/slo-schema';
-import { assertNever } from '@kbn/std';
 import * as t from 'io-ts';
+import { assertNever } from '@kbn/std';
 
 import { getElasticsearchQueryOrThrow } from '../transform_generators';
 

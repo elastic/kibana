@@ -26,7 +26,9 @@
         "tags": [],
         "label": "AlertActiveTimeRangeAnnotation",
         "description": [],
-        "signature": ["({ alertStart, alertEnd, color, id }: Props) => JSX.Element"],
+        "signature": [
+          "({ alertStart, alertEnd, color, id }: Props) => JSX.Element"
+        ],
         "path": "x-pack/packages/observability/alert_details/src/components/alert_active_time_range_annotation.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +40,9 @@
             "tags": [],
             "label": "{ alertStart, alertEnd, color, id }",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "x-pack/packages/observability/alert_details/src/components/alert_active_time_range_annotation.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,7 +59,9 @@
         "tags": [],
         "label": "AlertAnnotation",
         "description": [],
-        "signature": ["({ alertStart, color, dateFormat, id }: Props) => JSX.Element"],
+        "signature": [
+          "({ alertStart, color, dateFormat, id }: Props) => JSX.Element"
+        ],
         "path": "x-pack/packages/observability/alert_details/src/components/alert_annotation.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -67,7 +73,9 @@
             "tags": [],
             "label": "{ alertStart, color, dateFormat, id }",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "x-pack/packages/observability/alert_details/src/components/alert_annotation.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -84,7 +92,9 @@
         "tags": [],
         "label": "AlertThresholdAnnotation",
         "description": [],
-        "signature": ["({ threshold, color, id }: Props) => JSX.Element"],
+        "signature": [
+          "({ threshold, color, id }: Props) => JSX.Element"
+        ],
         "path": "x-pack/packages/observability/alert_details/src/components/alert_threshold_annotation.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -96,7 +106,9 @@
             "tags": [],
             "label": "{ threshold, color, id }",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "x-pack/packages/observability/alert_details/src/components/alert_threshold_annotation.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -113,7 +125,9 @@
         "tags": [],
         "label": "AlertThresholdTimeRangeRect",
         "description": [],
-        "signature": ["({ color, id, threshold }: Props) => JSX.Element"],
+        "signature": [
+          "({ color, id, threshold }: Props) => JSX.Element"
+        ],
         "path": "x-pack/packages/observability/alert_details/src/components/alert_threshold_time_range_rect.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -125,7 +139,9 @@
             "tags": [],
             "label": "{ color, id, threshold }",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "x-pack/packages/observability/alert_details/src/components/alert_threshold_time_range_rect.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -159,7 +175,9 @@
             "tags": [],
             "label": "{\n  featureIds,\n  ruleId,\n  dateRange,\n  http,\n  instanceId,\n}",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "x-pack/packages/observability/alert_details/src/hooks/use_alerts_history.ts",
             "deprecated": false,
             "trackAdoption": false,

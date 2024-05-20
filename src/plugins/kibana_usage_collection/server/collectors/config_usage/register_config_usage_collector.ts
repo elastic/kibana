@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ConfigUsageData, CoreUsageDataStart } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ConfigUsageData, CoreUsageDataStart } from '@kbn/core/server';
 
 export function registerConfigUsageCollector(
   usageCollection: UsageCollectionSetup,

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiI18nNumber,
   EuiPanel,
   EuiStat,
-  EuiText,
+  EuiI18nNumber,
   useEuiTheme,
+  EuiText,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React from 'react';
 
 import { OverviewStatusState } from '../../../../../../../common/runtime_types';
 

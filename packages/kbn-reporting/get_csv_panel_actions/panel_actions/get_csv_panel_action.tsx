@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable, firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import {
   AnalyticsServiceStart,
@@ -18,19 +18,19 @@ import {
 } from '@kbn/core/public';
 import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { ISearchEmbeddable } from '@kbn/discover-plugin/public';
-import { SEARCH_EMBEDDABLE_TYPE, loadSharingDataHelpers } from '@kbn/discover-plugin/public';
+import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
-import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { getI18nStrings } from './strings';
 
 function isSavedSearchEmbeddable(
@@ -60,7 +60,7 @@ type StartServices = [
     | 'uiSettings'
   >,
   PanelActionDependencies,
-  unknown,
+  unknown
 ];
 
 interface Params {

@@ -9,14 +9,29 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { RowRendererId } from '../../../../../../../common/api/timeline';
 import type { RowRenderer } from '../../../../../../../common/types/timeline';
-import { ID_FIELD_NAME } from '../../../../../../common/components/event_details/event_id';
+import { RowRendererId } from '../../../../../../../common/api/timeline';
 import { asArrayIfExists } from '../../../../../../common/lib/helpers';
+import {
+  TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
+  TLS_SERVER_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
+} from '../../../../certificate_fingerprint';
+import { EVENT_DURATION_FIELD_NAME } from '../../../../duration';
+import { ID_FIELD_NAME } from '../../../../../../common/components/event_details/event_id';
 import {
   DESTINATION_IP_FIELD_NAME,
   SOURCE_IP_FIELD_NAME,
 } from '../../../../../../explore/network/components/ip';
+import { JA3_HASH_FIELD_NAME } from '../../../../ja3_fingerprint';
+import { Netflow } from '../../../../netflow';
+import {
+  EVENT_END_FIELD_NAME,
+  EVENT_START_FIELD_NAME,
+} from '../../../../netflow/netflow_columns/duration_event_start_end';
+import {
+  PROCESS_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
+} from '../../../../netflow/netflow_columns/user_process';
 import {
   DESTINATION_PORT_FIELD_NAME,
   SOURCE_PORT_FIELD_NAME,
@@ -47,21 +62,6 @@ import {
   SOURCE_BYTES_FIELD_NAME,
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../../../../explore/network/components/source_destination/source_destination_arrows';
-import {
-  TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
-  TLS_SERVER_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
-} from '../../../../certificate_fingerprint';
-import { EVENT_DURATION_FIELD_NAME } from '../../../../duration';
-import { JA3_HASH_FIELD_NAME } from '../../../../ja3_fingerprint';
-import { Netflow } from '../../../../netflow';
-import {
-  EVENT_END_FIELD_NAME,
-  EVENT_START_FIELD_NAME,
-} from '../../../../netflow/netflow_columns/duration_event_start_end';
-import {
-  PROCESS_NAME_FIELD_NAME,
-  USER_NAME_FIELD_NAME,
-} from '../../../../netflow/netflow_columns/user_process';
 import { RowRendererContainer } from '../row_renderer';
 
 const Details = styled.div`

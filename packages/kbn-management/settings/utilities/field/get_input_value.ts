@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import { SettingType, UnsavedFieldChange, FieldDefinition } from '@kbn/management-settings-types';
 import { hasUnsavedChange } from './has_unsaved_change';
 
 type F<T extends SettingType> = Pick<FieldDefinition<T>, 'savedValue' | 'defaultValue'>;
@@ -99,8 +99,8 @@ export function getFieldInputValue<S extends SettingType>(field: F<S>, change?: 
   const value = isUnsavedChange
     ? change?.unsavedValue
     : field.savedValue !== undefined && field.savedValue !== null
-      ? field.savedValue
-      : field.defaultValue;
+    ? field.savedValue
+    : field.defaultValue;
 
   return [value, isUnsavedChange];
 }

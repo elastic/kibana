@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldNumber, EuiFieldNumberProps, EuiFormRow, EuiIconTip } from '@elastic/eui';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect } from 'react';
+import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps, EuiIconTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { AggParamEditorProps } from '../agg_param_props';
 
 export interface SizeParamEditorProps extends AggParamEditorProps<number | ''> {

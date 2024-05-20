@@ -14,8 +14,8 @@ import {
   HostFlyoutFilterActionParams,
   HostsViewQueryHostsCountRetrievedParams,
   HostsViewQuerySubmittedParams,
-  ITelemetryClient,
   InfraTelemetryEventTypes,
+  ITelemetryClient,
   PerformanceMetricInnerEvents,
 } from './types';
 

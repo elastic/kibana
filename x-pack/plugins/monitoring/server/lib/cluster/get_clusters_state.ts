@@ -6,10 +6,10 @@
  */
 
 import { find } from 'lodash';
-import { ElasticsearchModifiedSource, ElasticsearchResponse } from '../../../common/types/es';
-import { Globals } from '../../static_globals';
+import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 import { getIndexPatterns } from './get_index_patterns';
+import { Globals } from '../../static_globals';
 
 /**
  * Augment the {@clusters} with their cluster state's from the {@code response}.

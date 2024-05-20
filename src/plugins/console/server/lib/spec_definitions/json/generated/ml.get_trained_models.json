@@ -16,11 +16,18 @@
         "total_feature_importance",
         "definition_status"
       ],
-      "size": ["100"],
+      "size": [
+        "100"
+      ],
       "tags": ""
     },
-    "methods": ["GET"],
-    "patterns": ["_ml/trained_models/{model_id}", "_ml/trained_models"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/trained_models/{model_id}",
+      "_ml/trained_models"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-trained-models.html",
     "availability": {
       "stack": true,

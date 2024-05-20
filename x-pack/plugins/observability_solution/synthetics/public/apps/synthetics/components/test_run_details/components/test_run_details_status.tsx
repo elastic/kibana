@@ -7,9 +7,9 @@
 import React from 'react';
 
 import { EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
-import { BadgeStatus, MonitorStatus, STATUS_LABEL } from '../../common/components/monitor_status';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
+import { BadgeStatus, MonitorStatus, STATUS_LABEL } from '../../common/components/monitor_status';
 
 export const TestRunDetailsStatus = () => {
   const { monitor, isMonitorMissing } = useSelectedMonitor();

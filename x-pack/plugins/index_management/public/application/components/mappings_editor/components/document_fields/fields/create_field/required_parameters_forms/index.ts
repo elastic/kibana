@@ -6,12 +6,12 @@
  */
 
 import { ComponentType } from 'react';
-import { DataType, MainType, NormalizedFields, SubType } from '../../../../../types';
+import { MainType, SubType, DataType, NormalizedFields } from '../../../../../types';
 
 import { AliasTypeRequiredParameters } from './alias_type';
-import { DenseVectorRequiredParameters } from './dense_vector_type';
-import { ScaledFloatTypeRequiredParameters } from './scaled_float_type';
 import { TokenCountTypeRequiredParameters } from './token_count_type';
+import { ScaledFloatTypeRequiredParameters } from './scaled_float_type';
+import { DenseVectorRequiredParameters } from './dense_vector_type';
 
 export interface ComponentProps {
   allFields: NormalizedFields['byId'];

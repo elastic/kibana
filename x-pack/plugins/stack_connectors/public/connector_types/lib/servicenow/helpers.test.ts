@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
+  isRESTApiError,
+  isFieldInvalid,
   getConnectorDescriptiveTitle,
   getSelectedConnectorIcon,
-  isFieldInvalid,
-  isRESTApiError,
 } from './helpers';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 const deprecatedConnector: ActionConnector = {
   secrets: {},

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export function TabStatus({
   isLoading,

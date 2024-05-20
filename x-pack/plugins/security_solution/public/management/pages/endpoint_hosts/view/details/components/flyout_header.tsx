@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlyoutHeader, EuiSkeletonText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import React, { memo } from 'react';
+import { EuiFlyoutHeader, EuiSkeletonText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { BackToEndpointDetailsFlyoutSubHeader } from './back_to_endpoint_details_flyout_subheader';
 
 interface EndpointDetailsFlyoutHeaderProps {

@@ -10,27 +10,27 @@ import { HttpSetup } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { GuideState } from '@kbn/guided-onboarding';
 import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 import { API_BASE_PATH } from '../../common';
+import { ApiService } from './api.service';
 import {
-  mockPluginStateInProgress,
-  mockPluginStateNotStarted,
-  readyToCompleteGuideState,
   testGuideFirstStep,
   testGuideManualCompletionStep,
-  testGuideNotActiveState,
-  testGuideParams,
   testGuideStep1ActiveState,
   testGuideStep1InProgressState,
   testGuideStep2ActiveState,
-  testGuideStep2InProgressState,
-  testGuideStep2ReadyToCompleteState,
-  testGuideStep3ActiveState,
+  testGuideNotActiveState,
   testIntegration,
   wrongIntegration,
+  testGuideStep2InProgressState,
+  readyToCompleteGuideState,
+  mockPluginStateInProgress,
+  mockPluginStateNotStarted,
+  testGuideStep3ActiveState,
+  testGuideStep2ReadyToCompleteState,
+  testGuideParams,
 } from './api.mocks';
-import { ApiService } from './api.service';
 
 describe('GuidedOnboarding ApiService', () => {
   let httpClient: jest.Mocked<HttpSetup>;

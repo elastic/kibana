@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent } from '@testing-library/react';
 import React from 'react';
+import { fireEvent } from '@testing-library/react';
 import { render } from '../../helpers/test_helper';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';

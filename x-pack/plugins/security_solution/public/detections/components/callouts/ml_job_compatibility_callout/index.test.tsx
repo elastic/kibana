@@ -8,9 +8,9 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { MlJobCompatibilityCallout } from '.';
-import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { TestProviders } from '../../../../common/mock';
+import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { MlJobCompatibilityCallout } from '.';
 
 jest.mock('../../../../common/components/ml/hooks/use_installed_security_jobs');
 

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon, EuiImage, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
-import type { HttpStart } from '@kbn/core-http-browser';
+import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
 import type { Subscription } from 'rxjs';
+import type { HttpStart } from '@kbn/core-http-browser';
 
 import './loading_indicator.scss';
 

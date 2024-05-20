@@ -7,19 +7,19 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { EMSSettings } from '../../common/ems_settings';
 import {
   DEFAULT_EMS_FILE_API_URL,
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
-  DEFAULT_EMS_REST_VERSION,
   DEFAULT_EMS_TILE_API_URL,
+  DEFAULT_EMS_REST_VERSION,
 } from '../../common/ems_defaults';
-import { EMSSettings } from '../../common/ems_settings';
 import { createEMSClient } from './create_ems_client';
 
-import { LATEST_API_URL_PATH } from '@elastic/ems-client';
-import { BuildFlavor } from '@kbn/config/src/types';
 import type { EMSConfig } from '../../common/ems_settings';
+import { BuildFlavor } from '@kbn/config/src/types';
+import { LATEST_API_URL_PATH } from '@elastic/ems-client';
 
 const IS_ENTERPRISE_PLUS = () => true;
 

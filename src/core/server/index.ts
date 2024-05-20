@@ -29,23 +29,23 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
-import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
+import type { AppenderConfigType } from '@kbn/core-logging-server';
+import { appendersSchema } from '@kbn/core-logging-server-internal';
 import type {
   ExecutionContextSetup,
   ExecutionContextStart,
 } from '@kbn/core-execution-context-server';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { HttpResources } from '@kbn/core-http-resources-server';
 import type {
+  RequestHandler,
+  KibanaResponseFactory,
+  RouteMethod,
   HttpServiceSetup,
   IRouter,
-  KibanaResponseFactory,
-  RequestHandler,
-  RouteMethod,
 } from '@kbn/core-http-server';
-import type { AppenderConfigType } from '@kbn/core-logging-server';
-import { appendersSchema } from '@kbn/core-logging-server-internal';
+import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
+import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { HttpResources } from '@kbn/core-http-resources-server';
 import type {
   InternalPluginsServiceSetup,
   InternalPluginsServiceStart,
@@ -547,7 +547,7 @@ type PublicRequestHandler<
   B = unknown,
   Context extends RequestHandlerContext = RequestHandlerContext,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 > = RequestHandler<P, Q, B, Context, Method, ResponseFactory>;
 
 export type { PublicRequestHandler as RequestHandler, RequestHandler as BaseRequestHandler };

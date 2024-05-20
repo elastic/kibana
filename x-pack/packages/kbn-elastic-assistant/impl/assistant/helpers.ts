@@ -6,11 +6,11 @@
  */
 
 import { isEmpty, some } from 'lodash';
-import { Conversation } from '../..';
-import type { ClientMessage } from '../assistant_context/types';
 import { AIConnector } from '../connectorland/connector_selector';
 import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
-import { WELCOME_CONVERSATION, enterpriseMessaging } from './use_conversation/sample_conversations';
+import { Conversation } from '../..';
+import type { ClientMessage } from '../assistant_context/types';
+import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (
   rawResponse: FetchConnectorExecuteResponse

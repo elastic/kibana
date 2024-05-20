@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { transparentize, useEuiTheme } from '@elastic/eui';
-import { CSSObject } from '@emotion/react';
 import { useMemo } from 'react';
+import { useEuiTheme, transparentize } from '@elastic/eui';
+import { CSSObject } from '@emotion/react';
 
 interface StylesDeps {
   display: string | undefined;

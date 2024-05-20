@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { functionWrapper } from './utils';
+import { cumulativeSum, CumulativeSumArgs } from '../cumulative_sum';
 import { ExecutionContext } from '../../../execution/types';
 import { Datatable } from '../../../expression_types/specs/datatable';
-import { CumulativeSumArgs, cumulativeSum } from '../cumulative_sum';
-import { functionWrapper } from './utils';
 
 describe('interpreter/functions#cumulative_sum', () => {
   const fn = functionWrapper(cumulativeSum);

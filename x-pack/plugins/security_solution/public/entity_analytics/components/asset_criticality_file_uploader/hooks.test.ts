@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
-import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useFileValidation } from './hooks';
+import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 
 const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();

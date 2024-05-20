@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { DefaultAlertActions } from '../application/sections/alerts_table/row_actions';
 import type { AlertActionsProps } from '../types';
+import { DefaultAlertActions } from '../application/sections/alerts_table/row_actions';
 
 export const getAlertsTableDefaultAlertActionsLazy = (props: AlertActionsProps) => {
   return <DefaultAlertActions {...props} />;

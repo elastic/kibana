@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -12,42 +13,41 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiSteps,
-  logicalCSS,
   useEuiTheme,
+  logicalCSS,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import type { CasePostRequest } from '../../../common/types/api';
 import type { ActionConnector } from '../../../common/types/domain';
-import { useCasesFeatures } from '../../common/use_cases_features';
+import type { CasePostRequest } from '../../../common/types/api';
+import { Title } from './title';
+import { Description, fieldName as descriptionFieldName } from './description';
+import { Tags } from './tags';
+import { Connector } from './connector';
+import * as i18n from './translations';
+import { SyncAlertsToggle } from './sync_alerts_toggle';
 import type { CaseUI } from '../../containers/types';
-import type { UseCreateAttachments } from '../../containers/use_create_attachments';
-import type { CaseAttachmentsWithoutOwner } from '../../types';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { InsertTimeline } from '../insert_timeline';
-import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import type { CasesTimelineIntegration } from '../timeline_context';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
+import { InsertTimeline } from '../insert_timeline';
 import { removeItemFromSessionStorage } from '../utils';
+import type { UseCreateAttachments } from '../../containers/use_create_attachments';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
+import { SubmitCaseButton } from './submit_button';
+import { FormContext } from './form_context';
+import { useCasesFeatures } from '../../common/use_cases_features';
+import { CreateCaseOwnerSelector } from './owner_selector';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
+import type { CaseAttachmentsWithoutOwner } from '../../types';
+import { Severity } from './severity';
 import { Assignees } from './assignees';
+import { useCancelCreationAction } from './use_cancel_creation_action';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 import { Category } from './category';
-import { Connector } from './connector';
 import { CustomFields } from './custom_fields';
-import { Description, fieldName as descriptionFieldName } from './description';
-import { FormContext } from './form_context';
-import { CreateCaseOwnerSelector } from './owner_selector';
-import { Severity } from './severity';
-import { SubmitCaseButton } from './submit_button';
-import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { Tags } from './tags';
-import { Title } from './title';
-import * as i18n from './translations';
-import { useCancelCreationAction } from './use_cancel_creation_action';
 
 const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
   big

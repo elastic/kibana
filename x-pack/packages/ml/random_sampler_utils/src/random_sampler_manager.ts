@@ -42,8 +42,7 @@ export const RANDOM_SAMPLER_OPTION = {
 /**
  * Default option for random sampler type
  */
-export type RandomSamplerOption =
-  (typeof RANDOM_SAMPLER_OPTION)[keyof typeof RANDOM_SAMPLER_OPTION];
+export type RandomSamplerOption = typeof RANDOM_SAMPLER_OPTION[keyof typeof RANDOM_SAMPLER_OPTION];
 
 /**
  * Type for the random sampler probability

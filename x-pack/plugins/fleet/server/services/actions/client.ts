@@ -9,26 +9,23 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { FleetActionsClientError } from '../../../common/errors';
 
-import {
-  bulkCreateActions,
-  createAction,
-  getActionResultsByIds,
-  getActionResultsWithKuery,
-  getActionsByIds,
-  getActionsWithKuery,
-} from './actions';
 import type {
-  BulkCreateResponse,
+  FleetActionsClientInterface,
   FleetActionRequest,
   FleetActionResult,
-  FleetActionsClientInterface,
+  BulkCreateResponse,
 } from './types';
+import {
+  createAction,
+  bulkCreateActions,
+  getActionsByIds,
+  getActionsWithKuery,
+  getActionResultsByIds,
+  getActionResultsWithKuery,
+} from './actions';
 
 export class FleetActionsClient implements FleetActionsClientInterface {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private packageName: string
-  ) {
+  constructor(private esClient: ElasticsearchClient, private packageName: string) {
     if (!packageName) {
       throw new FleetActionsClientError('packageName is required');
     }

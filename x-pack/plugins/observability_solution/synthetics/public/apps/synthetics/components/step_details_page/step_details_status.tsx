@@ -7,9 +7,9 @@
 import React from 'react';
 
 import { EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
-import { STATUS_LABEL } from '../common/components/monitor_status';
-import { StatusBadge, parseBadgeStatus } from '../common/monitor_test_result/status_badge';
+import { parseBadgeStatus, StatusBadge } from '../common/monitor_test_result/status_badge';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { STATUS_LABEL } from '../common/components/monitor_status';
 
 export const StepDetailsStatus = () => {
   const { currentStep } = useJourneySteps();

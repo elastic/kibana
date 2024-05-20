@@ -7,10 +7,10 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { cloneIndex } from './clone_index';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
-import { cloneIndex } from './clone_index';
 
 jest.mock('./catch_retryable_es_client_errors');
 

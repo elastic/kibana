@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { DraggableChildrenFn } from '@hello-pangea/dnd';
 import { Droppable } from '@hello-pangea/dnd';
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 
 import { useDispatch } from 'react-redux';
 import type { ControlColumnProps, HeaderActionProps } from '../../../../../../common/types';
-import type { ColumnHeaderOptions, TimelineTabs } from '../../../../../../common/types/timeline';
+import { removeColumn, upsertColumn } from '../../../../store/actions';
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
+import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
+import type { BrowserFields } from '../../../../../common/containers/source';
 import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
 } from '../../../../../common/components/drag_and_drop/helpers';
-import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
-import type { BrowserFields } from '../../../../../common/containers/source';
-import { removeColumn, upsertColumn } from '../../../../store/actions';
+import type { ColumnHeaderOptions, TimelineTabs } from '../../../../../../common/types/timeline';
 import type { OnSelectAll } from '../../events';
 import {
   EventsTh,
-  EventsThGroupActions,
-  EventsThGroupData,
   EventsThead,
+  EventsThGroupData,
   EventsTrHeader,
+  EventsThGroupActions,
 } from '../../styles';
 import type { Sort } from '../sort';
 import { ColumnHeader } from './column_header';

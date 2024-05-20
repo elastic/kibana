@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { IConfigService } from '@kbn/config';
-import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
-import { CoreContext, CriticalError, coreConfigPaths } from '@kbn/core-base-server-internal';
-import type { Logger } from '@kbn/logging';
-import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
 import { firstValueFrom, of } from 'rxjs';
-import { createDataFolder } from './create_data_folder';
+import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
+import type { Logger } from '@kbn/logging';
+import type { IConfigService } from '@kbn/config';
+import { CoreContext, coreConfigPaths, CriticalError } from '@kbn/core-base-server-internal';
+import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
+import { HttpConfigType } from './types';
 import { PidConfigType, pidConfig as pidConfigDef } from './pid_config';
 import { resolveInstanceUuid } from './resolve_uuid';
-import { HttpConfigType } from './types';
+import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
 
 /**

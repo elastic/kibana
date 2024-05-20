@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
+import type { Client } from '@elastic/elasticsearch';
 import moment from 'moment';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 

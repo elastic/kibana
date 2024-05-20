@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { ALERTS, DISCOVER, EXPLORE } from '../../screens/serverless_security_header';
 import {
   EXPLORE_BREADCRUMB,
   HOSTS_BREADCRUMB,
 } from '../../screens/serverless_security_breadcrumbs';
-import { ALERTS, DISCOVER, EXPLORE } from '../../screens/serverless_security_header';
 
 const navigateTo = (page: string) => {
   cy.get(page).click();

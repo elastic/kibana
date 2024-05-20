@@ -6,9 +6,9 @@
  */
 
 import { ALL_VALUES_SELECTED } from '@kbn/exploratory-view-plugin/public';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 export const useExpViewAttributes = () => {
   const { urlParams, uxUiFilters } = useLegacyUrlParams();

@@ -10,8 +10,8 @@ import type {
   ProductFeaturesSecurityConfig,
 } from '@kbn/security-solution-features';
 import {
-  createEnabledProductFeaturesConfigMap,
   securityDefaultProductFeaturesConfig,
+  createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
 import {
   ProductFeatureSecurityKey,

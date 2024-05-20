@@ -60,7 +60,9 @@
             "tags": [],
             "label": "createdBy",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -72,7 +74,9 @@
             "tags": [],
             "label": "managed",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -116,7 +120,9 @@
             "tags": [],
             "label": "attributes",
             "description": [],
-            "signature": ["{ title: string; description?: string | undefined; }"],
+            "signature": [
+              "{ title: string; description?: string | undefined; }"
+            ],
             "path": "packages/content-management/table_list_view_common/index.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -6,14 +6,13 @@
  */
 import { Readable } from 'stream';
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
-import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import type { RuleToImport } from '../../../../../../../common/api/detection_engine/rule_management';
-import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
+import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import {
   checkIfActionsHaveMissingConnectors,
   filterExistingActionConnectors,
@@ -23,6 +22,7 @@ import {
   returnErroredImportResult,
   updateRuleActionsWithMigratedResults,
 } from './utils';
+import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
 
 const NO_ACTION_RESULT = {
   success: true,

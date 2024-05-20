@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
+import { NumberInput, NumberInputProps } from './number_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { wrap } from '../mocks';
-import { NumberInput, NumberInputProps } from './number_input';
 
 const name = 'Some number field';
 const id = 'some:number:field';

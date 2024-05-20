@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Query } from '@kbn/data-plugin/common';
-import { Filter } from '@kbn/es-query';
-import type { TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import React from 'react';
 import {
   FeatureCollection,
   GeoJsonProperties,
@@ -21,9 +14,19 @@ import {
   Polygon,
   Position,
 } from 'geojson';
-import React from 'react';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import type { Query } from '@kbn/data-plugin/common';
+import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
+import { Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { GEO_JSON_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { TooltipFeatureAction } from '../../../../common/descriptor_types';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import { AbstractSource, ISource } from '../source';
+import { IField } from '../../fields/field';
 import {
   DataFilters,
   DataRequestMeta,
@@ -31,11 +34,8 @@ import {
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
-import { IField } from '../../fields/field';
-import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
-import { AbstractSource, ISource } from '../source';
+import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
 
 export function hasVectorSourceMethod(
   source: ISource,

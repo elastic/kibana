@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type {
   BrushEndListener,
   ElementClickListener,
-  XYBrushEvent,
   XYChartElementEvent,
+  XYBrushEvent,
 } from '@elastic/charts';
-import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { getTimeZone } from '@kbn/visualization-utils';
+import { Axis, HistogramBarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import moment from 'moment';
-import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import { getTimeZone } from '@kbn/visualization-utils';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 
 interface Props {

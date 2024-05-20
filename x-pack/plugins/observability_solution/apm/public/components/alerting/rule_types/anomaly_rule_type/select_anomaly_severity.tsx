@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import {
-  ANOMALY_ALERT_SEVERITY_TYPES,
   AnomalyAlertSeverityType,
+  ANOMALY_ALERT_SEVERITY_TYPES,
 } from '../../../../../common/rules/apm_rule_types';
 
 export function AnomalySeverity({ type }: { type: AnomalyAlertSeverityType }) {

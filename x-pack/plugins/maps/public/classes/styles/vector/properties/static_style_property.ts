@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { STYLE_TYPE } from '../../../../../common/constants';
 import { AbstractStyleProperty } from './style_property';
+import { STYLE_TYPE } from '../../../../../common/constants';
 
 export class StaticStyleProperty<T extends object> extends AbstractStyleProperty<T> {
   static type = STYLE_TYPE.STATIC;

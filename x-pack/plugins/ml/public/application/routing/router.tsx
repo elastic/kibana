@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { Router } from '@kbn/shared-ux-router';
-import { type Location } from 'history';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { RouteProps } from 'react-router-dom';
+import { type Location } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 
-import type { AppMountParameters, ChromeBreadcrumb, ChromeStart } from '@kbn/core/public';
+import type { AppMountParameters, ChromeStart, ChromeBreadcrumb } from '@kbn/core/public';
 
 import { EuiSkeletonText } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 
-import type { MlPages } from '../../locator';
 import { MlPage } from '../components/ml_page';
+import type { MlPages } from '../../locator';
 import { type RouteResolverContext } from './use_resolver';
 
 // custom RouteProps making location non-optional

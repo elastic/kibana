@@ -12,11 +12,7 @@ export class MaxSizeStringBuilder {
   private size = 0;
   private pristine = true;
 
-  constructor(
-    private stream: Writable,
-    private maxSizeBytes: number,
-    private bom = ''
-  ) {}
+  constructor(private stream: Writable, private maxSizeBytes: number, private bom = '') {}
 
   tryAppend(chunk: string): boolean {
     const byteLength = Buffer.byteLength(chunk);

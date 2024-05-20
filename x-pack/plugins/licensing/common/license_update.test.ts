@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Subject, firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { take, toArray } from 'rxjs';
 
+import { ILicense } from './types';
 import { createLicenseUpdate } from './license_update';
 import { licenseMock } from './licensing.mock';
-import { ILicense } from './types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const stop$ = new Subject<void>();

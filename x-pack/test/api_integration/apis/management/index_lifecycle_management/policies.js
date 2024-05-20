@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import { registerHelpers as registerIndexHelpers } from './indices.helpers';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
+import { registerHelpers as registerIndexHelpers } from './indices.helpers';
 import { registerSnapshotPoliciesHelpers } from './snapshot_policies.helpers';
 import { registerSnapshotRepositoriesHelpers } from './snapshot_repositories.helpers';
 
 import { getPolicyPayload, getPolicyPayloadWithSearchableSnapshots } from './fixtures';
-import { getPolicyNames, initElasticsearchHelpers } from './lib';
+import { initElasticsearchHelpers, getPolicyNames } from './lib';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

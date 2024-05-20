@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
-import React from 'react';
-import { OTHER_CATEGORY_DEFAULT_COLOR, OTHER_CATEGORY_LABEL } from '../../style_util';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
+import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../../style_util';
 
 const OTHER_CATEGORY_SWATCHES = [
   euiThemeVars.euiColorLightestShade,

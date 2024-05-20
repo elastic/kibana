@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
-import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_group_distribution_fetcher';
+import { MobileErrorsAndCrashesTreemap } from '../charts/mobile_errors_and_crashes_treemap';
+import { MobileCrashGroupList } from './crash_group_list';
+import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { ErrorDistribution } from '../errors_and_crashes_group_details/shared/distribution';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import {
   getKueryWithMobileCrashFilter,
   getKueryWithMobileFilters,
 } from '../../../../../common/utils/get_kuery_with_mobile_filters';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_group_distribution_fetcher';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { MobileErrorsAndCrashesTreemap } from '../charts/mobile_errors_and_crashes_treemap';
-import { ErrorDistribution } from '../errors_and_crashes_group_details/shared/distribution';
-import { MobileCrashGroupList } from './crash_group_list';
 
 type MobileCrashGroupMainStatistics =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics'>;

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { AggParamEditorProps } from '../agg_param_props';
 import { FieldParamEditor } from './field';
 import { getCompatibleAggs } from './top_aggregate';
+import { AggParamEditorProps } from '../agg_param_props';
 
 function TopFieldParamEditor(props: AggParamEditorProps<DataViewField>) {
   const compatibleAggs = getCompatibleAggs(props.agg);

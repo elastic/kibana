@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import React, { VFC } from 'react';
+import { EuiDataGridColumnCellActionProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { Indicator } from '../../../../../common/types/indicator';
+import { AddToTimelineCellAction } from '../../../timeline/components/add_to_timeline';
 import { FilterInCellAction } from '../../../query_bar/components/filter_in';
 import { FilterOutCellAction } from '../../../query_bar/components/filter_out';
-import { AddToTimelineCellAction } from '../../../timeline/components/add_to_timeline';
-import type { Pagination } from '../../services/fetch_indicators';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../utils/field_value';
+import type { Pagination } from '../../services/fetch_indicators';
 import {
   FILTER_IN_BUTTON_TEST_ID,
   FILTER_OUT_BUTTON_TEST_ID,

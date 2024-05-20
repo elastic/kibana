@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiButton,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButton,
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Connector } from '@kbn/search-connectors';
-import React from 'react';
 
-import { useConnectorTypes } from '../../hooks/api/use_connector_types';
-import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibanaServices } from '../../hooks/use_kibana';
+import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 
 interface ConnectorSetupEmptyPromptProps {
   indexName: string;

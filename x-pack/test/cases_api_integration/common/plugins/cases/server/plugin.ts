@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
-import type { CasesServerSetup, CasesServerStart } from '@kbn/cases-plugin/server';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { FilesSetup } from '@kbn/files-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { getExternalReferenceAttachment } from './attachments/external_reference';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
+import { FilesSetup } from '@kbn/files-plugin/server';
+import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
-import { registerCaseFixtureFileKinds } from './files';
+import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { registerRoutes } from './routes';
+import { registerCaseFixtureFileKinds } from './files';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;

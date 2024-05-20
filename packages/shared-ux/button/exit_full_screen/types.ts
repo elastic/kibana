@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CustomBranding } from '@kbn/core-custom-branding-common';
-import { HTMLAttributes, MouseEventHandler } from 'react';
+import { MouseEventHandler, HTMLAttributes } from 'react';
 import { Observable } from 'rxjs';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
 
 /**
  * Abstract external services for this component.

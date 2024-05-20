@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { cloneDeep, isArray, mergeWith, uniq } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import type {
-  BaseKibanaFeatureConfig,
   ProductFeatureKibanaConfig,
+  BaseKibanaFeatureConfig,
   SubFeaturesPrivileges,
 } from '@kbn/security-solution-features';
-import { cloneDeep, isArray, mergeWith, uniq } from 'lodash';
 
 export class ProductFeaturesConfigMerger<T extends string = string> {
   constructor(

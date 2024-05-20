@@ -6,7 +6,6 @@
  */
 
 import type { ApplicationStart } from '@kbn/core/public';
-import type { CasesPermissions } from '../../../common';
 import {
   FEATURE_ID,
   GENERAL_CASES_OWNER,
@@ -14,6 +13,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import { getUICapabilities } from './capabilities';
+import type { CasesPermissions } from '../../../common';
 
 export type CasesOwners =
   | typeof SECURITY_SOLUTION_OWNER

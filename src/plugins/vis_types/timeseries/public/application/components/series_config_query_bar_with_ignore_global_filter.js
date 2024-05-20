@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiToolTip, htmlIdGenerator } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { htmlIdGenerator, EuiFlexItem, EuiFormRow, EuiToolTip, EuiFlexGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { YesNo } from './yes_no';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 import { QueryBarWrapper } from './query_bar_wrapper';
-import { YesNo } from './yes_no';
 
 export function SeriesConfigQueryBarWithIgnoreGlobalFilter({
   panel,

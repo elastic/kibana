@@ -7,8 +7,8 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { registerTodoContentType } from './examples/todos';
 import type { SetupDeps, StartDeps } from './types';
+import { registerTodoContentType } from './examples/todos';
 
 export class ContentManagementExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   constructor(initializerContext: PluginInitializerContext) {}

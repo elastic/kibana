@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiExpression, EuiPopover, EuiSelect } from '@elastic/eui';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import { EuiExpression, EuiPopover, EuiSelect } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
 import { ClosablePopoverTitle } from './components';

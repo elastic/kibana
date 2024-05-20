@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 

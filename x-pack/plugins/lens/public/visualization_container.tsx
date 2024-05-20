@@ -7,8 +7,8 @@
 
 import './visualization_container.scss';
 
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
 
 export function VisualizationContainer({
   children,

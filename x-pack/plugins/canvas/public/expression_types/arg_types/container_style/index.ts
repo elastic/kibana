@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import immutable from 'object-path-immutable';
 import { ComponentType } from 'react';
 import { withHandlers } from 'react-recompose';
-import { ArgTypesStrings } from '../../../../i18n';
+import immutable from 'object-path-immutable';
+import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';
-import { Arguments as ExtendedArguments, ExtendedTemplate } from './extended_template';
 import { Arguments as SimpleArguments, SimpleTemplate } from './simple_template';
+import { Arguments as ExtendedArguments, ExtendedTemplate } from './extended_template';
+import { ArgTypesStrings } from '../../../../i18n';
 
 const { set } = immutable;
 const { ContainerStyle: strings } = ArgTypesStrings;

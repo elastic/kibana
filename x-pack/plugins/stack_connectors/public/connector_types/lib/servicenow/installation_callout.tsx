@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import { SNStoreButton } from './sn_store_button';
 import * as i18n from './translations';
+import { SNStoreButton } from './sn_store_button';
 
 interface Props {
   appId: string;

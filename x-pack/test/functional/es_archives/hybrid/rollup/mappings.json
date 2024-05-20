@@ -1,7 +1,8 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
+    "aliases": {
+    },
     "index": "rollup_logstash",
     "mappings": {
       "_meta": {
@@ -16,11 +17,18 @@
                 "time_zone": "UTC"
               },
               "histogram": {
-                "fields": ["machine.ram"],
+                "fields": [
+                  "machine.ram"
+                ],
                 "interval": 5
               },
               "terms": {
-                "fields": ["extension.keyword", "geo.src", "geo.dest", "machine.os.keyword"]
+                "fields": [
+                  "extension.keyword",
+                  "geo.src",
+                  "geo.dest",
+                  "machine.os.keyword"
+                ]
               }
             },
             "id": "Rollupjob",
@@ -28,11 +36,19 @@
             "metrics": [
               {
                 "field": "bytes",
-                "metrics": ["avg"]
+                "metrics": [
+                  "avg"
+                ]
               },
               {
                 "field": "memory",
-                "metrics": ["avg", "max", "min", "sum", "value_count"]
+                "metrics": [
+                  "avg",
+                  "max",
+                  "min",
+                  "sum",
+                  "value_count"
+                ]
               }
             ],
             "page_size": 1000,

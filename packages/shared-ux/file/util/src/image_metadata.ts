@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 import * as bh from 'blurhash';
+import type { FileImageMetadata } from '@kbn/shared-ux-file-types';
 
 export function isImage(file: { type?: string }): boolean {
   return Boolean(file.type?.startsWith('image/'));

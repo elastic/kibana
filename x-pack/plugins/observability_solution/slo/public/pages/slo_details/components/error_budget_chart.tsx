@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React from 'react';
-import { ChartData } from '../../../typings/slo';
-import { useKibana } from '../../../utils/kibana_react';
-import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { TimeBounds } from '../types';
 import { SloTabId } from './slo_details';
+import { useKibana } from '../../../utils/kibana_react';
+import { toDuration, toMinutes } from '../../../utils/slo/duration';
+import { ChartData } from '../../../typings/slo';
 import { WideChart } from './wide_chart';
 
 function formatTime(minutes: number) {

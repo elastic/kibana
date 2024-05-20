@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { InPortal, OutPortal, createHtmlPortalNode } from 'react-reverse-portal';
+import { OutPortal, createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import { SettingsActions, SettingsActionsProps } from './settings_actions';
 
 export const SettingsBottomBar = () => {

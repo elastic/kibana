@@ -7,8 +7,8 @@
 
 import { EuiButton, EuiFlexItem, EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import React, { useState } from 'react';
 import {

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
+import { isEmpty } from 'lodash';
 
+import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertWithCommonFieldsLatest,
   SuppressionFieldsLatest,
 } from '@kbn/rule-registry-plugin/common/schemas';
-import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { makeFloatString } from './utils';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RuleServices } from '../types';
 import { createEnrichEventsFunction } from './enrichments';
-import { makeFloatString } from './utils';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
@@ -35,7 +35,7 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
 }
 
 export const bulkCreateWithSuppression = async <
-  T extends SuppressionFieldsLatest & BaseFieldsLatest,
+  T extends SuppressionFieldsLatest & BaseFieldsLatest
 >({
   alertWithSuppression,
   ruleExecutionLogger,

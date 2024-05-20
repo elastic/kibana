@@ -6,11 +6,11 @@
  */
 
 import {
+  timeslicesBudgetingMethodSchema,
   Duration,
   DurationUnit,
-  calendarAlignedTimeWindowSchema,
   rollingTimeWindowSchema,
-  timeslicesBudgetingMethodSchema,
+  calendarAlignedTimeWindowSchema,
 } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
 import { SLODefinition } from '../models';

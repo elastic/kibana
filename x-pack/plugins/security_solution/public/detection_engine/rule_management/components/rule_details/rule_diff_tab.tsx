@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { omit, pick } from 'lodash';
+import stringify from 'json-stable-stringify';
 import {
-  EuiFlexGroup,
-  EuiHorizontalRule,
-  EuiIconTip,
-  EuiPanel,
   EuiSpacer,
+  EuiPanel,
+  EuiHorizontalRule,
+  EuiFlexGroup,
   EuiTitle,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import stringify from 'json-stable-stringify';
-import { omit, pick } from 'lodash';
-import React, { useMemo } from 'react';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { normalizeMachineLearningJobIds } from '../../../../../common/detection_engine/utils';
-import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
 import {
-  filterEmptyThreats,
   formatScheduleStepData,
+  filterEmptyThreats,
 } from '../../../rule_creation_ui/pages/rule_creation/helpers';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { DiffView } from './json_diff/diff_view';
 import * as i18n from './json_diff/translations';
+import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 /* Inclding these properties in diff display might be confusing to users. */
 const HIDDEN_PROPERTIES = [

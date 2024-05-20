@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Type, schema } from '@kbn/config-schema';
-import { RuntimeType } from '.';
+import { schema, Type } from '@kbn/config-schema';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from './constants';
+import { RuntimeType } from '.';
 
 export const serializedFieldFormatSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -27,7 +27,7 @@ export const RUNTIME_FIELD_TYPES2 = [
 
 export const runtimeFieldNonCompositeFieldsSpecTypeSchema = schema.oneOf(
   RUNTIME_FIELD_TYPES2.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
-    Type<RuntimeType>,
+    Type<RuntimeType>
   ]
 );
 

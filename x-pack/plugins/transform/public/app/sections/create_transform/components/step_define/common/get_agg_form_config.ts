@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { getTermsAggConfig } from './terms_agg';
+import { getPercentilesAggConfig } from './percentiles_agg';
 import type { PivotSupportedAggs } from '../../../../../../../common/types/pivot_aggs';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../common/types/pivot_aggs';
-import { getPercentilesAggConfig } from './percentiles_agg';
-import { getTermsAggConfig } from './terms_agg';
 
 import type {
   PivotAggsConfigBase,

@@ -14,19 +14,19 @@ import type {
   TermsEnumRequest,
   TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
 import { ValuesType } from 'utility-types';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ApmDataSource } from '../../../../../common/data_source';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { Event } from '../../../../../typings/es_schemas/ui/event';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { Event } from '../../../../../typings/es_schemas/ui/event';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
@@ -73,8 +73,8 @@ type TypedSearchResponse<TParams extends APMEventESSearchRequest> = InferSearchR
     TParams['apm'] extends { events: ProcessorEvent[] }
       ? ValuesType<TParams['apm']['events']>
       : TParams['apm'] extends { sources: ApmDataSource[] }
-        ? ProcessorEventOfDocumentType<ValuesType<TParams['apm']['sources']>['documentType']>
-        : never
+      ? ProcessorEventOfDocumentType<ValuesType<TParams['apm']['sources']>['documentType']>
+      : never
   >,
   TParams
 >;

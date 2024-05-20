@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../common/util/alerts';
@@ -130,13 +130,10 @@ export function registerCollector(
           }>;
         };
       };
-      const countByResultType = aggResponse.count_by_result_type.buckets.reduce(
-        (acc, curr) => {
-          acc[curr.key] = curr.doc_count;
-          return acc;
-        },
-        {} as MlUsageData['alertRules'][typeof ML_ALERT_TYPES.ANOMALY_DETECTION]['count_by_result_type']
-      );
+      const countByResultType = aggResponse.count_by_result_type.buckets.reduce((acc, curr) => {
+        acc[curr.key] = curr.doc_count;
+        return acc;
+      }, {} as MlUsageData['alertRules'][typeof ML_ALERT_TYPES.ANOMALY_DETECTION]['count_by_result_type']);
 
       const jobsHealthRuleInstances = await esClient.search<{
         alert: {

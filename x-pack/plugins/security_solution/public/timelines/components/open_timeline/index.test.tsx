@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
-import React from 'react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/formatted_relative';
+import { SecurityPageName } from '../../../app/types';
 import { TimelineType } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types';
-import { SecurityPageName } from '../../../app/types';
 import {
   TestProviders,
+  mockOpenTimelineQueryResults,
   createMockStore,
   mockGlobalState,
-  mockOpenTimelineQueryResults,
 } from '../../../common/mock';
 
-import { getAllTimeline, useGetAllTimeline } from '../../containers/all';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
+import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
 
+import { useTimelineStatus } from './use_timeline_status';
+import { NotePreviews } from './note_previews';
+import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { StatefulOpenTimeline } from '.';
+import { TimelineTabsStyle } from './types';
+import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
+import { useTimelineTypes } from './use_timeline_types';
+import { deleteTimelinesByIds } from '../../containers/api';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
 } from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { deleteTimelinesByIds } from '../../containers/api';
-import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-import { NotePreviews } from './note_previews';
-import { TimelineTabsStyle } from './types';
-import { useTimelineStatus } from './use_timeline_status';
-import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
-import { useTimelineTypes } from './use_timeline_types';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');

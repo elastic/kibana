@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { RuleReferences } from '../../logic/use_find_references';
-import type { ExceptionListItemIdentifiers } from '../../utils/types';
 import { ExceptionItemCard } from '../exception_item_card';
-import { ExeptionItemsViewerEmptyPrompts } from './empty_viewer_state';
+import type { ExceptionListItemIdentifiers } from '../../utils/types';
+import type { RuleReferences } from '../../logic/use_find_references';
 import type { ViewerState } from './reducer';
+import { ExeptionItemsViewerEmptyPrompts } from './empty_viewer_state';
 
 const MyFlexItem = styled(EuiFlexItem)`
   margin: ${({ theme }) => `${theme.eui.euiSize} 0`};

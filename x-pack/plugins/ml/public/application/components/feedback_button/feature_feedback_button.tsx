@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactElement } from 'react';
 import React from 'react';
+import { EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';

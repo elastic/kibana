@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { ShallowWrapper, shallow } from 'enzyme';
 import React, { ReactElement } from 'react';
+import { shallow, ShallowWrapper } from 'enzyme';
 
+import { Table, TableProps, TableState } from './table';
 import { EuiTableFieldDataColumnType, keys } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SourceFiltersTableFilter } from '../../types';
-import { Table, TableProps, TableState } from './table';
 
 const indexPattern = {} as DataView;
 const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields }) as DataView;
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
 
 const getTableColumnRender = (
   component: ShallowWrapper<TableProps, TableState, Table>,

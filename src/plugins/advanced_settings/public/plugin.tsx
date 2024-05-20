@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 import { SectionRegistry } from '@kbn/management-settings-section-registry';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { withSuspense } from '@kbn/shared-ux-utility';
-import React from 'react';
 import ReactDOM from 'react-dom';
-import { AdvancedSettingsPluginSetup, AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
 const { setup: sectionRegistrySetup, start: sectionRegistryStart } = new SectionRegistry();
 

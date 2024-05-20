@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiContextMenuPanelProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import type { HostMetadata } from '../../../../../../common/endpoint/types';
 import { ContextMenuItemNavByRouter } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
+import type { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useEndpointActionItems } from '../hooks';
 
 export interface TableRowActionProps {

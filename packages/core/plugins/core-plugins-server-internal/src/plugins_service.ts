@@ -7,31 +7,31 @@
  */
 
 import Path from 'path';
-import { getFlattenedObject } from '@kbn/std';
-import { Observable, firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { filter, map, tap, toArray } from 'rxjs';
+import { getFlattenedObject } from '@kbn/std';
 
+import { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
-import { type PluginName, PluginType } from '@kbn/core-base-common';
-import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import { type PluginName, PluginType } from '@kbn/core-base-common';
 import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
+import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
+import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import {
   InternalCorePreboot,
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
-import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
-import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-import { Logger } from '@kbn/logging';
-import { PluginDiscoveryError, PluginDiscoveryErrorType, discover } from './discovery';
+import type { DiscoveredPlugin } from '@kbn/core-base-common';
+import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
 
-import { createBrowserConfig } from './create_browser_config';
+import type { PluginDependencies } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
-import type { PluginDependencies } from './types';
+import { createBrowserConfig } from './create_browser_config';
 
 /** @internal */
 export type DiscoveredPlugins = {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 // imports from npm packages
 import React from 'react';
+import { shallow } from 'enzyme';
 
 // imports from immediate files
 import { KibanaPageTemplateInner } from './page_template_inner';

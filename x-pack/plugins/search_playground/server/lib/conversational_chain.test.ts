@@ -6,11 +6,11 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { FakeListChatModel } from '@langchain/core/utils/testing';
-import { Message } from 'ai';
 import { createAssist as Assist } from '../utils/assist';
 import { ConversationalChain } from './conversational_chain';
+import { FakeListChatModel } from '@langchain/core/utils/testing';
+import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { Message } from 'ai';
 
 describe('conversational chain', () => {
   const createTestChain = async (

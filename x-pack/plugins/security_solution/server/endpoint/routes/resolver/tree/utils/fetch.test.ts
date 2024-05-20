@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type {
-  FieldsObject,
-  ResolverNode,
-  ResolverSchema,
-} from '../../../../../../common/endpoint/types';
-import { DescendantsQuery } from '../queries/descendants';
-import { LifecycleQuery } from '../queries/lifecycle';
-import { StatsQuery } from '../queries/stats';
 import type { TreeOptions } from './fetch';
 import {
   Fetcher,
@@ -24,6 +14,16 @@ import {
   getNameField,
   getParentField,
 } from './fetch';
+import { LifecycleQuery } from '../queries/lifecycle';
+import { DescendantsQuery } from '../queries/descendants';
+import { StatsQuery } from '../queries/stats';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type {
+  FieldsObject,
+  ResolverNode,
+  ResolverSchema,
+} from '../../../../../../common/endpoint/types';
 
 jest.mock('../queries/descendants');
 jest.mock('../queries/lifecycle');

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { v4 as uuidv4 } from 'uuid';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
-import { v4 as uuidv4 } from 'uuid';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
-import { getConfiguration } from './configurations';
 import { ConvertMetricVisToLensVisualization } from './types';
+import { getConfiguration } from './configurations';
 
 export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {

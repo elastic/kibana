@@ -8,12 +8,12 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { registerBulkDeleteRoute } from './bulk_delete';
-import { registerCleanRoute } from './clean';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
 import { registerFindRoute } from './find';
 import { registerGetRoute } from './get';
 import { registerUpdateRoute } from './update';
+import { registerCleanRoute } from './clean';
 
 export const registerKbnClientSoRoutes = (router: IRouter) => {
   registerBulkDeleteRoute(router);

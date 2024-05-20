@@ -20,8 +20,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PipelineDetailsTitle, PipelineNameAndDescription } from '../../shared';
 import type { MlInferenceState } from '../types';
+import { PipelineDetailsTitle, PipelineNameAndDescription } from '../../shared';
 
 interface Props {
   handlePipelineConfigUpdate: (configUpdate: Partial<MlInferenceState>) => void;

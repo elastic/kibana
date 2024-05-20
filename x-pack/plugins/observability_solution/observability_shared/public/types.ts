@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AppMountParameters } from '@kbn/core-application-browser';
 import { ReactNode } from 'react';
+import { AppMountParameters } from '@kbn/core-application-browser';
 
 export interface ApmIndicesConfig {
   error: string;

@@ -8,13 +8,13 @@
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
-  ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
-import { ALERT_STATUS_ALL } from '../../../common/constants';
 import { AlertStatusFilter } from '../../../common/typings';
+import { ALERT_STATUS_ALL } from '../../../common/constants';
 
 export const DEFAULT_QUERIES: Query[] = [];
 export const DEFAULT_QUERY_STRING = '';

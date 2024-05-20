@@ -9,10 +9,10 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { pluginServices, registry } from './services/plugin_services';
 import {
-  PresentationUtilPluginSetup,
   PresentationUtilPluginSetupDeps,
-  PresentationUtilPluginStart,
   PresentationUtilPluginStartDeps,
+  PresentationUtilPluginSetup,
+  PresentationUtilPluginStart,
 } from './types';
 
 import { registerExpressionsLanguage } from '.';

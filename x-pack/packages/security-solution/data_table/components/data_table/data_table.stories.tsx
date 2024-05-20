@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
-import { DragDropContext, DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { euiDarkVars } from '@kbn/ui-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { createStore as createReduxStore } from 'redux';
+import { DragDropContext, DropResult, ResponderProvided } from '@hello-pangea/dnd';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
-import { DataTableComponent } from '.';
-import { TableId } from '../..';
+import { Provider as ReduxStoreProvider } from 'react-redux';
+import { euiDarkVars } from '@kbn/ui-theme';
+import { createStore as createReduxStore } from 'redux';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { mockGlobalState } from '../../mock/global_state';
-import { mockTimelineData } from '../../mock/mock_timeline_data';
 import { getMappedNonEcsValue } from './utils';
+import { TableId } from '../..';
+import { mockTimelineData } from '../../mock/mock_timeline_data';
+import { DataTableComponent } from '.';
 
 export default {
   title: 'DataTable',

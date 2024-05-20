@@ -9,9 +9,9 @@ import { DARK_THEME } from '@elastic/charts';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { DataQualityPanel } from '.';
 import { TestProviders } from './mock/test_providers/test_providers';
+import { DataQualityPanel } from '.';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const { toasts } = notificationServiceMock.createSetupContract();
 

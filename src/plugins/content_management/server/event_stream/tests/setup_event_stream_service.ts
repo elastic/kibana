@@ -9,8 +9,8 @@
 import { type CoreSetup } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { EventStreamService } from '../event_stream_service';
-import { MemoryEventStreamClientFactory } from '../memory';
 import { EventStreamLoggerMock } from './event_stream_logger_mock';
+import { MemoryEventStreamClientFactory } from '../memory';
 
 export const setupEventStreamService = (kibanaCoreSetup: CoreSetup = coreMock.createSetup()) => {
   const logger = new EventStreamLoggerMock();

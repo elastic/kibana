@@ -8,23 +8,23 @@
 import { getNewThreatIndicatorRule } from '../../../../objects/rule';
 
 import {
-  ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON,
-  DEFINITION_DETAILS,
+  SUPPRESS_FOR_DETAILS,
   DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
-  SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
+  DEFINITION_DETAILS,
+  ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON,
 } from '../../../../screens/rule_details';
 
-import { TOOLTIP } from '../../../../screens/common';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import { TOOLTIP } from '../../../../screens/common';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
+import { getDetails } from '../../../../tasks/rule_details';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
 

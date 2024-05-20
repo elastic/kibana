@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { EuiButtonProps, PropsForButton } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-} from '@elastic/eui';
 import type { FC, PropsWithChildren, ReactElement, ReactNode } from 'react';
 import React, { isValidElement, memo, useMemo } from 'react';
 import styled from 'styled-components';
+import type { EuiButtonProps, PropsForButton } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
 
 const OTHER_NODES = {};
 

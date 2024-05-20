@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { addBasePath } from '..';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '..';
 import { componentTemplateSchema } from './schema_validation';
 
 const paramsSchema = schema.object({

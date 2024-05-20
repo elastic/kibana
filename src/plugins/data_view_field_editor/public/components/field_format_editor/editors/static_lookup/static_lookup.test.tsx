@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 import { StaticLookupFormatEditorFormatParams } from './static_lookup';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { StaticLookupFormatEditor } from './static_lookup';
 

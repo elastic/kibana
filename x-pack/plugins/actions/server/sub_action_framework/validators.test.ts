@@ -8,10 +8,10 @@
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { actionsConfigMock } from '../actions_config.mock';
 import {
-  TestConfig,
-  TestConfigSchema,
-  TestSecrets,
   TestSecretsSchema,
+  TestConfigSchema,
+  TestConfig,
+  TestSecrets,
   TestSubActionConnector,
 } from './mocks';
 import { IService, ServiceParams, SubActionConnectorType, ValidatorType } from './types';

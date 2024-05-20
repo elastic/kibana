@@ -18,9 +18,9 @@ import {
   registerV1ElasticsearchSettingsRoutes,
   registerV1EnterpriseSearchRoutes,
   registerV1HealthRoute,
-  registerV1KibanaRoutes,
   registerV1LogstashRoutes,
   registerV1SetupRoutes,
+  registerV1KibanaRoutes,
 } from './api/v1';
 
 export function requireUIRoutes(

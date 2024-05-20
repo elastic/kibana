@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { services as serverlessServices } from '../../../../test_serverless/api_integration/services';
-import { BsearchSecureService } from '../../../../test_serverless/shared/services/bsearch_secure';
 import { SpacesServiceProvider } from '../../../common/services/spaces';
+import { BsearchSecureService } from '../../../../test_serverless/shared/services/bsearch_secure';
+import { services as serverlessServices } from '../../../../test_serverless/api_integration/services';
 
 export const services = {
   ...serverlessServices,

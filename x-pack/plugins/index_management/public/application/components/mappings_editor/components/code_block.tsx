@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
+import { EuiCodeBlock } from '@elastic/eui';
 
 interface Props {
   children: React.ReactNode; // Note - ReactNodes (vs strings) will not have syntax highlighting

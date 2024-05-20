@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-import { StatusRuleParams } from '../../../../../../common/rules/status_rule';
-import { ClientPluginsStart } from '../../../../../plugin';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { kibanaService } from '../../../../../utils/kibana_service';
+import { ClientPluginsStart } from '../../../../../plugin';
 import { store } from '../../../state';
+import { StatusRuleParams } from '../../../../../../common/rules/status_rule';
 
 interface Props {
   core: CoreStart;

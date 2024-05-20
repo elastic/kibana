@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiHorizontalRule, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { FILTER_FIELDS } from '../../../../../../common/constants';
-import { useGetUrlParams } from '../../../../hooks';
-import { AlertQueryBar } from '../alert_query_bar/query_bar';
+import { EuiCallOut, EuiSpacer, EuiHorizontalRule, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FiltersExpressionsSelect, StatusExpressionSelect } from '../monitor_expressions';
-import { AvailabilityExpressionSelect } from '../monitor_expressions/availability_expression_select';
 import { AddFilterButton } from './add_filter_btn';
 import { OldAlertCallOut } from './old_alert_call_out';
+import { AvailabilityExpressionSelect } from '../monitor_expressions/availability_expression_select';
+import { AlertQueryBar } from '../alert_query_bar/query_bar';
+import { useGetUrlParams } from '../../../../hooks';
+import { FILTER_FIELDS } from '../../../../../../common/constants';
 
 export interface AlertMonitorStatusProps {
   ruleParams: { [key: string]: any };

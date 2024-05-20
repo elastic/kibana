@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Position, Token, TokensProvider } from '../../types';
 import { TokenIterator } from './token_iterator';
+import { Position, Token, TokensProvider } from '../../types';
 
 const mockTokensProviderFactory = (tokenMtx: Token[][]): TokensProvider => {
   return {

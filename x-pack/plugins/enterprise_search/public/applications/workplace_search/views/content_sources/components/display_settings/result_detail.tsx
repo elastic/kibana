@@ -29,7 +29,7 @@ import {
 
 import { ADD_FIELD_LABEL, EDIT_FIELD_LABEL, REMOVE_FIELD_LABEL } from '../../../../constants';
 
-import { EMPTY_FIELDS_DESCRIPTION, PREVIEW_TITLE, VISIBLE_FIELDS_TITLE } from './constants';
+import { VISIBLE_FIELDS_TITLE, EMPTY_FIELDS_DESCRIPTION, PREVIEW_TITLE } from './constants';
 import { DisplaySettingsLogic } from './display_settings_logic';
 import { ExampleResultDetailCard } from './example_result_detail_card';
 

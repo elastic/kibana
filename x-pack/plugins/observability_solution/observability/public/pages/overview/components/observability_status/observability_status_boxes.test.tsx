@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { ObservabilityStatusBoxes } from './observability_status_boxes';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('ObservabilityStatusBoxes', () => {
   it('should render all boxes passed as prop', () => {

@@ -10,7 +10,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, ReplaySubject, map, takeUntil } from 'rxjs';
+import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreStart } from '@kbn/core/public';
@@ -23,10 +23,10 @@ import type {
 } from '@kbn/security-plugin-types-public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
+import { SecurityNavControl } from './nav_control_component';
 import type { SecurityLicense } from '../../common';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
-import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;

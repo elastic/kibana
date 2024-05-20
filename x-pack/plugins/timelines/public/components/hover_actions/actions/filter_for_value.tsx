@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
-import { FilterValueFnArgs, HoverActionComponentProps } from './types';
+import { HoverActionComponentProps, FilterValueFnArgs } from './types';
 
 export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterIn', {
   defaultMessage: 'Filter In',

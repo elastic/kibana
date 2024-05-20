@@ -8,12 +8,12 @@
 
 import { inspect } from 'util';
 
-import { Bundle, CompilerMsg, Summarizer, WorkerMsg } from '../common';
+import { WorkerMsg, CompilerMsg, Bundle, Summarizer } from '../common';
 
-import { BundleCacheEvent } from './bundle_cache';
-import { WorkerStatus } from './observe_worker';
-import { OptimizerConfig } from './optimizer_config';
 import { ChangeEvent } from './watcher';
+import { WorkerStatus } from './observe_worker';
+import { BundleCacheEvent } from './bundle_cache';
+import { OptimizerConfig } from './optimizer_config';
 
 export interface OptimizerInitializedEvent {
   type: 'optimizer initialized';

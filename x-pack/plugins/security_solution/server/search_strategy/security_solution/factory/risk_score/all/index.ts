@@ -1,7 +1,3 @@
-import type { AggregationsMinAggregate } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { SearchRequest, TimeRange } from '@kbn/data-plugin/common';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,19 +5,23 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
  * 2.0.
  */
 import type { IEsSearchResponse } from '@kbn/search-types';
+import type { SearchRequest, TimeRange } from '@kbn/data-plugin/common';
 import { get, getOr } from 'lodash/fp';
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { AggregationsMinAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { SecuritySolutionFactory } from '../../types';
 import type {
+  RiskQueries,
   BucketItem,
   HostRiskScore,
-  RiskQueries,
   UserRiskScore,
 } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { getTotalCount } from '../../cti/event_enrichment/helpers';
-import type { SecuritySolutionFactory } from '../../types';
 import { buildRiskScoreQuery } from './query.risk_score.dsl';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
+import { getTotalCount } from '../../cti/event_enrichment/helpers';
 
 export const riskScore: SecuritySolutionFactory<
   RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore

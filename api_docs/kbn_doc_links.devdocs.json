@@ -49,7 +49,9 @@
             "tags": [],
             "label": "{ kibanaBranch, buildFlavor }",
             "description": [],
-            "signature": ["GetDocLinkOptions"],
+            "signature": [
+              "GetDocLinkOptions"
+            ],
             "path": "packages/kbn-doc-links/src/get_doc_links.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -89,7 +91,9 @@
             "tags": [],
             "label": "{\n  kibanaBranch,\n  buildFlavor,\n}",
             "description": [],
-            "signature": ["GetDocLinksMetaOptions"],
+            "signature": [
+              "GetDocLinksMetaOptions"
+            ],
             "path": "packages/kbn-doc-links/src/get_doc_meta.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -169,7 +173,9 @@
             "tags": [],
             "label": "canvas",
             "description": [],
-            "signature": ["{ readonly guide: string; }"],
+            "signature": [
+              "{ readonly guide: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -195,7 +201,9 @@
             "tags": [],
             "label": "console",
             "description": [],
-            "signature": ["{ readonly guide: string; readonly serverlessGuide: string; }"],
+            "signature": [
+              "{ readonly guide: string; readonly serverlessGuide: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -221,7 +229,9 @@
             "tags": [],
             "label": "discover",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -317,7 +327,9 @@
             "tags": [],
             "label": "heartbeat",
             "description": [],
-            "signature": ["{ readonly base: string; }"],
+            "signature": [
+              "{ readonly base: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -329,7 +341,9 @@
             "tags": [],
             "label": "libbeat",
             "description": [],
-            "signature": ["{ readonly getStarted: string; }"],
+            "signature": [
+              "{ readonly getStarted: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -341,7 +355,9 @@
             "tags": [],
             "label": "logstash",
             "description": [],
-            "signature": ["{ readonly base: string; readonly inputElasticAgent: string; }"],
+            "signature": [
+              "{ readonly base: string; readonly inputElasticAgent: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -353,7 +369,9 @@
             "tags": [],
             "label": "functionbeat",
             "description": [],
-            "signature": ["{ readonly base: string; }"],
+            "signature": [
+              "{ readonly base: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -365,7 +383,9 @@
             "tags": [],
             "label": "winlogbeat",
             "description": [],
-            "signature": ["{ readonly base: string; }"],
+            "signature": [
+              "{ readonly base: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -391,7 +411,9 @@
             "tags": [],
             "label": "runtimeFields",
             "description": [],
-            "signature": ["{ readonly overview: string; readonly mapping: string; }"],
+            "signature": [
+              "{ readonly overview: string; readonly mapping: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -417,7 +439,9 @@
             "tags": [],
             "label": "search",
             "description": [],
-            "signature": ["{ readonly sessions: string; readonly sessionLimits: string; }"],
+            "signature": [
+              "{ readonly sessions: string; readonly sessionLimits: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -493,7 +517,9 @@
             "tags": [],
             "label": "elasticsearch",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -547,7 +573,9 @@
             "tags": [],
             "label": "date",
             "description": [],
-            "signature": ["{ readonly dateMath: string; readonly dateMathIndexNames: string; }"],
+            "signature": [
+              "{ readonly dateMath: string; readonly dateMathIndexNames: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -559,7 +587,9 @@
             "tags": [],
             "label": "management",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -571,7 +601,9 @@
             "tags": [],
             "label": "ml",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -583,7 +615,9 @@
             "tags": [],
             "label": "transforms",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -595,7 +629,9 @@
             "tags": [],
             "label": "visualize",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -649,7 +685,9 @@
             "tags": [],
             "label": "taskManager",
             "description": [],
-            "signature": ["{ readonly healthMonitoring: string; }"],
+            "signature": [
+              "{ readonly healthMonitoring: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -675,7 +713,9 @@
             "tags": [],
             "label": "monitoring",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -729,7 +769,9 @@
             "tags": [],
             "label": "watcher",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -741,7 +783,9 @@
             "tags": [],
             "label": "ccs",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -767,7 +811,9 @@
             "tags": [],
             "label": "snapshotRestore",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -779,7 +825,9 @@
             "tags": [],
             "label": "ingest",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -805,7 +853,9 @@
             "tags": [],
             "label": "ecs",
             "description": [],
-            "signature": ["{ readonly guide: string; }"],
+            "signature": [
+              "{ readonly guide: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -831,7 +881,9 @@
             "tags": [],
             "label": "endpoints",
             "description": [],
-            "signature": ["{ readonly troubleshooting: string; }"],
+            "signature": [
+              "{ readonly troubleshooting: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -871,7 +923,9 @@
             "tags": [],
             "label": "searchUI",
             "description": [],
-            "signature": ["{ readonly appSearch: string; readonly elasticsearch: string; }"],
+            "signature": [
+              "{ readonly appSearch: string; readonly elasticsearch: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -911,7 +965,9 @@
             "tags": [],
             "label": "serverlessSecurity",
             "description": [],
-            "signature": ["{ readonly apiKeyPrivileges: string; }"],
+            "signature": [
+              "{ readonly apiKeyPrivileges: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -923,7 +979,9 @@
             "tags": [],
             "label": "synthetics",
             "description": [],
-            "signature": ["{ readonly featureRoles: string; }"],
+            "signature": [
+              "{ readonly featureRoles: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -935,7 +993,9 @@
             "tags": [],
             "label": "telemetry",
             "description": [],
-            "signature": ["{ readonly settings: string; }"],
+            "signature": [
+              "{ readonly settings: string; }"
+            ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false

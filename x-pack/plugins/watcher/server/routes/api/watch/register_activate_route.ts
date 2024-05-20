@@ -9,11 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 
-import {
-  buildClientWatchStatusModel,
-  buildServerWatchStatusModel,
-} from '../../../models/watch_status_model';
 import { RouteDependencies } from '../../../types';
+import {
+  buildServerWatchStatusModel,
+  buildClientWatchStatusModel,
+} from '../../../models/watch_status_model';
 
 function activateWatch(dataClient: IScopedClusterClient, watchId: string) {
   return dataClient.asCurrentUser.watcher.activateWatch({

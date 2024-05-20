@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
+import type cytoscape from 'cytoscape';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment-timezone';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -15,38 +21,32 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFlyoutBody,
   EuiPopover,
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
-import type cytoscape from 'cytoscape';
-import moment from 'moment-timezone';
-import type { FC } from 'react';
-import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import { CytoscapeContext } from './cytoscape';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
-import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 import {
-  useMlKibana,
   useMlLocator,
-  useNavigateToPath,
   useNotifications,
+  useNavigateToPath,
+  useMlKibana,
 } from '../../../../contexts/kibana';
 import { useEnabledFeatures } from '../../../../contexts/ml';
-import { useMlIndexUtils } from '../../../../util/index_service';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
-  DeleteActionModal,
   useDeleteAction,
+  DeleteActionModal,
 } from '../../analytics_management/components/action_delete';
-import { CytoscapeContext } from './cytoscape';
+import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
+import { useMlIndexUtils } from '../../../../util/index_service';
 
 interface Props {
   details: Record<string, any>;

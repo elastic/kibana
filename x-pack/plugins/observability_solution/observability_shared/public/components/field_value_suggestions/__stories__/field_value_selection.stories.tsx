@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { text } from '@storybook/addon-knobs';
 import React, { ComponentType, useEffect, useState } from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable } from 'rxjs';
-import { FieldValueSelection } from '../field_value_selection';
+import { CoreStart } from '@kbn/core/public';
+import { text } from '@storybook/addon-knobs';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { FieldValueSelectionProps } from '../types';
+import { FieldValueSelection } from '../field_value_selection';
 
 const values = [
   { label: 'elastic co frontend', count: 1 },

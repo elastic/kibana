@@ -8,29 +8,29 @@
 import React, { useEffect, useState } from 'react';
 
 import {
-  EuiButtonEmpty,
-  EuiLink,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiSpacer,
   EuiSteps,
   EuiText,
+  EuiPageHeader,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiLink,
+  EuiPageBody,
+  EuiPageSection,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { useAppContext } from '../../app_context';
-import { UIM_OVERVIEW_PAGE_LOAD, uiMetricService } from '../../lib/ui_metric';
+import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
 import { getFixIssuesStep } from './fix_issues_step';
-import { getLogsStep } from './logs_step';
-import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 import { getUpgradeStep } from './upgrade_step';
+import { getMigrateSystemIndicesStep } from './migrate_system_indices';
+import { getLogsStep } from './logs_step';
 
 type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 

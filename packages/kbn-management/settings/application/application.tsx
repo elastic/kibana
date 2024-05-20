@@ -8,24 +8,24 @@
 import React, { useState } from 'react';
 
 import {
-  EuiCallOut,
+  EuiText,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTabs,
-  EuiText,
   Query,
+  EuiTabs,
+  EuiCallOut,
 } from '@elastic/eui';
+import { getCategoryCounts } from '@kbn/management-settings-utilities';
 import { Form } from '@kbn/management-settings-components-form';
 import { SettingsTabs } from '@kbn/management-settings-types/tab';
-import { getCategoryCounts } from '@kbn/management-settings-utilities';
 import { EmptyState } from './empty_state';
-import { useScopeFields } from './hooks/use_scope_fields';
 import { i18nTexts } from './i18n_texts';
-import { QueryInput, QueryInputProps } from './query_input';
-import { readOnlyBadge } from './read_only_badge';
-import { useServices } from './services';
 import { Tab } from './tab';
+import { readOnlyBadge } from './read_only_badge';
+import { useScopeFields } from './hooks/use_scope_fields';
+import { QueryInput, QueryInputProps } from './query_input';
+import { useServices } from './services';
 
 export const DATA_TEST_SUBJ_SETTINGS_TITLE = 'managementSettingsTitle';
 export const SPACE_SETTINGS_TAB_ID = 'space-settings';

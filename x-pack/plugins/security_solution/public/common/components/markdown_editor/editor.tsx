@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { EuiMarkdownEditor } from '@elastic/eui';
-import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import type { ElementRef } from 'react';
 import React, {
   forwardRef,
@@ -18,9 +16,11 @@ import React, {
   useState,
   useCallback,
 } from 'react';
+import { EuiMarkdownEditor } from '@elastic/eui';
+import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 
+import { uiPlugins, parsingPlugins, processingPlugins } from './plugins';
 import { useUpsellingMessage } from '../../hooks/use_upselling';
-import { parsingPlugins, processingPlugins, uiPlugins } from './plugins';
 
 interface MarkdownEditorProps {
   onChange: (content: string) => void;

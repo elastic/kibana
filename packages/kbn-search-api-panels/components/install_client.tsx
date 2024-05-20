@@ -8,14 +8,14 @@
 
 import React from 'react';
 
-import { EuiPanelProps, EuiSpacer } from '@elastic/eui';
-import type { ApplicationStart } from '@kbn/core-application-browser';
+import { EuiSpacer, EuiPanelProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { LanguageDefinition } from '../types';
 import { CodeBox } from './code_box';
-import { GithubLink } from './github_link';
 import { OverviewPanel } from './overview_panel';
+import { LanguageDefinition } from '../types';
+import { GithubLink } from './github_link';
 
 interface InstallClientProps {
   codeSnippet: string;

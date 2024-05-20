@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { EuiScreenReaderOnly } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { FunctionComponent, useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
-import { CONSOLE_OUTPUT_LANG_ID, CONSOLE_THEME_ID, monaco } from '@kbn/monaco';
+import { css } from '@emotion/react';
 import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
-import React, { FunctionComponent, useCallback, useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiScreenReaderOnly } from '@elastic/eui';
+import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
 import { useEditorReadContext, useRequestReadContext } from '../../../contexts';
 import { convertMapboxVectorTileToJson } from '../legacy/console_editor/mapbox_vector_tile';
 import {
   isJSONContentType,
   isMapboxVectorTile,
-  languageForContentType,
   safeExpandLiteralStrings,
+  languageForContentType,
 } from '../utilities';
 import { useResizeCheckerUtils } from './hooks';
 

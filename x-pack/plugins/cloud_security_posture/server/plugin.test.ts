@@ -12,43 +12,43 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import {
-  createArtifactsClientMock,
-  createMockAgentPolicyService,
-  createMockAgentService,
-  createMockPackageService,
   createPackagePolicyServiceMock,
+  createArtifactsClientMock,
+  createMockPackageService,
+  createMockAgentService,
+  createMockAgentPolicyService,
 } from '@kbn/fleet-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import {
-  ElasticsearchClient,
-  RequestHandlerContext,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { CspPlugin } from './plugin';
+import { CspServerPluginStartDeps } from './types';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   Installation,
   ListResult,
   PackagePolicy,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
-import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import {
-  ExternalCallback,
   FleetStartContract,
-  PostPackagePolicyPostCreateCallback,
   PostPackagePolicyPostDeleteCallback,
+  PostPackagePolicyPostCreateCallback,
+  ExternalCallback,
 } from '@kbn/fleet-plugin/server';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import Chance from 'chance';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import {
+  ElasticsearchClient,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import * as onPackagePolicyPostCreateCallback from './fleet_integration/fleet_integration';
-import { CspPlugin } from './plugin';
-import { CspServerPluginStartDeps } from './types';
 
 const chance = new Chance();
 

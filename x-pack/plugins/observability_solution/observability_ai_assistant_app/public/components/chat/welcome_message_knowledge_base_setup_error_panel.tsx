@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCode,
   EuiDescriptionList,
-  EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiHorizontalRule,
-  EuiIcon,
+  EuiDescriptionListDescription,
   EuiLink,
-  EuiPanel,
   EuiSpacer,
+  EuiIcon,
   EuiText,
+  EuiHorizontalRule,
+  EuiPanel,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 

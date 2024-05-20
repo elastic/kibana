@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButton, EuiButtonEmpty, EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 

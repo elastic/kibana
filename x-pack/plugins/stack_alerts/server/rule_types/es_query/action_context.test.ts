@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Comparator } from '../../../common/comparator_types';
 import {
   EsQueryRuleActionContext,
   addMessages,
   getContextConditionsDescription,
 } from './action_context';
 import { EsQueryRuleParams, EsQueryRuleParamsSchema } from './rule_type_params';
+import { Comparator } from '../../../common/comparator_types';
 
 describe('addMessages', () => {
   it('generates expected properties', async () => {

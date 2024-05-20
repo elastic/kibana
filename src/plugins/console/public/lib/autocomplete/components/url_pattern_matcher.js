@@ -8,10 +8,10 @@
 
 import _ from 'lodash';
 import {
-  AcceptEndpointComponent,
-  ConstantComponent,
-  ListComponent,
   SharedComponent,
+  ConstantComponent,
+  AcceptEndpointComponent,
+  ListComponent,
   SimpleParamComponent,
 } from '.';
 

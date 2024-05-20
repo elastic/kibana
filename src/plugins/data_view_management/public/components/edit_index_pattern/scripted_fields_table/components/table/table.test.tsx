@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
-import { DataView } from '@kbn/data-views-plugin/public';
 import { Table } from '.';
 import { ScriptedFieldItem } from '../../types';
+import { DataView } from '@kbn/data-views-plugin/public';
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields }) as DataView;
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
 
 const items: ScriptedFieldItem[] = [
   { name: '1', lang: 'painless', script: '', isUserEditable: true },

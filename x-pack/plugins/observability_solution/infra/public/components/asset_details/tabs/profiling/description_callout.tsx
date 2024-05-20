@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 const LOCAL_STORAGE_KEY = 'infra-profiling-description-callout-dismissed';

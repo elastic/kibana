@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useState, useMemo, useCallback } from 'react';
+import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
-import { ContextMenuActions } from '../../../../components';
-import { useAuthz } from '../../../../hooks';
-import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
-import { ExperimentalFeaturesService } from '../../../../services';
 import type { Agent, AgentPolicy } from '../../../../types';
+import { useAuthz } from '../../../../hooks';
+import { ContextMenuActions } from '../../../../components';
 import {
-  AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
+  AgentReassignAgentPolicyModal,
   AgentUpgradeAgentModal,
 } from '../../components';
-import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import { useAgentRefresh } from '../hooks';
+import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
+import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
 

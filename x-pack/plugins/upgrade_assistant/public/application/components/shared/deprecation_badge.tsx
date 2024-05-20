@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiBadge } from '@elastic/eui';
 
 const i18nTexts = {
   criticalBadgeLabel: i18n.translate('xpack.upgradeAssistant.deprecationBadge.criticalBadgeLabel', {

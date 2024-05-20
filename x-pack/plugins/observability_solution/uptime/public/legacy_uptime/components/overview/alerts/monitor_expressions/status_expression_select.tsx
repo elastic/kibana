@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { DownNoExpressionSelect } from './down_number_select';
 import { TimeExpressionSelect } from './time_expression_select';

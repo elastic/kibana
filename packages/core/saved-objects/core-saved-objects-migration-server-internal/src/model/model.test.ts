@@ -6,21 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { chain } from 'lodash';
+import * as Either from 'fp-ts/lib/Either';
+import * as Option from 'fp-ts/lib/Option';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_INDEX_TYPES_MAP,
   type IndexMapping,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
-import { chain } from 'lodash';
-import type { AliasAction, RetryableEsClientError } from '../actions';
-import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
-import type { ResponseType } from '../next';
 import type {
   BaseState,
   CalculateExcludeFiltersState,
+  UpdateSourceMappingsPropertiesState,
   CheckTargetTypesMappingsState,
   CheckUnknownDocumentsState,
   CheckVersionIndexReadyActions,
@@ -29,7 +27,6 @@ import type {
   CloneTempToTarget,
   CreateNewTargetState,
   CreateReindexTempState,
-  DoneReindexingSyncState,
   FatalState,
   LegacyCreateReindexTargetState,
   LegacyDeleteState,
@@ -44,7 +41,6 @@ import type {
   OutdatedDocumentsTransform,
   PostInitState,
   PrepareCompatibleMigration,
-  ReadyToReindexSyncState,
   RefreshTarget,
   ReindexSourceToTempClosePit,
   ReindexSourceToTempIndexBulk,
@@ -55,15 +51,19 @@ import type {
   SetTempWriteBlock,
   State,
   TransformedDocumentsBulkIndex,
-  UpdateSourceMappingsPropertiesState,
   UpdateTargetMappingsMeta,
   UpdateTargetMappingsPropertiesState,
   UpdateTargetMappingsPropertiesWaitForTaskState,
   WaitForYellowSourceState,
+  ReadyToReindexSyncState,
+  DoneReindexingSyncState,
 } from '../state';
-import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
-import { model } from './model';
+import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
+import type { AliasAction, RetryableEsClientError } from '../actions';
+import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
+import { model } from './model';
+import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {

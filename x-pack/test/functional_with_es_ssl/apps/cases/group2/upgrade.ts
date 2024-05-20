@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
-  ExternalServiceSimulator,
-  getExternalServiceSimulatorPath,
-} from '@kbn/actions-simulators-plugin/server/plugin';
 import expect from '@kbn/expect';
+import {
+  getExternalServiceSimulatorPath,
+  ExternalServiceSimulator,
+} from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Env, IConfigService } from '@kbn/config';
-import type { CoreId } from '@kbn/core-base-common-internal';
+import type { IConfigService, Env } from '@kbn/config';
 import type { LoggerFactory } from '@kbn/logging';
+import type { CoreId } from '@kbn/core-base-common-internal';
 
 /**
  * Groups all main Kibana's core modules/systems/services that are consumed in a

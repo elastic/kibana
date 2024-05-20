@@ -7,25 +7,25 @@
 
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
-import { inputsActions } from '../../../common/store/inputs';
+import { getTimelineQueryTypes } from '../helpers';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { OpenTimelineResult } from '../../components/open_timeline/types';
-import { getTimelineQueryTypes } from '../helpers';
+import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
+import { inputsActions } from '../../../common/store/inputs';
 
+import * as i18n from '../../pages/translations';
 import type {
-  GetAllTimelineVariables,
-  PageInfoTimeline,
-  SortTimeline,
-  TimelineResult,
-  TimelineStatusLiteralWithNull,
   TimelineTypeLiteralWithNull,
+  TimelineStatusLiteralWithNull,
+  PageInfoTimeline,
+  TimelineResult,
+  SortTimeline,
+  GetAllTimelineVariables,
 } from '../../../../common/api/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
-import * as i18n from '../../pages/translations';
 import { getAllTimelines } from '../api';
 
 export interface AllTimelinesArgs {

@@ -9,8 +9,8 @@
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
   Collector,
-  createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
+  createCollectorFetchContextMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 
 import { registerUiMetricUsageCollector } from '.';

@@ -6,11 +6,11 @@
  */
 
 import { combineReducers } from 'redux';
-import { cloneJob } from './clone_job';
-import { createJob } from './create_job';
-import { detailPanel } from './detail_panel';
 import { jobs } from './jobs';
 import { tableState } from './table_state';
+import { detailPanel } from './detail_panel';
+import { cloneJob } from './clone_job';
+import { createJob } from './create_job';
 import { updateJob } from './update_job';
 
 export const rollupJobs = combineReducers({

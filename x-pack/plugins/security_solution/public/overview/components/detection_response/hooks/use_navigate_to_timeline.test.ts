@@ -9,8 +9,8 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { updateProviders } from '../../../../timelines/store/actions';
-import * as mock from './mock_data';
 import { useNavigateToTimeline } from './use_navigate_to_timeline';
+import * as mock from './mock_data';
 
 jest.mock('../../../../timelines/hooks/use_create_timeline', () => ({
   useCreateTimeline: () => jest.fn(),

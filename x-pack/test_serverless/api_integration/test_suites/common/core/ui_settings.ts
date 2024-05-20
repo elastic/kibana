@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 
 // To test setting validations we are using the existing 'defaultColumns' setting that is available in all serverless projects
 // (See list of common serverless settings in /packages/serverless/settings/common/index.ts)

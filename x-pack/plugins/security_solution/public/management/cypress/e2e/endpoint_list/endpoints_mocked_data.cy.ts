@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import type { MetadataListResponse } from '../../../../../common/endpoint/types';
 import { EndpointSortableField } from '../../../../../common/endpoint/types';
-import { loadPage } from '../../tasks/common';
+import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
+import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
-import type { ReturnTypeFromChainable } from '../../types';
+import { loadPage } from '../../tasks/common';
 
 describe('Endpoints page', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;

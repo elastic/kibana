@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React from 'react';
-import { CONTENT_FIELD, RESOURCE_FIELD } from '../../../../../common/data_types/logs/constants';
+import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { VirtualColumnServiceProvider } from '../../../../application/main/hooks/grid_customisations/use_virtual_column_services';
+import { CONTENT_FIELD, RESOURCE_FIELD } from '../../../../../common/data_types/logs/constants';
 import { Content } from './content';
 import { Resource } from './resource';
 

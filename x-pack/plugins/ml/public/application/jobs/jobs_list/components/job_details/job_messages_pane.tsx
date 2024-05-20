@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
-import type { JobMessage } from '../../../../../../common/types/audit_message';
-import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { JobMessages } from '../../../../components/job_messages';
-import { useMlApiContext } from '../../../../contexts/kibana';
 import { ml } from '../../../../services/ml_api_service';
+import { JobMessages } from '../../../../components/job_messages';
+import type { JobMessage } from '../../../../../../common/types/audit_message';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
+import { useMlApiContext } from '../../../../contexts/kibana';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { blurButtonOnClick } from '../../../../util/component_utils';
 interface JobMessagesPaneProps {
   jobId: string;

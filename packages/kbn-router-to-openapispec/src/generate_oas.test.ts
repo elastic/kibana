@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { generateOpenApiDocument } from './generate_oas';
-import { createRouter, createTestRouters, createVersionedRouter } from './generate_oas.test.util';
+import { schema } from '@kbn/config-schema';
+import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {

@@ -7,11 +7,11 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { DataView, FieldSpec, isNestedField } from '@kbn/data-plugin/common';
+import { isNestedField, FieldSpec, DataView } from '@kbn/data-plugin/common';
 import {
-  FIELD_FORMAT_IDS,
   FieldFormat,
   FieldFormatsRegistry,
+  FIELD_FORMAT_IDS,
 } from '@kbn/field-formats-plugin/common';
 
 import { FieldNotFoundError } from './errors';
@@ -53,7 +53,7 @@ export const toSanitizedFieldType = (fields: FieldSpec[]) =>
           name: field.name,
           label: field.customLabel ?? field.name,
           type: field.type,
-        }) as SanitizedFieldType
+        } as SanitizedFieldType)
     );
 
 export const getFieldsForTerms = (fields: string | Array<string | null> | undefined): string[] => {

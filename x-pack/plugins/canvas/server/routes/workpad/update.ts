@@ -6,16 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { CanvasWorkpad } from '../../../types';
 import { RouteInitializerDeps } from '..';
 import {
   API_ROUTE_WORKPAD,
-  API_ROUTE_WORKPAD_ASSETS,
   API_ROUTE_WORKPAD_STRUCTURES,
+  API_ROUTE_WORKPAD_ASSETS,
 } from '../../../common/lib/constants';
-import { CanvasWorkpad } from '../../../types';
-import { catchErrorHandler } from '../catch_error_handler';
+import { WorkpadSchema, WorkpadAssetSchema } from './workpad_schema';
 import { okResponse } from '../ok_response';
-import { WorkpadAssetSchema, WorkpadSchema } from './workpad_schema';
+import { catchErrorHandler } from '../catch_error_handler';
 
 const AssetsRecordSchema = schema.recordOf(schema.string(), WorkpadAssetSchema);
 

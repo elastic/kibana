@@ -15,12 +15,12 @@ import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 import { createDeleteIndexStream } from './delete_index_stream';
 
 import {
-  createStubClient,
-  createStubDataStreamRecord,
-  createStubDocRecord,
-  createStubIndexRecord,
-  createStubLogger,
   createStubStats,
+  createStubClient,
+  createStubIndexRecord,
+  createStubDataStreamRecord,
+  createStubLogger,
+  createStubDocRecord,
 } from './__mocks__/stubs';
 
 const log = createStubLogger();

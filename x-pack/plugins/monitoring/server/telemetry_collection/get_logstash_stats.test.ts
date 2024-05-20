@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import sinon from 'sinon';
 import {
-  fetchLogstashState,
   fetchLogstashStats,
-  processLogstashStateResults,
+  fetchLogstashState,
   processStatsResults,
+  processLogstashStateResults,
 } from './get_logstash_stats';
+import sinon from 'sinon';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const logstashStatsResultSetOfSelfMonitoring = require('./__mocks__/fixtures/logstash_stats_self_monitoring_results.json');

@@ -7,8 +7,8 @@
 
 import { MapStoreState } from '../reducers/store';
 
-import { DRAW_MODE } from '../../common/constants';
 import { FLYOUT_STATE } from '../reducers/ui';
+import { DRAW_MODE } from '../../common/constants';
 
 export const getFlyoutDisplay = ({ ui }: MapStoreState): FLYOUT_STATE => ui.flyoutDisplay;
 export const getDrawMode = ({ ui }: MapStoreState): DRAW_MODE => ui.drawMode;

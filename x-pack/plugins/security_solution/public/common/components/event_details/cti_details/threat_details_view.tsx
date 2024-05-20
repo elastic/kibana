@@ -12,15 +12,15 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { groupBy } from 'lodash';
 import React from 'react';
+import { groupBy } from 'lodash';
 
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import { EnrichmentAccordionGroup } from './enrichment_accordion_group';
-import { EnrichmentIcon } from './enrichment_icon';
-import { EnrichmentNoData } from './enrichment_no_data';
 import * as i18n from './translations';
+import { EnrichmentIcon } from './enrichment_icon';
+import { EnrichmentAccordionGroup } from './enrichment_accordion_group';
+import { EnrichmentNoData } from './enrichment_no_data';
 
 const EnrichmentSectionHeader: React.FC<{ type?: ENRICHMENT_TYPES }> = ({ type }) => {
   return type ? (

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { MouseEvent, useCallback, useEffect, useState } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { MouseEvent, useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { MONITOR_TYPES } from '../../../../../common/constants';
+import { useDispatch } from 'react-redux';
+import * as I18LABELS from './translations';
 import { FailedStepsApiResponse, Ping } from '../../../../../common/runtime_types';
+import { PingStatusColumn } from './columns/ping_status';
+import { ERROR_LABEL, LOCATION_LABEL, RES_CODE_LABEL, TIMESTAMP_LABEL } from './translations';
+import { LocationName } from './location_name';
+import { MONITOR_TYPES } from '../../../../../common/constants';
+import { PingTimestamp } from './columns/ping_timestamp';
+import { getShortTimeStamp } from '../../overview/monitor_list/columns/monitor_status_column';
+import { PingErrorCol } from './columns/ping_error';
+import { FailedStep } from './columns/failed_step';
+import { ResponseCodeColumn } from './columns/response_code';
+import { ExpandRowColumn } from './columns/expand_row';
+import { formatDuration, SpanWithMargin } from './ping_list';
 import { clearPings } from '../../../state/actions';
 import { pruneJourneyState } from '../../../state/actions/journey';
 import { Pagination } from '../../overview';
-import { getShortTimeStamp } from '../../overview/monitor_list/columns/monitor_status_column';
-import { ExpandRowColumn } from './columns/expand_row';
-import { FailedStep } from './columns/failed_step';
-import { PingErrorCol } from './columns/ping_error';
-import { PingStatusColumn } from './columns/ping_status';
-import { PingTimestamp } from './columns/ping_timestamp';
-import { ResponseCodeColumn } from './columns/response_code';
-import { LocationName } from './location_name';
-import { SpanWithMargin, formatDuration } from './ping_list';
-import * as I18LABELS from './translations';
-import { ERROR_LABEL, LOCATION_LABEL, RES_CODE_LABEL, TIMESTAMP_LABEL } from './translations';
 
 interface Props {
   loading?: boolean;

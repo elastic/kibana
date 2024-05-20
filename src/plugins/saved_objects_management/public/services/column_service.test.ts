@@ -7,11 +7,11 @@
  */
 
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import {
   SavedObjectsManagementColumnService,
   SavedObjectsManagementColumnServiceSetup,
 } from './column_service';
-import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import { SavedObjectsManagementColumn } from './types';
 
 class DummyColumn extends SavedObjectsManagementColumn {

@@ -14,7 +14,9 @@
       "tags": [],
       "label": "ExpressionTagcloudPluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "src/plugins/chart_expressions/expression_tagcloud/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -43,7 +45,9 @@
         "tags": [],
         "label": "EXPRESSION_NAME",
         "description": [],
-        "signature": ["\"tagcloud\""],
+        "signature": [
+          "\"tagcloud\""
+        ],
         "path": "src/plugins/chart_expressions/expression_tagcloud/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

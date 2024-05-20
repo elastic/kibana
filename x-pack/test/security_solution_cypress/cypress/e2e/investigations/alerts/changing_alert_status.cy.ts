@@ -9,30 +9,30 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { getNewRule } from '../../../objects/rule';
 import {
   ALERTS_COUNT,
+  TAKE_ACTION_POPOVER_BTN,
+  SELECTED_ALERTS,
   ALERT_COUNT_TABLE_COLUMN,
   ALERT_EMBEDDABLE_EMPTY_PROMPT,
-  SELECTED_ALERTS,
-  TAKE_ACTION_POPOVER_BTN,
 } from '../../../screens/alerts';
 
 import {
+  selectNumberOfAlerts,
+  waitForAlerts,
+  markAcknowledgedFirstAlert,
+  goToAcknowledgedAlerts,
   closeAlerts,
   closeFirstAlert,
-  goToAcknowledgedAlerts,
   goToClosedAlerts,
   goToOpenedAlerts,
-  markAcknowledgedFirstAlert,
   openAlerts,
   openFirstAlert,
-  parseAlertsCountToInt,
   selectCountTable,
-  selectNumberOfAlerts,
-  sumAlertCountFromAlertCountTable,
-  waitForAlerts,
   waitForPageFilters,
+  sumAlertCountFromAlertCountTable,
+  parseAlertsCountToInt,
 } from '../../../tasks/alerts';
-import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { createRule } from '../../../tasks/api_calls/rules';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';

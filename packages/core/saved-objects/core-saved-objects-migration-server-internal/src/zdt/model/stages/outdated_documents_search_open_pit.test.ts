@@ -7,12 +7,12 @@
  */
 
 import * as Either from 'fp-ts/lib/Either';
-import type { OutdatedDocumentsSearchOpenPitState } from '../../state';
 import {
-  type MockedMigratorContext,
   createContextMock,
   createPostDocInitState,
+  type MockedMigratorContext,
 } from '../../test_helpers';
+import type { OutdatedDocumentsSearchOpenPitState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { outdatedDocumentsSearchOpenPit } from './outdated_documents_search_open_pit';
 

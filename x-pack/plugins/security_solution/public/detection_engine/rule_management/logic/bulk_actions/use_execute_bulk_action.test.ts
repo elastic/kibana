@@ -9,10 +9,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
-import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
-import type { BulkAction } from '../../api/api';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
+import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useExecuteBulkAction } from './use_execute_bulk_action';
+import type { BulkAction } from '../../api/api';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/lib/telemetry');

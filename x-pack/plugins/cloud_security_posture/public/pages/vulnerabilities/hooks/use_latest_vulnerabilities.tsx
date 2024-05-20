@@ -1,12 +1,3 @@
-import {
-  AggregationsMultiBucketAggregateBase,
-  AggregationsStringRareTermsBucketKeys,
-  SearchRequest,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { EsHitRecord } from '@kbn/discover-utils/types';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,17 +5,26 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-ty
  * 2.0.
  */
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
+import { number } from 'io-ts';
+import {
+  SearchRequest,
+  SearchResponse,
+  AggregationsMultiBucketAggregateBase,
+  AggregationsStringRareTermsBucketKeys,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { EsHitRecord } from '@kbn/discover-utils/types';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
+import { CspVulnerabilityFinding } from '../../../../common/schemas';
 import {
   LATEST_VULNERABILITIES_INDEX_PATTERN,
   LATEST_VULNERABILITIES_RETENTION_POLICY,
 } from '../../../../common/constants';
-import { CspVulnerabilityFinding } from '../../../../common/schemas';
-import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { FindingsBaseEsQuery } from '../../../common/types';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
+import { FindingsBaseEsQuery } from '../../../common/types';
 import { VULNERABILITY_FIELDS } from '../constants';
 import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;

@@ -7,9 +7,9 @@
 
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import type { Datafeed, Job } from '../../../../../common/types/anomaly_detection_jobs';
-import type { Filter } from '../../../../../common/types/filters';
 import type { JobType } from '../../../../../common/types/saved_objects';
+import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Filter } from '../../../../../common/types/filters';
 
 export interface ImportedAdJob {
   job: Job;

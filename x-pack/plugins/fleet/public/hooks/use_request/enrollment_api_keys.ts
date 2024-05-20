@@ -8,17 +8,17 @@
 import { enrollmentAPIKeyRouteService } from '../../services';
 
 import type {
-  GetEnrollmentAPIKeysRequest,
-  GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
+  GetEnrollmentAPIKeysResponse,
+  GetEnrollmentAPIKeysRequest,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
 } from '../../types';
 
 import { API_VERSIONS } from '../../../common/constants';
 
-import { sendRequest, useConditionalRequest, useRequest } from './use_request';
-import type { SendConditionalRequestConfig, UseRequestConfig } from './use_request';
+import { useRequest, sendRequest, useConditionalRequest } from './use_request';
+import type { UseRequestConfig, SendConditionalRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 

@@ -5,67 +5,67 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Alert } from '@kbn/alerts-as-data-utils';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALERT_INSTANCE_ID,
-  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_UUID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
 import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
-import { isValidAlertIndexName } from '../alerts_service';
-import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import {
-  IIndexPatternString,
-  getIndexTemplateAndPattern,
-} from '../alerts_service/resource_installer_utils';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DeepPartial } from '@kbn/utility-types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import {
+  SummarizedAlerts,
+  ScopedQueryAlerts,
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleAlertData,
+  WithoutReservedActionGroups,
+  DataStreamAdapter,
+} from '../types';
+import { LegacyAlertsClient } from './legacy_alerts_client';
+import {
+  getIndexTemplateAndPattern,
+  IIndexPatternString,
+} from '../alerts_service/resource_installer_utils';
+import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
+import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from './types';
+import {
+  IAlertsClient,
+  InitializeExecutionOpts,
+  ProcessAndLogAlertsOpts,
+  TrackedAlerts,
+  ReportedAlert,
+  ReportedAlertData,
+  UpdateableAlert,
+  GetSummarizedAlertsParams,
+  GetMaintenanceWindowScopedQueryAlertsParams,
+  ScopedQueryAggregationResult,
+} from './types';
+import {
+  buildNewAlert,
+  buildOngoingAlert,
+  buildUpdatedRecoveredAlert,
+  buildRecoveredAlert,
+  formatRule,
+  getHitsWithCount,
+  getScopedQueryHitsWithIds,
+  getLifecycleAlertsQueries,
+  getMaintenanceWindowAlertsQuery,
+  getContinualAlertsQuery,
+} from './lib';
+import { isValidAlertIndexName } from '../alerts_service';
+import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
 } from '../task_runner/get_maintenance_windows';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  DataStreamAdapter,
-  RuleAlertData,
-  ScopedQueryAlerts,
-  SummarizedAlerts,
-  WithoutReservedActionGroups,
-} from '../types';
-import { LegacyAlertsClient } from './legacy_alerts_client';
-import {
-  buildNewAlert,
-  buildOngoingAlert,
-  buildRecoveredAlert,
-  buildUpdatedRecoveredAlert,
-  formatRule,
-  getContinualAlertsQuery,
-  getHitsWithCount,
-  getLifecycleAlertsQueries,
-  getMaintenanceWindowAlertsQuery,
-  getScopedQueryHitsWithIds,
-} from './lib';
-import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
-import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from './types';
-import {
-  GetMaintenanceWindowScopedQueryAlertsParams,
-  GetSummarizedAlertsParams,
-  IAlertsClient,
-  InitializeExecutionOpts,
-  ProcessAndLogAlertsOpts,
-  ReportedAlert,
-  ReportedAlertData,
-  ScopedQueryAggregationResult,
-  TrackedAlerts,
-  UpdateableAlert,
-} from './types';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -81,7 +81,7 @@ export class AlertsClient<
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string,
+  RecoveryActionGroupId extends string
 > implements
     IAlertsClient<AlertData, LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>
 {

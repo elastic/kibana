@@ -8,9 +8,9 @@
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, OPERATION_COLUMN, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
 import {
+  SYSTEM_CPU_PERCENTAGE_FIELD,
   DOCKER_CPU_PERCENTAGE_FIELD,
   K8S_POD_CPU_PERCENTAGE_FIELD,
-  SYSTEM_CPU_PERCENTAGE_FIELD,
   SYSTEM_MEMORY_PERCENTAGE_FIELD,
 } from '../constants/field_names/infra_metrics';
 import {

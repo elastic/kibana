@@ -7,9 +7,9 @@
  */
 
 import { Position } from '@elastic/charts';
-import { X_AXIS_CONFIG } from '../constants';
 import { strings } from '../i18n';
 import { XAxisConfigFn } from '../types';
+import { X_AXIS_CONFIG } from '../constants';
 import { commonAxisConfigArgs } from './common_axis_args';
 
 export const xAxisConfigFunction: XAxisConfigFn = {

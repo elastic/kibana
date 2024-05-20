@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { EuiComboBox, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ICON_TYPES_MAP } from '../../visualizations/constants/icons';
 
 export const ICONS = [

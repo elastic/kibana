@@ -8,11 +8,11 @@
 import React from 'react';
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { useDeleteFileAttachment } from '../../containers/use_delete_file_attachment';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
-import { useDeletePropertyAction } from '../user_actions/property_actions/use_delete_property_action';
 import * as i18n from './translations';
+import { useDeleteFileAttachment } from '../../containers/use_delete_file_attachment';
+import { useDeletePropertyAction } from '../user_actions/property_actions/use_delete_property_action';
+import { DeleteAttachmentConfirmationModal } from '../user_actions/delete_attachment_confirmation_modal';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface FileDeleteButtonProps {
   caseId: string;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { isEsqlRule } from '../../../../common/detection_engine/utils';
 import { RuleStep } from '../../../detections/pages/detection_engine/rules/types';
+import { isEsqlRule } from '../../../../common/detection_engine/utils';
 
 import type { DefineStepRule } from '../../../detections/pages/detection_engine/rules/types';
 

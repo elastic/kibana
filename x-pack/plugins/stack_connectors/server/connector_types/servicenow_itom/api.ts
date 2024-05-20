@@ -7,8 +7,8 @@
 
 import { api as commonApi } from '../lib/servicenow/api';
 import {
-  AddEventApiHandlerArgs,
   ExecutorSubActionAddEventParams,
+  AddEventApiHandlerArgs,
   ExternalServiceApiITOM,
 } from '../lib/servicenow/types';
 

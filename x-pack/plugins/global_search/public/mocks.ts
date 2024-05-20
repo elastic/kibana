@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { searchServiceMock } from './services/search_service.mock';
 import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
+import { searchServiceMock } from './services/search_service.mock';
 
 const createSetupMock = (): jest.Mocked<GlobalSearchPluginSetup> => {
   const searchMock = searchServiceMock.createSetupContract();

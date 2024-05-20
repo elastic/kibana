@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import type { SavedObjectReference } from '@kbn/core/server';
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
+import type { Client } from '@elastic/elasticsearch';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
-import { expectResponses, getTestTitle, getUrlPrefix } from '../lib/saved_object_test_utils';
 import { SPACES } from '../lib/spaces';
+import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
 
 export interface ImportTestDefinition extends TestDefinition {
@@ -306,8 +306,8 @@ export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: S
             const query = test.overwrite
               ? '?overwrite=true'
               : test.createNewCopies
-                ? '?createNewCopies=true'
-                : '';
+              ? '?createNewCopies=true'
+              : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import${query}`)
               .auth(user?.username, user?.password)

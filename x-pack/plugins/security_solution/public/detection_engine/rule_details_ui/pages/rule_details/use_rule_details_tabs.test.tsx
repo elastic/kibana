@@ -6,11 +6,11 @@
  */
 
 import { cleanup, renderHook } from '@testing-library/react-hooks';
-import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
-import type { Rule } from '../../../rule_management/logic';
-import { useRuleExecutionSettings } from '../../../rule_monitoring';
 import type { UseRuleDetailsTabsProps } from './use_rule_details_tabs';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
+import type { Rule } from '../../../rule_management/logic';
+import { useRuleExecutionSettings } from '../../../rule_monitoring';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 
 jest.mock('../../../rule_monitoring');
 jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');

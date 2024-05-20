@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_TELEMETRY_SAVED_OBJECT } from '../../common/constants';
 
 export const casesTelemetrySavedObjectType: SavedObjectsType = {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
+import { EuiSuperDatePicker } from '@elastic/eui';
+import { useUrlParams } from '../../hooks';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import {
   UptimeRefreshContext,
   UptimeSettingsContext,
   UptimeStartupPluginsContext,
 } from '../../contexts';
-import { useUrlParams } from '../../hooks';
 
 export interface CommonlyUsedRange {
   from: string;

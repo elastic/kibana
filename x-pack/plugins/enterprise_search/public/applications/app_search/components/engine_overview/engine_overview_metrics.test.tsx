@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
 
@@ -15,7 +15,7 @@ import { shallow } from 'enzyme';
 
 import { getPageTitle } from '../../../test_helpers';
 
-import { RecentApiLogs, TotalCharts, TotalStats } from './components';
+import { TotalStats, TotalCharts, RecentApiLogs } from './components';
 import { SuggestedCurationsCallout } from './components/suggested_curations_callout';
 import { EngineOverviewMetrics } from './engine_overview_metrics';
 

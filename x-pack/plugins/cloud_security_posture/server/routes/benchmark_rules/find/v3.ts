@@ -6,8 +6,8 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { getBenchmarkFilterQueryV2 } from '../../../../common/utils/helpers';
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 
 import type {
   CspBenchmarkRule,

@@ -8,12 +8,12 @@
 
 import * as Path from 'path';
 
-import { ConsoleBuffer } from '@jest/console';
-import { BaseReporter, Test, TestResult } from '@jest/reporters';
-import type { Config } from '@jest/types';
-import { CiStatsReportTestsOptions, CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { ToolingLog } from '@kbn/tooling-log';
 import getopts from 'getopts';
+import { CiStatsReporter, CiStatsReportTestsOptions } from '@kbn/ci-stats-reporter';
+import { ToolingLog } from '@kbn/tooling-log';
+import type { Config } from '@jest/types';
+import { BaseReporter, Test, TestResult } from '@jest/reporters';
+import { ConsoleBuffer } from '@jest/console';
 
 type LogEntry = ConsoleBuffer[0];
 

@@ -22,7 +22,9 @@
       "tags": [],
       "label": "NotificationsServerStart",
       "description": [],
-      "signature": ["EmailServiceStart"],
+      "signature": [
+        "EmailServiceStart"
+      ],
       "path": "x-pack/plugins/notifications/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -43,7 +45,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"notifications\""],
+        "signature": [
+          "\"notifications\""
+        ],
         "path": "x-pack/plugins/notifications/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

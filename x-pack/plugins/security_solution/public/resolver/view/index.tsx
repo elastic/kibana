@@ -7,10 +7,10 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { State } from '../../common/store/types';
-import { createResolver } from '../store/actions';
 import type { ResolverProps } from '../types';
 import { ResolverWithoutProviders } from './resolver_without_providers';
+import { createResolver } from '../store/actions';
+import type { State } from '../../common/store/types';
 /**
  * The `Resolver` component to use. This sets up the DataAccessLayer provider. Use `ResolverWithoutProviders` in tests or in other scenarios where you want to provide a different (or fake) data access layer.
  */

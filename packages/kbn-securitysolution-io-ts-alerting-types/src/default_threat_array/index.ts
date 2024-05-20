@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-import { Threats, threats } from '../threat';
+import { Either } from 'fp-ts/lib/Either';
+import { threats, Threats } from '../threat';
 
 /**
  * Types the DefaultThreatArray as:

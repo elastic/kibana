@@ -6,12 +6,12 @@
  */
 
 import { first } from 'lodash';
-import { CMDLINE_FIELD, TIMESTAMP_FIELD } from '../../../common/constants';
+import { TIMESTAMP_FIELD, CMDLINE_FIELD } from '../../../common/constants';
 import {
-  ProcessListAPIChartQueryAggregation,
   ProcessListAPIChartRequest,
-  ProcessListAPIChartResponse,
+  ProcessListAPIChartQueryAggregation,
   ProcessListAPIRow,
+  ProcessListAPIChartResponse,
 } from '../../../common/http_api';
 import { ESSearchClient } from '../metrics/types';
 

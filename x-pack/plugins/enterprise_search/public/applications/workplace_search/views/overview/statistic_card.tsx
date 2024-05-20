@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCard, EuiFlexItem, EuiTextColor, EuiTitle } from '@elastic/eui';
+import { EuiCard, EuiFlexItem, EuiTitle, EuiTextColor } from '@elastic/eui';
 
 import { EuiCardTo } from '../../../shared/react_router_helpers';
 

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 export const styles = {
   container: css`

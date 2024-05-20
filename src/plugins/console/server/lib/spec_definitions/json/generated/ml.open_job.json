@@ -5,10 +5,18 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "timeout": ["30m", "-1", "0"]
+      "timeout": [
+        "30m",
+        "-1",
+        "0"
+      ]
     },
-    "methods": ["POST"],
-    "patterns": ["_ml/anomaly_detectors/{job_id}/_open"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/_open"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-open-job.html",
     "availability": {
       "stack": true,

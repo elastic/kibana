@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../../../common/constants';
-import type { SingleCaseMetricsResponse } from '../../../../../common/types/api';
 import { IsolateHostActionType } from '../../../../../common/types/domain';
+import type { SingleCaseMetricsResponse } from '../../../../../common/types/api';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../../../common/constants';
 import type { AggregationBuilder, AggregationResponse } from '../../types';
 
 interface ActionsAggregation {

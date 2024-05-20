@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { TIMELINES_URL } from '../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { TIMELINES_URL } from '../../../../../../common/constants';
 
 import type { ConfigType } from '../../../../..';
 import type { SetupPlugins } from '../../../../../plugin';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { getTimelinesQuerySchema } from '../../../../../../common/api/timeline';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
-import { getAllTimeline } from '../../../saved_object/timelines';
 import { buildFrameworkRequest, escapeHatch, throwErrors } from '../../../utils/common';
+import { getAllTimeline } from '../../../saved_object/timelines';
+import { getTimelinesQuerySchema } from '../../../../../../common/api/timeline';
 
 export const getTimelinesRoute = (
   router: SecuritySolutionPluginRouter,

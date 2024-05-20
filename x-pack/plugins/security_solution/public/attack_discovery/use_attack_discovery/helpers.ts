@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
 import type {
   KnowledgeBaseConfig,
   TraceOptions,
 } from '@kbn/elastic-assistant/impl/assistant/types';
+import type { AttackDiscoveryPostRequestBody } from '@kbn/elastic-assistant-common';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { isEmpty } from 'lodash/fp';

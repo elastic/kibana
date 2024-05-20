@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { isEmpty } from 'lodash/fp';
 import {
   EuiBasicTable,
   EuiButton,
@@ -12,26 +14,24 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
-import React, { useCallback, useEffect, useState } from 'react';
 
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useCursor, useDeleteList, useFindLists } from '@kbn/securitysolution-list-hooks';
+import { useFindLists, useDeleteList, useCursor } from '@kbn/securitysolution-list-hooks';
 
 import { exportList } from '@kbn/securitysolution-list-api';
 
-import { AutoDownload } from '../../../common/components/auto_download/auto_download';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
+import { buildColumns } from './table_helpers';
 import { ValueListsForm } from './form';
 import { ReferenceErrorModal } from './reference_error_modal';
-import { buildColumns } from './table_helpers';
-import * as i18n from './translations';
+import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 
 interface ValueListsFlyoutProps {
   onClose: () => void;

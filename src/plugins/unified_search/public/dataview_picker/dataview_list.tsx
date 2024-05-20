@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+  EuiSelectable,
+  EuiSelectableProps,
   EuiBadge,
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiSelectable,
-  EuiSelectableProps,
+  EuiButtonGroup,
   toSentenceCase,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
-import { MIDDLE_TRUNCATION_PROPS } from '../filter_bar/filter_editor/lib/helpers';
+import { css } from '@emotion/react';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { SortingService } from './sorting_service';
+import { MIDDLE_TRUNCATION_PROPS } from '../filter_bar/filter_editor/lib/helpers';
 
 const strings = {
   sortOrder: {

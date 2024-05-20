@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 
-import { getId } from '../../../lib/get_id';
 import { useNotifyService, useWorkpadService } from '../../../services';
+import { getId } from '../../../lib/get_id';
 
 export const useCloneWorkpad = () => {
   const workpadService = useWorkpadService();

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  LicensingApiRequestHandlerContext,
   LicensingPluginSetup,
+  LicensingApiRequestHandlerContext,
 } from '@kbn/licensing-plugin/server';
 
 import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';

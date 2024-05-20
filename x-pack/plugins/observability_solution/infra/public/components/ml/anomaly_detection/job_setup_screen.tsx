@@ -1,27 +1,3 @@
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCode,
-  EuiComboBox,
-  EuiDescribedFormGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiForm,
-  EuiFormRow,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FeatureFeedbackButton, useUiTracker } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -29,17 +5,41 @@ import { FeatureFeedbackButton, useUiTracker } from '@kbn/observability-shared-p
  * 2.0.
  */
 import { debounce } from 'lodash';
-import moment, { Moment } from 'moment';
 import React, { useState, useCallback, useMemo, useEffect, useContext } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCode,
+  EuiCallOut,
+  EuiForm,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiComboBox,
+  EuiDescribedFormGroup,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import moment, { Moment } from 'moment';
+import { i18n } from '@kbn/i18n';
+import { FeatureFeedbackButton, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { css } from '@emotion/react';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
+import { FixedDatePicker } from '../../fixed_datepicker';
 import { DEFAULT_K8S_PARTITION_FIELD } from '../../../containers/ml/modules/metrics_k8s/module_descriptor';
+import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+import { INFRA_ML_FLYOUT_FEEDBACK_LINK } from './flyout_home';
 import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
-import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
-import { FixedDatePicker } from '../../fixed_datepicker';
-import { INFRA_ML_FLYOUT_FEEDBACK_LINK } from './flyout_home';
 
 interface Props {
   jobType: 'hosts' | 'kubernetes';

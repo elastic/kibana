@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiCallOut,
   EuiCard,
@@ -17,8 +19,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {

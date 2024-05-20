@@ -5,19 +5,25 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { join } from 'path';
-import { CasePostRequest } from '@kbn/cases-plugin/common';
+import { SavedObject } from '@kbn/core/server';
+import supertest from 'supertest';
 import {
-  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import {
-  CaseAttributes,
-  CaseSeverity,
-  CaseStatuses,
   UserCommentAttachmentAttributes,
+  CaseAttributes,
+  CaseStatuses,
+  CaseSeverity,
 } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CasePersistedSeverity,
+  CasePersistedStatus,
+} from '@kbn/cases-plugin/server/common/types/case';
 import {
   CaseUserActionWithoutReferenceIds,
   CommentUserAction,
@@ -25,24 +31,18 @@ import {
   CreateCaseUserAction,
   PushedUserAction,
 } from '@kbn/cases-plugin/common/types/domain';
-import {
-  CasePersistedSeverity,
-  CasePersistedStatus,
-} from '@kbn/cases-plugin/server/common/types/case';
-import { SavedObject } from '@kbn/core/server';
-import expect from '@kbn/expect';
-import supertest from 'supertest';
+import { CasePostRequest } from '@kbn/cases-plugin/common';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
+  deleteAllCaseItems,
   createCase,
   createComment,
-  deleteAllCaseItems,
-  findAttachments,
   findCases,
   getCaseUserActions,
+  findAttachments,
 } from '../../../../common/lib/api';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

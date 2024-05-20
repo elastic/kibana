@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiHorizontalRule } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { EuiBadge, EuiHorizontalRule } from '@elastic/eui';
 import { useCurrentThemeVars } from '../../../../contexts/kibana';
 import type {
   FormattedQuestionAnsweringResult,

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render } from '../../../../../lib/helper/rtl_helpers';
-import { renderLegendItem } from '../../step_detail/waterfall/waterfall_chart_wrapper';
 import { WaterfallChart } from './waterfall_chart';
+import { renderLegendItem } from '../../step_detail/waterfall/waterfall_chart_wrapper';
+import { render } from '../../../../../lib/helper/rtl_helpers';
 
 import 'jest-canvas-mock';
 import { waitFor } from '@testing-library/react';

@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiCard,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { flatMap } from 'lodash';
-import React, { useMemo } from 'react';
-import { appCategories, appDefinitions as defaultCardNavigationDefinitions } from './consts';
 import {
-  AppDefinition,
-  AppId,
-  AppProps,
+  EuiPageSection,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiCard,
+  EuiText,
+  EuiHorizontalRule,
+  EuiIcon,
+} from '@elastic/eui';
+import {
+  CardsNavigationComponentProps,
   AppRegistrySections,
   Application,
+  AppProps,
+  AppId,
+  AppDefinition,
   CardNavExtensionDefinition,
-  CardsNavigationComponentProps,
 } from './types';
+import { appCategories, appDefinitions as defaultCardNavigationDefinitions } from './consts';
 
 type AggregatedCardNavDefinitions =
   | NonNullable<CardsNavigationComponentProps['extendedCardNavigationDefinitions']>

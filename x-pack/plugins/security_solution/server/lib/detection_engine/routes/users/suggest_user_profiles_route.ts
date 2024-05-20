@@ -8,12 +8,12 @@
 import type { IKibanaResponse, StartServicesAccessor } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { SuggestUserProfilesRequestQuery } from '../../../../../common/api/detection_engine/users';
-import { DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL } from '../../../../../common/constants';
-import type { StartPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
+import { DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
+import type { StartPlugins } from '../../../../plugin';
+import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
+import { SuggestUserProfilesRequestQuery } from '../../../../../common/api/detection_engine/users';
 
 export const suggestUserProfilesRoute = (
   router: SecuritySolutionPluginRouter,

@@ -9,28 +9,28 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import {
+  pointInTimeFinderMock,
   mockGetCurrentTime,
   mockGetSearchDsl,
-  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { loggerMock } from '@kbn/logging-mocks';
-import { ApiExecutionContextMock, apiContextMock, kibanaMigratorMock } from '../../mocks';
 import { SavedObjectsRepository } from '../repository';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { apiContextMock, ApiExecutionContextMock, kibanaMigratorMock } from '../../mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
-  createConflictErrorPayload,
-  createDocumentMigrator,
-  createRegistry,
-  createSpySerializer,
-  createType,
-  mappings,
   mockTimestamp,
+  mappings,
+  createRegistry,
+  createDocumentMigrator,
   removeReferencesToSuccess,
+  createSpySerializer,
+  createConflictErrorPayload,
+  createType,
 } from '../../test_helpers/repository.test.common';
 import { performRemoveReferencesTo } from './remove_references_to';
 

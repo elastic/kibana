@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { FC, PropsWithChildren, useEffect, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import { Redirect, useParams } from 'react-router-dom';
-import { WorkpadPageRouteParams, WorkpadRouteProps } from '.';
-import { ErrorStrings } from '../../../i18n';
-import { CanvasWorkpad } from '../../../types';
-import { CanvasLoading } from '../../components/canvas_loading';
-import { ExportApp } from '../../components/export_app';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { useDispatch } from 'react-redux';
 import { WorkpadApp } from '../../components/workpad_app';
-import { useNotifyService } from '../../services';
+import { ExportApp } from '../../components/export_app';
+import { CanvasLoading } from '../../components/canvas_loading';
 // @ts-expect-error
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { usePageSync } from './hooks/use_page_sync';
-import { useRestoreHistory } from './hooks/use_restore_history';
+import { useNotifyService } from '../../services';
+import { CanvasWorkpad } from '../../../types';
+import { ErrorStrings } from '../../../i18n';
 import { useWorkpad } from './hooks/use_workpad';
+import { useRestoreHistory } from './hooks/use_restore_history';
 import { useWorkpadHistory } from './hooks/use_workpad_history';
+import { usePageSync } from './hooks/use_page_sync';
 import { useWorkpadPersist } from './hooks/use_workpad_persist';
-import { WorkpadPresentationHelper } from './workpad_presentation_helper';
+import { WorkpadRouteProps, WorkpadPageRouteParams } from '.';
 import { WorkpadRoutingContextComponent } from './workpad_routing_context';
+import { WorkpadPresentationHelper } from './workpad_presentation_helper';
 
 const { workpadRoutes: strings } = ErrorStrings;
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { timeoutOrUndefined } from '@kbn/osquery-io-ts-types';
-import * as t from 'io-ts';
 
 export const updateSavedQueryRequestBodySchema = t.type({
   id: t.string,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Node, Project, ReferenceFindableNode, SourceFile } from 'ts-morph';
+import { Node, SourceFile, Project, ReferenceFindableNode } from 'ts-morph';
 
 export interface NamedNode extends Node {
   getName(): string;

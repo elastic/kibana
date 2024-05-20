@@ -6,28 +6,28 @@
  */
 
 import _ from 'lodash';
-import { filter, take, toArray } from 'rxjs';
 import { v1 as uuidv1, v4 as uuidv4 } from 'uuid';
+import { filter, take, toArray } from 'rxjs';
 
-import apm from 'elastic-apm-node';
+import { TaskStatus, ConcreteTaskInstance, TaskPriority } from '../task';
+import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } from '../task_store';
+import { asTaskClaimEvent, TaskEvent } from '../task_events';
+import { asOk, isOk, unwrap } from '../lib/result_type';
+import { TaskTypeDictionary } from '../task_type_dictionary';
+import type { MustNotCondition } from '../queries/query_clauses';
+import { mockLogger } from '../test_utils';
+import {
+  TaskClaiming,
+  OwnershipClaimingOpts,
+  TaskClaimingOpts,
+  TASK_MANAGER_MARK_AS_CLAIMED,
+} from '../queries/task_claiming';
 import { Observable } from 'rxjs';
+import { taskStoreMock } from '../task_store.mock';
+import apm from 'elastic-apm-node';
+import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { ClaimOwnershipResult } from '.';
 import { FillPoolResult } from '../lib/fill_pool';
-import { asOk, isOk, unwrap } from '../lib/result_type';
-import type { MustNotCondition } from '../queries/query_clauses';
-import {
-  OwnershipClaimingOpts,
-  TASK_MANAGER_MARK_AS_CLAIMED,
-  TaskClaiming,
-  TaskClaimingOpts,
-} from '../queries/task_claiming';
-import { ConcreteTaskInstance, TaskPriority, TaskStatus } from '../task';
-import { TaskEvent, asTaskClaimEvent } from '../task_events';
-import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
-import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } from '../task_store';
-import { taskStoreMock } from '../task_store.mock';
-import { TaskTypeDictionary } from '../task_type_dictionary';
-import { mockLogger } from '../test_utils';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -198,7 +198,7 @@ describe('TaskClaiming', () => {
           },
           updateByQuery: store.updateByQuery.mock.calls[index] as [
             UpdateByQuerySearchOpts,
-            UpdateByQueryOpts,
+            UpdateByQueryOpts
           ],
         },
       }));

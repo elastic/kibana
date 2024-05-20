@@ -7,16 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Adapters } from '@kbn/inspector-plugin/common';
-import { AbortError, now } from '@kbn/kibana-utils-plugin/common';
 import type { Logger } from '@kbn/logging';
 import { isPromise } from '@kbn/std';
 import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last as lastOf, mapValues, reduce, zipObject } from 'lodash';
 import {
-  Observable,
-  ReplaySubject,
-  Subscription,
   combineLatest,
   defer,
   from,
@@ -27,28 +22,33 @@ import {
   takeWhile,
   throwError,
   timer,
+  Observable,
+  ReplaySubject,
+  Subscription,
 } from 'rxjs';
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
+import { now, AbortError } from '@kbn/kibana-utils-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
+import { Executor } from '../executor';
+import { createExecutionContainer, ExecutionContainer } from './container';
+import { createError } from '../util';
+import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstArgument,
   ExpressionAstExpression,
   ExpressionAstFunction,
-  ExpressionAstNode,
-  formatExpression,
   parse,
+  formatExpression,
   parseExpression,
+  ExpressionAstNode,
 } from '../ast';
-import { Executor } from '../executor';
+import { ExecutionContext, DefaultInspectorAdapters } from './types';
+import { getType, Datatable } from '../expression_types';
 import type { ExpressionFunction, ExpressionFunctionParameter } from '../expression_functions';
-import { Datatable, getType } from '../expression_types';
-import { ExpressionValueError, isExpressionValueError } from '../expression_types/specs/error';
-import { ExpressionExecutionParams } from '../service';
-import { createError } from '../util';
-import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
 import { getByAlias } from '../util/get_by_alias';
-import { ExecutionContainer, createExecutionContainer } from './container';
 import { ExecutionContract } from './execution_contract';
-import { DefaultInspectorAdapters, ExecutionContext } from './types';
+import { ExpressionExecutionParams } from '../service';
+import { createDefaultInspectorAdapters } from '../util/create_default_inspector_adapters';
 
 type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
   ReturnType<Function> extends ObservableLike<unknown>
@@ -188,7 +188,7 @@ export class Execution<
   Output = unknown,
   InspectorAdapters extends Adapters = ExpressionExecutionParams['inspectorAdapters'] extends object
     ? ExpressionExecutionParams['inspectorAdapters']
-    : DefaultInspectorAdapters,
+    : DefaultInspectorAdapters
 > {
   /**
    * Dynamic state of the execution.
@@ -248,10 +248,7 @@ export class Execution<
     return this.context.inspectorAdapters;
   }
 
-  constructor(
-    public readonly execution: ExecutionParams,
-    private readonly logger?: Logger
-  ) {
+  constructor(public readonly execution: ExecutionParams, private readonly logger?: Logger) {
     const { executor } = execution;
 
     this.contract = new ExecutionContract<Input, Output, InspectorAdapters>(this);

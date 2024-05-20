@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BooleanRelation, convertRangeFilterToTimeRange, extractTimeFilter } from '@kbn/es-query';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { BooleanRelation, extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
 import { QueryStart } from '../query';
 import { createFiltersFromMultiValueClickAction } from './filters/create_filters_from_multi_value_click';
 

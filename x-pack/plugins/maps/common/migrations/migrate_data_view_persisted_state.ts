@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { Serializable } from '@kbn/utility-types';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import type { Serializable } from '@kbn/utility-types';
 import type { MapAttributes } from '../content_management';
 
 export function migrateDataViewsPersistedState(

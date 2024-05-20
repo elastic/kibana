@@ -7,11 +7,11 @@
 
 import { uniq } from 'lodash';
 
-import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
-import { type Histogram, criticalTableLookup } from '@kbn/ml-chi2test';
+import { criticalTableLookup, type Histogram } from '@kbn/ml-chi2test';
+import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
+import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 import { LOG_RATE_ANALYSIS_SETTINGS } from '../constants';

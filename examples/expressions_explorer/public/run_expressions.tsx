@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useEffect } from 'react';
+import { pluck } from 'rxjs';
 import {
-  EuiButton,
   EuiCodeBlock,
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
   EuiPageBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSection,
-  EuiPageTemplate,
   EuiPanel,
-  EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Adapters, Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import React, { useState, useEffect } from 'react';
-import { pluck } from 'rxjs';
 import { ExpressionEditor } from './editor/expression_editor';
 
 interface Props {

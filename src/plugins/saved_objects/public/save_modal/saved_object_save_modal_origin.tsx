@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { OnSaveProps, SaveModalState, SavedObjectSaveModal } from '.';

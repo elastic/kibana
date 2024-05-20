@@ -13,8 +13,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { TestProviders } from '../../../common/mock';
 import { generateSeverityFilter } from '../../../explore/hosts/store/helpers';
-import { mockSeverityCount } from './__mocks__';
 import { ChartContent } from './chart_content';
+import { mockSeverityCount } from './__mocks__';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 jest.mock('../../../common/hooks/use_experimental_features', () => ({

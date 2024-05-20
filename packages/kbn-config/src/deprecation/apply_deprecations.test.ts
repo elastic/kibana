@@ -8,8 +8,8 @@
 
 import type { DocLinks } from '@kbn/doc-links';
 import { applyDeprecations } from './apply_deprecations';
-import { configDeprecationFactory as deprecations } from './deprecation_factory';
 import { ConfigDeprecation, ConfigDeprecationContext, ConfigDeprecationWithContext } from './types';
+import { configDeprecationFactory as deprecations } from './deprecation_factory';
 
 describe('applyDeprecations', () => {
   const context: ConfigDeprecationContext = {

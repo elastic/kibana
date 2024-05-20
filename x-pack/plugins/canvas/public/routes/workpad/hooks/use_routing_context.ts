@@ -6,15 +6,15 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useHistory, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { getWorkpad } from '../../../state/selectors/workpad';
 import { WorkpadPageRouteParams, WorkpadRoutingContextType } from '..';
 import {
   createTimeInterval,
-  getTimeInterval,
   isValidTimeInterval,
+  getTimeInterval,
 } from '../../../lib/time_interval';
-import { getWorkpad } from '../../../state/selectors/workpad';
 
 export const useRoutingContext: () => WorkpadRoutingContextType = () => {
   const [isAutoplayPaused, setIsAutoplayPaused] = useState<boolean>(false);

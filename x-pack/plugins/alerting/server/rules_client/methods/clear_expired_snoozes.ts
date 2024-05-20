@@ -6,10 +6,10 @@
  */
 
 import { RuleTypeParams, SanitizedRule } from '../../../common';
-import { isSnoozeExpired } from '../../lib';
 import { partiallyUpdateRule } from '../../saved_objects';
-import { updateMeta } from '../lib';
+import { isSnoozeExpired } from '../../lib';
 import { RulesClientContext } from '../types';
+import { updateMeta } from '../lib';
 
 export async function clearExpiredSnoozes(
   context: RulesClientContext,

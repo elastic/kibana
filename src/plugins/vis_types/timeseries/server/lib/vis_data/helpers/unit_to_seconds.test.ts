@@ -9,10 +9,10 @@
 import { Unit } from '@kbn/datemath';
 
 import {
-  convertIntervalToUnit,
-  getSuitableUnit,
   getUnitValue,
   parseInterval,
+  convertIntervalToUnit,
+  getSuitableUnit,
 } from './unit_to_seconds';
 
 describe('unit_to_seconds', () => {

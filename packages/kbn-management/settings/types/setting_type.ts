@@ -63,20 +63,10 @@ export type Value = string | boolean | number | Array<string | number> | undefin
  * given {@link SettingType}.
  * @public
  */
-export type KnownTypeToValue<T extends SettingType = SettingType> = T extends
-  | 'color'
-  | 'image'
-  | 'json'
-  | 'markdown'
-  | 'select'
-  | 'string'
-  ? string
-  : T extends 'boolean'
-    ? boolean
-    : T extends 'number' | 'bigint'
-      ? number
-      : T extends 'array'
-        ? Array<string | number>
-        : T extends 'undefined'
-          ? undefined
-          : never;
+export type KnownTypeToValue<T extends SettingType = SettingType> =
+  T extends 'color' | 'image' | 'json' | 'markdown' | 'select' | 'string' ? string :
+  T extends 'boolean' ? boolean :
+  T extends 'number' | 'bigint' ? number :
+  T extends 'array' ? Array<string | number> :
+  T extends 'undefined' ? undefined:
+  never;

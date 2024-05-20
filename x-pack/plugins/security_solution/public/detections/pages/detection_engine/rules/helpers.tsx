@@ -6,12 +6,12 @@
  */
 
 import dateMath from '@kbn/datemath';
-import memoizeOne from 'memoize-one';
 import moment from 'moment';
+import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
+import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
 import type {
   Severity,
   SeverityMapping,
@@ -19,27 +19,27 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { requiredOptional } from '@kbn/zod-helpers';
-import styled from 'styled-components';
-import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
 import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
+import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
 } from '../../../../../common/detection_engine/transform_actions';
-import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import { assertUnreachable } from '../../../../../common/utility_types';
-import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
-  ActionsStepRule,
   DefineStepRule,
   ScheduleStepRule,
+  ActionsStepRule,
 } from './types';
 import { DataSourceType, GroupByOptions } from './types';
+import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;

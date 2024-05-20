@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { filter } from 'rxjs';
+import { get } from 'lodash';
+import dedent from 'dedent';
+import { i18n } from '@kbn/i18n';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type {
   ActionType as ConnectorType,
@@ -12,19 +18,6 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import { TypeOf, schema } from '@kbn/config-schema';
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import {
-  ChatCompletionChunkEvent,
-  MessageRole,
-  StreamingChatResponseEventType,
-} from '@kbn/observability-ai-assistant-plugin/common';
-import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
-import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
-import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
-import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
-import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 import {
   EmailParamsSchema,
   JiraParamsSchema,
@@ -33,11 +26,18 @@ import {
   SlackParamsSchema,
   WebhookParamsSchema,
 } from '@kbn/stack-connectors-plugin/server';
-import dedent from 'dedent';
-import { get } from 'lodash';
-import { filter } from 'rxjs';
-import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
+import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
+import {
+  ChatCompletionChunkEvent,
+  MessageRole,
+  StreamingChatResponseEventType,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
+import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
+import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
+import { getSystemMessageFromInstructions } from '@kbn/observability-ai-assistant-plugin/server/service/util/get_system_message_from_instructions';
 import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
+import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 
 const CONNECTOR_PRIVILEGES = ['api:observabilityAIAssistant', 'app:observabilityAIAssistant'];
 
@@ -160,9 +160,9 @@ async function executor(
     client,
     screenContexts: [],
   });
-  const actionsClient = await (await resources.plugins.actions.start()).getActionsClientWithRequest(
-    request
-  );
+  const actionsClient = await (
+    await resources.plugins.actions.start()
+  ).getActionsClientWithRequest(request);
 
   const connectorsList = await actionsClient.getAll().then((connectors) => {
     return connectors.map((connector) => {

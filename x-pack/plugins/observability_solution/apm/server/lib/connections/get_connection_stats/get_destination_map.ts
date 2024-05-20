@@ -6,11 +6,13 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { rangeQuery } from '@kbn/observability-plugin/server';
 import objectHash from 'object-hash';
-import { Node, NodeType } from '../../../../common/connections';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -22,12 +24,10 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/es_fields/apm';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
+import { Node, NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
+import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 
 type Destination = {
   dependencyName: string;

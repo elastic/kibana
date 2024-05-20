@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { RisonValue, decode } from '@kbn/rison';
-import { Location } from 'history';
 import { parse } from 'query-string';
+import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { decode, RisonValue } from '@kbn/rison';
 import { useHistory } from 'react-router-dom';
 import { replaceStateKeyInQueryString } from '../../common/url_state_storage_service';
 

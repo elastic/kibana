@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import turfAlong from '@turf/along';
-import turfArea from '@turf/area';
-// @ts-expect-error
-import turfCenterOfMass from '@turf/center-of-mass';
-import { lineString, polygon } from '@turf/helpers';
-import turfLength from '@turf/length';
 import {
   Feature,
   FeatureCollection,
@@ -21,6 +15,12 @@ import {
   MultiPoint,
   MultiPolygon,
 } from 'geojson';
+import turfAlong from '@turf/along';
+import turfArea from '@turf/area';
+// @ts-expect-error
+import turfCenterOfMass from '@turf/center-of-mass';
+import turfLength from '@turf/length';
+import { lineString, polygon } from '@turf/helpers';
 import { GEO_JSON_TYPE, KBN_IS_CENTROID_FEATURE } from '../../../../../common/constants';
 
 export function getCentroidFeatures(featureCollection: FeatureCollection): Feature[] {

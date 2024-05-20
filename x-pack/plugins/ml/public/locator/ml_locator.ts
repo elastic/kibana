@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import type { KibanaLocation, LocatorDefinition } from '@kbn/share-plugin/public';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
+import { formatChangePointDetectionUrl } from './formatters/aiops';
+import { formatNotificationsUrl } from './formatters/notifications';
 import type {
-  ChangePointDetectionQueryState,
   DataFrameAnalyticsExplorationUrlState,
-  MlLocator,
   MlLocatorParams,
+  MlLocator,
+  ChangePointDetectionQueryState,
 } from '../../common/types/locator';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,
   formatAnomalyDetectionJobManagementUrl,
+  formatExplorerUrl,
+  formatSingleMetricViewerUrl,
   formatDataFrameAnalyticsCreateJobUrl,
   formatDataFrameAnalyticsExplorationUrl,
   formatDataFrameAnalyticsJobManagementUrl,
   formatDataFrameAnalyticsMapUrl,
+  formatGenericMlUrl,
   formatEditCalendarUrl,
   formatEditFilterUrl,
-  formatExplorerUrl,
-  formatGenericMlUrl,
-  formatSingleMetricViewerUrl,
 } from './formatters';
-import { formatChangePointDetectionUrl } from './formatters/aiops';
-import { formatNotificationsUrl } from './formatters/notifications';
 import {
-  formatMemoryUsageUrl,
   formatTrainedModelsManagementUrl,
+  formatMemoryUsageUrl,
 } from './formatters/trained_models';
 
 export type { MlLocatorParams, MlLocator };

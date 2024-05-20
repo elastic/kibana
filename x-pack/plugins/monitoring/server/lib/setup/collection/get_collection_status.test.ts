@@ -7,8 +7,8 @@
 
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { infraPluginMock } from '@kbn/infra-plugin/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { configSchema, createConfig } from '../../../config';
 import { monitoringPluginMock } from '../../../mocks';

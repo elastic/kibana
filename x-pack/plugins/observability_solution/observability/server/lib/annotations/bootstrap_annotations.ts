@@ -7,9 +7,9 @@
 
 import type {
   CoreSetup,
-  IScopedClusterClient,
-  KibanaRequest,
   PluginInitializerContext,
+  KibanaRequest,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { createAnnotationsClient } from './create_annotations_client';

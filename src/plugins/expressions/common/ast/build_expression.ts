@@ -7,14 +7,14 @@
  */
 
 import { AnyExpressionFunctionDefinition } from '../expression_functions/types';
+import { ExpressionAstExpression, ExpressionAstFunction } from './types';
 import {
+  buildExpressionFunction,
   ExpressionAstFunctionBuilder,
   InferFunctionDefinition,
-  buildExpressionFunction,
 } from './build_function';
 import { format } from './format';
 import { parse } from './parse';
-import { ExpressionAstExpression, ExpressionAstFunction } from './types';
 
 /**
  * Type guard that checks whether a given value is an

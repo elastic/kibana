@@ -6,10 +6,10 @@
  */
 
 import {
-  convertCloudRemoteAddressToProxyConnection,
-  i18nTexts,
   isCloudAdvancedOptionsEnabled,
   validateCloudRemoteAddress,
+  convertCloudRemoteAddressToProxyConnection,
+  i18nTexts,
 } from './validate_cloud_url';
 
 describe('Cloud remote address', () => {

@@ -8,14 +8,14 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TimelineId } from '../../../../../common/types';
-import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 import type { BrowserField } from '../../../containers/source';
-import { TestProviders } from '../../../mock';
-import { getEmptyValue } from '../../empty_value';
-import type { AlertSummaryRow } from '../helpers';
-import type { EventFieldsData } from '../types';
 import { PrevalenceCellRenderer } from './prevalence_cell';
+import { TestProviders } from '../../../mock';
+import type { EventFieldsData } from '../types';
+import { TimelineId } from '../../../../../common/types';
+import type { AlertSummaryRow } from '../helpers';
+import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
+import { getEmptyValue } from '../../empty_value';
 
 jest.mock('../../../lib/kibana');
 jest.mock('../../../containers/alerts/use_alert_prevalence', () => ({

@@ -249,8 +249,9 @@ export class InspectorService extends FtrService {
    */
   public async getSelectedOption(): Promise<string> {
     await this.openInspectorRequestsView();
-    const selectedOption =
-      await this.comboBox.getComboBoxSelectedOptions('inspectorRequestChooser');
+    const selectedOption = await this.comboBox.getComboBoxSelectedOptions(
+      'inspectorRequestChooser'
+    );
 
     if (selectedOption.length !== 1) {
       return 'Combobox has multiple options';

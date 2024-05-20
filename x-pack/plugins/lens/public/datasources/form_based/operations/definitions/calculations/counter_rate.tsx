@@ -7,19 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { COUNTER_RATE_ID, COUNTER_RATE_NAME } from '@kbn/lens-formula-docs';
-import { OperationDefinition } from '..';
-import { FormBasedLayer } from '../../../types';
-import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { getFilter, getFormatFromPreviousColumn } from '../helpers';
+import { FormBasedLayer } from '../../../types';
 import {
   buildLabelFunction,
-  checkForDataLayerType,
+  getErrorsForDateReference,
   checkForDateHistogram,
   dateBasedOperationToExpression,
-  getErrorsForDateReference,
   hasDateField,
+  checkForDataLayerType,
 } from './utils';
+import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
+import { OperationDefinition } from '..';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {

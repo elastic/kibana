@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiFilePicker, EuiFilePickerProps, EuiImage } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useImperativeHandle, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFilePicker, EuiFilePickerProps, EuiImage } from '@elastic/eui';
 
 import { ResetInputRef } from '@kbn/management-settings-types';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
-import { TEST_SUBJ_PREFIX_FIELD } from '.';
-import { useServices } from '../services';
 import type { InputProps } from '../types';
+import { useServices } from '../services';
+import { TEST_SUBJ_PREFIX_FIELD } from '.';
 
 /**
  * Props for a {@link ImageInput} component.

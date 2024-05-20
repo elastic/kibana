@@ -9,42 +9,42 @@ import { isEmpty } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { DataViewFieldBase, Filter } from '@kbn/es-query';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../utils/get_filter';
-import { bulkCreateSuppressedThresholdAlerts } from './bulk_create_suppressed_threshold_alerts';
 import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
 import { findThresholdSignals } from './find_threshold_signals';
 import { getThresholdBucketFilters } from './get_threshold_bucket_filters';
 import { getThresholdSignalHistory } from './get_threshold_signal_history';
+import { bulkCreateSuppressedThresholdAlerts } from './bulk_create_suppressed_threshold_alerts';
 
-import type { ExperimentalFeatures } from '../../../../../common';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type {
   BulkCreate,
   RuleRangeTuple,
-  RunOpts,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
+  RunOpts,
 } from '../types';
+import type { ThresholdAlertState, ThresholdSignalHistory } from './types';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
   getUnprocessedExceptionsWarnings,
 } from '../utils/utils';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from './build_signal_history';
-import type { ThresholdAlertState, ThresholdSignalHistory } from './types';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 export const thresholdExecutor = async ({
   inputIndex,

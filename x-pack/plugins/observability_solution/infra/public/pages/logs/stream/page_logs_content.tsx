@@ -13,12 +13,12 @@ import {
   LogEntryFlyout,
   LogEntryStreamItem,
   ScrollableLogTextStreamView,
-  WithSummary,
-  WithSummaryProps,
   useLogHighlightsStateContext,
   useLogPositionStateContext,
   useLogStreamContext,
   useLogViewContext,
+  WithSummary,
+  WithSummaryProps,
 } from '@kbn/logs-shared-plugin/public';
 import { useSelector } from '@xstate/react';
 import stringify from 'json-stable-stringify';
@@ -29,8 +29,8 @@ import { AutoSizer } from '../../../components/auto_sizer';
 import { LogMinimap } from '../../../components/logging/log_minimap';
 import { PageContent } from '../../../components/page';
 import {
-  WithFlyoutOptionsUrlState,
   useLogEntryFlyoutContext,
+  WithFlyoutOptionsUrlState,
 } from '../../../containers/logs/log_flyout';
 import { useLogViewConfigurationContext } from '../../../containers/logs/log_view_configuration';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';

@@ -74,7 +74,9 @@
             "tags": [],
             "label": "homePage",
             "description": [],
-            "signature": ["\"enterpriseSearch\""],
+            "signature": [
+              "\"enterpriseSearch\""
+            ],
             "path": "packages/solution-nav/es/definition.ts",
             "deprecated": false,
             "trackAdoption": false

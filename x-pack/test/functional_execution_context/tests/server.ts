@@ -11,7 +11,7 @@ import {
 } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { ANY, assertLogContains, isExecutionContextLog, readLogFile } from '../test_utils';
+import { readLogFile, assertLogContains, isExecutionContextLog, ANY } from '../test_utils';
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

@@ -11,9 +11,9 @@ import {
 } from '../../../../../common/constants';
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
-import type { State } from './edit_transform_flyout_state';
 import { initializeFormField } from './form_field';
 import { initializeFormSection } from './form_section';
+import type { State } from './edit_transform_flyout_state';
 
 // Takes in a transform configuration and returns the default state to populate the form.
 // It supports overrides to apply a pre-existing configuration.

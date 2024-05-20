@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { AssistantAvatar, UpgradeButtons, useAssistantContext } from '@kbn/elastic-assistant';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import * as i18n from './translations';

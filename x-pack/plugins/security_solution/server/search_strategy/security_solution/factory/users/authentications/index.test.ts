@@ -7,14 +7,14 @@
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
+import * as buildQuery from './dsl/query.dsl';
 import { authentications } from '.';
-import type { UserAuthenticationsRequestOptions } from '../../../../../../common/api/search_strategy';
 import {
-  formattedSearchStrategyResponse,
   mockOptions,
   mockSearchStrategyResponse,
+  formattedSearchStrategyResponse,
 } from './__mocks__';
-import * as buildQuery from './dsl/query.dsl';
+import type { UserAuthenticationsRequestOptions } from '../../../../../../common/api/search_strategy';
 
 describe('authentications search strategy', () => {
   const buildAuthenticationQuery = jest.spyOn(buildQuery, 'buildQuery');

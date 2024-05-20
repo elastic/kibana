@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 import { useMetricsExplorerViews } from '../../../../hooks/use_metrics_explorer_views';
+import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 import { MetricsExplorerViewState } from '../hooks/use_metric_explorer_state';
 
 interface Props {

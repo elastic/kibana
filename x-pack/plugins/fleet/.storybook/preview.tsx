@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Description, Primary, Stories, Subtitle, Title } from '@storybook/addon-docs';
-import { addDecorator } from '@storybook/react';
 import React from 'react';
+import { addDecorator } from '@storybook/react';
+import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs';
 
 import { decorator } from './decorator';
 

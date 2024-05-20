@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { mapFilter } from './map_filter';
 import type { Filter, PhraseFilter } from '@kbn/es-query';
 import { getDisplayValueFromFilter } from '../../..';
-import { mapFilter } from './map_filter';
 
 describe('filter manager utilities', () => {
   describe('mapFilter()', () => {

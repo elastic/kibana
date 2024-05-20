@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
 import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 
 interface RangeOptionProps<ParamName extends string> {
   label: string;

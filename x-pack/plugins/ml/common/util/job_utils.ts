@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import numeral from '@elastic/numeral';
-import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import {
-  ES_AGGREGATION,
-  MLCATEGORY,
-  ML_JOB_AGGREGATION,
-  type MlEntityField,
-} from '@kbn/ml-anomaly-utils';
-import { isDefined } from '@kbn/ml-is-defined';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { cloneDeep, each, isEmpty, isEqual, pick } from 'lodash';
+import semverGte from 'semver/functions/gte';
 import type { Duration } from 'moment';
 import moment from 'moment';
-import semverGte from 'semver/functions/gte';
-import type { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
-import { CREATED_BY_LABEL } from '../constants/new_job';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { FilterStateStore } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { isDefined } from '@kbn/ml-is-defined';
+import {
+  type MlEntityField,
+  ES_AGGREGATION,
+  ML_JOB_AGGREGATION,
+  MLCATEGORY,
+} from '@kbn/ml-anomaly-utils';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
+import { parseInterval } from './parse_interval';
+import { maxLengthValidator } from './validators';
+import { CREATED_BY_LABEL } from '../constants/new_job';
 import type {
   CombinedJob,
   CombinedJobWithStats,
@@ -36,11 +37,10 @@ import type {
   JobId,
 } from '../types/anomaly_detection_jobs';
 import type { MlServerLimits } from '../types/ml_server_info';
+import type { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
-import { getFirstKeyInObject } from './object_utils';
-import { parseInterval } from './parse_interval';
 import { findAggField } from './validation_utils';
-import { maxLengthValidator } from './validators';
+import { getFirstKeyInObject } from './object_utils';
 
 export interface ValidationResults {
   valid: boolean;

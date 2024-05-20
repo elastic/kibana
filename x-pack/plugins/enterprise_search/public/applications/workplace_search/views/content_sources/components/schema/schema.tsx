@@ -16,8 +16,8 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { SchemaAddFieldModal, SchemaErrorsCallout } from '../../../../../shared/schema';
@@ -29,12 +29,12 @@ import { SourceLayout } from '../source_layout';
 
 import {
   SCHEMA_ADD_FIELD_BUTTON,
-  SCHEMA_EMPTY_SCHEMA_DESCRIPTION,
-  SCHEMA_EMPTY_SCHEMA_TITLE,
-  SCHEMA_FILTER_PLACEHOLDER,
-  SCHEMA_MANAGE_SCHEMA_DESCRIPTION,
   SCHEMA_MANAGE_SCHEMA_TITLE,
+  SCHEMA_MANAGE_SCHEMA_DESCRIPTION,
+  SCHEMA_FILTER_PLACEHOLDER,
   SCHEMA_SAVE_BUTTON,
+  SCHEMA_EMPTY_SCHEMA_TITLE,
+  SCHEMA_EMPTY_SCHEMA_DESCRIPTION,
 } from './constants';
 import { SchemaFieldsTable } from './schema_fields_table';
 import { SchemaLogic } from './schema_logic';

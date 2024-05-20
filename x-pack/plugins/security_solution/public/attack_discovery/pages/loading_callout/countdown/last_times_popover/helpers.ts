@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 
+import { APPROXIMATE_TIME_REMAINING, ABOVE_THE_AVERAGE_TIME } from '../translations';
 import type { GenerationInterval } from '../../../../types';
-import { ABOVE_THE_AVERAGE_TIME, APPROXIMATE_TIME_REMAINING } from '../translations';
 
 export const MAX_SECONDS_BADGE_WIDTH = 64; // px
 

@@ -7,9 +7,9 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
+import { useRuleIndices } from './use_rule_indices';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
-import { useRuleIndices } from './use_rule_indices';
 
 jest.mock('../../../common/components/ml/hooks/use_get_jobs');
 jest.mock('../../../common/components/ml_popover/hooks/use_security_jobs');

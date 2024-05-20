@@ -6,6 +6,8 @@
     "id": "savedObjectsTaggingOss",
     "server": false,
     "browser": true,
-    "optionalPlugins": ["savedObjects"]
+    "optionalPlugins": [
+      "savedObjects"
+    ]
   }
 }

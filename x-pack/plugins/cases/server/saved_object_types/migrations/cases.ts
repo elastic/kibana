@@ -7,27 +7,27 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { cloneDeep, flow, unset } from 'lodash';
+import { cloneDeep, unset, flow } from 'lodash';
+import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
+import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
 import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
-import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
 
-import type { CaseAttributes } from '../../../common/types/domain';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
   SEVERITY_EXTERNAL_TO_ESMODEL,
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '../../common/constants';
-import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
-import type { ConnectorPersistedFields } from '../../common/types/connectors';
-import { CASE_TYPE_INDIVIDUAL } from './constants';
 import {
   transformConnectorIdToReference,
   transformPushConnectorIdToReference,
 } from './user_actions/connector_id';
+import { CASE_TYPE_INDIVIDUAL } from './constants';
 import { pipeMigrations } from './utils';
+import type { ConnectorPersistedFields } from '../../common/types/connectors';
+import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import type { CaseAttributes } from '../../../common/types/domain';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;

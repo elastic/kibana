@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
-import { BUILT_IN_ALERTS_FEATURE } from './feature';
-import { registerBuiltInRuleTypes } from './rule_types';
 import { StackAlertsDeps, StackAlertsStartDeps } from './types';
+import { registerBuiltInRuleTypes } from './rule_types';
+import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 export class AlertingBuiltinsPlugin
   implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps>

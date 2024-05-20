@@ -9,14 +9,13 @@
 
 import type * as rt from 'io-ts';
 
-import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type {
   SavedObjectMigrationContext,
   SavedObjectReference,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { NONE_CONNECTOR_ID } from '../../../../common/constants';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { CaseAttributes, CaseConnector } from '../../../../common/types/domain';
 import { CaseConnectorRt, ExternalServiceRt } from '../../../../common/types/domain';
 import {
@@ -24,9 +23,10 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../../common/utils';
+import type { UserActionVersion800 } from './types';
 import { logError } from '../utils';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
-import type { UserActionVersion800 } from './types';
+import { NONE_CONNECTOR_ID } from '../../../../common/constants';
 
 export function isCreateConnector(action?: string, actionFields?: string[]): boolean {
   return action === 'create' && actionFields != null && actionFields.includes('connector');

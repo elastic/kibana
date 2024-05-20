@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { VectorTile } from '@mapbox/vector-tile';
+import Protobuf from 'pbf';
+import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import expect from '@kbn/expect';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
-import { VectorTile } from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
 
 function findFeature(layer, callbackFn) {
   for (let i = 0; i < layer.length; i++) {

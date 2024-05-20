@@ -5,18 +5,17 @@
  * 2.0.
  */
 
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import {
-  EuiHorizontalRule,
-  EuiInMemoryTable,
-  EuiLink,
+  EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiLink,
+  EuiHorizontalRule,
+  EuiInMemoryTable,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import {
+  AlertStatus,
   ALERT_CASE_IDS,
   ALERT_DURATION,
   ALERT_END,
@@ -28,24 +27,25 @@ import {
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
-  AlertStatus,
 } from '@kbn/rule-data-utils';
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 
 import { get } from 'lodash';
-import { TimeRange } from '../../../common/custom_threshold_rule/types';
 import { paths } from '../../../common/locators/paths';
-import { useCaseViewNavigation } from '../../hooks/use_case_view_navigation';
-import { useFetchBulkCases } from '../../hooks/use_fetch_bulk_cases';
-import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
+import { TimeRange } from '../../../common/custom_threshold_rule/types';
 import { TopAlert } from '../../typings/alerts';
+import { useFetchBulkCases } from '../../hooks/use_fetch_bulk_cases';
+import { useCaseViewNavigation } from '../../hooks/use_case_view_navigation';
 import { useKibana } from '../../utils/kibana_react';
-import { getSources } from './helpers/get_sources';
 import {
   FlyoutThresholdData,
   mapRuleParamsWithFlyout,
 } from './helpers/map_rules_params_with_flyout';
 import { ColumnIDs, overviewColumns } from './overview_columns';
+import { getSources } from './helpers/get_sources';
+import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 
 export const AlertOverview = memo(
   ({

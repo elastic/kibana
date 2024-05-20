@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
-import React, { memo } from 'react';
+import type { EventFieldsData } from '../../../../common/components/event_details/types';
+import { FieldValueCell } from '../../../../common/components/event_details/table/field_value_cell';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
-import { TimelineTabs } from '../../../../../common/types';
+import { FieldNameCell } from '../../../../common/components/event_details/table/field_name_cell';
+import { CellActions } from '../components/cell_actions';
+import * as i18n from '../../../../common/components/event_details/translations';
+import { useRightPanelContext } from '../context';
 import type { ColumnsProvider } from '../../../../common/components/event_details/event_fields_browser';
 import { EventFieldsBrowser } from '../../../../common/components/event_details/event_fields_browser';
-import { FieldNameCell } from '../../../../common/components/event_details/table/field_name_cell';
-import { FieldValueCell } from '../../../../common/components/event_details/table/field_value_cell';
-import * as i18n from '../../../../common/components/event_details/translations';
-import type { EventFieldsData } from '../../../../common/components/event_details/types';
-import { CellActions } from '../components/cell_actions';
-import { useRightPanelContext } from '../context';
+import { TimelineTabs } from '../../../../../common/types';
 
 export const getFieldFromBrowserField = memoizeOne(
   (keys: string[], browserFields: BrowserFields): BrowserField | undefined =>

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { LEGACY_DARK_THEME, LEGACY_LIGHT_THEME, Theme } from '@elastic/charts';
 // @ts-ignore
 import colorJS from 'color';
+import { Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 function computeRelativeLuminosity(rgb: string) {
   return colorJS(rgb).luminosity();

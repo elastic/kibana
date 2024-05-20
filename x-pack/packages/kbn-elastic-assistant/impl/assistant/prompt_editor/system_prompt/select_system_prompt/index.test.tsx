@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
 import { Props, SelectSystemPrompt } from '.';
 import { TEST_IDS } from '../../../constants';

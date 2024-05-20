@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { keys } from '@elastic/eui';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { httpServiceMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test-jest-helpers';
-import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { keys } from '@elastic/eui';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
 import { columnServiceMock } from '../../../services/column_service.mock';
 import { Table, TableProps } from './table';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,

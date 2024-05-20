@@ -1,14 +1,3 @@
-import {
-  EuiCallOut,
-  EuiCode,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -17,6 +6,17 @@ import {
  */
 import React from 'react';
 import styled from 'styled-components';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiSkeletonText,
+  EuiCallOut,
+  EuiLink,
+  EuiCode,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

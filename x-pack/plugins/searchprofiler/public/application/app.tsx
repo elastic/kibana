@@ -8,16 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
 
 import {
-  EmptyTreePlaceHolder,
+  SearchProfilerTabs,
+  ProfileTree,
   HighlightDetailsFlyout,
   LicenseWarningNotice,
   ProfileLoadingPlaceholder,
+  EmptyTreePlaceHolder,
   ProfileQueryEditor,
-  ProfileTree,
-  SearchProfilerTabs,
 } from './components';
 
 import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';

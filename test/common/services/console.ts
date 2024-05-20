@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { helpers } from '../../api_integration/apis/console/helpers';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { helpers } from '../../api_integration/apis/console/helpers';
 export function ConsoleProvider({ getService }: FtrProviderContext) {
   return {
     helpers: helpers(getService),

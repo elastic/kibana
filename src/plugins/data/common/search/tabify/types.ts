@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RangeFilterParams } from '@kbn/es-query';
 import { Moment } from 'moment';
+import { RangeFilterParams } from '@kbn/es-query';
 import { IAggConfig } from '../aggs';
 
 /** @internal **/

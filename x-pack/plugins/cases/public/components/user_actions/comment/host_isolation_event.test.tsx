@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 import { HostIsolationCommentEvent } from './host_isolation_event';
 
 const defaultProps = () => {

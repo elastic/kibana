@@ -6,8 +6,14 @@
     "id": "corePluginB",
     "server": true,
     "browser": true,
-    "configPath": ["core_plugin_b"],
-    "requiredPlugins": ["corePluginA"],
-    "optionalPlugins": ["corePluginC"]
+    "configPath": [
+      "core_plugin_b"
+    ],
+    "requiredPlugins": [
+      "corePluginA"
+    ],
+    "optionalPlugins": [
+      "corePluginC"
+    ]
   }
 }

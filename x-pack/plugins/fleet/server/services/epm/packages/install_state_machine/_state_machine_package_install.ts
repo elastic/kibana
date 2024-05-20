@@ -6,10 +6,10 @@
  */
 import type {
   ElasticsearchClient,
-  ISavedObjectsImporter,
   Logger,
   SavedObject,
   SavedObjectsClientContract,
+  ISavedObjectsImporter,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
@@ -19,37 +19,37 @@ import { PackageSavedObjectConflictError } from '../../../../errors';
 
 import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
 import { INSTALL_STATES } from '../../../../../common/types';
-import type { PackageInstallContext, StateContext, StateNames } from '../../../../../common/types';
+import type { PackageInstallContext, StateNames, StateContext } from '../../../../../common/types';
 import type { PackageAssetReference } from '../../../../types';
 
 import type {
-  AssetReference,
-  EsAssetReference,
-  IndexTemplateEntry,
-  InstallSource,
-  InstallType,
   Installation,
-  KibanaAssetReference,
+  InstallType,
+  InstallSource,
   PackageVerificationResult,
+  EsAssetReference,
+  KibanaAssetReference,
+  IndexTemplateEntry,
+  AssetReference,
 } from '../../../../types';
 
-import type { StateMachineDefinition } from './state_machine';
-import { handleState } from './state_machine';
 import {
   stepCreateRestartInstallation,
-  stepDeletePreviousPipelines,
-  stepInstallILMPolicies,
-  stepInstallIndexTemplatePipelines,
   stepInstallKibanaAssets,
+  stepInstallILMPolicies,
   stepInstallMlModel,
-  stepInstallTransforms,
+  stepInstallIndexTemplatePipelines,
   stepRemoveLegacyTemplates,
-  stepResolveKibanaPromise,
-  stepSaveArchiveEntries,
-  stepSaveSystemObject,
   stepUpdateCurrentWriteIndices,
+  stepInstallTransforms,
+  stepDeletePreviousPipelines,
+  stepSaveArchiveEntries,
+  stepResolveKibanaPromise,
+  stepSaveSystemObject,
   updateLatestExecutedState,
 } from './steps';
+import type { StateMachineDefinition } from './state_machine';
+import { handleState } from './state_machine';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;

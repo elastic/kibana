@@ -2,7 +2,8 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".fleet-agents": {}
+      ".fleet-agents": {
+      }
     },
     "index": ".fleet-agents-7",
     "mappings": {
@@ -233,3 +234,4 @@
     }
   }
 }
+

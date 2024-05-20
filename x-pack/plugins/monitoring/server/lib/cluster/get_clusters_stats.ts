@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
-import { ElasticsearchModifiedSource, ElasticsearchResponse } from '../../../common/types/es';
-import { Globals } from '../../static_globals';
-import { LegacyRequest } from '../../types';
 import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
+import { parseCrossClusterPrefix } from '../../../common/ccs_utils';
 import { getClustersState } from './get_clusters_state';
-import { getElasticsearchDataset, getIndexPatterns } from './get_index_patterns';
+import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
+import { getIndexPatterns, getElasticsearchDataset } from './get_index_patterns';
+import { Globals } from '../../static_globals';
 
 /**
  * This will fetch the cluster stats and cluster state as a single object per cluster.

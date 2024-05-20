@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { AbstractESAggSource } from '.';
+import { IField } from '../../fields/field';
+import { IESAggField } from '../../fields/agg';
+import _ from 'lodash';
 import { AGG_TYPE } from '../../../../common/constants';
 import { AggDescriptor } from '../../../../common/descriptor_types';
-import { IESAggField } from '../../fields/agg';
-import { IField } from '../../fields/field';
 
 const sumFieldName = 'myFieldGettingSummed';
 const metricExamples = [

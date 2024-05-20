@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { bulkGetSchemas } from './bulk_get';
 import type { ProcedureName } from './constants';
-import { createSchemas } from './create';
-import { deleteSchemas } from './delete';
-import { getSchemas } from './get';
-import { mSearchSchemas } from './msearch';
-import { searchSchemas } from './search';
 import type { ProcedureSchemas } from './types';
+import { getSchemas } from './get';
+import { bulkGetSchemas } from './bulk_get';
+import { createSchemas } from './create';
 import { updateSchemas } from './update';
+import { deleteSchemas } from './delete';
+import { searchSchemas } from './search';
+import { mSearchSchemas } from './msearch';
 
 export const schemas: {
   [key in ProcedureName]: ProcedureSchemas;

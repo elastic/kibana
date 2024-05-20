@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { JOB_ACTION } from '../../../../../../common/constants/job_actions';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
+import { JOB_ACTION } from '../../../../../../common/constants/job_actions';
 
-import { i18n } from '@kbn/i18n';
-import { isManagedJob } from '../../../jobs_utils';
 import {
+  stopDatafeeds,
   cloneJob,
   closeJobs,
-  isClosable,
-  isResettable,
   isStartable,
   isStoppable,
-  stopDatafeeds,
+  isClosable,
+  isResettable,
 } from '../utils';
+import { i18n } from '@kbn/i18n';
+import { isManagedJob } from '../../../jobs_utils';
 
 export function actionsMenuContent(
   showEditJobFlyout,

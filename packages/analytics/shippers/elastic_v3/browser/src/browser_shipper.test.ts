@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClientInitContext, Event } from '@kbn/analytics-client';
 import { loggerMock } from '@kbn/logging-mocks';
-import { firstValueFrom } from 'rxjs';
+import type { AnalyticsClientInitContext, Event } from '@kbn/analytics-client';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
+import { firstValueFrom } from 'rxjs';
 import { ElasticV3BrowserShipper } from './browser_shipper';
 
 describe('ElasticV3BrowserShipper', () => {

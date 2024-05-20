@@ -28,14 +28,14 @@ import {
   SavedObjectsBulkResponse,
 } from '@kbn/core/server';
 
-import { schema } from '@kbn/config-schema';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import { schema } from '@kbn/config-schema';
 
-import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   esoModelVersionExampleV1,
@@ -43,7 +43,7 @@ import {
   esoModelVersionExampleV3,
 } from './types';
 
-import { EXAMPLE_SAVED_OBJECT_TYPE, EsoModelVersionExampleTypeRegistration } from './types/latest';
+import { EsoModelVersionExampleTypeRegistration, EXAMPLE_SAVED_OBJECT_TYPE } from './types/latest';
 
 const documentVersionConstants = [
   esoModelVersionExampleV1.ESO_MV_RAW_DOC,
@@ -400,8 +400,9 @@ export class EsoModelVersionExample implements Plugin<void, void> {
             return { type: parts[0], id: parts[1] };
           });
 
-          const result: SavedObjectsBulkResponse =
-            await savedObjects.client.bulkGet(bulkGetObjects);
+          const result: SavedObjectsBulkResponse = await savedObjects.client.bulkGet(
+            bulkGetObjects
+          );
           return response.ok({
             body: result,
           });

@@ -6,16 +6,16 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createTelemetrySecurityListTaskConfig } from './security_lists';
 import {
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
-import {
-  createMockTaskMetrics,
   createMockTelemetryEventsSender,
   createMockTelemetryReceiver,
+  createMockTaskMetrics,
 } from '../__mocks__';
-import { createTelemetrySecurityListTaskConfig } from './security_lists';
+import {
+  ENDPOINT_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 
 describe('security list telemetry task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

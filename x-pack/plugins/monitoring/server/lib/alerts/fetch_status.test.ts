@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { fetchStatus } from './fetch_status';
+import { AlertUiState, AlertState } from '../../../common/types/alerts';
+import { AlertSeverity } from '../../../common/enums';
 import {
-  RULE_CLUSTER_HEALTH,
   RULE_CPU_USAGE,
+  RULE_CLUSTER_HEALTH,
   RULE_DISK_USAGE,
   RULE_MISSING_MONITORING_DATA,
 } from '../../../common/constants';
-import { AlertSeverity } from '../../../common/enums';
-import { AlertState, AlertUiState } from '../../../common/types/alerts';
-import { fetchStatus } from './fetch_status';
 
 jest.mock('../../static_globals', () => ({
   Globals: {

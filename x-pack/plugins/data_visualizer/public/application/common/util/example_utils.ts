@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import type {
   GeoPointExample,
   LatLongExample,

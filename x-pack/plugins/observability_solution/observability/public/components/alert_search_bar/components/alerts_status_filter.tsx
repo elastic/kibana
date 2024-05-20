@@ -8,9 +8,9 @@
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AlertStatus } from '../../../../common/typings';
-import { ACTIVE_ALERTS, ALL_ALERTS, RECOVERED_ALERTS, UNTRACKED_ALERTS } from '../constants';
+import { ALL_ALERTS, ACTIVE_ALERTS, RECOVERED_ALERTS, UNTRACKED_ALERTS } from '../constants';
 import { AlertStatusFilterProps } from '../types';
+import { AlertStatus } from '../../../../common/typings';
 
 const options: EuiButtonGroupOptionProps[] = [
   {

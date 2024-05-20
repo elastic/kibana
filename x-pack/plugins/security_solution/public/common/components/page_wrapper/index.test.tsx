@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { SecuritySolutionPageWrapper } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { TestProviders } from '../../mock';

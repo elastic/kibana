@@ -7,11 +7,11 @@
 
 import Boom from '@hapi/boom';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
-import { getMaintenanceWindowSo } from '../../../../data/maintenance_window';
-import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import type { MaintenanceWindow } from '../../types';
-import { getMaintenanceWindowParamsSchema } from './schemas';
 import type { GetMaintenanceWindowParams } from './types';
+import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
+import { getMaintenanceWindowParamsSchema } from './schemas';
+import { getMaintenanceWindowSo } from '../../../../data/maintenance_window';
 
 export async function getMaintenanceWindow(
   context: MaintenanceWindowClientContext,

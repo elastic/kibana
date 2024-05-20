@@ -1,4 +1,3 @@
-import { css } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import { css } from '@emotion/react';
  * 2.0.
  */
 import React, { useEffect } from 'react';
+import { css } from '@emotion/react';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import { EuiFocusTrap, EuiImage, EuiOverlayMask, keys } from '@elastic/eui';
+import { EuiOverlayMask, EuiFocusTrap, EuiImage, keys } from '@elastic/eui';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import type { Owner } from '../../../common/constants/types';

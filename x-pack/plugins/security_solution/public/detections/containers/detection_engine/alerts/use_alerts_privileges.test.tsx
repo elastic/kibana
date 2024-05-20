@@ -7,13 +7,13 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import produce from 'immer';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { Privilege } from './types';
 import type { UseAlertsPrivelegesReturn } from './use_alerts_privileges';
 import { useAlertsPrivileges } from './use_alerts_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');

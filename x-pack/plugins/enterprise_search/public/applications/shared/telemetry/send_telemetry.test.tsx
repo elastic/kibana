@@ -13,8 +13,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  SendAppSearchTelemetry,
   SendEnterpriseSearchTelemetry,
+  SendAppSearchTelemetry,
   SendWorkplaceSearchTelemetry,
 } from '.';
 

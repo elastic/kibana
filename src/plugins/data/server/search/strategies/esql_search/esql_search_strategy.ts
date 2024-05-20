@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { from } from 'rxjs';
-import { KbnSearchError, getKbnSearchError } from '../../report_search_error';
-import { sanitizeRequestParams } from '../../sanitize_request_params';
+import type { Logger } from '@kbn/core/server';
+import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const esqlSearchStrategyProvider = (
   logger: Logger,

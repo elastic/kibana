@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
+import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 import { TriggersAndActionsUiServices } from '../..';
 

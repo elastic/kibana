@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import Chainable from '../lib/classes/chainable';
 import reduce from '../lib/reduce';
+import Chainable from '../lib/classes/chainable';
 
 export default new Chainable('max', {
   args: [

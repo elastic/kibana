@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { MockRouter, mockDependencies, mockRequestHandler } from '../../__mocks__';
+import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
 import {
+  registerOAuthAuthorizeRoute,
   registerOAuthAuthorizeAcceptRoute,
   registerOAuthAuthorizeDenyRoute,
-  registerOAuthAuthorizeRoute,
 } from './oauth';
 
 describe('oauth routes', () => {

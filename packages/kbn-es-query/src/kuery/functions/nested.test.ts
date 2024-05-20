@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataViewBase } from '../../..';
-import { fields } from '../../filters/stubs';
-import * as ast from '../ast';
 import { nodeTypes } from '../node_types';
+import { fields } from '../../filters/stubs';
+import { DataViewBase } from '../../..';
+import * as ast from '../ast';
 import * as nested from './nested';
 import type { KqlNestedFunctionNode } from './nested';
 

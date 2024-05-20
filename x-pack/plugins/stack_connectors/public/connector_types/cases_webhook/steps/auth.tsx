@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { FunctionComponent } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -13,8 +14,6 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { Field, PasswordField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
   FIELD_TYPES,
   UseArray,
@@ -22,7 +21,8 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { FunctionComponent } from 'react';
+import { Field, TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from '../translations';
 const { emptyField } = fieldValidators;
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Dataset } from '@kbn/rule-registry-plugin/server';
 import * as t from 'io-ts';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
 const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({

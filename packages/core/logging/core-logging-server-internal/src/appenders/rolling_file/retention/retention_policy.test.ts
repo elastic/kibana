@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import {
+  listFilesExceedingSizeMock,
+  listFilesOlderThanMock,
+  deleteFilesMock,
+} from './retention_policy.test.mocks';
 import type { RetentionPolicyConfig } from '@kbn/core-logging-server';
 import { rollingFileAppenderMocks } from '../mocks';
 import { GenericRetentionPolicy, retentionPolicyConfigSchema } from './retention_policy';
-import {
-  deleteFilesMock,
-  listFilesExceedingSizeMock,
-  listFilesOlderThanMock,
-} from './retention_policy.test.mocks';
 
 describe('GenericRetentionPolicy', () => {
   let context: ReturnType<typeof rollingFileAppenderMocks.createContext>;

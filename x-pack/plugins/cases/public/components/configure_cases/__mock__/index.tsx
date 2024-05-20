@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { mockedTestProvidersOwner } from '../../../common/mock';
 import type { ActionTypeConnector } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
-import { mockedTestProvidersOwner } from '../../../common/mock';
-import { actionTypesMock, connectorsMock } from '../../../common/mock/connectors';
 import type { ActionConnector } from '../../../containers/configure/types';
+import { connectorsMock, actionTypesMock } from '../../../common/mock/connectors';
 export { mappings } from '../../../containers/configure/mock';
 
 export const connectors: ActionConnector[] = connectorsMock;

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiSpacer,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import { DocLinksStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
 
 import { RuntimeField } from '../../types';
+import { FormState } from '../runtime_field_form';
 import {
   RuntimeFieldEditor,
   Props as RuntimeFieldEditorProps,
 } from '../runtime_field_editor/runtime_field_editor';
-import { FormState } from '../runtime_field_form';
 
 const geti18nTexts = (field?: RuntimeField) => {
   return {

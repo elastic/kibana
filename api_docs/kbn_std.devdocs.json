@@ -36,7 +36,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-std/src/semaphore.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -48,7 +50,9 @@
                 "tags": [],
                 "label": "capacity",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-std/src/semaphore.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -64,7 +68,11 @@
             "tags": [],
             "label": "acquire",
             "description": [],
-            "signature": ["<T>() => ", "OperatorFunction", "<T, T>"],
+            "signature": [
+              "<T>() => ",
+              "OperatorFunction",
+              "<T, T>"
+            ],
             "path": "packages/kbn-std/src/semaphore.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -78,7 +86,9 @@
             "tags": [],
             "label": "release",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-std/src/semaphore.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -99,7 +109,9 @@
         "description": [
           "\nCan be used in switch statements to ensure we perform exhaustive checks, see\nhttps://www.typescriptlang.org/docs/handbook/advanced-types.html#exhaustiveness-checking\n"
         ],
-        "signature": ["(x: never) => never"],
+        "signature": [
+          "(x: never) => never"
+        ],
         "path": "packages/kbn-std/src/assert_never.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -111,7 +123,9 @@
             "tags": [],
             "label": "x",
             "description": [],
-            "signature": ["never"],
+            "signature": [
+              "never"
+            ],
             "path": "packages/kbn-std/src/assert_never.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -147,8 +161,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
-            "description": ["Items to iterate"],
-            "signature": ["ObservableInput", "<T>"],
+            "description": [
+              "Items to iterate"
+            ],
+            "signature": [
+              "ObservableInput",
+              "<T>"
+            ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -160,8 +179,13 @@
             "type": "Function",
             "tags": [],
             "label": "fn",
-            "description": ["Function to call for each item"],
-            "signature": ["AsyncMapFn", "<T, any>"],
+            "description": [
+              "Function to call for each item"
+            ],
+            "signature": [
+              "AsyncMapFn",
+              "<T, any>"
+            ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -197,8 +221,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
-            "description": ["Items to iterate"],
-            "signature": ["ObservableInput", "<T>"],
+            "description": [
+              "Items to iterate"
+            ],
+            "signature": [
+              "ObservableInput",
+              "<T>"
+            ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -210,8 +239,12 @@
             "type": "number",
             "tags": [],
             "label": "limit",
-            "description": ["Maximum number of operations to run in parallel"],
-            "signature": ["number"],
+            "description": [
+              "Maximum number of operations to run in parallel"
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -223,8 +256,13 @@
             "type": "Function",
             "tags": [],
             "label": "fn",
-            "description": ["Function to call for each item"],
-            "signature": ["AsyncMapFn", "<T, any>"],
+            "description": [
+              "Function to call for each item"
+            ],
+            "signature": [
+              "AsyncMapFn",
+              "<T, any>"
+            ],
             "path": "packages/kbn-std/src/iteration/for_each.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -260,8 +298,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
-            "description": ["Items to iterate"],
-            "signature": ["ObservableInput", "<T1>"],
+            "description": [
+              "Items to iterate"
+            ],
+            "signature": [
+              "ObservableInput",
+              "<T1>"
+            ],
             "path": "packages/kbn-std/src/iteration/map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -276,7 +319,10 @@
             "description": [
               "Function to call for each item. Result is added/concatenated into the result array in place of the input value"
             ],
-            "signature": ["AsyncMapFn", "<T1, T2>"],
+            "signature": [
+              "AsyncMapFn",
+              "<T1, T2>"
+            ],
             "path": "packages/kbn-std/src/iteration/map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -312,8 +358,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
-            "description": ["Items to iterate"],
-            "signature": ["ObservableInput", "<T1>"],
+            "description": [
+              "Items to iterate"
+            ],
+            "signature": [
+              "ObservableInput",
+              "<T1>"
+            ],
             "path": "packages/kbn-std/src/iteration/map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -325,8 +376,12 @@
             "type": "number",
             "tags": [],
             "label": "limit",
-            "description": ["Maximum number of operations to run in parallel"],
-            "signature": ["number"],
+            "description": [
+              "Maximum number of operations to run in parallel"
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-std/src/iteration/map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -341,7 +396,10 @@
             "description": [
               "Function to call for each item. Result is added/concatenated into the result array in place of the input value"
             ],
-            "signature": ["AsyncMapFn", "<T1, T2>"],
+            "signature": [
+              "AsyncMapFn",
+              "<T1, T2>"
+            ],
             "path": "packages/kbn-std/src/iteration/map.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -382,7 +440,9 @@
             "tags": [],
             "label": "object",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-std/src/deep_freeze.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -401,7 +461,9 @@
         "description": [
           "\nRecursively traverses through the object's properties and expands ones with\ndot-separated names into nested objects (eg. { a.b: 'c'} -> { a: { b: 'c' })."
         ],
-        "signature": ["(obj: any, path: string[]) => any"],
+        "signature": [
+          "(obj: any, path: string[]) => any"
+        ],
         "path": "packages/kbn-std/src/ensure_deep_object.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -412,8 +474,12 @@
             "type": "Any",
             "tags": [],
             "label": "obj",
-            "description": ["Object to traverse through."],
-            "signature": ["any"],
+            "description": [
+              "Object to traverse through."
+            ],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-std/src/ensure_deep_object.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -425,15 +491,21 @@
             "type": "Array",
             "tags": [],
             "label": "path",
-            "description": ["The current path of the traversal"],
-            "signature": ["string[]"],
+            "description": [
+              "The current path of the traversal"
+            ],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/kbn-std/src/ensure_deep_object.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["Same object instance with expanded properties."],
+        "returnComment": [
+          "Same object instance with expanded properties."
+        ],
         "initialIsOpen": false
       },
       {
@@ -443,7 +515,9 @@
         "tags": [],
         "label": "ensureNoUnsafeProperties",
         "description": [],
-        "signature": ["(obj: any) => void"],
+        "signature": [
+          "(obj: any) => void"
+        ],
         "path": "packages/kbn-std/src/ensure_no_unsafe_properties.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -455,7 +529,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-std/src/ensure_no_unsafe_properties.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -472,7 +548,9 @@
         "tags": [],
         "label": "ensureValidObjectPath",
         "description": [],
-        "signature": ["(path: string[]) => void"],
+        "signature": [
+          "(path: string[]) => void"
+        ],
         "path": "packages/kbn-std/src/ensure_deep_object.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -484,7 +562,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/kbn-std/src/ensure_deep_object.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -503,7 +583,9 @@
         "description": [
           "\nRetrieve the value for the specified path\n\nNote that dot is _not_ allowed to specify a deeper key, it will assume that\nthe dot is part of the key itself."
         ],
-        "signature": ["(obj: CFG, path: [A, B, C, D, E]) => CFG[A][B][C][D][E]"],
+        "signature": [
+          "(obj: CFG, path: [A, B, C, D, E]) => CFG[A][B][C][D][E]"
+        ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -515,7 +597,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["CFG"],
+            "signature": [
+              "CFG"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -528,7 +612,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["[A, B, C, D, E]"],
+            "signature": [
+              "[A, B, C, D, E]"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -545,7 +631,9 @@
         "tags": [],
         "label": "get",
         "description": [],
-        "signature": ["(obj: CFG, path: [A, B, C, D]) => CFG[A][B][C][D]"],
+        "signature": [
+          "(obj: CFG, path: [A, B, C, D]) => CFG[A][B][C][D]"
+        ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -557,7 +645,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["CFG"],
+            "signature": [
+              "CFG"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -570,7 +660,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["[A, B, C, D]"],
+            "signature": [
+              "[A, B, C, D]"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -587,7 +679,9 @@
         "tags": [],
         "label": "get",
         "description": [],
-        "signature": ["(obj: CFG, path: [A, B, C]) => CFG[A][B][C]"],
+        "signature": [
+          "(obj: CFG, path: [A, B, C]) => CFG[A][B][C]"
+        ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -599,7 +693,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["CFG"],
+            "signature": [
+              "CFG"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -612,7 +708,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["[A, B, C]"],
+            "signature": [
+              "[A, B, C]"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -629,7 +727,9 @@
         "tags": [],
         "label": "get",
         "description": [],
-        "signature": ["(obj: CFG, path: [A, B]) => CFG[A][B]"],
+        "signature": [
+          "(obj: CFG, path: [A, B]) => CFG[A][B]"
+        ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -641,7 +741,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["CFG"],
+            "signature": [
+              "CFG"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -654,7 +756,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["[A, B]"],
+            "signature": [
+              "[A, B]"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -671,7 +775,9 @@
         "tags": [],
         "label": "get",
         "description": [],
-        "signature": ["(obj: CFG, path: A | [A]) => CFG[A]"],
+        "signature": [
+          "(obj: CFG, path: A | [A]) => CFG[A]"
+        ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -683,7 +789,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["CFG"],
+            "signature": [
+              "CFG"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -696,7 +804,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["A | [A]"],
+            "signature": [
+              "A | [A]"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -713,7 +823,9 @@
         "tags": [],
         "label": "get",
         "description": [],
-        "signature": ["(obj: CFG, path: string | string[]) => any"],
+        "signature": [
+          "(obj: CFG, path: string | string[]) => any"
+        ],
         "path": "packages/kbn-std/src/get.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -725,7 +837,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["CFG"],
+            "signature": [
+              "CFG"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -738,7 +852,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["string | string[]"],
+            "signature": [
+              "string | string[]"
+            ],
             "path": "packages/kbn-std/src/get.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -757,7 +873,9 @@
         "description": [
           "\n Flattens a deeply nested object to a map of dot-separated\n paths pointing to all primitive values **and arrays**\n from `rootValue`.\n\n example:\n   getFlattenedObject({ a: { b: 1, c: [2,3] } })\n   // => { 'a.b': 1, 'a.c': [2,3] }\n"
         ],
-        "signature": ["(rootValue: Record<string, any>) => { [key: string]: any; }"],
+        "signature": [
+          "(rootValue: Record<string, any>) => { [key: string]: any; }"
+        ],
         "path": "packages/kbn-std/src/get_flattened_object.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -769,7 +887,9 @@
             "tags": [],
             "label": "rootValue",
             "description": [],
-            "signature": ["Record<string, any>"],
+            "signature": [
+              "Record<string, any>"
+            ],
             "path": "packages/kbn-std/src/get_flattened_object.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -788,7 +908,9 @@
         "description": [
           "\nReturns the origin (protocol + host + port) from given `url` if `url` is a valid absolute url, or null otherwise"
         ],
-        "signature": ["(url: string) => string | null"],
+        "signature": [
+          "(url: string) => string | null"
+        ],
         "path": "packages/kbn-std/src/url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -800,7 +922,9 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -816,8 +940,12 @@
         "type": "Function",
         "tags": [],
         "label": "isInternalURL",
-        "description": ["\nDetermine if url is outside of this Kibana install."],
-        "signature": ["(url: string, basePath: string) => boolean | undefined"],
+        "description": [
+          "\nDetermine if url is outside of this Kibana install."
+        ],
+        "signature": [
+          "(url: string, basePath: string) => boolean | undefined"
+        ],
         "path": "packages/kbn-std/src/is_internal_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -829,7 +957,9 @@
             "tags": [],
             "label": "url",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-std/src/is_internal_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -842,7 +972,9 @@
             "tags": [],
             "label": "basePath",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-std/src/is_internal_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -859,7 +991,9 @@
         "tags": [],
         "label": "isPromise",
         "description": [],
-        "signature": ["(maybePromise: T | Promise<T>) => boolean"],
+        "signature": [
+          "(maybePromise: T | Promise<T>) => boolean"
+        ],
         "path": "packages/kbn-std/src/promise.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -871,7 +1005,9 @@
             "tags": [],
             "label": "maybePromise",
             "description": [],
-            "signature": ["T | Promise<T>"],
+            "signature": [
+              "T | Promise<T>"
+            ],
             "path": "packages/kbn-std/src/promise.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -890,7 +1026,9 @@
         "description": [
           "\nDetermine if a url is relative. Any url including a protocol, hostname, or\nport is not considered relative. This means that absolute *paths* are considered\nto be relative *urls*"
         ],
-        "signature": ["(candidatePath: string) => boolean"],
+        "signature": [
+          "(candidatePath: string) => boolean"
+        ],
         "path": "packages/kbn-std/src/url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -902,7 +1040,9 @@
             "tags": [],
             "label": "candidatePath",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -940,8 +1080,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
-            "description": ["Items to iterate"],
-            "signature": ["ObservableInput", "<T1>"],
+            "description": [
+              "Items to iterate"
+            ],
+            "signature": [
+              "ObservableInput",
+              "<T1>"
+            ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -956,7 +1101,10 @@
             "description": [
               "Function to call for each item. Result is added/concatenated into the result array in place of the input value"
             ],
-            "signature": ["AsyncMapFn", "<T1, T2>"],
+            "signature": [
+              "AsyncMapFn",
+              "<T1, T2>"
+            ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -973,7 +1121,9 @@
         "tags": [],
         "label": "mapToObject",
         "description": [],
-        "signature": ["(map: ReadonlyMap<string, V>) => Record<string, V>"],
+        "signature": [
+          "(map: ReadonlyMap<string, V>) => Record<string, V>"
+        ],
         "path": "packages/kbn-std/src/map_to_object.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -985,7 +1135,9 @@
             "tags": [],
             "label": "map",
             "description": [],
-            "signature": ["ReadonlyMap<string, V>"],
+            "signature": [
+              "ReadonlyMap<string, V>"
+            ],
             "path": "packages/kbn-std/src/map_to_object.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1023,8 +1175,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
-            "description": ["Items to iterate"],
-            "signature": ["ObservableInput", "<T1>"],
+            "description": [
+              "Items to iterate"
+            ],
+            "signature": [
+              "ObservableInput",
+              "<T1>"
+            ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1036,8 +1193,12 @@
             "type": "number",
             "tags": [],
             "label": "limit",
-            "description": ["Maximum number of operations to run in parallel"],
-            "signature": ["number"],
+            "description": [
+              "Maximum number of operations to run in parallel"
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1052,7 +1213,10 @@
             "description": [
               "Function to call for each item. Result is added/concatenated into the result array in place of the input value"
             ],
-            "signature": ["AsyncMapFn", "<T1, T2>"],
+            "signature": [
+              "AsyncMapFn",
+              "<T1, T2>"
+            ],
             "path": "packages/kbn-std/src/iteration/observable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1071,7 +1235,9 @@
         "description": [
           "\nDeeply merges two objects, omitting undefined values, and not deeply merging Arrays.\n"
         ],
-        "signature": ["(baseObj: TBase, source1: TSource1) => TBase & TSource1"],
+        "signature": [
+          "(baseObj: TBase, source1: TSource1) => TBase & TSource1"
+        ],
         "path": "packages/kbn-std/src/merge.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1083,7 +1249,9 @@
             "tags": [],
             "label": "baseObj",
             "description": [],
-            "signature": ["TBase"],
+            "signature": [
+              "TBase"
+            ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1096,7 +1264,9 @@
             "tags": [],
             "label": "source1",
             "description": [],
-            "signature": ["TSource1"],
+            "signature": [
+              "TSource1"
+            ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1127,7 +1297,9 @@
             "tags": [],
             "label": "baseObj",
             "description": [],
-            "signature": ["TBase"],
+            "signature": [
+              "TBase"
+            ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1140,7 +1312,9 @@
             "tags": [],
             "label": "overrideObj",
             "description": [],
-            "signature": ["TSource1"],
+            "signature": [
+              "TSource1"
+            ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1153,7 +1327,9 @@
             "tags": [],
             "label": "overrideObj2",
             "description": [],
-            "signature": ["TSource2"],
+            "signature": [
+              "TSource2"
+            ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1184,7 +1360,9 @@
             "tags": [],
             "label": "baseObj",
             "description": [],
-            "signature": ["TBase"],
+            "signature": [
+              "TBase"
+            ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1197,7 +1375,9 @@
             "tags": [],
             "label": "overrideObj",
             "description": [],
-            "signature": ["TSource1"],
+            "signature": [
+              "TSource1"
+            ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1210,7 +1390,9 @@
             "tags": [],
             "label": "overrideObj2",
             "description": [],
-            "signature": ["TSource2"],
+            "signature": [
+              "TSource2"
+            ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1227,7 +1409,9 @@
         "tags": [],
         "label": "merge",
         "description": [],
-        "signature": ["(baseObj: Record<string, any>, sources: Record<string, any>[]) => TReturn"],
+        "signature": [
+          "(baseObj: Record<string, any>, sources: Record<string, any>[]) => TReturn"
+        ],
         "path": "packages/kbn-std/src/merge.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1239,7 +1423,9 @@
             "tags": [],
             "label": "baseObj",
             "description": [],
-            "signature": ["Record<string, any>"],
+            "signature": [
+              "Record<string, any>"
+            ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1252,7 +1438,9 @@
             "tags": [],
             "label": "sources",
             "description": [],
-            "signature": ["Record<string, any>[]"],
+            "signature": [
+              "Record<string, any>[]"
+            ],
             "path": "packages/kbn-std/src/merge.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1300,8 +1488,12 @@
             "type": "string",
             "tags": [],
             "label": "url",
-            "description": ["The string url to parse."],
-            "signature": ["string"],
+            "description": [
+              "The string url to parse."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1313,7 +1505,9 @@
             "type": "Function",
             "tags": [],
             "label": "urlModifier",
-            "description": ["A function that will modify the parsed url, or return a new one."],
+            "description": [
+              "A function that will modify the parsed url, or return a new one."
+            ],
             "signature": [
               "(urlParts: ",
               {
@@ -1339,7 +1533,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["The modified and reformatted url"],
+        "returnComment": [
+          "The modified and reformatted url"
+        ],
         "initialIsOpen": false
       },
       {
@@ -1351,7 +1547,9 @@
         "description": [
           "\nParse the url value from query param. By default\n\nBy default query param is set to next."
         ],
-        "signature": ["(href: string, basePath: string, nextUrlQueryParam: string) => string"],
+        "signature": [
+          "(href: string, basePath: string, nextUrlQueryParam: string) => string"
+        ],
         "path": "packages/kbn-std/src/parse_next_url.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1363,7 +1561,9 @@
             "tags": [],
             "label": "href",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-std/src/parse_next_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1376,7 +1576,9 @@
             "tags": [],
             "label": "basePath",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-std/src/parse_next_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1389,7 +1591,9 @@
             "tags": [],
             "label": "nextUrlQueryParam",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-std/src/parse_next_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1406,7 +1610,9 @@
         "tags": [],
         "label": "pick",
         "description": [],
-        "signature": ["(obj: T, keys: readonly K[]) => Pick<T, K>"],
+        "signature": [
+          "(obj: T, keys: readonly K[]) => Pick<T, K>"
+        ],
         "path": "packages/kbn-std/src/pick.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1418,7 +1624,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-std/src/pick.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1431,7 +1639,9 @@
             "tags": [],
             "label": "keys",
             "description": [],
-            "signature": ["readonly K[]"],
+            "signature": [
+              "readonly K[]"
+            ],
             "path": "packages/kbn-std/src/pick.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1450,7 +1660,9 @@
         "description": [
           "\nCoerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha)\nto regular semver (x.y.z)."
         ],
-        "signature": ["(version: string) => string"],
+        "signature": [
+          "(version: string) => string"
+        ],
         "path": "packages/kbn-std/src/strip_version_qualifier.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1462,7 +1674,9 @@
             "tags": [],
             "label": "version",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-std/src/strip_version_qualifier.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1481,7 +1695,9 @@
         "description": [
           "\nUnset a (potentially nested) key from given object.\nThis mutates the original object.\n"
         ],
-        "signature": ["(obj: OBJ, atPath: string) => void"],
+        "signature": [
+          "(obj: OBJ, atPath: string) => void"
+        ],
         "path": "packages/kbn-std/src/unset.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1493,7 +1709,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["OBJ"],
+            "signature": [
+              "OBJ"
+            ],
             "path": "packages/kbn-std/src/unset.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1506,7 +1724,9 @@
             "tags": [],
             "label": "atPath",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-std/src/unset.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1548,7 +1768,9 @@
                 "tags": [],
                 "label": "promise",
                 "description": [],
-                "signature": ["Promise<T>"],
+                "signature": [
+                  "Promise<T>"
+                ],
                 "path": "packages/kbn-std/src/promise.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1592,7 +1814,9 @@
             "tags": [],
             "label": "auth",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1604,7 +1828,9 @@
             "tags": [],
             "label": "hash",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1616,7 +1842,9 @@
             "tags": [],
             "label": "hostname",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1628,7 +1856,9 @@
             "tags": [],
             "label": "pathname",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1640,7 +1870,9 @@
             "tags": [],
             "label": "protocol",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1652,7 +1884,9 @@
             "tags": [],
             "label": "slashes",
             "description": [],
-            "signature": ["boolean | null | undefined"],
+            "signature": [
+              "boolean | null | undefined"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1664,7 +1898,9 @@
             "tags": [],
             "label": "port",
             "description": [],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1676,7 +1912,10 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": ["ParsedQuery", "<string>"],
+            "signature": [
+              "ParsedQuery",
+              "<string>"
+            ],
             "path": "packages/kbn-std/src/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1694,7 +1933,9 @@
         "tags": [],
         "label": "Freezable",
         "description": [],
-        "signature": ["any[] | { [k: string]: any; }"],
+        "signature": [
+          "any[] | { [k: string]: any; }"
+        ],
         "path": "packages/kbn-std/src/deep_freeze.ts",
         "deprecated": false,
         "trackAdoption": false,

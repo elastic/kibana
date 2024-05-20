@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
-import { useDataViewsContext } from '../../hooks/use_data_views';
 import { buildMetadataFilter } from './build_metadata_filter';
+import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 import type { Field } from './utils';
+import { useDataViewsContext } from '../../hooks/use_data_views';
 
 interface AddMetadataFilterButtonProps {
   item: Field;

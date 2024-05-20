@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { uniq } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { uniq } from 'lodash';
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
 // import { AutocompleteStart } from '../../../../../../../src/plugins/unified_search/public';
 type AutocompleteStart = any;
 
+import * as i18n from '../translations';
 import {
-  GetGenericComboBoxPropsReturn,
   getGenericComboBoxProps,
+  GetGenericComboBoxPropsReturn,
 } from '../get_generic_combo_box_props';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
-import { paramContainsSpace } from '../param_contains_space';
 import { paramIsValid } from '../param_is_valid';
-import * as i18n from '../translations';
+import { paramContainsSpace } from '../param_contains_space';
 
 interface AutocompleteFieldMatchAnyProps {
   placeholder: string;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { type FC, type PropsWithChildren, useEffect } from 'react';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
-import React, { type FC, type PropsWithChildren, useEffect } from 'react';
 import { type ChartTooltipService, type TooltipData } from '../components/chart_tooltip';
 import { useCurrentThemeVars } from '../contexts/kibana';
 import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './constants';

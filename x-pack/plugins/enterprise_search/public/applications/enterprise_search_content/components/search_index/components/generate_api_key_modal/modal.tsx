@@ -7,27 +7,27 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCodeBlock,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
   EuiFormRow,
-  EuiLink,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiPanel,
-  EuiSpacer,
   EuiText,
+  EuiSpacer,
+  EuiLink,
+  EuiFormLabel,
+  EuiCodeBlock,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

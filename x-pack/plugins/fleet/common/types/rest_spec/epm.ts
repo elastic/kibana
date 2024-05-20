@@ -9,16 +9,16 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   AssetReference,
-  AssetSOObject,
   CategorySummaryList,
-  EpmPackageInstallStatus,
-  InstallResultStatus,
-  InstallSource,
-  InstallType,
-  PackageInfo,
   PackageList,
+  PackageInfo,
   PackageUsageStats,
+  InstallType,
+  InstallSource,
+  EpmPackageInstallStatus,
   SimpleSOAssetType,
+  AssetSOObject,
+  InstallResultStatus,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {

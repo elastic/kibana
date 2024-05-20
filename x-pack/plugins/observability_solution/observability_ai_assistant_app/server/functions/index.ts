@@ -6,12 +6,12 @@
  */
 
 import type { RegistrationCallback } from '@kbn/observability-ai-assistant-plugin/server';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 import { registerAlertsFunction } from './alerts';
-import { registerChangesFunction } from './changes';
-import { registerLensFunction } from './lens';
 import { registerQueryFunction } from './query';
+import { registerLensFunction } from './lens';
 import { registerVisualizeESQLFunction } from './visualize_esql';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import { registerChangesFunction } from './changes';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<RegistrationCallback>[0],

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { act, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { render, act, screen, waitFor } from '@testing-library/react';
 import { UnsavedChangesBadge } from './unsaved_changes_badge';
 
 describe('<UnsavedChangesBadge />', () => {

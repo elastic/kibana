@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import generate from '@babel/generator';
 import { parseExpression } from '@babel/parser';
 import * as t from '@babel/types';
+import generate from '@babel/generator';
 import Prettier from 'prettier';
 
 import { ManagedConfigKey } from './managed_config_keys';

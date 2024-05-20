@@ -1,6 +1,3 @@
-import dateMath from '@kbn/datemath';
-import { chain } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
  * Side Public License, v 1.
  */
 import * as rt from 'io-ts';
+import dateMath from '@kbn/datemath';
+import { chain } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
 
 const isValidDatemath = (value: string): boolean => {
   const parsedValue = dateMath.parse(value);

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import { overwrite } from '../../helpers';
 import { bucketTransform } from '../../helpers/bucket_transform';
+import { get } from 'lodash';
 
 export function metricBuckets(req, panel, series) {
   return (next) => async (doc) => {

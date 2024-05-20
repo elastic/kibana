@@ -8,10 +8,10 @@
 import { PathReporter } from 'io-ts/lib/PathReporter';
 
 import {
-  NonEmptyString,
   limitedArraySchema,
   limitedNumberSchema,
   limitedStringSchema,
+  NonEmptyString,
   paginationSchema,
 } from '.';
 import { MAX_DOCS_PER_PAGE } from '../constants';
@@ -88,9 +88,8 @@ describe('schema', () => {
     const fieldName = 'foo';
 
     it('fails when given string is shorter than minimum', () => {
-      expect(
-        PathReporter.report(limitedStringSchema({ fieldName, min: 2, max: 1 }).decode('a'))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(limitedStringSchema({ fieldName, min: 2, max: 1 }).decode('a')))
+        .toMatchInlineSnapshot(`
         Array [
           "The length of the foo is too short. The minimum length is 2.",
         ]
@@ -98,9 +97,8 @@ describe('schema', () => {
     });
 
     it('fails when given string is empty and minimum is not 0', () => {
-      expect(
-        PathReporter.report(limitedStringSchema({ fieldName, min: 1, max: 1 }).decode(''))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(limitedStringSchema({ fieldName, min: 1, max: 1 }).decode('')))
+        .toMatchInlineSnapshot(`
         Array [
           "The foo field cannot be an empty string.",
         ]
@@ -108,9 +106,8 @@ describe('schema', () => {
     });
 
     it('fails when given string consists only empty characters and minimum is not 0', () => {
-      expect(
-        PathReporter.report(limitedStringSchema({ fieldName, min: 1, max: 1 }).decode('  '))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(limitedStringSchema({ fieldName, min: 1, max: 1 }).decode('  ')))
+        .toMatchInlineSnapshot(`
         Array [
           "The foo field cannot be an empty string.",
         ]
@@ -140,9 +137,8 @@ describe('schema', () => {
     });
 
     it('succeeds when given string is empty and minimum is 0', () => {
-      expect(
-        PathReporter.report(limitedStringSchema({ fieldName, min: 0, max: 5 }).decode(''))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(limitedStringSchema({ fieldName, min: 0, max: 5 }).decode('')))
+        .toMatchInlineSnapshot(`
         Array [
           "No errors!",
         ]
@@ -150,9 +146,8 @@ describe('schema', () => {
     });
 
     it('succeeds when given string consists only empty characters and minimum is 0', () => {
-      expect(
-        PathReporter.report(limitedStringSchema({ fieldName, min: 0, max: 5 }).decode('  '))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(limitedStringSchema({ fieldName, min: 0, max: 5 }).decode('  ')))
+        .toMatchInlineSnapshot(`
         Array [
           "No errors!",
         ]
@@ -182,9 +177,8 @@ describe('schema', () => {
 
   describe('paginationSchema', () => {
     it('succeeds when no page or perPage passed', () => {
-      expect(
-        PathReporter.report(paginationSchema({ maxPerPage: 1 }).decode({}))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 1 }).decode({})))
+        .toMatchInlineSnapshot(`
         Array [
           "No errors!",
         ]
@@ -192,9 +186,8 @@ describe('schema', () => {
     });
 
     it('succeeds when only valid page is passed', () => {
-      expect(
-        PathReporter.report(paginationSchema({ maxPerPage: 2 }).decode({ page: 0 }))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 2 }).decode({ page: 0 })))
+        .toMatchInlineSnapshot(`
         Array [
           "No errors!",
         ]
@@ -202,9 +195,8 @@ describe('schema', () => {
     });
 
     it('succeeds when only valid perPage is passed', () => {
-      expect(
-        PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: 1 }))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: 1 })))
+        .toMatchInlineSnapshot(`
         Array [
           "No errors!",
         ]
@@ -222,9 +214,8 @@ describe('schema', () => {
     });
 
     it('fails when perPage > maxPerPage', () => {
-      expect(
-        PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: 4 }))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: 4 })))
+        .toMatchInlineSnapshot(`
         Array [
           "The provided perPage value is too high. The maximum allowed perPage value is 3.",
         ]
@@ -279,9 +270,8 @@ describe('schema', () => {
     });
 
     it.skip('fails when page number is negative', () => {
-      expect(
-        PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ page: -1 }))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ page: -1 })))
+        .toMatchInlineSnapshot(`
               Array [
                 "The provided page value is too low. The minimum allowed page value is 0.",
               ]
@@ -289,9 +279,8 @@ describe('schema', () => {
     });
 
     it.skip('fails when perPage number is negative', () => {
-      expect(
-        PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: -1 }))
-      ).toMatchInlineSnapshot(`
+      expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: -1 })))
+        .toMatchInlineSnapshot(`
               Array [
                 "The provided perPage value is too low. The minimum allowed perPage value is 0.",
               ]

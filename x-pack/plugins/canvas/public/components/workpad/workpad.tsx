@@ -5,29 +5,29 @@
  * 2.0.
  */
 import React, { FC, useContext, useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import useObservable from 'react-use/lib/useObservable';
-import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
-import { State } from '../../../types';
-import { useZoomHandlers } from '../../lib/app_handler_creators';
 // @ts-expect-error
 import { transitionsRegistry } from '../../lib/transitions_registry';
-import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
-import { WorkpadRoutingContext } from '../../routes/workpad';
-import { usePlatformService } from '../../services';
 // @ts-expect-error
 import { fetchAllRenderables as fetchAllRenderablesAction } from '../../state/actions/elements';
 // @ts-expect-error
 import { setZoomScale as setZoomScaleAction } from '../../state/actions/transient';
 import { getFullscreen, getZoomScale } from '../../state/selectors/app';
 import {
-  getAllElements,
-  getPages,
   getSelectedPageIndex,
+  getAllElements,
   getWorkpad,
+  getPages,
 } from '../../state/selectors/workpad';
+import { useZoomHandlers } from '../../lib/app_handler_creators';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
+import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
+import { WorkpadRoutingContext } from '../../routes/workpad';
+import { usePlatformService } from '../../services';
+import { Workpad as WorkpadComponent, Props } from './workpad.component';
+import { State } from '../../../types';
 import { useIncomingEmbeddable } from '../hooks';
-import { Props, Workpad as WorkpadComponent } from './workpad.component';
 
 type ContainerProps = Pick<Props, 'registerLayout' | 'unregisterLayout'>;
 

@@ -8,16 +8,16 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import {
-  endSelector,
   isLoadingSelector,
   startSelector,
+  endSelector,
 } from '../../common/components/super_date_picker/selectors';
-import { getScopeFromPath, useSourcererDataView } from '../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { sourcererSelectors } from '../../common/store';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useSourcererDataView, getScopeFromPath } from '../../common/containers/sourcerer';
+import { sourcererSelectors } from '../../common/store';
 
 export function useTimelineDataFilters(isActiveTimelines: boolean) {
   const getStartSelector = useMemo(() => startSelector(), []);

@@ -9,9 +9,9 @@ import { each } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiLink, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { blurButtonOnClick } from '../../util/component_utils';
 
 /*

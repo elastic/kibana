@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import type { ComplianceDashboardData } from '../../../common/types_old';
 import { calculatePostureScore } from '../../../common/utils/helpers';
+import type { ComplianceDashboardData } from '../../../common/types_old';
 
 export interface FindingsEvaluationsQueryResult {
   failed_findings: {

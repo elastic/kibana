@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiSteps,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiEmptyPrompt,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiText,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiPanel,
+  EuiTitle,
+  EuiSpacer,
+  EuiSteps,
+} from '@elastic/eui';
+import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import {
   CodeBox,
+  getConsoleRequest,
+  getLanguageDefinitionCodeSnippet,
   IngestPipelinePanel,
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
-  getConsoleRequest,
-  getLanguageDefinitionCodeSnippet,
 } from '@kbn/search-api-panels';
-import React, { useMemo, useState } from 'react';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';
 
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { javaDefinition } from '../languages/java';
-import { LanguageGrid } from '../languages/language_grid';
 import { languageDefinitions } from '../languages/languages';
+import { LanguageGrid } from '../languages/language_grid';
 
-import { DEFAULT_INGESTION_PIPELINE } from '../../constants';
 import { useIngestPipelines } from '../../hooks/api/use_ingest_pipelines';
+import { DEFAULT_INGESTION_PIPELINE } from '../../constants';
 
 import {
   API_KEY_PLACEHOLDER,

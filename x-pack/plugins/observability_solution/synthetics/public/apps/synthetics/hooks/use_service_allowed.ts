@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
 // import { syntheticsServiceAllowedSelector } from '../../../state/selectors';
 // import { getSyntheticsServiceAllowed } from '../../../state/actions';
 

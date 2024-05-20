@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConfigDeprecation, ConfigDeprecationFactory } from '@kbn/core/server';
 import { get } from 'lodash';
+import { ConfigDeprecationFactory, ConfigDeprecation } from '@kbn/core/server';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../common/constants';
 
 /**

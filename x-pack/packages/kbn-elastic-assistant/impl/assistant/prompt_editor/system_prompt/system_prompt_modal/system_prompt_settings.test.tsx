@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render } from '@testing-library/react';
+import { SystemPromptSettings } from './system_prompt_settings';
+import { TestProviders } from '../../../../mock/test_providers/test_providers';
 import { alertConvo, welcomeConvo } from '../../../../mock/conversation';
 import { mockSystemPrompts } from '../../../../mock/system_prompt';
-import { TestProviders } from '../../../../mock/test_providers/test_providers';
 import { TEST_IDS } from '../../../constants';
-import { SystemPromptSettings } from './system_prompt_settings';
 
 const onSelectedSystemPromptChange = jest.fn();
 const setUpdatedSystemPromptSettings = jest.fn().mockImplementation((fn) => {

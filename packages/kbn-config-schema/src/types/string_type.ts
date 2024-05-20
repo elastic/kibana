@@ -10,7 +10,7 @@ import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import { Type, TypeOptions, convertValidationFunction } from './type';
 
-import { META_FIELD_X_OAS_MAX_LENGTH, META_FIELD_X_OAS_MIN_LENGTH } from '../oas_meta_fields';
+import { META_FIELD_X_OAS_MIN_LENGTH, META_FIELD_X_OAS_MAX_LENGTH } from '../oas_meta_fields';
 
 export type StringOptions = TypeOptions<string> & {
   minLength?: number;

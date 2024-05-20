@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render, screen } from '@testing-library/react';
 
-import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
-import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import { BulkActionRuleErrorsList } from './bulk_action_rule_errors_list';
+import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import type { DryRunResult } from './types';
+import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
 const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (

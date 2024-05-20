@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover, getUrlPrefix } from '../../../common/lib';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Spaces } from '../../scenarios';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUnsecuredActionTests({ getService }: FtrProviderContext) {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup } from '@kbn/core/public';
 import { mockNow } from '../utils/test_helpers';
-import { callApi, clearCache } from './rest/call_api';
+import { clearCache, callApi } from './rest/call_api';
+import { CoreStart, HttpSetup } from '@kbn/core/public';
 
 type CoreMock = CoreStart & {
   http: {

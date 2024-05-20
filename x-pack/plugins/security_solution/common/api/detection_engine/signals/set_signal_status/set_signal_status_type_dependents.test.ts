@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SetSignalsStatusSchema } from './set_signal_status_route';
 import { setSignalStatusValidateTypeDependents } from './set_signal_status_type_dependents';
+import type { SetSignalsStatusSchema } from './set_signal_status_route';
 
 describe('update_rules_type_dependents', () => {
   test('You can have just a "signals_id"', () => {

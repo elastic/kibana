@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DataViewBase } from '@kbn/es-query';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { entryHasListType, entryHasNonEcsType } from './utils';
+import { entryHasNonEcsType, entryHasListType } from './utils';
+import type { DataViewBase } from '@kbn/es-query';
 
 describe('alerts_actions#utils', () => {
   describe('#entryHasListType', () => {

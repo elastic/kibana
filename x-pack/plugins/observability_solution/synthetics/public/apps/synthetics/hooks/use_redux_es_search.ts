@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IInspectorInfo } from '@kbn/data-plugin/common';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { useEffect, useMemo } from 'react';
+import { IInspectorInfo } from '@kbn/data-plugin/common';
 import { useDispatch, useSelector } from 'react-redux';
+import { useEffect, useMemo } from 'react';
 import {
   executeEsQueryAction,
   selectEsQueryError,
@@ -19,7 +19,7 @@ import {
 
 export const useReduxEsSearch = <
   DocumentSource extends unknown,
-  TParams extends estypes.SearchRequest,
+  TParams extends estypes.SearchRequest
 >(
   params: TParams,
   fnDeps: any[],

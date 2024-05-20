@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { ComponentType, HTMLAttributes, ReactWrapper } from 'enzyme';
 import { Component as ReactComponent } from 'react';
+import { ComponentType, HTMLAttributes, ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
 import {
-  getJSXComponentWithProps,
-  mountComponentAsync,
   mountComponentSync,
+  mountComponentAsync,
+  getJSXComponentWithProps,
 } from './mount_component';
 import {
-  AsyncSetupFunc,
+  TestBedConfig,
   AsyncTestBedConfig,
+  TestBed,
   SetupFunc,
   SyncSetupFunc,
-  TestBed,
-  TestBedConfig,
+  AsyncSetupFunc,
 } from './types';
 
 const defaultConfig: TestBedConfig = {

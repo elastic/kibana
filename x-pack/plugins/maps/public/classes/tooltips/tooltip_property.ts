@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { GeoJsonProperties, Geometry } from 'geojson';
 import _ from 'lodash';
 import { ReactNode } from 'react';
+import { GeoJsonProperties, Geometry } from 'geojson';
+import { Filter } from '@kbn/es-query';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { RawValue } from '../../../common/constants';
 import type { TooltipFeature } from '../../../common/descriptor_types';
 

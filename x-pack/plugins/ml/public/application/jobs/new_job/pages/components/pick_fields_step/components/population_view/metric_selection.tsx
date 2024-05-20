@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
-import type { AggFieldPair, Field } from '@kbn/ml-anomaly-utils';
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState, useReducer, useMemo } from 'react';
-import { sortFields } from '../../../../../../../../../common/util/fields_utils';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
-import type { LineChartData } from '../../../../../common/chart_loader';
-import type { PopulationJobCreator } from '../../../../../common/job_creator';
-import { defaultChartSettings, getChartSettings } from '../../../charts/common/settings';
+import { EuiHorizontalRule } from '@elastic/eui';
+import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
+import type { PopulationJobCreator } from '../../../../../common/job_creator';
+import type { LineChartData } from '../../../../../common/chart_loader';
 import type { DropDownLabel, DropDownProps } from '../agg_select';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
+import { sortFields } from '../../../../../../../../../common/util/fields_utils';
+import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
+import { MetricSelector } from './metric_selector';
 import { PopulationFieldSelector } from '../population_field';
 import { ChartGrid } from './chart_grid';
-import { MetricSelector } from './metric_selector';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 interface Props {
   setIsValid: (na: boolean) => void;

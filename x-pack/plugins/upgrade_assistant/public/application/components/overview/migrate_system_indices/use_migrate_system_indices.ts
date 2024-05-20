@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 
 import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../../common/constants';

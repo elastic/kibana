@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiStat } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexItem, EuiStat, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
 import { useLongTaskMetricsQuery } from '../../../../hooks/use_long_task_metrics_query';
 import {
   DATA_UNDEFINED_LABEL,

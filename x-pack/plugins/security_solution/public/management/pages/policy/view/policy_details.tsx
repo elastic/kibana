@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
-import { APP_UI_ID } from '../../../../../common/constants';
-import type { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
-import { useAppUrl } from '../../../../common/lib/kibana';
-import { getPoliciesPath } from '../../../common/routing';
+import { EuiCallOut, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { usePolicyDetailsSelector } from './policy_hooks';
+import { policyDetails, agentStatusSummary, apiError } from '../store/policy_details/selectors';
+import { AgentsSummary } from './components/agents_summary';
+import { PolicyTabs } from './tabs';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button/back_to_external_app_button';
-import { agentStatusSummary, apiError, policyDetails } from '../store/policy_details/selectors';
-import { AgentsSummary } from './components/agents_summary';
-import { usePolicyDetailsSelector } from './policy_hooks';
-import { PolicyTabs } from './tabs';
+import type { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
+import { getPoliciesPath } from '../../../common/routing';
+import { useAppUrl } from '../../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../../common/constants';
 
 export const PolicyDetails = React.memo(() => {
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();

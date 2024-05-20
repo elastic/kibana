@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { VECTOR_STYLES } from '../../../../../../../common/constants';
+import _ from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { RangedStyleLegendRow } from '../../../../components/ranged_style_legend_row';
-import { IDynamicStyleProperty } from '../../../properties/dynamic_style_property';
+import { VECTOR_STYLES } from '../../../../../../../common/constants';
 import { CircleIcon } from '../circle_icon';
+import { IDynamicStyleProperty } from '../../../properties/dynamic_style_property';
 import { getMaxLabel, getMinLabel } from './get_ordinal_label';
 
 function getLineWidthIcons() {

@@ -19,10 +19,10 @@ import type {
 import React, { useCallback, useState } from 'react';
 
 import { IlmPhasesEmptyPrompt } from '../../../ilm_phases_empty_prompt';
-import { PatternRollup, SelectedIndex } from '../../../types';
-import { useDataQualityContext } from '../../data_quality_context';
 import { IndicesDetails } from './indices_details';
 import { StorageDetails } from './storage_details';
+import { PatternRollup, SelectedIndex } from '../../../types';
+import { useDataQualityContext } from '../../data_quality_context';
 
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;

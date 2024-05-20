@@ -7,9 +7,9 @@
 
 import type { AxiosResponse } from 'axios';
 
+import type { KbnClient } from '@kbn/test';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS, epmRouteService } from '@kbn/fleet-plugin/common';
-import type { KbnClient } from '@kbn/test';
 import { usageTracker } from '../data_loaders/usage_tracker';
 
 export const getEndpointPackageInfo = usageTracker.track(

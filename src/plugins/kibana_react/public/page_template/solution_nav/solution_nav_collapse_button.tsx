@@ -7,8 +7,8 @@
  */
 import './solution_nav_collapse_button.scss';
 
-import classNames from 'classnames';
 import React, { FunctionComponent } from 'react';
+import classNames from 'classnames';
 
 import { EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

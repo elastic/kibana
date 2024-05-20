@@ -1,6 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
-import { dynamic } from '@kbn/shared-ux-utility';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,11 +5,14 @@ import { dynamic } from '@kbn/shared-ux-utility';
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { DatasetQualityContext, DatasetQualityContextValue } from './context';
+import { useKibanaContextForPluginProvider } from '../../utils';
+import { DatasetQualityStartDeps } from '../../types';
 import { DatasetQualityController } from '../../controller';
 import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
-import { DatasetQualityStartDeps } from '../../types';
-import { useKibanaContextForPluginProvider } from '../../utils';
-import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 
 export interface DatasetQualityProps {
   controller: DatasetQualityController;

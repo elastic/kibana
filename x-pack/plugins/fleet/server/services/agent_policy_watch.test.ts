@@ -27,8 +27,8 @@ import { LicenseService } from '../../common/services';
 
 import { createAgentPolicyMock } from '../../common/mocks';
 
-import { agentPolicyService } from './agent_policy';
 import { PolicyWatcher } from './agent_policy_watch';
+import { agentPolicyService } from './agent_policy';
 
 jest.mock('./agent_policy');
 const agentPolicySvcMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;

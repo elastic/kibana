@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import fastIsEqual from 'fast-deep-equal';
 import { isEmpty, xor } from 'lodash';
 import moment, { Moment } from 'moment';
+import fastIsEqual from 'fast-deep-equal';
 
 import { DashboardPanelMap } from '../../../../common';
 

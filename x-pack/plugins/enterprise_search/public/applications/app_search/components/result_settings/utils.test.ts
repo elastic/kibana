@@ -9,12 +9,12 @@ import { SchemaType } from '../../../shared/schema/types';
 
 import {
   areFieldsAtDefaultSettings,
-  areFieldsEmpty,
-  clearAllFields,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
+  clearAllFields,
   resetAllFields,
   splitResultFields,
+  areFieldsEmpty,
 } from './utils';
 
 describe('clearAllFields', () => {

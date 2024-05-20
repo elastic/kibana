@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
 import React from 'react';
+import { EuiToolTip, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { getActionDetails } from '../../../rule_response_actions/constants';
 
 interface ResponseActionProps {

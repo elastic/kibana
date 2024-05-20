@@ -13,8 +13,8 @@ import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { APP_API_ROUTES } from '../../constants';
-import { defaultFleetErrorHandler } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
+import { defaultFleetErrorHandler } from '../../errors';
 import { PostHealthCheckRequestSchema } from '../../types';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {

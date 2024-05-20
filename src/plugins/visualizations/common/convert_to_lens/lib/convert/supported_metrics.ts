@@ -7,8 +7,8 @@
  */
 
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { Operations } from '../../constants';
 import { Operation } from '../../types';
+import { Operations } from '../../constants';
 
 interface Agg {
   isFormula?: false;
@@ -235,7 +235,7 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
 
 type SupportedMetricsKeys = keyof LocalSupportedMetrics;
 
-export type SupportedMetric = (typeof SUPPORTED_METRICS)[SupportedMetricsKeys];
+export type SupportedMetric = typeof SUPPORTED_METRICS[SupportedMetricsKeys];
 
 export const getFormulaFromMetric = (metric: SupportedMetric) => {
   if (metric.isFormula) {

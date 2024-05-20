@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { dataViewMock } from '../__mocks__';
+import { formatHit } from './format_hit';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DataTableRecord, EsHitRecord } from '../types';
 import { buildDataTableRecord } from './build_data_record';
-import { formatHit } from './format_hit';
 
 describe('formatHit', () => {
   let row: DataTableRecord;

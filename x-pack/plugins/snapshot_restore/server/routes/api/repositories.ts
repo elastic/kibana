@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type {
-  PluginStats,
-  SnapshotGetRepositoryResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TypeOf } from '@kbn/config-schema';
+import type {
+  SnapshotGetRepositoryResponse,
+  PluginStats,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
-  MODULE_REPOSITORY_TYPES,
   ON_PREM_REPOSITORY_TYPES,
   REPOSITORY_PLUGINS_MAP,
+  MODULE_REPOSITORY_TYPES,
 } from '../../../common';
 import { Repository, RepositoryType } from '../../../common/types';
 import { RouteDependencies } from '../../types';
@@ -23,8 +23,8 @@ import { nameParameterSchema, repositorySchema } from './validate_schemas';
 
 import {
   deserializeRepositorySettings,
-  getManagedRepositoryName,
   serializeRepositorySettings,
+  getManagedRepositoryName,
 } from '../../lib';
 
 interface ManagedRepository {

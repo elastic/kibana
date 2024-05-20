@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import React, { ReactNode, OptionHTMLAttributes } from 'react';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 

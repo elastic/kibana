@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiIconTip, EuiInMemoryTable, EuiLink, Query } from '@elastic/eui';
+import React, { FC, ReactNode } from 'react';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { FC, ReactNode } from 'react';
-import { TagWithRelations, TagsCapabilities } from '../../../common';
+import { TagsCapabilities, TagWithRelations } from '../../../common';
 import { TagBadge } from '../../components';
 import { TagAction } from '../actions';
 

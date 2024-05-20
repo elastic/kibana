@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
 
 import { useFleetStatus, useStartServices } from '../../../../hooks';
 

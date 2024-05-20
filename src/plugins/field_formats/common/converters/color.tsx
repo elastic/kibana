@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, escape, findLast } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
-import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
+import { findLast, cloneDeep, escape } from 'lodash';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { FIELD_FORMAT_IDS, HtmlContextTypeConvert } from '../types';
+import { HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
+import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
 
 /** @public */
 export class ColorFormat extends FieldFormat {

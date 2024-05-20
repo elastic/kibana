@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { existsSync } from 'fs';
-import Path from 'path';
 import { inspect } from 'util';
 import Fs from 'fs/promises';
+import { existsSync } from 'fs';
+import Path from 'path';
 
-import { createFailError } from '@kbn/dev-cli-errors';
-import { isAxiosResponseError } from '@kbn/dev-utils';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
 import FormData from 'form-data';
+import { isAxiosResponseError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-import { parseArchive } from './import_export/parse_archive';
-import { KbnClientRequester, ReqOptions, uriencode } from './kbn_client_requester';
+import { KbnClientRequester, uriencode, ReqOptions } from './kbn_client_requester';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
+import { parseArchive } from './import_export/parse_archive';
 
 interface ImportApiResponse {
   success: boolean;

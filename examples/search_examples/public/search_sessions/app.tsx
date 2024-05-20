@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
   EuiButton,
@@ -23,31 +26,28 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { catchError, map, tap } from 'rxjs';
 import { lastValueFrom, of } from 'rxjs';
 
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { CoreStart } from '@kbn/core/public';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { TimeRange } from '@kbn/es-query';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 
 import {
+  connectToQueryState,
   DataPublicPluginStart,
+  isRunningResponse,
   QueryState,
   SearchSessionState,
-  connectToQueryState,
-  isRunningResponse,
 } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { PLUGIN_ID } from '../../common';
-import { SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR, getInitialStateFromUrl } from './app_locator';
+import { getInitialStateFromUrl, SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR } from './app_locator';
 
 interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];

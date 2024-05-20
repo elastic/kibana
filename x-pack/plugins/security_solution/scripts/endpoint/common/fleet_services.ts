@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { userInfo } from 'os';
+import { map, memoize, pick } from 'lodash';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type {
   Agent,
   AgentPolicy,
   AgentStatus,
-  CopyAgentPolicyResponse,
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   CreatePackagePolicyRequest,
@@ -25,28 +24,31 @@ import type {
   GetPackagePoliciesResponse,
   PackagePolicy,
   PostFleetSetupResponse,
+  CopyAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
-  AGENTS_INDEX,
   AGENT_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  API_VERSIONS,
-  APP_API_ROUTES,
-  PACKAGE_POLICY_API_ROUTES,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  SETUP_API_ROUTE,
   agentPolicyRouteService,
   agentRouteService,
+  AGENTS_INDEX,
+  API_VERSIONS,
+  APP_API_ROUTES,
   epmRouteService,
+  PACKAGE_POLICY_API_ROUTES,
+  SETUP_API_ROUTE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
+import type { GetFleetServerHostsResponse } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import {
   enrollmentAPIKeyRouteService,
   fleetServerHostsRoutesService,
   outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
 import type {
-  CopyAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   EnrollmentAPIKey,
   GenerateServiceTokenResponse,
@@ -54,27 +56,25 @@ import type {
   GetEnrollmentAPIKeysResponse,
   GetOutputsResponse,
   PostAgentUnenrollResponse,
+  CopyAgentPolicyRequest,
 } from '@kbn/fleet-plugin/common/types';
-import type { GetFleetServerHostsResponse } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
-import type { KbnClient } from '@kbn/test';
-import type { ToolingLog } from '@kbn/tooling-log';
-import axios from 'axios';
-import { map, memoize, pick } from 'lodash';
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
-import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
-import {
-  RETRYABLE_TRANSIENT_ERRORS,
-  createToolingLogger,
-  retryOnError,
-} from '../../../common/endpoint/data_loaders/utils';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import axios from 'axios';
+import { userInfo } from 'os';
+import { isFleetServerRunning } from './fleet_server/fleet_server_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';
 import { downloadAndStoreAgent } from './agent_downloads_service';
-import { isFleetServerRunning } from './fleet_server/fleet_server_services';
-import { fetchKibanaStatus } from './stack_services';
 import type { HostVm } from './types';
+import {
+  createToolingLogger,
+  RETRYABLE_TRANSIENT_ERRORS,
+  retryOnError,
+} from '../../../common/endpoint/data_loaders/utils';
+import { fetchKibanaStatus } from './stack_services';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
 const fleetGenerator = new FleetAgentGenerator();
 const CURRENT_USERNAME = userInfo().username.toLowerCase();
@@ -561,14 +561,11 @@ export const getLatestAgentDownloadVersion = async (
 
   const stackVersionToArtifactVersion: Record<string, string> = artifactVersionsResponse.versions
     .filter(isValidArtifactVersion)
-    .reduce(
-      (acc, artifactVersion) => {
-        const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
-        acc[stackVersion] = artifactVersion;
-        return acc;
-      },
-      {} as Record<string, string>
-    );
+    .reduce((acc, artifactVersion) => {
+      const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
+      acc[stackVersion] = artifactVersion;
+      return acc;
+    }, {} as Record<string, string>);
 
   log?.verbose(
     `Versions found from [${artifactsUrl}]:\n${JSON.stringify(

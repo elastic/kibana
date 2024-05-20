@@ -1,4 +1,3 @@
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +5,13 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { i18n } from '@kbn/i18n';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { createTag, findTagsByName } from '../../../tags/saved_objects';
-import type { BulkCreateSavedObjectsResult } from '../types';
 import { RISK_SCORE_TAG_DESCRIPTION, getRiskScoreTagName } from './utils';
+import type { BulkCreateSavedObjectsResult } from '../types';
+import { createTag, findTagsByName } from '../../../tags/saved_objects';
 
 export const createRiskScoreTag = async ({
   riskScoreEntity,

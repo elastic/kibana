@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
+import { MAX_OPEN_CASES, DEFAULT_MAX_OPEN_CASES } from './constants';
 import { CASES_CONNECTOR_TIME_WINDOW_REGEX } from '../../../common/constants';
-import { DEFAULT_MAX_OPEN_CASES, MAX_OPEN_CASES } from './constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
   validate: (value) => {

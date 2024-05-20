@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import { discoverServiceMock } from '../../../__mocks__/services';
+import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';

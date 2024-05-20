@@ -1,4 +1,3 @@
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +6,10 @@ import { render } from '@testing-library/react';
  * Side Public License, v 1.
  */
 import React from 'react';
-import { OsCondition } from '.';
+import { render } from '@testing-library/react';
 import * as i18n from '../../translations';
 import { OS_LABELS } from '../conditions.config';
+import { OsCondition } from '.';
 
 describe('OsCondition', () => {
   it('should render one OS_LABELS', () => {

@@ -13,18 +13,18 @@ import { SavedQueryRuleCreateProps } from '@kbn/security-solution-plugin/common/
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
-  ALERT_ORIGINAL_EVENT,
   ALERT_ORIGINAL_TIME,
+  ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { getAlerts } from '../../../../utils';
 import {
   createRule,
-  deleteAllAlerts,
   deleteAllRules,
+  deleteAllAlerts,
   getRuleForAlertTesting,
 } from '../../../../../../../common/utils/security_solution';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { getAlerts } from '../../../../utils';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors

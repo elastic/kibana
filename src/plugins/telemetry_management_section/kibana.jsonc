@@ -6,8 +6,15 @@
     "id": "telemetryManagementSection",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["telemetry", "advancedSettings"],
-    "optionalPlugins": ["usageCollection"],
-    "requiredBundles": ["usageCollection"]
+    "requiredPlugins": [
+      "telemetry",
+      "advancedSettings"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "usageCollection"
+    ]
   }
 }

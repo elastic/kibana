@@ -1,5 +1,3 @@
-import { EuiButton } from '@elastic/eui';
-import { ComponentMeta } from '@storybook/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,15 +6,17 @@ import { ComponentMeta } from '@storybook/react';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { ComponentMeta } from '@storybook/react';
+import { EuiButton } from '@elastic/eui';
 
 import { action } from '@storybook/addon-actions';
 import { TextField } from '../../components';
 import { STORYBOOK_SECTION } from '../constants';
+import { FormHook, FieldConfig } from '../types';
 import { useForm } from '../hooks/use_form';
-import { FieldConfig, FormHook } from '../types';
-import { formStories } from './__stories__';
 import { Form, Props as FormProps } from './form';
 import { UseField } from './use_field';
+import { formStories } from './__stories__';
 
 export default {
   component: Form,

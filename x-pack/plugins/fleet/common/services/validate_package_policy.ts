@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
+import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
 
 import type {
   NewPackagePolicy,
-  PackageInfo,
-  PackagePolicyConfigRecordEntry,
   PackagePolicyInput,
   PackagePolicyInputStream,
+  PackagePolicyConfigRecordEntry,
+  PackageInfo,
   RegistryStream,
   RegistryVarsEntry,
 } from '../types';
@@ -22,13 +22,13 @@ import type {
 import { DATASET_VAR_NAME } from '../constants';
 
 import {
-  doesPackageHaveIntegrations,
-  getNormalizedDataStreams,
-  getNormalizedInputs,
   isValidNamespace,
+  doesPackageHaveIntegrations,
+  getNormalizedInputs,
+  getNormalizedDataStreams,
 } from '.';
-import { isValidDataset } from './is_valid_namespace';
 import { packageHasNoPolicyTemplates } from './policy_template';
+import { isValidDataset } from './is_valid_namespace';
 
 type Errors = string[] | null;
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, render } from '@testing-library/react';
 
 import { DEFAULT_LATEST_ALERTS } from '../assistant_context/constants';
-import { mockSystemPrompts } from '../mock/system_prompt';
-import { TestProviders } from '../mock/test_providers/test_providers';
 import { KnowledgeBaseSettings } from './knowledge_base_settings';
+import { TestProviders } from '../mock/test_providers/test_providers';
 import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
+import { mockSystemPrompts } from '../mock/system_prompt';
 
 const mockUseAssistantContext = {
   allSystemPrompts: mockSystemPrompts,

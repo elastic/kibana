@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { InspectButton } from '.';

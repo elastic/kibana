@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { LegendColorPickerProps } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
-import { ColorPicker } from '@kbn/charts-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { ReactWrapper } from 'enzyme';
-import React from 'react';
-import { createMockBucketColumns, createMockVisData } from '../mocks';
 import {
   LegendColorPickerWrapper,
   LegendColorPickerWrapperContext,
   LegendColorPickerWrapperContextType,
 } from './get_color_picker';
+import { ColorPicker } from '@kbn/charts-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { createMockBucketColumns, createMockVisData } from '../mocks';
 
 const bucketColumns = createMockBucketColumns();
 const visData = createMockVisData();

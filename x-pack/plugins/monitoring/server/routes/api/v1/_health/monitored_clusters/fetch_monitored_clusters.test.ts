@@ -6,15 +6,15 @@
  */
 
 import assert from 'assert';
-import type { Logger } from '@kbn/core/server';
 import sinon from 'sinon';
+import type { Logger } from '@kbn/core/server';
 import { fetchMonitoredClusters } from './fetch_monitored_clusters';
 
 const getMockLogger = () =>
   ({
     warn: sinon.spy(),
     error: sinon.spy(),
-  }) as unknown as Logger;
+  } as unknown as Logger);
 
 describe(__filename, () => {
   describe('fetchMonitoringClusters', () => {

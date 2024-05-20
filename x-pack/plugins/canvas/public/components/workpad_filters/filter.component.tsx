@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiPanel, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
+import { EuiDescriptionList, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedFilterViewInstance } from '../../../types';
 
 interface Props {

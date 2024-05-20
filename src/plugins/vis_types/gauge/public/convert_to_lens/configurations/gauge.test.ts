@@ -8,8 +8,8 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { GaugeType, GaugeVisParams } from '../../types';
 import { getConfiguration } from './gauge';
+import { GaugeType, GaugeVisParams } from '../../types';
 
 const params: GaugeVisParams = {
   addTooltip: false,
@@ -54,7 +54,7 @@ describe('getConfiguration', () => {
       name: 'custom',
       params: { name: 'custom', gaugeType },
       type: 'palette',
-    }) as PaletteOutput<CustomPaletteParams>;
+    } as PaletteOutput<CustomPaletteParams>);
 
   test('shourd return correct configuration - Arc', () => {
     const layerId = 'layer-id';

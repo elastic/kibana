@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { Rule } from 'eslint';
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 import * as T from '@babel/types';
 import { ImportType } from '@kbn/import-resolver';
-import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
-import type { Rule } from 'eslint';
 
 const JEST_MODULE_METHODS = [
   'jest.createMockFromModule',

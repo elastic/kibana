@@ -14,8 +14,8 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 
 import { agentPolicyService } from '../agent_policy';
-import { appContextService } from '../app_context';
 import { auditLoggingService } from '../audit_logging';
+import { appContextService } from '../app_context';
 
 import { deleteEnrollmentApiKey, generateEnrollmentAPIKey } from './enrollment_api_key';
 

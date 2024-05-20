@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { TooltipValueFormatter } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import classNames from 'classnames';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import classNames from 'classnames';
 import TooltipTrigger from 'react-popper-tooltip';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { TooltipValueFormatter } from '@elastic/charts';
 
 import './_index.scss';
 

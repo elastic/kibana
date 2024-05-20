@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { useLinkProps } from '../use_link_props';
 import { Breadcrumbs } from './breadcrumbs';
+import { useLinkProps } from '../use_link_props';
 
 /**
  * Display an error in the panel when something goes wrong and give the user a way to "retreat" back to a default state.

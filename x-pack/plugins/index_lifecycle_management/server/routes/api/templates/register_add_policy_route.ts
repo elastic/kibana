@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { merge } from 'lodash';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { merge } from 'lodash';
 
 import { TemplateFromEs, TemplateSerialized } from '@kbn/index-management-plugin/common/types';
 import { LegacyTemplateSerialized } from '@kbn/index-management-plugin/server';
-import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../../../services';
 
 async function getLegacyIndexTemplate(
   client: ElasticsearchClient,

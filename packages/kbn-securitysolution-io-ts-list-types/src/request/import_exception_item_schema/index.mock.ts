@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ImportExceptionListItemSchema, ImportExceptionListItemSchemaDecoded } from '.';
 import { ENTRIES } from '../../constants/index.mock';
+import { ImportExceptionListItemSchema, ImportExceptionListItemSchemaDecoded } from '.';
 
 export const getImportExceptionsListItemSchemaMock = (
   itemId = 'item_id_1',

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React, { useState, useEffect } from 'react';
 import {
-  EuiAccordion,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiComboBox,
+  EuiFormRow,
   EuiFieldText,
+  EuiComboBox,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiButtonEmpty,
   EuiLink,
+  EuiAccordion,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import React, { useState, useEffect } from 'react';
+import { UrlTemplate } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { urlTemplateIconChoices } from '../../helpers/style_choices';
-import { isKibanaUrl, isUrlTemplateValid, replaceKibanaUrlParam } from '../../helpers/url_template';
-import { UrlTemplate } from '../../types';
+import { isUrlTemplateValid, isKibanaUrl, replaceKibanaUrlParam } from '../../helpers/url_template';
 import { isEqual } from '../helpers';
 import { IconRenderer } from '../icon_renderer';
 

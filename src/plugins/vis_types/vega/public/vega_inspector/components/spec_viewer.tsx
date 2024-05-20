@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import React, { useEffect, useState } from 'react';
 
 import {
-  CommonProps,
-  EuiButtonEmpty,
-  EuiCopy,
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
+  EuiCopy,
+  EuiButtonEmpty,
   EuiSpacer,
+  CommonProps,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { VegaAdapter } from '../vega_adapter';

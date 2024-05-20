@@ -9,10 +9,10 @@
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter, updateFilter } from '@kbn/es-query';
 import { BooleanRelation } from '@kbn/es-query';
-import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import type { Operator } from '../../filter_bar/filter_editor';
+import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
 import { getBooleanRelationType } from '../../utils';
+import type { Operator } from '../../filter_bar/filter_editor';
 import { FilterLocation, Path } from '../types';
 
 const PATH_SEPARATOR = '.';

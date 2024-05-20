@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 
 interface Props {
   id: string;

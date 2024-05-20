@@ -7,11 +7,18 @@
       "pretty": "__flag__",
       "allow_no_match": "__flag__",
       "from": "",
-      "size": ["100"],
+      "size": [
+        "100"
+      ],
       "exclude_generated": "__flag__"
     },
-    "methods": ["GET"],
-    "patterns": ["_ml/data_frame/analytics/{id}", "_ml/data_frame/analytics"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/data_frame/analytics/{id}",
+      "_ml/data_frame/analytics"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-dfanalytics.html",
     "availability": {
       "stack": true,

@@ -7,12 +7,13 @@
  */
 import './solution_nav.scss';
 
+import React, { FC, useState, useMemo, useEffect } from 'react';
+import classNames from 'classnames';
 import {
   EuiAvatarProps,
   EuiCollapsibleNavGroup,
   EuiFlyout,
   EuiFlyoutProps,
-  EuiPageSidebar,
   EuiPanel,
   EuiSideNav,
   EuiSideNavItemType,
@@ -20,16 +21,15 @@ import {
   EuiSpacer,
   EuiTitle,
   htmlIdGenerator,
-  useEuiTheme,
-  useEuiThemeCSSVariables,
   useIsWithinBreakpoints,
   useIsWithinMinBreakpoint,
+  useEuiTheme,
+  useEuiThemeCSSVariables,
+  EuiPageSidebar,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
-import classNames from 'classnames';
-import React, { FC, useState, useMemo, useEffect } from 'react';
 
 import { SolutionNavCollapseButton } from './collapse_button';
 

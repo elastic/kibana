@@ -1,6 +1,3 @@
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,13 +5,16 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/public';
  * 2.0.
  */
 import { useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { useQuery } from '@tanstack/react-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { FieldType } from '../../../rule_creation/logic/esql_validator';
 import { getEsqlQueryConfig } from '../../../rule_creation/logic/get_esql_query_config';
+import type { FieldType } from '../../../rule_creation/logic/esql_validator';
 
 export const esqlToOptions = (
   columns: { error: unknown } | DatatableColumn[] | undefined | null,

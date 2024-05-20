@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ipRangeFunction } from './ip_range';
 import { functionWrapper } from './utils';
+import { ipRangeFunction } from './ip_range';
 
 describe('interpreter/functions#ipRange', () => {
   const fn = functionWrapper(ipRangeFunction);

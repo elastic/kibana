@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { PureComponent } from 'react';
+import { get } from 'lodash';
 import {
-  EuiLink,
   EuiPage,
+  EuiLink,
   EuiPageBody,
   EuiPanel,
-  EuiScreenReaderOnly,
   EuiSpacer,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
+import { ClusterStatus } from '../cluster_status';
+import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { get } from 'lodash';
-import React, { PureComponent } from 'react';
+import { i18n } from '@kbn/i18n';
 import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
-import { SetupModeFeature } from '../../../../common/enums';
-import { AlertsStatus } from '../../../alerts/status';
-import { formatNumber, formatPercentageUsage } from '../../../lib/format_number';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
-import { EuiMonitoringTable } from '../../table';
-import { ClusterStatus } from '../cluster_status';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { AlertsStatus } from '../../../alerts/status';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 export class Listing extends PureComponent {
   getColumns() {

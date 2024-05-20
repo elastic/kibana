@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getGoalValue, getMaxValue, getMinValue, getValueFromAccessor } from './accessors';
+import { getValueFromAccessor, getMaxValue, getMinValue, getGoalValue } from './accessors';
 
 describe('expression gauge utils', () => {
   describe('getValueFromAccessor', () => {

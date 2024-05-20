@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { actionCreator } from './__fixtures__/action_creator';
 import { elementsReducer } from './elements';
+import { actionCreator } from './__fixtures__/action_creator';
 
 describe('elements reducer', () => {
   let state;

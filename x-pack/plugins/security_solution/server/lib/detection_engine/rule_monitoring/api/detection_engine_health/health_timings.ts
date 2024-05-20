@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 import moment from 'moment';
+import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 import type { HealthTimings } from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 export const calculateHealthTimings = (requestReceivedAt: IsoDateString): HealthTimings => {

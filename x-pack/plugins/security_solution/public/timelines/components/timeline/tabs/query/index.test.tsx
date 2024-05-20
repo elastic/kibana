@@ -9,25 +9,25 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
-import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 
-import { waitFor } from '@testing-library/react';
 import type { Props as QueryTabContentComponentProps } from '.';
 import { QueryTabContentComponent } from '.';
-import { TimelineStatus } from '../../../../../../common/api/timeline';
-import { Direction } from '../../../../../../common/search_strategy';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
-import * as helpers from '../../../../../common/lib/kuery';
-import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { useTimelineEvents } from '../../../../containers';
-import { useTimelineEventsDetails } from '../../../../containers/details';
 import { defaultRowRenderers } from '../../body/renderers';
 import type { Sort } from '../../body/sort';
 import { mockDataProviders } from '../../data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineStatus } from '../../../../../../common/api/timeline';
+import { useTimelineEvents } from '../../../../containers';
+import { useTimelineEventsDetails } from '../../../../containers/details';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
+import { Direction } from '../../../../../../common/search_strategy';
+import * as helpers from '../../../../../common/lib/kuery';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),

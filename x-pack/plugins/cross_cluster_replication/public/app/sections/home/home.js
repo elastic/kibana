@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { PureComponent } from 'react';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiPageHeader } from '@elastic/eui';
 
-import { listBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
+import { setBreadcrumbs, listBreadcrumb } from '../../services/breadcrumbs';
 import { routing } from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
 import { FollowerIndicesList } from './follower_indices_list';

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
+import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
 } from '../../../../common/endpoint/models/policy_config';
-import type { ManifestSchema } from '../../../../common/endpoint/schema/manifest';
-import type { PolicyConfig, PolicyData } from '../../../../common/endpoint/types';
-import { useHttp } from '../../../common/lib/kibana';
 import type { GetPolicyResponse } from '../../pages/policy/types';
+import { useHttp } from '../../../common/lib/kibana';
+import type { PolicyData, PolicyConfig } from '../../../../common/endpoint/types';
+import type { ManifestSchema } from '../../../../common/endpoint/schema/manifest';
 
 interface ApiDataResponse {
   /** Data return from the Fleet API. Its the full integration policy (package policy) */

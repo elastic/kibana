@@ -6,8 +6,8 @@
  */
 
 import { formatNumber } from '@elastic/eui';
-import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import type { useKibanaContextForPlugin } from '../../../utils';
+import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 
 import {
   BYTE_NUMBER_FORMAT,

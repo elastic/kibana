@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import React, { useMemo } from 'react';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
+import { useTabs } from './tabs';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 import type {
   EntityDetailsLeftPanelTab,
   LeftPanelTabsType,
 } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
-import { useTabs } from './tabs';
+import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 
 interface UserParam {
   name: string;

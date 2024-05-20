@@ -6,10 +6,10 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback, useRef, useState } from 'react';
+import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
-import { FetchConnectorExecuteResponse, fetchConnectorExecuteAction } from '../api';
+import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 
 interface SendMessageProps {
   apiConfig: ApiConfig;

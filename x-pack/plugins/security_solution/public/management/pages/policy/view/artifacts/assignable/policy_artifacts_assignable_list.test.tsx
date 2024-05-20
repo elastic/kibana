@@ -1,5 +1,3 @@
-import * as reactTestingLibrary from '@testing-library/react';
-import { fireEvent } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,11 +5,13 @@ import { fireEvent } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { getMockListResponse } from '../../../test_utils';
 import type { PolicyArtifactsAssignableListProps } from './policy_artifacts_assignable_list';
 import { PolicyArtifactsAssignableList } from './policy_artifacts_assignable_list';
+import * as reactTestingLibrary from '@testing-library/react';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { fireEvent } from '@testing-library/react';
+import { getMockListResponse } from '../../../test_utils';
 
 describe('Policy artifacts list', () => {
   let mockedContext: AppContextTestRender;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { first, get } from 'lodash';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export const getPodNodeName = async (
   framework: KibanaFramework,

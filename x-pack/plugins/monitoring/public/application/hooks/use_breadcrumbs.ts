@@ -1,7 +1,3 @@
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import createContainer from 'constate';
-import { History } from 'history';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,7 +5,11 @@ import { History } from 'history';
  * 2.0.
  */
 import { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import createContainer from 'constate';
+import { History } from 'history';
 import { Observable } from 'rxjs';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface Crumb {
   url?: string | null;

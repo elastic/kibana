@@ -27,7 +27,9 @@
         "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
         "id": "def-common.savedObjectsServiceMock",
         "type": "Object",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "savedObjectsServiceMock",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts",
@@ -63,7 +65,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<SavedObjectsServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<SavedObjectsServiceContract>"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -101,7 +105,9 @@
         "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
         "id": "def-common.simpleSavedObjectMock",
         "type": "Object",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "simpleSavedObjectMock",
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",

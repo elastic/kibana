@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import url from 'url';
 import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
+  createLogger,
   InfraSynthtraceEsClient,
   LogLevel,
-  createLogger,
 } from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
+import url from 'url';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
 import { InheritedServices } from './types';
 

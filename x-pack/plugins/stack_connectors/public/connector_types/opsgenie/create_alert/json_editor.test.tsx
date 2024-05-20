@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
+import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import JsonEditor from './json_editor';
 
 describe('JsonEditor', () => {

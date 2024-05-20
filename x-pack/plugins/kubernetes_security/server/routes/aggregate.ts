@@ -5,23 +5,23 @@
  * 2.0.
  */
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter, Logger } from '@kbn/core/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  AGGREGATE_MAX_BUCKETS,
-  AGGREGATE_PAGE_SIZE,
   AGGREGATE_ROUTE,
-  CLOUD_INSTANCE_NAME,
-  CONTAINER_IMAGE_NAME,
-  ENTRY_LEADER_ENTITY_ID,
-  ENTRY_LEADER_INTERACTIVE,
-  ENTRY_LEADER_USER_ID,
+  AGGREGATE_PAGE_SIZE,
+  AGGREGATE_MAX_BUCKETS,
   ORCHESTRATOR_CLUSTER_ID,
-  ORCHESTRATOR_CLUSTER_NAME,
-  ORCHESTRATOR_NAMESPACE,
   ORCHESTRATOR_RESOURCE_ID,
+  ORCHESTRATOR_NAMESPACE,
+  ORCHESTRATOR_CLUSTER_NAME,
+  CONTAINER_IMAGE_NAME,
+  CLOUD_INSTANCE_NAME,
+  ENTRY_LEADER_ENTITY_ID,
+  ENTRY_LEADER_USER_ID,
+  ENTRY_LEADER_INTERACTIVE,
 } from '../../common/constants';
 import { AggregateBucketPaginationResult } from '../../common/types';
 

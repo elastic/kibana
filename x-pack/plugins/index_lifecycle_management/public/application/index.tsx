@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ApplicationStart, CoreStart, ScopedHistory, UnmountCallback } from '@kbn/core/public';
-import { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { ScopedHistory, ApplicationStart, UnmountCallback, CoreStart } from '@kbn/core/public';
+import { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 
 import {
-  APP_WRAPPER_CLASS,
   CloudSetup,
   ILicense,
   KibanaContextProvider,
+  APP_WRAPPER_CLASS,
   KibanaRenderContextProvider,
   RedirectAppLinks,
 } from '../shared_imports';

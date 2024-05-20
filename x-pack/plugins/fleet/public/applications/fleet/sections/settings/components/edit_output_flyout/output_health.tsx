@@ -9,8 +9,8 @@ import { EuiBadge, EuiCallOut, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import type { GetOutputHealthResponse } from '../../../../../../../common/types';
 

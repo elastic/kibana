@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { StaticAssets, type StaticAssetsParams } from './static_assets';
 import { BasePath } from '../base_path_service';
 import { CdnConfig } from '../cdn_config';
-import { StaticAssets, type StaticAssetsParams } from './static_assets';
 
 describe('StaticAssets', () => {
   let basePath: BasePath;

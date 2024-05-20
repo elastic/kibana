@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiConfirmModal } from '@elastic/eui';
 
 import { useServices, useToastNotifications } from '../app_context';
 import { executeRetention as executeRetentionRequest } from '../services/http';

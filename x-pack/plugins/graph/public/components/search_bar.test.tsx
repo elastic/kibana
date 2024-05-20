@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { SearchBar, SearchBarProps, SearchBarComponent, SearchBarStateProps } from './search_bar';
+import React, { Component } from 'react';
 import {
   DocLinksStart,
   HttpStart,
@@ -13,28 +16,25 @@ import {
   OverlayStart,
   SavedObjectsStart,
 } from '@kbn/core/public';
+import { act } from 'react-dom/test-utils';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import React, { Component } from 'react';
-import { act } from 'react-dom/test-utils';
-import { SearchBar, SearchBarComponent, SearchBarProps, SearchBarStateProps } from './search_bar';
+import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
 
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { createQueryStringInput } from '@kbn/unified-search-plugin/public/query_string_input/get_query_string_input';
-import { ReactWrapper } from 'enzyme';
-import { Provider } from 'react-redux';
 import { GraphStore, setDatasource, submitSearchSaga } from '../state_management';
+import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
+import { Provider } from 'react-redux';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { createQueryStringInput } from '@kbn/unified-search-plugin/public/query_string_input/get_query_string_input';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 

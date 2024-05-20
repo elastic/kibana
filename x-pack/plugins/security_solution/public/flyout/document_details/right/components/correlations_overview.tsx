@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
-import { get } from 'lodash';
-import React, { useCallback } from 'react';
 
-import { isActiveTimeline } from '../../../../helpers';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { RelatedAlertsBySession } from './related_alerts_by_session';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
+import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
+import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
+import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
+import { SuppressedAlerts } from './suppressed_alerts';
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
+import { RelatedCases } from './related_cases';
+import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { CORRELATIONS_TEST_ID } from './test_ids';
+import { useRightPanelContext } from '../context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
-import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
-import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
-import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
-import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
-import { useRightPanelContext } from '../context';
-import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
-import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
-import { RelatedAlertsBySession } from './related_alerts_by_session';
-import { RelatedCases } from './related_cases';
-import { SuppressedAlerts } from './suppressed_alerts';
-import { CORRELATIONS_TEST_ID } from './test_ids';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { isActiveTimeline } from '../../../../helpers';
 
 /**
  * Correlations section under Insights section, overview tab.

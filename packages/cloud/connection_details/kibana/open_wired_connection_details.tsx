@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { openConnectionDetails, OpenConnectionDetailsParams } from './open_connection_details';
 import { getGlobalDependencies } from './global';
-import { OpenConnectionDetailsParams, openConnectionDetails } from './open_connection_details';
 
 export type OpenWiredConnectionDetailsParams = Partial<Omit<OpenConnectionDetailsParams, 'start'>>;
 

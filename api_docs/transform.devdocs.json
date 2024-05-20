@@ -46,7 +46,9 @@
         "tags": [],
         "label": "registerTransformHealthRuleType",
         "description": [],
-        "signature": ["(params: RegisterParams) => void"],
+        "signature": [
+          "(params: RegisterParams) => void"
+        ],
         "path": "x-pack/plugins/transform/server/lib/alerting/transform_health_rule_type/register_transform_health_rule_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -58,7 +60,9 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["RegisterParams"],
+            "signature": [
+              "RegisterParams"
+            ],
             "path": "x-pack/plugins/transform/server/lib/alerting/transform_health_rule_type/register_transform_health_rule_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -88,7 +92,9 @@
         "tags": [],
         "label": "TRANSFORM_RULE_TYPE",
         "description": [],
-        "signature": ["{ readonly TRANSFORM_HEALTH: \"transform_health\"; }"],
+        "signature": [
+          "{ readonly TRANSFORM_HEALTH: \"transform_health\"; }"
+        ],
         "path": "x-pack/plugins/transform/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

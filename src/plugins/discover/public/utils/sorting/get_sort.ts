@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import { IUiSettingsClient } from '@kbn/core/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { SortInput, getDefaultSort, getSortArray } from '../../../common/utils/sorting';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import { getDefaultSort, getSortArray, SortInput } from '../../../common/utils/sorting';
 
 /**
  * sorting for embeddable, like getSortArray,but returning a default in the case the given sort or dataView is not valid

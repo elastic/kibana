@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectsRepository } from '../saved_objects_repository';
 import type { SavedObjectsFindOptions, SavedObjectsFindResponse } from './find';
+import type { ISavedObjectsRepository } from '../saved_objects_repository';
 
 /**
  * Options for the create point-in-time finder operation

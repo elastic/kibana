@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
-import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { map } from 'lodash';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { getRbacControl } from '../../../../common/endpoint/service/response_actions/utils';
+import { useKibana } from '../../../common/lib/kibana';
+import { CHOOSE_FROM_THE_LIST, LEARN_MORE } from './translations';
+import { EndpointActionText } from './utils';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
   ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import { getRbacControl } from '../../../../common/endpoint/service/response_actions/utils';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../common/lib/kibana';
-import { CHOOSE_FROM_THE_LIST, LEARN_MORE } from './translations';
-import { EndpointActionText } from './utils';
 
 interface ActionTypeFieldProps {
   basePath: string;

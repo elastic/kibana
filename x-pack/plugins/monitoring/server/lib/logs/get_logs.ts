@@ -6,16 +6,16 @@
  */
 
 import moment from 'moment';
-import { LogsResponse } from '../../../common/types/logs';
-import { MonitoringConfig } from '../../config';
-import { LegacyRequest } from '../../types';
-import { TimerangeFilter, createTimeFilter } from '../create_query';
 import { checkParam } from '../error_missing_required';
+import { createTimeFilter, TimerangeFilter } from '../create_query';
+import { detectReason, LogsIndexCheckOpts } from './detect_reason';
+import { elasticsearchLogsFilter } from './logs_filter';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
 import { getTimezone } from '../get_timezone';
-import { LogsIndexCheckOpts, detectReason } from './detect_reason';
 import { detectReasonFromException } from './detect_reason_from_exception';
-import { elasticsearchLogsFilter } from './logs_filter';
+import { LegacyRequest } from '../../types';
+import { LogsResponse } from '../../../common/types/logs';
+import { MonitoringConfig } from '../../config';
 
 interface Log {
   timestamp?: string | number;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
 import { InfraAssetMetricsItem } from '../../../../../common/http_api';
-import * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
-import { useHostsTable } from './use_hosts_table';
-import * as useHostsViewHooks from './use_hosts_view';
-import * as useMetricsDataViewHooks from './use_metrics_data_view';
 import * as useUnifiedSearchHooks from './use_unified_search';
+import * as useHostsViewHooks from './use_hosts_view';
+import * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
+import * as useMetricsDataViewHooks from './use_metrics_data_view';
 
 jest.mock('./use_unified_search');
 jest.mock('./use_hosts_view');

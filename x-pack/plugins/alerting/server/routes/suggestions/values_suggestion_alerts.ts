@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
+import { firstValueFrom, Observable } from 'rxjs';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
+import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  AlertConsumers,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
-  AlertConsumers,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
-import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
-import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { Observable, firstValueFrom } from 'rxjs';
 
+import { verifyAccessAndContext } from '../lib';
+import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterOpts,
   AlertingAuthorizationFilterType,
 } from '../../authorization';
-import { GetAlertIndicesAlias, ILicenseState } from '../../lib';
-import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
 import { AlertingRequestHandlerContext } from '../../types';
-import { verifyAccessAndContext } from '../lib';
+import { GetAlertIndicesAlias, ILicenseState } from '../../lib';
 
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.ESDSL,

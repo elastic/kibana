@@ -15,7 +15,7 @@ import {
 import React from 'react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { EmbeddableApiContext, apiPublishesTimeRange } from '@kbn/presentation-publishing';
+import { apiPublishesTimeRange, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { core } from '../../kibana_services';
 import { customizePanelAction } from '../panel_actions';
 

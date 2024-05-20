@@ -8,19 +8,19 @@
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { isServerlessAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
-import { SloCallout } from '../../shared/slo_callout';
 import { TransactionDetailsTabs } from './transaction_details_tabs';
+import { isServerlessAgentName } from '../../../../common/agent_name';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { SloCallout } from '../../shared/slo_callout';
 
 export function TransactionDetails() {
   const { path, query } = useAnyOfApmParams(

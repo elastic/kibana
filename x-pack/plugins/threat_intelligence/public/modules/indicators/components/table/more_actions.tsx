@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useState, VFC } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -12,12 +13,11 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useState, VFC } from 'react';
-import { Indicator } from '../../../../../common/types/indicator';
 import { AddToBlockListContextMenu } from '../../../block_list/components/add_to_block_list';
-import { canAddToBlockList } from '../../../block_list/utils/can_add_to_block_list';
-import { AddToExistingCase } from '../../../cases/components/add_to_existing_case';
 import { AddToNewCase } from '../../../cases/components/add_to_new_case';
+import { AddToExistingCase } from '../../../cases/components/add_to_existing_case';
+import { Indicator } from '../../../../../common/types/indicator';
+import { canAddToBlockList } from '../../../block_list/utils/can_add_to_block_list';
 import {
   ADD_TO_BLOCK_LIST_TEST_ID,
   ADD_TO_EXISTING_TEST_ID,

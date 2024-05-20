@@ -1,9 +1,3 @@
-import expect from '@kbn/expect';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
-import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/delete_monitor_project';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,6 +5,12 @@ import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
+import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
+import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/delete_monitor_project';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import expect from '@kbn/expect';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';

@@ -6,24 +6,24 @@
  */
 
 import { recurse } from 'cypress-recurse';
-import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
-import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
+import { performUserActions } from '../../tasks/perform_user_actions';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 import type { MetadataListResponse, PolicyData } from '../../../../../common/endpoint/types';
-import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
+import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts, removeAllArtifactsPromise } from '../../tasks/artifacts';
-import { loadPage, request } from '../../tasks/common';
-import { createEndpointHost } from '../../tasks/create_endpoint_host';
-import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
-import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
+import { login } from '../../tasks/login';
+import { request, loadPage } from '../../tasks/common';
 import {
   createAgentPolicyTask,
   getEndpointIntegrationVersion,
   yieldEndpointPolicyRevision,
 } from '../../tasks/fleet';
-import { login } from '../../tasks/login';
-import { performUserActions } from '../../tasks/perform_user_actions';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
+import { createEndpointHost } from '../../tasks/create_endpoint_host';
+import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
+import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
 const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
   request<MetadataListResponse>({

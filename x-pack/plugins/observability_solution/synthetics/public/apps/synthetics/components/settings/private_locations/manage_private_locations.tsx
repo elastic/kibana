@@ -6,17 +6,17 @@
  */
 import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getServiceLocations } from '../../../state';
+import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
+import { PrivateLocationsTable } from './locations_table';
+import { ManageEmptyState } from './manage_empty_state';
+import { AddLocationFlyout, NewLocation } from './add_location_flyout';
+import { usePrivateLocationsAPI } from './hooks/use_locations_api';
 import {
   getAgentPoliciesAction,
   selectAddingNewPrivateLocation,
   setAddingNewPrivateLocation,
 } from '../../../state/private_locations';
-import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { AddLocationFlyout, NewLocation } from './add_location_flyout';
-import { usePrivateLocationsAPI } from './hooks/use_locations_api';
-import { PrivateLocationsTable } from './locations_table';
-import { ManageEmptyState } from './manage_empty_state';
+import { getServiceLocations } from '../../../state';
 
 export const ManagePrivateLocations = () => {
   const dispatch = useDispatch();

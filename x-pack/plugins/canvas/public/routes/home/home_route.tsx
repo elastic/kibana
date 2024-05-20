@@ -1,4 +1,3 @@
-import { Route } from '@kbn/shared-ux-router';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { Route } from '@kbn/shared-ux-router';
  * 2.0.
  */
 import React from 'react';
+import { Route } from '@kbn/shared-ux-router';
 
 import { HomeApp } from '../../components/home_app';
 

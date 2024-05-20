@@ -6,8 +6,8 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
 import type { UseHighlightedFieldsResult } from '../hooks/use_highlighted_fields';
+import type { HighlightedFieldsTableRow } from '../../right/components/highlighted_fields';
 
 /**
  * Converts the highlighted fields to a format that can be consumed by the HighlightedFields component

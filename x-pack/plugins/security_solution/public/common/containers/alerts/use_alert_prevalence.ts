@@ -8,12 +8,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
+import { useGlobalTime } from '../use_global_time';
 import type { GenericBuckets } from '../../../../common/search_strategy';
-import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
-import { useGlobalTime } from '../use_global_time';
 
 const ALERT_PREVALENCE_AGG = 'countOfAlertsWithSameFieldAndValue';
 

@@ -6,20 +6,20 @@
  */
 
 import { createSelector, defaultMemoize } from 'reselect';
-import * as nodeModel from '../../../common/endpoint/models/node';
-import type { EventStats } from '../../../common/endpoint/types';
 import type { State } from '../../common/store/types';
-import type {
-  AnalyzerById,
-  DataState,
-  IsometricTaxiLayout,
-  NodeData,
-  ResolverState,
-  VisibleEntites,
-} from '../types';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
+import type {
+  AnalyzerById,
+  ResolverState,
+  IsometricTaxiLayout,
+  DataState,
+  VisibleEntites,
+  NodeData,
+} from '../types';
+import type { EventStats } from '../../../common/endpoint/types';
+import * as nodeModel from '../../../common/endpoint/models/node';
 
 export const selectAnalyzer = (state: State): AnalyzerById => state.analyzer;
 

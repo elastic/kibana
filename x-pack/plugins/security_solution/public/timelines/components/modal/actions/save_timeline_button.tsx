@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { TimelineStatus } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import type { State } from '../../../../common/store';
-import { selectTimelineById } from '../../../store/selectors';
-import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
+import { selectTimelineById } from '../../../store/selectors';
+import type { State } from '../../../../common/store';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 
 export interface SaveTimelineButtonProps {
   /**

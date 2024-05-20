@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { useEffect, useState } from 'react';
+import { isEqual } from 'lodash';
 import { EventEmitter } from 'events';
 import { Query } from '@kbn/es-query';
-import { isEqual } from 'lodash';
-import { useEffect, useState } from 'react';
-import { convertFromSerializedVis } from '../../../utils/saved_visualize_utils';
 import {
-  IEditorController,
+  VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
-  VisualizeServices,
+  IEditorController,
 } from '../../types';
+import { convertFromSerializedVis } from '../../../utils/saved_visualize_utils';
 
 export const useEditorUpdates = (
   services: VisualizeServices,

@@ -7,8 +7,8 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
-  FindDatasetValue,
   FindDatasetsRequestQuery,
+  FindDatasetValue,
   FindIntegrationsRequestQuery,
   FindIntegrationsValue,
 } from '../../../common/latest';

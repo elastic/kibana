@@ -6,16 +6,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FINAL_SUMMARY_KQL } from './single_metric_config';
 import { ColumnFilter, ConfigProps, SeriesConfig } from '../../types';
 import {
-  FORMULA_COLUMN,
   FieldLabels,
   OPERATION_COLUMN,
-  PERCENTILE,
-  RECORDS_FIELD,
   REPORT_METRIC_FIELD,
+  PERCENTILE,
   ReportTypes,
+  FORMULA_COLUMN,
+  RECORDS_FIELD,
 } from '../constants';
+import {
+  CLS_LABEL,
+  DCL_LABEL,
+  DOWN_LABEL,
+  FCP_LABEL,
+  LCP_LABEL,
+  MONITORS_DURATION_LABEL,
+  STEP_DURATION_LABEL,
+  UP_LABEL,
+  PAGE_LOAD_TIME_LABEL,
+  NETWORK_TIMINGS_LABEL,
+} from '../constants/labels';
 import {
   MONITOR_DURATION_US,
   NETWORK_TIMINGS_FIELDS,
@@ -27,20 +40,7 @@ import {
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,
 } from '../constants/field_names/synthetics';
-import {
-  CLS_LABEL,
-  DCL_LABEL,
-  DOWN_LABEL,
-  FCP_LABEL,
-  LCP_LABEL,
-  MONITORS_DURATION_LABEL,
-  NETWORK_TIMINGS_LABEL,
-  PAGE_LOAD_TIME_LABEL,
-  STEP_DURATION_LABEL,
-  UP_LABEL,
-} from '../constants/labels';
 import { buildExistsFilter } from '../utils';
-import { FINAL_SUMMARY_KQL } from './single_metric_config';
 const SUMMARY_UP = 'summary.up';
 const SUMMARY_DOWN = 'summary.down';
 

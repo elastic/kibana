@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Env } from '@kbn/config';
+import { loggerMock } from '@kbn/logging-mocks';
 import { getEnvOptions } from '@kbn/config-mocks';
+import { Env } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { SavedObjectsType, SavedObject } from '@kbn/core-saved-objects-server';
 import {
+  modelVersionToVirtualVersion,
   SavedObjectTypeRegistry,
   globalSwitchToModelVersionAt,
-  modelVersionToVirtualVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-import type { SavedObject, SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { loggerMock } from '@kbn/logging-mocks';
-import { REPO_ROOT } from '@kbn/repo-info';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const currentVersion = env.packageInfo.version;

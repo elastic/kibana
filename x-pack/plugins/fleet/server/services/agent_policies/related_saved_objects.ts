@@ -13,10 +13,10 @@ import { outputService } from '../output';
 
 import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils';
 
-import { OutputNotFoundError } from '../../errors';
+import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
 import { appContextService } from '../app_context';
 import { bulkGetFleetProxies } from '../fleet_proxies';
-import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
+import { OutputNotFoundError } from '../../errors';
 
 export async function fetchRelatedSavedObjects(
   soClient: SavedObjectsClientContract,

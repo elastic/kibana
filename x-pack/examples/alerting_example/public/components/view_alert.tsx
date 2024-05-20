@@ -8,23 +8,23 @@
 import React, { useState, useEffect, Fragment } from 'react';
 
 import {
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiLoadingLogo,
-  EuiSpacer,
   EuiText,
+  EuiLoadingLogo,
+  EuiCallOut,
   EuiTextColor,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiCodeBlock,
+  EuiSpacer,
 } from '@elastic/eui';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { CoreStart } from '@kbn/core/public';
+import { isEmpty } from 'lodash';
 import {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '@kbn/alerting-plugin/common';
-import { CoreStart } from '@kbn/core/public';
-import { isEmpty } from 'lodash';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 import { Rule, RuleTaskState } from '../../common/types';
 

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
-import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import moment from 'moment';
 import { type Observable, takeUntil, timer } from 'rxjs';
-import { ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL } from './constants';
-import { rollTotals, serializeKey } from './rollups';
+import type { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
 import {
   type ApplicationUsageDaily,
   type ApplicationUsageTotal,
+  registerMappings,
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,
-  registerMappings,
 } from './saved_objects_types';
 import { applicationUsageSchema } from './schema';
+import { rollTotals, serializeKey } from './rollups';
+import { ROLL_TOTAL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
 import type { ApplicationUsageTelemetryReport, ApplicationUsageViews } from './types';
 
 export const transformByApplicationViews = (

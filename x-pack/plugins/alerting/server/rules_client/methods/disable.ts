@@ -6,14 +6,14 @@
  */
 import type { SavedObjectReference } from '@kbn/core/server';
 
-import { AlertingAuthorizationEntity, WriteOperations } from '../../authorization';
-import { RuleAttributes } from '../../data/rule/types';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { RawRule } from '../../types';
-import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
-import { migrateLegacyActions, untrackRuleAlerts, updateMeta } from '../lib';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
+import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
+import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export async function disable(
   context: RulesClientContext,

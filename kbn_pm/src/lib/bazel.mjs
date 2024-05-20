@@ -9,12 +9,12 @@
 import Path from 'path';
 import Fsp from 'fs/promises';
 
-import { cleanPaths } from './clean.mjs';
-import { createCliError } from './cli_error.mjs';
-import * as Color from './colors.mjs';
-import { indent } from './indent.mjs';
-import { REPO_ROOT } from './paths.mjs';
 import { run } from './spawn.mjs';
+import * as Color from './colors.mjs';
+import { createCliError } from './cli_error.mjs';
+import { REPO_ROOT } from './paths.mjs';
+import { cleanPaths } from './clean.mjs';
+import { indent } from './indent.mjs';
 
 const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/index.js';
 

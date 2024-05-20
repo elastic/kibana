@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiIcon, EuiLink, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { SourceTooltip } from './source_tooltip';
+import { i18n } from '@kbn/i18n';
 
 export const SourceDestination = (props) => {
   const { sourceName, targetName, targetTransportAddress } = props;

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
+import * as React from 'react';
 import {
   EuiAccordion,
-  EuiCallOut,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiText,
   EuiTitle,
+  EuiCallOut,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEffect } from 'react';
-import * as React from 'react';
 import styled from 'styled-components';
-import { StdErrorLogs } from '../../common/components/stderr_logs';
+import { FAILED_TO_SCHEDULE } from '../manual_test_run_mode/browser_test_results';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import {
   CheckGroupResult,
   useBrowserRunOnceMonitors,
 } from '../hooks/use_browser_run_once_monitors';
-import { FAILED_TO_SCHEDULE } from '../manual_test_run_mode/browser_test_results';
 import { TestResultHeader } from '../test_result_header';
+import { StdErrorLogs } from '../../common/components/stderr_logs';
 
 interface Props {
   testRunId: string;

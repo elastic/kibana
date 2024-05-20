@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { SupertestReturnType } from '../../common/apm_api_supertest';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
+import { SupertestReturnType } from '../../common/apm_api_supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

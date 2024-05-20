@@ -7,51 +7,51 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type {
-  ElasticsearchClient,
   RequestHandler,
   ResponseHeaders,
+  ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
+import { safeDump } from 'js-yaml';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
-import { agentPolicyService, appContextService } from '../../services';
+import { appContextService, agentPolicyService } from '../../services';
 import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
+import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import type {
-  AgentPolicy,
-  BulkGetAgentPoliciesRequestSchema,
-  CopyAgentPolicyRequestSchema,
-  CreateAgentPolicyRequestSchema,
-  DeleteAgentPolicyRequestSchema,
-  FleetRequestHandler,
   GetAgentPoliciesRequestSchema,
+  GetOneAgentPolicyRequestSchema,
+  CreateAgentPolicyRequestSchema,
+  UpdateAgentPolicyRequestSchema,
+  CopyAgentPolicyRequestSchema,
+  DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
   GetK8sManifestRequestSchema,
-  GetOneAgentPolicyRequestSchema,
-  UpdateAgentPolicyRequestSchema,
+  FleetRequestHandler,
+  BulkGetAgentPoliciesRequestSchema,
+  AgentPolicy,
 } from '../../types';
 
 import type {
-  BulkGetAgentPoliciesResponse,
-  CopyAgentPolicyResponse,
-  CreateAgentPolicyResponse,
-  DeleteAgentPolicyResponse,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
+  GetOneAgentPolicyResponse,
+  CreateAgentPolicyResponse,
+  UpdateAgentPolicyResponse,
+  CopyAgentPolicyResponse,
+  DeleteAgentPolicyResponse,
+  GetFullAgentPolicyResponse,
   GetFullAgentConfigMapResponse,
   GetFullAgentManifestResponse,
-  GetFullAgentPolicyResponse,
-  GetOneAgentPolicyResponse,
-  UpdateAgentPolicyResponse,
+  BulkGetAgentPoliciesResponse,
 } from '../../../common/types';
 import {
+  defaultFleetErrorHandler,
   AgentPolicyNotFoundError,
   FleetUnauthorizedError,
-  defaultFleetErrorHandler,
 } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 

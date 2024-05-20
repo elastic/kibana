@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanel } from '@elastic/eui';
-import { Story } from '@storybook/react';
 import React from 'react';
-import { generateMockUrlIndicator } from '../../../../common/types/indicator';
-import { StoryProvidersComponent } from '../../../mocks/story_providers';
+import { Story } from '@storybook/react';
+import { EuiContextMenuPanel } from '@elastic/eui';
 import { AddToNewCase } from './add_to_new_case';
+import { StoryProvidersComponent } from '../../../mocks/story_providers';
+import { generateMockUrlIndicator } from '../../../../common/types/indicator';
 
 export default {
   title: 'AddToNewCase',

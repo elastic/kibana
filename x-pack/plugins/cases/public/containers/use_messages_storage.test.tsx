@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import type { UseMessagesStorage } from './use_messages_storage';
 import { useMessagesStorage } from './use_messages_storage';
 

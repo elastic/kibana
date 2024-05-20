@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPE, ReportManager, UiCounterMetricType } from '@kbn/analytics';
-import type { UserAgentMetric } from '@kbn/analytics';
 import expect from '@kbn/expect';
+import { ReportManager, METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { UserAgentMetric } from '@kbn/analytics';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { EuiPage, EuiPageBody, EuiPageTemplate, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { EuiPage, EuiPageBody, EuiPageTemplate, EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback, FC, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
-import { SetupModeFeature } from '../../../common/enums';
-import { AlertsDropdown } from '../../alerts/alerts_dropdown';
-import { PageLoading } from '../../components';
-import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
+import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
+import { PageLoading } from '../../components';
 import {
   getSetupModeState,
   isSetupModeFeatureEnabled,
   toggleSetupMode,
   updateSetupModeData,
 } from '../../lib/setup_mode';
-import { HeaderActionMenuContext } from '../contexts/header_action_menu_context';
-import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
+import { SetupModeFeature } from '../../../common/enums';
+import { AlertsDropdown } from '../../alerts/alerts_dropdown';
 import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
-import { useTitle } from '../hooks/use_title';
+import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
+import { HeaderActionMenuContext } from '../contexts/header_action_menu_context';
 
 export interface TabMenuItem {
   id: string;

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 
-import { ExecutionContextSearch } from '@kbn/es-query';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import { ExecutionContextSearch } from '@kbn/es-query';
 import { Datatable, ExpressionType } from '../expression_types';
-import { ExpressionsInspectorAdapter } from '../util';
 import { TablesAdapter } from '../util/tables_adapter';
+import { ExpressionsInspectorAdapter } from '../util';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;

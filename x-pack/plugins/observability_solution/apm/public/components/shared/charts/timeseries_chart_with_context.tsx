@@ -12,20 +12,20 @@ import {
   Position,
   YDomainRange,
 } from '@elastic/charts';
+import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
+import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useTheme } from '../../../hooks/use_theme';
 import { unit } from '../../../utils/style';
 import { getTimeZone } from './helper/timezone';
 import { TimeseriesChart } from './timeseries_chart';
+import { useTheme } from '../../../hooks/use_theme';
 
 interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
   color?: string;

@@ -8,23 +8,23 @@
 
 import Path from 'path';
 
-import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
-import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import globby from 'globby';
 import normalize from 'normalize-path';
 
-import { addMessagesToReport } from './add_messages_to_report';
-import { getBuildkiteMetadata } from './buildkite_metadata';
-import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 import { getFailures } from './get_failures';
 import { GithubApi } from './github_api';
-import { createFailureIssue, updateFailureIssue } from './report_failure';
+import { updateFailureIssue, createFailureIssue } from './report_failure';
+import { readTestReport, getRootMetadata } from './test_report';
+import { addMessagesToReport } from './add_messages_to_report';
+import { getReportMessageIter } from './report_metadata';
 import { reportFailuresToEs } from './report_failures_to_es';
 import { reportFailuresToFile } from './report_failures_to_file';
-import { getReportMessageIter } from './report_metadata';
-import { getRootMetadata, readTestReport } from './test_report';
+import { getBuildkiteMetadata } from './buildkite_metadata';
+import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 
 const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
 const DISABLE_MISSING_TEST_REPORT_ERRORS =

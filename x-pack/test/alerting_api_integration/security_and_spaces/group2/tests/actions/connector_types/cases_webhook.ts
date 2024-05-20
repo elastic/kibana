@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import httpProxy from 'http-proxy';
+import expect from '@kbn/expect';
 
-import {
-  ExternalServiceSimulator,
-  getExternalServiceSimulatorPath,
-} from '@kbn/actions-simulators-plugin/server/plugin';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
+import {
+  getExternalServiceSimulatorPath,
+  ExternalServiceSimulator,
+} from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 

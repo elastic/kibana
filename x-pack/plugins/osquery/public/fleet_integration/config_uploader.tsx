@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFilePicker, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState, useRef } from 'react';
 
 const SUPPORTED_CONFIG_EXTENSIONS = ['application/json', 'text/plain'];
 

@@ -15,12 +15,12 @@ import {
   EuiHighlight,
   EuiToolTip,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 
 import { Conversation } from '../../../..';
-import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 import * as i18n from '../conversation_selector/translations';
+import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 
 interface Props {
   conversations: Record<string, Conversation>;

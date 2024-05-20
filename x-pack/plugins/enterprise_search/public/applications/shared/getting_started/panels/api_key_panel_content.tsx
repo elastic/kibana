@@ -8,14 +8,14 @@
 import React from 'react';
 
 import {
-  EuiBadge,
-  EuiButton,
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiTitle,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiButton,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

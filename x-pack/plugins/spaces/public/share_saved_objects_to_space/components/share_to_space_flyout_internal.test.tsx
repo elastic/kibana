@@ -11,15 +11,10 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import type { Space } from '../../../common';
-import { ALL_SPACES_ID } from '../../../common/constants';
-import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
-import { getSpacesContextProviderWrapper } from '../../spaces_context';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { AliasTable } from './alias_table';
 import { NoSpacesAvailable } from './no_spaces_available';
 import { RelativesFooter } from './relatives_footer';
@@ -27,6 +22,11 @@ import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ShareModeControl } from './share_mode_control';
 import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
 import { ShareToSpaceForm } from './share_to_space_form';
+import type { Space } from '../../../common';
+import { ALL_SPACES_ID } from '../../../common/constants';
+import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
+import { getSpacesContextProviderWrapper } from '../../spaces_context';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
 
 interface SetupOpts {
   mockSpaces?: Space[];

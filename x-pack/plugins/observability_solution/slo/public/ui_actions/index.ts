@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { SloPublicPluginsStart, SloPublicStart } from '..';
-import { createAddErrorBudgetPanelAction } from './create_error_budget_action';
-import { createOverviewPanelAction } from './create_overview_panel_action';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { createEditSloAlertsPanelAction } from './edit_slo_alerts_panel';
 import { createEditSloOverviewPanelAction } from './edit_slo_overview_panel';
+import { createOverviewPanelAction } from './create_overview_panel_action';
+import { createAddErrorBudgetPanelAction } from './create_error_budget_action';
+import { SloPublicPluginsStart, SloPublicStart } from '..';
 
 export function registerSloUiActions(
   uiActions: UiActionsSetup,

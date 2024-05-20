@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import type { CustomFieldTypes } from '../../../../common/types/domain';
 import type { CasesConfigurationUI } from '../../../../common/ui';
+import type { CustomFieldTypes } from '../../../../common/types/domain';
 import { builderMap as customFieldsBuilder } from '../../custom_fields/builder';
+import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
 import { MultiSelectFilter } from '../multi_select_filter';
 import { deflattenCustomFieldKey, flattenCustomFieldKey } from '../utils';
-import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
 
 interface CustomFieldFilterOptionFactoryProps {
   buttonLabel: string;

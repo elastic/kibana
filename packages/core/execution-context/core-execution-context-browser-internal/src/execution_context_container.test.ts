@@ -7,8 +7,8 @@
  */
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import {
-  BAGGAGE_MAX_PER_NAME_VALUE_PAIRS,
   ExecutionContextContainer,
+  BAGGAGE_MAX_PER_NAME_VALUE_PAIRS,
 } from './execution_context_container';
 
 describe('KibanaExecutionContext', () => {

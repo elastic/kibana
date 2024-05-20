@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { euiLightVars } from '@kbn/ui-theme';
-import { upperFirst } from 'lodash/fp';
 import React from 'react';
+import { upperFirst } from 'lodash/fp';
+import { euiLightVars } from '@kbn/ui-theme';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { HealthTruncateText } from '../health_truncate_text';
 

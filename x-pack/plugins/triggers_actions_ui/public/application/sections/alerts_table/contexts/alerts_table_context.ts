@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryClient } from '@tanstack/react-query';
-import { noop } from 'lodash';
 import { createContext } from 'react';
+import { noop } from 'lodash';
+import { QueryClient } from '@tanstack/react-query';
 import { AlertsTableContextType } from '../types';
 
 export const AlertsTableQueryContext = createContext<QueryClient | undefined>(undefined);

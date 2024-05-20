@@ -6,21 +6,21 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormFieldset,
-  EuiFormRow,
   EuiPanel,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFormFieldset,
   EuiSelect,
+  EuiFieldText,
+  EuiFormRow,
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { DISCOVERY_RULE_TYPE_ALL, Operation, STAGED_DISCOVERY_RULE_ID } from '.';
+import { Operation, DISCOVERY_RULE_TYPE_ALL, STAGED_DISCOVERY_RULE_ID } from '.';
 
 interface Props {
   id: string;

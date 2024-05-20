@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { RefreshInterval } from '@kbn/data-plugin/common';
 import dateMath from '@kbn/datemath';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
 
 export function isTimeRangeValid(timeRange?: { from: string; to: string }): boolean {
   if (!timeRange?.from || !timeRange?.to) {

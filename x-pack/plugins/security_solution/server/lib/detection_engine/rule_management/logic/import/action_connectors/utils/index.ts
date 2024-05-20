@@ -1,9 +1,3 @@
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type {
-  SavedObjectsImportFailure,
-  SavedObjectsImportSuccess,
-} from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,9 +5,15 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
  * 2.0.
  */
 import { pick } from 'lodash';
-import type { RuleToImport } from '../../../../../../../../common/api/detection_engine/rule_management';
+import type {
+  SavedObjectsImportFailure,
+  SavedObjectsImportSuccess,
+} from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkError } from '../../../../../routes/utils';
 import { createBulkErrorObject } from '../../../../../routes/utils';
+import type { RuleToImport } from '../../../../../../../../common/api/detection_engine/rule_management';
 import type {
   ActionRules,
   ConflictError,
@@ -79,8 +79,8 @@ export const handleActionConnectorsErrors = (error: ErrorType, id?: string): Bul
           (error as ConflictError)?.type === 'conflict'
             ? 'There is a conflict'
             : (error as Error).message
-              ? (error as Error).message
-              : '',
+            ? (error as Error).message
+            : '',
       });
 
     case 403:

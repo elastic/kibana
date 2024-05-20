@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Axis, Position } from '@elastic/charts';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { FC } from 'react';
 import React from 'react';
-import { useDataVisualizerKibana } from '../../../kibana_context';
+import { Axis, Position } from '@elastic/charts';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { LineChartPoint } from './event_rate_chart';
+import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface Props {
   chartData?: LineChartPoint[];

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-import moment from 'moment';
 
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleSchedule } from '../../../../../../../common/api/detection_engine/prebuilt_rules';

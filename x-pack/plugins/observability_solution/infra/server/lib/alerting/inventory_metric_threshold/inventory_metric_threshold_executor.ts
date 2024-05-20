@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import {
+  ALERT_REASON,
+  ALERT_EVALUATION_VALUES,
+  ALERT_EVALUATION_THRESHOLD,
+} from '@kbn/rule-data-utils';
+import { first, get } from 'lodash';
 import {
   ActionGroup,
   ActionGroupIdsOf,
@@ -12,16 +19,10 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
-import { i18n } from '@kbn/i18n';
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUES,
-  ALERT_REASON,
-} from '@kbn/rule-data-utils';
-import { first, get } from 'lodash';
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import {
   AlertStates,
   InventoryMetricConditions,
@@ -31,10 +32,8 @@ import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { InfraBackendLibs } from '../../infra_types';
 import { LogQueryFields } from '../../metrics/types';
-import { getEvaluationValues, getThresholds } from '../common/get_values';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
@@ -43,13 +42,14 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import {
-  UNGROUPED_FACTORY_KEY,
   createScopedLogger,
   flattenAdditionalContext,
   getContextForRecoveredAlerts,
   getInventoryViewInAppUrlWithSpaceId,
+  UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
-import { ConditionResult, evaluateCondition } from './evaluate_condition';
+import { getEvaluationValues, getThresholds } from '../common/get_values';
+import { evaluateCondition, ConditionResult } from './evaluate_condition';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
@@ -214,12 +214,12 @@ export const createInventoryMetricThresholdExecutor =
       const nextState = isError
         ? AlertStates.ERROR
         : isNoData
-          ? AlertStates.NO_DATA
-          : shouldAlertFire
-            ? AlertStates.ALERT
-            : shouldAlertWarn
-              ? AlertStates.WARNING
-              : AlertStates.OK;
+        ? AlertStates.NO_DATA
+        : shouldAlertFire
+        ? AlertStates.ALERT
+        : shouldAlertWarn
+        ? AlertStates.WARNING
+        : AlertStates.OK;
       let reason;
       if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
         reason = results

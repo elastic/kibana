@@ -5,61 +5,61 @@
  * 2.0.
  */
 
-import type { ApmBase } from '@elastic/apm-rum';
-import type { DistributiveOmit } from '@elastic/eui';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { ReactElement, PropsWithChildren } from 'react';
+import type React from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
-import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { DistributiveOmit } from '@elastic/eui';
+import type { ApmBase } from '@elastic/apm-rum';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { PropsWithChildren, ReactElement } from 'react';
-import type React from 'react';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
+import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import type { canUseCases } from './client/helpers/can_use_cases';
+import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
+import type { GetCasesContextProps } from './client/ui/get_cases_context';
+import type { GetCasesProps } from './client/ui/get_cases';
+import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
+import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
+import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../common/ui';
+import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
+import type { getUICapabilities } from './client/helpers/capabilities';
+import type { AttachmentFramework } from './client/attachment_framework/types';
+import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import type {
+  CasesByAlertIDRequest,
+  GetRelatedCasesByAlertResponse,
+  CasesFindRequest,
+  CasesStatusRequest,
   CasesBulkGetRequest,
   CasesBulkGetResponse,
-  CasesByAlertIDRequest,
-  CasesFindRequest,
   CasesMetricsRequest,
-  CasesStatusRequest,
-  GetRelatedCasesByAlertResponse,
 } from '../common/types/api';
 import type {
   AlertAttachmentPayload,
+  UserCommentAttachmentPayload,
+  PersistableStateAttachmentPayload,
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
-  PersistableStateAttachmentPayload,
-  UserCommentAttachmentPayload,
 } from '../common/types/domain';
-import type { CasesFindResponseUI, CasesMetrics, CasesStatus } from '../common/ui';
-import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
-import type { AttachmentFramework } from './client/attachment_framework/types';
-import type { canUseCases } from './client/helpers/can_use_cases';
-import type { getUICapabilities } from './client/helpers/capabilities';
-import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
-import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
-import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
-import type { GetCasesProps } from './client/ui/get_cases';
-import type { GetCasesContextProps } from './client/ui/get_cases_context';
-import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
-import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 
 export interface CasesPublicSetupDependencies {
   files: FilesSetup;

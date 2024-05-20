@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React, { FunctionComponent, useState } from 'react';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -20,10 +24,6 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
-import React, { FunctionComponent, useState } from 'react';
 
 import { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import mockConfigPercentage from '../../fixtures/dispatch_heatmap_config.json';
 import mockDispatchDataD3 from '../../fixtures/dispatch_heatmap_d3.json';
-import mockdataPoint from '../../fixtures/dispatch_heatmap_data_point.json';
 import { Dispatch } from './dispatch';
+import mockdataPoint from '../../fixtures/dispatch_heatmap_data_point.json';
+import mockConfigPercentage from '../../fixtures/dispatch_heatmap_config.json';
 
 jest.mock('d3', () => ({
   event: {

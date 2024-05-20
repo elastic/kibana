@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createWriteStream, mkdir } from 'fs';
 import path from 'path';
+import { createWriteStream, mkdir } from 'fs';
 
 import yauzl from 'yauzl';
 

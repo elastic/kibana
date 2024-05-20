@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { servicesMock } from '../../__mocks__/services';
 import { dataTableContextComplexMock } from '../../__mocks__/table_context';
-import type { ValueToStringConverter } from '../types';
-import { convertValueToString } from './convert_value_to_string';
+import { servicesMock } from '../../__mocks__/services';
 import {
+  copyValueToClipboard,
   copyColumnNameToClipboard,
   copyColumnValuesToClipboard,
-  copyValueToClipboard,
 } from './copy_value_to_clipboard';
+import { convertValueToString } from './convert_value_to_string';
+import type { ValueToStringConverter } from '../types';
 
 const execCommandMock = (global.document.execCommand = jest.fn());
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});

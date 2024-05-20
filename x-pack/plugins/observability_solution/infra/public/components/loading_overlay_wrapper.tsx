@@ -6,9 +6,9 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { transparentize } from 'polished';
 import React, { FC, PropsWithChildren } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 export const LoadingOverlayWrapper: React.FC<
   React.HTMLAttributes<HTMLDivElement> & {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Category, RangeFieldMeta, StyleMetaDescriptor } from '../../../../common/descriptor_types';
+import { StyleMetaDescriptor, RangeFieldMeta, Category } from '../../../../common/descriptor_types';
 
 export class StyleMeta {
   private readonly _descriptor: StyleMetaDescriptor;

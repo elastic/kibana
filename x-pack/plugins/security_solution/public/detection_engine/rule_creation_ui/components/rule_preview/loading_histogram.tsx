@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingChart } from '@elastic/eui';
 import styled from 'styled-components';
-import { HeaderSection } from '../../../../common/components/header_section';
-import { Panel } from '../../../../common/components/panel';
 import * as i18n from './translations';
+import { Panel } from '../../../../common/components/panel';
+import { HeaderSection } from '../../../../common/components/header_section';
 
 const LoadingChart = styled(EuiLoadingChart)`
   display: block;

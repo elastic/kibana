@@ -7,8 +7,8 @@
 
 import * as rt from 'io-ts';
 
-import { routeTimingMetadataRT, timeRangeRT } from '../../shared';
-import { anomalyTypeRT, metricRT, paginationCursorRT, paginationRT, sortRT } from './common';
+import { timeRangeRT, routeTimingMetadataRT } from '../../shared';
+import { anomalyTypeRT, paginationCursorRT, sortRT, paginationRT, metricRT } from './common';
 
 export const INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH =
   '/api/infra/infra_ml/results/metrics_hosts_anomalies';

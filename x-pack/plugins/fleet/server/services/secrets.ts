@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { set } from '@kbn/safer-lodash-set';
 import { get, keyBy } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 
 import type {
   KafkaOutput,
@@ -35,32 +35,32 @@ import {
 } from '../../common/services';
 
 import type {
-  DeletedSecretReference,
-  DeletedSecretResponse,
   PackageInfo,
   PackagePolicy,
-  PolicySecretReference,
   RegistryVarsEntry,
   Secret,
-  SecretPath,
   VarSecretReference,
+  PolicySecretReference,
+  SecretPath,
+  DeletedSecretResponse,
+  DeletedSecretReference,
 } from '../types';
 
+import { FleetError } from '../errors';
 import {
   OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
   SECRETS_ENDPOINT_PATH,
   SECRETS_MINIMUM_FLEET_SERVER_VERSION,
 } from '../constants';
-import { FleetError } from '../errors';
 
 import { retryTransientEsErrors } from './epm/elasticsearch/retry';
 
 import { auditLoggingService } from './audit_logging';
 
-import { settingsService } from '.';
 import { appContextService } from './app_context';
-import { checkFleetServerVersionsForSecretsStorage } from './fleet_server';
 import { packagePolicyService } from './package_policy';
+import { settingsService } from '.';
+import { checkFleetServerVersionsForSecretsStorage } from './fleet_server';
 
 export async function createSecrets(opts: {
   esClient: ElasticsearchClient;
@@ -159,18 +159,15 @@ export async function findPackagePoliciesUsingSecrets(opts: {
   }
 
   // create a map of secret_references.id to package policy id
-  const packagePoliciesBySecretId = packagePolicies.items.reduce(
-    (acc, packagePolicy) => {
-      packagePolicy?.secret_references?.forEach((secretReference) => {
-        if (!acc[secretReference.id]) {
-          acc[secretReference.id] = [];
-        }
-        acc[secretReference.id].push(packagePolicy.id);
-      });
-      return acc;
-    },
-    {} as Record<string, string[]>
-  );
+  const packagePoliciesBySecretId = packagePolicies.items.reduce((acc, packagePolicy) => {
+    packagePolicy?.secret_references?.forEach((secretReference) => {
+      if (!acc[secretReference.id]) {
+        acc[secretReference.id] = [];
+      }
+      acc[secretReference.id].push(packagePolicy.id);
+    });
+    return acc;
+  }, {} as Record<string, string[]>);
 
   const res = [];
 

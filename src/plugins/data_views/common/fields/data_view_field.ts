@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { DataViewFieldBase } from '@kbn/es-query';
 import { KbnFieldType, getKbnFieldType } from '@kbn/field-types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { DataView, FieldSpec } from '..';
+import { DataViewFieldBase } from '@kbn/es-query';
 import type { RuntimeFieldSpec } from '../types';
+import { FieldSpec, DataView } from '..';
 import {
-  getDataViewFieldSubtypeMulti,
-  getDataViewFieldSubtypeNested,
+  shortenDottedString,
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
-  shortenDottedString,
+  getDataViewFieldSubtypeMulti,
+  getDataViewFieldSubtypeNested,
 } from './utils';
 
 /**
@@ -184,8 +184,8 @@ export class DataViewField implements DataViewFieldBase {
     return this.spec.customLabel
       ? this.spec.customLabel
       : this.spec.shortDotsEnable
-        ? shortenDottedString(this.spec.name)
-        : this.spec.name;
+      ? shortenDottedString(this.spec.name)
+      : this.spec.name;
   }
 
   /**

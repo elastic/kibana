@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiSkeletonRectangle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { capitalize } from 'lodash';
+import { EuiSkeletonRectangle, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
+import { capitalize } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { QualityIndicator } from '.';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 

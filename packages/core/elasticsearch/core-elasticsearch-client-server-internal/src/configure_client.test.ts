@@ -12,18 +12,18 @@ jest.mock('./log_query_and_deprecation', () => ({
 }));
 
 import { Agent } from 'http';
+import {
+  parseClientOptionsMock,
+  createTransportMock,
+  ClientMock,
+} from './configure_client.test.mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
-import { type AgentFactoryProvider, AgentManager } from './agent_manager';
 import { configureClient } from './configure_client';
-import {
-  ClientMock,
-  createTransportMock,
-  parseClientOptionsMock,
-} from './configure_client.test.mocks';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
+import { type AgentFactoryProvider, AgentManager } from './agent_manager';
 
 const kibanaVersion = '1.0.0';
 

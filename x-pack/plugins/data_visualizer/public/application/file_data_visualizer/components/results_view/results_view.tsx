@@ -7,24 +7,24 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import type { FC } from 'react';
-import React from 'react';
 
 import { FILE_FORMATS } from '../../../../../common/constants';
-import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
-import { AnalysisSummary } from '../analysis_summary';
 import { FileContents } from '../file_contents';
+import { AnalysisSummary } from '../analysis_summary';
+import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 
 interface Props {

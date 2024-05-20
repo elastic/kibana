@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { useEffect, useState } from 'react';
 import { ApmPluginStartDeps } from '../plugin';
 
 export function useCurrentUser() {

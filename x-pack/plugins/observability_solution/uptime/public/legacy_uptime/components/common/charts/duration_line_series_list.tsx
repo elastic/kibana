@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CurveType, Fit, LineSeries, ScaleType } from '@elastic/charts';
 import React from 'react';
-import { MS_LABEL, SEC_LABEL } from '../../../../../common/translations/translations';
+import { LineSeries, CurveType, Fit, ScaleType } from '@elastic/charts';
 import { LocationDurationLine } from '../../../../../common/types';
 import { microToMilli, microToSec } from '../../../lib/formatting';
+import { MS_LABEL, SEC_LABEL } from '../../../../../common/translations/translations';
 
 interface Props {
   monitorType: string;

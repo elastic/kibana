@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import { useGetCaseConfigurationsQuery } from './use_get_case_configurations_query';
+import * as api from './api';
+import { waitFor } from '@testing-library/react';
 import { useToasts } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import * as api from './api';
-import { useGetCaseConfigurationsQuery } from './use_get_case_configurations_query';
 import { initialConfiguration } from './utils';
 
 jest.mock('./api');

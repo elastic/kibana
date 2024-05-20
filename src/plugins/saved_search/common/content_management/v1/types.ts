@@ -12,8 +12,8 @@ import type {
   SavedObjectSearchOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { SavedSearchContentType } from '../../constants';
 import { SavedSearchAttributes } from '../../types';
+import { SavedSearchContentType } from '../../constants';
 
 interface SavedSearchCreateOptions {
   id?: SavedObjectCreateOptions['id'];

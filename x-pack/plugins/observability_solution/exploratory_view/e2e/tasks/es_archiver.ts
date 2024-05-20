@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { execSync } from 'child_process';
 import Path from 'path';
+import { execSync } from 'child_process';
 
 const ES_ARCHIVE_DIR = './fixtures/es_archiver';
 

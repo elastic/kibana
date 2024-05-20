@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
-import type { attachmentDomainV1 } from '../../../../common/types/domain';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { attachmentDomainV1 } from '../../../../common/types/domain';
 
 /**
  * @deprecated since version 8.1.0

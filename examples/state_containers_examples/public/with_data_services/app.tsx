@@ -6,33 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { Router } from '@kbn/shared-ux-router';
-import { History } from 'history';
 import React, { useEffect, useMemo, useState } from 'react';
+import { History } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 
 import {
   EuiFieldText,
   EuiPageBody,
-  EuiPageHeader,
   EuiPageTemplate,
+  EuiPageHeader,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
 import {
+  connectToQueryState,
   DataPublicPluginStart,
   QueryState,
-  connectToQueryState,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   BaseStateContainer,
-  IKbnUrlStateStorage,
   createStateContainer,
+  IKbnUrlStateStorage,
   syncState,
   useContainerState,
 } from '@kbn/kibana-utils-plugin/public';

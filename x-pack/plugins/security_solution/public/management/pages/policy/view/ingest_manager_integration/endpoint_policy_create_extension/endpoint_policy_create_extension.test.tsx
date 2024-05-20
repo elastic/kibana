@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
+import { EndpointPolicyCreateExtension } from './endpoint_policy_create_extension';
 import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
 } from '@kbn/fleet-plugin/common';
-import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { licenseService } from '../../../../../../common/hooks/use_license';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { EndpointPolicyCreateExtension } from './endpoint_policy_create_extension';
+import { licenseService } from '../../../../../../common/hooks/use_license';
+import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../../../../../../common/hooks/use_license', () => {

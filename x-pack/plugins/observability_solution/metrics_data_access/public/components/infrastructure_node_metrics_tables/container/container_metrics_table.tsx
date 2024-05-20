@@ -6,8 +6,8 @@
  */
 
 import type {
-  EuiBasicTableColumn,
   Criteria as EuiCriteria,
+  EuiBasicTableColumn,
   EuiTableSortingType,
 } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';

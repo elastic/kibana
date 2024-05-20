@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
-import { namespaceType } from '../default_namespace';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { exceptionListType } from '../exception_list';
+import { namespaceType } from '../default_namespace';
 
 export const list = t.exact(
   t.type({

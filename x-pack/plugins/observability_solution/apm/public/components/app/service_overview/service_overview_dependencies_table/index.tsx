@@ -8,17 +8,17 @@
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { ReactNode } from 'react';
-import { NodeType, getNodeName } from '../../../../../common/connections';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { DependencyLink } from '../../../shared/links/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
-import { DependencyLink } from '../../../shared/links/dependency_link';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;

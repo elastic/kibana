@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client/methods/bulk_edit';
-import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
 import moment from 'moment';
+import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
+import type { RuleParamsModifierResult } from '@kbn/alerting-plugin/server/rules_client/methods/bulk_edit';
 import type { ExperimentalFeatures } from '../../../../../../common';
+import type { InvestigationFieldsCombined, RuleAlertType } from '../../../rule_schema';
 import type {
   BulkActionEditForRuleParams,
   BulkActionEditPayloadIndexPatterns,
@@ -16,7 +17,6 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import { invariant } from '../../../../../../common/utils/invariant';
-import type { InvestigationFieldsCombined, RuleAlertType } from '../../../rule_schema';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>
   Array.from(new Set([...arr, ...items]));

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { keyBy } from 'lodash';
+import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

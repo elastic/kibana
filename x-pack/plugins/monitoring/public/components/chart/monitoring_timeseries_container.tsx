@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiScreenReaderOnly,
-  EuiTextAlign,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { Fragment } from 'react';
+import { get, first } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { first, get } from 'lodash';
-import React, { Fragment } from 'react';
-import { AlertsBadge } from '../../alerts/badge';
-import type { AlertsByName } from '../../alerts/types';
+import {
+  EuiBadge,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiScreenReaderOnly,
+  EuiTextAlign,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { getTechnicalPreview } from './get_technical_preview';
 import { getTitle } from './get_title';
 import { getUnits } from './get_units';
-import { InfoTooltip } from './info_tooltip';
 import { MonitoringTimeseries } from './monitoring_timeseries';
+import { InfoTooltip } from './info_tooltip';
+import { AlertsBadge } from '../../alerts/badge';
+import type { AlertsByName } from '../../alerts/types';
 
 import './monitoring_timeseries_container.scss';
 

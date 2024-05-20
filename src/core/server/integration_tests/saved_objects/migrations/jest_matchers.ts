@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { LogRecord } from '@kbn/logging';
 import type { MatcherFunction } from 'expect';
+import type { LogRecord } from '@kbn/logging';
 
 const toContainLogEntry: MatcherFunction<[entry: string]> = (actual, entry) => {
   if (!Array.isArray(actual)) {

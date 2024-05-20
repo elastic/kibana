@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import React from 'react';
+import classNames from 'classnames';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { getTypeLabelFromField } from '../../lib';
 import { NormalizedRuntimeField } from '../../types';
+import { getTypeLabelFromField } from '../../lib';
 
 import { DeleteRuntimeFieldProvider } from './delete_field_provider';
 

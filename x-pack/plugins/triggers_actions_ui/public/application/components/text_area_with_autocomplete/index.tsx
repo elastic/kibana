@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import getCaretCoordinates from 'textarea-caret';
+import { Properties } from 'csstype';
 import {
+  EuiTextArea,
   EuiFormRow,
-  EuiHighlight,
-  EuiOutsideClickDetector,
-  EuiPortal,
   EuiSelectable,
   EuiSelectableOption,
-  EuiTextArea,
-  useEuiBackgroundColor,
+  EuiPortal,
+  EuiHighlight,
+  EuiOutsideClickDetector,
   useEuiTheme,
+  useEuiBackgroundColor,
 } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { Properties } from 'csstype';
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import getCaretCoordinates from 'textarea-caret';
 import { filterSuggestions } from './lib/filter_suggestions_for_autocomplete';
 import { templateActionVariable } from './lib/template_action_variable';
 

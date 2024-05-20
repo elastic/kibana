@@ -7,9 +7,9 @@
 
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { useCurrentThemeVars } from '../../../../../../contexts/kibana';
-import { getTimeBucketsFromCache } from '../../../../../../util/get_time_buckets_from_cache';
 import type { JobCreatorType } from '../../../../common/job_creator';
 import { isMultiMetricJobCreator, isPopulationJobCreator } from '../../../../common/job_creator';
+import { getTimeBucketsFromCache } from '../../../../../../util/get_time_buckets_from_cache';
 
 export function useChartColors() {
   const { euiTheme } = useCurrentThemeVars();

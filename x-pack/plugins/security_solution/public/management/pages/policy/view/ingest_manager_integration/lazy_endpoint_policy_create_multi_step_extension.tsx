@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PackagePolicyCreateMultiStepExtensionComponent } from '@kbn/fleet-plugin/public';
 import { lazy } from 'react';
+import type { PackagePolicyCreateMultiStepExtensionComponent } from '@kbn/fleet-plugin/public';
 
 export const LazyEndpointPolicyCreateMultiStepExtension =
   lazy<PackagePolicyCreateMultiStepExtensionComponent>(async () => {

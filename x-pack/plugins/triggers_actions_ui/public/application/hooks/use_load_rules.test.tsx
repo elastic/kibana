@@ -1,11 +1,3 @@
-import {
-  RuleExecutionStatusErrorReasons,
-  RuleExecutionStatusWarningReasons,
-} from '@kbn/alerting-plugin/common';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks/dom';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,9 +5,17 @@ import { renderHook } from '@testing-library/react-hooks/dom';
  * 2.0.
  */
 import React from 'react';
-import { useKibana } from '../../common/lib/kibana';
-import { RuleStatus } from '../../types';
+import { renderHook } from '@testing-library/react-hooks/dom';
 import { useLoadRulesQuery as useLoadRules } from './use_load_rules_query';
+import {
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
+} from '@kbn/alerting-plugin/common';
+import { RuleStatus } from '../../types';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useKibana } from '../../common/lib/kibana';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/rules_kuery_filter', () => ({

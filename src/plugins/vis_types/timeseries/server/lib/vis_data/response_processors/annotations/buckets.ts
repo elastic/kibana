@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { get, isEmpty } from 'lodash';
-import type { Annotation } from '../../../../../common/types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { overwrite } from '../../helpers';
+import type { Annotation } from '../../../../../common/types';
 
 interface AnnotationsBuckets {
   key: string;

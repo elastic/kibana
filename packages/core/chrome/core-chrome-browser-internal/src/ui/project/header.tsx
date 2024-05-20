@@ -12,8 +12,8 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiLoadingSpinner,
-  EuiThemeComputed,
   useEuiTheme,
+  EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -33,14 +33,14 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
 import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable, debounceTime, of } from 'rxjs';
+import { debounceTime, Observable, of } from 'rxjs';
 import { useHeaderActionMenuMounter } from '../header/header_action_menu';
+import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { HeaderTopBanner } from '../header/header_top_banner';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/screen_reader_a11y';
 import { AppMenuBar } from './app_menu';
-import { Breadcrumbs } from './breadcrumbs';
 import { ProjectNavigation } from './navigation';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({

@@ -6,6 +6,8 @@
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   DraggableProvided,
   DraggableStateSnapshot,
@@ -13,15 +15,13 @@ import type {
   NotDraggingStyle,
 } from '@hello-pangea/dnd';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
-import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { dragAndDropActions } from '../../store/drag_and_drop';
+import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 
 import { TruncatableText } from '../truncatable_text';
 import { CellActionsWrapper } from './cell_actions_wrapper';

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
-import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { isActiveTimeline } from '../../../../helpers';
-import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 import type { BrowserFields } from '../../../containers/source';
-import { getEnrichedFieldInfo } from '../helpers';
-import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
+import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
+import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 import type { InsightAccordionState } from './insight_accordion';
 import { InsightAccordion } from './insight_accordion';
+import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
 import { SimpleAlertTable } from './simple_alert_table';
+import { getEnrichedFieldInfo } from '../helpers';
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import {
-  SOURCE_EVENT_COUNT,
+  SOURCE_EVENT_LOADING,
   SOURCE_EVENT_EMPTY,
   SOURCE_EVENT_ERROR,
-  SOURCE_EVENT_LOADING,
+  SOURCE_EVENT_COUNT,
 } from './translations';
 
 interface Props {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 
 interface Props {
   children: React.ReactNode;

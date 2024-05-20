@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import { UserActionActions } from '../../../common/types/domain';
-import { TestProviders } from '../../common/mock';
-import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { getUserAction } from '../../containers/mock';
-import { getMockBuilderArgs } from './mock';
+import { TestProviders } from '../../common/mock';
 import { createPushedUserActionBuilder } from './pushed';
+import { getMockBuilderArgs } from './mock';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { UserActionActions } from '../../../common/types/domain';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');

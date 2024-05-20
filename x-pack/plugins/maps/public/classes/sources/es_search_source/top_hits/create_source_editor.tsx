@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React, { Component } from 'react';
+import { EuiPanel } from '@elastic/eui';
 
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { SCALING_TYPES } from '../../../../../common/constants';
-import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
 import {
   getGeoFields,
-  getIsTimeseries,
-  getSortFields,
   getTermsFields,
+  getSortFields,
+  getIsTimeseries,
 } from '../../../../index_pattern_util';
-import { OnSourceChangeArgs } from '../../source';
+import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import { TopHitsForm } from './top_hits_form';
+import { OnSourceChangeArgs } from '../../source';
 
 interface Props {
   onSourceConfigChange: (

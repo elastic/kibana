@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';
 import { ListSnapshotReposResponse } from '../../../../common/types';
 
+import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 import { handleEsError } from '../../../shared_imports';
-import { RouteDependencies } from '../../../types';
 
 export const registerFetchRoute = ({ router, license }: RouteDependencies) => {
   router.get(

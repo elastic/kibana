@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { DataTypes, DataTypesLabels } from '../../labels';
+import { fireEvent, screen } from '@testing-library/react';
 import { mockAppDataView, mockUxSeries, render } from '../../rtl_helpers';
 import { DataTypesSelect } from './data_type_select';
+import { DataTypes, DataTypesLabels } from '../../labels';
 
 describe('DataTypeSelect', function () {
   const seriesId = 0;

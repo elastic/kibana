@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ExpressionValueFilter, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
-import { ExpressionFunctionDefinition, ExpressionValueFilter } from '../../../types';
 
 interface Arguments {
   column: string;

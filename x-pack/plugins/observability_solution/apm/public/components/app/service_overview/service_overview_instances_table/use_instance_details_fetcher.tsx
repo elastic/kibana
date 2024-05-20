@@ -1,4 +1,3 @@
-import { useApmParams } from '../../../../hooks/use_apm_params';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
  * 2.0.
  */
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
 export function useInstanceDetailsFetcher({

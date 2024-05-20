@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SerializableRecord } from '@kbn/utility-types';
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
-import { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { createExtract, createInject } from '../../../common';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { createDashboardSavedObjectTypeMigrations } from './dashboard_saved_object_migrations';
 import { DashboardDoc730ToLatest } from './migrate_to_730/types';
 

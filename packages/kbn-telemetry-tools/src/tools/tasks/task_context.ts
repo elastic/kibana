@@ -7,8 +7,8 @@
  */
 
 import { TelemetryRC } from '../config';
-import { ParsedUsageCollection } from '../ts_parser';
 import { ErrorReporter } from './error_reporter';
+import { ParsedUsageCollection } from '../ts_parser';
 export interface TelemetryRoot {
   config: TelemetryRC;
   parsedCollections?: ParsedUsageCollection[];

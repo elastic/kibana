@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import expect from '@kbn/expect';
+import {
+  INTERNAL_EXCEPTION_FILTER,
+  EXCEPTION_LIST_URL,
+  EXCEPTION_LIST_ITEM_URL,
+} from '@kbn/securitysolution-list-constants';
+import {
+  getExceptionFilterFromExceptionItemsSchemaMock,
+  getExceptionFilterFromExceptionIdsSchemaMock,
+} from '@kbn/lists-plugin/common/schemas/request/get_exception_filter_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMockWithoutId } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import {
-  getExceptionFilterFromExceptionIdsSchemaMock,
-  getExceptionFilterFromExceptionItemsSchemaMock,
-} from '@kbn/lists-plugin/common/schemas/request/get_exception_filter_schema.mock';
-import {
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-  INTERNAL_EXCEPTION_FILTER,
-} from '@kbn/securitysolution-list-constants';
 
 import { createListsIndex, deleteListsIndex } from '../../../utils';
 

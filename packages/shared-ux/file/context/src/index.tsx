@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import React, { createContext, useContext, type FC, type PropsWithChildren } from 'react';
+import type { BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 
 export interface FilesContextValue {
   /**

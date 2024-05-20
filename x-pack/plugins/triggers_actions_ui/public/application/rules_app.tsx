@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import React, { lazy } from 'react';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import {
   ChromeBreadcrumb,
   CoreStart,
@@ -14,27 +15,27 @@ import {
   ScopedHistory,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { KibanaFeature } from '@kbn/features-plugin/common';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { Redirect } from 'react-router-dom';
 
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { ruleDetailsRoute } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
   AlertsTableConfigurationRegistryContract,
@@ -42,16 +43,15 @@ import {
 } from '../types';
 import {
   Section,
-  legacyRouteToAlerts,
   legacyRouteToRuleDetails,
   routeToConnectors,
+  legacyRouteToAlerts,
 } from './constants';
-import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
-import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
+import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));

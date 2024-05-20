@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { EsResponseTooLargeError } from '.';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
-  type RetryableEsClientError,
   catchRetryableEsClientErrors,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { DEFAULT_PIT_KEEP_ALIVE } from './open_pit';
+import { EsResponseTooLargeError } from '.';
 
 /** @internal */
 export interface ReadWithPit {

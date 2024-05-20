@@ -1,4 +1,3 @@
-import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,14 @@ import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types'
  * 2.0.
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import {
+  AlertsFilter,
+  DEFAULT_FLAPPING_SETTINGS,
+  RecoveredActionGroup,
+  RuleAlertData,
+} from '../types';
 import {
   ALERT_ACTION_GROUP,
   ALERT_CONSECUTIVE_MATCHES,
@@ -38,44 +45,37 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { keys, range } from 'lodash';
+import * as LegacyAlertsClientModule from './legacy_alerts_client';
+import { LegacyAlertsClient } from './legacy_alerts_client';
 import { Alert } from '../alert/alert';
-import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { AlertsClient, AlertsClientParams } from './alerts_client';
+import {
+  GetSummarizedAlertsParams,
+  ProcessAndLogAlertsOpts,
+  GetMaintenanceWindowScopedQueryAlertsParams,
+} from './types';
+import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
+import { keys, range } from 'lodash';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import {
-  AlertsFilter,
-  DEFAULT_FLAPPING_SETTINGS,
-  RecoveredActionGroup,
-  RuleAlertData,
-} from '../types';
-import { AlertsClient, AlertsClientParams } from './alerts_client';
+import { expandFlattenedAlert } from './lib';
 import {
   alertRuleData,
   getExpectedQueryByExecutionUuid,
   getExpectedQueryByTimeRange,
   getParamsByExecutionUuid,
-  getParamsByMaintenanceWindowScopedQuery,
   getParamsByTimeQuery,
+  getParamsByMaintenanceWindowScopedQuery,
   getParamsByUpdateMaintenanceWindowIds,
   mockAAD,
 } from './alerts_client_fixtures';
-import * as LegacyAlertsClientModule from './legacy_alerts_client';
-import { LegacyAlertsClient } from './legacy_alerts_client';
-import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
-import { expandFlattenedAlert } from './lib';
-import {
-  GetMaintenanceWindowScopedQueryAlertsParams,
-  GetSummarizedAlertsParams,
-  ProcessAndLogAlertsOpts,
-} from './types';
+import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
 const maxAlerts = 1000;
-let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
+let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const alertingEventLogger = alertingEventLoggerMock.create();
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();

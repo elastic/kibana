@@ -7,7 +7,6 @@
 
 import type { PassThrough, Readable } from 'stream';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Description,
@@ -32,6 +31,7 @@ import type {
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version, VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ConfigType } from '../../config';
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { flatten, minBy, pick, mapValues, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type {
+  Layer,
+  Column,
   AnyColumnWithReferences,
   AnyColumnWithSourceField,
-  Column,
-  Layer,
   TermsColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { flatten, mapValues, minBy, partition, pick } from 'lodash';
 import { generateId } from '../../id_generator';
 import type {
   DatasourceSuggestion,
@@ -23,28 +23,28 @@ import type {
   TableChangeType,
   VisualizationDimensionGroupConfig,
 } from '../../types';
-import { documentField } from './document_field';
 import { columnToOperation } from './form_based';
 import {
-  BaseIndexPatternColumn,
-  ColumnAdvancedParams,
-  FormulaIndexPatternColumn,
-  OperationType,
-  getExistingColumnGroups,
+  insertNewColumn,
+  replaceColumn,
   getMetricOperationTypes,
   getOperationTypesForField,
+  operationDefinitionMap,
+  BaseIndexPatternColumn,
+  OperationType,
+  getExistingColumnGroups,
+  isReferenced,
   getReferencedColumnIds,
   hasTermsWithManyBuckets,
-  insertNewColumn,
-  isReferenced,
-  operationDefinitionMap,
-  replaceColumn,
+  FormulaIndexPatternColumn,
   updateColumnLabel,
+  ColumnAdvancedParams,
 } from './operations';
+import { hasField } from './pure_utils';
+import type { FormBasedPrivateState, FormBasedLayer } from './types';
+import { documentField } from './document_field';
 import { OperationDefinition } from './operations/definitions';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
-import { hasField } from './pure_utils';
-import type { FormBasedLayer, FormBasedPrivateState } from './types';
 
 export type IndexPatternSuggestion = DatasourceSuggestion<FormBasedPrivateState>;
 

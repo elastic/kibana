@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CanExpandPanels, apiCanExpandPanels } from '@kbn/presentation-containers';
+import { apiCanExpandPanels, CanExpandPanels } from '@kbn/presentation-containers';
 import {
+  apiHasParentApi,
+  apiHasUniqueId,
   EmbeddableApiContext,
   HasParentApi,
   HasUniqueId,
-  apiHasParentApi,
-  apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 

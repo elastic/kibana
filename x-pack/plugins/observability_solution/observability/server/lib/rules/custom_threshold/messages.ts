@@ -6,20 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { formatDurationFromTimeUnitChar } from '../../../../common';
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
-import { UNGROUPED_FACTORY_KEY } from './constants';
+import { formatDurationFromTimeUnitChar } from '../../../../common';
 import { Evaluation } from './lib/evaluate_rule';
-import { FormattedEvaluation, formatAlertResult } from './lib/format_alert_result';
+import { formatAlertResult, FormattedEvaluation } from './lib/format_alert_result';
 import {
-  ABOVE_OR_EQ_TEXT,
-  ABOVE_TEXT,
-  BELOW_OR_EQ_TEXT,
   BELOW_TEXT,
+  ABOVE_TEXT,
   BETWEEN_TEXT,
-  CUSTOM_EQUATION_I18N,
   NOT_BETWEEN_TEXT,
+  CUSTOM_EQUATION_I18N,
+  ABOVE_OR_EQ_TEXT,
+  BELOW_OR_EQ_TEXT,
 } from './translations';
+import { UNGROUPED_FACTORY_KEY } from './constants';
 
 const toNumber = (value: number | string) =>
   typeof value === 'string' ? parseFloat(value) : value;

@@ -1,6 +1,3 @@
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,14 +6,17 @@ import type { IKibanaSearchResponse } from '@kbn/search-types';
  */
 import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import { firstValueFrom } from 'rxjs';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY } from '../../../../common/endpoint/constants';
 import { useHttp, useKibana } from '../../../common/lib/kibana';
-import type { ServerApiError } from '../../../common/types';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSecurityPackage } from './ingest';
+import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
+import type { ServerApiError } from '../../../common/types';
 
 // FIXME:PT move to `hooks` folder
 export function useGetEndpointSpecificPolicies(

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { SolutionSideNav, type SolutionSideNavProps } from './solution_side_nav';
-import { TELEMETRY_EVENT } from './telemetry/const';
 import type { SolutionSideNavItem } from './types';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { TELEMETRY_EVENT } from './telemetry/const';
 
 const mockTrack = jest.fn();
 

@@ -7,17 +7,17 @@
  */
 
 import { EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import React from 'react';
-import * as constants from '../../../../../../common/data_types/logs/constants';
+import { CustomGridColumnProps } from '@kbn/unified-data-table';
+import { css } from '@emotion/react';
 import {
   contentHeaderTooltipParagraph1,
   contentHeaderTooltipParagraph2,
   contentLabel,
 } from '../../../../data_types/logs/translations';
-import { FieldWithToken } from './field_with_token';
+import * as constants from '../../../../../../common/data_types/logs/constants';
 import { TooltipButton } from './tooltip_button';
+import { FieldWithToken } from './field_with_token';
 
 export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColumnProps) => {
   const { euiTheme } = useEuiTheme();

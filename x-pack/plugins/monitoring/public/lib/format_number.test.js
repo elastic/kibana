@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { formatBytesUsage, formatNumber } from './format_number';
+import { formatNumber, formatBytesUsage } from './format_number';
 
 describe('format_number', () => {
   describe('formatBytesUsage', () => {

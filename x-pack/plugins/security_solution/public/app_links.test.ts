@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { appLinks } from './app_links';
-import type { AppLinkItems, LinkItem } from './common/links/types';
+import type { LinkItem, AppLinkItems } from './common/links/types';
 
 const traverse = (linksItems: AppLinkItems, fn: (link: LinkItem) => void) => {
   linksItems.forEach((link) => {

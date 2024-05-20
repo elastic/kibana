@@ -1,4 +1,3 @@
-import { SortDirection } from '@kbn/data-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +6,13 @@ import { SortDirection } from '@kbn/data-plugin/public';
  * Side Public License, v 1.
  */
 import { DataView } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
+import { createSearchSourceStub } from './_stubs';
+import { fetchAnchor, updateSearchSource } from './anchor';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { createSearchSourceStub } from './_stubs';
-import { fetchAnchor, updateSearchSource } from './anchor';
 
 describe('context app', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

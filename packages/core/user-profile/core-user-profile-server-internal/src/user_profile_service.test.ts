@@ -11,9 +11,9 @@ import {
   getDefaultUserProfileImplementationMock,
 } from './user_profile_service.test.mocks';
 
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { UserProfileService } from './user_profile_service';
 
 const createStubContract = (): CoreUserProfileDelegateContract => {

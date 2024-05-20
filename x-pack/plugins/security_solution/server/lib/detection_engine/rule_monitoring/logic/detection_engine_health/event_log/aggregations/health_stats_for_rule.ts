@@ -9,10 +9,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 
 import type {
-  HealthHistory,
   HealthIntervalGranularity,
   RuleHealthSnapshot,
   RuleHealthStats,
+  HealthHistory,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
 import type { RawData } from '../../../utils/normalization';
 

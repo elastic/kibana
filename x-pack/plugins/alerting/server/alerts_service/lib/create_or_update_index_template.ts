@@ -10,11 +10,11 @@ import {
   MappingTypeMapping,
   Metadata,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { IIndexPatternString } from '../resource_installer_utils';
-import { DataStreamAdapter } from './data_stream_adapter';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { DataStreamAdapter } from './data_stream_adapter';
 
 interface GetIndexTemplateOpts {
   componentTemplateRefs: string[];

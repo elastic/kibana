@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiForm } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
+import { EuiForm } from '@elastic/eui';
 
 import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { ANALYTICS_STEPS } from '../../page';
-import { AdvancedStepDetails } from './advanced_step_details';
 import { AdvancedStepForm } from './advanced_step_form';
+import { AdvancedStepDetails } from './advanced_step_details';
+import { ANALYTICS_STEPS } from '../../page';
 
 export const AdvancedStep: FC<CreateAnalyticsStepProps> = ({
   actions,

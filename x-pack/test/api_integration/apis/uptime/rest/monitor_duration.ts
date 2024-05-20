@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { API_URLS } from '@kbn/uptime-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import expect from '@kbn/expect';
 import { expectFixtureEql } from './helper/expect_fixture_eql';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('monitor duration query', () => {

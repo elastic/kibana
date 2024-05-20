@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { render, waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { EditConnectorProps } from '.';
 import { EditConnector } from '.';
 
-import { ConnectorTypes } from '../../../common';
 import {
   type AppMockRenderer,
-  TestProviders,
   createAppMockRenderer,
-  noCasesPermissions,
+  TestProviders,
   noConnectorsCasePermission,
+  noCasesPermissions,
 } from '../../common/mock';
-import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, connectorsMock } from '../../containers/mock';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { ReturnUsePushToService } from '../use_push_to_service';
 import { usePushToService } from '../use_push_to_service';
+import { ConnectorTypes } from '../../../common';
 
 const onSubmit = jest.fn();
 const caseConnectors = getCaseConnectorsMockResponse();

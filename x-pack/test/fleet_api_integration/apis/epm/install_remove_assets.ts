@@ -7,9 +7,9 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
 import { AssetReference } from '@kbn/fleet-plugin/common/types';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
-import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';

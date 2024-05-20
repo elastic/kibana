@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { useCallback, useState, useMemo, useEffect } from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
+import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { indexNameToDataStreamParts } from '../../common/utils';
-import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { getLensAttributes } from '../components/flyout/degraded_docs_trend/lens_attributes';
-import { useKibanaContextForPlugin } from '../utils';
 import { useCreateDataView } from './use_create_dataview';
-import { useDatasetQualityFlyout } from './use_dataset_quality_flyout';
 import { useLinkToLogsExplorer } from './use_link_to_logs_explorer';
+import { useDatasetQualityFlyout } from './use_dataset_quality_flyout';
+import { useKibanaContextForPlugin } from '../utils';
 
 const exploreDataInLogsExplorerText = i18n.translate(
   'xpack.datasetQuality.flyoutChartExploreDataInLogsExplorerText',

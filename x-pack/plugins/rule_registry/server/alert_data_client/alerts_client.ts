@@ -1,4 +1,3 @@
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,52 +5,53 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { EsQueryConfig, Filter, buildEsQuery } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
+import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
 import {
-  ALERT_CASE_IDS,
-  ALERT_END,
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
   ALERT_TIME_RANGE,
-  AlertConsumers,
-  MAX_CASES_PER_ALERT,
-  STATUS_VALUES,
-  ValidFeatureId,
+  ALERT_STATUS,
   getEsQueryConfig,
   getSafeSortIds,
   isValidFeatureId,
+  STATUS_VALUES,
+  ValidFeatureId,
+  ALERT_STATUS_RECOVERED,
+  ALERT_END,
+  ALERT_STATUS_ACTIVE,
+  ALERT_CASE_IDS,
+  MAX_CASES_PER_ALERT,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
-import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   InlineScript,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PluginStartContract as AlertingStart, RuleTypeParams } from '@kbn/alerting-plugin/server';
+import { RuleTypeParams, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
 import {
-  AlertingAuthorization,
-  AlertingAuthorizationEntity,
   ReadOperations,
+  AlertingAuthorization,
   WriteOperations,
+  AlertingAuthorizationEntity,
 } from '@kbn/alerting-plugin/server';
-import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import { EcsEvent, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
+import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
+import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { BrowserFields } from '../../common';
-import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
+import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
+  ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
-  ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
 } from '../../common/technical_rule_data_field_names';
-import { getAuthzFilter, getSpacesFilter } from '../lib';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { IRuleDataService } from '../rule_data_plugin_service';
-import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
+import { getAuthzFilter, getSpacesFilter } from '../lib';
 import { fieldDescriptorToBrowserFieldMapper } from './browser_fields';
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776

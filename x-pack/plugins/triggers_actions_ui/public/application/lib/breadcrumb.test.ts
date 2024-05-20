@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { routeToConnectors, routeToHome, routeToRules } from '../constants';
 import { getAlertingSectionBreadcrumb } from './breadcrumb';
+import { i18n } from '@kbn/i18n';
+import { routeToConnectors, routeToRules, routeToHome } from '../constants';
 
 describe('getAlertingSectionBreadcrumb', () => {
   test('if change calls return proper breadcrumb title ', async () => {

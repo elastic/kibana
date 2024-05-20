@@ -21,7 +21,7 @@ import {
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { SecurityCellActionsTrigger } from '../../../../app/actions/constants';
-import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
+import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
@@ -29,13 +29,13 @@ import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/compone
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import * as i18n from '../translations';
 import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
 import type { UserAlertsItem } from './use_user_alerts_items';
 import { useUserAlertsItems } from './use_user_alerts_items';
+import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
+import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 interface UserAlertsTableProps {
   signalIndexName: string | null;

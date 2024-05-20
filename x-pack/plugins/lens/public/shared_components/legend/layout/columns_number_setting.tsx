@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 
 export const DEFAULT_FLOATING_COLUMNS = 1;
 

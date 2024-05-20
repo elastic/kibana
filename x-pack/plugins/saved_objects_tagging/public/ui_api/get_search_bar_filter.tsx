@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  GetSearchBarFilterOptions,
   SavedObjectsTaggingApiUi,
+  GetSearchBarFilterOptions,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import React from 'react';
 
 import { Tag } from '../../common';
 import { TagSearchBarOption } from '../components';

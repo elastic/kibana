@@ -84,7 +84,9 @@
           "master": 1,
           "ingest": 1
         },
-        "versions": ["7.0.0-alpha1"],
+        "versions": [
+          "7.0.0-alpha1"
+        ],
         "os": {
           "available_processors": 8,
           "allocated_processors": 1,
@@ -142,7 +144,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Upgrade",
             "classname": "org.elasticsearch.xpack.upgrade.Upgrade",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -152,7 +156,9 @@
             "java_version": "1.8",
             "description": "The Elasticsearch plugin that powers SQL for Elasticsearch",
             "classname": "org.elasticsearch.xpack.sql.plugin.SqlPlugin",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -162,7 +168,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Machine Learning",
             "classname": "org.elasticsearch.xpack.ml.MachineLearning",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": true
           },
           {
@@ -172,7 +180,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Logstash",
             "classname": "org.elasticsearch.xpack.logstash.Logstash",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -182,7 +192,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Deprecation",
             "classname": "org.elasticsearch.xpack.deprecation.Deprecation",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -192,7 +204,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Monitoring",
             "classname": "org.elasticsearch.xpack.monitoring.Monitoring",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -212,7 +226,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Security",
             "classname": "org.elasticsearch.xpack.security.Security",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -222,7 +238,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Rollup",
             "classname": "org.elasticsearch.xpack.rollup.Rollup",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -232,7 +250,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Watcher",
             "classname": "org.elasticsearch.xpack.watcher.Watcher",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -242,7 +262,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Graph",
             "classname": "org.elasticsearch.xpack.graph.Graph",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           }
         ],
@@ -289,7 +311,9 @@
       }
     },
     "kibana": {
-      "uuids": ["46205c28-9d41-447a-a438-c8b86fb5d1ce"],
+      "uuids": [
+        "46205c28-9d41-447a-a438-c8b86fb5d1ce"
+      ],
       "status": "green",
       "requests_total": 1,
       "concurrent_connections": 1,
@@ -401,7 +425,9 @@
           "master": 1,
           "ingest": 1
         },
-        "versions": ["7.0.0-alpha1"],
+        "versions": [
+          "7.0.0-alpha1"
+        ],
         "os": {
           "available_processors": 8,
           "allocated_processors": 1,
@@ -459,7 +485,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Upgrade",
             "classname": "org.elasticsearch.xpack.upgrade.Upgrade",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -469,7 +497,9 @@
             "java_version": "1.8",
             "description": "The Elasticsearch plugin that powers SQL for Elasticsearch",
             "classname": "org.elasticsearch.xpack.sql.plugin.SqlPlugin",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -479,7 +509,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Machine Learning",
             "classname": "org.elasticsearch.xpack.ml.MachineLearning",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": true
           },
           {
@@ -489,7 +521,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Logstash",
             "classname": "org.elasticsearch.xpack.logstash.Logstash",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -499,7 +533,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Deprecation",
             "classname": "org.elasticsearch.xpack.deprecation.Deprecation",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -509,7 +545,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Monitoring",
             "classname": "org.elasticsearch.xpack.monitoring.Monitoring",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -529,7 +567,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Security",
             "classname": "org.elasticsearch.xpack.security.Security",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -539,7 +579,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Rollup",
             "classname": "org.elasticsearch.xpack.rollup.Rollup",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -549,7 +591,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Watcher",
             "classname": "org.elasticsearch.xpack.watcher.Watcher",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           },
           {
@@ -559,7 +603,9 @@
             "java_version": "1.8",
             "description": "Elasticsearch Expanded Pack Plugin - Graph",
             "classname": "org.elasticsearch.xpack.graph.Graph",
-            "extended_plugins": ["x-pack-core"],
+            "extended_plugins": [
+              "x-pack-core"
+            ],
             "has_native_controller": false
           }
         ],

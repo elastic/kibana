@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { SerializableRecord } from '@kbn/utility-types';
-import { isNumber } from 'lodash';
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs';
+import { isNumber } from 'lodash';
+import { SerializableRecord } from '@kbn/utility-types';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
-import { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
-import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
 import {
   ExpressionRenderError,
-  ExpressionRendererEvent,
-  IExpressionLoaderParams,
   RenderErrorHandlerFnType,
+  IExpressionLoaderParams,
+  ExpressionRendererEvent,
 } from './types';
+import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
+import { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
 
 import { getRenderersRegistry } from './services';
 

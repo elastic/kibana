@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ConnectorConfigCategoryProperties, ConnectorConfigProperties } from '../types/connectors';
+import { ConnectorConfigProperties, ConnectorConfigCategoryProperties } from '../types/connectors';
 
 export function isCategoryEntry(
   input:

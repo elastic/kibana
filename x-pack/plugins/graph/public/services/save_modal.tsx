@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import React from 'react';
 import { SaveResult } from '@kbn/saved-objects-plugin/public';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-import React from 'react';
-import { OnSaveGraphProps, SaveModal } from '../components/save_modal';
-import { GraphSavePolicy, GraphWorkspaceSavedObject } from '../types';
+import { ContentClient } from '@kbn/content-management-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
+import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
 
 export interface SaveWorkspaceServices
   extends Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'> {

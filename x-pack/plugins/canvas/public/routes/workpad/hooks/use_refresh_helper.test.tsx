@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import React, { PropsWithChildren } from 'react';
-import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
+import { renderHook } from '@testing-library/react-hooks';
 import { useRefreshHelper } from './use_refresh_helper';
+import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn();
@@ -27,13 +27,12 @@ const getMockedContext = (context: any) =>
   ({
     refreshInterval: 0,
     ...context,
-  }) as WorkpadRoutingContextType;
+  } as WorkpadRoutingContextType);
 
 const getContextWrapper =
   (context: WorkpadRoutingContextType) =>
-  ({ children }: PropsWithChildren<unknown>) => (
-    <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>
-  );
+  ({ children }: PropsWithChildren<unknown>) =>
+    <WorkpadRoutingContext.Provider value={context}>{children}</WorkpadRoutingContext.Provider>;
 
 describe('useRefreshHelper', () => {
   beforeEach(() => {

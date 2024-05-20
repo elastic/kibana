@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React, { useMemo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiCard,
-  EuiEmptyPrompt,
-  EuiFacetButton,
-  EuiFacetGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFacetGroup,
+  EuiFacetButton,
+  EuiCard,
   EuiSpacer,
   EuiText,
+  EuiEmptyPrompt,
+  EuiButton,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import React, { useMemo, useCallback } from 'react';
 import { PRODUCER_DISPLAY_NAMES } from '../../common/i18n';
-import { RuleTypeCountsByProducer, RuleTypeWithDescription } from '../types';
+import { RuleTypeWithDescription, RuleTypeCountsByProducer } from '../types';
 
 interface RuleTypeListProps {
   ruleTypes: RuleTypeWithDescription[];

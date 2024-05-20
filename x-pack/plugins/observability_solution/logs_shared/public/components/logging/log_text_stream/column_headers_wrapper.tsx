@@ -20,7 +20,8 @@ export const LogColumnHeadersWrapper = euiStyled.div.attrs((props) => ({
     overflow: hidden;
     padding-right: ${ASSUMED_SCROLLBAR_WIDTH}px;
     border-bottom: ${(props) => props.theme.eui.euiBorderThin};
-    box-shadow: 0 2px 2px -1px ${(props) => transparentize(0.3, props.theme.eui.euiColorLightShade)};
+    box-shadow: 0 2px 2px -1px ${(props) =>
+      transparentize(0.3, props.theme.eui.euiColorLightShade)};
     position: relative;
     z-index: 1;
   `;

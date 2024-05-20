@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type {
-  CoreSetup,
-  CustomRequestHandlerContext,
-  IScopedClusterClient,
   KibanaRequest,
   KibanaResponseFactory,
+  CustomRequestHandlerContext,
+  IScopedClusterClient,
   RequestHandler,
   SavedObjectsClientContract,
+  CoreSetup,
 } from '@kbn/core/server';
-import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
-import { createExecutionContext } from '@kbn/ml-route-utils';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { createExecutionContext } from '@kbn/ml-route-utils';
 
 import { PLUGIN_ID } from '../../common/constants/app';
-import type { MlLicense } from '../../common/license';
 import type { MLSavedObjectService } from '../saved_objects';
 import { mlSavedObjectServiceFactory } from '../saved_objects';
+import type { MlLicense } from '../../common/license';
 
-import { getDataViewsServiceFactory } from './data_views_utils';
 import type { MlClient } from './ml_client';
 import { getMlClient } from './ml_client';
+import { getDataViewsServiceFactory } from './data_views_utils';
 
 type MLRequestHandlerContext = CustomRequestHandlerContext<{
   alerting?: AlertingApiRequestHandlerContext;

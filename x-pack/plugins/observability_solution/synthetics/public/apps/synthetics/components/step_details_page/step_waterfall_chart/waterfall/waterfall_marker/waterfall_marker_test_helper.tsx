@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { JourneyStep } from '../../../../../../../../common/runtime_types';
 import { SyntheticsStartupPluginsContext } from '../../../../../contexts';
+import { JourneyStep } from '../../../../../../../../common/runtime_types';
 import { WaterfallContext } from '../context/waterfall_context';
 
 const EmbeddableMock = ({

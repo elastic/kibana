@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { DataViewField } from '@kbn/data-plugin/common';
-import { indexPatterns } from '@kbn/data-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component, Fragment } from 'react';
-import type { AggDescriptor } from '../../../../common/descriptor_types';
+import type { DataViewField } from '@kbn/data-plugin/common';
+import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
+import type { AggDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 
 interface Props {

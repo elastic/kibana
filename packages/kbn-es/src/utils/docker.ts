@@ -1,6 +1,3 @@
-import fs from 'fs';
-import { basename, join, resolve } from 'path';
-import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,40 +7,43 @@ import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
  */
 import chalk from 'chalk';
 import execa from 'execa';
+import fs from 'fs';
 import Fsp from 'fs/promises';
+import { resolve, basename, join } from 'path';
+import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
 
+import { ToolingLog } from '@kbn/tooling-log';
+import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
 import { CA_CERT_PATH, ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 import {
-  MOCK_IDP_ATTRIBUTE_EMAIL,
-  MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_ENTITY_ID,
   MOCK_IDP_ATTRIBUTE_PRINCIPAL,
   MOCK_IDP_ATTRIBUTE_ROLES,
-  MOCK_IDP_ENTITY_ID,
-  MOCK_IDP_REALM_NAME,
-  createMockIdpMetadata,
+  MOCK_IDP_ATTRIBUTE_EMAIL,
+  MOCK_IDP_ATTRIBUTE_NAME,
   ensureSAMLRoleMapping,
+  createMockIdpMetadata,
 } from '@kbn/mock-idp-utils';
-import { REPO_ROOT, kibanaPackageJson as pkg } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
 
-import { EsClusterExecOptions } from '../cluster_exec_options';
+import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
+import { EsClusterExecOptions } from '../cluster_exec_options';
 import {
+  SERVERLESS_RESOURCES_PATHS,
+  SERVERLESS_SECRETS_PATH,
+  SERVERLESS_JWKS_PATH,
+  SERVERLESS_IDP_METADATA_PATH,
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_FILES_PATH,
-  SERVERLESS_IDP_METADATA_PATH,
-  SERVERLESS_JWKS_PATH,
-  SERVERLESS_RESOURCES_PATHS,
-  SERVERLESS_ROLES_ROOT_PATH,
-  SERVERLESS_SECRETS_PATH,
   SERVERLESS_SECRETS_SSL_PATH,
+  SERVERLESS_ROLES_ROOT_PATH,
 } from '../paths';
-import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import {
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
 } from './serverless_file_realm';
-import { waitForSecurityIndex } from './wait_for_security_index';
+import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
 interface ImageOptions {
@@ -606,13 +606,10 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
 
   const resourceFileOverrides: Record<string, string> = resources
-    ? (Array.isArray(resources) ? resources : [resources]).reduce(
-        (acc, filePath) => {
-          acc[basename(filePath)] = resolve(process.cwd(), filePath);
-          return acc;
-        },
-        {} as Record<string, string>
-      )
+    ? (Array.isArray(resources) ? resources : [resources]).reduce((acc, filePath) => {
+        acc[basename(filePath)] = resolve(process.cwd(), filePath);
+        return acc;
+      }, {} as Record<string, string>)
     : {};
 
   // Read roles for the specified projectType

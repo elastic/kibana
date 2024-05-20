@@ -1,5 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiI18nNumber, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,7 +5,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React from 'react';
+import { EuiText, EuiLoadingSpinner, EuiI18nNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { selectOverviewState } from '../../../../state/overview';
 
 export const OverviewPaginationInfo = ({

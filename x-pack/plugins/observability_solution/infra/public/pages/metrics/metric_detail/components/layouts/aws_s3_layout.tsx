@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { withTheme } from '@kbn/kibana-react-plugin/common';
-import React from 'react';
+import { EuiPanel } from '@elastic/eui';
 import type { LayoutPropsWithTheme } from '../../types';
-import { ChartSectionVis } from '../chart_section_vis';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
+import { ChartSectionVis } from '../chart_section_vis';
 
 export const AwsS3Layout = withTheme(
   ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { Frequency } from '@kbn/rrule';
 import moment, { Moment } from 'moment';
-import { RecurringScheduleFormProps } from '../components/schema';
+import { Frequency } from '@kbn/rrule';
+import * as i18n from '../translations';
 import {
-  ISO_WEEKDAYS_TO_RRULE,
   MaintenanceWindowFrequency,
+  ISO_WEEKDAYS_TO_RRULE,
   RRULE_WEEKDAYS_TO_ISO_WEEKDAYS,
 } from '../constants';
-import * as i18n from '../translations';
-import { getNthByWeekday } from './get_nth_by_weekday';
 import { monthDayDate } from './month_day_date';
+import { getNthByWeekday } from './get_nth_by_weekday';
+import { RecurringScheduleFormProps } from '../components/schema';
 
 export const recurringSummary = (
   startDate: Moment,
@@ -74,18 +74,18 @@ export const recurringSummary = (
     const onSummary = dailyWithWeekdays
       ? dailyWeekdaySummary
       : frequency === Frequency.WEEKLY
-        ? weeklySummary
-        : frequency === Frequency.MONTHLY
-          ? monthlySummary
-          : frequency === Frequency.YEARLY
-            ? yearlyByMonthSummary
-            : null;
+      ? weeklySummary
+      : frequency === Frequency.MONTHLY
+      ? monthlySummary
+      : frequency === Frequency.YEARLY
+      ? yearlyByMonthSummary
+      : null;
 
     const untilSummary = schedule.until
       ? i18n.CREATE_FORM_UNTIL_DATE_SUMMARY(moment(schedule.until).format('LL'))
       : schedule.count
-        ? i18n.CREATE_FORM_OCURRENCES_SUMMARY(schedule.count)
-        : null;
+      ? i18n.CREATE_FORM_OCURRENCES_SUMMARY(schedule.count)
+      : null;
 
     const every = i18n
       .CREATE_FORM_RECURRING_SUMMARY(

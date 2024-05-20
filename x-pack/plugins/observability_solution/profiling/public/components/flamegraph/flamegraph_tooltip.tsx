@@ -23,9 +23,9 @@ import { isNumber } from 'lodash';
 import React from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
-import { asInteger } from '../../utils/formatters/as_integer';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
+import { asInteger } from '../../utils/formatters/as_integer';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
 

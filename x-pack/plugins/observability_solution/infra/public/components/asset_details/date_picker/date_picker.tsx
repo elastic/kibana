@@ -6,17 +6,17 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiSuperDatePicker,
-  type EuiSuperDatePickerProps,
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiText,
-  type OnRefreshProps,
   type OnTimeChangeProps,
+  type OnRefreshProps,
+  type EuiSuperDatePickerProps,
 } from '@elastic/eui';
 import type {
-  DurationRange,
   OnRefreshChangeProps,
+  DurationRange,
 } from '@elastic/eui/src/components/date_picker/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

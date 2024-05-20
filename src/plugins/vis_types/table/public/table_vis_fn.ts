@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Datatable, ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '@kbn/expressions-plugin/public';
+import { prepareLogTable, Dimension } from '@kbn/visualizations-plugin/public';
+import { TableVisData, TableVisConfig } from './types';
 import { VIS_TYPE_TABLE } from '../common';
-import { TableVisConfig, TableVisData } from './types';
 import { tableVisResponseHandler } from './utils';
 
 export interface TableVisRenderValue {

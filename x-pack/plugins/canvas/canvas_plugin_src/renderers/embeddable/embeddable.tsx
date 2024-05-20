@@ -11,8 +11,8 @@ import {
   EmbeddableFactoryNotFoundError,
   EmbeddablePanel,
   IEmbeddable,
-  ReactEmbeddableRenderer,
   isErrorEmbeddable,
+  ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableAppContext } from '@kbn/presentation-publishing';
@@ -20,9 +20,9 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { pluginServices } from '../../../public/services';
 import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
-import { pluginServices } from '../../../public/services';
 import {
   CanvasContainerApi,
   EmbeddableInput,

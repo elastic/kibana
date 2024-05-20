@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
-import React from 'react';
-import {
-  IndexLifecyclePhaseSelectOption,
-  indexLifecyclePhaseRt,
-} from '../../../../common/storage_explorer_types';
-import { Breadcrumb } from '../../app/breadcrumb';
+import { EuiLink } from '@elastic/eui';
 import { StorageExplorer } from '../../app/storage_explorer';
-import { getStorageExplorerFeedbackHref } from '../../app/storage_explorer/get_storage_explorer_links';
 import { ApmMainTemplate } from '../templates/apm_main_template';
+import { Breadcrumb } from '../../app/breadcrumb';
+import {
+  indexLifecyclePhaseRt,
+  IndexLifecyclePhaseSelectOption,
+} from '../../../../common/storage_explorer_types';
+import { getStorageExplorerFeedbackHref } from '../../app/storage_explorer/get_storage_explorer_links';
 
 export const storageExplorer = {
   '/storage-explorer': {

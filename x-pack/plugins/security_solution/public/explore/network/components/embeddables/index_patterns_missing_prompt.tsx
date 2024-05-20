@@ -9,7 +9,7 @@ import { EuiButton, EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import { useBasePath, useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useBasePath } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 
 export const IndexPatternsMissingPromptComponent = () => {

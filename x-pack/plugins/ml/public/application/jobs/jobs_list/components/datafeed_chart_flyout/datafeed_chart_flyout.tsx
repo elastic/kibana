@@ -5,6 +5,29 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import {
+  EuiButtonEmpty,
+  EuiCheckbox,
+  EuiDatePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiIcon,
+  EuiIconTip,
+  EuiLoadingChart,
+  EuiPortal,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import type {
   CustomAnnotationTooltip,
   LineAnnotationDatum,
@@ -24,33 +47,10 @@ import {
   RectAnnotation,
   ScaleType,
   Settings,
+  timeFormatter,
   Tooltip,
   TooltipType,
-  timeFormatter,
 } from '@elastic/charts';
-import {
-  EuiButtonEmpty,
-  EuiCheckbox,
-  EuiDatePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiIcon,
-  EuiIconTip,
-  EuiLoadingChart,
-  EuiPortal,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-  htmlIdGenerator,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import moment from 'moment';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import type {
   CombinedJobWithStats,
@@ -59,15 +59,15 @@ import type {
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import type { JobMessage } from '../../../../../../common/types/audit_message';
 import type { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
-import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
-import { useCurrentThemeVars, useMlApiContext } from '../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
+import { useCurrentThemeVars, useMlApiContext } from '../../../../contexts/kibana';
+import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
-import { loadFullJob } from '../utils';
+import { EditQueryDelay } from './edit_query_delay';
 import type { ChartDirectionType } from './constants';
 import { CHART_DIRECTION, CHART_SIZE } from './constants';
-import { EditQueryDelay } from './edit_query_delay';
+import { loadFullJob } from '../utils';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { type ChartDataWithNullValues, fillMissingChartData } from './fill_missing_chart_data';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');

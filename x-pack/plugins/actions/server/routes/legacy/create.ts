@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { BASE_ACTION_API_PATH } from '../../../common';
-import { ILicenseState } from '../../lib';
-import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { IRouter } from '@kbn/core/server';
 import { ActionsRequestHandlerContext } from '../../types';
+import { ILicenseState } from '../../lib';
+import { BASE_ACTION_API_PATH } from '../../../common';
 import { verifyAccessAndContext } from '../verify_access_and_context';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export const bodySchema = schema.object({
   name: schema.string(),

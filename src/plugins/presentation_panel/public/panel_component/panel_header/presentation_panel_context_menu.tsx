@@ -26,7 +26,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { uiActions } from '../../kibana_services';
-import { CONTEXT_MENU_TRIGGER, contextMenuTrigger } from '../../panel_actions';
+import { contextMenuTrigger, CONTEXT_MENU_TRIGGER } from '../../panel_actions';
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 

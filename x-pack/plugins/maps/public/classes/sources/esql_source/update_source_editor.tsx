@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
 import {
   EuiFormRow,
   EuiPanel,
@@ -15,14 +16,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
+import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 import { getIndexPatternService } from '../../../kibana_services';
-import type { OnSourceChangeArgs } from '../source';
 import { ESQLEditor } from './esql_editor';
-import { getFields } from './esql_utils';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
+import { getFields } from './esql_utils';
 
 interface Props {
   onChange(...args: OnSourceChangeArgs[]): void;

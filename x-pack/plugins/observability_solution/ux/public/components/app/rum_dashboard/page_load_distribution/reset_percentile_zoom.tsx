@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiHideFor, EuiShowFor } from '@elastic/eui';
 import React from 'react';
+import { EuiButtonEmpty, EuiHideFor, EuiShowFor, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { PercentileRange } from './types';
 

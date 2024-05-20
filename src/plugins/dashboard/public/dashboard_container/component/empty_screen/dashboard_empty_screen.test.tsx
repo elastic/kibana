@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { buildMockDashboard } from '../../../mocks';
+import { DashboardEmptyScreen } from './dashboard_empty_screen';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardContainerContext } from '../../embeddable/dashboard_container';
-import { DashboardEmptyScreen } from './dashboard_empty_screen';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 pluginServices.getServices().visualizations.getAliases = jest
   .fn()

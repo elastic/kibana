@@ -1,4 +1,3 @@
-import { useMutation } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +5,13 @@ import { useMutation } from '@tanstack/react-query';
  * 2.0.
  */
 import { useDispatch } from 'react-redux';
+import { useMutation } from '@tanstack/react-query';
 
-import { TimelineId } from '../../../../../../common/types/timeline';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { appActions } from '../../../../../common/store/app';
 import { timelineActions } from '../../../../store';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import * as i18n from '../translations';
 
 export function useDeleteNote(

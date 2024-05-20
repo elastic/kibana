@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 
 import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '@kbn/cross-cluster-replication-plugin/common/constants';
 import { getFollowerIndexPayload } from './fixtures';
-import { registerHelpers as registerFollowerIndicesnHelpers } from './follower_indices.helpers';
 import { registerHelpers as registerElasticSearchHelpers } from './lib';
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
+import { registerHelpers as registerFollowerIndicesnHelpers } from './follower_indices.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

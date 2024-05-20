@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Meta } from '@storybook/react';
 import React from 'react';
+import { Meta } from '@storybook/react';
 
 import { ReplacementCard as ConnectedComponent } from './replacement_card';
 import { ReplacementCard as PureComponent } from './replacement_card.component';

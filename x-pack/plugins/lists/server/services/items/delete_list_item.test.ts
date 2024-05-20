@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LIST_ITEM_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
+import { LIST_ITEM_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
+import { getListItem } from './get_list_item';
 import { deleteListItem } from './delete_list_item';
 import { getDeleteListItemOptionsMock } from './delete_list_item.mock';
-import { getListItem } from './get_list_item';
 
 jest.mock('./get_list_item', () => ({
   getListItem: jest.fn(),

@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import { getIsRulePreviewDisabled, getTimeframeOptions, isNoisy } from './helpers';
+import { isNoisy, getTimeframeOptions, getIsRulePreviewDisabled } from './helpers';
 
 describe('query_preview/helpers', () => {
   const timeframeEnd = moment();

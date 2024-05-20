@@ -9,7 +9,7 @@ import { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib
 
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { MlModelDeploymentState, MlModelDeploymentStatus } from '../../../common/types/ml';
+import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
 
 import { getMlModelDeploymentStatus } from './get_ml_model_deployment_status';
 import { isNotFoundExceptionError } from './ml_model_deployment_common';

@@ -30,25 +30,21 @@ export const Link = styled(({ iconSide, children, ...rest }) => (
     vertical-align: top;
     white-space: nowrap;
 
-    ${
-      iconSide === 'left' &&
-      css`
+    ${iconSide === 'left' &&
+    css`
       .euiIcon {
         margin-right: ${theme.eui.euiSizeXS};
       }
-    `
-    }
+    `}
 
-    ${
-      iconSide === 'right' &&
-      css`
+    ${iconSide === 'right' &&
+    css`
       flex-direction: row-reverse;
 
       .euiIcon {
         margin-left: ${theme.eui.euiSizeXS};
       }
-    `
-    }
+    `}
   `}
 `;
 Link.displayName = 'Link';

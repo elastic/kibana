@@ -9,11 +9,15 @@ import { getNewRule } from '../../../../../objects/rule';
 
 import { RULE_STATUS } from '../../../../../screens/create_new_rule';
 
-import { ALERTS_COUNT } from '../../../../../screens/alerts';
-import { CONFIRM_BTN } from '../../../../../screens/exceptions';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
+import { login } from '../../../../../tasks/login';
+import {
+  openExceptionFlyoutFromEmptyViewerPrompt,
+  visitRuleDetailsPage,
+  clickEnableRuleSwitch,
+  waitForTheRuleToBeExecuted,
+  goToAlertsTab,
+} from '../../../../../tasks/rule_details';
 import {
   addExceptionEntryFieldMatchAnyValue,
   addExceptionEntryFieldValue,
@@ -21,14 +25,10 @@ import {
   addExceptionFlyoutItemName,
   submitNewExceptionItem,
 } from '../../../../../tasks/exceptions';
-import { login } from '../../../../../tasks/login';
-import {
-  clickEnableRuleSwitch,
-  goToAlertsTab,
-  openExceptionFlyoutFromEmptyViewerPrompt,
-  visitRuleDetailsPage,
-  waitForTheRuleToBeExecuted,
-} from '../../../../../tasks/rule_details';
+import { CONFIRM_BTN } from '../../../../../screens/exceptions';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { ALERTS_COUNT } from '../../../../../screens/alerts';
+import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiText, EuiToolTip } from '@elastic/eui';
 import React, { Fragment } from 'react';
+import { EuiText, EuiToolTip } from '@elastic/eui';
+import { AlertPanel } from '../panel';
 import { RULE_PANEL_MENU } from '../../../common/constants';
-import { getCalendar, getDateFromNow } from '../../../common/formatting';
+import { getDateFromNow, getCalendar } from '../../../common/formatting';
 import {
   AlertState,
   CommonAlert,
   CommonAlertState,
   CommonAlertStatus,
 } from '../../../common/types/alerts';
-import { Legacy } from '../../legacy_shims';
-import { AlertPanel } from '../panel';
 import { PanelItem } from '../types';
 import { sortByNewestAlert } from './sort_by_newest_alert';
+import { Legacy } from '../../legacy_shims';
 
 interface MenuAlert {
   alert: CommonAlert;

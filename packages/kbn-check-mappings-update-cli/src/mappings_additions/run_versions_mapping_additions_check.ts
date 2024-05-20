@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { FieldListMap } from '@kbn/core-saved-objects-base-server-internal';
-import { createFailError } from '@kbn/dev-cli-errors';
 import { ToolingLog } from '@kbn/tooling-log';
-import { type CompareResult, compareFieldLists } from './compare_type_field_lists';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { FieldListMap } from '@kbn/core-saved-objects-base-server-internal';
+import { compareFieldLists, type CompareResult } from './compare_type_field_lists';
 import { readCurrentFields, writeCurrentFields } from './current_fields';
 import { extractFieldListsFromPlugins } from './extract_field_lists_from_plugins';
 
@@ -25,8 +25,9 @@ export const runModelVersionMappingAdditionsChecks = async ({
   log: ToolingLog;
 }) => {
   log.info('Generating field lists from registry and file');
-  const { fieldsFromRegisteredTypes, fieldsFromModelVersions } =
-    await extractFieldListsFromPlugins(log);
+  const { fieldsFromRegisteredTypes, fieldsFromModelVersions } = await extractFieldListsFromPlugins(
+    log
+  );
   const currentFields = await readCurrentFields();
 
   const allTypeNames = [

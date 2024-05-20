@@ -8,18 +8,18 @@
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 
 import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils';
-import { ES_AGGREGATION, getSeverityType } from '@kbn/ml-anomaly-utils';
+import { getSeverityType, ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 import type { ModelPlotOutputResults } from '../../../../services/results_service';
 import { mlResultsService } from '../../../../services/results_service';
 
-import type { ChartLoader } from '../chart_loader';
 import type { JobCreatorType } from '../job_creator';
 import { isMultiMetricJobCreator } from '../job_creator';
+import type { ChartLoader } from '../chart_loader';
 
 import { getScoresByRecord } from './searches';
 
@@ -230,7 +230,7 @@ export class ResultsLoader {
     const anomalies: Record<number, Anomaly[]> = {};
     anomalies[0] = Object.entries(results).map(
       ([time, value]) =>
-        ({ time: +time, value, severity: getSeverityType(value as number) }) as Anomaly
+        ({ time: +time, value, severity: getSeverityType(value as number) } as Anomaly)
     );
     return anomalies;
   }
@@ -247,7 +247,7 @@ export class ResultsLoader {
     const anomalies: Record<number, Anomaly[]> = {};
     Object.entries(resp.results).forEach(([dtrIdx, results]) => {
       anomalies[+dtrIdx] = results.map(
-        (r) => ({ ...r, severity: getSeverityType(r.value as number) }) as Anomaly
+        (r) => ({ ...r, severity: getSeverityType(r.value as number) } as Anomaly)
       );
     });
     return anomalies;

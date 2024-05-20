@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core/server';
 import { SavedObjectsManagement } from './management';
+import { SavedObjectsType, SavedObjectTypeRegistry } from '@kbn/core/server';
 
 describe('SavedObjectsManagement', () => {
   let registry: SavedObjectTypeRegistry;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { ExploratoryEmbeddableProps } from '../../../..';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { getDataTypeIndices } from '../../../../utils/observability_data_views';
 import { AppDataType } from '../types';
+import { ExploratoryEmbeddableProps } from '../../../..';
 
 export function useLocalDataView(
   seriesDataType: AppDataType,

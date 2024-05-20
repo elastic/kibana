@@ -18,17 +18,17 @@ import {
   getDashboardLocatorParamsFromEmbeddable,
 } from '@kbn/dashboard-plugin/public';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import {
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
   DashboardDrilldownOptions,
+  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from '@kbn/presentation-util-plugin/public';
+import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 
 import {
   DASHBOARD_LINK_TYPE,
-  LINKS_VERTICAL_LAYOUT,
   Link,
   LinksLayoutType,
+  LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
 import { useLinks } from '../links_hooks';

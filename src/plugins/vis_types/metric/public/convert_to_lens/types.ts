@@ -7,7 +7,7 @@
  */
 
 import { TimefilterContract } from '@kbn/data-plugin/public';
-import { MetricVisConfiguration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
+import { NavigateToLensContext, MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { VisParams } from '../types';
 

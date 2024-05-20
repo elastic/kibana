@@ -9,7 +9,7 @@
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlEmbeddable, ControlFactory, ControlInput, ControlOutput } from '../..';
-import { ControlTypeRegistry, ControlsServiceType } from './types';
+import { ControlsServiceType, ControlTypeRegistry } from './types';
 
 export type ControlsServiceFactory = PluginServiceFactory<ControlsServiceType>;
 export const controlsServiceFactory = () => getStubControlsService();
@@ -24,7 +24,7 @@ export const getStubControlsService = () => {
   const getControlFactory = <
     I extends ControlInput = ControlInput,
     O extends ControlOutput = ControlOutput,
-    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>,
+    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>
   >(
     type: string
   ) => {

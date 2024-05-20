@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
-import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../../../services';
 
 interface PoliciesMap {
   [K: string]: {

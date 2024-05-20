@@ -11,13 +11,13 @@ import React, { Component } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCheckbox,
-  EuiHorizontalRule,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiHorizontalRule,
+  EuiCheckbox,
 } from '@elastic/eui';
 
 import moment from 'moment';

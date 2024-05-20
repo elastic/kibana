@@ -9,7 +9,7 @@
 import deepEqual from 'fast-deep-equal';
 import React, { createContext } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-import { Subject, Subscription, distinctUntilChanged, skip, switchMap } from 'rxjs';
+import { distinctUntilChanged, skip, Subject, Subscription, switchMap } from 'rxjs';
 
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import {

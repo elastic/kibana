@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiToolTipProps } from '@elastic/eui';
+import React from 'react';
+import { ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import { MountPoint } from '@kbn/core/public';
+import { TopNavMenu } from './top_nav_menu';
+import { TopNavMenuData } from './top_nav_menu_data';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { ReactWrapper } from 'enzyme';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { TopNavMenu } from './top_nav_menu';
+import { EuiToolTipProps } from '@elastic/eui';
 import type { TopNavMenuBadgeProps } from './top_nav_menu_badges';
-import { TopNavMenuData } from './top_nav_menu_data';
 
 const unifiedSearch = {
   ui: {

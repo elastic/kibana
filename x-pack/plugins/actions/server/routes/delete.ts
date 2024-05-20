@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { BASE_ACTION_API_PATH } from '../../common';
 import { ILicenseState } from '../lib';
+import { BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 

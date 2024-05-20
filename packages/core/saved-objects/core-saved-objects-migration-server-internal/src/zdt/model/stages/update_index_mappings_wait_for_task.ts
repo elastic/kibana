@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
 import {} from 'lodash';
-import { throwBadResponse } from '../../../model/helpers';
+import * as Either from 'fp-ts/lib/Either';
 import { delayRetryState } from '../../../model/retry_state';
+import { throwBadResponse } from '../../../model/helpers';
 import { isTypeof } from '../../actions';
 import type { ModelStage } from '../types';
 

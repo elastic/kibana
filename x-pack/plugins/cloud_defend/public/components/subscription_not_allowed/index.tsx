@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLink, EuiPageSection } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageSection, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useKibana } from '../../common/hooks/use_kibana';

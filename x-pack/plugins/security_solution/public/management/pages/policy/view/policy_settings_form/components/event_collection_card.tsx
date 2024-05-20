@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
+import React, { memo, useCallback, useContext, useMemo } from 'react';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { ThemeContext } from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBetaBadge,
   EuiCheckbox,
@@ -14,19 +19,14 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type { EuiCheckboxProps } from '@elastic/eui/src/components/form/checkbox/checkbox';
-import { i18n } from '@kbn/i18n';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { cloneDeep, get, set } from 'lodash';
-import type { ReactElement } from 'react';
-import React, { memo, useCallback, useContext, useMemo } from 'react';
-import { ThemeContext } from 'styled-components';
-import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
-import type { UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import type { EuiCheckboxProps } from '@elastic/eui/src/components/form/checkbox/checkbox';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { SettingCard, SettingCardHeader } from './setting_card';
+import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
+import type { UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 
 const mapOperatingSystemToPolicyOsKey = {
   [OperatingSystem.WINDOWS]: PolicyOperatingSystem.windows,
@@ -69,10 +69,10 @@ export interface EventCollectionCardProps<T extends OperatingSystem = OperatingS
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ANY = any;
 interface EventCollectionCardComponent {
-  <T extends OperatingSystem>(
-    props: EventCollectionCardProps<T>,
-    context?: ANY
-  ): ReactElement<ANY, ANY> | null;
+  <T extends OperatingSystem>(props: EventCollectionCardProps<T>, context?: ANY): ReactElement<
+    ANY,
+    ANY
+  > | null;
   displayName?: string | undefined;
 }
 

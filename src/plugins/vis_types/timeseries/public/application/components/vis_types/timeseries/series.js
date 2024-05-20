@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTab,
-  EuiTabs,
-  useEuiTheme,
-} from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { aggRowSplitStyles, tsvbEditorRowStyles } from '../../../styles/common.styles';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiButtonIcon,
+  useEuiTheme,
+} from '@elastic/eui';
+import { ColorPicker } from '../../color_picker';
 import { AddDeleteButtons } from '../../add_delete_buttons';
 import { Aggs } from '../../aggs/aggs';
-import { ColorPicker } from '../../color_picker';
-import { createTextHandler } from '../../lib/create_text_handler';
+import { TimeseriesConfig as SeriesConfig } from './config';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { Split } from '../../split';
-import { TimeseriesConfig as SeriesConfig } from './config';
+import { createTextHandler } from '../../lib/create_text_handler';
+import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { format, parse } from 'url';
-import type { KibanaRequest } from '@kbn/core/server';
 import axios from 'axios';
+import { format, parse } from 'url';
 import { castArray, first, pick, pickBy } from 'lodash';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 
 export function registerKibanaFunction({

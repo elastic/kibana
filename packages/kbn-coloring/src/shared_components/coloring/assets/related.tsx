@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiIconProps } from '@elastic/eui';
 import React from 'react';
+import { EuiIconProps } from '@elastic/eui';
 
 export const RelatedIcon = (props: Omit<EuiIconProps, 'type'>) => (
   <svg width="24" height="24" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" {...props}>

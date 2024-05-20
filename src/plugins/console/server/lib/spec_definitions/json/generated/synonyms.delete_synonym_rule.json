@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["DELETE"],
-    "patterns": ["_synonyms/{set_id}/{rule_id}"],
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_synonyms/{set_id}/{rule_id}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-synonym-rule.html",
     "availability": {
       "stack": true,

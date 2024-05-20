@@ -39,7 +39,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nIdentifier of the plugin."],
+            "description": [
+              "\nIdentifier of the plugin."
+            ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -53,7 +55,9 @@
             "description": [
               "\nRoot configuration path used by the plugin, defaults to \"id\" in snake_case format."
             ],
-            "signature": ["string | string[]"],
+            "signature": [
+              "string | string[]"
+            ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -64,7 +68,9 @@
             "type": "Enum",
             "tags": [],
             "label": "type",
-            "description": ["\nType of the plugin, defaults to `standard`."],
+            "description": [
+              "\nType of the plugin, defaults to `standard`."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-base-common",
@@ -87,7 +93,9 @@
             "description": [
               "\nAn optional list of the other plugins that **must be** installed and enabled\nfor this plugin to function properly."
             ],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -101,7 +109,9 @@
             "description": [
               "\nAn optional list of the other plugins that if installed and enabled **may be**\nleveraged by this plugin for some additional functionality but otherwise are\nnot required for this plugin to work properly."
             ],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -115,7 +125,9 @@
             "description": [
               "\nList of plugin ids that this plugin's UI code imports modules from that are\nnot in `requiredPlugins`.\n"
             ],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -129,7 +141,9 @@
             "description": [
               "\nAn optional list of plugin dependencies that can be resolved dynamically at runtime\nusing the dynamic contract resolving capabilities from the plugin service."
             ],
-            "signature": ["readonly string[]"],
+            "signature": [
+              "readonly string[]"
+            ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -143,7 +157,9 @@
             "description": [
               "\nSpecifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when\nconfigured, etc.) Default is false."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -174,7 +190,9 @@
         "tags": [],
         "label": "EUI_STYLES_GLOBAL",
         "description": [],
-        "signature": ["\"eui-global\""],
+        "signature": [
+          "\"eui-global\""
+        ],
         "path": "packages/core/base/core-base-common/src/eui.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -187,7 +205,9 @@
         "tags": [],
         "label": "EUI_STYLES_UTILS",
         "description": [],
-        "signature": ["\"eui-utilities\""],
+        "signature": [
+          "\"eui-utilities\""
+        ],
         "path": "packages/core/base/core-base-common/src/eui.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -202,7 +222,9 @@
         "description": [
           "\nDedicated type for plugin name/id that is supposed to make Map/Set/Arrays\nthat use it as a key or value more obvious.\n"
         ],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/core/base/core-base-common/src/plugins.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -215,7 +237,9 @@
         "tags": [],
         "label": "PluginOpaqueId",
         "description": [],
-        "signature": ["symbol"],
+        "signature": [
+          "symbol"
+        ],
         "path": "packages/core/base/core-base-common/src/plugins.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { parse } from '../parse';
 import type { Ast } from './ast';
+import { parse } from '../parse';
 
 export function fromExpression(expression: string, type = 'expression'): Ast {
   try {

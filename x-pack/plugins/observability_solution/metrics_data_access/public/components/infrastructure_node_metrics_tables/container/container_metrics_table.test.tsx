@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import { MetricsExplorerSeries } from '../../../../common/http_api';
 import { CoreProviders } from '../../../apps/common_providers';
-import { createMetricsClientMock, createStartServicesAccessorMock } from '../test_helpers';
+import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { createStartServicesAccessorMock, createMetricsClientMock } from '../test_helpers';
 import { ContainerMetricsTable } from './container_metrics_table';
 import { createLazyContainerMetricsTable } from './create_lazy_container_metrics_table';
 import IntegratedContainerMetricsTable from './integrated_container_metrics_table';

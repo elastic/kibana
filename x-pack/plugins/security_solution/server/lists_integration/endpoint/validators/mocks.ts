@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../common/endpoint/service/artifacts';
-import type { ExceptionItemLikeOptions } from '../types';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { BaseValidator } from './base_validator';
+import type { ExceptionItemLikeOptions } from '../types';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../common/endpoint/service/artifacts';
 
 /**
  * Exposes all `protected` methods of `BaseValidator` by prefixing them with an underscore.

@@ -9,11 +9,11 @@ import { render, screen } from '@testing-library/react';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
-import { EMPTY_PLACEHOLDER, getIncompatibleMappingsTableColumns } from '.';
 import { SAME_FAMILY } from '../../data_quality_panel/same_family/translations';
-import { eventCategory } from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { TestProviders } from '../../mock/test_providers/test_providers';
+import { eventCategory } from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { EnrichedFieldMetadata } from '../../types';
+import { EMPTY_PLACEHOLDER, getIncompatibleMappingsTableColumns } from '.';
 
 describe('getIncompatibleMappingsTableColumns', () => {
   test('it returns the expected column configuration', () => {

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { of, Observable } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
-import { Observable, of } from 'rxjs';
-import { take } from 'rxjs';
 import { calculateStatus$ } from './status';
+import { take } from 'rxjs';
 
 describe('calculateStatus$', () => {
   const expectUnavailableDueToEs = (status$: Observable<ServiceStatus>) =>

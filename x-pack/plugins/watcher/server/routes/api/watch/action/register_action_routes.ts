@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../../types';
 import { registerAcknowledgeRoute } from './register_acknowledge_route';
+import { RouteDependencies } from '../../../../types';
 
 export function registerActionRoutes(deps: RouteDependencies) {
   registerAcknowledgeRoute(deps);

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
+import { HttpSetup } from '@kbn/core/public';
 
 import {
-  AsyncTestBedConfig,
-  TestBed,
-  findTestSubject,
   registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
+  findTestSubject,
 } from '@kbn/test-jest-helpers';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
-import { ROUTES, getListPath } from '../../../public/application/services/navigation';
 import { WithAppDependencies } from './setup_environment';
+import { getListPath, ROUTES } from '../../../public/application/services/navigation';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {

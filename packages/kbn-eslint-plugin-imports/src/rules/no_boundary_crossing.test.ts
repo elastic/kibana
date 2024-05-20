@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ModuleType } from '@kbn/repo-source-classifier';
-import dedent from 'dedent';
 import { RuleTester } from 'eslint';
 import { NoBoundaryCrossingRule } from './no_boundary_crossing';
+import { ModuleType } from '@kbn/repo-source-classifier';
+import dedent from 'dedent';
 
 const make = (from: ModuleType, to: ModuleType, imp = 'import') => ({
   filename: `${from}.ts`,

@@ -13,13 +13,13 @@ import moment from 'moment';
 
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 
-import { NoResults } from '../errors';
 import { visTypes as chartTypes } from '../visualizations/vis_types';
-import { Axis } from './axis/axis';
-import { Binder } from './binder';
-import { ChartGrid as Grid } from './chart_grid';
-import { ChartTitle } from './chart_title';
+import { NoResults } from '../errors';
 import { Layout } from './layout/layout';
+import { ChartTitle } from './chart_title';
+import { Axis } from './axis/axis';
+import { ChartGrid as Grid } from './chart_grid';
+import { Binder } from './binder';
 
 const markdownIt = new MarkdownIt({
   html: false,

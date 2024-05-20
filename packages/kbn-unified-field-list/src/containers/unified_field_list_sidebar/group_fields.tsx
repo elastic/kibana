@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { uniqBy } from 'lodash';
 import {
-  type DataView,
   type DataViewField,
+  type DataView,
   getFieldSubtypeMulti,
 } from '@kbn/data-views-plugin/public';
-import { uniqBy } from 'lodash';
 import type { SearchMode } from '../../types';
 
 export function shouldShowField(

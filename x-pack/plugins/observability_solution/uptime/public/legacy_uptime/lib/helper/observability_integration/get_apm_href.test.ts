@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MonitorSummary, makePing } from '../../../../../common/runtime_types';
 import { getLegacyApmHref } from './get_apm_href';
+import { MonitorSummary, makePing } from '../../../../../common/runtime_types';
 
 describe('getLegacyApmHref', () => {
   let summary: MonitorSummary;

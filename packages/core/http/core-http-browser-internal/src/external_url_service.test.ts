@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Sha256 } from '@kbn/crypto-browser';
 import type { IExternalUrlPolicy } from '@kbn/core-http-common';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
-import { Sha256 } from '@kbn/crypto-browser';
 
 import { ExternalUrlService } from './external_url_service';
 

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component } from 'react';
 import { memoize } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -19,10 +19,10 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { IUiSettingsClient } from '@kbn/core/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { CSV_MIME_TYPE, datatableToCSV, tableHasFormulas } from '../../../../common';
 
 interface DataDownloadOptionsState {

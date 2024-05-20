@@ -4,29 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { API_VERSIONS } from '../../../common/constants';
 import { agentPolicyRouteService } from '../../services';
+import { API_VERSIONS } from '../../../common/constants';
 
 import type {
-  BulkGetAgentPoliciesResponse,
-  CopyAgentPolicyRequest,
-  CopyAgentPolicyResponse,
-  CreateAgentPolicyRequest,
-  CreateAgentPolicyResponse,
-  DeleteAgentPolicyRequest,
-  DeleteAgentPolicyResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
-  GetFullAgentPolicyResponse,
   GetOneAgentPolicyResponse,
+  GetFullAgentPolicyResponse,
+  CreateAgentPolicyRequest,
+  CreateAgentPolicyResponse,
   UpdateAgentPolicyRequest,
   UpdateAgentPolicyResponse,
+  CopyAgentPolicyRequest,
+  CopyAgentPolicyResponse,
+  DeleteAgentPolicyRequest,
+  DeleteAgentPolicyResponse,
+  BulkGetAgentPoliciesResponse,
 } from '../../types';
 
-import { sendRequest, sendRequestForRq, useConditionalRequest, useRequest } from './use_request';
-import type { RequestError, SendConditionalRequestConfig } from './use_request';
+import { useRequest, sendRequest, useConditionalRequest, sendRequestForRq } from './use_request';
+import type { SendConditionalRequestConfig, RequestError } from './use_request';
 
 export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {
   return useRequest<GetAgentPoliciesResponse>({

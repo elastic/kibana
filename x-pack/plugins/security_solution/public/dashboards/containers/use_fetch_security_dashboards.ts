@@ -6,9 +6,9 @@
  */
 
 import { useEffect } from 'react';
-import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
-import { REQUEST_NAMES, useFetch } from '../../common/hooks/use_fetch';
+import { useFetch, REQUEST_NAMES } from '../../common/hooks/use_fetch';
 import { useKibana } from '../../common/lib/kibana';
+import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
 import { useSecurityTags } from '../context/dashboard_context';
 
 export const useFetchSecurityDashboards = () => {

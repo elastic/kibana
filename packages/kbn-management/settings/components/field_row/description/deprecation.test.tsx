@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { wrap } from '../mocks';
+import { render } from '@testing-library/react';
 import { FieldDeprecation } from './deprecation';
+import { wrap } from '../mocks';
 
 describe('FieldDeprecation', () => {
   const defaultProps = {

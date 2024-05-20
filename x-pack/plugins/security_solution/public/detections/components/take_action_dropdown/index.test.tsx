@@ -1,6 +1,3 @@
-import { waitFor } from '@testing-library/react';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,39 +5,42 @@ import { mount } from 'enzyme';
  * 2.0.
  */
 import React from 'react';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import type { HttpSetup } from '@kbn/core/public';
 import type { TakeActionDropdownProps } from '.';
 import { TakeActionDropdown } from '.';
-import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
-import { HostStatus } from '../../../../common/endpoint/types';
+import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
+import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineId } from '../../../../common/types/timeline';
-import { allCasesPermissions } from '../../../cases_test_utils';
-import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
-import {
-  ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
-  ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-} from '../../../common/components/toolbar/bulk_actions/translations';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
-import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
-import { useHttp, useKibana } from '../../../common/lib/kibana';
-import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../../common/mock';
-import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
-import {
-  isAlertFromEndpointAlert,
-  isAlertFromEndpointEvent,
-} from '../../../common/utils/endpoint_alert_check';
-import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { useHttp, useKibana } from '../../../common/lib/kibana';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from '../endpoint_responder/translations';
+import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
+import type { HttpSetup } from '@kbn/core/public';
+import {
+  isAlertFromEndpointAlert,
+  isAlertFromEndpointEvent,
+} from '../../../common/utils/endpoint_alert_check';
+import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
+import { allCasesPermissions } from '../../../cases_test_utils';
+import { HostStatus } from '../../../../common/endpoint/types';
+import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
+import {
+  ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
+  ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+} from '../../../common/components/toolbar/bulk_actions/translations';
 
 jest.mock('../../../common/components/user_privileges');
 

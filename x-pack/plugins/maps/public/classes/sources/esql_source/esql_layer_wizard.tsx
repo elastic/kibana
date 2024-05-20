@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { CreateSourceEditor } from './create_source_editor';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
+import { sourceTitle, ESQLSource } from './esql_source';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
-import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { GeoJsonVectorLayer } from '../../layers/vector_layer';
 import { DocumentsLayerIcon } from '../../layers/wizards/icons/documents_layer_icon';
-import { CreateSourceEditor } from './create_source_editor';
-import { ESQLSource, sourceTitle } from './esql_source';
 
 export const esqlLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.ESQL,

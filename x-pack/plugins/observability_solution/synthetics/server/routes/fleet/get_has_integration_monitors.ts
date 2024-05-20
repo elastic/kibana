@@ -1,4 +1,3 @@
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
  * 2.0.
  */
 import { SyntheticsRestApiRouteFactory } from '../types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getHasIntegrationMonitorsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

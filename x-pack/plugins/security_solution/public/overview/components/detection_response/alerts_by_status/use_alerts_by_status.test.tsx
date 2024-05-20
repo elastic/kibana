@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
-import { alertsByStatusQuery, from, mockAlertsData, parsedMockAlertsData, to } from './mock_data';
+import { from, mockAlertsData, alertsByStatusQuery, parsedMockAlertsData, to } from './mock_data';
 import type { UseAlertsByStatus, UseAlertsByStatusProps } from './use_alerts_by_status';
 import { useAlertsByStatus } from './use_alerts_by_status';
 

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsImporter,
-  SavedObjectsImportHook,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsImportHook,
 } from '@kbn/core-saved-objects-server';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
@@ -39,15 +39,12 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     this.#savedObjectsClient = savedObjectsClient;
     this.#typeRegistry = typeRegistry;
     this.#importSizeLimit = importSizeLimit;
-    this.#importHooks = typeRegistry.getAllTypes().reduce(
-      (hooks, type) => {
-        if (type.management?.onImport) {
-          hooks[type.name] = [type.management.onImport];
-        }
-        return hooks;
-      },
-      {} as Record<string, SavedObjectsImportHook[]>
-    );
+    this.#importHooks = typeRegistry.getAllTypes().reduce((hooks, type) => {
+      if (type.management?.onImport) {
+        hooks[type.name] = [type.management.onImport];
+      }
+      return hooks;
+    }, {} as Record<string, SavedObjectsImportHook[]>);
   }
 
   public import({

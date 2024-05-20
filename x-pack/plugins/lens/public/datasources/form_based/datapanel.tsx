@@ -6,17 +6,18 @@
  */
 
 import './datapanel.scss';
+import { uniq } from 'lodash';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import { type DataView, DataViewField, FieldSpec } from '@kbn/data-plugin/common';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type DataView, DataViewField, FieldSpec } from '@kbn/data-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   FieldList,
   FieldListFilters,
@@ -26,20 +27,19 @@ import {
   useExistingFieldsFetcher,
   useGroupedFields,
 } from '@kbn/unified-field-list';
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
-import { uniq } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import { buildIndexPatternField } from '../../data_views_service/loader';
-import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import type {
   DatasourceDataPanelProps,
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
 } from '../../types';
-import { FieldItem } from '../common/field_item';
 import type { FormBasedPrivateState } from './types';
+import { IndexPatternServiceAPI } from '../../data_views_service/service';
+import { FieldItem } from '../common/field_item';
 
 export type Props = Omit<
   DatasourceDataPanelProps<FormBasedPrivateState>,

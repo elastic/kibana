@@ -7,11 +7,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { firstValueFrom } from 'rxjs';
-import { EqlSearchStrategyRequest } from '../../../../common';
-import { getMockSearchConfig } from '../../../../config.mock';
-import { SearchStrategyDependencies } from '../../types';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
+import { SearchStrategyDependencies } from '../../types';
+import { EqlSearchStrategyRequest } from '../../../../common';
+import { firstValueFrom } from 'rxjs';
+import { getMockSearchConfig } from '../../../../config.mock';
 
 const getMockEqlResponse = () => ({
   body: {

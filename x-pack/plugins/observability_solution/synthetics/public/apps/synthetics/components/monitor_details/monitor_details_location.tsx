@@ -6,14 +6,14 @@
  */
 import React, { useCallback } from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams, useRouteMatch } from 'react-router-dom';
-import { MONITOR_ERRORS_ROUTE, MONITOR_HISTORY_ROUTE } from '../../../../../common/constants';
-import { PLUGIN } from '../../../../../common/constants/plugin';
-import { ClientPluginsStart } from '../../../../plugin';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useGetUrlParams } from '../../hooks';
-import { MonitorLocationSelect } from '../common/components/monitor_location_select';
+import { MONITOR_ERRORS_ROUTE, MONITOR_HISTORY_ROUTE } from '../../../../../common/constants';
+import { ClientPluginsStart } from '../../../../plugin';
+import { PLUGIN } from '../../../../../common/constants/plugin';
 import { useSelectedLocation } from './hooks/use_selected_location';
+import { MonitorLocationSelect } from '../common/components/monitor_location_select';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
 export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean }) => {

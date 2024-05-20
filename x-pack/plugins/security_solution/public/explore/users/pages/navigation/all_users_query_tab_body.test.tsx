@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { UsersType } from '../../store/model';
 import { AllUsersQueryTabBody } from './all_users_query_tab_body';
+import { UsersType } from '../../store/model';
 
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../../common/lib/kibana');

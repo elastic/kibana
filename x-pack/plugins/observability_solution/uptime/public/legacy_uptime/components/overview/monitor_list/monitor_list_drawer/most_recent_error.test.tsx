@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
-import moment from 'moment';
+import { shallowWithIntl, renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import moment from 'moment';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { MonitorDetails, PingError } from '../../../../../../common/runtime_types';
 import { MostRecentError } from './most_recent_error';
+import { MonitorDetails, PingError } from '../../../../../../common/runtime_types';
 
 describe('MostRecentError component', () => {
   let monitorDetails: MonitorDetails;

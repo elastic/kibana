@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { groupBy, isEmpty, partition } from 'lodash';
+import { isEmpty, groupBy, partition } from 'lodash';
 import type { SectionDescriptor } from './types';
 
 const EXCLUDED_FIELDS = ['error.exception.stacktrace', 'span.stacktrace'];

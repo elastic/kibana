@@ -8,11 +8,11 @@
 import React, { type FC } from 'react';
 
 import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingSpinner,
+  EuiFlexGroup,
   useEuiTheme,
+  EuiCallOut,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { checkLicense } from '../../lib/check_license';
 import { Pipeline } from '../../models/pipeline';
+import { checkLicense } from '../../lib/check_license';
 import type { LogstashPluginRouter } from '../../types';
 
 export function registerPipelineSaveRoute(

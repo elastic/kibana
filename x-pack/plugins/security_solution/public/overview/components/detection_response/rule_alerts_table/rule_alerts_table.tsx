@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
+import { capitalize } from 'lodash';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -17,29 +19,27 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { capitalize } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
+import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { SecurityCellActionsTrigger } from '../../../../app/actions/constants';
-import { HeaderSection } from '../../../../common/components/header_section';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
+import { HeaderSection } from '../../../../common/components/header_section';
 
+import { SEVERITY_COLOR } from '../utils';
+import * as i18n from '../translations';
+import type { RuleAlertsItem } from './use_rule_alerts_items';
+import { useRuleAlertsItems } from './use_rule_alerts_items';
+import type { NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
+import { useNavigation } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../../common/constants';
-import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
-import { FormattedCount } from '../../../../common/components/formatted_number';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { FormattedCount } from '../../../../common/components/formatted_number';
+import { SecurityCellActions, CellActionsMode } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import type { GetAppUrl, NavigateTo } from '../../../../common/lib/kibana';
-import { useNavigation } from '../../../../common/lib/kibana';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import * as i18n from '../translations';
-import { SEVERITY_COLOR } from '../utils';
-import type { RuleAlertsItem } from './use_rule_alerts_items';
-import { useRuleAlertsItems } from './use_rule_alerts_items';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;

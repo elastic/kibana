@@ -7,8 +7,8 @@
 import type { JsonValue } from '@kbn/utility-types';
 
 import {
-  IMAGE_MIME_TYPES,
   compressionMimeTypes,
+  IMAGE_MIME_TYPES,
   pdfMimeTypes,
   textMimeTypes,
 } from '../../../common/constants/mime_types';

@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EuiDataGridCellProps } from '@elastic/eui';
-import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
-import type { TableId } from '@kbn/securitysolution-data-table';
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import { find, getOr } from 'lodash/fp';
 import React, { useMemo, memo } from 'react';
+import { find, getOr } from 'lodash/fp';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
+import type { TableId } from '@kbn/securitysolution-data-table';
+import { useLicense } from '../../../common/hooks/use_license';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
+import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
-import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
-import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useLicense } from '../../../common/hooks/use_license';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
+import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import { eventRenderedViewColumns, getColumns } from './columns';
-import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`

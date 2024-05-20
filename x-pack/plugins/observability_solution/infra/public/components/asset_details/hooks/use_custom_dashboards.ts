@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useCallback } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import type {
   InfraCustomDashboard,
-  InfraCustomDashboardAssetType,
   InfraSavedCustomDashboard,
+  InfraCustomDashboardAssetType,
 } from '../../../../common/custom_dashboards';
 import {
   InfraCustomDashboardRT,
   InfraDeleteCustomDashboardsResponseBodyRT,
 } from '../../../../common/http_api/custom_dashboards_api';
-import { createPlainError, throwErrors } from '../../../../common/runtime_types';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useTrackedPromise } from '../../../utils/use_tracked_promise';
+import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 
 type ActionType = 'create' | 'update' | 'delete';
 const errorMessages: Record<ActionType, string> = {

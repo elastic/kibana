@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
+import classNames from 'classnames';
+import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
-import classNames from 'classnames';
-import React from 'react';
 
-import type { SnakeToCamelCase } from '../../../../common/types';
 import type { UserCommentAttachment } from '../../../../common/types/domain';
-import { getMarkdownEditorStorageKey } from '../../markdown_editor/utils';
-import { HoverableAvatarResolver } from '../../user_profiles/hoverable_avatar_resolver';
-import { HoverableUsernameResolver } from '../../user_profiles/hoverable_username_resolver';
-import { UserActionContentToolbar } from '../content_toolbar';
-import { UserActionMarkdown } from '../markdown_form';
-import { UserCommentPropertyActions } from '../property_actions/user_comment_property_actions';
 import { UserActionTimestamp } from '../timestamp';
-import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { SnakeToCamelCase } from '../../../../common/types';
+import { UserActionMarkdown } from '../markdown_form';
+import { UserActionContentToolbar } from '../content_toolbar';
+import type { UserActionBuilderArgs, UserActionBuilder } from '../types';
+import { HoverableUsernameResolver } from '../../user_profiles/hoverable_username_resolver';
+import { HoverableAvatarResolver } from '../../user_profiles/hoverable_avatar_resolver';
+import { UserCommentPropertyActions } from '../property_actions/user_comment_property_actions';
+import { getMarkdownEditorStorageKey } from '../../markdown_editor/utils';
 import * as i18n from './translations';
 
 type BuilderArgs = Pick<

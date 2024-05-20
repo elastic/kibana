@@ -10,14 +10,14 @@ import { AxiosResponse } from 'axios';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
   ExternalService,
-  ExternalServiceParamsClose,
   ExternalServiceParamsCreate,
   ExternalServiceParamsUpdate,
-  GetApplicationInfoResponse,
   ImportSetApiResponse,
   ImportSetApiResponseError,
-  ServiceFactory,
   ServiceNowIncident,
+  GetApplicationInfoResponse,
+  ServiceFactory,
+  ExternalServiceParamsClose,
 } from './types';
 
 import * as i18n from './translations';

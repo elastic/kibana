@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React from 'react';
 import { Feedback, FeedbackButtons } from '../buttons/feedback_buttons';
-import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
+import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 
 const containerClassName = css`
   padding-top: 4px;

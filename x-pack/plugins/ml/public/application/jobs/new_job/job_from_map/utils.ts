@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
-import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { MapApi } from '@kbn/maps-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
+import type { MapApi } from '@kbn/maps-plugin/public';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
+import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
 export async function redirectToGeoJobWizard(
   embeddable: MapApi,

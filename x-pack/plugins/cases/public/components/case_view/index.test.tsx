@@ -14,25 +14,24 @@
 
 import React from 'react';
 
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { CaseViewProps } from './types';
 import { connectorsMock } from '../../containers/mock';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { useUpdateCase } from '../../containers/use_update_case';
 import type { UseGetCase } from '../../containers/use_get_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useUpdateCase } from '../../containers/use_update_case';
-import type { CaseViewProps } from './types';
 
-import { waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import CaseView from '.';
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useKibana } from '../../common/lib/kibana';
+import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { casesQueriesKeys } from '../../containers/constants';
-import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
+import CaseView from '.';
+import { waitFor } from '@testing-library/react';
 import { useGetTags } from '../../containers/use_get_tags';
-import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { casesQueriesKeys } from '../../containers/constants';
 import {
   alertsHit,
   caseViewProps,
@@ -41,6 +40,7 @@ import {
   defaultUpdateCaseState,
   defaultUseFindCaseUserActions,
 } from './mocks';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');

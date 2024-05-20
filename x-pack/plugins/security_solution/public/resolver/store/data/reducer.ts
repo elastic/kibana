@@ -7,31 +7,31 @@
 
 import type { Draft } from 'immer';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
-import * as nodeDataModel from '../../models/node_data';
-import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 import type { DataState } from '../../types';
-import { appReceivedNewExternalProperties } from '../actions';
-import { immerCase, initialAnalyzerState } from '../helpers';
-import {
-  appAbortedResolverDataRequest,
-  appRequestedCurrentRelatedEventData,
-  appRequestedResolverData,
-  appRequestingNodeData,
-  serverFailedToReturnCurrentRelatedEventData,
-  serverFailedToReturnNodeData,
-  serverFailedToReturnNodeEventsInCategory,
-  serverFailedToReturnResolverData,
-  serverReturnedCurrentRelatedEventData,
-  serverReturnedNodeData,
-  serverReturnedNodeEventsInCategory,
-  serverReturnedResolverData,
-  userOverrodeDateRange,
-  userReloadedResolverNode,
-  userRequestedAdditionalRelatedEvents,
-} from './action';
-import * as nodeEventsInCategoryModel from './node_events_in_category_model';
+import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 import * as selectors from './selectors';
+import * as nodeEventsInCategoryModel from './node_events_in_category_model';
+import * as nodeDataModel from '../../models/node_data';
+import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
+import { initialAnalyzerState, immerCase } from '../helpers';
+import { appReceivedNewExternalProperties } from '../actions';
+import {
+  serverReturnedResolverData,
+  appRequestedResolverData,
+  appAbortedResolverDataRequest,
+  serverFailedToReturnResolverData,
+  serverReturnedNodeEventsInCategory,
+  userRequestedAdditionalRelatedEvents,
+  serverFailedToReturnNodeEventsInCategory,
+  serverReturnedNodeData,
+  userReloadedResolverNode,
+  appRequestingNodeData,
+  serverFailedToReturnNodeData,
+  appRequestedCurrentRelatedEventData,
+  serverReturnedCurrentRelatedEventData,
+  serverFailedToReturnCurrentRelatedEventData,
+  userOverrodeDateRange,
+} from './action';
 
 export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   .withHandling(

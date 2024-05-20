@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
+import { Introduction } from './introduction';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { TutorialsCategory } from '../../../../common/constants';
-import { Introduction } from './introduction';
 
 const basePathMock = httpServiceMock.createBasePath();
 

@@ -6,9 +6,9 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { ChartType, suggestionsApi } from './lens_suggestions_api';
-import { DatasourceMock, createMockDatasource, createMockVisualization } from './mocks';
+import { createMockVisualization, DatasourceMock, createMockDatasource } from './mocks';
 import { DatasourceSuggestion } from './types';
+import { suggestionsApi, ChartType } from './lens_suggestions_api';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,

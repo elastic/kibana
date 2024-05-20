@@ -1,6 +1,3 @@
-import { ByteSizeValue } from '@kbn/config-schema';
-import { fromRoot } from '@kbn/repo-info';
-import { duration } from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +7,9 @@ import { duration } from 'moment';
  */
 import { take } from 'rxjs';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
+import { duration } from 'moment';
+import { fromRoot } from '@kbn/repo-info';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { createCoreContextConfigServiceMock } from './test_helpers';
 
 describe('Legacy config', () => {

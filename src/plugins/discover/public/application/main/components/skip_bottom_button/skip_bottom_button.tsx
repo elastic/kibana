@@ -8,7 +8,7 @@
 
 import React from 'react';
 import './skip_bottom_button.scss';
-import { EuiButton, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface SkipBottomButtonProps {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { KueryNode } from '@kbn/es-query';
-import { chunk } from 'lodash';
 import pMap from 'p-map';
+import { chunk } from 'lodash';
+import { KueryNode } from '@kbn/es-query';
+import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { BulkActionSkipResult } from '../../../common/bulk_edit';
-import { RuleAttributes } from '../../data/rule/types';
 import { convertRuleIdsToKueryNode } from '../../lib';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { BulkOperationError } from '../types';
-import { RETRY_IF_CONFLICTS_ATTEMPTS, waitBeforeNextRetry } from './wait_before_next_retry';
+import { RuleAttributes } from '../../data/rule/types';
+import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 // max number of failed SO ids in one retry filter
 const MaxIdsNumberInRetryFilter = 1000;

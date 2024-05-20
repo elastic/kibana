@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { ATTRIBUTE_SERVICE_KEY, AttributeService } from '.';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
+import { coreMock } from '@kbn/core/public/mocks';
 import { AttributeServiceOptions } from './attribute_service';
+import { CoreStart } from '@kbn/core/public';
+import { AttributeService, ATTRIBUTE_SERVICE_KEY } from '.';
 
 export const mockAttributeService = <
   A extends { title: string },
@@ -18,7 +18,7 @@ export const mockAttributeService = <
     [ATTRIBUTE_SERVICE_KEY]: A;
   },
   R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
-  M extends unknown = unknown,
+  M extends unknown = unknown
 >(
   type: string,
   options: AttributeServiceOptions<A, M>,

@@ -7,9 +7,9 @@
  */
 
 import { LastValueParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { CommonColumnsConverterArgs, LastValueColumn } from './types';
 import type { Metric } from '../../../../common/types';
 import { createColumn, getFormat } from './column';
-import { CommonColumnsConverterArgs, LastValueColumn } from './types';
 
 export const convertToLastValueParams = (metric: Metric): LastValueParams => ({
   sortField: metric.order_by,

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TimelineId } from '../../../../common/types/timeline';
 import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
+import { selectTimelineById } from '../selectors';
+import { TimelineId } from '../../../../common/types/timeline';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
+import { refreshTimelines, ensureTimelineIsSaved } from './helpers';
 import {
+  startTimelineSaving,
   endTimelineSaving,
   pinEvent,
-  showCallOutUnauthorizedMsg,
-  startTimelineSaving,
   unPinEvent,
+  showCallOutUnauthorizedMsg,
 } from '../actions';
-import { selectTimelineById } from '../selectors';
-import { ensureTimelineIsSaved, refreshTimelines } from './helpers';
 
 jest.mock('../actions', () => {
   const actual = jest.requireActual('../actions');

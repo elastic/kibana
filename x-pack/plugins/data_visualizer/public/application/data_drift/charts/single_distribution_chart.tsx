@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import type { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import {
   Axis,
   BarSeries,
@@ -17,14 +18,13 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import type { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { Histogram } from '@kbn/ml-chi2test';
 
 import { i18n } from '@kbn/i18n';
-import { DATA_COMPARISON_TYPE } from '../constants';
 import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
+import { DATA_COMPARISON_TYPE } from '../constants';
 import type { DataDriftField, Feature } from '../types';
 
 import { getFieldFormatType, useFieldFormatter } from './default_value_formatter';

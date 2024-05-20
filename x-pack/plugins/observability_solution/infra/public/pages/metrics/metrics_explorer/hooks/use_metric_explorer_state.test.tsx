@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import React from 'react';
-import {
-  createSeries,
-  derivedIndexPattern,
-  resp,
-  source,
-} from '../../../../utils/fixtures/metrics_explorer';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { MetricsExplorerOptionsContainer } from './use_metrics_explorer_options';
+import React from 'react';
+import {
+  source,
+  derivedIndexPattern,
+  resp,
+  createSeries,
+} from '../../../../utils/fixtures/metrics_explorer';
 
 jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
   useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],

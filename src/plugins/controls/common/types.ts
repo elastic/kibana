@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 
 export type ControlWidth = 'small' | 'medium' | 'large';
 export type ControlStyle = 'twoLine' | 'oneLine';

@@ -8,12 +8,12 @@
 
 import Path from 'path';
 
-import { FlagsReader, getFlags } from '@kbn/dev-cli-runner';
-import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/jest-serializers';
+import { getFlags, FlagsReader } from '@kbn/dev-cli-runner';
+import { createAnyInstanceSerializer, createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { EsVersion } from '../../functional_test_runner';
-import { FLAG_OPTIONS, parseFlags } from './flags';
+import { parseFlags, FLAG_OPTIONS } from './flags';
 
 jest.mock('uuid', () => ({ v4: () => 'some-uuid' }));
 

@@ -1,4 +1,3 @@
-import { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common';
  */
 import * as t from 'io-ts';
 import { ReactNode } from 'react';
+import { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common';
 
 export type {
   PackagePolicyCreateExtensionComponentProps,

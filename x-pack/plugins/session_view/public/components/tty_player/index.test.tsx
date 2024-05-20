@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { act, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { TTYPlayer, TTYPlayerDeps } from '.';
+import { waitFor, act } from '@testing-library/react';
 import {
   TEST_PROCESS_INDEX,
   TEST_SESSION_START_TIME,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { TTYPlayerDeps, TTYPlayer } from '.';
+import userEvent from '@testing-library/user-event';
 
 describe('TTYPlayer component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

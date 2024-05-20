@@ -8,11 +8,11 @@
 
 jest.mock('@elastic/apm-rum');
 
-import { type Transaction, apm, init } from '@elastic/apm-rum';
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
-import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types-jest';
 import { Subject } from 'rxjs';
+import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types-jest';
+import { init, apm, type Transaction } from '@elastic/apm-rum';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import { ApmSystem } from './apm_system';
 
 const initMock = init as jest.Mocked<typeof init>;

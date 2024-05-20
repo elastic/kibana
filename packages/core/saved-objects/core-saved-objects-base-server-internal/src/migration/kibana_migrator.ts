@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { Observable } from 'rxjs';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '../mappings';
 import type { IDocumentMigrator } from './document_migrator';
 

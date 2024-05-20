@@ -6,9 +6,9 @@
  */
 
 import { Subject } from 'rxjs';
-import { bufferCount, take } from 'rxjs';
-import { TaskManagerConfig } from '../config';
+import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
+import { TaskManagerConfig } from '../config';
 
 describe('Configuration Statistics Aggregator', () => {
   test('merges the static config with the merged configs', async () => {

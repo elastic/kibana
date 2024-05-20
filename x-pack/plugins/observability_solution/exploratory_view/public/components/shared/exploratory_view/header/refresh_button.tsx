@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useSeriesStorage } from '../hooks/use_series_storage';
+import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LastUpdated } from './last_updated';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 
 export function RefreshButton() {
   const { setLastRefresh, chartTimeRangeContext } = useSeriesStorage();

@@ -9,7 +9,7 @@ import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public'
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
 import { buildSlo } from '../../../data/slo/slo';
-import { SloDeleteModal as Component, Props } from './slo_delete_confirmation_modal';
+import { Props, SloDeleteModal as Component } from './slo_delete_confirmation_modal';
 
 export default {
   component: Component,

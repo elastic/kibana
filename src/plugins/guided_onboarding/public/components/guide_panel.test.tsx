@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { CoreTheme } from '@kbn/core/public';
-import React from 'react';
 import { act } from 'react-dom/test-utils';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { CoreTheme } from '@kbn/core/public';
 
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import type { HttpSetup } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import type { HttpSetup } from '@kbn/core/public';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { testGuideConfig, testGuideId } from '@kbn/guided-onboarding';
-import { TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 
 import type { PluginState } from '../../common';
 import { API_BASE_PATH } from '../../common';
+import { apiService } from '../services/api.service';
+import type { GuidedOnboardingApi } from '../types';
 import {
-  mockPluginStateInProgress,
-  mockPluginStateNotStarted,
-  readyToCompleteGuideState,
   testGuideStep1ActiveState,
   testGuideStep1InProgressState,
   testGuideStep2InProgressState,
   testGuideStep2ReadyToCompleteState,
   testGuideStep3ActiveState,
+  readyToCompleteGuideState,
+  mockPluginStateNotStarted,
+  mockPluginStateInProgress,
 } from '../services/api.mocks';
-import { apiService } from '../services/api.service';
-import type { GuidedOnboardingApi } from '../types';
 import { GuidePanel } from './guide_panel';
 
 const applicationMock = applicationServiceMock.createStartContract();

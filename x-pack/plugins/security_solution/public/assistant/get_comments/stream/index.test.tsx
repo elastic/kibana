@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { AsApiContract } from '@kbn/actions-plugin/common';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import type { UseQueryResult } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { StreamComment } from '.';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { useFetchConnectorsQuery } from '../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query';
+import { StreamComment } from '.';
 import { useStream } from './use_stream';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { AsApiContract } from '@kbn/actions-plugin/common';
 const mockSetComplete = jest.fn();
 jest.mock('../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query');
 

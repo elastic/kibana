@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import type { ServerVersion } from '@kbn/core-status-common-internal';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ServerVersion } from '@kbn/core-status-common-internal';
 
 interface VersionHeaderProps {
   version: ServerVersion;

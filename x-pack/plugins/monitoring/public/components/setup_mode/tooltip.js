@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import { get } from 'lodash';
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import React from 'react';
 import { getIdentifier } from './formatting';
 
 export function SetupModeTooltip({ setupModeData, badgeClickLink, productName }) {

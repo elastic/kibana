@@ -8,14 +8,15 @@
 import { EuiFlexGrid, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { TagsList } from '@kbn/observability-shared-plugin/public';
 import {
-  SLOWithSummaryResponse,
   occurrencesBudgetingMethodSchema,
   querySchema,
   rollingTimeWindowTypeSchema,
+  SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { DisplayQuery } from './display_query';
 import { useKibana } from '../../../../utils/kibana_react';
 import {
   BUDGETING_METHOD_OCCURRENCES,
@@ -25,7 +26,6 @@ import {
   toIndicatorTypeLabel,
 } from '../../../../utils/slo/labels';
 import { ApmIndicatorOverview } from './apm_indicator_overview';
-import { DisplayQuery } from './display_query';
 import { SyntheticsIndicatorOverview } from './synthetics_indicator_overview';
 
 import { OverviewItem } from './overview_item';

@@ -8,7 +8,7 @@
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { DEFAULTS } from '../constants';
-import { CliOptions, DatasetRT, PartialConfig, Schedule } from '../types';
+import { DatasetRT, PartialConfig, Schedule, CliOptions } from '../types';
 
 export function cliOptionsToPartialConfig(options: CliOptions) {
   const schedule: Schedule = {

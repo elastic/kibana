@@ -9,35 +9,35 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import {
+  pointInTimeFinderMock,
   mockGetCurrentTime,
   mockGetSearchDsl,
-  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsBaseOptions } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { loggerMock } from '@kbn/logging-mocks';
-import { kibanaMigratorMock } from '../../mocks';
 import { SavedObjectsRepository } from '../repository';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { kibanaMigratorMock } from '../../mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
-  HIDDEN_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
   NAMESPACE_AGNOSTIC_TYPE,
-  createBadRequestErrorPayload,
-  createDocumentMigrator,
-  createGenericNotFoundErrorPayload,
-  createRegistry,
-  createSpySerializer,
-  getMockGetResponse,
-  getSuccess,
-  mappings,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  HIDDEN_TYPE,
   mockTimestamp,
+  mappings,
   mockVersion,
+  createRegistry,
+  createDocumentMigrator,
+  getMockGetResponse,
+  createSpySerializer,
+  getSuccess,
+  createBadRequestErrorPayload,
+  createGenericNotFoundErrorPayload,
 } from '../../test_helpers/repository.test.common';
 
 describe('#get', () => {

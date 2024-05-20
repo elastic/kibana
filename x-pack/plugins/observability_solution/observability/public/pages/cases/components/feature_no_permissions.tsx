@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { useKibana } from '../../../utils/kibana_react';
 import { EmptyPage } from './empty_page';
+import { useKibana } from '../../../utils/kibana_react';
 
 export const CaseFeatureNoPermissions = React.memo(() => {
   const { docLinks } = useKibana().services;

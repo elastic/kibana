@@ -7,22 +7,22 @@
 
 import {
   EuiBottomBar,
-  EuiButton,
   EuiButtonEmpty,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
 import { isEmpty } from 'lodash';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { SavedQueryForm } from '../../../saved_queries/form';
 import type {
-  SavedQueryFormData,
   SavedQuerySOFormData,
+  SavedQueryFormData,
 } from '../../../saved_queries/form/use_saved_query_form';
 import { useSavedQueryForm } from '../../../saved_queries/form/use_saved_query_form';
 

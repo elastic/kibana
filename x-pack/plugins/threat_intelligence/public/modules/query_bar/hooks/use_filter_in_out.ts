@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
 import { useCallback } from 'react';
-import { Indicator } from '../../../../common/types/indicator';
-import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
-import { useSourcererDataView } from '../../indicators/hooks/use_sourcerer_data_view';
+import { Filter } from '@kbn/es-query';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
+import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
+import { Indicator } from '../../../../common/types/indicator';
 import { FilterIn, FilterOut, updateFiltersArray } from '../utils/filter';
+import { useSourcererDataView } from '../../indicators/hooks/use_sourcerer_data_view';
 
 export interface UseFilterInParam {
   /**

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 import type { FillMaskInference } from './fill_mask_inference';
 import { PredictionProbabilityList } from './text_classification_output';

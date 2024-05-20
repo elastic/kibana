@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
-import { render } from '../../../../lib/helper/rtl_helpers';
+import { screen } from '@testing-library/react';
 import {
   AlertMonitorStatusComponent,
   AlertMonitorStatusProps,
   hasFilters,
 } from './alert_monitor_status';
+import { render } from '../../../../lib/helper/rtl_helpers';
 
 describe('alert monitor status component', () => {
   jest.setTimeout(10_000);

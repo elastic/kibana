@@ -6,8 +6,8 @@
  */
 
 import type {
-  ISavedObjectTypeRegistry,
   ISavedObjectsRepository,
+  ISavedObjectTypeRegistry,
   SavedObject,
 } from '@kbn/core/server';
 import {

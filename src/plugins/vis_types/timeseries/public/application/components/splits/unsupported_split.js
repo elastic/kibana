@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import PropTypes from 'prop-types';
+import React from 'react';
 import {
-  EuiCode,
+  htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiCode,
   EuiTitle,
-  htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React from 'react';
-import { titleStyles } from '../../styles/common.styles';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
+import { titleStyles } from '../../styles/common.styles';
 
 export const SplitUnsupported = (props) => {
   const { onChange, model, uiRestrictions } = props;

@@ -6,8 +6,8 @@
  */
 
 import { storiesOf } from '@storybook/react';
-import moment from 'moment';
 import React from 'react';
+import moment from 'moment';
 import { FiltersGroup } from '../filters_group.component';
 import { FiltersGroup as FiltersGroupType } from '../types';
 

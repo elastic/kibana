@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { EndpointPrivileges } from '../../types';
 import {
   type ConsoleResponseActionCommands,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from './constants';
+import type { EndpointPrivileges } from '../../types';
 
 export const getRbacControl = ({
   commandName,

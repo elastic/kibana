@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { DataViewType } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_PATH } from '@kbn/data-views-plugin/server';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const archivePath = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';

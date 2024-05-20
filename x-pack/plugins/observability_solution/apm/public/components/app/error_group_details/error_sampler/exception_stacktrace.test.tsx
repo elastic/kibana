@@ -6,8 +6,8 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 import * as stories from './exception_stacktrace.stories';
 import { ExceptionStackTraceTitleProps } from './exception_stacktrace_title';
 

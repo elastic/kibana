@@ -1,6 +1,3 @@
-import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
-import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
  */
 import expect from '@kbn/expect';
 import { ValuesType } from 'utility-types';
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createServiceGroupApi, deleteAllServiceGroups } from '../service_groups_api_methods';
 import { createServiceTransactionMetricsDocs } from './es_utils';

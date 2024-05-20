@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiCode, EuiLink } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent } from 'react';
+import { EuiCode, EuiLink } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
-  Field,
-  UseField,
   fieldValidators,
+  UseField,
+  Field,
   useKibana,
 } from '../../../../../../shared_imports';
 
@@ -22,7 +22,7 @@ import { XJsonEditor } from '../field_components';
 
 import { TargetField } from './common_fields/target_field';
 
-import { EDITOR_PX_HEIGHT, FieldsConfig, from, to } from './shared';
+import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
 
 const { emptyField, isJsonField } = fieldValidators;
 

@@ -8,12 +8,12 @@
 
 import React, { useMemo, useCallback } from 'react';
 
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
-import { ValueAxis, VisParams } from '../../../../types';
+import { VisParams, ValueAxis } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 
 type GridPanelOptions = ValidationVisOptionsProps<VisParams>;

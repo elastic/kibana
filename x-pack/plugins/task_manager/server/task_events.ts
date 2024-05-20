@@ -9,13 +9,13 @@ import { monitorEventLoopDelay } from 'perf_hooks';
 
 import { ConcreteTaskInstance } from './task';
 
-import type { EventLoopDelayConfig } from './config';
-import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
+import { Result, Err } from './lib/result_type';
 import { ClaimAndFillPoolResult } from './lib/fill_pool';
-import { Err, Result } from './lib/result_type';
-import { TaskManagerMetrics } from './metrics/task_metrics_collector';
 import { PollingError } from './polling';
 import { DecoratedError, TaskRunResult } from './task_running';
+import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
+import type { EventLoopDelayConfig } from './config';
+import { TaskManagerMetrics } from './metrics/task_metrics_collector';
 
 export enum TaskPersistence {
   Recurring = 'recurring',

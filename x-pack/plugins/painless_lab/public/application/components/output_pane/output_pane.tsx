@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { FunctionComponent } from 'react';
 import {
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiTabbedContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
 
 import { Response } from '../../types';
-import { ContextTab } from './context_tab';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
+import { ContextTab } from './context_tab';
 
 interface Props {
   isLoading: boolean;

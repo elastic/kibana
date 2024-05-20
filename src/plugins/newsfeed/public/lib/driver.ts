@@ -10,9 +10,9 @@ import moment from 'moment';
 import * as Rx from 'rxjs';
 import { NEWSFEED_DEFAULT_SERVICE_BASE_URL } from '../../common/constants';
 import { ApiItem, FetchResult, NewsfeedPluginBrowserConfig } from '../types';
+import { INewsfeedApiDriver } from './types';
 import { convertItems } from './convert_items';
 import type { NewsfeedStorage } from './storage';
-import { INewsfeedApiDriver } from './types';
 
 type ApiConfig = NewsfeedPluginBrowserConfig['service'];
 

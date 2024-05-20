@@ -6,23 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { CSSProperties, Dispatch } from 'react';
+import { debounce } from 'lodash';
+import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
-import { debounce } from 'lodash';
-import { CSSProperties, Dispatch } from 'react';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
-import { StorageKeys, getStorage } from '../../../../services';
-import { MetricsTracker } from '../../../../types';
+import { getStorage, StorageKeys } from '../../../../services';
 import { sendRequest } from '../../../hooks';
+import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
 
 import {
   AutocompleteType,
-  SELECTED_REQUESTS_CLASSNAME,
   containsUrlParams,
-  getAutoIndentedRequests,
   getBodyCompletionItems,
   getCurlRequest,
   getDocumentationLinkFromAutocomplete,
@@ -33,8 +31,10 @@ import {
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
   replaceRequestVariables,
+  SELECTED_REQUESTS_CLASSNAME,
   stringifyRequest,
   trackSentRequests,
+  getAutoIndentedRequests,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';

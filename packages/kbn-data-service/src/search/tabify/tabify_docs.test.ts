@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { tabifyDocs, flattenHit } from './tabify_docs';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { flattenHit, tabifyDocs } from './tabify_docs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 
 class MockFieldFormatter {}
 

@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { nginx as nginxRequiredMetrics } from '../../shared/metrics/required_metrics';
-import { InventoryModel } from '../../types';
 import { metrics } from './metrics';
+import { InventoryModel } from '../../types';
+import { nginx as nginxRequiredMetrics } from '../../shared/metrics/required_metrics';
 
 export { podSnapshotMetricTypes } from './metrics';
 

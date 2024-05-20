@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiThemeComputed } from '@elastic/eui';
 
 export const partitionVisWrapperStyle = css({
   display: 'flex',

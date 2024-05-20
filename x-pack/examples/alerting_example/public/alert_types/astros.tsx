@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React, { useState, useEffect, Fragment } from 'react';
 import {
-  EuiCallOut,
-  EuiExpression,
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiFieldNumber,
   EuiPopoverTitle,
   EuiSelect,
+  EuiCallOut,
+  EuiExpression,
   EuiTextColor,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { flatten } from 'lodash';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { flatten } from 'lodash';
-import React, { useState, useEffect, Fragment } from 'react';
 import { ALERTING_EXAMPLE_APP_ID, Craft, Operator } from '../../common/constants';
 
 export function registerNavigation(alerting: AlertingSetup) {

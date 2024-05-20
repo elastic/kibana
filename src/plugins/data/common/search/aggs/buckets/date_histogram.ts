@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { DataViewFieldBase, TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { every, find, get, isNil, noop, omitBy } from 'lodash';
+import { get, noop, find, every, omitBy, isNil } from 'lodash';
 import moment from 'moment-timezone';
+import { i18n } from '@kbn/i18n';
+import { DataViewFieldBase, TimeRange } from '@kbn/es-query';
 
 import { AggTypesDependencies, KBN_FIELD_TYPES, TimeRangeBounds, UI_SETTINGS } from '../../..';
 
 import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
-import { autoInterval, intervalOptions, isAutoInterval } from './_interval_options';
+import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
+import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { aggDateHistogramFnName } from './date_histogram_fn';
 import { TimeBuckets } from './lib/time_buckets';
 

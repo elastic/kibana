@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { resolve, relative } from 'path';
 import { Stats, createReadStream, createWriteStream } from 'fs';
-import { relative, resolve } from 'path';
+import { stat, rename } from 'fs/promises';
 import { Readable, Writable } from 'stream';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { createPromiseFromStreams } from '@kbn/utils';
-import { rename, stat } from 'fs/promises';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  createFormatArchiveStreams,
-  createParseArchiveStreams,
-  isGzip,
   prioritizeMappings,
   readDirectory,
+  isGzip,
+  createParseArchiveStreams,
+  createFormatArchiveStreams,
 } from '../lib';
 
 async function isDirectory(path: string): Promise<boolean> {

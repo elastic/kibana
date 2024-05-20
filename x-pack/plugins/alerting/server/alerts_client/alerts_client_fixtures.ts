@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AlertRuleData } from '.';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
-import { AlertsFilter } from '../types';
 import {
-  GetMaintenanceWindowScopedQueryAlertsParams,
   GetSummarizedAlertsParams,
+  GetMaintenanceWindowScopedQueryAlertsParams,
   UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
 } from './types';
+import type { MaintenanceWindow } from '../application/maintenance_window/types';
+import { AlertRuleData } from '.';
+import { AlertsFilter } from '../types';
 
 export const alertRuleData: AlertRuleData = {
   consumer: 'bar',

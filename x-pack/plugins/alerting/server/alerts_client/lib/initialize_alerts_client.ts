@@ -8,9 +8,9 @@
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { Logger } from '@kbn/core/server';
 import { LegacyAlertsClient } from '..';
+import { IAlertsClient } from '../types';
 import { AlertsService } from '../../alerts_service';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -19,7 +19,7 @@ import {
   RuleTypeParams,
   SanitizedRule,
 } from '../../types';
-import { IAlertsClient } from '../types';
+import { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
 
 export type RuleData<Params extends RuleTypeParams> = Pick<
   SanitizedRule<Params>,
@@ -45,7 +45,7 @@ export const initializeAlertsClient = async <
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string,
+  RecoveryActionGroupId extends string
 >({
   alertsService,
   context,

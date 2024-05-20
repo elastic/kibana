@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
-import React, { Fragment } from 'react';
 
 export const pageCss = ({ euiTheme }: UseEuiTheme) => ({
   background: euiTheme.colors.emptyShade,

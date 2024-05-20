@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { KibanaFeature } from '@kbn/features-plugin/common';
-import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import type { AuditLogger, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { Authorization, Operations } from '.';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { Authorization, Operations } from '.';
 import { AuthorizationAuditLogger } from './audit_logger';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
+import type { AuditLogger, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 const createSpacesDisabledFeaturesMock = (disabledFeatures: string[] = []) => {
   const spacesStart: jest.Mocked<SpacesPluginStart> = spacesMock.createStart();

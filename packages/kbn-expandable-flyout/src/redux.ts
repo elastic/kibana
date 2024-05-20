@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { configureStore } from '@reduxjs/toolkit';
 import { createContext } from 'react';
-import { ReactReduxContextValue, createDispatchHook, createSelectorHook } from 'react-redux';
+import { createDispatchHook, createSelectorHook, ReactReduxContextValue } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
 import { reducer } from './reducer';
-import { State, initialState } from './state';
+import { initialState, State } from './state';
 
 export const store = configureStore({
   reducer,

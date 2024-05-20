@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 
-import type { UserActionUI } from '../../containers/types';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
+import type { UserActionUI } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
 interface UserActionsPagination {

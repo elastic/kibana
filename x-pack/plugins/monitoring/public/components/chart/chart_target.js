@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { get, isEqual, filter } from 'lodash';
 import $ from 'jquery';
-import { filter, get, isEqual } from 'lodash';
 import React from 'react';
 import { eventBus } from './event_bus';
 import { getChartOptions } from './get_chart_options';

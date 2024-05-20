@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 export interface FormattedComboBoxProps {
   onChange: (value: string[]) => void;

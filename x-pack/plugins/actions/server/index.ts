@@ -1,5 +1,3 @@
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +5,11 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
  * 2.0.
  */
 import { get } from 'lodash';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { configSchema, ActionsConfig, CustomHostSettings } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';
 import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
-import { ActionsConfig, CustomHostSettings, configSchema } from './config';
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';

@@ -7,10 +7,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EmbeddableFactory } from './embeddable_factory';
-import { EmbeddableRoot } from './embeddable_root';
-import { ErrorEmbeddable } from './error_embeddable';
 import { EmbeddableInput, IEmbeddable } from './i_embeddable';
+import { EmbeddableRoot } from './embeddable_root';
+import { EmbeddableFactory } from './embeddable_factory';
+import { ErrorEmbeddable } from './error_embeddable';
 import { isErrorEmbeddable } from './is_error_embeddable';
 
 /**

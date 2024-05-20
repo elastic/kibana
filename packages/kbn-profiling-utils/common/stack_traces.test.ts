@@ -8,9 +8,9 @@
 
 import {
   DecodedStackTraceResponse,
-  StackTraceResponse,
   decodeStackTraceResponse,
   makeFrameID,
+  StackTraceResponse,
 } from './stack_traces';
 
 describe('Stack trace response operations', () => {

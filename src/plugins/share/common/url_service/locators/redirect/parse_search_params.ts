@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { i18n } from '@kbn/i18n';
 import { decompressFromBase64 } from 'lz-string';
 import type { RedirectOptions } from './types';
 

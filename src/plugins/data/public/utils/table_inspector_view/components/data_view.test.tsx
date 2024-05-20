@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { TablesAdapter } from '@kbn/expressions-plugin/common';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React, { Suspense } from 'react';
 import { getTableViewDescription } from '..';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { TablesAdapter } from '@kbn/expressions-plugin/common';
 
 jest.mock('@kbn/share-plugin/public', () => ({
   downloadMultipleAs: jest.fn(),

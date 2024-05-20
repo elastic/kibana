@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import React, { Component, Fragment } from 'react';
+import { merge } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiDelayRender,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
@@ -19,32 +22,29 @@ import {
   EuiLink,
   EuiLoadingLogo,
   EuiOverlayMask,
-  EuiScreenReaderOnly,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiTitle,
+  EuiDelayRender,
+  EuiScreenReaderOnly,
   htmlIdGenerator,
+  EuiSwitchEvent,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { merge } from 'lodash';
-import React, { Component, Fragment } from 'react';
 
-import { PROXY_MODE, SNIFF_MODE } from '../../../../../common/constants';
 import { Cluster, ClusterPayload } from '../../../../../common/lib';
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../common/constants';
 
 import { AppContext, Context } from '../../../app_context';
 
 import { skippingDisconnectedClustersUrl } from '../../../services/documentation';
 
-import { ConnectionMode } from './components';
 import { RequestFlyout } from './request_flyout';
+import { ConnectionMode } from './components';
 import {
   ClusterErrors,
   convertCloudRemoteAddressToProxyConnection,
-  isCloudAdvancedOptionsEnabled,
   validateCluster,
+  isCloudAdvancedOptionsEnabled,
 } from './validators';
 
 const defaultClusterValues: ClusterPayload = {

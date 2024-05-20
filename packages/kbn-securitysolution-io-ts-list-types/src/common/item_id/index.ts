@@ -8,8 +8,8 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 export const item_id = NonEmptyString;
 export type ItemId = t.TypeOf<typeof item_id>;

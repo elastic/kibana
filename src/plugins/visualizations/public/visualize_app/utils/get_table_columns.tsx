@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
+import React from 'react';
+import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { VisualizationListItem } from '../..';
 
 const getBadge = (item: VisualizationListItem) => {

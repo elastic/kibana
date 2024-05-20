@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
+import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { TableHeader } from './table_header';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import React from 'react';
-import { TableHeader } from './table_header';
 
 const defaultUiSettings = {
   get: (key: string) => {

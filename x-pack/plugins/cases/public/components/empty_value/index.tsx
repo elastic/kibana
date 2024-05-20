@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { get, isString } from 'lodash/fp';
 import React from 'react';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import * as i18n from './translations';
 

@@ -7,10 +7,11 @@
 
 import { compose, lifecycle, withHandlers, withProps, withState } from 'react-recompose';
 import { connect } from 'react-redux';
-import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../../common/lib';
-import { flatten } from '../../../lib/aeroelastic/functional';
-import { updater } from '../../../lib/aeroelastic/layout';
 import { createStore } from '../../../lib/aeroelastic/store';
+import { updater } from '../../../lib/aeroelastic/layout';
+import { getNodes, getPageById, isWriteable } from '../../../state/selectors/workpad';
+import { flatten } from '../../../lib/aeroelastic/functional';
+import { canUserWrite, getFullscreen, getZoomScale } from '../../../state/selectors/app';
 import {
   elementLayer,
   insertNodes,
@@ -18,11 +19,10 @@ import {
   setMultiplePositions,
 } from '../../../state/actions/elements';
 import { selectToplevelNodes } from '../../../state/actions/transient';
-import { canUserWrite, getFullscreen, getZoomScale } from '../../../state/selectors/app';
-import { getNodes, getPageById, isWriteable } from '../../../state/selectors/workpad';
 import { crawlTree, globalStateUpdater, shapesForNodes } from '../integration_utils';
-import { eventHandlers } from './event_handlers';
+import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../../common/lib';
 import { InteractiveWorkpadPage as InteractiveComponent } from './interactive_workpad_page';
+import { eventHandlers } from './event_handlers';
 
 const configuration = {
   getAdHocChildAnnotationName: 'adHocChildAnnotation',

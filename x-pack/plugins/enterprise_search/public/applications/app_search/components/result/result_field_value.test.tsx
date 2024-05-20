@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { InternalSchemaType, SchemaType } from '../../../shared/schema/types';
+import { SchemaType, InternalSchemaType } from '../../../shared/schema/types';
 
 import { ResultFieldValue } from '.';
 

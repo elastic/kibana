@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
-import { ML_PARTITION_FIELDS, type MlPartitionFieldsType } from '@kbn/ml-anomaly-utils';
-import type { MlClient } from '../../lib/ml_client';
-import type { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type MlPartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import type { CriteriaField } from './results_service';
+import type { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
+import type { MlClient } from '../../lib/ml_client';
 
 type SearchTerm =
   | {

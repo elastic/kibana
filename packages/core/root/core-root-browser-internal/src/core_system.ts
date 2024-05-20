@@ -6,49 +6,49 @@
  * Side Public License, v 1.
  */
 
+import { filter, firstValueFrom } from 'rxjs';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
+import {
+  InjectedMetadataService,
+  type InjectedMetadataParams,
+} from '@kbn/core-injected-metadata-browser-internal';
+import { BrowserLoggingSystem } from '@kbn/core-logging-browser-internal';
+import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
+import { ThemeService } from '@kbn/core-theme-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
-import { ApplicationService } from '@kbn/core-application-browser-internal';
-import { CoreAppsService } from '@kbn/core-apps-browser-internal';
-import type { CoreContext } from '@kbn/core-base-browser-internal';
-import { ChromeService } from '@kbn/core-chrome-browser-internal';
-import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
-import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
-import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
+import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
-import { I18nService } from '@kbn/core-i18n-browser-internal';
-import {
-  type InjectedMetadataParams,
-  InjectedMetadataService,
-} from '@kbn/core-injected-metadata-browser-internal';
-import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
-import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
-import { BrowserLoggingSystem } from '@kbn/core-logging-browser-internal';
-import { NotificationsService } from '@kbn/core-notifications-browser-internal';
-import { OverlayService } from '@kbn/core-overlays-browser-internal';
-import { PluginsService } from '@kbn/core-plugins-browser-internal';
-import { RenderingService } from '@kbn/core-rendering-browser-internal';
-import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
-import { SecurityService } from '@kbn/core-security-browser-internal';
-import { ThemeService } from '@kbn/core-theme-browser-internal';
 import { SettingsService, UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
-import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
+import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
+import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { filter, firstValueFrom } from 'rxjs';
+import { OverlayService } from '@kbn/core-overlays-browser-internal';
+import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
+import { NotificationsService } from '@kbn/core-notifications-browser-internal';
+import { ChromeService } from '@kbn/core-chrome-browser-internal';
+import { ApplicationService } from '@kbn/core-application-browser-internal';
+import { RenderingService } from '@kbn/core-rendering-browser-internal';
+import { CoreAppsService } from '@kbn/core-apps-browser-internal';
+import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
+import { PluginsService } from '@kbn/core-plugins-browser-internal';
+import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
+import { SecurityService } from '@kbn/core-security-browser-internal';
+import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
+import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
+  LOAD_SETUP_DONE,
+  LOAD_START_DONE,
   KIBANA_LOADED_EVENT,
-  LOAD_BOOTSTRAP_START,
   LOAD_CORE_CREATED,
   LOAD_FIRST_NAV,
-  LOAD_SETUP_DONE,
+  LOAD_BOOTSTRAP_START,
   LOAD_START,
-  LOAD_START_DONE,
 } from './events';
-import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
 import './core_system.scss';
 

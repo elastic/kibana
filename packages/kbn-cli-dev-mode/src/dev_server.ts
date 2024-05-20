@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { observeLines } from '@kbn/stdio-dev-helpers';
 import * as Rx from 'rxjs';
-import { ignoreElements, map, mergeMap, scan, share, switchMap, take, takeUntil, tap } from 'rxjs';
+import { map, tap, take, share, mergeMap, switchMap, scan, takeUntil, ignoreElements } from 'rxjs';
+import { observeLines } from '@kbn/stdio-dev-helpers';
 
-import { Log } from './log';
 import { usingServerProcess } from './using_server_process';
 import { Watcher } from './watcher';
+import { Log } from './log';
 
 export interface Options {
   log: Log;

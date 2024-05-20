@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { transparentize } from '@elastic/eui';
-import { CSSObject, css } from '@emotion/react';
 import { useMemo } from 'react';
-import type { Teletype } from '../../../common';
+import { CSSObject, css } from '@emotion/react';
+import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
+import type { Teletype } from '../../../common';
 
 export const useStyles = (tty?: Teletype, show?: boolean) => {
   const { euiTheme, euiVars } = useEuiTheme();

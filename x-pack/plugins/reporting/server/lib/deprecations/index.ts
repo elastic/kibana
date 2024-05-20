@@ -7,8 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import { DeprecationsDetails, DocLinksServiceSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { DeprecationsDetails, DocLinksServiceSetup } from '@kbn/core/server';
 import { checkIlmMigrationStatus } from './check_ilm_migration_status';
 
 function deprecationError(

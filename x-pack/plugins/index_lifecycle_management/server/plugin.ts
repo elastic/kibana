@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { IScopedClusterClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { Index } from '@kbn/index-management-plugin/common/types';
 import { PLUGIN } from '../common/constants';
-import { IndexLifecycleManagementConfig } from './config';
+import { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
+import { IndexLifecycleManagementConfig } from './config';
 import { handleEsError } from './shared_imports';
-import { Dependencies } from './types';
 
 const indexLifecycleDataEnricher = async (
   indicesList: Index[],

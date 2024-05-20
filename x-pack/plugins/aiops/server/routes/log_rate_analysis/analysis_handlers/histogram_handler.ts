@@ -7,30 +7,30 @@
 
 import { queue } from 'async';
 
-import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type {
-  NumericChartData,
   SignificantItem,
   SignificantItemHistogramItem,
+  NumericChartData,
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
+import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
-import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import {
   addSignificantItemsHistogramAction,
   updateLoadingStateAction,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
+import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
 import { getHistogramQuery } from '@kbn/aiops-log-rate-analysis/queries/get_histogram_query';
 
-import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 import {
   MAX_CONCURRENT_QUERIES,
   PROGRESS_STEP_HISTOGRAMS,
 } from '../response_stream_utils/constants';
+import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 
 export const histogramHandlerFactory =
   <T extends ApiVersion>({

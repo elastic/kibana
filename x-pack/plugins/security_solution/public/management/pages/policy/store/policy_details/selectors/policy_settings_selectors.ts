@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
-import { policyFactory as policyConfigFactory } from '../../../../../../../common/endpoint/models/policy_config';
-import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
+import type { PolicyDetailsState } from '../../../types';
 import type {
   Immutable,
   NewPolicyData,
@@ -17,23 +17,23 @@ import type {
   PolicyData,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';
+import { policyFactory as policyConfigFactory } from '../../../../../../../common/endpoint/models/policy_config';
 import {
-  MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
-  MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
-  MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
 } from '../../../../../common/constants';
 import type { ManagementRoutePolicyDetailsParams } from '../../../../../types';
-import type { PolicyDetailsState } from '../../../types';
+import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 import {
-  isOnBlocklistsView,
-  isOnHostIsolationExceptionsView,
-  isOnPolicyEventFiltersView,
-  isOnPolicyFormView,
   isOnPolicyTrustedAppsView,
+  isOnPolicyEventFiltersView,
+  isOnHostIsolationExceptionsView,
+  isOnPolicyFormView,
+  isOnBlocklistsView,
   isOnProtectionUpdatesView,
 } from './policy_common_selectors';
 

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type {
   ElasticsearchCapabilities,
   ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
-import { firstValueFrom } from 'rxjs';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 
 const SERVERLESS_BUILD_FLAVOR = 'serverless';

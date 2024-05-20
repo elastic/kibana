@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { IFieldSubTypeNested } from '@kbn/es-query';
 import { useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { IFieldSubTypeNested } from '@kbn/es-query';
 
-import { i18n } from '@kbn/i18n';
 import type { BrowserField } from '@kbn/timelines-plugin/common';
-import { getAllFieldsByName } from '../../../../common/containers/source';
-import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
-import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
+import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
+import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { getAllFieldsByName } from '../../../../common/containers/source';
 import { isLensSupportedType } from '../../../../common/utils/lens';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {

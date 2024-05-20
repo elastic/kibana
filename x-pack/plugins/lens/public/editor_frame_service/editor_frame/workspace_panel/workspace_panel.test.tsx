@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import { act, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
+import { UserMessage } from '../../../types';
+import { fireEvent, screen, act } from '@testing-library/react';
 import {
-  createExpressionRendererMock,
-  createMockDatasource,
-  createMockFramePublicAPI,
   createMockVisualization,
+  createMockDatasource,
+  createExpressionRendererMock,
+  createMockFramePublicAPI,
   createMockedDragDropContext,
   renderWithReduxStore,
 } from '../../../mocks';
-import { UserMessage } from '../../../types';
 
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import type { FieldSpec } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { WorkspacePanel } from './workspace_panel';
+import { ReactWrapper } from 'enzyme';
 import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import { buildExistsFilter } from '@kbn/es-query';
-import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { Ast, toExpression } from '@kbn/interpreter';
+import { coreMock } from '@kbn/core/public/mocks';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
-import { ReactWrapper } from 'enzyme';
-import faker from 'faker';
-import { getLensInspectorService } from '../../../lens_inspector_service';
 import {
   applyChanges,
   setState,
   updateDatasourceState,
   updateVisualizationState,
 } from '../../../state_management';
+import { getLensInspectorService } from '../../../lens_inspector_service';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
-import { WorkspacePanel } from './workspace_panel';
+import { Ast, toExpression } from '@kbn/interpreter';
+import faker from 'faker';
 
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },

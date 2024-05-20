@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '../../../common/constants';
 
-import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
-import { Benchmark, CspBenchmarkRule } from '../../../common/types/latest';
-import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
+import { CspBenchmarkRule, Benchmark } from '../../../common/types/latest';
 import { getClusters } from '../compliance_dashboard/get_clusters';
 import { getStats } from '../compliance_dashboard/get_stats';
+import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
 
 export const getBenchmarksData = async (
   soClient: SavedObjectsClientContract,

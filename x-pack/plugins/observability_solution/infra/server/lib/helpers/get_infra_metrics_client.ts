@@ -1,4 +1,3 @@
-import type { KibanaRequest } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import type { KibanaRequest } from '@kbn/core/server';
  * 2.0.
  */
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { InfraPluginRequestHandlerContext } from '../../types';
-import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { InfraSources } from '../sources';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 
 type RequiredParams = Omit<ESSearchRequest, 'index'> & {
   body: {

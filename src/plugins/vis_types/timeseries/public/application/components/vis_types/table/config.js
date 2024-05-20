@@ -6,39 +6,39 @@
  * Side Public License, v 1.
  */
 
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { v4 as uuidv4 } from 'uuid';
+import { i18n } from '@kbn/i18n';
+import { last } from 'lodash';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataFormatPicker } from '../../data_format_picker';
+import { createSelectHandler } from '../../lib/create_select_handler';
+import { createTextHandler } from '../../lib/create_text_handler';
+import { FieldSelect } from '../../aggs/field_select';
+import { YesNo } from '../../yes_no';
+import { ColorRules } from '../../color_rules';
 import {
-  EuiCode,
+  htmlIdGenerator,
   EuiComboBox,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFieldText,
   EuiFormRow,
+  EuiCode,
   EuiHorizontalRule,
   EuiSpacer,
   EuiTitle,
-  htmlIdGenerator,
   withEuiTheme,
 } from '@elastic/eui';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { last } from 'lodash';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
+import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
+import { QueryBarWrapper } from '../../query_bar_wrapper';
+import { DATA_FORMATTERS, BUCKET_TYPES } from '../../../../../common/enums';
 import { isConfigurationFeatureEnabled } from '../../../../../common/check_ui_restrictions';
-import { BUCKET_TYPES, DATA_FORMATTERS } from '../../../../../common/enums';
 import { filterCannotBeAppliedErrorMessage } from '../../../../../common/errors';
 import { tsvbEditorRowStyles } from '../../../styles/common.styles';
-import { FieldSelect } from '../../aggs/field_select';
-import { ColorRules } from '../../color_rules';
-import { DataFormatPicker } from '../../data_format_picker';
-import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
-import { createSelectHandler } from '../../lib/create_select_handler';
-import { createTextHandler } from '../../lib/create_text_handler';
-import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
-import { QueryBarWrapper } from '../../query_bar_wrapper';
-import { YesNo } from '../../yes_no';
 
 class TableSeriesConfigUi extends Component {
   UNSAFE_componentWillMount() {

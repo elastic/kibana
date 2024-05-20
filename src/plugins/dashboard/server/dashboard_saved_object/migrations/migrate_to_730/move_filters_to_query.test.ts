@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { Pre600FilterQuery, moveFiltersToQuery } from './move_filters_to_query';
+import { FilterStateStore, Filter } from '@kbn/es-query';
+import { moveFiltersToQuery, Pre600FilterQuery } from './move_filters_to_query';
 
 const filter: Filter = {
   meta: { disabled: false, negate: false, alias: '' },

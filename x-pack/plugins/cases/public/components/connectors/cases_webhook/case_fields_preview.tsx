@@ -9,8 +9,8 @@ import React from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { ConnectorTypes } from '../../../../common/types/domain';
-import { ConnectorCard } from '../card';
 import type { ConnectorFieldsPreviewProps } from '../types';
+import { ConnectorCard } from '../card';
 import * as i18n from './translations';
 
 const CasesWebhookPreviewComponent: React.FunctionComponent<ConnectorFieldsPreviewProps<null>> = ({

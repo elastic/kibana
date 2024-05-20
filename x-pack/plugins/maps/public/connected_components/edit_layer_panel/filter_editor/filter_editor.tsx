@@ -9,28 +9,28 @@ import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
+  EuiTitle,
   EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiTitle,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
-import type { DataView, Query } from '@kbn/data-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import type { DataView, Query } from '@kbn/data-plugin/common';
 import { APP_ID } from '../../../../common/constants';
+import { getData, getSearchBar } from '../../../kibana_services';
+import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
+import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
 import { ILayer } from '../../../classes/layers/layer';
 import { hasESSourceMethod } from '../../../classes/sources/es_source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
-import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
-import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
-import { getData, getSearchBar } from '../../../kibana_services';
 
 export interface Props {
   layer: ILayer;

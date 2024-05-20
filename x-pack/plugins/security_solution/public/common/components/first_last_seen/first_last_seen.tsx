@@ -9,10 +9,10 @@ import React, { useMemo } from 'react';
 
 import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 
-import { Direction } from '../../../../common/search_strategy';
 import { useFirstLastSeen } from '../../containers/use_first_last_seen';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
+import { Direction } from '../../../../common/search_strategy';
 
 export enum FirstLastSeenType {
   FIRST_SEEN = 'first-seen',

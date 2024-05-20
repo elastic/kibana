@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  legacyRouteToAlerts,
-  routeToConnectors,
   routeToHome,
-  routeToLogs,
+  routeToConnectors,
   routeToRules,
+  routeToLogs,
+  legacyRouteToAlerts,
 } from '../constants';
 
 export const getAlertingSectionBreadcrumb = (

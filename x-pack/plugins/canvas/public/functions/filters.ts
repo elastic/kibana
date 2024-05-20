@@ -7,10 +7,10 @@
 
 import { fromExpression } from '@kbn/interpreter';
 import { get } from 'lodash';
-import { InitializeArguments } from '.';
+import { pluginServices } from '../services';
 import type { FiltersFunction } from '../../common/functions';
 import { buildFiltersFunction } from '../../common/functions';
-import { pluginServices } from '../services';
+import { InitializeArguments } from '.';
 
 export interface Arguments {
   group: string[];

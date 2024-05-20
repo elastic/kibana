@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, compareFilters } from '@kbn/es-query';
+import { compareFilters, Filter } from '@kbn/es-query';
 import React, { FC, useCallback, useState } from 'react';
 import { CloseFilterEditorConfirmModal } from './close_confirm_modal';
 
@@ -38,7 +38,7 @@ const isQueryDslFilterChanged = (original: QueryDslFilter, updated: QueryDslFilt
   original.queryDsl !== updated.queryDsl || original.customLabel !== updated.customLabel;
 
 export function withCloseFilterEditorConfirmModal<
-  T extends WithCloseFilterEditorConfirmModalProps = WithCloseFilterEditorConfirmModalProps,
+  T extends WithCloseFilterEditorConfirmModalProps = WithCloseFilterEditorConfirmModalProps
 >(WrappedComponent: FC<T>) {
   return function (props: Omit<T, keyof WithCloseFilterEditorConfirmModalProps>) {
     const [actionsOnClose, setActionsOnClose] = useState<Action[]>();

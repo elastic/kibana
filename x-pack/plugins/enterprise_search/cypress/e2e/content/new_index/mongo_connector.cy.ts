@@ -8,13 +8,13 @@
 import { login } from '../../../tasks/login';
 import {
   CONNECTOR_INDEX,
-  INDEX_OVERVIEW,
-  NEW_CONNECTOR_PAGE,
-  NEW_INDEX_CARD,
-  ROUTES,
-  SEARCH_INDICES,
-  SELECT_CONNECTOR,
   getIndexRoute,
+  INDEX_OVERVIEW,
+  NEW_INDEX_CARD,
+  NEW_CONNECTOR_PAGE,
+  ROUTES,
+  SELECT_CONNECTOR,
+  SEARCH_INDICES,
 } from '../selectors';
 
 describe('Enterprise Search MongoDB connector', () => {

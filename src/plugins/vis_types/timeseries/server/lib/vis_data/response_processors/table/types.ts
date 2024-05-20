@@ -7,9 +7,9 @@
  */
 import { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
 
-import type { Panel, PanelData, Series } from '../../../../../common/types';
 import type { ProcessorFunction } from '../../build_processor_function';
 import type { TableSearchRequestMeta } from '../../request_processors/table/types';
+import type { Panel, Series, PanelData } from '../../../../../common/types';
 
 export interface TableResponseProcessorsParams {
   response: {

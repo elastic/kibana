@@ -7,12 +7,12 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { expectToReject, getDataStreamSettingsOfEarliestIndex, rolloverDataStream } from './utils';
 import {
   DatasetQualityApiClient,
   DatasetQualityApiError,
 } from './common/dataset_quality_api_supertest';
 import { DatasetQualityFtrContextProvider } from './common/services';
-import { expectToReject, getDataStreamSettingsOfEarliestIndex, rolloverDataStream } from './utils';
 
 export default function ({ getService }: DatasetQualityFtrContextProvider) {
   const datasetQualityApiClient: DatasetQualityApiClient = getService('datasetQualityApiClient');

@@ -1,5 +1,3 @@
-import { i18n } from '@kbn/i18n';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,11 +5,13 @@ import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { HostMetricsExplanationContent } from '../../../lens';
-import { ContainerMetricsExplanationContent } from '../../../lens/metric_explanation/container_metrics_explanation_content';
-import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import { TitleWithTooltip } from '../../components/section_title';
+import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import { ServicesTooltipContent } from '../../components/services_tooltip_content';
+import { ContainerMetricsExplanationContent } from '../../../lens/metric_explanation/container_metrics_explanation_content';
 
 export const MetricsSectionTitle = ({ assetType }: { assetType: InventoryItemType }) => {
   return (

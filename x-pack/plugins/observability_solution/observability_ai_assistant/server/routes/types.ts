@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type {
   CoreStart,
   CustomRequestHandlerContext,
@@ -14,9 +13,10 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
 import type { Logger } from '@kbn/logging';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { ObservabilityAIAssistantService } from '../service';
 import type {
   ObservabilityAIAssistantPluginSetupDependencies,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getSearchStatus } from './get_search_status';
 import { SearchStatus } from './types';
+import { getSearchStatus } from './get_search_status';
 
 describe('getSearchStatus', () => {
   let mockClient: any;

@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
-import { checkLicense } from '../../lib/check_license';
 import type { LogstashPluginRouter } from '../../types';
+import { checkLicense } from '../../lib/check_license';
 
 export function registerPipelineDeleteRoute(router: LogstashPluginRouter) {
   router.delete(

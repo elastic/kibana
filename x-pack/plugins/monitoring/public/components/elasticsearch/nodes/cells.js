@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { get } from 'lodash';
+import { formatMetric } from '../../../lib/format_number';
 import {
+  EuiText,
+  EuiPopover,
   EuiButtonIcon,
   EuiDescriptionList,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
-  EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import React, { useState } from 'react';
-import { formatMetric } from '../../../lib/format_number';
 
 const TRENDING_DOWN = i18n.translate('xpack.monitoring.elasticsearch.node.cells.trendingDownText', {
   defaultMessage: 'down',

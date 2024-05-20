@@ -5,34 +5,34 @@
  * 2.0.
  */
 
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createSpaces,
   createUsersAndRoles,
   deleteSpaces,
   deleteUsersAndRoles,
 } from '../../../../rule_registry/common/lib/authentication';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import {
-  observabilityMinReadAlertsAll,
-  observabilityMinReadAlertsAllSpacesAll,
   observabilityMinReadAlertsRead,
   observabilityMinReadAlertsReadSpacesAll,
-  observabilityMinimalAll,
-  observabilityMinimalAllSpacesAll,
   observabilityMinimalRead,
   observabilityMinimalReadSpacesAll,
+  observabilityMinReadAlertsAll,
+  observabilityMinReadAlertsAllSpacesAll,
+  observabilityMinimalAll,
+  observabilityMinimalAllSpacesAll,
 } from '../../../../rule_registry/common/lib/authentication/roles';
 import {
-  obsMinAll,
-  obsMinAllSpacesAll,
-  obsMinRead,
-  obsMinReadAlertsAll,
-  obsMinReadAlertsAllSpacesAll,
   obsMinReadAlertsRead,
   obsMinReadAlertsReadSpacesAll,
+  obsMinRead,
   obsMinReadSpacesAll,
   superUser,
+  obsMinReadAlertsAll,
+  obsMinReadAlertsAllSpacesAll,
+  obsMinAll,
+  obsMinAllSpacesAll,
 } from '../../../../rule_registry/common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export

@@ -6,11 +6,11 @@
  */
 
 import {
-  TaskErrorSource,
   createTaskRunError,
   getErrorSource,
   isUnrecoverableError,
   isUserError,
+  TaskErrorSource,
   throwUnrecoverableError,
 } from './errors';
 

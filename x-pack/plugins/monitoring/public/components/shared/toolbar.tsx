@@ -6,11 +6,11 @@
  */
 
 import { EuiPageHeader, EuiSuperDatePicker, OnRefreshChangeProps } from '@elastic/eui';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useContext, useCallback, useMemo } from 'react';
-import { GlobalStateContext } from '../../application/contexts/global_state_context';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useMonitoringTimeContainerContext } from '../../application/hooks/use_monitoring_time';
+import { GlobalStateContext } from '../../application/contexts/global_state_context';
 import { Legacy } from '../../legacy_shims';
 import { MonitoringStartServices } from '../../types';
 interface MonitoringToolbarProps {

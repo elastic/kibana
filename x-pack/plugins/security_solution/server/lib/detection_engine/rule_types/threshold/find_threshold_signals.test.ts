@@ -7,15 +7,15 @@
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
-import { TIMESTAMP_RUNTIME_FIELD } from '../constants';
-import { buildTimestampRuntimeMapping } from '../utils';
-import { getQueryFilter } from '../utils/get_query_filter';
 import * as single_search_after from '../utils/single_search_after';
 import { findThresholdSignals } from './find_threshold_signals';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { buildTimestampRuntimeMapping } from '../utils';
+import { TIMESTAMP_RUNTIME_FIELD } from '../constants';
+import { getQueryFilter } from '../utils/get_query_filter';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 const mockSingleSearchAfter = jest.fn(async () => ({
   searchResult: {

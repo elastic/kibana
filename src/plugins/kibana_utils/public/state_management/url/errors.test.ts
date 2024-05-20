@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { withNotifyOnErrors } from './errors';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 describe('state management URL errors', () => {
   const notifications = notificationServiceMock.createStartContract();

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
-  EuiSkeletonRectangle,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  EuiIcon,
+  EuiCode,
   OnTimeChangeProps,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
-import React, { useEffect, useState } from 'react';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { useDegradedDocsChart } from '../../../hooks';
 
-import { DEFAULT_DATEPICKER_REFRESH, DEFAULT_TIME_RANGE } from '../../../../common/constants';
+import { DEFAULT_TIME_RANGE, DEFAULT_DATEPICKER_REFRESH } from '../../../../common/constants';
 import { flyoutDegradedDocsText } from '../../../../common/translations';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 import { DegradedDocsChart } from './degraded_docs_chart';

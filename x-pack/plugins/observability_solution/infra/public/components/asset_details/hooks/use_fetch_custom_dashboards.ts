@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useEffect } from 'react';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraSavedCustomDashboard } from '../../../../common/custom_dashboards';
 import { InfraGetCustomDashboardsResponseBodyRT } from '../../../../common/http_api/custom_dashboards_api';
-import { createPlainError, throwErrors } from '../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
+import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 import { useRequestObservable } from './use_request_observable';
 
 interface UseDashboardProps {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
+import type { Logger } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { createEsIndexRequestBody } from '../../../../common/api/entity_analytics/risk_score';
 import { RISK_SCORE_CREATE_INDEX } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { createIndex } from './lib/create_index';
+import { createEsIndexRequestBody } from '../../../../common/api/entity_analytics/risk_score';
 
 export const createEsIndexRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned

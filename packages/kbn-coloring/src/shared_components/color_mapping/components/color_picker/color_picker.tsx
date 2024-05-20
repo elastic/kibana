@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiHorizontalRule,
   EuiPopoverTitle,
   EuiTab,
   EuiTabs,
   EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { ColorMapping } from '../../config';
 import { getPalette } from '../../palettes';
-import { NeutralPalette } from '../../palettes/neutral';
 import { PaletteColors } from './palette_colors';
 import { RGBPicker } from './rgb_picker';
+import { NeutralPalette } from '../../palettes/neutral';
 
 export function ColorPicker({
   palette,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';

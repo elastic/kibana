@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ClientPluginsStart } from '../../../../../plugin';
+import { useEuiTheme } from '@elastic/eui';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { ERRORS_LABEL } from './monitor_errors_count';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 interface Props {
   from: string;

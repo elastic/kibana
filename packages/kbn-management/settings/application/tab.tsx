@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiTab } from '@elastic/eui';
 import React from 'react';
+import { EuiTab } from '@elastic/eui';
 
 export const DATA_TEST_SUBJ_PREFIX_TAB = 'settings-tab';
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { type FC, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,18 +21,17 @@ import {
   EuiSelect,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC, useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
+import { useMlLink } from '../../application/contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
+import type { MlApiServices } from '../../application/services/ml_api_service';
 import { extractInfluencers } from '../../../common/util/job_utils';
 import { JobSelectorControl } from '../../alerting/job_selector';
-import { useMlLink } from '../../application/contexts/kibana';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import type { MlApiServices } from '../../application/services/ml_api_service';
+import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 
 export type ExplicitInput = AnomalySwimlaneEmbeddableUserInput;

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { Observable, Subject } from 'rxjs';
-import { bufferCount, map, skip, take } from 'rxjs';
-import stats from 'stats-lite';
 import { v4 as uuidv4 } from 'uuid';
+import { Subject, Observable } from 'rxjs';
+import stats from 'stats-lite';
+import { take, bufferCount, skip, map } from 'rxjs';
 
-import { take as takeLeft, takeRight, times } from 'lodash';
-import { ephemeralTaskLifecycleMock } from '../ephemeral_task_lifecycle.mock';
-import { asOk } from '../lib/result_type';
-import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import {
-  TaskPersistence,
+  asTaskRunEvent,
   TaskTiming,
   asTaskManagerStatEvent,
-  asTaskRunEvent,
+  TaskPersistence,
 } from '../task_events';
+import { asOk } from '../lib/result_type';
+import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
 import {
-  EphemeralTaskStat,
-  SummarizedEphemeralTaskStat,
   createEphemeralTaskAggregator,
   summarizeEphemeralStat,
+  SummarizedEphemeralTaskStat,
+  EphemeralTaskStat,
 } from './ephemeral_task_statistics';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import { ephemeralTaskLifecycleMock } from '../ephemeral_task_lifecycle.mock';
+import { times, takeRight, take as takeLeft } from 'lodash';
 
 describe('Ephemeral Task Statistics', () => {
   test('returns the average size of the ephemeral queue', async () => {

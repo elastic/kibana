@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { PassThrough, Readable, Writable } from 'stream';
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { castArray } from 'lodash';
+import { PassThrough, Readable, Writable } from 'stream';
 import { isGeneratorObject } from 'util/types';
 import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
-import { SynthtraceEsClient } from '../../lib/utils/with_client';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
+import { SynthtraceEsClient } from '../../lib/utils/with_client';
 
 export async function startLiveDataUpload({
   runOptions,
@@ -25,8 +25,9 @@ export async function startLiveDataUpload({
 }) {
   const file = runOptions.file;
 
-  const { logger, apmEsClient, logsEsClient, infraEsClient, assetsEsClient } =
-    await bootstrap(runOptions);
+  const { logger, apmEsClient, logsEsClient, infraEsClient, assetsEsClient } = await bootstrap(
+    runOptions
+  );
 
   const scenario = await getScenario({ file, logger });
   const { generate } = await scenario({ ...runOptions, logger });
@@ -87,13 +88,10 @@ export async function startLiveDataUpload({
       const promises = generatorsAndClientsArray.map(({ generator }, i) => {
         const concatenatedStream = castArray(generator)
           .reverse()
-          .reduce<Writable>(
-            (prev, current) => {
-              const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
-              return currentStream.pipe(prev);
-            },
-            new PassThrough({ objectMode: true })
-          );
+          .reduce<Writable>((prev, current) => {
+            const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
+            return currentStream.pipe(prev);
+          }, new PassThrough({ objectMode: true }));
 
         concatenatedStream.pipe(streams[i], { end: false });
 

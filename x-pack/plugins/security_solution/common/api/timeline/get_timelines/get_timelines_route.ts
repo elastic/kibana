@@ -6,13 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import { unionWithNullType } from '../../../utility_types';
 import {
-  TimelineStatusLiteralRt,
-  TimelineTypeLiteralRt,
   direction,
   sortFieldTimeline,
+  TimelineStatusLiteralRt,
+  TimelineTypeLiteralRt,
 } from '../model/api';
+import { unionWithNullType } from '../../../utility_types';
 
 const BoolFromString = rt.union([rt.literal('true'), rt.literal('false')]);
 

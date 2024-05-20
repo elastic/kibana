@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useRef } from 'react';
 
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { documentationService } from '../../../../services/documentation';
-import { useDispatch } from '../../mappings_state_context';
-import { Form, JsonEditorField, SerializerFunc, UseField, useForm } from '../../shared_imports';
+import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import { useForm, Form, SerializerFunc, UseField, JsonEditorField } from '../../shared_imports';
 import { MappingsTemplates } from '../../types';
+import { useDispatch } from '../../mappings_state_context';
 import { templatesFormSchema } from './templates_form_schema';
+import { documentationService } from '../../../../services/documentation';
 
 interface Props {
   value?: MappingsTemplates;

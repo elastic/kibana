@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { ProductLine } from './configs';
+import { render, fireEvent } from '@testing-library/react';
 import { ProductSwitch } from './product_switch';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { ProductLine } from './configs';
 
 describe('ProductSwitch', () => {
   const onProductSwitchChangedMock = jest.fn();

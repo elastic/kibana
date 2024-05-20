@@ -7,9 +7,9 @@
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { SerializedSearchSourceFields } from '../..';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
+import { SerializedSearchSourceFields } from '../..';
 import { SearchSourceFields } from './types';
 
 /**

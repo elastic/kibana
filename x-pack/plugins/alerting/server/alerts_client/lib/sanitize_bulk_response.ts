@@ -1,6 +1,3 @@
-import { TransportResult } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { set } from '@kbn/safer-lodash-set';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,7 +5,10 @@ import { set } from '@kbn/safer-lodash-set';
  * 2.0.
  */
 import { cloneDeep } from 'lodash';
+import { TransportResult } from '@elastic/elasticsearch';
 import { get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const sanitizeBulkErrorResponse = (
   response: TransportResult<estypes.BulkResponse, unknown> | estypes.BulkResponse

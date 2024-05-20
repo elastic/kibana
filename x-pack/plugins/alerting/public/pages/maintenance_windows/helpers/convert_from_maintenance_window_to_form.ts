@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { Frequency } from '@kbn/rrule';
 import { has } from 'lodash';
-import moment from 'moment';
-import type { MaintenanceWindow, RRuleParams } from '../../../../common';
 import type { FormProps, RecurringScheduleFormProps } from '../components/schema';
+import type { RRuleParams, MaintenanceWindow } from '../../../../common';
 import { EndsOptions, MaintenanceWindowFrequency } from '../constants';
 import { getInitialByWeekday } from './get_initial_by_weekday';
 
@@ -37,8 +37,8 @@ export const convertFromMaintenanceWindowToForm = (
   const ends = rRule.until
     ? EndsOptions.ON_DATE
     : rRule.count
-      ? EndsOptions.AFTER_X
-      : EndsOptions.NEVER;
+    ? EndsOptions.AFTER_X
+    : EndsOptions.NEVER;
 
   const recurringSchedule: RecurringScheduleFormProps = {
     frequency: isCustomFrequency ? 'CUSTOM' : frequency,

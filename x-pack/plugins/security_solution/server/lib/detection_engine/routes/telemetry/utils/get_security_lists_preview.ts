@@ -8,8 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 
 import { PreviewTelemetryEventsSender } from '../../../../telemetry/preview_sender';
-import { PreviewTaskMetricsService } from '../../../../telemetry/preview_task_metrics';
 import type { ITelemetryReceiver } from '../../../../telemetry/receiver';
+import { PreviewTaskMetricsService } from '../../../../telemetry/preview_task_metrics';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { createTelemetrySecurityListTaskConfig } from '../../../../telemetry/tasks/security_lists';
 import { parseNdjson } from './parse_ndjson';

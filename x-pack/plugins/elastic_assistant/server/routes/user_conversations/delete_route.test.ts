@@ -6,16 +6,16 @@
  */
 
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common';
-import { getDeleteConversationRequest, requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import { deleteConversationRoute } from './delete_route';
+import { getDeleteConversationRequest, requestMock } from '../../__mocks__/request';
 
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import {
   getConversationMock,
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Delete conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;

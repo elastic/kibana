@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type {
-  ESQLAstItem,
   ESQLColumn,
   ESQLCommand,
-  ESQLFunction,
+  ESQLAstItem,
   ESQLMessage,
+  ESQLFunction,
 } from '@kbn/esql-ast';
-import { i18n } from '@kbn/i18n';
 import {
   getFunctionDefinition,
   isAssignment,
@@ -21,6 +21,7 @@ import {
   isFunctionItem,
   isLiteralItem,
 } from '../shared/helpers';
+import { ENRICH_MODES } from './settings';
 import {
   appendSeparatorOption,
   asOption,
@@ -29,7 +30,6 @@ import {
   onOption,
   withOption,
 } from './options';
-import { ENRICH_MODES } from './settings';
 import type { CommandDefinition } from './types';
 
 export const commandDefinitions: CommandDefinition[] = [

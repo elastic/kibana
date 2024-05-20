@@ -1,4 +1,3 @@
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +5,12 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
  * 2.0.
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { SECURITY_INTEGRATIONS_CRIBL_ROUTING_PIPELINE } from '../../../common/constants';
-import { getRouteEntriesFromPolicyConfig } from '../../../common/security_integrations/cribl/translator';
 import type { IngestPipelineRequest } from '../../../common/security_integrations/cribl/types';
+import { getRouteEntriesFromPolicyConfig } from '../../../common/security_integrations/cribl/translator';
 import { buildPipelineRequest } from '../../lib/security_integrations/cribl/util/pipeline_builder';
+import { SECURITY_INTEGRATIONS_CRIBL_ROUTING_PIPELINE } from '../../../common/constants';
 
 export const putCriblRoutingPipeline = async (
   esClient: ElasticsearchClient,

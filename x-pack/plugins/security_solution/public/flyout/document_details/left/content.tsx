@@ -6,12 +6,12 @@
  */
 
 import { useEuiBackgroundColor } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import type { LeftPanelPaths } from '.';
-import { FlyoutBody } from '../../shared/components/flyout_body';
 import type { LeftPanelTabType } from './tabs';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 
 export interface PanelContentProps {
   /**

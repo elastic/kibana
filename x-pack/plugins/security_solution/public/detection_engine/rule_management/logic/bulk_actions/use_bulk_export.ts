@@ -8,10 +8,10 @@
 import { useCallback } from 'react';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
-import type { QueryOrIds } from '../../api/api';
 import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation';
-import { useGuessRuleIdsForBulkAction } from './use_guess_rule_ids_for_bulk_action';
 import { useShowBulkErrorToast } from './use_show_bulk_error_toast';
+import type { QueryOrIds } from '../../api/api';
+import { useGuessRuleIdsForBulkAction } from './use_guess_rule_ids_for_bulk_action';
 
 export function useBulkExport() {
   const { mutateAsync } = useBulkExportMutation();

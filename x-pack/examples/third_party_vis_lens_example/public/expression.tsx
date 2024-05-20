@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { css, keyframes } from '@emotion/css';
 import type {
   Datatable,
@@ -13,8 +15,6 @@ import type {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { RotatingNumberState } from '../common/types';
 
 export const getRotatingNumberRenderer = (

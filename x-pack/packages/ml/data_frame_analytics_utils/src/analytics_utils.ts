@@ -9,9 +9,9 @@ import { ANALYSIS_CONFIG_TYPE } from './constants';
 import type {
   AnalysisConfig,
   ClassificationAnalysis,
-  DataFrameAnalysisConfigType,
   OutlierAnalysis,
   RegressionAnalysis,
+  DataFrameAnalysisConfigType,
 } from './types';
 
 /**

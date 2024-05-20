@@ -7,11 +7,11 @@
 
 import { act } from 'react-dom/test-utils';
 
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
-import { AsyncTestBedConfig, TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 import { EnrichPolicyCreate } from '../../../public/application/sections/enrich_policy_create';
 import { indexManagementStore } from '../../../public/application/store';
-import { TestSubjects, WithAppDependencies, services } from '../helpers';
+import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
 const testBedConfig: AsyncTestBedConfig = {
   store: () => indexManagementStore(services as any),

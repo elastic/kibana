@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import React, { useState } from 'react';
+import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 
 import { AlertListItem } from './types';
 

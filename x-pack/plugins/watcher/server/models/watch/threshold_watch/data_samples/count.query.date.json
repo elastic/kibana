@@ -1,6 +1,6 @@
 {
   "size": 0,
-  "query": {
+    "query": {
     "bool": {
       "filter": {
         "range": {

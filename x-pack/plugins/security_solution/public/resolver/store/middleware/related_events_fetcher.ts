@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import type { Dispatch, MiddlewareAPI } from 'redux';
+import { isEqual } from 'lodash';
 import type { ResolverPaginatedEvents } from '../../../../common/endpoint/types';
 
-import type { State } from '../../../common/store/types';
 import type { DataAccessLayer, PanelViewAndParameters } from '../../types';
+import * as selectors from '../selectors';
+import type { State } from '../../../common/store/types';
 import {
   serverFailedToReturnNodeEventsInCategory,
   serverReturnedNodeEventsInCategory,
 } from '../data/action';
-import * as selectors from '../selectors';
 
 export function RelatedEventsFetcher(
   dataAccessLayer: DataAccessLayer,

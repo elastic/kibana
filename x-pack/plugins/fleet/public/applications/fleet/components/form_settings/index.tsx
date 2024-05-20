@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
-import React from 'react';
 import { ZodFirstPartyTypeKind } from 'zod';
+import React from 'react';
+import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
 
 import { SettingsFieldGroup } from './settings_field_group';
-import { SettingsFieldWrapper, getInnerType } from './settings_field_wrapper';
+import { getInnerType, SettingsFieldWrapper } from './settings_field_wrapper';
 
 export const settingComponentRegistry = new Map<
   string,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { screen } from '@elastic/eui/lib/test/rtl';
 import { fireEvent, waitFor } from '@testing-library/react';
+import { screen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
-import { render } from '../../../../../lib/helper/rtl_helpers';
 import { StepImagePopover, StepImagePopoverProps } from './step_image_popover';
+import { render } from '../../../../../lib/helper/rtl_helpers';
 
 describe('StepImagePopover', () => {
   let defaultProps: StepImagePopoverProps;

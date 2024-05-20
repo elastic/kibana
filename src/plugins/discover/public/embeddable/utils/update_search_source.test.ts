@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { updateSearchSource } from './update_search_source';
 import {
   buildDataViewMock,
   dataViewMock,
   shallowMockedFields,
 } from '@kbn/discover-utils/src/__mocks__';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { updateSearchSource } from './update_search_source';
 
 const dataViewMockWithTimeField = buildDataViewMock({
   name: 'the-data-view',

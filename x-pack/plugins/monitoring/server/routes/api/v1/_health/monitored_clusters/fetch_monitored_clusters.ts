@@ -7,13 +7,13 @@
 
 import { merge } from 'lodash';
 
-import type { FetchExecution, FetchParameters } from '../types';
-import { MonitoredClusters, buildMonitoredClusters } from './build_monitored_clusters';
+import { buildMonitoredClusters, MonitoredClusters } from './build_monitored_clusters';
 import {
-  enterpriseSearchQuery,
   monitoredClustersQuery,
   persistentMetricsetsQuery,
+  enterpriseSearchQuery,
 } from './monitored_clusters_query';
+import type { FetchParameters, FetchExecution } from '../types';
 
 interface MonitoredClustersResponse {
   clusters?: MonitoredClusters;

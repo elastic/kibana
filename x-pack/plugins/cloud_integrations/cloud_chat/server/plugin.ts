@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
 
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import type { ChatVariant } from '../common/types';
-import type { CloudChatConfigType } from './config';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { registerChatRoute } from './routes';
+import type { CloudChatConfigType } from './config';
+import type { ChatVariant } from '../common/types';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;

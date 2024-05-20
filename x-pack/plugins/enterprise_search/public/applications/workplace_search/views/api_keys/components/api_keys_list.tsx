@@ -9,21 +9,21 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiConfirmModal, EuiCopy } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiConfirmModal } from '@elastic/eui';
 
-import { CANCEL_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
+import { DELETE_BUTTON_LABEL, CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { HiddenText } from '../../../../shared/hidden_text';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 import { ApiToken } from '../../../types';
 
 import { ApiKeysLogic } from '../api_keys_logic';
 import {
-  API_KEYS_CONFIRM_DELETE_LABEL,
-  API_KEYS_CONFIRM_DELETE_TITLE,
-  COPIED_TOOLTIP,
   DELETE_API_KEY_BUTTON_DESCRIPTION,
-  KEY_TITLE,
+  COPIED_TOOLTIP,
   NAME_TITLE,
+  KEY_TITLE,
+  API_KEYS_CONFIRM_DELETE_TITLE,
+  API_KEYS_CONFIRM_DELETE_LABEL,
 } from '../constants';
 
 import { ApiKey } from './api_key';

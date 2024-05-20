@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import {
-  ImportCommentsArray,
-  ImportCommentsArrayOrUndefined,
-  importComment,
-  importCommentsArray,
-  importCommentsArrayOrUndefined,
-} from '.';
+import { left } from 'fp-ts/lib/Either';
 import { getCommentsArrayMock, getCommentsMock } from '../comment/index.mock';
 import { getCreateCommentsArrayMock } from '../create_comment/index.mock';
+import {
+  importComment,
+  ImportCommentsArray,
+  importCommentsArray,
+  ImportCommentsArrayOrUndefined,
+  importCommentsArrayOrUndefined,
+} from '.';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('ImportComment', () => {
   describe('importComment', () => {

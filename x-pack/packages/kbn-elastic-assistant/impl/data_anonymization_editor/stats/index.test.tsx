@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
-import { Stats } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
+import { Stats } from '.';
 
 describe('Stats', () => {
   const anonymizationFields = [

@@ -10,8 +10,8 @@ import React from 'react';
 import type { UseCreateFieldButton, UseCreateFieldButtonProps } from '.';
 import { useCreateFieldButton } from '.';
 
-import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
+import { renderHook } from '@testing-library/react-hooks';
 
 const mockOpenFieldEditor = jest.fn();
 const mockOnHide = jest.fn();

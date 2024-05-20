@@ -1,4 +1,3 @@
-import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +6,13 @@ import type { EuiTableFieldDataColumnType } from '@elastic/eui';
  */
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { isJobStarted } from '../../../../common/machine_learning/helpers';
-import type { SecurityJob } from '../../../common/components/ml_popover/types';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import * as i18n from './translations';
+import type { SecurityJob } from '../../../common/components/ml_popover/types';
+import { isJobStarted } from '../../../../common/machine_learning/helpers';
 
-import type { AnomaliesCount } from '../../../common/components/ml/anomaly/use_anomalies_search';
 import { TotalAnomalies } from './components/total_anomalies';
+import type { AnomaliesCount } from '../../../common/components/ml/anomaly/use_anomalies_search';
 
 type AnomaliesColumns = Array<EuiTableFieldDataColumnType<AnomaliesCount>>;
 

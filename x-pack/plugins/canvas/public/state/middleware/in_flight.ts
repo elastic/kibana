@@ -7,8 +7,8 @@
 
 import { Dispatch, Middleware } from 'redux';
 import {
-  LoadingIndicatorInterface,
   loadingIndicator as defaultLoadingIndicator,
+  LoadingIndicatorInterface,
 } from '../../lib/loading_indicator';
 import { convert } from '../../lib/modify_path';
 

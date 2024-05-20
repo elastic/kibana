@@ -29,17 +29,17 @@ import {
 import { ControlGroupContainer } from '../embeddable/control_group_container';
 import { ControlGroupContainerFactory } from '../embeddable/control_group_container_factory';
 import {
-  CONTROL_GROUP_TYPE,
   ControlGroupCreationOptions,
   ControlGroupInput,
   ControlGroupOutput,
+  CONTROL_GROUP_TYPE,
 } from '../types';
 import {
   AwaitingControlGroupAPI,
-  ControlGroupAPI,
   buildApiFromControlGroupContainer,
+  ControlGroupAPI,
 } from './control_group_api';
-import { ControlGroupInputBuilder, controlGroupInputBuilder } from './control_group_input_builder';
+import { controlGroupInputBuilder, ControlGroupInputBuilder } from './control_group_input_builder';
 
 export interface ControlGroupRendererProps {
   filters?: Filter[];

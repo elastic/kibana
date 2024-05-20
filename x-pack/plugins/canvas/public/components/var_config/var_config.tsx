@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { useState, FC } from 'react';
 import {
   EuiAccordion,
-  EuiBasicTableColumn,
-  EuiButton,
   EuiButtonIcon,
-  EuiInMemoryTable,
-  EuiSpacer,
-  EuiTableActionsColumnType,
-  EuiText,
   EuiToken,
   EuiToolTip,
+  EuiText,
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiTableActionsColumnType,
+  EuiSpacer,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, FC } from 'react';
 
 import { CanvasVariable } from '../../../types';
 
-import { DeleteVar } from './delete_var';
 import { EditVar } from './edit_var';
+import { DeleteVar } from './delete_var';
 
 enum PanelMode {
   List,

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { FC } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -16,9 +17,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   addBasePath: (path: string) => string;

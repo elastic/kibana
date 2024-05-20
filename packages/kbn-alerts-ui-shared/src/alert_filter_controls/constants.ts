@@ -7,8 +7,8 @@
  */
 
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
 import { FilterControlConfig } from './types';
 
 export const DEFAULT_CONTROLS: FilterControlConfig[] = [

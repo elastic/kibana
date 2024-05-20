@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { getFieldPreviewChanges } from './lib';
 import { BehaviorSubject } from 'rxjs';
 import { ChangeType, FieldPreview } from '../preview/types';
-import { getFieldPreviewChanges } from './lib';
 
 // note that periods and overlap in parent and subfield names are to test for corner cases
 const parentName = 'composite.field';

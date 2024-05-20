@@ -6,19 +6,19 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SecurityPageName } from '../../../../common/constants';
 import type { RiskScoreEntity } from '../../../../common/search_strategy';
-import { SecuritySolutionLinkButton } from '../../../common/components/links';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useKibana } from '../../../common/lib/kibana';
 import type { inputsModel } from '../../../common/store';
+import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
 import { useRiskScoreToastContent } from './use_risk_score_toast_content';
 import { installRiskScoreModule } from './utils';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { SecuritySolutionLinkButton } from '../../../common/components/links';
+import { SecurityPageName } from '../../../../common/constants';
 
 const RiskScoreEnableButtonComponent = ({
   refetch,

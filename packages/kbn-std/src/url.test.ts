@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getUrlOrigin, isRelativeUrl, modifyUrl } from './url';
+import { modifyUrl, isRelativeUrl, getUrlOrigin } from './url';
 
 describe('modifyUrl()', () => {
   test('throws an error with invalid input', () => {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { createReadStream } from 'fs';
-import readline from 'readline';
-import * as Either from '../either';
-import { pluckIndex } from '../transforms';
 import { always, id, pipe } from '../utils';
+import * as Either from '../either';
+import readline from 'readline';
+import { createReadStream } from 'fs';
+import { pluckIndex } from '../transforms';
 
 const coverageDelimRe = /^#CC#\s/;
 

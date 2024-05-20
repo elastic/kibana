@@ -7,7 +7,7 @@
 
 import { SwimlaneConnectorType } from '../../../../common/types/domain';
 import { swimlaneConnector as connector } from '../mock';
-import { connectorValidator, isAnyRequiredFieldNotSet } from './validator';
+import { isAnyRequiredFieldNotSet, connectorValidator } from './validator';
 
 describe('Swimlane validator', () => {
   describe('isAnyRequiredFieldNotSet', () => {

@@ -6,49 +6,49 @@
  * Side Public License, v 1.
  */
 
+import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
-  Ast,
-  CriteriaWithPagination,
-  Direction,
   EuiBasicTableColumn,
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
+  Pagination,
+  Direction,
   EuiSpacer,
   EuiTableActionsColumnType,
-  Pagination,
+  CriteriaWithPagination,
   Query,
+  Ast,
 } from '@elastic/eui';
+import { keyBy, uniq, get } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useOpenContentEditor } from '@kbn/content-management-content-editor';
 import type {
   OpenContentEditorParams,
   SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { get, keyBy, uniq } from 'lodash';
-import React, { useReducer, useCallback, useEffect, useRef, useMemo } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 
 import {
-  ConfirmDeleteModal,
-  ItemDetails,
-  ListingLimitWarning,
   Table,
+  ConfirmDeleteModal,
+  ListingLimitWarning,
+  ItemDetails,
   UpdatedAtField,
 } from './components';
-import type { SortColumnField } from './components';
-import { UserAvatarTip } from './components/user_avatar_tip';
-import { NoUsersTip } from './components/user_missing_tip';
-import { getReducer } from './reducer';
 import { useServices } from './services';
 import type { SavedObjectsFindOptionsReference } from './services';
-import { RowActions, TableItemsRowActions } from './types';
+import { getReducer } from './reducer';
+import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
+import { RowActions, TableItemsRowActions } from './types';
+import { UserAvatarTip } from './components/user_avatar_tip';
+import { NoUsersTip } from './components/user_missing_tip';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -56,7 +56,7 @@ interface ContentEditorConfig
 }
 
 export interface TableListViewTableProps<
-  T extends UserContentCommonSchema = UserContentCommonSchema,
+  T extends UserContentCommonSchema = UserContentCommonSchema
 > {
   entityName: string;
   entityNamePlural: string;
@@ -580,7 +580,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         ),
         render: (field: string, record: { createdBy?: string }) =>
           record.createdBy ? <UserAvatarTip uid={record.createdBy} /> : null,
-        sortable: false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
+        sortable:
+          false /* createdBy column is not sortable because it doesn't make sense to sort by id*/,
         width: '100px',
         align: 'center',
       });
@@ -1056,8 +1057,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const testSubjectState = isDeletingItems
     ? 'table-is-deleting'
     : hasInitialFetchReturned && !isFetchingItems
-      ? 'table-is-ready'
-      : 'table-is-loading';
+    ? 'table-is-ready'
+    : 'table-is-loading';
 
   return (
     <>

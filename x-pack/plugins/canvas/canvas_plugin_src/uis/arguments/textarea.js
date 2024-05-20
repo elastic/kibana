@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArgumentStrings } from '../../../i18n';
-import { withDebounceArg } from '../../../public/components/with_debounce_arg';
+import PropTypes from 'prop-types';
+import { EuiFormRow, EuiTextArea, EuiSpacer, EuiButton } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { withDebounceArg } from '../../../public/components/with_debounce_arg';
+import { ArgumentStrings } from '../../../i18n';
 
 const { Textarea: strings } = ArgumentStrings;
 
@@ -44,7 +44,7 @@ const TextAreaArgInput = ({ argValue, typeInstance, onValueChange, renderError, 
         <EuiTextArea
           className="canvasTextArea__code"
           id={argId}
-          compressed={true}
+          compressed
           rows={10}
           value={value}
           resize="none"

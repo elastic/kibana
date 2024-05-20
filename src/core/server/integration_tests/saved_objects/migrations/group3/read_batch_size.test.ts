@@ -7,14 +7,14 @@
  */
 
 import Path from 'path';
+import fs from 'fs/promises';
 import { Root } from '@kbn/core-root-server-internal';
 import {
-  type TestElasticsearchUtils,
   createRootWithCorePlugins,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import fs from 'fs/promises';
-import { startElasticsearch } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
+import { startElasticsearch } from '../kibana_migrator_test_kit';
 
 const logFilePath = Path.join(__dirname, 'read_batch_size.log');
 

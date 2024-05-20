@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { encryptTelemetry, getKID } from './encrypt';
 import { createRequestEncryptor, mockEncrypt } from './encrypt.test.mocks';
 import { telemetryJWKS } from './telemetry_jwks';
+import { encryptTelemetry, getKID } from './encrypt';
 
 describe('getKID', () => {
   it(`returns 'kibana_dev' kid for development`, async () => {

@@ -8,18 +8,18 @@
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useCallback } from 'react';
 import type { BulkActionResponse } from '..';
+import { APP_UI_ID } from '../../../../../common/constants';
 import type { BulkActionType } from '../../../../../common/api/detection_engine/rule_management';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
-import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { getEditRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import type { BulkAction } from '../../api/api';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
-import { useGuessRuleIdsForBulkAction } from './use_guess_rule_ids_for_bulk_action';
 import { useShowBulkErrorToast } from './use_show_bulk_error_toast';
 import { useShowBulkSuccessToast } from './use_show_bulk_success_toast';
+import { useGuessRuleIdsForBulkAction } from './use_guess_rule_ids_for_bulk_action';
 
 export const goToRuleEditPage = (
   ruleId: string,

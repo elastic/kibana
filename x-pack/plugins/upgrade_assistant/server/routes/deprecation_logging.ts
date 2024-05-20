@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import moment from 'moment-timezone';
+import { schema } from '@kbn/config-schema';
 import {
   API_BASE_PATH,
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
 } from '../../common/constants';
 
-import { DEPRECATION_LOGS_INDEX } from '../../common/constants';
 import {
   getDeprecationLoggingStatus,
   setDeprecationLogging,
 } from '../lib/es_deprecation_logging_apis';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
+import { DEPRECATION_LOGS_INDEX } from '../../common/constants';
 
 export function registerDeprecationLoggingRoutes({
   router,

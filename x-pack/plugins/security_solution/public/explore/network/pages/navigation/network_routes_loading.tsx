@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingSpinner, EuiFlexGroup } from '@elastic/eui';
 
 const FlexGroup = styled(EuiFlexGroup)`
   min-height: 200px;

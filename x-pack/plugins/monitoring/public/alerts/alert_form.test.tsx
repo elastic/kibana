@@ -9,25 +9,25 @@
  * Prevent any breaking changes to context requirement from breaking the alert form/actions
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import React, { Fragment, lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { ReactWrapper, mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
-import ActionForm from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';
-import { RuleForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/rule_form/rule_form';
 import {
-  GenericValidationResult,
-  Rule,
-  RuleTypeModel,
   ValidationResult,
+  Rule,
+  GenericValidationResult,
+  RuleTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactWrapper, mount } from 'enzyme';
-import React, { Fragment, lazy } from 'react';
-import { act } from 'react-dom/test-utils';
+import { RuleForm } from '@kbn/triggers-actions-ui-plugin/public/application/sections/rule_form/rule_form';
+import ActionForm from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/action_form';
 import { Legacy } from '../legacy_shims';
+import { I18nProvider } from '@kbn/i18n-react';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),

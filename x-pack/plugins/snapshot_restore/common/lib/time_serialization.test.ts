@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TIME_UNITS } from '../constants';
 import { deserializeTime, serializeTime } from './time_serialization';
+import { TIME_UNITS } from '../constants';
 
 describe('time_serialization', () => {
   describe('deserializeTime()', () => {

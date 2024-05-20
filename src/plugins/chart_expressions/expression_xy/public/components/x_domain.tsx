@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { isUndefined, uniq, find } from 'lodash';
+import React from 'react';
+import moment from 'moment';
+import dateMath, { Unit } from '@kbn/datemath';
 import { Endzones, getAdjustedInterval } from '@kbn/charts-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import dateMath, { Unit } from '@kbn/datemath';
 import {
   getAccessorByDimension,
   getColumnByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import { find, isUndefined, uniq } from 'lodash';
-import moment from 'moment';
-import React from 'react';
 import type { AxisExtentConfigResult, CommonXYDataLayerConfig } from '../../common';
 
 export interface XDomain {
@@ -62,8 +62,8 @@ export const getXDomain = (
         minInterval,
       }
     : isHistogram
-      ? { minInterval, min: NaN, max: NaN }
-      : undefined;
+    ? { minInterval, min: NaN, max: NaN }
+    : undefined;
 
   if ((isHistogram || isTimeViz) && isFullyQualified(baseDomain)) {
     if (xExtent && !isTimeViz) {

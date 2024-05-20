@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import { flattenDeep, merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { merge, flattenDeep } from 'lodash';
+import type { Client } from '@elastic/elasticsearch';
 import { makePing } from './make_ping';
 import { TlsProps } from './make_tls';
 

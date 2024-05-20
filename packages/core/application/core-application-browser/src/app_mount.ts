@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { Observable } from 'rxjs';
+import type { CoreTheme } from '@kbn/core-theme-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { AppLeaveHandler } from './app_leave';
 import type { ScopedHistory } from './scoped_history';
 

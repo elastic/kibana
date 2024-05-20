@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiHealth, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { AlertSeverity } from '../../common/enums';
+import { EuiToolTip, EuiHealth } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { AlertState } from '../../common/types/alerts';
-import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
-import { isInSetupMode } from '../lib/setup_mode';
+import { AlertSeverity } from '../../common/enums';
 import { AlertsBadge } from './badge';
+import { isInSetupMode } from '../lib/setup_mode';
+import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 import type { AlertsByName } from './types';
 
 interface Props {

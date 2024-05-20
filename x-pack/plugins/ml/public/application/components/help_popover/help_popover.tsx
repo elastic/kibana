@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import './help_popover.scss';
 
 export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> = ({ onClick }) => {

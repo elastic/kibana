@@ -7,8 +7,8 @@
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { Message } from '../../common';
-import { ChatFeedback, chatFeedbackEventSchema } from './schemas/chat_feedback';
-import { InsightFeedback, insightFeedbackEventSchema } from './schemas/insight_feedback';
+import { chatFeedbackEventSchema, ChatFeedback } from './schemas/chat_feedback';
+import { insightFeedbackEventSchema, InsightFeedback } from './schemas/insight_feedback';
 import { userSentPromptEventSchema } from './schemas/user_sent_prompt';
 import { ObservabilityAIAssistantTelemetryEventType } from './telemetry_event_type';
 

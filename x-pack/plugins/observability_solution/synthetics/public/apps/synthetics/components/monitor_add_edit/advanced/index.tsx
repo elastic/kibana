@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
-import { Field } from '../form/field';
 import { FORM_CONFIG } from '../form/form_config';
+import { Field } from '../form/field';
 import { ConfigKey, FormMonitorType } from '../types';
 
 export const AdvancedConfig = ({ readOnly }: { readOnly: boolean }) => {

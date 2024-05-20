@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { mount, shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
-import { EuiConfirmModal, EuiFilePicker } from '@elastic/eui';
+import { EuiFilePicker, EuiConfirmModal } from '@elastic/eui';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 jest.mock('../../../utils', () => ({

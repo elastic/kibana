@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -16,7 +16,7 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 import { AnalyticsCollectionView } from './components/analytics_collection_view/analytics_collection_view';
 import { AnalyticsOverview } from './components/analytics_overview/analytics_overview';
 
-import { COLLECTION_VIEW_PATH, ROOT_PATH } from './routes';
+import { ROOT_PATH, COLLECTION_VIEW_PATH } from './routes';
 
 export const Analytics: React.FC<InitialAppData> = (props) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;

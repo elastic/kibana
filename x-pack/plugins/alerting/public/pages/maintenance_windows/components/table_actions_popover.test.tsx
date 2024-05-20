@@ -8,9 +8,9 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
-import { MaintenanceWindowStatus } from '../../../../common';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { TableActionsPopover } from './table_actions_popover';
+import { MaintenanceWindowStatus } from '../../../../common';
 
 describe('TableActionsPopover', () => {
   let appMockRenderer: AppMockRenderer;

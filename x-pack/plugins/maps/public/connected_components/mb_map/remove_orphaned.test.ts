@@ -8,15 +8,15 @@
 /* eslint-disable max-classes-per-file */
 
 import type {
-  LayerSpecification,
   Map as MbMap,
+  LayerSpecification,
   SourceSpecification,
   StyleSpecification,
 } from '@kbn/mapbox-gl';
-import _ from 'lodash';
-import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
-import { ILayer } from '../../classes/layers/layer';
 import { removeOrphanedSourcesAndLayers } from './remove_orphaned';
+import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
+import _ from 'lodash';
+import { ILayer } from '../../classes/layers/layer';
 
 class MockMbMap {
   private _style: StyleSpecification;

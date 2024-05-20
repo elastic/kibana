@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { EuiText, EuiButton } from '@elastic/eui';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 interface LogEntryCategoriesSetupContentProps {
   onOpenSetup: () => void;

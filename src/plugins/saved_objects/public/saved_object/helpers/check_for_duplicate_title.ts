@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { SavedObject, SavedObjectKibanaServices, StartServices } from '../../types';
-import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
 import { findObjectByTitle } from './find_object_by_title';
+import { SAVE_DUPLICATE_REJECTED } from '../../constants';
+import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
 
 /**
  * check for an existing SavedObject with the same title in ES

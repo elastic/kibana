@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { ChangeEvent, Component } from 'react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, Component } from 'react';
 import { RowActionButtons } from '../row_action_buttons';
 
 interface Props {

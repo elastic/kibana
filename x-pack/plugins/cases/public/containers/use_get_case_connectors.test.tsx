@@ -6,10 +6,10 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useToasts } from '../common/lib/kibana';
+import * as api from './api';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
-import * as api from './api';
+import { useToasts } from '../common/lib/kibana';
 import { useGetCaseConnectors } from './use_get_case_connectors';
 
 jest.mock('./api');

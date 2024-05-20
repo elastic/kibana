@@ -7,20 +7,20 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import {
+  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   CreateKnowledgeBaseRequestParams,
   CreateKnowledgeBaseResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { KNOWLEDGE_BASE } from '../../../common/constants';
+import { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
-import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
-import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
+import { KNOWLEDGE_BASE } from '../../../common/constants';
+import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
 import { getKbResource } from './get_kb_resource';
+import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 
 /**
  * Load Knowledge Base index, pipeline, and resources (collection of documents)

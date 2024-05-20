@@ -8,11 +8,11 @@
 import { act } from '@testing-library/react';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { createMemoryHistory } from 'history';
+import { Simulator } from '../../test_utilities/simulator';
+import { pausifyMock } from '../../data_access_layer/mocks/pausify_mock';
 import { emptifyMock } from '../../data_access_layer/mocks/emptify_mock';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
-import { pausifyMock } from '../../data_access_layer/mocks/pausify_mock';
 import { firstRelatedEventID } from '../../mocks/resolver_tree';
-import { Simulator } from '../../test_utilities/simulator';
 import { urlSearch } from '../../test_utilities/url_search';
 import '../../test_utilities/extend_jest';
 

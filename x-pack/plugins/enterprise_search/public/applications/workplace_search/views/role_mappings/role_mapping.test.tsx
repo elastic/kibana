@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { AttributeSelector, RoleMappingFlyout, RoleSelector } from '../../../shared/role_mapping';
+import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 import { wsRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
 import { GroupAssignmentSelector } from './group_assignment_selector';

@@ -7,18 +7,18 @@
  */
 
 import Path from 'path';
-import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   type ISavedObjectTypeRegistry,
   MAIN_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
 import {
   clearLog,
-  currentVersion,
-  getCurrentVersionTypeRegistry,
-  getKibanaMigratorTestKit,
   startElasticsearch,
+  getKibanaMigratorTestKit,
+  getCurrentVersionTypeRegistry,
+  currentVersion,
 } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
 import '../jest_matchers';

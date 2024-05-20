@@ -9,16 +9,16 @@ import { extname } from 'path';
 
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 
+import type { ListsPluginRouter } from '../types';
+import { ConfigType } from '../config';
 import {
   ImportExceptionsRequestQueryDecoded,
   importExceptionsRequestQuery,
   importExceptionsResponse,
 } from '../../common/api';
-import { ConfigType } from '../config';
-import type { ListsPluginRouter } from '../types';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 

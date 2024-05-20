@@ -9,7 +9,7 @@
 import rison from '@kbn/rison';
 import { encodeState } from '../../../common/state_management/encode_state';
 import { isStateHash } from '../../../common/state_management/state_hash';
-import { persistState, retrieveState } from '../state_hash';
+import { retrieveState, persistState } from '../state_hash';
 
 // should be:
 // export function decodeState<State extends RisonValue>(expandedOrHashedState: string)

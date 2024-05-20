@@ -38,7 +38,9 @@
             "tags": [],
             "label": "abortSignal",
             "description": [],
-            "signature": ["AbortSignal | undefined"],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
             "path": "packages/shared-ux/file/types/base_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -73,7 +75,9 @@
             "type": "Function",
             "tags": [],
             "label": "find",
-            "description": ["\nFind a set of files given some filters.\n"],
+            "description": [
+              "\nFind a set of files given some filters.\n"
+            ],
             "signature": [
               "(args: { kind?: string | string[] | undefined; kindToExclude?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; mimeType?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
               {
@@ -111,7 +115,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- File filters"],
+                "description": [
+                  "- File filters"
+                ],
                 "signature": [
                   "{ kind?: string | string[] | undefined; kindToExclude?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; mimeType?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
                   {
@@ -144,7 +150,9 @@
             "type": "Function",
             "tags": [],
             "label": "bulkDelete",
-            "description": ["\nBulk a delete a set of files given their IDs.\n"],
+            "description": [
+              "\nBulk a delete a set of files given their IDs.\n"
+            ],
             "signature": [
               "(args: { ids: string[]; } & ",
               {
@@ -166,7 +174,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- Bulk delete args"],
+                "description": [
+                  "- Bulk delete args"
+                ],
                 "signature": [
                   "{ ids: string[]; } & ",
                   {
@@ -191,7 +201,9 @@
             "type": "Function",
             "tags": [],
             "label": "create",
-            "description": ["\nCreate a new file object with the provided metadata.\n"],
+            "description": [
+              "\nCreate a new file object with the provided metadata.\n"
+            ],
             "signature": [
               "(args: { name: string; meta?: M | undefined; alt?: string | undefined; mimeType?: string | undefined; kind: string; } & ",
               {
@@ -221,7 +233,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- create file args"],
+                "description": [
+                  "- create file args"
+                ],
                 "signature": [
                   "{ name: string; meta?: M | undefined; alt?: string | undefined; mimeType?: string | undefined; kind: string; } & ",
                   {
@@ -270,7 +284,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- delete file args"],
+                "description": [
+                  "- delete file args"
+                ],
                 "signature": [
                   "{ id: string; kind: string; } & ",
                   {
@@ -295,7 +311,9 @@
             "type": "Function",
             "tags": [],
             "label": "getById",
-            "description": ["\nGet a file object by ID.\n"],
+            "description": [
+              "\nGet a file object by ID.\n"
+            ],
             "signature": [
               "(args: { id: string; kind: string; } & ",
               {
@@ -325,7 +343,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- get file by ID args"],
+                "description": [
+                  "- get file by ID args"
+                ],
                 "signature": [
                   "{ id: string; kind: string; } & ",
                   {
@@ -350,7 +370,9 @@
             "type": "Function",
             "tags": [],
             "label": "list",
-            "description": ["\nList all file objects, of a given {@link FileKindBrowser}.\n"],
+            "description": [
+              "\nList all file objects, of a given {@link FileKindBrowser}.\n"
+            ],
             "signature": [
               "(args: { kind: string; status?: string | string[] | undefined; extension?: string | string[] | undefined; mimeType?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
               {
@@ -388,7 +410,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- list files args"],
+                "description": [
+                  "- list files args"
+                ],
                 "signature": [
                   "{ kind: string; status?: string | string[] | undefined; extension?: string | string[] | undefined; mimeType?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
                   {
@@ -421,7 +445,9 @@
             "type": "Function",
             "tags": [],
             "label": "update",
-            "description": ["\nUpdate a set of of metadata values of the file object.\n"],
+            "description": [
+              "\nUpdate a set of of metadata values of the file object.\n"
+            ],
             "signature": [
               "(args: { id: string; kind: string; name?: string | undefined; meta?: M | undefined; alt?: string | undefined; } & ",
               {
@@ -451,7 +477,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- update file args"],
+                "description": [
+                  "- update file args"
+                ],
                 "signature": [
                   "{ id: string; kind: string; name?: string | undefined; meta?: M | undefined; alt?: string | undefined; } & ",
                   {
@@ -476,7 +504,9 @@
             "type": "Function",
             "tags": [],
             "label": "upload",
-            "description": ["\nStream the contents of the file to Kibana server for storage.\n"],
+            "description": [
+              "\nStream the contents of the file to Kibana server for storage.\n"
+            ],
             "signature": [
               "(args: { id: string; body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; selfDestructOnAbort?: boolean | undefined; } & ",
               {
@@ -498,7 +528,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- upload file args"],
+                "description": [
+                  "- upload file args"
+                ],
                 "signature": [
                   "{ id: string; body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; selfDestructOnAbort?: boolean | undefined; } & ",
                   {
@@ -523,7 +555,9 @@
             "type": "Function",
             "tags": [],
             "label": "download",
-            "description": ["\nStream a download of the file object's content.\n"],
+            "description": [
+              "\nStream a download of the file object's content.\n"
+            ],
             "signature": [
               "(args: { fileName?: string | undefined; id: string; kind: string; } & ",
               {
@@ -545,7 +579,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- download file args"],
+                "description": [
+                  "- download file args"
+                ],
                 "signature": [
                   "{ fileName?: string | undefined; id: string; kind: string; } & ",
                   {
@@ -594,7 +630,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "args",
-                "description": ["- get download URL args"],
+                "description": [
+                  "- get download URL args"
+                ],
                 "signature": [
                   "Pick<",
                   {
@@ -618,9 +656,13 @@
             "parentPluginId": "@kbn/shared-ux-file-types",
             "id": "def-common.BaseFilesClient.share",
             "type": "Function",
-            "tags": ["note"],
+            "tags": [
+              "note"
+            ],
             "label": "share",
-            "description": ["\nShare a file by creating a new file share instance.\n"],
+            "description": [
+              "\nShare a file by creating a new file share instance.\n"
+            ],
             "signature": [
               "(args: { name?: string | undefined; validUntil?: number | undefined; fileId: string; kind: string; } & ",
               {
@@ -650,7 +692,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- File share arguments"],
+                "description": [
+                  "- File share arguments"
+                ],
                 "signature": [
                   "{ name?: string | undefined; validUntil?: number | undefined; fileId: string; kind: string; } & ",
                   {
@@ -675,7 +719,9 @@
             "type": "Function",
             "tags": [],
             "label": "unshare",
-            "description": ["\nDelete a file share instance.\n"],
+            "description": [
+              "\nDelete a file share instance.\n"
+            ],
             "signature": [
               "(args: { id: string; kind: string; } & ",
               {
@@ -697,7 +743,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- File unshare arguments"],
+                "description": [
+                  "- File unshare arguments"
+                ],
                 "signature": [
                   "{ id: string; kind: string; } & ",
                   {
@@ -722,7 +770,9 @@
             "type": "Function",
             "tags": [],
             "label": "getShare",
-            "description": ["\nGet a file share instance.\n"],
+            "description": [
+              "\nGet a file share instance.\n"
+            ],
             "signature": [
               "(args: { id: string; kind: string; } & ",
               {
@@ -752,7 +802,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- Get file share arguments"],
+                "description": [
+                  "- Get file share arguments"
+                ],
                 "signature": [
                   "{ id: string; kind: string; } & ",
                   {
@@ -777,7 +829,9 @@
             "type": "Function",
             "tags": [],
             "label": "listShares",
-            "description": ["\nList all file shares. Optionally scoping to a specific\nfile.\n"],
+            "description": [
+              "\nList all file shares. Optionally scoping to a specific\nfile.\n"
+            ],
             "signature": [
               "(args: { forFileId?: string | undefined; kind: string; } & ",
               {
@@ -815,7 +869,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "args",
-                "description": ["- Get file share arguments"],
+                "description": [
+                  "- Get file share arguments"
+                ],
                 "signature": [
                   "{ forFileId?: string | undefined; kind: string; } & ",
                   {
@@ -848,7 +904,9 @@
             "type": "Function",
             "tags": [],
             "label": "getFileKind",
-            "description": ["\nGet a file kind"],
+            "description": [
+              "\nGet a file kind"
+            ],
             "signature": [
               "(id: string) => ",
               {
@@ -869,8 +927,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": ["The id of the file kind"],
-                "signature": ["string"],
+                "description": [
+                  "The id of the file kind"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/shared-ux/file/types/base_file_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -901,8 +963,12 @@
             "type": "string",
             "tags": [],
             "label": "blurhash",
-            "description": ["\nThe blurhash that can be displayed while the image is loading"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe blurhash that can be displayed while the image is loading"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -913,7 +979,9 @@
             "type": "number",
             "tags": [],
             "label": "width",
-            "description": ["\nWidth, in px, of the original image"],
+            "description": [
+              "\nWidth, in px, of the original image"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -924,7 +992,9 @@
             "type": "number",
             "tags": [],
             "label": "height",
-            "description": ["\nHeight, in px, of the original image"],
+            "description": [
+              "\nHeight, in px, of the original image"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -938,7 +1008,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FileJSON",
-        "description": ["\nAttributes of a file that represent a serialised version of the file."],
+        "description": [
+          "\nAttributes of a file that represent a serialised version of the file."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-file-types",
@@ -959,7 +1031,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nUnique file ID."],
+            "description": [
+              "\nUnique file ID."
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -970,7 +1044,9 @@
             "type": "string",
             "tags": [],
             "label": "created",
-            "description": ["\nISO string of when this file was created"],
+            "description": [
+              "\nISO string of when this file was created"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -981,7 +1057,9 @@
             "type": "string",
             "tags": [],
             "label": "updated",
-            "description": ["\nISO string of when the file was updated"],
+            "description": [
+              "\nISO string of when the file was updated"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -990,9 +1068,13 @@
             "parentPluginId": "@kbn/shared-ux-file-types",
             "id": "def-common.FileJSON.name",
             "type": "string",
-            "tags": ["note"],
+            "tags": [
+              "note"
+            ],
             "label": "name",
-            "description": ["\nFile name.\n"],
+            "description": [
+              "\nFile name.\n"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1003,8 +1085,12 @@
             "type": "string",
             "tags": [],
             "label": "mimeType",
-            "description": ["\nMIME type of the file's contents."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nMIME type of the file's contents."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1015,8 +1101,12 @@
             "type": "number",
             "tags": [],
             "label": "size",
-            "description": ["\nThe size, in bytes, of the file content."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe size, in bytes, of the file content."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1025,10 +1115,16 @@
             "parentPluginId": "@kbn/shared-ux-file-types",
             "id": "def-common.FileJSON.extension",
             "type": "string",
-            "tags": ["note"],
+            "tags": [
+              "note"
+            ],
             "label": "extension",
-            "description": ["\nThe file extension (dot suffix).\n"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe file extension (dot suffix).\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1042,7 +1138,9 @@
             "description": [
               "\nA consumer defined set of attributes.\n\nConsumers of the file service can add their own tags and identifiers to\na file using the \"meta\" object."
             ],
-            "signature": ["Meta | undefined"],
+            "signature": [
+              "Meta | undefined"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1056,7 +1154,9 @@
             "description": [
               "\nUse this text to describe the file contents for display and accessibility."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1065,7 +1165,9 @@
             "parentPluginId": "@kbn/shared-ux-file-types",
             "id": "def-common.FileJSON.fileKind",
             "type": "string",
-            "tags": ["note"],
+            "tags": [
+              "note"
+            ],
             "label": "fileKind",
             "description": [
               "\nA unique kind that governs various aspects of the file. A consumer of the\nfiles service must register a file kind and link their files to a specific\nkind.\n"
@@ -1096,8 +1198,12 @@
             "type": "Object",
             "tags": [],
             "label": "user",
-            "description": ["\nUser data associated with this file"],
-            "signature": ["{ name?: string | undefined; id?: string | undefined; } | undefined"],
+            "description": [
+              "\nUser data associated with this file"
+            ],
+            "signature": [
+              "{ name?: string | undefined; id?: string | undefined; } | undefined"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1108,7 +1214,9 @@
             "type": "Object",
             "tags": [],
             "label": "hash",
-            "description": ["\nFile hash information"],
+            "description": [
+              "\nFile hash information"
+            ],
             "signature": [
               "{ [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined"
             ],
@@ -1136,7 +1244,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nUnique file kind ID"],
+            "description": [
+              "\nUnique file kind ID"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1145,10 +1255,16 @@
             "parentPluginId": "@kbn/shared-ux-file-types",
             "id": "def-common.FileKindBase.allowedMimeTypes",
             "type": "Array",
-            "tags": ["default"],
+            "tags": [
+              "default"
+            ],
             "label": "allowedMimeTypes",
-            "description": ["\nThe MIME type of the file content.\n"],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "\nThe MIME type of the file content.\n"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1188,12 +1304,16 @@
             "parentPluginId": "@kbn/shared-ux-file-types",
             "id": "def-common.FileKindBrowser.maxSizeBytes",
             "type": "number",
-            "tags": ["default"],
+            "tags": [
+              "default"
+            ],
             "label": "maxSizeBytes",
             "description": [
               "\nMax file contents size, in bytes, enforced for this file kind in the upload\ncomponent.\n"
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1223,7 +1343,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FileShareJSON",
-        "description": ["\nAttributes of a file that represent a serialised version of the file."],
+        "description": [
+          "\nAttributes of a file that represent a serialised version of the file."
+        ],
         "path": "packages/shared-ux/file/types/sharing.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1234,7 +1356,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nUnique ID share instance"],
+            "description": [
+              "\nUnique ID share instance"
+            ],
             "path": "packages/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1245,7 +1369,9 @@
             "type": "string",
             "tags": [],
             "label": "created",
-            "description": ["\nISO timestamp the share was created"],
+            "description": [
+              "\nISO timestamp the share was created"
+            ],
             "path": "packages/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1256,7 +1382,9 @@
             "type": "number",
             "tags": [],
             "label": "validUntil",
-            "description": ["\nUnix timestamp (in milliseconds) of when this share expires"],
+            "description": [
+              "\nUnix timestamp (in milliseconds) of when this share expires"
+            ],
             "path": "packages/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1267,8 +1395,12 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["\nA user-friendly name for the file share"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nA user-friendly name for the file share"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1279,7 +1411,9 @@
             "type": "string",
             "tags": [],
             "label": "fileId",
-            "description": ["\nThe ID of the file this share is linked to"],
+            "description": [
+              "\nThe ID of the file this share is linked to"
+            ],
             "path": "packages/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1305,7 +1439,9 @@
             "tags": [],
             "label": "page",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/shared-ux/file/types/base_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1317,7 +1453,9 @@
             "tags": [],
             "label": "perPage",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/shared-ux/file/types/base_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1367,8 +1505,12 @@
         "type": "Type",
         "tags": [],
         "label": "FileCompression",
-        "description": ["\nSupported file compression algorithms"],
-        "signature": ["\"none\" | \"br\" | \"gzip\" | \"deflate\""],
+        "description": [
+          "\nSupported file compression algorithms"
+        ],
+        "signature": [
+          "\"none\" | \"br\" | \"gzip\" | \"deflate\""
+        ],
         "path": "packages/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1380,7 +1522,9 @@
         "type": "Type",
         "tags": [],
         "label": "FileMetadata",
-        "description": ["\nExtra metadata on a file object specific to Kibana implementation."],
+        "description": [
+          "\nExtra metadata on a file object specific to Kibana implementation."
+        ],
         "signature": [
           "Required<Pick<",
           {
@@ -1411,7 +1555,9 @@
         "type": "Type",
         "tags": [],
         "label": "FileShare",
-        "description": ["\nData stored with a file share object"],
+        "description": [
+          "\nData stored with a file share object"
+        ],
         "signature": [
           "{ created: string; token: string; name?: string | undefined; valid_until: number; }"
         ],
@@ -1424,9 +1570,13 @@
         "parentPluginId": "@kbn/shared-ux-file-types",
         "id": "def-common.FileShareJSONWithToken",
         "type": "Type",
-        "tags": ["note"],
+        "tags": [
+          "note"
+        ],
         "label": "FileShareJSONWithToken",
-        "description": ["\nA version of the file share with a token included.\n"],
+        "description": [
+          "\nA version of the file share with a token included.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-file-types",

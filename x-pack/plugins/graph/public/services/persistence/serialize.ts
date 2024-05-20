@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { IndexpatternDatasource } from '../../state_management';
 import {
-  AdvancedSettings,
-  BlockListedNode,
-  GraphWorkspaceSavedObject,
-  SerializedEdge,
-  SerializedNode,
-  SerializedUrlTemplate,
-  SerializedWorkspaceState,
-  UrlTemplate,
-  Workspace,
-  WorkspaceEdge,
-  WorkspaceField,
   WorkspaceNode,
+  WorkspaceEdge,
+  SerializedEdge,
+  UrlTemplate,
+  SerializedUrlTemplate,
+  WorkspaceField,
+  GraphWorkspaceSavedObject,
+  SerializedWorkspaceState,
+  Workspace,
+  AdvancedSettings,
+  SerializedNode,
+  BlockListedNode,
 } from '../../types';
+import { IndexpatternDatasource } from '../../state_management';
 
 function serializeNode(
   { data, scaledSize, parent, x, y, label, color }: BlockListedNode,

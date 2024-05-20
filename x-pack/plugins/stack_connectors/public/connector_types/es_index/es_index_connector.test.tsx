@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { screen, fireEvent, waitFor, render } from '@testing-library/react';
+import IndexActionConnectorFields from './es_index_connector';
+import { EuiComboBox, EuiSwitch, EuiSwitchEvent, EuiSelect } from '@elastic/eui';
 import {
   AppMockRenderer,
   ConnectorFormTestProvider,
   createAppMockRenderer,
 } from '../lib/test_utils';
-import IndexActionConnectorFields from './es_index_connector';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { request } from '../../tasks/common';
+import { loadLiveQuery } from '../../tasks/api_fixtures';
 import { API_VERSIONS } from '../../../common/constants';
 import { ServerlessRoleName } from '../../support/roles';
-import { loadLiveQuery } from '../../tasks/api_fixtures';
-import { request } from '../../tasks/common';
 
 describe('Live query', { tags: ['@ess', '@serverless'] }, () => {
   let liveQueryId: string;

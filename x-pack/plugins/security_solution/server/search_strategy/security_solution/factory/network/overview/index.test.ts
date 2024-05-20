@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import * as buildQuery from './query.overview_network.dsl';
 import { networkOverview } from '.';
 import {
-  formattedSearchStrategyResponse,
   mockOptions,
   mockSearchStrategyResponse,
+  formattedSearchStrategyResponse,
 } from './__mocks__';
-import * as buildQuery from './query.overview_network.dsl';
 
 describe('networkOverview search strategy', () => {
   const buildOverviewNetworkQuery = jest.spyOn(buildQuery, 'buildOverviewNetworkQuery');

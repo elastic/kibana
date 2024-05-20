@@ -10,10 +10,10 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+import { schema } from './schema';
+import { FormFields } from './form_fields';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
-import { FormFields } from './form_fields';
-import { schema } from './schema';
 import { customFieldSerializer } from './utils';
 
 export interface CustomFieldFormState {

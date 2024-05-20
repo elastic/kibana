@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
 import { EmptyMessage } from './empty_message';
+import { render } from '@testing-library/react';
 
 describe('EmptyMessage', () => {
   it('renders a null component', () => {

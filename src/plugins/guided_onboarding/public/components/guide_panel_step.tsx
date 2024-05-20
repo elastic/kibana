@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import {
-  EuiAccordion,
   EuiButton,
+  EuiText,
+  EuiAccordion,
+  EuiHorizontalRule,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
   useEuiTheme,
+  EuiLink,
 } from '@elastic/eui';
-import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { StepConfig, StepDescriptionWithLink, StepStatus } from '@kbn/guided-onboarding';
+import type { StepStatus, StepConfig, StepDescriptionWithLink } from '@kbn/guided-onboarding';
 import { getGuidePanelStepStyles } from './guide_panel_step.styles';
 
 interface GuideStepProps {

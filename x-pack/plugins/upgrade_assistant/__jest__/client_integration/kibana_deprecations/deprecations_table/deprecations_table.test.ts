@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { DeprecationsServiceStart } from '@kbn/core/public';
-import { deprecationsServiceMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
+import { deprecationsServiceMock } from '@kbn/core/public/mocks';
+import type { DeprecationsServiceStart } from '@kbn/core/public';
 
 import { setupEnvironment } from '../../helpers';
-import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
 import { kibanaDeprecationsServiceHelpers } from '../service.mock';
+import { KibanaTestBed, setupKibanaPage } from '../kibana_deprecations.helpers';
 
 describe('Kibana deprecations - Deprecations table', () => {
   let testBed: KibanaTestBed;

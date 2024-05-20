@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiFilePickerProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -20,17 +21,16 @@ import {
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
 import type { WarningSchema } from '../../../../common/api/detection_engine';
 
 import type {
-  ImportDataProps,
   ImportDataResponse,
+  ImportDataProps,
 } from '../../../detection_engine/rule_management/logic';
 import { useAppToasts } from '../../hooks/use_app_toasts';
-import { ActionConnectorWarnings } from './action_connectors_warning';
 import * as i18n from './translations';
 import { showToasterMessage } from './utils';
+import { ActionConnectorWarnings } from './action_connectors_warning';
 
 interface ImportDataModalProps {
   checkBoxLabel: string;

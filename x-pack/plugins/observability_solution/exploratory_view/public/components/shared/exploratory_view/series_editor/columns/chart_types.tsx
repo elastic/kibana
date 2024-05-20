@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SeriesType } from '@kbn/lens-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
-import { SeriesUrl } from '../../../../..';
 import { ExploratoryViewPublicPluginsStart } from '../../../../../plugin';
+import { SeriesUrl } from '../../../../..';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 const CHART_TYPE_LABEL = i18n.translate('xpack.exploratoryView.expView.chartTypes.label', {

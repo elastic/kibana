@@ -69,7 +69,9 @@ const TimeRulerTickLabel = euiStyled.text`
 
 const TimeRulerGridLine = euiStyled.line`
   stroke: ${(props) =>
-    props.theme.darkMode ? props.theme.eui.euiColorDarkestShade : props.theme.eui.euiColorDarkShade};
+    props.theme.darkMode
+      ? props.theme.eui.euiColorDarkestShade
+      : props.theme.eui.euiColorDarkShade};
   stroke-opacity: 0.5;
   stroke-width: 1px;
 `;

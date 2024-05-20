@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
 import Path from 'path';
-import { AUTOCOMPLETE_DEFINITIONS_FOLDER } from '@kbn/console-plugin/common/constants';
-import { createFlagError } from '@kbn/dev-cli-errors';
+import fs from 'fs';
 import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { AUTOCOMPLETE_DEFINITIONS_FOLDER } from '@kbn/console-plugin/common/constants';
 import { generateConsoleDefinitions } from './generate_console_definitions';
 
 export function runGenerateConsoleDefinitionsCli() {

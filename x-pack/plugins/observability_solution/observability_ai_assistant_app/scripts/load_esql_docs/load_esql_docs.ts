@@ -1,4 +1,3 @@
-import Path from 'path';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,6 +11,7 @@ import FastGlob from 'fast-glob';
 import Fs from 'fs/promises';
 import { once, partition } from 'lodash';
 import pLimit from 'p-limit';
+import Path from 'path';
 import git, { SimpleGitProgressEvent } from 'simple-git';
 import yargs, { Argv } from 'yargs';
 import { extractSections } from './extract_sections';

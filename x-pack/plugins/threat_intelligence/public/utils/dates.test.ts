@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import moment from 'moment-timezone';
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { dateFormatter, getDateDifferenceInDays, barChartTimeAxisLabelFormatter } from './dates';
 import { EMPTY_VALUE } from '../constants/common';
-import { barChartTimeAxisLabelFormatter, dateFormatter, getDateDifferenceInDays } from './dates';
 
 const mockValidStringDate = '1 Jan 2022 00:00:00 GMT';
 const mockInvalidStringDate = 'invalid date';

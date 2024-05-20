@@ -5,58 +5,58 @@
  * 2.0.
  */
 
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { omit } from 'lodash';
+import { useRouteMatch } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiBottomBar,
   EuiButtonEmpty,
-  EuiErrorBoundary,
+  EuiBottomBar,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiErrorBoundary,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { omit } from 'lodash';
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { useRouteMatch } from 'react-router-dom';
 
 import {
-  useGetOnePackagePolicy,
-  useBreadcrumbs as useIntegrationsBreadcrumbs,
-} from '../../../../integrations/hooks';
-import {
-  DevtoolsRequestFlyoutButton,
-  Error as ErrorComponent,
-  EuiButtonWithTooltip,
-  ExtensionWrapper,
-  Loading,
-} from '../../../components';
-import {
+  useLink,
+  useBreadcrumbs,
+  useStartServices,
+  useConfig,
+  useUIExtension,
   sendGetAgentStatus,
   useAuthz,
-  useBreadcrumbs,
-  useConfig,
-  useLink,
-  useStartServices,
-  useUIExtension,
 } from '../../../hooks';
+import {
+  useBreadcrumbs as useIntegrationsBreadcrumbs,
+  useGetOnePackagePolicy,
+} from '../../../../integrations/hooks';
+import {
+  Loading,
+  Error as ErrorComponent,
+  ExtensionWrapper,
+  EuiButtonWithTooltip,
+  DevtoolsRequestFlyoutButton,
+} from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
+import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
+import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
-import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
-import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 
 import {
   AGENTLESS_POLICY_ID,
   HIDDEN_API_REFERENCE_PACKAGES,
 } from '../../../../../../common/constants';
-import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
 
 import { UpgradeStatusCallout } from './components';
-import { useHistoryBlock, usePackagePolicyWithRelatedData } from './hooks';
+import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 
 export const EditPackagePolicyPage = memo(() => {

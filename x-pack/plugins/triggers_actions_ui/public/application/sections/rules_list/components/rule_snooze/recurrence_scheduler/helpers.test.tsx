@@ -12,8 +12,8 @@ import {
   generateNthByweekday,
   getInitialByweekday,
   getWeekdayInfo,
-  rRuleWeekdayToWeekdayName,
   recurrenceSummary,
+  rRuleWeekdayToWeekdayName,
 } from './helpers';
 
 describe('Recurrence scheduler helper', () => {

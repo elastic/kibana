@@ -6,10 +6,10 @@
  */
 
 import {
-  convertIntervalToUnit,
-  getSuitableUnit,
   getUnitValue,
   parseInterval,
+  convertIntervalToUnit,
+  getSuitableUnit,
 } from './unit_to_seconds';
 
 describe('parseInterval()', () => {

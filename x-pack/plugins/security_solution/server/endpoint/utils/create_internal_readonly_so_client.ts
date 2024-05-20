@@ -6,8 +6,8 @@
  */
 
 import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
-import { EndpointError } from '../../../common/endpoint/errors';
 import { createInternalSoClient } from './create_internal_so_client';
+import { EndpointError } from '../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;
 

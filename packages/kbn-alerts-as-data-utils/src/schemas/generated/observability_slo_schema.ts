@@ -1,4 +1,3 @@
-import { Either } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +9,7 @@ import { Either } from 'fp-ts/lib/Either';
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
+import { Either } from 'fp-ts/lib/Either';
 import { AlertSchema } from './alert_schema';
 import { LegacyAlertSchema } from './legacy_alert_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
@@ -67,7 +67,8 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const ObservabilitySloAlertRequired = rt.type({});
+const ObservabilitySloAlertRequired = rt.type({
+});
 // prettier-ignore
 const ObservabilitySloAlertOptional = rt.partial({
   'kibana.alert.context': schemaUnknown,
@@ -86,11 +87,6 @@ const ObservabilitySloAlertOptional = rt.partial({
 });
 
 // prettier-ignore
-export const ObservabilitySloAlertSchema = rt.intersection([
-  ObservabilitySloAlertRequired,
-  ObservabilitySloAlertOptional,
-  AlertSchema,
-  LegacyAlertSchema,
-]);
+export const ObservabilitySloAlertSchema = rt.intersection([ObservabilitySloAlertRequired, ObservabilitySloAlertOptional, AlertSchema, LegacyAlertSchema]);
 // prettier-ignore
 export type ObservabilitySloAlert = rt.TypeOf<typeof ObservabilitySloAlertSchema>;

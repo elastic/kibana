@@ -9,10 +9,10 @@
 import { driverInstanceMock, storageInstanceMock } from './api.test.mocks';
 
 import moment from 'moment';
-import { take } from 'rxjs';
+import { getApi } from './api';
 import { TestScheduler } from 'rxjs/testing';
 import { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
-import { getApi } from './api';
+import { take } from 'rxjs';
 
 import { NewsfeedApiDriver as MockNewsfeedApiDriver } from './driver';
 import { NeverFetchNewsfeedApiDriver as MockNeverFetchNewsfeedApiDriver } from './never_fetch_driver';

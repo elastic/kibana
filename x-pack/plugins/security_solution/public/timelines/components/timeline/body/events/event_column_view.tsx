@@ -8,22 +8,22 @@
 import React, { useMemo } from 'react';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type {
   ControlColumnProps,
   RowCellRender,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../../common/types';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { OnRowSelected } from '../../events';
+import { EventsTrData, EventsTdGroupActions } from '../../styles';
+import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
+import type { inputsModel } from '../../../../../common/store';
 import type {
-  CellValueElementProps,
   ColumnHeaderOptions,
+  CellValueElementProps,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import type { inputsModel } from '../../../../../common/store';
-import type { OnRowSelected } from '../../events';
-import { EventsTdGroupActions, EventsTrData } from '../../styles';
-import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
 
 interface Props {
   id: string;

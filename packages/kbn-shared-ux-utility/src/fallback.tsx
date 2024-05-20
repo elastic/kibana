@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
 
 /**
  * A simple implementation of `React.Suspense.fallback` that renders a loading spinner.

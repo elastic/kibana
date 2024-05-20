@@ -6,9 +6,9 @@
  */
 
 import {
-  hideAxis,
   xAxisConfig,
   yAxisConfig,
+  hideAxis,
 } from '../../../canvas_plugin_src/functions/common/__fixtures__/test_styles';
 import { getFlotAxisConfig } from './get_flot_axis_config';
 

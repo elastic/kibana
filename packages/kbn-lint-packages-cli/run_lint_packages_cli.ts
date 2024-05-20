@@ -8,18 +8,18 @@
 
 import Path from 'path';
 
-import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
-import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
+import { updatePackageMap, getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { PackageLintTarget, runLintRules } from '@kbn/repo-linter';
-import { getPackages, updatePackageMap } from '@kbn/repo-packages';
 import { TS_PROJECTS } from '@kbn/ts-projects';
+import { makeMatcher } from '@kbn/picomatcher';
+import { runLintRules, PackageLintTarget } from '@kbn/repo-linter';
 
-import { migratePluginsToPackages } from './migrate_plugins_to_package';
 import { RULES } from './rules';
+import { migratePluginsToPackages } from './migrate_plugins_to_package';
 
 const legacyManifestMatcher = makeMatcher(['**/kibana.json', '!**/{__fixtures__,fixtures}/**']);
 

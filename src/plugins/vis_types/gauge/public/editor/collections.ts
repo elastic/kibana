@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { colorSchemas } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { colorSchemas } from '@kbn/charts-plugin/public';
 import { Alignment, GaugeType } from '../types';
 
 export const getGaugeTypes = () => [

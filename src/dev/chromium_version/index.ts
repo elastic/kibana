@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
+import fs from 'fs';
 import fetch from 'node-fetch';
+import path from 'path';
 import {
   type ChromeVersion,
   type ChromiumCommit,
-  ChromiumDashVersionSchema,
   type ChromiumDashVersionType,
+  ChromiumDashVersionSchema,
+  forkCompatibilityMap,
   PuppeteerPackageSchema,
   type PuppeteerPackageType,
   type PuppeteerRelease,
-  forkCompatibilityMap,
 } from './util';
 
 async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {

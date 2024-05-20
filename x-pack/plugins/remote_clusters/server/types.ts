@@ -7,9 +7,9 @@
 
 import { IRouter } from '@kbn/core/server';
 
-import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import { handleEsError } from './shared_imports';
 

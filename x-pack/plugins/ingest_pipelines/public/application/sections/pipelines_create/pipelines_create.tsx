@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps, useHistory } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
+import { getListPath } from '../../services/navigation';
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import { PipelineForm } from '../../components';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
-import { getListPath } from '../../services/navigation';
 
 interface Props {
   /**

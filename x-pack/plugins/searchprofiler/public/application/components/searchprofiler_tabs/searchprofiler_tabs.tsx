@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Targets } from '../../types';

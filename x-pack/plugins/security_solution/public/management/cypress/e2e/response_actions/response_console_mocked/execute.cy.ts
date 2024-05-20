@@ -6,16 +6,16 @@
  */
 
 import type { ActionDetails } from '../../../../../../common/endpoint/types';
+import type { ReturnTypeFromChainable } from '../../../types';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import { interceptActionRequests, sendActionResponse } from '../../../tasks/isolate';
-import { login } from '../../../tasks/login';
 import {
   inputConsoleCommand,
   openResponseConsoleFromEndpointList,
   submitCommand,
   waitForEndpointListPageToBeLoaded,
 } from '../../../tasks/response_console';
-import type { ReturnTypeFromChainable } from '../../../types';
+import { interceptActionRequests, sendActionResponse } from '../../../tasks/isolate';
+import { login } from '../../../tasks/login';
 
 describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {

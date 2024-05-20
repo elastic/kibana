@@ -6,8 +6,8 @@
  */
 
 import { mount } from 'enzyme';
-import React from 'react';
 import { Panel } from '.';
+import React from 'react';
 
 describe('Panel', () => {
   test('it does not have the boolean loading as a Eui Property', () => {

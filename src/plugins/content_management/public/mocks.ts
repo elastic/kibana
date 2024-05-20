@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ContentManagementPublicSetup, ContentManagementPublicStart } from './types';
+import { ContentManagementPublicStart, ContentManagementPublicSetup } from './types';
 
 const createSetupContract = (): ContentManagementPublicSetup => {
   return {

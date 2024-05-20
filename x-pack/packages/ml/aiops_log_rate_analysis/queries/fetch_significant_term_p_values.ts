@@ -1,5 +1,3 @@
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,17 +5,19 @@ import type { ElasticsearchClient } from '@kbn/core/server';
  * 2.0.
  */
 import { uniqBy } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 import type { Logger } from '@kbn/logging';
-import { SIGNIFICANT_ITEM_TYPE, type SignificantItem } from '@kbn/ml-agg-utils';
+import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import {
-  type RandomSamplerWrapper,
   createRandomSamplerWrapper,
+  type RandomSamplerWrapper,
 } from '@kbn/ml-random-sampler-utils';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
-import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 import { LOG_RATE_ANALYSIS_SETTINGS, RANDOM_SAMPLER_SEED } from '../constants';
+import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
 import { getNormalizedScore } from './get_normalized_score';
 import { getQueryWithParams } from './get_query_with_params';

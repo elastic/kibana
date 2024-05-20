@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
-import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { createContext, useMemo, FC, PropsWithChildren } from 'react';
+import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { UptimeAppColors } from '../app/uptime_app';
 
 export interface UptimeThemeContextValues {

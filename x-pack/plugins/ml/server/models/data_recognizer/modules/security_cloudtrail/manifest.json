@@ -60,5 +60,7 @@
       "job_id": "rare_error_code"
     }
   ],
-  "tags": ["security"]
+  "tags": [
+    "security"
+  ]
 }

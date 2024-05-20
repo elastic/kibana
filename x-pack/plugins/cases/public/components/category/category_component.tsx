@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
 import { ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX } from './translations';
 
 export interface CategoryComponentProps {

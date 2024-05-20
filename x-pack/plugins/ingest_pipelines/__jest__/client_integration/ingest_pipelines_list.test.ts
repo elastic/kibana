@@ -9,9 +9,9 @@ import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../common/constants';
 
-import { Pipeline } from '../../common/types';
-import { pageHelpers, setupEnvironment } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { PipelineListTestBed } from './helpers/pipelines_list.helpers';
+import { Pipeline } from '../../common/types';
 
 const { setup } = pageHelpers.pipelinesList;
 

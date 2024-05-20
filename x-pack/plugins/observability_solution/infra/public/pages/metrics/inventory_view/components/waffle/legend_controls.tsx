@@ -6,37 +6,37 @@
  */
 
 import {
-  EuiButton,
   EuiButtonEmpty,
+  EuiButton,
   EuiButtonIcon,
   EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiPopover,
   EuiPopoverTitle,
-  EuiRange,
-  EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiSelect,
+  EuiRange,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { first, last } from 'lodash';
 import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
+import { first, last } from 'lodash';
+import type { WaffleLegendOptions } from '../../hooks/use_waffle_options';
 import {
   type InfraWaffleMapBounds,
   type InventoryColorPalette,
   PALETTES,
 } from '../../../../../lib/lib';
-import type { WaffleLegendOptions } from '../../hooks/use_waffle_options';
-import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
 import { getColorPalette } from '../../lib/get_color_palette';
-import { PalettePreview } from './palette_preview';
+import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
 import { SwatchLabel } from './swatch_label';
+import { PalettePreview } from './palette_preview';
 
 interface Props {
   onChange: (options: {

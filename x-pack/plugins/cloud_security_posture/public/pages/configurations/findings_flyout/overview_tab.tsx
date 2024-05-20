@@ -15,24 +15,24 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { EuiAccordionProps, EuiDescriptionListProps } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import moment from 'moment';
+import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
-import moment from 'moment';
-import React, { useMemo } from 'react';
+import { truthy } from '../../../../common/utils/helpers';
+import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
   INTERNAL_FEATURE_FLAGS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_PATTERN,
 } from '../../../../common/constants';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { truthy } from '../../../../common/utils/helpers';
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
-import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
-import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown } from './findings_flyout';
+import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;

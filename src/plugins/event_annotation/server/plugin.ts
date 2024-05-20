@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import {
-  eventAnnotationGroup,
   manualPointEventAnnotation,
+  eventAnnotationGroup,
   manualRangeEventAnnotation,
   queryPointEventAnnotation,
 } from '../common';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { EventAnnotationGroupStorage } from './content_management';
 import { setupSavedObjects } from './saved_objects';
+import { EventAnnotationGroupStorage } from './content_management';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 interface SetupDependencies {
   expressions: ExpressionsServerSetup;

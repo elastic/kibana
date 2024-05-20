@@ -8,21 +8,21 @@
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
-import { ALERTS_PAGE } from '../../../screens/kibana_navigation';
 import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
   GLOBAL_SEARCH_BAR_PINNED_FILTER,
 } from '../../../screens/search_bar';
-import { deleteDataView, postDataView } from '../../../tasks/api_calls/common';
-import {
-  navigateFromKibanaCollapsibleTo,
-  openKibanaNavigation,
-} from '../../../tasks/kibana_navigation';
-import { navigateToAlertsPageInServerless } from '../../../tasks/serverless/navigation';
 import {
   DISCOVER_WITH_FILTER_URL,
   DISCOVER_WITH_PINNED_FILTER_URL,
 } from '../../../urls/navigation';
+import {
+  navigateFromKibanaCollapsibleTo,
+  openKibanaNavigation,
+} from '../../../tasks/kibana_navigation';
+import { ALERTS_PAGE } from '../../../screens/kibana_navigation';
+import { deleteDataView, postDataView } from '../../../tasks/api_calls/common';
+import { navigateToAlertsPageInServerless } from '../../../tasks/serverless/navigation';
 
 const DATAVIEW = 'audit*';
 

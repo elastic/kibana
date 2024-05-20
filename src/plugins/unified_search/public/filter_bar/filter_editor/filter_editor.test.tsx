@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { UseEuiTheme, EuiThemeComputed } from '@elastic/eui';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';
 import { dataViewMockList } from '../../dataview_picker/mocks/dataview';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const dataMock = dataPluginMock.createStartContract();
 jest.mock('@kbn/code-editor', () => {

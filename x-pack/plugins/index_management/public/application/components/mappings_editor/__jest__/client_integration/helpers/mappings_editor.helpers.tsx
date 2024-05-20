@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { TestBed, findTestSubject, registerTestBed } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
+import { registerTestBed, TestBed, findTestSubject } from '@kbn/test-jest-helpers';
 
-import { getChildFieldsName } from '../../../lib';
-import { MappingsEditor } from '../../../mappings_editor';
-import { RuntimeField } from '../../../shared_imports';
 // This import needs to come first as it sets the jest.mock calls
 import { WithAppDependencies } from './setup_environment';
+import { getChildFieldsName } from '../../../lib';
+import { RuntimeField } from '../../../shared_imports';
+import { MappingsEditor } from '../../../mappings_editor';
 
 export interface DomFields {
   [key: string]: {

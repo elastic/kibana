@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React, { ReactNode, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiButtonIcon,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiTitle,
+  EuiToolTip,
   EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiTitle,
-  EuiToolTip,
+  EuiFlexItem,
+  EuiFlexGroup,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
-import React, { ReactNode, useCallback } from 'react';
 
-import { UnitStrings } from '../../../../i18n';
 import { timeDuration } from '../../../lib/time_duration';
+import { UnitStrings } from '../../../../i18n';
 import { CustomInterval } from './custom_interval';
 
 const { time: timeStrings } = UnitStrings;

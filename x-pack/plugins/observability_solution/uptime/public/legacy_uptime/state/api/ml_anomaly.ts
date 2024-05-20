@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { extractErrorMessage } from '@kbn/ml-error-utils';
+import moment from 'moment';
 import {
   DataRecognizerConfigResponse,
   JobExistResult,
   MlCapabilitiesResponse,
 } from '@kbn/ml-plugin/public';
-import moment from 'moment';
-import { API_URLS, ML_MODULE_ID } from '../../../../common/constants';
-import { getJobPrefix, getMLJobId } from '../../../../common/lib/ml';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { apiService } from './utils';
 import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
+import { API_URLS, ML_MODULE_ID } from '../../../../common/constants';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,
   HeartbeatIndicesParam,
   MonitorIdParam,
 } from '../actions/types';
-import { apiService } from './utils';
+import { getJobPrefix, getMLJobId } from '../../../../common/lib/ml';
 
 export const getMLCapabilities = async (): Promise<MlCapabilitiesResponse> => {
   return await apiService.get(API_URLS.ML_CAPABILITIES, { version: '1' });

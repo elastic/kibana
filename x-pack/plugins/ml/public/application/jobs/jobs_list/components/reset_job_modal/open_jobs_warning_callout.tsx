@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { JOB_STATE } from '../../../../../../common/constants/states';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import { JOB_STATE } from '../../../../../../common/constants/states';
 
 interface Props {
   jobs: MlSummaryJob[];

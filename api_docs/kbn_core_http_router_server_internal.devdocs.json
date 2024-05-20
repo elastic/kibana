@@ -62,7 +62,9 @@
             "tags": [],
             "label": "useVersionResolutionStrategyForInternalPaths",
             "description": [],
-            "signature": ["Map<string, boolean>"],
+            "signature": [
+              "Map<string, boolean>"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -74,7 +76,9 @@
             "tags": [],
             "label": "pluginId",
             "description": [],
-            "signature": ["symbol | undefined"],
+            "signature": [
+              "symbol | undefined"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -109,7 +113,9 @@
                 "tags": [],
                 "label": "{\n    router,\n    defaultHandlerResolutionStrategy,\n    isDev,\n    useVersionResolutionStrategyForInternalPaths,\n  }",
                 "description": [],
-                "signature": ["VersionedRouterArgs"],
+                "signature": [
+                  "VersionedRouterArgs"
+                ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -480,7 +486,11 @@
             "tags": [],
             "label": "getRoutes",
             "description": [],
-            "signature": ["() => ", "VersionedRouterRoute", "[]"],
+            "signature": [
+              "() => ",
+              "VersionedRouterRoute",
+              "[]"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -508,7 +518,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -520,7 +532,9 @@
                 "tags": [],
                 "label": "responseToolkit",
                 "description": [],
-                "signature": ["ResponseToolkit"],
+                "signature": [
+                  "ResponseToolkit"
+                ],
                 "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -536,7 +550,11 @@
             "tags": [],
             "label": "toBadRequest",
             "description": [],
-            "signature": ["(message: string) => ", "Boom", "<unknown>"],
+            "signature": [
+              "(message: string) => ",
+              "Boom",
+              "<unknown>"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -548,7 +566,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -564,7 +584,11 @@
             "tags": [],
             "label": "toInternalError",
             "description": [],
-            "signature": ["() => ", "Boom", "<any>"],
+            "signature": [
+              "() => ",
+              "Boom",
+              "<any>"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -597,7 +621,10 @@
                 "tags": [],
                 "label": "kibanaResponse",
                 "description": [],
-                "signature": ["KibanaResponse", "<any>"],
+                "signature": [
+                  "KibanaResponse",
+                  "<any>"
+                ],
                 "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -668,7 +695,9 @@
             "tags": [],
             "label": "fieldsToKeep",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -681,7 +710,9 @@
             "tags": [],
             "label": "fieldsToExclude",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -761,7 +792,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -773,7 +806,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -785,7 +820,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -797,7 +834,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -809,7 +848,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -894,7 +935,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -906,7 +949,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -932,7 +977,9 @@
             "tags": [],
             "label": "oldest",
             "description": [],
-            "signature": ["(versions: string[]) => string | undefined"],
+            "signature": [
+              "(versions: string[]) => string | undefined"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -945,7 +992,9 @@
                 "tags": [],
                 "label": "versions",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -959,7 +1008,9 @@
             "tags": [],
             "label": "newest",
             "description": [],
-            "signature": ["(versions: string[]) => string | undefined"],
+            "signature": [
+              "(versions: string[]) => string | undefined"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -972,7 +1023,9 @@
                 "tags": [],
                 "label": "versions",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -986,7 +1039,9 @@
             "tags": [],
             "label": "none",
             "description": [],
-            "signature": ["(versions: string[]) => string | undefined"],
+            "signature": [
+              "(versions: string[]) => string | undefined"
+            ],
             "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -999,7 +1054,9 @@
                 "tags": [],
                 "label": "versions",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/handler_resolvers.ts",
                 "deprecated": false,
                 "trackAdoption": false

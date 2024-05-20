@@ -9,9 +9,9 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MLCATEGORY, ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
+import { i18n } from '@kbn/i18n';
+import { ML_ENTITY_FIELD_OPERATIONS, MLCATEGORY } from '@kbn/ml-anomaly-utils';
 import { EMPTY_FIELD_VALUE_LABEL } from '../../timeseriesexplorer/components/entity_control/entity_control';
 import { blurButtonOnClick } from '../../util/component_utils';
 

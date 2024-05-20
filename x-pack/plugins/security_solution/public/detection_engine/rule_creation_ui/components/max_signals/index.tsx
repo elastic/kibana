@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { EuiFieldNumberProps } from '@elastic/eui';
-import { EuiFieldNumber, EuiFormRow, EuiIcon, EuiTextColor } from '@elastic/eui';
-import { css } from '@emotion/css';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useMemo, useCallback } from 'react';
+import type { EuiFieldNumberProps } from '@elastic/eui';
+import { EuiTextColor, EuiFormRow, EuiFieldNumber, EuiIcon } from '@elastic/eui';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { css } from '@emotion/css';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface MaxSignalsFieldProps {
   dataTestSubj: string;

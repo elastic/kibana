@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { Action } from '@kbn/ui-actions-plugin/public';
+import React from 'react';
 import { act } from '@testing-library/react';
 import { mount } from 'enzyme';
-import React from 'react';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { AlertsCountPanel } from '.';
 
 import type { Status } from '../../../../../common/api/detection_engine';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
-import { allowedExperimentalValues } from '../../../../../common/experimental_features';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
 import { TestProviders } from '../../../../common/mock';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
 import { TABLE } from '../../../pages/detection_engine/chart_panels/chart_select/translations';
-import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';

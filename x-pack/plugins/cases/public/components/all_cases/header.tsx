@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { HeaderPage } from '../header_page';
+import * as i18n from './translations';
 import type { ErrorMessage } from '../use_push_to_service/callout/types';
 import { NavButtons } from './nav_buttons';
-import * as i18n from './translations';
 
 interface OwnProps {
   actionsErrors: ErrorMessage[];

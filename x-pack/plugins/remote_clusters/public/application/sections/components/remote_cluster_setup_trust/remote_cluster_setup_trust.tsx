@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React, { useState, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSpacer,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiText,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useContext } from 'react';
 
-import { AppContext } from '../../../app_context';
 import * as docs from '../../../services/documentation';
+import { AppContext } from '../../../app_context';
 import { ConfirmTrustSetupModal } from './confirm_modal';
 
 const MIN_ALLOWED_VERSION_API_KEYS_METHOD = '8.10';

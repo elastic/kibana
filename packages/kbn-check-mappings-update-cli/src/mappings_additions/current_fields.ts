@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { readFile, writeFile } from 'fs/promises';
 import Path from 'path';
 import { FieldListMap } from '@kbn/core-saved-objects-base-server-internal';
 import { prettyPrintAndSortKeys } from '@kbn/utils';
-import { readFile, writeFile } from 'fs/promises';
 
 const CURRENT_FIELDS_FILE_PATH = Path.resolve(__dirname, '../../current_fields.json');
 

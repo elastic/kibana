@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FetchExecution, FetchParameters, MonitoredProduct } from '../types';
+import { FetchParameters, FetchExecution, MonitoredProduct } from '../types';
 
 import type { Products } from '../errors_helpers/build_errors';
 
-import { buildErrors } from '../errors_helpers/build_errors';
 import { errorsQuery } from '../errors_helpers/errors_query';
+import { buildErrors } from '../errors_helpers/build_errors';
 
 interface MetricbeatResponse {
   products?: Products;

@@ -8,10 +8,10 @@
 
 import { act, render } from '@testing-library/react';
 import React from 'react';
-import { CellActionsProvider } from '../context';
 import { makeAction } from '../mocks/helpers';
-import type { CellActionExecutionContext } from '../types';
 import { InlineActions } from './inline_actions';
+import type { CellActionExecutionContext } from '../types';
+import { CellActionsProvider } from '../context';
 
 const defaultProps = {
   anchorPosition: 'rightCenter' as const,

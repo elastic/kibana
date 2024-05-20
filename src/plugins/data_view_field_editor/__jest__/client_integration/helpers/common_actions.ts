@@ -1,4 +1,3 @@
-import { TestBed } from '@kbn/test-jest-helpers';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { TestBed } from '@kbn/test-jest-helpers';
  * Side Public License, v 1.
  */
 import { act } from 'react-dom/test-utils';
+import { TestBed } from '@kbn/test-jest-helpers';
 
 /**
  * We often need to wait for both the documents & the preview to be fetched.

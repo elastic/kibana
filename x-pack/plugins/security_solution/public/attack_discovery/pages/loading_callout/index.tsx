@@ -10,9 +10,9 @@ import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
 import { useKibana } from '../../../common/lib/kibana';
-import type { GenerationInterval } from '../../types';
 import { Countdown } from './countdown';
 import { LoadingMessages } from './loading_messages';
+import type { GenerationInterval } from '../../types';
 
 const BACKGROUND_COLOR_LIGHT = '#E6F1FA';
 const BACKGROUND_COLOR_DARK = '#0B2030';

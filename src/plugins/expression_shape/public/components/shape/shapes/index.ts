@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ShapeType } from '../../reusable';
 import { Arrow as arrow } from './arrow';
 import { ArrowMulti as arrowMulti } from './arrow_multi';
 import { Bookmark as bookmark } from './bookmark';
-import { Circle as circle } from './circle';
 import { Cross as cross } from './cross';
+import { Circle as circle } from './circle';
 import { Hexagon as hexagon } from './hexagon';
 import { Kite as kite } from './kite';
 import { Pentagon as pentagon } from './pentagon';
@@ -23,6 +22,7 @@ import { Star as star } from './star';
 import { Tag as tag } from './tag';
 import { Triangle as triangle } from './triangle';
 import { TriangleRight as triangleRight } from './triangle_right';
+import { ShapeType } from '../../reusable';
 
 const shapes: { [key: string]: ShapeType } = {
   arrow,

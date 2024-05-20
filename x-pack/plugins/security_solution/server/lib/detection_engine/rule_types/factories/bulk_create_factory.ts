@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { performance } from 'perf_hooks';
+import { isEmpty } from 'lodash';
 
-import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { PersistenceAlertService } from '@kbn/rule-registry-plugin/server';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { makeFloatString } from '../utils/utils';
+import type { RefreshTypes } from '../../types';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import type { RefreshTypes } from '../../types';
-import { makeFloatString } from '../utils/utils';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;

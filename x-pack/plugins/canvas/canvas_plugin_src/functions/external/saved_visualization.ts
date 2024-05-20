@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
+import { omit } from 'lodash';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { VisualizeInput } from '@kbn/visualizations-plugin/public';
-import { omit } from 'lodash';
-import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { getFunctionHelp } from '../../../i18n';
-import { ExpressionValueFilter, SeriesStyle, TimeRange as TimeRangeArg } from '../../../types';
+import { SavedObjectReference } from '@kbn/core/types';
 import {
-  EmbeddableExpression,
-  EmbeddableExpressionType,
   EmbeddableTypes,
+  EmbeddableExpressionType,
+  EmbeddableExpression,
 } from '../../expression_types';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
+import { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   id: string;
@@ -78,15 +78,12 @@ export function savedVisualization(): ExpressionFunctionDefinition<
       const visOptions: VisualizeInput['vis'] = {};
 
       if (colors) {
-        visOptions.colors = colors.reduce(
-          (reduction, color) => {
-            if (color.label && color.color) {
-              reduction[color.label] = color.color;
-            }
-            return reduction;
-          },
-          {} as Record<string, string>
-        );
+        visOptions.colors = colors.reduce((reduction, color) => {
+          if (color.label && color.color) {
+            reduction[color.label] = color.color;
+          }
+          return reduction;
+        }, {} as Record<string, string>);
       }
 
       if (hideLegend === true) {

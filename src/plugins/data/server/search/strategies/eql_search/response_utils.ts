@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
 import type { ConnectionRequestParams } from '@elastic/transport';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { EqlSearchResponse } from './types';
 import { EqlSearchStrategyResponse } from '../../../../common';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
-import { EqlSearchResponse } from './types';
 
 /**
  * Get the Kibana representation of an EQL search response (see `IKibanaSearchResponse`).

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import type {
   AttachmentActionType,
   ExternalReferenceAttachmentType,
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { lazy } from 'react';
 
 const AttachmentContentLazy = lazy(() => import('./external_references_content'));
 

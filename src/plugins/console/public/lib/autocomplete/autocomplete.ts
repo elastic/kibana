@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 // TODO: All of these imports need to be moved to the core editor so that it can inject components from there.
 import {
@@ -23,10 +23,10 @@ import type RowParser from '../row_parser';
 
 import * as utils from '../utils';
 
-import { ConstantComponent, URL_PATH_END_MARKER } from './components';
 import { populateContext } from './engine';
-import { looksLikeTypingIn } from './looks_like_typing_in';
 import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
+import { URL_PATH_END_MARKER, ConstantComponent } from './components';
+import { looksLikeTypingIn } from './looks_like_typing_in';
 
 let lastEvaluatedToken: Token | null = null;
 
@@ -1154,7 +1154,8 @@ export default function ({
     tracer('starting autocomplete', lastEvaluatedToken, '->', currentToken);
     lastEvaluatedToken = currentToken;
     editor.execCommand('startAutocomplete');
-  }, 100);
+  },
+  100);
 
   function editorChangeListener() {
     const position = editor.getCurrentPosition();

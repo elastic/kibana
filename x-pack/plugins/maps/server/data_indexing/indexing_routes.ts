@@ -12,16 +12,16 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
-  CHECK_IS_DRAWING_INDEX,
+  INDEX_SOURCE_API_PATH,
+  MAX_DRAWING_SIZE_BYTES,
   GET_MATCHING_INDEXES_PATH,
   INDEX_FEATURE_PATH,
-  INDEX_SOURCE_API_PATH,
+  CHECK_IS_DRAWING_INDEX,
   MAPS_NEW_VECTOR_LAYER_META_CREATED_BY,
-  MAX_DRAWING_SIZE_BYTES,
 } from '../../common/constants';
 import { createDocSource } from './create_doc_source';
-import { getMatchingIndexes } from './get_indexes_matching_pattern';
 import { writeDataToIndex } from './index_data';
+import { getMatchingIndexes } from './get_indexes_matching_pattern';
 
 export function initIndexingRoutes({
   router,

@@ -16,11 +16,11 @@ import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
-  EuiSpacer,
+  EuiFlexItem,
   EuiText,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export interface SectionItem {

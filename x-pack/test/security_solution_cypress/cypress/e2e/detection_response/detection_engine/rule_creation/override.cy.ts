@@ -12,7 +12,7 @@ import {
   getSeveritiesOverride,
 } from '../../../../objects/rule';
 
-import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../../screens/alerts';
+import { ALERT_GRID_CELL, ALERTS_COUNT } from '../../../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
@@ -23,8 +23,8 @@ import {
   SEVERITY,
 } from '../../../../screens/alerts_detection_rules';
 import {
-  ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
+  ABOUT_DETAILS,
   ABOUT_RULE_DESCRIPTION,
   ADDITIONAL_LOOK_BACK_DETAILS,
   CUSTOM_QUERY_DETAILS,
@@ -32,8 +32,8 @@ import {
   DETAILS_DESCRIPTION,
   DETAILS_TITLE,
   FALSE_POSITIVES_DETAILS,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
-  INTERVAL_ABBR_VALUE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -49,11 +49,11 @@ import {
   TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
   TIMESTAMP_OVERRIDE_DETAILS,
-  removeExternalLinkText,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
-import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import {
   createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
@@ -64,8 +64,8 @@ import {
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
-import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 
 describe('Rules override', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewOverrideRule();

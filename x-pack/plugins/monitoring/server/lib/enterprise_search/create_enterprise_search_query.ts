@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EnterpriseSearchMetric, EnterpriseSearchMetricFields } from '../metrics';
+import { createQuery } from '../create_query';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { getEntsearchDataset } from '../cluster/get_index_patterns';
-import { createQuery } from '../create_query';
-import { EnterpriseSearchMetric, EnterpriseSearchMetricFields } from '../metrics';
 
 /**
  * {@code createQuery} for all Enterprise Search instances.

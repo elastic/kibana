@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { updateMappingsMock } from './update_index_meta.test.mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
 import { updateIndexMeta } from './update_index_meta';
-import { updateMappingsMock } from './update_index_meta.test.mocks';
 
 describe('updateIndexMeta', () => {
   it('calls updateMappings with the correct parameters', () => {

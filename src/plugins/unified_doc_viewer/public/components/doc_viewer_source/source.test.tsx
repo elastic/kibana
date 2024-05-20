@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import '@kbn/code-editor-mock/jest_helper';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
+import { DocViewerSource } from './source';
 import * as hooks from '../../hooks/use_es_doc_search';
+import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { JsonCodeEditorCommon } from '../json_code_editor';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import type { UnifiedDocViewerServices } from '../../types';
-import { JsonCodeEditorCommon } from '../json_code_editor';
-import { DocViewerSource } from './source';
 
 const mockDataView = {
   getComputedFields: () => [],

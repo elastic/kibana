@@ -8,7 +8,7 @@
 
 import { last } from 'lodash';
 
-import type { Metric, Series } from '../../../../common/types';
+import type { Series, Metric } from '../../../../common/types';
 
 export const getLastMetric = (series: Series) =>
   last(series.metrics.filter((s) => s.type !== 'series_agg')) as Metric;

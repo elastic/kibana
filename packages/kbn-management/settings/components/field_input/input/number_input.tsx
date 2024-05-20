@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
+import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { useServices } from '../services';
-import { InputProps } from '../types';
 
 /**
  * Props for a {@link NumberInput} component.

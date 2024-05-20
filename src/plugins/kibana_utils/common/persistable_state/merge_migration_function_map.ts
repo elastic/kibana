@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { mergeWith } from 'lodash';
-import { MigrateFunction, MigrateFunctionsObject } from './types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { MigrateFunctionsObject, MigrateFunction } from './types';
 
 export const mergeMigrationFunctionMaps = (
   obj1: MigrateFunctionsObject,

@@ -6,9 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ActionFunction, InvokeCallback, actions } from 'xstate';
-import { isDataViewSelection } from '../../../../../common/data_source_selection';
+import { ActionFunction, actions, InvokeCallback } from 'xstate';
 import { LogsExplorerCustomizations } from '../../../../controller';
+import { isDataViewSelection } from '../../../../../common/data_source_selection';
 import {
   getChartDisplayOptionsFromDiscoverAppState,
   getDiscoverAppStateFromContext,

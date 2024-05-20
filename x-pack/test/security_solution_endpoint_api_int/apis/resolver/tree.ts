@@ -6,21 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  RelatedEventCategory,
-  Tree,
-} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { getNameField } from '@kbn/security-solution-plugin/server/endpoint/routes/resolver/tree/utils/fetch';
+import { ResolverNode } from '@kbn/security-solution-plugin/common/endpoint/types';
 import {
   parentEntityIDSafeVersion,
   timestampSafeVersion,
 } from '@kbn/security-solution-plugin/common/endpoint/models/event';
-import { ResolverNode } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { getNameField } from '@kbn/security-solution-plugin/server/endpoint/routes/resolver/tree/utils/fetch';
+import {
+  Tree,
+  RelatedEventCategory,
+} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { HEADERS } from '../../headers';
-import { GeneratedTrees, Options } from '../../services/resolver';
+import { Options, GeneratedTrees } from '../../services/resolver';
 import { schemaWithAncestry, schemaWithName, schemaWithoutAncestry, verifyTree } from './common';
+import { HEADERS } from '../../headers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

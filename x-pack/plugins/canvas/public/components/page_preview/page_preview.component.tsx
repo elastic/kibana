@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React, { FC } from 'react';
-import { CanvasPage } from '../../../types';
+import PropTypes from 'prop-types';
 import { DomPreview } from '../dom_preview';
 import { PageControls } from './page_controls';
+import { CanvasPage } from '../../../types';
 
 export interface Props {
   isWriteable: boolean;

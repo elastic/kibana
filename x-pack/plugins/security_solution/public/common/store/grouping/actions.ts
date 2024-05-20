@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TableId } from '@kbn/securitysolution-data-table';
 import actionCreatorFactory from 'typescript-fsa';
+import type { TableId } from '@kbn/securitysolution-data-table';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/groups');
 

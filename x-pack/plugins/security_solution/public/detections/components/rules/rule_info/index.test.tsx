@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
 import { CreatedBy, UpdatedBy } from '.';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 
 describe('Rule related info', () => {

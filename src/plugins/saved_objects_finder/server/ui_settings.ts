@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from '@kbn/core/server';
-import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '../common';
+import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
   [PER_PAGE_SETTING]: {

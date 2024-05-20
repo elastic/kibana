@@ -7,25 +7,25 @@
 
 import { AlertingConnectorFeatureId, UptimeConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE, OWNER_INFO } from '../../../common/constants';
+import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import type { Owner } from '../../../common/constants/types';
-import type { CasesClient } from '../../client';
 import { CasesConnector } from './cases_connector';
 import { DEFAULT_MAX_OPEN_CASES } from './constants';
-import {
-  CasesConnectorConfigSchema,
-  CasesConnectorRuleActionParamsSchema,
-  CasesConnectorSecretsSchema,
-} from './schema';
+import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE, OWNER_INFO } from '../../../common/constants';
 import type {
   CasesConnectorConfig,
   CasesConnectorParams,
   CasesConnectorRuleActionParams,
   CasesConnectorSecrets,
 } from './types';
+import {
+  CasesConnectorConfigSchema,
+  CasesConnectorRuleActionParamsSchema,
+  CasesConnectorSecretsSchema,
+} from './schema';
+import type { CasesClient } from '../../client';
 import { constructRequiredKibanaPrivileges } from './utils';
 
 interface GetCasesConnectorTypeArgs {

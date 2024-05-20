@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { useLegendAction } from '@elastic/charts';
-import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover } from '@elastic/eui';
-import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
-import { i18n } from '@kbn/i18n';
 import React, { useState, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
+import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { useLegendAction } from '@elastic/charts';
 import type { CellValueAction } from '../types';
 
 const hasFilterCellAction = (actions: CellValueAction[]) => {

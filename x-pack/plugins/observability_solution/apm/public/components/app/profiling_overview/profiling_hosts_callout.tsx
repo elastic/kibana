@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { ApmPluginStartDeps } from '../../../plugin';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 
 interface Props {
   serviceName: string;

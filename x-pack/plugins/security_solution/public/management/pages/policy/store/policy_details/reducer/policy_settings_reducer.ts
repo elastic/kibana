@@ -7,6 +7,7 @@
 
 // eslint-disable-next-line import/no-nodejs-modules
 import { parse } from 'querystring';
+import { fullPolicy, isOnPolicyDetailsPage, license } from '../selectors/policy_settings_selectors';
 import type {
   Immutable,
   PolicyConfig,
@@ -15,9 +16,8 @@ import type {
 } from '../../../../../../../common/endpoint/types';
 import type { ImmutableReducer } from '../../../../../../common/store';
 import type { AppAction } from '../../../../../../common/store/actions';
-import { extractPolicyDetailsArtifactsListPageLocation } from '../../../../../common/routing';
 import type { PolicyDetailsState } from '../../../types';
-import { fullPolicy, isOnPolicyDetailsPage, license } from '../selectors/policy_settings_selectors';
+import { extractPolicyDetailsArtifactsListPageLocation } from '../../../../../common/routing';
 import { initialPolicyDetailsState } from './initial_policy_details_state';
 
 const updatePolicyConfigInPolicyData = (

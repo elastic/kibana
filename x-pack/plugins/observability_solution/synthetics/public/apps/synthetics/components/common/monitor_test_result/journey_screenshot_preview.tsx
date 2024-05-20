@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiPopover, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useState, MouseEvent } from 'react';
+import { EuiPopover, useEuiTheme } from '@elastic/eui';
 
+import { POPOVER_SCREENSHOT_SIZE, ScreenshotImageSize } from '../screenshot/screenshot_size';
 import { JourneyScreenshotDialog } from '../screenshot/journey_screenshot_dialog';
 import { ScreenshotImage } from '../screenshot/screenshot_image';
-import { POPOVER_SCREENSHOT_SIZE, ScreenshotImageSize } from '../screenshot/screenshot_size';
 
 export interface StepImagePopoverProps {
   timestamp?: string;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiIcon, EuiLink, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
+import { EuiFormRow, EuiSpacer, EuiIcon, EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
-import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { useAppContext } from '../../context';
 

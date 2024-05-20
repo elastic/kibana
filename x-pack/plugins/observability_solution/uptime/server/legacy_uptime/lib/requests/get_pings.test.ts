@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getPings } from './get_pings';
 import { set } from '@kbn/safer-lodash-set';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { getPings } from './get_pings';
 import { getUptimeESMockClient } from './test_helpers';
 
 describe('getAll', () => {

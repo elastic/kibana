@@ -7,27 +7,27 @@
 
 import { cloneDeep } from 'lodash';
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { actionsAuthorizationMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { RulesClient, ConstructorOptions } from './rules_client';
 import {
-  loggingSystemMock,
   savedObjectsClientMock,
+  loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ruleTypeRegistryMock } from './rule_type_registry.mock';
+import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsClientMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { AlertingAuthorization } from './authorization/alerting_authorization';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
-import { AlertingAuthorization } from './authorization/alerting_authorization';
-import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
-import { backfillClientMock } from './backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
-import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
-import { ruleTypeRegistryMock } from './rule_type_registry.mock';
-import { ConstructorOptions, RulesClient } from './rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
+import { backfillClientMock } from './backfill_client/backfill_client.mock';
 
 jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),

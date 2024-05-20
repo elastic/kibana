@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { isEmpty } from 'lodash/fp';
-import { getCaseConfigurationDetailsUrl } from '../../../common/api';
-import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type {
   ConfigurationPatchRequest,
@@ -23,8 +21,10 @@ import type {
   Configuration,
 } from '../../../common/types/domain';
 import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
-import { convertArrayToCamelCase, convertToCamelCase } from '../../api/utils';
+import { getCaseConfigurationDetailsUrl } from '../../../common/api';
+import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
+import { convertToCamelCase, convertArrayToCamelCase } from '../../api/utils';
 import type { ApiProps, CasesConfigurationUI } from '../types';
 import { decodeCaseConfigurationsResponse, decodeCaseConfigureResponse } from '../utils';
 

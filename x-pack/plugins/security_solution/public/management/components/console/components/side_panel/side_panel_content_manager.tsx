@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
+import {
+  EuiText,
+  EuiIcon,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import { CommandList } from '../command_list';
+import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
+import { SidePanelContentLayout } from './side_panel_content_layout';
+import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
-import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
-import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
-import { CommandList } from '../command_list';
-import { SidePanelContentLayout } from './side_panel_content_layout';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   padding-top: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingSmall};

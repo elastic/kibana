@@ -12,6 +12,7 @@ import {
   createUserAndRole,
   deleteUserAndRole,
 } from '../../../../../../../common/services/security_solution';
+import { setAlertAssignees } from '../../../../utils';
 import {
   createAlertsIndex,
   createRule,
@@ -22,9 +23,8 @@ import {
   waitForAlertsToBePresent,
   waitForRuleSuccess,
 } from '../../../../../../../common/utils/security_solution';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { setAlertAssignees } from '../../../../utils';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

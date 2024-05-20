@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
 import React from 'react';
+import { useMutation } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';

@@ -10,25 +10,22 @@ import type { NewPackagePolicy, PackageInfo } from '../../server/types';
 import nginxPackageInfo from '../../server/services/package_policies/fixtures/package_info/nginx_1.5.0.json';
 
 import {
-  generateInputId,
   simplifiedPackagePolicytoNewPackagePolicy,
+  generateInputId,
 } from './simplified_package_policy_helper';
 
 function getEnabledInputsAndStreams(newPackagePolicy: NewPackagePolicy) {
   return newPackagePolicy.inputs
     .filter((input) => input.enabled)
-    .reduce(
-      (acc, input) => {
-        const inputId = generateInputId(input);
+    .reduce((acc, input) => {
+      const inputId = generateInputId(input);
 
-        acc[inputId] = input.streams
-          .filter((stream) => stream.enabled)
-          .map((stream) => stream.data_stream.dataset);
+      acc[inputId] = input.streams
+        .filter((stream) => stream.enabled)
+        .map((stream) => stream.data_stream.dataset);
 
-        return acc;
-      },
-      {} as Record<string, string[]>
-    );
+      return acc;
+    }, {} as Record<string, string[]>);
 }
 
 describe('toPackagePolicy', () => {

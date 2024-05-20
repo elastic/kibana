@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TSVBMetricModel, TSVBMetricModelCreator } from '../../../types';
+import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
 // see discussion in: https://github.com/elastic/kibana/issues/42687
 

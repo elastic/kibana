@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { FC, PropsWithChildren } from 'react';
 import { Frequency } from '@kbn/rrule';
 import { fireEvent, within } from '@testing-library/react';
-import React, { FC, PropsWithChildren } from 'react';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { AppMockRenderer, createAppMockRenderer } from '../../../../lib/test_utils';
-import { EndsOptions } from '../../constants';
 import { FormProps, schema } from '../schema';
 import { RecurringSchedule } from './recurring_schedule';
+import { EndsOptions } from '../../constants';
 
 const initialValue: FormProps = {
   title: 'test',

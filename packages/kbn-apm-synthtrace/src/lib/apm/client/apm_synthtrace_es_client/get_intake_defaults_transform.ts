@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Transform } from 'stream';
 import { ApmFields } from '@kbn/apm-synthtrace-client';
+import { Transform } from 'stream';
 
 export function getIntakeDefaultsTransform() {
   return new Transform({

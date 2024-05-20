@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { DragDropContextProps, EuiDragDropContext, useEuiPaddingSize } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { BooleanRelation, type Filter, compareFilters } from '@kbn/es-query';
 import React, { useEffect, useReducer, useCallback, useState, useRef } from 'react';
-import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { type Filter, BooleanRelation, compareFilters } from '@kbn/es-query';
 import { FiltersBuilderContextType } from './context';
 import { FilterGroup } from './filter_group';
-import { filtersBuilderCss } from './filters_builder.styles';
 import { FiltersBuilderReducer } from './reducer';
-import { FilterLocation } from './types';
 import { getPathInArray } from './utils';
+import { FilterLocation } from './types';
+import { filtersBuilderCss } from './filters_builder.styles';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export interface FiltersBuilderProps {
   filters: Filter[];

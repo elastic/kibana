@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
-import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { cloneDeep } from 'lodash/fp';
+import { shallow } from 'enzyme';
 
-import { mockAnomalies } from '../mock';
 import { ScoreComponent } from './score';
+import { mockAnomalies } from '../mock';
 
 describe('draggable_score', () => {
   let anomalies = cloneDeep(mockAnomalies);

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import classnames from 'classnames';
 import React, { PropsWithChildren } from 'react';
+import classnames from 'classnames';
 
 /**
  * DropOverlayWrapper Props

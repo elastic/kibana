@@ -8,10 +8,10 @@ import type { Logger } from '@kbn/core/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../../common/constants';
 import {
-  mockGetCurrentUser,
-  requestContextMock,
-  requestMock,
   serverMock,
+  requestContextMock,
+  mockGetCurrentUser,
+  requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { getEmptySavedObjectsResponse } from '../../../detection_engine/routes/__mocks__/request_responses';
 import { createRiskScoreTag } from '../helpers/create_risk_score_tag';

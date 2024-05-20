@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { useCreateTimeline } from '../../hooks/use_create_timeline';
+import { render } from '@testing-library/react';
 import { AddTimelineButton } from './add_timeline_button';
+import { useCreateTimeline } from '../../hooks/use_create_timeline';
 
 jest.mock('../../hooks/use_create_timeline');
 

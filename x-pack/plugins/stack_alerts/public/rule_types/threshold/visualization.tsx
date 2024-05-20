@@ -5,40 +5,40 @@
  * 2.0.
  */
 
+import React, { Fragment, useEffect, useState } from 'react';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import { interval } from 'rxjs';
 import {
   AnnotationDomainType,
   Axis,
   Chart,
   LineAnnotation,
   LineSeries,
-  PartialTheme,
   Position,
   ScaleType,
   Settings,
   niceTimeFormatter,
+  PartialTheme,
 } from '@elastic/charts';
+import moment from 'moment-timezone';
 import {
   EuiCallOut,
-  EuiEmptyPrompt,
   EuiLoadingChart,
-  EuiLoadingSpinner,
   EuiSpacer,
+  EuiEmptyPrompt,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggregationType, Comparator } from '@kbn/triggers-actions-ui-plugin/public';
-import moment from 'moment-timezone';
-import React, { Fragment, useEffect, useState } from 'react';
-import { interval } from 'rxjs';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
+import { i18n } from '@kbn/i18n';
 import {
-  GetThresholdRuleVisualizationDataParams,
   getThresholdRuleVisualizationData,
+  GetThresholdRuleVisualizationDataParams,
 } from './index_threshold_api';
 import { IndexThresholdRuleParams } from './types';
 

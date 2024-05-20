@@ -6,8 +6,8 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 import { Asset } from '../../../common/types_api';
+import { CollectorOptions, QUERY_MAX_SIZE } from '.';
 import { extractFieldValue } from '../utils';
 
 export async function collectPods({

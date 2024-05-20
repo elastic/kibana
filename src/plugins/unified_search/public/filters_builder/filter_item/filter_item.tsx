@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useContext, useState } from 'react';
 import {
   EuiDraggable,
   EuiDroppable,
@@ -17,34 +18,33 @@ import {
   useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { cx } from '@emotion/css';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
-import { BooleanRelation, buildEmptyFilter, getFilterParams } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useContext, useState } from 'react';
+import type { Filter } from '@kbn/es-query';
+import { buildEmptyFilter, getFilterParams, BooleanRelation } from '@kbn/es-query';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { cx } from '@emotion/css';
 
 import { css } from '@emotion/react';
-import { getFieldFromFilter, getOperatorFromFilter } from '../../filter_bar/filter_editor';
-import { Operator } from '../../filter_bar/filter_editor';
+import { FieldInput } from './field_input';
+import { OperatorInput } from './operator_input';
+import { ParamsEditor } from './params_editor';
 import { getBooleanRelationType } from '../../utils';
 import { FiltersBuilderContextType } from '../context';
 import { FilterGroup } from '../filter_group';
 import type { Path } from '../types';
+import { getFieldFromFilter, getOperatorFromFilter } from '../../filter_bar/filter_editor';
+import { Operator } from '../../filter_bar/filter_editor';
 import { getGroupedFilters } from '../utils/filters_builder';
-import { FilterItemActions, MinimisedFilterItemActions } from './actions';
-import { FieldInput } from './field_input';
 import {
   cursorAddCss,
   cursorOrCss,
-  disabledDraggableCss,
   fieldAndParamCss,
   getGrabIconCss,
   operationCss,
+  disabledDraggableCss,
 } from './filter_item.styles';
-import { OperatorInput } from './operator_input';
-import { ParamsEditor } from './params_editor';
 import { Tooltip } from './tooltip';
+import { FilterItemActions, MinimisedFilterItemActions } from './actions';
 
 export const strings = {
   getDragFilterAriaLabel: () =>

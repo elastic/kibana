@@ -7,17 +7,17 @@
 
 // utility functions for handling custom URLs
 
+import { get, flow } from 'lodash';
+import moment from 'moment';
+import rison, { type RisonValue } from '@kbn/rison';
 import type { TimeRange } from '@kbn/es-query';
 import type {
   MlAnomalyRecordDoc,
-  MlCustomUrlAnomalyRecordDoc,
-  MlKibanaUrlConfig,
   MlUrlConfig,
+  MlKibanaUrlConfig,
+  MlCustomUrlAnomalyRecordDoc,
 } from '@kbn/ml-anomaly-utils';
 import type { DataGridItem } from '@kbn/ml-data-grid';
-import rison, { type RisonValue } from '@kbn/rison';
-import { flow, get } from 'lodash';
-import moment from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Action } from '@kbn/analytics-plugin-a-plugin/public/custom_shipper';
-import type { Event, TelemetryCounter } from '@kbn/core/server';
 import expect from '@kbn/expect';
+import type { Event, TelemetryCounter } from '@kbn/core/server';
+import type { Action } from '@kbn/analytics-plugin-a-plugin/public/custom_shipper';
 import '@kbn/analytics-plugin-a-plugin/public/types';
 import type { FtrProviderContext } from '../services';
 

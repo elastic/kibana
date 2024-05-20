@@ -6,20 +6,20 @@
  */
 
 import type {
-  FailedResourceState,
-  LoadedResourceState,
-  LoadingResourceState,
   UninitialisedResourceState,
+  LoadingResourceState,
+  LoadedResourceState,
+  FailedResourceState,
 } from './async_resource_state';
 import {
-  getCurrentResourceError,
-  getLastLoadedResourceState,
-  isFailedResourceState,
-  isLoadedResourceState,
-  isLoadingResourceState,
-  isOutdatedResourceState,
-  isStaleResourceState,
   isUninitialisedResourceState,
+  isLoadingResourceState,
+  isLoadedResourceState,
+  isFailedResourceState,
+  isStaleResourceState,
+  getLastLoadedResourceState,
+  getCurrentResourceError,
+  isOutdatedResourceState,
 } from './async_resource_state';
 
 interface TestData {

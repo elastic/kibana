@@ -6,11 +6,11 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { TagsCapabilities } from '../../../common/capabilities';
 import { createTagCapabilities } from '../../../common/test_utils';
-import { assignmentServiceMock } from '../../services/assignments/assignment_service.mock';
-import { tagsCacheMock } from '../../services/tags/tags_cache.mock';
+import { TagsCapabilities } from '../../../common/capabilities';
 import { tagClientMock } from '../../services/tags/tags_client.mock';
+import { tagsCacheMock } from '../../services/tags/tags_cache.mock';
+import { assignmentServiceMock } from '../../services/assignments/assignment_service.mock';
 import { TagBulkAction } from '../types';
 
 import { getBulkActions } from '.';

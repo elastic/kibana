@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ArrayNode, Key } from '@elastic/charts';
-import { getGroupFromPath, getLayersMultiDimensional, getLayersOneDimension } from '.';
-import { RISK_SCORE_STEPS, getRiskScorePalette } from '../chart_palette';
+import { getRiskScorePalette, RISK_SCORE_STEPS } from '../chart_palette';
 import { maxRiskSubAggregations } from '../flatten/mocks/mock_buckets';
+import { getGroupFromPath, getLayersOneDimension, getLayersMultiDimensional } from '.';
+import type { Key, ArrayNode } from '@elastic/charts';
 
 describe('layers', () => {
   const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS);

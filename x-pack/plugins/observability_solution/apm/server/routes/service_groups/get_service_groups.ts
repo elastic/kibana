@@ -7,10 +7,10 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
+  ServiceGroup,
+  SavedServiceGroup,
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
   MAX_NUMBER_OF_SERVICE_GROUPS,
-  SavedServiceGroup,
-  ServiceGroup,
 } from '../../../common/service_groups';
 
 export async function getServiceGroups({

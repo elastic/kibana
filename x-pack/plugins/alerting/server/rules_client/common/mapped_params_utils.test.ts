@@ -8,10 +8,10 @@
 import { fromKueryExpression } from '@kbn/es-query';
 import {
   getMappedParams,
-  getModifiedField,
   getModifiedFilter,
-  getModifiedSearch,
+  getModifiedField,
   getModifiedSearchFields,
+  getModifiedSearch,
   getModifiedValue,
   modifyFilterKueryNode,
 } from './mapped_params_utils';

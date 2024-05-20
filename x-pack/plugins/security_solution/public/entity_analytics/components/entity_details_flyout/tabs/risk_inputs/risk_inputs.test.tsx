@@ -6,13 +6,13 @@
  */
 
 import { render } from '@testing-library/react';
-import { times } from 'lodash/fp';
 import React from 'react';
-import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
-import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { TestProviders } from '../../../../../common/mock';
-import { alertInputDataMock } from '../../mocks';
+import { times } from 'lodash/fp';
 import { RiskInputsTab } from './risk_inputs_tab';
+import { alertInputDataMock } from '../../mocks';
+import { RiskSeverity } from '../../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
 
 const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
 

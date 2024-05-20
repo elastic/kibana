@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import {
+  getLatestMappingsVirtualVersionMap,
   IndexMapping,
   IndexTypesMap,
   SavedObjectsMigrationConfigType,
-  getLatestMappingsVirtualVersionMap,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import type { Logger } from '@kbn/logging';
-import * as Option from 'fp-ts/Option';
-import { excludeUnusedTypesQuery } from './core';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import {
-  type OutdatedDocumentsQueryParams,
   getOutdatedDocumentsQuery,
+  type OutdatedDocumentsQueryParams,
 } from './get_outdated_documents_query';
-import { getTempIndexName } from './model/helpers';
 import type { InitState } from './state';
+import { excludeUnusedTypesQuery } from './core';
+import { getTempIndexName } from './model/helpers';
 
 export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   kibanaVersion: string;

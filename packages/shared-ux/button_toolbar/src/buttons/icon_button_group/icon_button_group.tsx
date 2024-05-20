@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import {
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
-  EuiButtonGroupProps,
-  IconType,
   htmlIdGenerator,
+  EuiButtonGroupOptionProps,
   useEuiTheme,
+  IconType,
+  EuiButtonGroupProps,
 } from '@elastic/eui';
-import React from 'react';
 
 import { IconButtonGroupStyles } from './icon_button_group.styles';
 

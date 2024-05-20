@@ -1,5 +1,3 @@
-import { useEuiTheme } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +5,11 @@ import { EuiText } from '@elastic/eui';
  * 2.0.
  */
 import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import React from 'react';
 
 interface Props {
   eventType: ProcessorEvent.transaction | ProcessorEvent.span;

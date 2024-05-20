@@ -9,8 +9,8 @@ import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProfilingESField } from '@kbn/profiling-utils';
 import {
   IndexLifecyclePhaseSelectOption,
-  StorageExplorerHostDetails,
   indexLifeCyclePhaseToDataTier,
+  StorageExplorerHostDetails,
 } from '../../../common/storage_explorer';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 import { getEstimatedSizeForDocumentsInIndex } from './get_daily_data_generation.size';

@@ -6,20 +6,17 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { map } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
-import { PLUGIN_ID } from '../../../common';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type {
-  GetLiveQueryResultsRequestParamsSchema,
   GetLiveQueryResultsRequestQuerySchema,
+  GetLiveQueryResultsRequestParamsSchema,
 } from '../../../common/api';
-import {
-  getLiveQueryResultsRequestParamsSchema,
-  getLiveQueryResultsRequestQuerySchema,
-} from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
+import { PLUGIN_ID } from '../../../common';
 import type {
   ActionDetailsRequestOptions,
   ActionDetailsStrategyResponse,
@@ -28,8 +25,11 @@ import type {
 } from '../../../common/search_strategy';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { getActionResponses } from './utils';
+import {
+  getLiveQueryResultsRequestParamsSchema,
+  getLiveQueryResultsRequestQuerySchema,
+} from '../../../common/api';
 
 export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.versioned

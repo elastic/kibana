@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 interface StartDeps {
   data: DataPublicPluginStart;

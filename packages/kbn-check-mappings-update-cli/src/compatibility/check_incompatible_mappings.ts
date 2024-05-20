@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
-import { createFailError } from '@kbn/dev-cli-errors';
 import { SomeDevLog } from '@kbn/some-dev-log';
+import { Client } from '@elastic/elasticsearch';
+import { createFailError } from '@kbn/dev-cli-errors';
+import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 
 const TEST_INDEX_NAME = '.kibana_mappings_check';
 

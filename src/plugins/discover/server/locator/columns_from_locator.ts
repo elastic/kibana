@@ -7,9 +7,9 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { LocatorServicesDeps } from '.';
 import { DiscoverAppLocatorParams } from '../../common';
 

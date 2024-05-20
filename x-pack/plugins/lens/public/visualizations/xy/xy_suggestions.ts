@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { Position } from '@elastic/charts';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
+import { Position } from '@elastic/charts';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type {
   SuggestionRequest,
-  TableChangeType,
-  TableSuggestion,
-  TableSuggestionColumn,
   VisualizationSuggestion,
+  TableSuggestionColumn,
+  TableSuggestion,
+  TableChangeType,
 } from '../../types';
 import { getColorMappingDefaults } from '../../utils';
-import { getIconForSeries } from './state_helpers';
 import {
-  SeriesType,
   State,
-  XYDataLayerConfig,
-  XYLayerConfig,
   XYState,
   visualizationTypes,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  SeriesType,
 } from './types';
+import { getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
 const columnSortOrder = {
@@ -543,8 +543,8 @@ function buildSuggestion({
       mainPalette?.type === 'legacyPalette'
         ? mainPalette.value
         : existingLayer && 'palette' in existingLayer
-          ? (existingLayer as XYDataLayerConfig).palette
-          : undefined,
+        ? (existingLayer as XYDataLayerConfig).palette
+        : undefined,
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
@@ -558,8 +558,8 @@ function buildSuggestion({
     colorMapping: !mainPalette
       ? getColorMappingDefaults()
       : mainPalette?.type === 'colorMapping'
-        ? mainPalette.value
-        : undefined,
+      ? mainPalette.value
+      : undefined,
   };
 
   const hasDateHistogramDomain =
@@ -658,8 +658,8 @@ function getScore(
     changeType === 'reduced' || changeType === 'layers'
       ? 0.3
       : changeType === 'unchanged'
-        ? 0.5
-        : 1;
+      ? 0.5
+      : 1;
   // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
   return (((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3) * changeFactor;
 }

@@ -16,7 +16,7 @@ import { FlashMessagesLogic } from '../../../shared/flash_messages';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { WorkplaceSearchPageTemplate } from '../../components/layout';
 import { NAV } from '../../constants';
-import { USERS_AND_ROLES_PATH, getGroupPath } from '../../routes';
+import { getGroupPath, USERS_AND_ROLES_PATH } from '../../routes';
 
 import { AddGroupModal } from './components/add_group_modal';
 import { ClearFiltersLink } from './components/clear_filters_link';

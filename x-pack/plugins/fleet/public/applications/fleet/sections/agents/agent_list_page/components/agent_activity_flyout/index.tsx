@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiPanel,
-  EuiText,
   EuiTitle,
+  EuiText,
+  EuiPanel,
+  EuiButtonEmpty,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { SO_SEARCH_LIMIT } from '../../../../../constants';
-import {
-  sendPostRetrieveAgentsByActions,
-  useGetAgentPolicies,
-  useStartServices,
-} from '../../../../../hooks';
 import type { ActionStatus } from '../../../../../types';
 import { useActionStatus } from '../../hooks';
+import {
+  useGetAgentPolicies,
+  useStartServices,
+  sendPostRetrieveAgentsByActions,
+} from '../../../../../hooks';
+import { SO_SEARCH_LIMIT } from '../../../../../constants';
 
 import { getKuery } from '../../utils/get_kuery';
 

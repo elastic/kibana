@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect } from 'react';
+import { EuiSpacer, EuiButtonEmpty, EuiText, EuiLink } from '@elastic/eui';
 
-import { useConfig } from '../../config_context';
-import { useDispatch, useMappingsState } from '../../mappings_state_context';
+import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import {
+  documentationService,
   GlobalFlyout,
   RuntimeField,
   RuntimeFieldEditorFlyoutContent,
   RuntimeFieldEditorFlyoutContentProps,
-  documentationService,
 } from '../../shared_imports';
+import { useConfig } from '../../config_context';
 import { EmptyPrompt } from './empty_prompt';
 import { RuntimeFieldsListItemContainer } from './runtimefields_list_item_container';
 

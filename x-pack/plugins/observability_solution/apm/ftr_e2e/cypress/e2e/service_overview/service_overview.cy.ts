@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import url from 'url';
 import moment from 'moment';
+import url from 'url';
 import { synthtrace } from '../../../synthtrace';
 import { opbeans } from '../../fixtures/synthtrace/opbeans';
 import { checkA11y } from '../../support/commands';

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
 import { Observable } from 'rxjs';
+import { Logger } from '@kbn/logging';
 import {
   ChatCompletionChunkEvent,
-  StreamingChatResponseEventType,
   createInternalServerError,
+  StreamingChatResponseEventType,
 } from '../../../../../common';
 import { TokenCountEvent } from '../../../../../common/conversation_complete';
 import { TOOL_USE_END, TOOL_USE_START } from './constants';

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
-import { calculateBounds } from '@kbn/data-plugin/common';
+import { UnifiedFieldListSidebarContainerProps } from '../src/containers/unified_field_list_sidebar';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { indexPatternFieldEditorPluginMock as dataViewFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { calculateBounds } from '@kbn/data-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { UnifiedFieldListSidebarContainerProps } from '../src/containers/unified_field_list_sidebar';
+import { indexPatternFieldEditorPluginMock as dataViewFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 
 export const getServicesMock = (): UnifiedFieldListSidebarContainerProps['services'] => {
   const mockedServices: UnifiedFieldListSidebarContainerProps['services'] = {

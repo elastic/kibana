@@ -6,8 +6,8 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { IHttpSerializedFetchError } from '..';
 import { CertResult, SyntheticsParams } from '../../../../../common/runtime_types';
+import { IHttpSerializedFetchError } from '..';
 import { getCertsListAction } from './actions';
 
 export interface CertsListState {

@@ -7,8 +7,8 @@
  */
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
-import { createAuditLoggerMock } from '../test_helpers/create_audit_logger.mock';
 import { convertSecurityApi } from './convert_security_api';
+import { createAuditLoggerMock } from '../test_helpers/create_audit_logger.mock';
 
 describe('convertSecurityApi', () => {
   it('returns the API from the source', () => {

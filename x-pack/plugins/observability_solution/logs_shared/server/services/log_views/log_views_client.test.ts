@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { dataViewsService as dataViewsServiceMock } from '@kbn/data-views-plugin/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import {
+  defaultLogViewId,
   LogView,
   LogViewAttributes,
   LogViewsStaticConfig,
-  defaultLogViewId,
 } from '../../../common/log_views';
 import { createLogViewMock } from '../../../common/log_views/log_view.mock';
 import {

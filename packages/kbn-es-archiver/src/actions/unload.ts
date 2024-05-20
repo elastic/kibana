@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
+import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
-import { relative, resolve } from 'path';
 import { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { REPO_ROOT } from '@kbn/repo-info';
-import type { KbnClient } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClient } from '@kbn/test';
 import { createPromiseFromStreams } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import {
-  createDeleteIndexStream,
-  createFilterRecordsStream,
-  createParseArchiveStreams,
-  createStats,
   isGzip,
+  createStats,
   prioritizeMappings,
   readDirectory,
+  createParseArchiveStreams,
+  createFilterRecordsStream,
+  createDeleteIndexStream,
 } from '../lib';
 
 export async function unloadAction({

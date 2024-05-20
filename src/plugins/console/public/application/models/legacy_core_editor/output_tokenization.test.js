@@ -7,9 +7,9 @@
  */
 
 import './legacy_core_editor.test.mocks';
-import ace from 'brace';
 import $ from 'jquery';
 import RowParser from '../../../lib/row_parser';
+import ace from 'brace';
 import { createReadOnlyAceEditor } from './create_readonly';
 let output;
 const tokenIterator = ace.acequire('ace/token_iterator');

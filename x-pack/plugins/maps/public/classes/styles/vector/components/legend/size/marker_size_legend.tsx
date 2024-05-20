@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
-import _ from 'lodash';
 import React, { Component } from 'react';
+import _ from 'lodash';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { RangeFieldMeta } from '../../../../../../../common/descriptor_types';
 import { DynamicSizeProperty } from '../../../properties/dynamic_size_property';
 import { RightAlignedText } from '../right_aligned_text';

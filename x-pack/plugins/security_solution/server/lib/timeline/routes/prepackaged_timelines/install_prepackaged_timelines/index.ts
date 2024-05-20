@@ -12,8 +12,8 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_PREPACKAGED_URL } from '../../../../../../common/constants';
 
-import type { ConfigType } from '../../../../../config';
 import type { SetupPlugins } from '../../../../../plugin';
+import type { ConfigType } from '../../../../../config';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 

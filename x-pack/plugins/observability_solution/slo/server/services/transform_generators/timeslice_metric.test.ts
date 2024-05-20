@@ -6,9 +6,9 @@
  */
 
 import {
-  createSLO,
-  createSLOWithTimeslicesBudgetingMethod,
   createTimesliceMetricIndicator,
+  createSLOWithTimeslicesBudgetingMethod,
+  createSLO,
 } from '../fixtures/slo';
 import { TimesliceMetricTransformGenerator } from './timeslice_metric';
 

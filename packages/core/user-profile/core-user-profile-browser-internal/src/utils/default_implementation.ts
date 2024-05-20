@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import type {
   CoreUserProfileDelegateContract,
   GetUserProfileResponse,
 } from '@kbn/core-user-profile-browser';
 import { UserProfileData } from '@kbn/core-user-profile-common';
-import { of } from 'rxjs';
 
 export const getDefaultUserProfileImplementation = (): CoreUserProfileDelegateContract => {
   return {

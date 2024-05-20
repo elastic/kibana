@@ -6,14 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
 import { map } from 'lodash';
-import { parseDuration } from '../../lib';
+import { i18n } from '@kbn/i18n';
 import { validateHours } from '../../routes/lib/validate_hours';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RawRule, RuleNotifyWhen } from '../../types';
+import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertAction, NormalizedSystemAction } from '../types';
 import { RulesClientContext } from '../types';
+import { parseDuration } from '../../lib';
 
 export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
   actions: NormalizedAlertAction[];

@@ -7,15 +7,15 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { snakeCase, startsWith } from 'lodash';
-import moment from 'moment';
-import { emptyLabel, getValueOrEmpty } from '../../../../common/empty_label';
+import { startsWith, snakeCase } from 'lodash';
 import { BUCKET_TYPES, DATA_FORMATTERS } from '../../../../common/enums';
-import { getFieldsForTerms } from '../../../../common/fields_utils';
 import { getLastValue } from '../../../../common/last_value_utils';
-import { createFieldFormatter } from './create_field_formatter';
-import { getMetricsField } from './get_metrics_field';
+import { getValueOrEmpty, emptyLabel } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
+import { getMetricsField } from './get_metrics_field';
+import { createFieldFormatter } from './create_field_formatter';
+import moment from 'moment';
+import { getFieldsForTerms } from '../../../../common/fields_utils';
 
 export const convertSeriesToVars = (series, model, getConfig = null, fieldFormatMap, dataView) => {
   const variables = {};

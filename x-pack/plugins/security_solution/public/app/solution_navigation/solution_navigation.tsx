@@ -1,7 +1,3 @@
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { SolutionSideNavPanelContent } from '@kbn/security-solution-side-nav/panel';
-import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
-import type { PanelComponentProps } from '@kbn/shared-ux-chrome-navigation/src/ui/components/panel/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,17 +5,21 @@ import type { PanelComponentProps } from '@kbn/shared-ux-chrome-navigation/src/u
  * 2.0.
  */
 import React from 'react';
+import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
+import type { PanelComponentProps } from '@kbn/shared-ux-chrome-navigation/src/ui/components/panel/types';
+import { SolutionSideNavPanelContent } from '@kbn/security-solution-side-nav/panel';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 
-import type { CoreStart } from '@kbn/core/public';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import type { SolutionNavLinks$ } from '../../common/links';
-import { navLinks$ } from '../../common/links/nav_links';
+import type { CoreStart } from '@kbn/core/public';
+import { usePanelSideNavItems } from './use_panel_side_nav_items';
 import { CATEGORIES, FOOTER_CATEGORIES } from './categories';
 import { formatNavigationTree } from './navigation_tree';
-import { usePanelSideNavItems } from './use_panel_side_nav_items';
+import type { SolutionNavLinks$ } from '../../common/links';
+import { navLinks$ } from '../../common/links/nav_links';
 
 export const withNavigationProvider = <T extends object>(
   Component: React.ComponentType<T>,

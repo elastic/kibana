@@ -7,23 +7,23 @@
  */
 
 import Boom from '@hapi/boom';
-import type {
-  DocumentMigrateOptions,
-  IDocumentMigrator,
-  IsDowngradeRequiredOptions,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type {
-  ISavedObjectTypeRegistry,
   SavedObjectUnsanitizedDoc,
+  ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import type { Logger } from '@kbn/logging';
-import { buildActiveMigrations } from './build_active_migrations';
-import { DocumentDowngradePipeline, DocumentUpgradePipeline } from './pipelines';
-import { maxVersion } from './pipelines/utils';
+import type {
+  IDocumentMigrator,
+  DocumentMigrateOptions,
+  IsDowngradeRequiredOptions,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { ActiveMigrations } from './types';
-import { TransformType } from './types';
+import { maxVersion } from './pipelines/utils';
+import { buildActiveMigrations } from './build_active_migrations';
+import { DocumentUpgradePipeline, DocumentDowngradePipeline } from './pipelines';
 import { downgradeRequired } from './utils';
+import { TransformType } from './types';
 
 interface TransformOptions {
   convertNamespaceTypes?: boolean;

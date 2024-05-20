@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { ML_APP_ROUTE, PLUGIN_ID } from '../../common/constants/app';
-import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { MlCapabilities } from '../../common/types/capabilities';
-import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import type { MlCoreSetup } from '../plugin';
-import { registerAnomalyDetectionRule } from './anomaly_detection_rule';
+import { ML_ALERT_TYPES } from '../../common/constants/alerts';
+import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import { ML_APP_ROUTE, PLUGIN_ID } from '../../common/constants/app';
+import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import { registerJobsHealthAlertingRule } from './jobs_health_rule';
+import { registerAnomalyDetectionRule } from './anomaly_detection_rule';
 
 export function registerMlAlerts(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,

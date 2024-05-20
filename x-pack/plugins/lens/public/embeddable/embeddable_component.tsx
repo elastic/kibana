@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { EuiLoadingChart } from '@elastic/eui';
+import React, { FC, useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { PanelLoader } from '@kbn/panel-loader';
+import { EuiLoadingChart } from '@elastic/eui';
 import {
   EmbeddableFactory,
   EmbeddableInput,
@@ -17,27 +21,23 @@ import {
   IEmbeddable,
   useEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
-import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import { PanelLoader } from '@kbn/panel-loader';
-import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import React, { FC, useEffect } from 'react';
+import type { LensByReferenceInput, LensByValueInput } from './embeddable';
+import type { Document } from '../persistence';
+import type { FormBasedPersistedState } from '../datasources/form_based/types';
+import type { TextBasedPersistedState } from '../datasources/text_based/types';
+import type { XYState } from '../visualizations/xy/types';
 import type {
+  PieVisualizationState,
+  LegacyMetricState,
   AllowedGaugeOverrides,
   AllowedPartitionOverrides,
   AllowedSettingsOverrides,
   AllowedXYOverrides,
-  LegacyMetricState,
-  PieVisualizationState,
 } from '../../common/types';
-import type { FormBasedPersistedState } from '../datasources/form_based/types';
-import type { TextBasedPersistedState } from '../datasources/text_based/types';
-import type { Document } from '../persistence';
 import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';
-import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
-import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
 import type { MetricVisualizationState } from '../visualizations/metric/types';
-import type { XYState } from '../visualizations/xy/types';
-import type { LensByReferenceInput, LensByValueInput } from './embeddable';
+import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
+import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 
 type LensAttributes<TVisType, TVisState> = Omit<
   Document,

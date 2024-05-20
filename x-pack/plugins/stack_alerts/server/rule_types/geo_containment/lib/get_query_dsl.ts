@@ -6,11 +6,11 @@
  */
 
 import {
+  fromKueryExpression,
+  toElasticsearchQuery,
+  luceneStringToDsl,
   DataViewBase,
   Query,
-  fromKueryExpression,
-  luceneStringToDsl,
-  toElasticsearchQuery,
 } from '@kbn/es-query';
 
 export const getQueryDsl = (query: Query, indexPattern?: DataViewBase) => {

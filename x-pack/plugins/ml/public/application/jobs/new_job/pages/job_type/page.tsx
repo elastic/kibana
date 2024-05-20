@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
+  EuiTitle,
+  EuiSpacer,
   EuiCallOut,
+  EuiText,
   EuiFlexGrid,
   EuiFlexItem,
   EuiLink,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
-import React, { useEffect, useState, useMemo } from 'react';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
-import { DataRecognizer } from '../../../../components/data_recognizer';
-import { LinkCard } from '../../../../components/link_card';
-import { MlPageHeader } from '../../../../components/page_header';
-import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { useDataSource } from '../../../../contexts/ml';
+import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
+import { LinkCard } from '../../../../components/link_card';
 import { CategorizationIcon } from './categorization_job_icon';
-import { GeoIcon } from './geo_job_icon';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
 import { RareIcon } from './rare_job_icon';
+import { GeoIcon } from './geo_job_icon';
+import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
+import { MlPageHeader } from '../../../../components/page_header';
 
 export const Page: FC = () => {
   const {

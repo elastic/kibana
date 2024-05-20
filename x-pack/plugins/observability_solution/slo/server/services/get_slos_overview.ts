@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
-import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
-import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
   GetOverviewParams,
   GetOverviewResponse,
 } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import moment from 'moment';
+import { observabilityAlertFeatureIds } from '@kbn/observability-plugin/common';
 import { typedSearch } from '../utils/queries';
-import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 
 export class GetSLOsOverview {
   constructor(

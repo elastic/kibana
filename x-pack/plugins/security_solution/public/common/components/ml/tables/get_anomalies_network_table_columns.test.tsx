@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NetworkType } from '../../../../explore/network/store/model';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
+import { NetworkType } from '../../../../explore/network/store/model';
 import * as i18n from './translations';
 
 jest.mock('../../../lib/kibana');

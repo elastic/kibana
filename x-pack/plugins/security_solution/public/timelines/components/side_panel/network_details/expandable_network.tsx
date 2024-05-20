@@ -6,30 +6,30 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
-import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { EmptyPrompt } from '../../../../common/components/empty_prompt';
-import { NetworkDetailsLink } from '../../../../common/components/links';
-import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
-import { networkToCriteria } from '../../../../common/components/ml/criteria/network_to_criteria';
-import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
+import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { NetworkDetailsLink } from '../../../../common/components/links';
+import { IpOverview } from '../../../../explore/network/components/details';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { networkToCriteria } from '../../../../common/components/ml/criteria/network_to_criteria';
+import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { useKibana } from '../../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
 import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { IpOverview } from '../../../../explore/network/components/details';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useNetworkDetails } from '../../../../explore/network/containers/details';
 import { networkModel } from '../../../../explore/network/store';
+import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
+import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 
 interface ExpandableNetworkProps {
   expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };

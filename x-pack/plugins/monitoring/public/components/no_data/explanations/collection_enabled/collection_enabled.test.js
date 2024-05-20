@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ExplainCollectionEnabled } from './collection_enabled';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 const enabler = {};
 let component;

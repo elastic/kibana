@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { TimelineId } from '../../../../common/types/timeline';
 import { createMockStore } from '../../../common/mock';
 import { selectTimelineById } from '../selectors';
+import { TimelineId } from '../../../../common/types/timeline';
 
 import {
-  addProvider,
+  setChanged,
+  updateKqlMode,
+  showTimeline,
   applyKqlFilterQuery,
+  addProvider,
   dataProviderEdited,
   removeColumn,
   removeProvider,
-  setChanged,
-  setExcludedRowRendererIds,
-  setFilters,
-  setSavedQueryId,
-  showTimeline,
   updateColumns,
+  updateEqlOptions,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderType,
-  updateDataView,
-  updateEqlOptions,
-  updateKqlMode,
   updateProviders,
   updateRange,
-  updateSavedSearch,
   updateSort,
-  updateTitleAndDescription,
   upsertColumn,
+  updateDataView,
+  updateTitleAndDescription,
+  setExcludedRowRendererIds,
+  setFilters,
+  setSavedQueryId,
+  updateSavedSearch,
 } from '../actions';
 import { timelineChangedTypes } from './timeline_changed';
 

@@ -6,14 +6,14 @@
  */
 
 import { upperFirst } from 'lodash';
-import { ElasticsearchResponse } from '../../../common/types/es';
-import { MonitoringConfig } from '../../config';
-import { LegacyRequest } from '../../types';
-import { getDiffCalculation } from '../beats/_beats_stats';
-import { createQuery } from '../create_query';
 import { checkParam } from '../error_missing_required';
+import { createQuery } from '../create_query';
+import { getDiffCalculation } from '../beats/_beats_stats';
 import { ApmMetric } from '../metrics';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { MonitoringConfig } from '../../config';
 
 export function handleResponse(
   response: ElasticsearchResponse,

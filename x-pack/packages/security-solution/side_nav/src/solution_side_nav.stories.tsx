@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { LinkCategoryType } from '@kbn/security-solution-navigation';
-import { SolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import React from 'react';
+import { SolutionNav } from '@kbn/shared-ux-page-solution-nav';
+import { LinkCategoryType } from '@kbn/security-solution-navigation';
+import readme from '../../README.mdx';
 import {
   SolutionSideNav as SolutionSideNavComponent,
+  type SolutionSideNavProps,
   type SolutionSideNavItem,
   SolutionSideNavItemPosition,
-  type SolutionSideNavProps,
 } from '..';
-import readme from '../../README.mdx';
 
 const items: SolutionSideNavItem[] = [
   {

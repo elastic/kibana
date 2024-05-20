@@ -21,12 +21,12 @@ import {
 
 import {
   deleteOutputHandler,
-  getLatestOutputHealth,
   getOneOuputHandler,
   getOutputsHandler,
-  postLogstashApiKeyHandler,
   postOutputHandler,
   putOutputHandler,
+  postLogstashApiKeyHandler,
+  getLatestOutputHealth,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {

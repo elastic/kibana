@@ -8,10 +8,10 @@
 import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import ThroughputChart from '../../../components/alerting/ui_components/alert_details_app_section/throughput_chart';
-import { ServiceNameCallout } from '../service_name_callout';
-import { TimeRangeCallout } from '../time_range_callout';
 import { EmbeddableApmAlertingVizProps } from '../types';
 import { useAlertingProps } from '../use_alerting_props';
+import { TimeRangeCallout } from '../time_range_callout';
+import { ServiceNameCallout } from '../service_name_callout';
 
 export function APMAlertingThroughputChart({
   rule,

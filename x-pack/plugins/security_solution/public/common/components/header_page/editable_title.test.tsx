@@ -9,8 +9,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
 import { EditableTitle } from './editable_title';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('EditableTitle', () => {
   const mount = useMountAppended();

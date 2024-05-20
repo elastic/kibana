@@ -5,35 +5,39 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  QueryDslQueryContainer,
-  SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect, memo } from 'react';
+import { isEmpty } from 'lodash';
 import {
+  EuiDataGridColumn,
+  EuiProgress,
+  EuiDataGridSorting,
+  EuiEmptyPrompt,
+  EuiDataGridProps,
+  EuiDataGridToolBarVisibilityOptions,
   EuiButton,
   EuiCode,
   EuiCopy,
-  EuiDataGridColumn,
   EuiDataGridControlColumn,
-  EuiDataGridProps,
-  EuiDataGridSorting,
-  EuiDataGridToolBarVisibilityOptions,
-  EuiEmptyPrompt,
-  EuiProgress,
 } from '@elastic/eui';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   BrowserFields,
   RuleRegistrySearchRequestPagination,
 } from '@kbn/rule-registry-plugin/common';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { isEmpty } from 'lodash';
-import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect, memo } from 'react';
+import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
+import { useFetchAlerts } from './hooks/use_fetch_alerts';
+import { AlertsTable } from './alerts_table';
+import { EmptyState } from './empty_state';
 import {
   Alert,
   Alerts,
@@ -43,26 +47,22 @@ import {
   RowSelectionState,
   TableUpdateHandlerArgs,
 } from '../../../types';
-import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
-import { AlertsTable } from './alerts_table';
-import { bulkActionsReducer } from './bulk_actions/reducer';
-import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
-import { EmptyState } from './empty_state';
-import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
-import { useBulkGetCases } from './hooks/use_bulk_get_cases';
-import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
-import { useColumns } from './hooks/use_columns';
-import { useFetchAlerts } from './hooks/use_fetch_alerts';
-import { alertsTableQueryClient } from './query_client';
-import { InspectButtonContainer } from './toolbar/components/inspect';
 import {
   ALERTS_TABLE_CONF_ERROR_MESSAGE,
   ALERTS_TABLE_CONF_ERROR_TITLE,
-  ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL,
-  ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE,
   ALERTS_TABLE_UNKNOWN_ERROR_TITLE,
+  ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE,
+  ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL,
 } from './translations';
+import { bulkActionsReducer } from './bulk_actions/reducer';
+import { useColumns } from './hooks/use_columns';
+import { InspectButtonContainer } from './toolbar/components/inspect';
+import { alertsTableQueryClient } from './query_client';
+import { useBulkGetCases } from './hooks/use_bulk_get_cases';
+import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
+import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
+import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
 
 const DefaultPagination = {
   pageSize: 10,

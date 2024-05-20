@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { GroupBySelect } from './group_by_select';
+import { FilterItems } from './filter_items';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { FilterItems } from './filter_items';
-import { GroupBySelect } from './group_by_select';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const RESET_STATE = {
   split_filters: undefined,

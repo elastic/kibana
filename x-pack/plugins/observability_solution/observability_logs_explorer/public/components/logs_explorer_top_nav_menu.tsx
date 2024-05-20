@@ -14,19 +14,19 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
 import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
-import { AlertsPopover } from './alerts_popover';
 import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
 import { ConnectedOnboardingLink } from './onboarding_link';
+import { AlertsPopover } from './alerts_popover';
 
 export const LogsExplorerTopNavMenu = () => {
   const {

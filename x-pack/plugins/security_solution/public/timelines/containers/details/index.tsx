@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
+import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsRequestOptionsInput } from '@kbn/timelines-plugin/common';
 import { EntityType } from '@kbn/timelines-plugin/common';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useKibana } from '../../../common/lib/kibana';
 import type {
   SearchHit,
   TimelineEventsDetailsItem,
@@ -22,7 +23,6 @@ import type {
 } from '../../../../common/search_strategy';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 
 export interface EventsArgs {
@@ -49,7 +49,7 @@ export const useTimelineEventsDetails = ({
   EventsArgs['detailsData'],
   SearchHit | undefined,
   EventsArgs['ecs'],
-  () => Promise<void>,
+  () => Promise<void>
 ] => {
   const asyncNoop = () => Promise.resolve();
   const { data } = useKibana().services;

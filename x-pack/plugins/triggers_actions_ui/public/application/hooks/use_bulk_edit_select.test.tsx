@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { RuleTableItem } from '../../types';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useBulkEditSelect } from './use_bulk_edit_select';
+import { RuleTableItem } from '../../types';
 
 const items = [
   {

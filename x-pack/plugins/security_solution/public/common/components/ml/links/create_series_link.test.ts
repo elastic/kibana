@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
 import { mockAnomalies } from '../mock';
+import { cloneDeep } from 'lodash/fp';
 import { createSeriesLink } from './create_series_link';
 
 describe('create_series_link', () => {

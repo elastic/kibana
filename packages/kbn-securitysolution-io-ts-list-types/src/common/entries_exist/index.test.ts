@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { EntryExists, entriesExists } from '.';
+import { left } from 'fp-ts/lib/Either';
 import { getEntryExistsMock } from './index.mock';
+import { entriesExists, EntryExists } from '.';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('entriesExists', () => {
   test('it should validate an entry', () => {

@@ -5,19 +5,38 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
+import React, { FC, useEffect } from 'react';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { useHistory, useLocation } from 'react-router-dom';
+import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
-import { Route, Routes } from '@kbn/shared-ux-router';
-import React, { FC, useEffect } from 'react';
-import { OutPortal } from 'react-reverse-portal';
-import { useHistory, useLocation } from 'react-router-dom';
+import { CertificateTitle } from './components/certificates/certificate_title';
+import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
+import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
+import { ClientPluginsStart } from '../../plugin';
+import { getMonitorsRoute } from './components/monitors_page/route_config';
+import { SyntheticsPageTemplateComponent } from './components/common/page_template/synthetics_page_template';
+import { getMonitorDetailsRoute } from './components/monitor_details/route_config';
+import { getStepDetailsRoute } from './components/step_details_page/route_config';
+import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
+import { getSettingsRouteConfig } from './components/settings/route_config';
+import { TestRunDetails } from './components/test_run_details/test_run_details';
+import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
+import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
+import { GettingStartedPage } from './components/getting_started/getting_started_page';
+import {
+  InspectMonitorPortalNode,
+  MonitorDetailsLinkPortalNode,
+  MonitorTypePortalNode,
+} from './components/monitor_add_edit/portals';
 import {
   CERTIFICATES_ROUTE,
   GETTING_STARTED_ROUTE,
@@ -26,28 +45,9 @@ import {
   TEST_RUN_DETAILS_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
-import { ClientPluginsStart } from '../../plugin';
 import { apiService } from '../../utils/api_service';
-import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
-import { CertificateTitle } from './components/certificates/certificate_title';
-import { CertificatesPage } from './components/certificates/certificates';
-import { SyntheticsPageTemplateComponent } from './components/common/page_template/synthetics_page_template';
 import { getErrorDetailsRouteConfig } from './components/error_details/route_config';
-import { GettingStartedPage } from './components/getting_started/getting_started_page';
-import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/monitor_add_page';
-import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
-import {
-  InspectMonitorPortalNode,
-  MonitorDetailsLinkPortalNode,
-  MonitorTypePortalNode,
-} from './components/monitor_add_edit/portals';
-import { getMonitorDetailsRoute } from './components/monitor_details/route_config';
-import { getMonitorsRoute } from './components/monitors_page/route_config';
-import { getSettingsRouteConfig } from './components/settings/route_config';
-import { getStepDetailsRoute } from './components/step_details_page/route_config';
-import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
-import { TestRunDetails } from './components/test_run_details/test_run_details';
-import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
+import { CertificatesPage } from './components/certificates/certificates';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;

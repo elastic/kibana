@@ -6,10 +6,10 @@
  */
 
 import {
-  EuiFormLabel,
-  EuiResizeObserver,
   type EuiResizeObserverProps,
   useEuiTheme,
+  EuiFormLabel,
+  EuiResizeObserver,
 } from '@elastic/eui';
 import React, { createContext, useState, useContext, ReactChild, ReactChildren } from 'react';
 

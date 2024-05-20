@@ -10,8 +10,8 @@ import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { CSPViolationEvent, PermissionsPolicyViolationEvent } from './analytics_service';
 import {
-  AUTHENTICATION_TYPE_EVENT_TYPE,
   AnalyticsService,
+  AUTHENTICATION_TYPE_EVENT_TYPE,
   CSP_VIOLATION_EVENT_TYPE,
   PERMISSIONS_POLICY_VIOLATION_EVENT_TYPE,
 } from './analytics_service';

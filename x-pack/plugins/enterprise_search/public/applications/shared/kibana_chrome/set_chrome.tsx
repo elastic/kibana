@@ -14,18 +14,18 @@ import { APPLICATIONS_PLUGIN } from '../../../../common/constants';
 import { KibanaLogic } from '../kibana';
 
 import {
-  BreadcrumbTrail,
-  useAiSearchBreadcrumbs,
-  useAnalyticsBreadcrumbs,
-  useAppSearchBreadcrumbs,
-  useElasticsearchBreadcrumbs,
-  useEnterpriseSearchApplicationsBreadcrumbs,
-  useEnterpriseSearchContentBreadcrumbs,
   useGenerateBreadcrumbs,
   useSearchBreadcrumbs,
+  useEnterpriseSearchApplicationsBreadcrumbs,
+  useAnalyticsBreadcrumbs,
+  useEnterpriseSearchContentBreadcrumbs,
+  useAiSearchBreadcrumbs,
+  useElasticsearchBreadcrumbs,
+  useAppSearchBreadcrumbs,
+  useWorkplaceSearchBreadcrumbs,
+  BreadcrumbTrail,
   useSearchExperiencesBreadcrumbs,
   useVectorSearchBreadcrumbs,
-  useWorkplaceSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 import {
   aiSearchTitle,

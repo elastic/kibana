@@ -9,11 +9,11 @@
 import Path from 'path';
 import Url from 'url';
 
+import { RunWithCommands, Flags } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import { Flags, RunWithCommands } from '@kbn/dev-cli-runner';
 import { KbnClient } from './kbn_client';
 
-import { EsVersion, readConfigFile } from './functional_test_runner';
+import { readConfigFile, EsVersion } from './functional_test_runner';
 
 function getSinglePositionalArg(flags: Flags) {
   const positional = flags._;

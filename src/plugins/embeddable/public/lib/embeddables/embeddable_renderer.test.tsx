@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
-import { embeddablePluginMock } from '../../mocks';
 import {
-  HELLO_WORLD_EMBEDDABLE,
   HelloWorldEmbeddable,
   HelloWorldEmbeddableFactoryDefinition,
+  HELLO_WORLD_EMBEDDABLE,
 } from '../../tests/fixtures';
 import { EmbeddableRenderer, useEmbeddableFactory } from './embeddable_renderer';
+import { embeddablePluginMock } from '../../mocks';
 
 describe('useEmbeddableFactory', () => {
   it('should update upstream value changes', async () => {

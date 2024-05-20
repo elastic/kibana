@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { BoolQuery } from '@kbn/es-query';
+import * as t from 'io-ts';
 import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
 import { either } from 'fp-ts/lib/Either';
-import * as t from 'io-ts';
+import { BoolQuery } from '@kbn/es-query';
 import { ApmDocumentType } from '../../common/document_type';
 import { RollupInterval } from '../../common/rollup';
 

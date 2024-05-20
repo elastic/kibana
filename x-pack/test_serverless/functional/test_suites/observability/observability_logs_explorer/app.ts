@@ -1,4 +1,3 @@
-import { log, timerange } from '@kbn/apm-synthtrace-client';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { log, timerange } from '@kbn/apm-synthtrace-client';
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

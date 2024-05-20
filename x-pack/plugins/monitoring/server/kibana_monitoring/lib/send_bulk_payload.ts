@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { KIBANA_SYSTEM_ID, MONITORING_SYSTEM_API_VERSION } from '../../../common/constants';
+import { MONITORING_SYSTEM_API_VERSION, KIBANA_SYSTEM_ID } from '../../../common/constants';
 
 /*
  * Send the Kibana usage data to the ES Monitoring Bulk endpoint

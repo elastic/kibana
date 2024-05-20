@@ -10,10 +10,10 @@ import React from 'react';
 import { EuiTable, EuiTableBody, EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
 
 import { ACTIONS_HEADER } from '../../../../shared/constants';
-import { DOCUMENTS_HEADER, SEARCHABLE_HEADER, SOURCE } from '../../../constants';
+import { SOURCE, DOCUMENTS_HEADER, SEARCHABLE_HEADER } from '../../../constants';
 import { ContentSourceDetails } from '../../../types';
 import { STATUS_HEADER } from '../../../views/content_sources/constants';
-import { ISourceRow, SourceRow } from '../source_row';
+import { SourceRow, ISourceRow } from '../source_row';
 
 interface SourcesTableProps extends ISourceRow {
   sources: ContentSourceDetails[];

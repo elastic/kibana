@@ -1,4 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +5,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
  * 2.0.
  */
 import React from 'react';
-import { HeaderPage } from '../../../../common/components/header_page';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { CoverageOverviewLink } from '../../../../common/components/links_to_docs';
+import { HeaderPage } from '../../../../common/components/header_page';
 
-import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
-import { CoverageOverviewFiltersPanel } from './filters_panel';
+import * as i18n from './translations';
 import { CoverageOverviewTacticPanel } from './tactic_panel';
 import { CoverageOverviewMitreTechniquePanelPopover } from './technique_panel_popover';
-import * as i18n from './translations';
+import { CoverageOverviewFiltersPanel } from './filters_panel';
+import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 
 const CoverageOverviewHeaderComponent = () => (
   <HeaderPage

@@ -6,14 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { ITelemetryEventsSender } from '../sender';
+import type { TelemetryFilterListArtifact } from '../types';
+import type { ITelemetryReceiver } from '../receiver';
+import type { ITaskMetricsService } from '../task_metrics.types';
+import type { TaskExecutionPeriod } from '../task';
 import { artifactService } from '../artifact';
 import { filterList } from '../filterlists';
 import { newTelemetryLogger } from '../helpers';
-import type { ITelemetryReceiver } from '../receiver';
-import type { ITelemetryEventsSender } from '../sender';
-import type { TaskExecutionPeriod } from '../task';
-import type { ITaskMetricsService } from '../task_metrics.types';
-import type { TelemetryFilterListArtifact } from '../types';
 
 export function createTelemetryFilterListArtifactTaskConfig() {
   const taskName = 'Security Solution Telemetry Filter List Artifact Task';

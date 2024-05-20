@@ -26,15 +26,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { HelpMenu } from '../../../components/help_menu';
-import { ItemsGrid } from '../../../components/items_grid';
-import { ml } from '../../../services/ml_api_service';
-import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
-import { getDocLinks } from '../../../util/dependency_cache';
 import { EditFilterListHeader } from './header';
 import { EditFilterListToolbar } from './toolbar';
+import { ItemsGrid } from '../../../components/items_grid';
 import { isValidFilterListId, saveFilterList } from './utils';
+import { ml } from '../../../services/ml_api_service';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { getDocLinks } from '../../../util/dependency_cache';
+import { HelpMenu } from '../../../components/help_menu';
 
 const DEFAULT_ITEMS_PER_PAGE = 50;
 

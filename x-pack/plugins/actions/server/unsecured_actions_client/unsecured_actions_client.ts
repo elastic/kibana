@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { IClusterClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
-import { ConnectorWithExtraFindData } from '../application/connector/types';
+import { IClusterClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import {
   BulkUnsecuredExecutionEnqueuer,
   ExecuteOptions,
@@ -16,11 +14,13 @@ import {
 } from '../create_unsecured_execute_function';
 import {
   ActionExecutorContract,
-  type RelatedSavedObjects,
   asNotificationExecutionSource,
+  type RelatedSavedObjects,
 } from '../lib';
-import { asBackgroundTaskExecutionSource } from '../lib/action_execution_source';
 import { ActionTypeExecutorResult, InMemoryConnector } from '../types';
+import { asBackgroundTaskExecutionSource } from '../lib/action_execution_source';
+import { ConnectorWithExtraFindData } from '../application/connector/types';
+import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
 
 // requests from the notification service (for system notification)
 const NOTIFICATION_REQUESTER_ID = 'notifications';

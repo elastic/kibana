@@ -6,20 +6,20 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
   MonitorOverviewItem,
 } from '../../../common/runtime_types';
-import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { getSyntheticsMonitor } from '../../legacy_uptime/lib/requests/get_monitor';
-import { getAllMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { MonitorsQuery, QuerySchema, SEARCH_FIELDS, getMonitorFilters } from '../common';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import { getMonitorFilters, MonitorsQuery, QuerySchema, SEARCH_FIELDS } from '../common';
 import { mapSavedObjectToMonitor } from './helper';
+import { getSyntheticsMonitor } from '../../legacy_uptime/lib/requests/get_monitor';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

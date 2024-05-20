@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PasswordField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { memo } from 'react';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import * as i18n from '../translations';
 
 interface Props {

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
 
 const LOADED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
 

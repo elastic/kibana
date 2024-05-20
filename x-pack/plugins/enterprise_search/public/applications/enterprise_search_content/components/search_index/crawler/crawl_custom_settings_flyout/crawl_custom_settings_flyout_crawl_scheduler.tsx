@@ -14,10 +14,10 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
-  EuiSplitPanel,
-  EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiSplitPanel,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

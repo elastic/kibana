@@ -6,8 +6,8 @@
  */
 
 import semverGte from 'semver/functions/gte';
-import { savedObjectMigrations } from '../saved_objects/saved_object_migrations';
 import { embeddableMigrations } from './embeddable_migrations';
+import { savedObjectMigrations } from '../saved_objects/saved_object_migrations';
 
 describe('saved object migrations and embeddable migrations', () => {
   test('should have same versions registered (>7.12)', () => {

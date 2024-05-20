@@ -11,8 +11,8 @@ import { EntityAnalyticsAnomalies } from '.';
 import type { AnomaliesCount } from '../../../common/components/ml/anomaly/use_anomalies_search';
 import { AnomalyEntity } from '../../../common/components/ml/anomaly/use_anomalies_search';
 
-import type { SecurityJob } from '../../../common/components/ml_popover/types';
 import { TestProviders } from '../../../common/mock';
+import type { SecurityJob } from '../../../common/components/ml_popover/types';
 
 jest.mock('../../../common/components/ml_popover/hooks/use_enable_data_feed', () => ({
   useEnableDataFeed: () => ({

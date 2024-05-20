@@ -1,4 +1,3 @@
-import type { RouteEntry } from '../../../../../common/security_integrations/cribl/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import type { RouteEntry } from '../../../../../common/security_integrations/cri
  * 2.0.
  */
 import { buildPipelineRequest } from './pipeline_builder';
+import type { RouteEntry } from '../../../../../common/security_integrations/cribl/types';
 
 describe('Put cribl routing pipeline tests', () => {
   const routeEntries = [

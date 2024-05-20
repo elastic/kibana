@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { css } from '@emotion/css';
 import {
   EuiAccordion,
   EuiComment,
@@ -12,7 +14,6 @@ import {
   EuiPanel,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   ChatActionClickHandler,
@@ -21,12 +22,11 @@ import {
   Feedback,
   TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import React, { useState } from 'react';
-import { getRoleTranslation } from '../../utils/get_role_translation';
 import { ChatItemActions } from './chat_item_actions';
 import { ChatItemAvatar } from './chat_item_avatar';
 import { ChatItemContentInlinePromptEditor } from './chat_item_content_inline_prompt_editor';
 import { ChatTimelineItem } from './chat_timeline';
+import { getRoleTranslation } from '../../utils/get_role_translation';
 
 export interface ChatItemProps extends Omit<ChatTimelineItem, 'message'> {
   onActionClick: ChatActionClickHandler;
@@ -185,8 +185,8 @@ export function ChatItem({
         actions.length === 0 && !content
           ? noPanelMessageClassName
           : collapsed
-            ? noBodyMessageClassName
-            : normalMessageClassName
+          ? noBodyMessageClassName
+          : normalMessageClassName
       }
     >
       <EuiPanel hasShadow={false} paddingSize="s">

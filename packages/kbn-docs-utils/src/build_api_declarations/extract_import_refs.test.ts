@@ -8,13 +8,13 @@
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+import { getPluginApiDocId } from '../utils';
+import { extractImportReferences } from './extract_import_refs';
+import { ApiScope, PluginOrPackage, Reference } from '../types';
 import {
   getKibanaPlatformPackage,
   getKibanaPlatformPlugin,
 } from '../integration_tests/kibana_platform_plugin_mock';
-import { ApiScope, PluginOrPackage, Reference } from '../types';
-import { getPluginApiDocId } from '../utils';
-import { extractImportReferences } from './extract_import_refs';
 
 const plugin = getKibanaPlatformPlugin('pluginA');
 const packageA = getKibanaPlatformPackage('@kbn/package-a');

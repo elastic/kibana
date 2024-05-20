@@ -6,25 +6,25 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
-  LIST_ENDPOINT_EVENT_FILTER,
   LIST_ENDPOINT_EXCEPTION,
+  LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
   TELEMETRY_CHANNEL_LISTS,
 } from '../constants';
+import type { ESClusterInfo, ESLicense, Nullable } from '../types';
 import {
   batchTelemetryRecords,
-  createUsageCounterLabel,
-  formatValueListMetaData,
-  newTelemetryLogger,
   templateExceptionList,
+  formatValueListMetaData,
+  createUsageCounterLabel,
+  newTelemetryLogger,
 } from '../helpers';
-import type { ITelemetryReceiver } from '../receiver';
 import type { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
-import type { ESClusterInfo, ESLicense, Nullable } from '../types';
 
 export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
   const taskName = 'Security Solution Lists Telemetry';

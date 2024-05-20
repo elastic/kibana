@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
-import { TestBedConfig, registerTestBed } from '@kbn/test-jest-helpers';
 
 import { Cluster } from '../../../public';
 import { RemoteClusterEdit } from '../../../public/application/sections';
-import { AppRouter, registerRouter } from '../../../public/application/services';
 import { createRemoteClustersStore } from '../../../public/application/store';
-import { WithAppDependencies, createRemoteClustersActions } from '../helpers';
+import { AppRouter, registerRouter } from '../../../public/application/services';
+import { createRemoteClustersActions, WithAppDependencies } from '../helpers';
 
 export const REMOTE_CLUSTER_EDIT_NAME = 'new-york';
 

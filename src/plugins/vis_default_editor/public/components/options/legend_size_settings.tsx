@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/public';
-import React, { useCallback, useEffect } from 'react';
+import { EuiFormRow, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import { LegendSize, DEFAULT_LEGEND_SIZE } from '@kbn/visualizations-plugin/public';
 
 const legendSizeOptions: Array<{ value: LegendSize; inputDisplay: string }> = [
   {

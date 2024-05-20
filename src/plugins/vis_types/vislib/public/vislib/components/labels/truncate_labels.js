@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import d3 from 'd3';
 import $ from 'jquery';
+import d3 from 'd3';
 
 /***
  *

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { changeColorPalette, getColorStops, mergePaletteParams, updateRangeType } from './utils';
+import { getColorStops, mergePaletteParams, updateRangeType, changeColorPalette } from './utils';
 
-import { isValidColor } from '../../color_manipulation';
 import { getPaletteRegistry } from './mocks/palettes_registry';
+import { isValidColor } from '../../color_manipulation';
 
 describe('getColorStops', () => {
   const paletteRegistry = getPaletteRegistry();

@@ -6,15 +6,14 @@
  */
 
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { FC, PropsWithChildren } from 'react';
-import { useIsDarkMode } from '../hooks/use_is_dark_mode';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import {
   type KibanaEnvContext,
   useKibanaContextForPluginProvider,
@@ -23,6 +22,7 @@ import {
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
+import { useIsDarkMode } from '../hooks/use_is_dark_mode';
 
 export const CommonInfraProviders: FC<
   PropsWithChildren<{

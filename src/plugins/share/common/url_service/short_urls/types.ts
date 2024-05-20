@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { ILocatorClient, LocatorData, LocatorPublic } from '../locators';
+import type { LocatorPublic, ILocatorClient, LocatorData } from '../locators';
 
 /**
  * A factory for Short URL Service. We need this factory as the dependency
@@ -22,7 +22,7 @@ export interface IShortUrlClientFactory<D, Client extends IShortUrlClient = ISho
 
 export type IShortUrlClientFactoryProvider<
   D,
-  ShortUrlClient extends IShortUrlClient = IShortUrlClient,
+  ShortUrlClient extends IShortUrlClient = IShortUrlClient
 > = (params: { locators: ILocatorClient }) => IShortUrlClientFactory<D, ShortUrlClient>;
 
 /**

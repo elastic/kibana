@@ -6,11 +6,11 @@
  */
 
 import React, { Fragment } from 'react';
-import { Locations } from '../../../../../../common/runtime_types';
-import { ManualTestRun } from '../../../state/manual_test_runs';
 import { useRunOnceErrors } from '../hooks/use_run_once_errors';
+import { ManualTestRun } from '../../../state/manual_test_runs';
 import { BrowserTestRunResult } from './browser_test_results';
 import { SimpleTestResults } from './simple_test_results';
+import { Locations } from '../../../../../../common/runtime_types';
 
 export function ManualTestRunMode({
   manualTestRun,

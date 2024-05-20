@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { Fragment, PureComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiFieldText,
   EuiFormErrorText,
   EuiFormRow,
-  EuiSelect,
   EuiSpacer,
+  EuiSelect,
+  EuiFieldText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, PureComponent } from 'react';
 
 import { routing } from '../services/routing';
 

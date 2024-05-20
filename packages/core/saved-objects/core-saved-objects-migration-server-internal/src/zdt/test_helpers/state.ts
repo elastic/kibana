@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { OutdatedDocumentsSearchState, PostDocInitState, PostInitState } from '../state/types';
+import { PostInitState, PostDocInitState, OutdatedDocumentsSearchState } from '../state/types';
 
 export const createPostInitState = (): PostInitState => ({
   controlState: 'INIT',

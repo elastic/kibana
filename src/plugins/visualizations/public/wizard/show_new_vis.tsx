@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { EuiPortal, EuiProgress } from '@elastic/eui';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
+import { EuiPortal, EuiProgress } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
-  getAnalytics,
-  getApplication,
-  getContentManagement,
-  getDocLinks,
-  getEmbeddable,
   getHttp,
+  getTypes,
+  getApplication,
+  getEmbeddable,
+  getDocLinks,
+  getAnalytics,
   getI18n,
   getTheme,
-  getTypes,
+  getContentManagement,
   getUISettings,
 } from '../services';
 import type { BaseVisType } from '../vis_types';

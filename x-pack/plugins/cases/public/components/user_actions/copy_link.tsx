@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import copy from 'copy-to-clipboard';
 import React, { memo, useCallback } from 'react';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import copy from 'copy-to-clipboard';
 
-import { useCaseViewNavigation, useCaseViewParams } from '../../common/navigation';
 import * as i18n from './translations';
+import { useCaseViewNavigation, useCaseViewParams } from '../../common/navigation';
 
 interface UserActionCopyLinkProps {
   id: string;

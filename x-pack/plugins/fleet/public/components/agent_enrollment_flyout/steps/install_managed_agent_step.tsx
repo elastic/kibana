@@ -13,10 +13,10 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
-import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
 import { InstallSection } from '../../enrollment_instructions/install_section';
+import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
 
-import type { CloudSecurityIntegration, K8sMode } from '../types';
+import type { K8sMode, CloudSecurityIntegration } from '../types';
 
 export const InstallManagedAgentStep = ({
   installCommand,

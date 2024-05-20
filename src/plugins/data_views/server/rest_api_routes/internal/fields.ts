@@ -8,16 +8,16 @@
 
 import { createHash } from 'crypto';
 import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
-import { FIELDS_PATH as path } from '../../../common/constants';
 import { unwrapEtag } from '../../../common/utils';
-import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import { IBody, IQuery, parseFields, querySchema, validate } from './fields_for';
+import { FIELDS_PATH as path } from '../../../common/constants';
+import { parseFields, IBody, IQuery, querySchema, validate } from './fields_for';
+import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 
 export function calculateHash(srcBuffer: Buffer) {
   const hash = createHash('sha1');
@@ -96,8 +96,9 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
 
       if (cacheMaxAge && fields.length) {
         const stale = 365 * 24 * 60 * 60 - cacheMaxAge;
-        headers['cache-control'] =
-          `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
+        headers[
+          'cache-control'
+        ] = `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
       } else {
         headers['cache-control'] = 'private, no-cache';
       }

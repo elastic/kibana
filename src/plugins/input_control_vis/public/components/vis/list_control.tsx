@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import React, { PureComponent } from 'react';
+import _ from 'lodash';
 
-import { EuiComboBox, EuiFieldText, EuiThemeProvider } from '@elastic/eui';
+import { injectI18n, InjectedIntlProps } from '@kbn/i18n-react';
+import { EuiFieldText, EuiComboBox, EuiThemeProvider } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { InjectedIntlProps, injectI18n } from '@kbn/i18n-react';
 import { FormRow } from './form_row';
 
 interface ListControlUiState {

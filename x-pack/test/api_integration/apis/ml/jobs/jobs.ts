@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import type { CombinedJobWithStats } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { DATAFEED_CONFIG, MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG } from './common_jobs';
+import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG, DATAFEED_CONFIG } from './common_jobs';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

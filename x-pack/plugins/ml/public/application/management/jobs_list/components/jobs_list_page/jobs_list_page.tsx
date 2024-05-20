@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { Router } from '@kbn/shared-ux-router';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { CoreStart } from '@kbn/core/public';
 
 import {
   EuiButtonEmpty,
@@ -20,29 +20,29 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { type MlFeatures, PLUGIN_ID } from '../../../../../../common/constants/app';
-import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getMlGlobalServices } from '../../../../util/get_services';
+import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
+import { type MlFeatures, PLUGIN_ID } from '../../../../../../common/constants/app';
 
 import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
 
-import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
-import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
-import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
+import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
+import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
+import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
 
-import { DocsLink } from './docs_link';
 import { SpaceManagement } from './space_management';
+import { DocsLink } from './docs_link';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 

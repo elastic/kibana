@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiExpression, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiSelect } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexItem, EuiFlexGroup, EuiPopover, EuiSelect, EuiExpression } from '@elastic/eui';
 import {
   PartialCriteria,
   ThresholdType,

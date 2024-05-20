@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { alertsMock, mockCaseIdsFromAlertId, mockSignalIndex, mockUserPrivilege } from '../mock';
 import type {
-  AlertSearchResponse,
-  AlertsIndex,
-  BasicSignals,
-  CasesFromAlertsResponse,
-  Privilege,
   QueryAlerts,
+  AlertSearchResponse,
+  BasicSignals,
+  AlertsIndex,
+  Privilege,
+  CasesFromAlertsResponse,
 } from '../types';
+import { alertsMock, mockSignalIndex, mockUserPrivilege, mockCaseIdsFromAlertId } from '../mock';
 
 export const fetchQueryAlerts = async <Hit, Aggregations>({
   query,

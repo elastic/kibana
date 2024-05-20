@@ -5,37 +5,39 @@
  * 2.0.
  */
 
+import React, { ReactElement, useRef } from 'react';
 import {
   Axis,
   Chart,
   LineAnnotation,
+  niceTimeFormatter,
   Position,
   RectAnnotation,
   Settings,
   Tooltip,
-  niceTimeFormatter,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { first, last } from 'lodash';
-import React, { ReactElement, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { Color } from '../../../../common/color_palette';
-import { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
+import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
-import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
-import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
+import { Color } from '../../../../common/color_palette';
+import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
+import { MetricExpression, TimeRange } from '../types';
 import {
   MetricsExplorerChartType,
   MetricsExplorerOptionsMetric,
 } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
+import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
+import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
+import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
+import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import {
   ChartContainer,
   LoadingState,
@@ -44,9 +46,7 @@ import {
   tooltipProps,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
-import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
 import { CUSTOM_EQUATION } from '../i18n_strings';
-import { MetricExpression, TimeRange } from '../types';
 
 interface Props {
   expression: MetricExpression;

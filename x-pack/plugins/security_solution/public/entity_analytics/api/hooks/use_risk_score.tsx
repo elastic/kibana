@@ -8,23 +8,23 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
+import { createFilter } from '../../../common/containers/helpers';
 import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
 import {
   RiskQueries,
+  getUserRiskIndex,
   RiskScoreEntity,
   getHostRiskIndex,
-  getUserRiskIndex,
 } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
-import { createFilter } from '../../../common/containers/helpers';
-import { useRiskScoreFeatureStatus } from './use_risk_score_feature_status';
 
-import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
-import type { inputsModel } from '../../../common/store';
-import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { InspectResponse } from '../../../types';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { isIndexNotFoundError } from '../../../common/utils/exceptions';
+import type { inputsModel } from '../../../common/store';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 import { useIsNewRiskScoreModuleInstalled } from './use_risk_engine_status';
 
 export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity.user> {

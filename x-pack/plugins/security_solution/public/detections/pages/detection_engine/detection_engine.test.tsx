@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls';
-import { mockAlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls/mocks';
+import React, { useEffect } from 'react';
+import { render, waitFor } from '@testing-library/react';
+import { useParams } from 'react-router-dom';
+import { mockGlobalState, TestProviders, createMockStore } from '../../../common/mock';
+import { useUserData } from '../../components/user_info';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import type { State } from '../../../common/store';
+import { mockHistory, Router } from '../../../common/mock/router';
+import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
+import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { TableId } from '@kbn/securitysolution-data-table';
-import { render, waitFor } from '@testing-library/react';
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
-import { TestProviders, createMockStore, mockGlobalState } from '../../../common/mock';
-import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
-import { Router, mockHistory } from '../../../common/mock/router';
-import type { State } from '../../../common/store';
-import type { AlertsTableComponentProps } from '../../components/alerts_table/alerts_grouping';
-import { useUserData } from '../../components/user_info';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
+import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_filter_controls/alert_filter_controls';
 import { DetectionEnginePage } from './detection_engine';
+import type { AlertsTableComponentProps } from '../../components/alerts_table/alerts_grouping';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
+import { mockAlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls/mocks';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

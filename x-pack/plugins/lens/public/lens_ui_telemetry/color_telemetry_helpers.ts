@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ColorMapping, DEFAULT_OTHER_ASSIGNMENT_INDEX, NeutralPalette } from '@kbn/coloring';
+import { ColorMapping, NeutralPalette, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
 import { isEqual } from 'lodash';
 import { nonNullable } from '../utils';
 
@@ -81,11 +81,11 @@ const getUnassignedTermsType = (
         specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.type === 'colorCode'
           ? 'custom'
           : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.type === 'loop'
-            ? 'loop'
-            : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.paletteId ===
-                NeutralPalette.id
-              ? NeutralPalette.id
-              : 'palette'
+          ? 'loop'
+          : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.paletteId ===
+            NeutralPalette.id
+          ? NeutralPalette.id
+          : 'palette'
       }`
     : undefined;
 };

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSpacer, EuiText, EuiTextAlign, htmlIdGenerator } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { EuiText, EuiSpacer, EuiTextAlign, EuiButton, htmlIdGenerator } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SettingsStateProps } from './settings';
 import { UrlTemplateForm } from './url_template_form';
 import { useListKeys } from './use_list_keys';

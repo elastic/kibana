@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 
 jest.mock('../../services', () => {

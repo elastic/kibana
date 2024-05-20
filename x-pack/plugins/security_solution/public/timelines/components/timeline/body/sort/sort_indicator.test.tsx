@@ -11,7 +11,7 @@ import { Direction } from '../../../../../../common/search_strategy';
 
 import * as i18n from '../translations';
 
-import { SortIndicator, getDirection } from './sort_indicator';
+import { getDirection, SortIndicator } from './sort_indicator';
 
 describe('SortIndicator', () => {
   describe('rendering', () => {

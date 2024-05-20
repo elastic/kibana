@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { SnapshotNode } from '../../../../../common/http_api';
 import { InventoryView } from '../../../../../common/inventory_views';
+import { SnapshotNode } from '../../../../../common/http_api';
 import { AutoSizer } from '../../../../components/auto_sizer';
+import { NodesOverview } from './nodes_overview';
+import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { PageContent } from '../../../../components/page';
-import { TryItButton } from '../../../../components/try_it_button';
-import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../lib/lib';
+import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import {
   DEFAULT_LEGEND,
-  WaffleLegendOptions,
   useWaffleOptionsContext,
+  WaffleLegendOptions,
 } from '../hooks/use_waffle_options';
-import { useWaffleTimeContext } from '../hooks/use_waffle_time';
-import { useWaffleViewState } from '../hooks/use_waffle_view_state';
-import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
+import { InfraFormatterType, InfraWaffleMapBounds } from '../../../../lib/lib';
+import { Toolbar } from './toolbars/toolbar';
+import { ViewSwitcher } from './waffle/view_switcher';
 import { createInventoryMetricFormatter } from '../lib/create_inventory_metric_formatter';
 import { createLegend } from '../lib/create_legend';
+import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
-import { NodesOverview } from './nodes_overview';
-import { Toolbar } from './toolbars/toolbar';
 import { LegendControls } from './waffle/legend_controls';
-import { ViewSwitcher } from './waffle/view_switcher';
+import { TryItButton } from '../../../../components/try_it_button';
 
 interface Props {
   currentView?: InventoryView | null;

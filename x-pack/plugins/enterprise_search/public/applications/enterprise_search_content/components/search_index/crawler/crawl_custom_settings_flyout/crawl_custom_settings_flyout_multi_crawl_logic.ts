@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { ConnectorScheduling } from '@kbn/search-connectors';
 
@@ -15,10 +15,10 @@ import { CrawlerIndex } from '../../../../../../../common/types/indices';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
-import { CrawlerCustomSchedule, DomainConfig } from '../../../../api/crawler/types';
+import { DomainConfig, CrawlerCustomSchedule } from '../../../../api/crawler/types';
 import {
-  crawlerCustomSchedulingClientToServer,
   crawlerCustomSchedulingServerToClient,
+  crawlerCustomSchedulingClientToServer,
 } from '../../../../api/crawler/utils';
 import { IndexNameLogic } from '../../index_name_logic';
 

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiText,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
 import { HOST_LIMIT_OPTIONS } from '../../constants';
 import { HostLimitOptions } from '../../types';
 

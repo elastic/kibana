@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { getDefaultSort } from './get_default_sort';
 import {
   stubDataView,
   stubDataViewWithoutTimeField,
 } from '@kbn/data-views-plugin/common/data_view.stub';
-import { getDefaultSort } from './get_default_sort';
 
 describe('getDefaultSort function', function () {
   test('should be a function', function () {

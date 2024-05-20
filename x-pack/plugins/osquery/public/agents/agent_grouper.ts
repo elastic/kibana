@@ -7,10 +7,10 @@
 
 import { generateColorPicker } from './helpers';
 import {
+  ALL_AGENTS_LABEL,
   AGENT_PLATFORMS_LABEL,
   AGENT_POLICY_LABEL,
   AGENT_SELECTION_LABEL,
-  ALL_AGENTS_LABEL,
 } from './translations';
 import type { Group, GroupOption, GroupedAgent } from './types';
 import { AGENT_GROUP_KEY } from './types';

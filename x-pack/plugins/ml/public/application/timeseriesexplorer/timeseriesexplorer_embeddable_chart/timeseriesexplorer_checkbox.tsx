@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCheckbox, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { EuiCheckbox, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 
 interface Props {
   id: string;

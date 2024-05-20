@@ -7,17 +7,17 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ESSearchResponse } from '@kbn/es-types';
-import { Annotation as ESAnnotation } from '@kbn/observability-plugin/common/annotations';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
-  WrappedElasticsearchClientError,
   unwrapEsResponse,
+  WrappedElasticsearchClientError,
 } from '@kbn/observability-plugin/server';
+import type { ESSearchResponse } from '@kbn/es-types';
+import { Annotation as ESAnnotation } from '@kbn/observability-plugin/common/annotations';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { environmentQuery } from '../../../../common/utils/environment_query';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function getStoredAnnotations({

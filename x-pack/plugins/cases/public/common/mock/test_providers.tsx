@@ -7,18 +7,18 @@
 
 /* eslint-disable no-console */
 
-import { ThemeProvider } from '@emotion/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { ThemeProvider } from '@emotion/react';
 
-import type { ScopedFilesClient } from '@kbn/files-plugin/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
 import { render as reactRender } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
+import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
+import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import { euiDarkVars } from '@kbn/ui-theme';
 import { QueryClient } from '@tanstack/react-query';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -26,14 +26,14 @@ import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
-import type { ReleasePhase } from '../../components/types';
 import type { StartServices } from '../../types';
+import type { ReleasePhase } from '../../components/types';
 
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { CasesProvider } from '../../components/cases_context';
 import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { allCasesPermissions } from './permissions';
 
 interface TestProviderProps {

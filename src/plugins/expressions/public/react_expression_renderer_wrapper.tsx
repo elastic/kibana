@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PanelLoader } from '@kbn/panel-loader';
 import React, { lazy, Suspense } from 'react';
+import { PanelLoader } from '@kbn/panel-loader';
 import type { ReactExpressionRendererProps } from './react_expression_renderer';
 
 const ReactExpressionRendererComponent = lazy(async () => {

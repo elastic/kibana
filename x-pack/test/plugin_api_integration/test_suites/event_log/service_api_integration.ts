@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IEvent } from '@kbn/event-log-plugin/server';
-import expect from '@kbn/expect';
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import expect from '@kbn/expect';
+import { IEvent } from '@kbn/event-log-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

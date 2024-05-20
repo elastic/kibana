@@ -6,15 +6,15 @@
  */
 
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import {
-  EncryptedSyntheticsMonitor,
-  ServiceLocationErrorsResponse,
-  SyntheticsMonitor,
-  SyntheticsMonitorCodec,
-} from '../../../../../common/runtime_types';
 import type { ProjectAPIKeyResponse } from '../../../../../server/routes/monitor_cruds/get_api_key';
 import { apiService } from '../../../../utils/api_service';
+import {
+  EncryptedSyntheticsMonitor,
+  SyntheticsMonitor,
+  SyntheticsMonitorCodec,
+  ServiceLocationErrorsResponse,
+} from '../../../../../common/runtime_types';
+import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export type UpsertMonitorResponse = ServiceLocationErrorsResponse | EncryptedSyntheticsMonitor;
 

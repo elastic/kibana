@@ -1,5 +1,3 @@
-import { i18n } from '@kbn/i18n';
-import { either } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +5,10 @@ import { either } from 'fp-ts/lib/Either';
  * 2.0.
  */
 import * as t from 'io-ts';
-import { OPTIONAL_LABEL, isSettingsFormValid } from '../settings_form/utils';
+import { either } from 'fp-ts/lib/Either';
+import { i18n } from '@kbn/i18n';
 import { PackagePolicyVars, SettingsRow } from '../typings';
+import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 
 const arrayRegex = new RegExp(/[\[\]]/);
 function getAllowedOriginsRt() {

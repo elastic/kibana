@@ -5,53 +5,53 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { IScopedClusterClient } from '@kbn/core/server';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniq } from 'lodash';
-import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
-import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
-import type { JobAction } from '../../../common/constants/job_actions';
-import {
-  JOB_ACTION,
-  JOB_ACTION_TASK,
-  JOB_ACTION_TASKS,
-  getJobActionString,
-} from '../../../common/constants/job_actions';
-import { DATAFEED_STATE, JOB_STATE } from '../../../common/constants/states';
-import type {
-  AuditMessage,
-  CombinedJobWithStats,
-  Datafeed,
-  DatafeedWithStats,
-  Job,
-  MlSummaryJob,
-} from '../../../common/types/anomaly_detection_jobs';
-import type {
-  BulkCreateResults,
-  JobsExistResponse,
-  ResetJobsResponse,
-} from '../../../common/types/job_service';
+import Boom from '@hapi/boom';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   getSingleMetricViewerJobErrorMessage,
-  isJobWithGeoData,
   parseTimeIntervalForJob,
+  isJobWithGeoData,
 } from '../../../common/util/job_utils';
+import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
+import type { JobAction } from '../../../common/constants/job_actions';
+import {
+  getJobActionString,
+  JOB_ACTION_TASK,
+  JOB_ACTION_TASKS,
+  JOB_ACTION,
+} from '../../../common/constants/job_actions';
+import type {
+  MlSummaryJob,
+  AuditMessage,
+  DatafeedWithStats,
+  CombinedJobWithStats,
+  Datafeed,
+  Job,
+} from '../../../common/types/anomaly_detection_jobs';
+import type {
+  JobsExistResponse,
+  BulkCreateResults,
+  ResetJobsResponse,
+} from '../../../common/types/job_service';
+import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import { datafeedsProvider } from './datafeeds';
+import { jobAuditMessagesProvider } from '../job_audit_messages';
+import { resultsServiceProvider } from '../results_service';
+import { CalendarManager } from '../calendar';
+import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import {
   getEarliestDatafeedStartTime,
   getLatestDataOrBucketTimestamp,
 } from '../../../common/util/job_utils';
-import { parseInterval } from '../../../common/util/parse_interval';
-import type { MlClient } from '../../lib/ml_client';
-import type { AuthorizationHeader } from '../../lib/request_authorization';
-import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
-import { CalendarManager } from '../calendar';
-import { jobAuditMessagesProvider } from '../job_audit_messages';
-import { resultsServiceProvider } from '../results_service';
-import { datafeedsProvider } from './datafeeds';
-import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { groupsProvider } from './groups';
+import type { MlClient } from '../../lib/ml_client';
+import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
+import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
+import type { AuthorizationHeader } from '../../lib/request_authorization';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 interface Results {
   [id: string]: {

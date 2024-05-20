@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import {
   EuiBadge,
   EuiContextMenuItem,
@@ -14,8 +16,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
 
 enum ProcessingType {
   reverting = 'reverting',

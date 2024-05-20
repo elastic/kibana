@@ -8,29 +8,29 @@
 
 import expect from 'expect';
 
-import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import type {
-  QueryRuleCreateProps,
-  RuleCreateProps,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
   LIST_URL,
 } from '@kbn/securitysolution-list-constants';
+import type {
+  QueryRuleCreateProps,
+  RuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { createRuleWithExceptionEntries, getSimpleRule } from '../../../../utils';
 import {
-  createRule,
   deleteAllAlerts,
   deleteAllRules,
+  createRule,
 } from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createListsIndex,
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
 } from '../../../../../lists_and_exception_lists/utils';
-import { createRuleWithExceptionEntries, getSimpleRule } from '../../../../utils';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

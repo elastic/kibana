@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common';
-import { HttpSetup } from '@kbn/core/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 const rewriteBodyRes: RewriteRequestCase<RulesSettingsFlapping> = ({

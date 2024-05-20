@@ -8,8 +8,8 @@
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import {
   AnyExpressionFunctionDefinition,
-  AnyExpressionRenderDefinition,
   AnyExpressionTypeDefinition,
+  AnyExpressionRenderDefinition,
   AnyRendererFactory,
 } from '../types';
 import { ElementFactory } from '../types';

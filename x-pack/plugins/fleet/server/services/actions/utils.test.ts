@@ -10,12 +10,12 @@ import * as esKuery from '@kbn/es-query';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
 import {
-  type IndexType,
+  validateFilterKueryNode,
   allowedFleetActionsFields,
   allowedFleetActionsResultsFields,
-  hasFieldKeyError,
   isFieldDefined,
-  validateFilterKueryNode,
+  hasFieldKeyError,
+  type IndexType,
 } from './utils';
 
 describe('utils', () => {

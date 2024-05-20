@@ -1,9 +1,3 @@
-import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,6 +6,12 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
  */
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
+import { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 
 interface TextBasedLanguagesErrorResponse {
   error: {

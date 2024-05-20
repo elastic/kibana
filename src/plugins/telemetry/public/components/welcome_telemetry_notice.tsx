@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 import React from 'react';
+import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { OptInMessage, type OptInMessageProps } from './opt_in_message';
 
 export const WelcomeTelemetryNotice: React.FC<OptInMessageProps> = (props) => {

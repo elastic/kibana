@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
-import { RenderOptions, fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_settings_popover';
+import userEvent from '@testing-library/user-event';
+import { RenderOptions, fireEvent, render, screen } from '@testing-library/react';
+import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
 
 describe('Legend Settings', () => {
   let defaultProps: LegendSettingsPopoverProps;

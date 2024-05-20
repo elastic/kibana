@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { get } from 'lodash';
-import moment from 'moment';
 import React from 'react';
-import { formatTimestampToDuration } from '../../../../common';
-import { APM_SYSTEM_ID, CALCULATE_DURATION_SINCE } from '../../../../common/constants';
-import { SetupModeFeature } from '../../../../common/enums';
-import { checkAgentTypeMetric } from '../../../lib/apm_agent';
+import moment from 'moment';
+import { get } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
+import { ClusterItemContainer, BytesUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiLink,
+  EuiTitle,
+  EuiPanel,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+} from '@elastic/eui';
+import { formatTimestampToDuration } from '../../../../common';
+import { CALCULATE_DURATION_SINCE, APM_SYSTEM_ID } from '../../../../common/constants';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
-import { SetupModeTooltip } from '../../setup_mode/tooltip';
-import { BytesUsage, ClusterItemContainer, DisabledIfNoDataAndInSetupModeLink } from './helpers';
+import { SetupModeFeature } from '../../../../common/enums';
+import { checkAgentTypeMetric } from '../../../lib/apm_agent';
 
 const getServerTitle = (isFleetTypeMetric, total) => {
   const apmsTotal = <span data-test-subj="apmsTotal">{total}</span>;

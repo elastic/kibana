@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
-import { FilterValueLabel } from '../../filter_value_label/filter_value_label';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useSeriesFilters } from '../hooks/use_series_filters';
+import { FilterValueLabel } from '../../filter_value_label/filter_value_label';
 import { SeriesUrl } from '../types';
 
 interface Props {

@@ -1,4 +1,3 @@
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +5,8 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
@@ -14,22 +14,22 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 
 import { groupBy } from 'lodash';
 
-import { agentPolicyService, appContextService } from '..';
+import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
+import { appContextService, agentPolicyService } from '..';
+import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { isAgentUpgradeAvailable } from '../../../common/services';
-import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { AGENTS_INDEX } from '../../constants';
 import {
-  AgentNotFoundError,
   FleetError,
-  FleetUnauthorizedError,
   isESClientError,
+  AgentNotFoundError,
+  FleetUnauthorizedError,
 } from '../../errors';
-import type { Agent, AgentSOAttributes, ListWithKuery } from '../../types';
 
 import { auditLoggingService } from '../audit_logging';
 
-import { agentSOAttributesToFleetServerAgentDoc, searchHitToAgent } from './helpers';
+import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';

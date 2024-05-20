@@ -21,10 +21,10 @@ import {
   transformOutput,
 } from '../..';
 
-import { COMMENTS_WITH_CREATEDAT_CREATEDBY, ENTRIES_WITH_IDS } from '../mocks/constants.mock';
 import { getCreateExceptionListItemSchemaMock } from '../mocks/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../mocks/request/update_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../mocks/response/exception_list_item_schema.mock';
+import { COMMENTS_WITH_CREATEDAT_CREATEDBY, ENTRIES_WITH_IDS } from '../mocks/constants.mock';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),

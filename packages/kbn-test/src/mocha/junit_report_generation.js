@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { mkdirSync, writeFileSync } from 'fs';
-import { dirname, relative } from 'path';
-import { inspect } from 'util';
-import { getCodeOwnersForFile, getPathsWithOwnersReversed } from '@kbn/code-owners';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getCodeOwnersForFile, getPathsWithOwnersReversed } from '@kbn/code-owners';
+import { dirname, relative } from 'path';
+import { writeFileSync, mkdirSync } from 'fs';
+import { inspect } from 'util';
 
 import xmlBuilder from 'xmlbuilder';
 import { getUniqueJunitReportPath } from '../report_path';
 
-import { escapeCdata } from '../..';
 import { getSnapshotOfRunnableLogs } from './log_cache';
+import { escapeCdata } from '../..';
 
 const dateNow = Date.now.bind(Date);
 

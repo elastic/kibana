@@ -7,11 +7,11 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { ISearchRequestParams } from '@kbn/search-types';
-import { ACTIONS_INDEX } from '../../../../../../common/constants';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { AgentsRequestOptions } from '../../../../../../common/search_strategy/osquery/agents';
 import { getQueryFilter } from '../../../../../utils/build_query';
+import { ACTIONS_INDEX } from '../../../../../../common/constants';
 
 export const buildActionsQuery = ({
   kuery = '',

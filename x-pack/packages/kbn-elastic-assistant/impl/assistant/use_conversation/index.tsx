@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useCallback } from 'react';
+import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
-import { ClientMessage, Conversation } from '../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../assistant_context/types';
+import * as i18n from './translations';
+import { getDefaultSystemPrompt } from './helpers';
 import {
   createConversation as createConversationApi,
   deleteConversation as deleteConversationApi,
   getConversationById,
   updateConversation,
 } from '../api/conversations';
-import { getDefaultSystemPrompt } from './helpers';
 import { WELCOME_CONVERSATION } from './sample_conversations';
-import * as i18n from './translations';
 
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: '',

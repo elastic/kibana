@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IconColor } from '@elastic/eui';
 import { upperCase } from 'lodash';
+import type { IconColor } from '@elastic/eui';
 import type { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { assertUnreachable } from '../../../../../../../common/utility_types';

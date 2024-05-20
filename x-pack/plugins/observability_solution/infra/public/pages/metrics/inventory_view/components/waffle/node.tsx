@@ -7,21 +7,21 @@
 
 import React from 'react';
 
+import { first } from 'lodash';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useBoolean } from '@kbn/react-hooks';
-import { first } from 'lodash';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../lib/lib';
-import { colorFromValue } from '../../lib/color_from_value';
 import { ConditionalToolTip } from './conditional_tooltip';
+import { colorFromValue } from '../../lib/color_from_value';
 
-import { type AssetDetailsFlyoutPropertiesUpdater } from '../../hooks/use_asset_details_flyout_url_state';
 import { NodeContextMenu } from './node_context_menu';
 import { NodeSquare } from './node_square';
+import { type AssetDetailsFlyoutPropertiesUpdater } from '../../hooks/use_asset_details_flyout_url_state';
 
 interface Props {
   squareSize: number;

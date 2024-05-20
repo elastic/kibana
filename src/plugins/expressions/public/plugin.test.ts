@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionsServiceFork } from '../common/service/expressions_fork';
-import { add } from '../common/test_helpers/expression_functions/add';
 import { expressionsPluginMock } from './mocks';
+import { add } from '../common/test_helpers/expression_functions/add';
+import { ExpressionsServiceFork } from '../common/service/expressions_fork';
 
 describe('ExpressionsPublicPlugin', () => {
   test('can instantiate from mocks', async () => {

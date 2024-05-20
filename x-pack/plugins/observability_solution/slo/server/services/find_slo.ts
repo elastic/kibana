@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindSLOParams, FindSLOResponse, Pagination, findSLOResponseSchema } from '@kbn/slo-schema';
+import { FindSLOParams, FindSLOResponse, findSLOResponseSchema, Pagination } from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
 import { SLODefinition } from '../domain/models';
 import { IllegalArgumentError } from '../errors';

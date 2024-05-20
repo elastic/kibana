@@ -10,11 +10,11 @@ import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
+import type { Capabilities } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import type { Capabilities } from '@kbn/core/public';
-import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -24,15 +24,15 @@ import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mock
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
+import { EditRolePage } from './edit_role_page';
+import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
+import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
+import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 import type { Role } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import { userAPIClientMock } from '../../users/index.mock';
 import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
-import { EditRolePage } from './edit_role_page';
-import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
-import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
-import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 
 const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();

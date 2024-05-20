@@ -6,23 +6,23 @@
  */
 
 import type { UserActionType } from '../../../common/types/domain';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { UserActionBuilder } from './abstract_builder';
-import { AssigneesUserActionBuilder } from './builders/assignees';
-import { CategoryUserActionBuilder } from './builders/category';
+import { CreateCaseUserActionBuilder } from './builders/create_case';
+import { TitleUserActionBuilder } from './builders/title';
 import { CommentUserActionBuilder } from './builders/comment';
 import { ConnectorUserActionBuilder } from './builders/connector';
-import { CreateCaseUserActionBuilder } from './builders/create_case';
-import { CustomFieldsUserActionBuilder } from './builders/custom_fields';
 import { DescriptionUserActionBuilder } from './builders/description';
-import { NoopUserActionBuilder } from './builders/noop';
 import { PushedUserActionBuilder } from './builders/pushed';
-import { SettingsUserActionBuilder } from './builders/settings';
-import { SeverityUserActionBuilder } from './builders/severity';
 import { StatusUserActionBuilder } from './builders/status';
 import { TagsUserActionBuilder } from './builders/tags';
-import { TitleUserActionBuilder } from './builders/title';
+import { SettingsUserActionBuilder } from './builders/settings';
+import type { UserActionBuilder } from './abstract_builder';
+import { SeverityUserActionBuilder } from './builders/severity';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { BuilderDeps } from './types';
+import { AssigneesUserActionBuilder } from './builders/assignees';
+import { NoopUserActionBuilder } from './builders/noop';
+import { CategoryUserActionBuilder } from './builders/category';
+import { CustomFieldsUserActionBuilder } from './builders/custom_fields';
 
 const builderMap = {
   assignees: AssigneesUserActionBuilder,

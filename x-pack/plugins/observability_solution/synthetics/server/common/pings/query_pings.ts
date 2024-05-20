@@ -11,13 +11,13 @@ import {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SUMMARY_FILTER } from '../../../common/constants/client_defaults';
+import { UptimeEsClient } from '../../lib';
 import {
   GetPingsParams,
   HttpResponseBody,
-  Ping,
   PingsResponse,
+  Ping,
 } from '../../../common/runtime_types';
-import { UptimeEsClient } from '../../lib';
 
 const DEFAULT_PAGE_SIZE = 25;
 

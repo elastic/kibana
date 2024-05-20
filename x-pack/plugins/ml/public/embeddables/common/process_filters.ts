@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getDefaultQuery } from '@kbn/data-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import { getDefaultQuery } from '@kbn/data-plugin/public';
 
 export function processFilters(
   optionalFilters?: Filter[],

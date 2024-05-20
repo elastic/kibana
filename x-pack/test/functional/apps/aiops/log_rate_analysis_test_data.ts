@@ -7,10 +7,10 @@
 
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
-import { getArtificialLogDataViewTestData } from './log_rate_analysis/test_data/artificial_log_data_view_test_data';
+import { kibanaLogsDataViewTestData } from './log_rate_analysis/test_data/kibana_logs_data_view_test_data';
 import { farequoteDataViewTestData } from './log_rate_analysis/test_data/farequote_data_view_test_data';
 import { farequoteDataViewTestDataWithQuery } from './log_rate_analysis/test_data/farequote_data_view_test_data_with_query';
-import { kibanaLogsDataViewTestData } from './log_rate_analysis/test_data/kibana_logs_data_view_test_data';
+import { getArtificialLogDataViewTestData } from './log_rate_analysis/test_data/artificial_log_data_view_test_data';
 
 import type { TestData } from './types';
 

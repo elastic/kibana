@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import pMap from 'p-map';
-import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { constructOwnerFromFileKind } from '../../../common/files';
+import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { OwnerEntity } from '../../authorization';
 
 type FileEntityInfo = Pick<FileJSON, 'fileKind' | 'id'>;

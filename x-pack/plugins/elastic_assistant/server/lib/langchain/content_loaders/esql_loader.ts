@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { Logger } from '@kbn/core/server';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
+import { resolve } from 'path';
 
-import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { addRequiredKbResourceMetadata } from './add_required_kb_resource_metadata';
+import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 
 /**
  * Loads the ESQL docs and language files into the Knowledge Base.

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { RedirectAppLinksComponentProps } from '@kbn/shared-ux-link-redirect-app-types';
 import React, { FC } from 'react';
+import type { RedirectAppLinksComponentProps } from '@kbn/shared-ux-link-redirect-app-types';
 
-import { RedirectAppLinks as Component } from './redirect_app_links.component';
 import { useServices } from './services';
+import { RedirectAppLinks as Component } from './redirect_app_links.component';
 
 /**
  * A service-enabled component that provides Kibana-specific functionality to the `RedirectAppLinks`

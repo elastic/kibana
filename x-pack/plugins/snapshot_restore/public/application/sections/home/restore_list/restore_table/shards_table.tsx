@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBasicTable,
+  EuiProgress,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiProgress,
-  EuiSpacer,
   EuiText,
+  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 
 import { SnapshotRestore, SnapshotRestoreShard } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import Papa from 'papaparse';
-import { getFunctionErrors, getFunctionHelp } from '../../../i18n';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Datatable } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   data: string;

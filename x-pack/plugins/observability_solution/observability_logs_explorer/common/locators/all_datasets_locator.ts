@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
-  ALL_DATASETS_LOCATOR_ID,
-  AllDatasetsLocatorParams,
-} from '@kbn/deeplinks-observability/locators';
-import { AllDatasetSelection } from '@kbn/logs-explorer-plugin/common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { AllDatasetSelection } from '@kbn/logs-explorer-plugin/common';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
 import { ObsLogsExplorerLocatorDependencies } from './types';
 import { constructLocatorPath } from './utils';
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { EuiSwitch } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { ErrorCountRuleParams } from '../rule_types/error_count_rule_type';
 import { TransactionDurationRuleParams } from '../rule_types/transaction_duration_rule_type';
 import { ErrorRateRuleParams } from '../rule_types/transaction_error_rate_rule_type';
+import { ErrorCountRuleParams } from '../rule_types/error_count_rule_type';
 import { ApmRuleUnifiedSearchBar } from './apm_rule_unified_search_bar';
 
 interface Props {

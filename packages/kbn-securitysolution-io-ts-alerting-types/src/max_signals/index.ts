@@ -8,8 +8,8 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 
 export const max_signals = PositiveIntegerGreaterThanZero;
 export type MaxSignals = t.TypeOf<typeof max_signals>;

@@ -7,14 +7,14 @@
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { validateRuleDefaultExceptionList } from './validate_rule_default_exception_list';
 import { requestContextMock } from '../../../routes/__mocks__';
+import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getRuleMock,
 } from '../../../routes/__mocks__/request_responses';
-import { getQueryRuleParams } from '../../../rule_schema/mocks';
-import { validateRuleDefaultExceptionList } from './validate_rule_default_exception_list';
 
 const notDefaultExceptionList: List = {
   id: '1',

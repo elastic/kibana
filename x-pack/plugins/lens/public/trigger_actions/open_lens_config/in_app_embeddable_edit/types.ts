@@ -1,4 +1,3 @@
-import type { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import type { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
  * 2.0.
  */
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { Observable } from 'rxjs';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 

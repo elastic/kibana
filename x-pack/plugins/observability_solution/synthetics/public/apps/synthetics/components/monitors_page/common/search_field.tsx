@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFieldSearch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useRef } from 'react';
+import { EuiFieldSearch } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 import { useGetUrlParams, useUrlParams } from '../../../hooks';
 
 export function SearchField() {

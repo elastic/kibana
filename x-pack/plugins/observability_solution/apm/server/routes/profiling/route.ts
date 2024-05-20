@@ -6,15 +6,15 @@
  */
 
 import { isoToEpochSecsRt, toNumberRt } from '@kbn/io-ts-utils';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import * as t from 'io-ts';
-import { TRANSACTION_PROFILER_STACK_TRACE_IDS } from '../../../common/es_fields/apm';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt } from '../default_api_types';
 import { fetchFlamegraph } from './fetch_flamegraph';
 import { fetchFunctions } from './fetch_functions';
+import { TRANSACTION_PROFILER_STACK_TRACE_IDS } from '../../../common/es_fields/apm';
 
 const servicesFlamegraphRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/flamegraph',

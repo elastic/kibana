@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DocLinksServiceSetup, Logger } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
-import { TaskManagerConfig } from '../config';
+import { Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import { HealthStatus } from '../monitoring';
+import { TaskManagerConfig } from '../config';
 import { MonitoredHealth } from '../routes/health';
 import { calculateHealthStatus } from './calculate_health_status';
 

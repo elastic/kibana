@@ -5,46 +5,46 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type {
-  PluginSetupContract as AlertingPluginSetup,
-  PluginStartContract as AlertingPluginStart,
-} from '@kbn/alerting-plugin/server';
-import type { CasesServerSetup, CasesServerStart } from '@kbn/cases-plugin/server';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
-import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
+import type { UsageCollectionSetup as UsageCollectionPluginSetup } from '@kbn/usage-collection-plugin/server';
+import type {
+  PluginSetupContract as AlertingPluginSetup,
+  PluginStartContract as AlertingPluginStart,
+} from '@kbn/alerting-plugin/server';
+import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FleetStartContract as FleetPluginStart } from '@kbn/fleet-plugin/server';
-import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import type {
   RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
 } from '@kbn/rule-registry-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract as TaskManagerPluginSetup,
   TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
-import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
-import type { UsageCollectionSetup as UsageCollectionPluginSetup } from '@kbn/usage-collection-plugin/server';
-import type { ExperimentalFeatures } from '../common';
+import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { ProductFeaturesService } from './lib/product_features_service/product_features_service';
+import type { ExperimentalFeatures } from '../common';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;

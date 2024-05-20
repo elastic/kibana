@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 
 import { formatResponse } from '../../lib/format';
 import { Response } from '../../types';

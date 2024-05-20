@@ -7,8 +7,8 @@
 
 import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { IFieldSubType } from '@kbn/es-query';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ReactNode } from 'react';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';

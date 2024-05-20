@@ -7,9 +7,9 @@
 import expect from '@kbn/expect';
 
 import {
+  EUI_AMSTERDAM_PALETTE_COLORS,
   ELASTIC_BRAND_PALETTE_COLORS,
   EUIAmsterdamColorBlindPalette,
-  EUI_AMSTERDAM_PALETTE_COLORS,
   ElasticBrandPalette,
 } from '@kbn/coloring/src/shared_components/color_mapping/palettes';
 import { FtrProviderContext } from '../../../ftr_provider_context';

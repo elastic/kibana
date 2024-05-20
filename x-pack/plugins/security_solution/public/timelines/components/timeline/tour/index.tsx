@@ -10,13 +10,13 @@
  *
  * */
 
-import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import React, { useEffect, useCallback, useState, useMemo } from 'react';
+import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
 import type { TimelineType } from '../../../../../common/api/timeline';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../common/constants';
 import type { TimelineTabs } from '../../../../../common/types';
-import { useKibana } from '../../../../common/lib/kibana';
 import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
 import { timelineTourSteps, tourConfig } from './step_config';
 import * as i18n from './translations';
 

@@ -21,16 +21,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import {
-  SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregation,
   SnapshotCustomAggregationRT,
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,
+  SNAPSHOT_CUSTOM_AGGREGATIONS,
 } from '../../../../common/http_api/snapshot_api';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
 

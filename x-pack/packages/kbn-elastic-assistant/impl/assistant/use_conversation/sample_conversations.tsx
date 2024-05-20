@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ClientMessage, Conversation } from '../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../assistant_context/types';
 import * as i18n from '../../content/prompts/welcome/translations';
 import { WELCOME_CONVERSATION_TITLE } from './translations';
 

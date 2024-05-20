@@ -13,10 +13,10 @@ import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common'
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import '@kbn/code-editor-mock/jest_helper';
 
-import { licenseMock } from '../../../../../../common/licensing/index.mock';
-import { RoleValidator } from '../../validate_role';
 import { RemoteClusterPrivileges } from './remote_cluster_privileges';
 import { RemoteClusterPrivilegesForm } from './remote_cluster_privileges_form';
+import { licenseMock } from '../../../../../../common/licensing/index.mock';
+import { RoleValidator } from '../../validate_role';
 
 test('it renders without crashing', async () => {
   const wrapper = shallowWithIntl(

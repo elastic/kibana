@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPopover, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiPopover, EuiButtonIcon, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
 
 const iconButtonTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileSelectButton',

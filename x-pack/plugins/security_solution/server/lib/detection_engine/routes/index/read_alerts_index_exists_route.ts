@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
-import { getIndexExists, transformError } from '@kbn/securitysolution-es-utils';
-import { DETECTION_ENGINE_ALERTS_INDEX_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { DETECTION_ENGINE_ALERTS_INDEX_URL } from '../../../../../common/constants';
 
-import type { ReadAlertsIndexExistsResponse } from '../../../../../common/api/detection_engine';
 import { buildSiemResponse } from '../utils';
+import type { ReadAlertsIndexExistsResponse } from '../../../../../common/api/detection_engine';
 
 export const readAlertsIndexExistsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

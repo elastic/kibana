@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SanitizedRule } from '../../../../../types';
 import { RuleParams } from '../../../types/rule';
+import { SanitizedRule } from '../../../../../types';
 
 export interface BulkEnableRulesParams {
   filter?: string;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { useKibana } from '../../../../common/lib/kibana';
+import { shallow, mount } from 'enzyme';
+import { withActionOperations, ComponentOpts } from './with_actions_api_operations';
 import * as actionApis from '../../../lib/action_connector_api';
-import { ComponentOpts, withActionOperations } from './with_actions_api_operations';
+import { useKibana } from '../../../../common/lib/kibana';
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
 

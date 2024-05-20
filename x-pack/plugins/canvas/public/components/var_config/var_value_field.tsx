@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiFieldNumber, EuiFieldText } from '@elastic/eui';
+import React, { FC, useCallback } from 'react';
+import { EuiFieldText, EuiFieldNumber, EuiButtonGroup } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC, useCallback } from 'react';
 
 import { CanvasVariable } from '../../../types';
 

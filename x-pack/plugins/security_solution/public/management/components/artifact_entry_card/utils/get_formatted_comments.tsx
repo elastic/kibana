@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiText } from '@elastic/eui';
-import type { CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
-import React from 'react';
 import styled from 'styled-components';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import type { CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 import { COMMENT_EVENT } from '../../../../detection_engine/rule_exceptions/utils/translations';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 const CustomEuiAvatar = styled(EuiAvatar)`
   background-color: ${({ theme }) => theme.eui.euiColorLightShade} !important;

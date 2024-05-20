@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import React, { useCallback, type SVGProps } from 'react';
 import { i18n } from '@kbn/i18n';
 import { LinkButton } from '@kbn/security-solution-navigation/links';
-import React, { useCallback, type SVGProps } from 'react';
-import { useStepContext } from '../context/step_context';
+import type { IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { AddIntegrationsSteps } from '../types';
+import { useStepContext } from '../context/step_context';
 import { IntegrationsPageName } from './types';
 
 const SEE_INTEGRATIONS = i18n.translate(

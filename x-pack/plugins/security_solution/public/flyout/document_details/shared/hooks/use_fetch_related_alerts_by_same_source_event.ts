@@ -6,9 +6,9 @@
  */
 
 import { useMemo } from 'react';
+import { ANCESTOR_ID } from '../constants/field_names';
 import { useAlertPrevalence } from '../../../../common/containers/alerts/use_alert_prevalence';
 import { isActiveTimeline } from '../../../../helpers';
-import { ANCESTOR_ID } from '../constants/field_names';
 
 export interface UseFetchRelatedAlertsBySameSourceEventParams {
   /**

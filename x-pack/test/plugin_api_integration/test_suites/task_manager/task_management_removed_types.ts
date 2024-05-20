@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import url from 'url';
 import expect from '@kbn/expect';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import url from 'url';
 import supertest from 'supertest';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface RawDoc {

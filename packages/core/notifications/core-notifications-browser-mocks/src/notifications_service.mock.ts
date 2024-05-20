@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types-jest';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { NotificationsServiceContract } from '@kbn/core-notifications-browser-internal';
-import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types-jest';
 import { toastsServiceMock } from './toasts_service.mock';
 
 const createSetupContractMock = () => {

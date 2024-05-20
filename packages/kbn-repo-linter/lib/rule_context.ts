@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 
-import { RepoPath } from '@kbn/repo-path';
 import { SomeDevLog } from '@kbn/some-dev-log';
+import { RepoPath } from '@kbn/repo-path';
 
 import { NamedViolation, Rule } from './rule';
 

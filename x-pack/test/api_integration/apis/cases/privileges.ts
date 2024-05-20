@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
 import expect from '@kbn/expect';
-import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
+import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
 import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
+import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import {
@@ -17,7 +17,6 @@ import {
   deleteCases,
   getCase,
 } from '../../../cases_api_integration/common/lib/api';
-import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
 import {
   casesAllUser,
   casesNoDeleteUser,
@@ -35,6 +34,7 @@ import {
   secReadCasesReadUser,
   secReadUser,
 } from './common/users';
+import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
 
 export default ({ getService }: FtrProviderContext): void => {
   describe('feature privilege', () => {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { withSuspense } from '@kbn/shared-ux-utility';
 import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
 export { CurrentTime } from './current_time';
 export { EmptyPlaceholder } from './empty_placeholder';

@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { ENTITIES, getAutocompleteInfo } from '../../../services';
+import { getAutocompleteInfo, ENTITIES } from '../../../services';
 import { ListComponent } from './list_component';
 
 function FieldGenerator(context) {

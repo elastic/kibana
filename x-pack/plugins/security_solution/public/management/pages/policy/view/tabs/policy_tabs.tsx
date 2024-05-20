@@ -11,52 +11,52 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
 import { useLicense } from '../../../../../common/hooks/use_license';
-import { useHttp, useToasts } from '../../../../../common/lib/kibana';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { ProtectionUpdatesLayout } from '../protection_updates/protection_updates_layout';
+import { PolicySettingsLayout } from '../policy_settings_layout';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
-  getBlocklistsListPath,
-  getEventFiltersListPath,
-  getHostIsolationExceptionsListPath,
-  getPolicyBlocklistsPath,
   getPolicyDetailPath,
-  getPolicyDetailsArtifactsListPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
-  getPolicyProtectionUpdatesPath,
   getPolicyTrustedAppsPath,
+  getEventFiltersListPath,
+  getHostIsolationExceptionsListPath,
   getTrustedAppsListPath,
+  getPolicyDetailsArtifactsListPath,
+  getBlocklistsListPath,
+  getPolicyBlocklistsPath,
+  getPolicyProtectionUpdatesPath,
 } from '../../../../common/routing';
+import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
-import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
-import { BlocklistsApiClient } from '../../../blocklist/services/blocklists_api_client';
-import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
-import { EventFiltersApiClient } from '../../../event_filters/service/api_client';
-import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
-import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
-import { TrustedAppsApiClient } from '../../../trusted_apps/service/api_client';
 import {
-  isOnBlocklistsView,
   isOnHostIsolationExceptionsView,
   isOnPolicyEventFiltersView,
   isOnPolicyFormView,
   isOnPolicyTrustedAppsView,
-  isOnProtectionUpdatesView,
+  isOnBlocklistsView,
   policyDetails,
   policyIdFromParams,
+  isOnProtectionUpdatesView,
 } from '../../store/policy_details/selectors';
 import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
 import { usePolicyDetailsSelector } from '../policy_hooks';
-import { PolicySettingsLayout } from '../policy_settings_layout';
-import { ProtectionUpdatesLayout } from '../protection_updates/protection_updates_layout';
-import { POLICY_ARTIFACT_BLOCKLISTS_LABELS } from './blocklists_translations';
 import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from './event_filters_translations';
-import { POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS } from './host_isolation_exceptions_translations';
 import { POLICY_ARTIFACT_TRUSTED_APPS_LABELS } from './trusted_apps_translations';
-import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
+import { POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS } from './host_isolation_exceptions_translations';
+import { POLICY_ARTIFACT_BLOCKLISTS_LABELS } from './blocklists_translations';
+import { TrustedAppsApiClient } from '../../../trusted_apps/service/api_client';
+import { EventFiltersApiClient } from '../../../event_filters/service/api_client';
+import { BlocklistsApiClient } from '../../../blocklist/services/blocklists_api_client';
+import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
+import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
+import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
+import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
+import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
 
 enum PolicyTabKeys {
   SETTINGS = 'settings',

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React from 'react';
 import { AssistantAvatar } from './assistant_avatar/assistant_avatar';
 
 const Container = styled.div`

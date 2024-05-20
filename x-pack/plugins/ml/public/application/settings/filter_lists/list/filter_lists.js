@@ -9,20 +9,20 @@
  * React table for displaying a table of filter lists.
  */
 
-import { PropTypes } from 'prop-types';
 import React, { Component } from 'react';
+import { PropTypes } from 'prop-types';
 
 import { i18n } from '@kbn/i18n';
 
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 
-import { ml } from '../../../services/ml_api_service';
-import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { FilterListsHeader } from './header';
 import { FilterListsTable } from './table';
+import { ml } from '../../../services/ml_api_service';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 
-import { HelpMenu } from '../../../components/help_menu';
 import { getDocLinks } from '../../../util/dependency_cache';
+import { HelpMenu } from '../../../components/help_menu';
 
 export class FilterListsUI extends Component {
   static displayName = 'FilterLists';

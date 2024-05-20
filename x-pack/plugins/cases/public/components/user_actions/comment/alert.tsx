@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React from 'react';
+import { get, isEmpty } from 'lodash';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { get, isEmpty } from 'lodash';
-import React from 'react';
 
-import type { SnakeToCamelCase } from '../../../../common/types';
 import type { AlertAttachment } from '../../../../common/types/domain';
-import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
-import { UserActionContentToolbar } from '../content_toolbar';
-import { AlertPropertyActions } from '../property_actions/alert_property_actions';
-import { UserActionTimestamp } from '../timestamp';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import { UserActionTimestamp } from '../timestamp';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
 import { UserActionShowAlert } from './show_alert';
 import { ShowAlertTableLink } from './show_alert_table_link';
+import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
+import { UserActionContentToolbar } from '../content_toolbar';
+import { AlertPropertyActions } from '../property_actions/alert_property_actions';
 import { DELETE_ALERTS_SUCCESS_TITLE } from './translations';
 
 type BuilderArgs = Pick<

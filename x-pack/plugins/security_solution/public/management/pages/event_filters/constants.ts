@@ -11,11 +11,11 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
+  EXCEPTION_LIST_URL,
+  EXCEPTION_LIST_ITEM_URL,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_NAME,
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
+  ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION,
 } from '@kbn/securitysolution-list-constants';
 
 export const EVENT_FILTER_LIST_TYPE: ExceptionListType = ExceptionListTypeEnum.ENDPOINT_EVENTS;

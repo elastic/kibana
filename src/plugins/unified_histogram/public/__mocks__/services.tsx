@@ -1,7 +1,3 @@
-import { calculateBounds } from '@kbn/data-plugin/common';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,6 +7,10 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
  */
 import React from 'react';
 import { of } from 'rxjs';
+import { calculateBounds } from '@kbn/data-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { UnifiedHistogramServices } from '../types';
 import { allSuggestionsMock } from './suggestions';
 

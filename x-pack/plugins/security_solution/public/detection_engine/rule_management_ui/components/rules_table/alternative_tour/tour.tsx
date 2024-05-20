@@ -6,11 +6,11 @@
  */
 
 import { EuiText, EuiTourStep } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
+import React, { useCallback, useEffect, useState } from 'react';
 import { siemGuideId } from '../../../../../../common/guided_onboarding/siem_guide_config';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
 

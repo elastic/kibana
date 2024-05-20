@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
-  CLOUD_PROVIDER,
-  CLOUD_SERVICE_NAME,
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
+  CLOUD_PROVIDER,
+  CLOUD_SERVICE_NAME,
 } from '../../../common/es_fields/apm';
-import { ServerlessType, getServerlessTypeFromCloudData } from '../../../common/serverless';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getServerlessTypeFromCloudData, ServerlessType } from '../../../common/serverless';
 
 interface ServiceAgent {
   agent?: {

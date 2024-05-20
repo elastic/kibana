@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import supertest from 'supertest';
+import { omit } from 'lodash';
 
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ContextService } from '@kbn/core-http-context-server-internal';
-import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { createCoreContext, createHttpService } from '@kbn/core-http-server-mocks';
-import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
+import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
-import { ServiceStatus, ServiceStatusLevel, ServiceStatusLevels } from '@kbn/core-status-common';
-import { registerStatusRoute } from '@kbn/core-status-server-internal';
+import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
+import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '@kbn/core-status-common';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { registerStatusRoute } from '@kbn/core-status-server-internal';
 
 const coreId = Symbol('core');
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { SavedObjectReference } from '@kbn/core/types';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { MAP_EMBEDDABLE_NAME, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { MapAttributes } from '../common/content_management';
-import { extractReferences, injectReferences } from '../common/migrations/references';
-import { checkForDuplicateTitle, getMapClient } from './content_management';
-import { MapByReferenceInput, MapByValueInput } from './embeddable/types';
+import { MAP_EMBEDDABLE_NAME, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getCoreOverlays, getEmbeddableService } from './kibana_services';
+import { extractReferences, injectReferences } from '../common/migrations/references';
+import { getMapClient, checkForDuplicateTitle } from './content_management';
+import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
 export interface SharingSavedObjectProps {
   outcome?: ResolvedSimpleSavedObject['outcome'];

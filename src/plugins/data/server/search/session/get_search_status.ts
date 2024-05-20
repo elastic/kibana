@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import { AsyncSearchStatusResponse } from '../..';
 import { SearchSessionRequestStatus } from '../../../common';
 import { SearchStatus } from './types';
+import { AsyncSearchStatusResponse } from '../..';
 
 export async function getSearchStatus(
   internalClient: ElasticsearchClient,

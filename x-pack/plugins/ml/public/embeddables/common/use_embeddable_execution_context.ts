@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ExecutionContextStart } from '@kbn/core/public';
-import type { KibanaExecutionContext } from '@kbn/core/types';
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
+import type { KibanaExecutionContext } from '@kbn/core/types';
+import { useMemo } from 'react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
+import type { ExecutionContextStart } from '@kbn/core/public';
 
 /**
  * Use execution context for ML embeddables.

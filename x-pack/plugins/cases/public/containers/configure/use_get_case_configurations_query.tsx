@@ -6,12 +6,12 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { useCasesToast } from '../../common/use_cases_toast';
+import * as i18n from './translations';
+import { getCaseConfigure } from './api';
 import type { ServerError } from '../../types';
 import { casesQueriesKeys } from '../constants';
 import type { CasesConfigurationUI } from '../types';
-import { getCaseConfigure } from './api';
-import * as i18n from './translations';
+import { useCasesToast } from '../../common/use_cases_toast';
 import { initialConfiguration } from './utils';
 
 export const useGetCaseConfigurationsQuery = <T,>({

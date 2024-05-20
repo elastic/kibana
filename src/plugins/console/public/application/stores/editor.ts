@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { identity } from 'fp-ts/lib/function';
-import { produce } from 'immer';
 import { Reducer } from 'react';
+import { produce } from 'immer';
+import { identity } from 'fp-ts/lib/function';
+import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
 import { TextObject } from '../../../common/text_object';
-import { DEFAULT_SETTINGS, DevToolsSettings } from '../../services';
 import { SenseEditor } from '../models';
 
 export interface Store {

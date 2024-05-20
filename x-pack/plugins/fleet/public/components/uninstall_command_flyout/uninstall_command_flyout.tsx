@@ -16,10 +16,10 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import type { RequestError } from '../../hooks';
 import { useStartServices } from '../../hooks';
@@ -32,9 +32,9 @@ import {
   useGetUninstallTokens,
 } from '../../hooks/use_request/uninstall_tokens';
 
-import { EmptyPolicyNameHint } from './empty_policy_name_hint';
-import type { UninstallCommandTarget } from './types';
 import { UninstallCommandsPerPlatform } from './uninstall_commands_per_platform';
+import type { UninstallCommandTarget } from './types';
+import { EmptyPolicyNameHint } from './empty_policy_name_hint';
 
 const UninstallAgentDescription = () => {
   const { docLinks } = useStartServices();

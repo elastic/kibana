@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
 import { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import {
   buildAggregation,
   getDateRangeInfo,
@@ -18,10 +18,10 @@ import {
 } from '../../../common';
 
 import {
-  TimeSeriesCondition,
   TimeSeriesQuery,
   TimeSeriesResult,
   TimeSeriesResultRow,
+  TimeSeriesCondition,
 } from './time_series_types';
 export type { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 

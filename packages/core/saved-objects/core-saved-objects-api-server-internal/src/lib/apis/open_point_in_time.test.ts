@@ -9,30 +9,30 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import {
+  pointInTimeFinderMock,
   mockGetCurrentTime,
   mockGetSearchDsl,
-  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsOpenPointInTimeOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { loggerMock } from '@kbn/logging-mocks';
-import { kibanaMigratorMock } from '../../mocks';
 import { SavedObjectsRepository } from '../repository';
+import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { kibanaMigratorMock } from '../../mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
   HIDDEN_TYPE,
-  createDocumentMigrator,
-  createGenericNotFoundErrorPayload,
-  createRegistry,
-  createSpySerializer,
-  mappings,
   mockTimestamp,
+  mappings,
+  createRegistry,
+  createDocumentMigrator,
+  createSpySerializer,
+  createGenericNotFoundErrorPayload,
 } from '../../test_helpers/repository.test.common';
 import { PointInTimeFinder } from '../point_in_time_finder';
 

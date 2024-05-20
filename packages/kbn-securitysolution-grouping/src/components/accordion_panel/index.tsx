@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
 import type { GroupingBucket } from '../types';
+import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
 
 interface GroupPanelProps<T> {
   customAccordionButtonClassName?: string;

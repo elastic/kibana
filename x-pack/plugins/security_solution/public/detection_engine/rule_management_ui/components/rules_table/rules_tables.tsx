@@ -8,33 +8,33 @@
 import { EuiBasicTable, EuiConfirmModal, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useRef } from 'react';
-import type { FindRulesSortField } from '../../../../../common/api/detection_engine/rule_management';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
-import { useUserData } from '../../../../detections/components/user_info';
+import type { Rule } from '../../../rule_management/logic';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { EuiBasicTableOnChange } from '../../../../detections/pages/detection_engine/rules/types';
-import type { Rule } from '../../../rule_management/logic';
-import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
-import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
-import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
-import { RulesTableUtilityBar } from '../rules_table_utility_bar/rules_table_utility_bar';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
-import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { useBulkActions } from './bulk_actions/use_bulk_actions';
 import { useBulkActionsConfirmation } from './bulk_actions/use_bulk_actions_confirmation';
 import { useBulkActionsDryRun } from './bulk_actions/use_bulk_actions_dry_run';
-import { useBulkDuplicateExceptionsConfirmation } from './bulk_actions/use_bulk_duplicate_confirmation';
 import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout';
-import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { AllRulesTabs } from './rules_table_toolbar';
+import { RulesTableUtilityBar } from '../rules_table_utility_bar/rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
+import { useUserData } from '../../../../detections/components/user_info';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { useBulkDuplicateExceptionsConfirmation } from './bulk_actions/use_bulk_duplicate_confirmation';
+import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
+import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
+import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
+import type { FindRulesSortField } from '../../../../../common/api/detection_engine/rule_management';
+import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -180,7 +180,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         setSelectedRuleIds(selected.map(({ id }) => id));
         setIsAllSelected(false);
       },
-      selected: selectedRuleIds.map((id) => ({ id }) as Rule), // EuiBasicTable only needs the itemId
+      selected: selectedRuleIds.map((id) => ({ id } as Rule)), // EuiBasicTable only needs the itemId
     }),
     [loadingRuleIds, setIsAllSelected, setSelectedRuleIds, selectedRuleIds]
   );

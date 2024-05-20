@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash';
-import React from 'react';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from '.';
-import { TimelineType } from '../../../../common/api/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
-import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { sourcererActions, sourcererModel } from '../../store/sourcerer';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
-import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
-import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import { SourcererScopeName, initialSourcererState } from '../../store/sourcerer/model';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/api/timeline';
+import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
 

@@ -10,19 +10,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPagination,
-  EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { Environment } from '../../../../../common/environment_rt';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
-import { WaterfallFetchResult } from '../use_waterfall_fetcher';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import { TransactionTab, TransactionTabs } from './transaction_tabs';
+import { Environment } from '../../../../../common/environment_rt';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { WaterfallFetchResult } from '../use_waterfall_fetcher';
 
 interface Props<TSample extends {}> {
   waterfallFetchResult: WaterfallFetchResult;

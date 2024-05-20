@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import React, { lazy } from 'react';
-import { HeatmapTypeProps, HeatmapVisParams } from '../../types';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { HeatmapVisParams, HeatmapTypeProps } from '../../types';
 
 const HeatmapOptionsLazy = lazy(() => import('./heatmap'));
 
 export const getHeatmapOptions =
   ({ showElasticChartsOptions, palettes }: HeatmapTypeProps) =>
-  (props: VisEditorOptionsProps<HeatmapVisParams>) => (
-    <HeatmapOptionsLazy
-      {...props}
-      palettes={palettes}
-      showElasticChartsOptions={showElasticChartsOptions}
-    />
-  );
+  (props: VisEditorOptionsProps<HeatmapVisParams>) =>
+    (
+      <HeatmapOptionsLazy
+        {...props}
+        palettes={palettes}
+        showElasticChartsOptions={showElasticChartsOptions}
+      />
+    );

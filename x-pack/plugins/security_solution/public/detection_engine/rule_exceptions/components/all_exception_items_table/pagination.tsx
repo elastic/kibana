@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiTablePagination } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiTablePagination } from '@elastic/eui';
 
-import type { GetExceptionItemProps } from '.';
 import type { ExceptionsPagination } from '../../utils/types';
 import * as i18n from './translations';
+import type { GetExceptionItemProps } from '.';
 
 interface ExceptionsViewerPaginationProps {
   pagination: ExceptionsPagination;

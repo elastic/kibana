@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { IKibanaResponse } from '@kbn/core/server';
-import { ScreenshotBlockDoc } from '../../../../common/runtime_types/ping/synthetics';
-import { UMServerLibs } from '../../uptime_server';
 import { createJourneyScreenshotBlocksRoute } from './journey_screenshot_blocks';
+import { UMServerLibs } from '../../uptime_server';
+import { ScreenshotBlockDoc } from '../../../../common/runtime_types/ping/synthetics';
 
 describe('journey screenshot blocks route', () => {
   let handlerContext: any;

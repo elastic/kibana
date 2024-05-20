@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { cloneDeep, assign } from 'lodash';
 import { SavedObjectsClientContract } from '@kbn/core/public';
-import { assign, cloneDeep } from 'lodash';
 import { SavedObject, SavedObjectConfig } from '../../types';
 
 /**

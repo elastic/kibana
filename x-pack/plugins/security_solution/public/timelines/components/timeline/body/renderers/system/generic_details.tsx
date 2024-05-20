@@ -13,14 +13,14 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 import { OverflowField } from '../../../../../../common/components/tables/helpers';
 
-import { Badge } from '../../../../../../common/components/page';
-import { Details, TokensFlexItem } from '../helpers';
-import { NetflowRenderer } from '../netflow';
-import { ProcessDraggable } from '../process_draggable';
-import { UserHostWorkingDir } from '../user_host_working_dir';
-import { AuthSsh } from './auth_ssh';
-import { Package } from './package';
 import * as i18n from './translations';
+import { NetflowRenderer } from '../netflow';
+import { UserHostWorkingDir } from '../user_host_working_dir';
+import { Details, TokensFlexItem } from '../helpers';
+import { ProcessDraggable } from '../process_draggable';
+import { Package } from './package';
+import { AuthSsh } from './auth_ssh';
+import { Badge } from '../../../../../../common/components/page';
 
 interface Props {
   contextId: string;

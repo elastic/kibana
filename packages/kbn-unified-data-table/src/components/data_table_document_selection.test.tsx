@@ -1,8 +1,3 @@
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { getDocId } from '@kbn/discover-utils';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,13 +6,18 @@ import { render, screen } from '@testing-library/react';
  * Side Public License, v 1.
  */
 import React from 'react';
-import { dataTableContextMock } from '../../__mocks__/table_context';
-import { UnifiedDataTableContext } from '../table_context';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   DataTableCompareToolbarBtn,
   DataTableDocumentToolbarBtn,
   SelectButton,
 } from './data_table_document_selection';
+import { dataTableContextMock } from '../../__mocks__/table_context';
+import { UnifiedDataTableContext } from '../table_context';
+import { getDocId } from '@kbn/discover-utils';
+import { render, screen } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 describe('document selection', () => {
   describe('getDocId', () => {

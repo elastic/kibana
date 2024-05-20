@@ -8,12 +8,12 @@
 
 import React from 'react';
 
-import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 
 import { buildMockDashboard } from '../../../mocks';
+import { Item, Props as DashboardGridItemProps } from './dashboard_grid_item';
 import { DashboardContainerContext } from '../../embeddable/dashboard_container';
-import { Props as DashboardGridItemProps, Item } from './dashboard_grid_item';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   const original = jest.requireActual('@kbn/embeddable-plugin/public');

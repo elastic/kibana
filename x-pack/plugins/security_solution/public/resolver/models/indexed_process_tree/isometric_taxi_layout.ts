@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import * as indexedProcessTreeModel from '.';
+import type {
+  IndexedProcessTree,
+  Vector2,
+  EdgeLineSegment,
+  ProcessWidths,
+  NodePositions,
+  EdgeLineMetadata,
+  ProcessWithWidthMetadata,
+  Matrix3,
+  IsometricTaxiLayout,
+} from '../../types';
 import * as nodeModel from '../../../../common/endpoint/models/node';
 import type { ResolverNode } from '../../../../common/endpoint/types';
-import { getFriendlyElapsedTime as elapsedTime } from '../../lib/date';
-import type {
-  EdgeLineMetadata,
-  EdgeLineSegment,
-  IndexedProcessTree,
-  IsometricTaxiLayout,
-  Matrix3,
-  NodePositions,
-  ProcessWidths,
-  ProcessWithWidthMetadata,
-  Vector2,
-} from '../../types';
 import * as vector2 from '../vector2';
+import * as indexedProcessTreeModel from '.';
+import { getFriendlyElapsedTime as elapsedTime } from '../../lib/date';
 
 /**
  * Graph the process tree
@@ -489,16 +489,10 @@ function* levelOrderWithWidths(
  */
 /* prettier-ignore */
 const isometricTransformMatrix: Matrix3 = [
-  Math.sqrt(2) / 2,
-  -(Math.sqrt(2) / 2),
-  0,
-  Math.sqrt(6) / 6,
-  Math.sqrt(6) / 6,
-  -(Math.sqrt(6) / 3),
-  0,
-  0,
-  1,
-];
+  Math.sqrt(2) / 2,   -(Math.sqrt(2) / 2),  0,
+  Math.sqrt(6) / 6,   Math.sqrt(6) / 6,     -(Math.sqrt(6) / 3),
+  0,                  0,                    1,
+]
 
 const unit = 140;
 const distanceBetweenNodesInUnits = 2;

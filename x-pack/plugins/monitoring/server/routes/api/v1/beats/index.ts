@@ -6,8 +6,8 @@
  */
 
 import { MonitoringCore } from '../../../../types';
-import { beatsDetailRoute } from './beat_detail';
 import { beatsListingRoute } from './beats';
+import { beatsDetailRoute } from './beat_detail';
 import { beatsOverviewRoute } from './overview';
 
 export function registerV1BeatsRoutes(server: MonitoringCore) {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { type EuiDataGridColumn, EuiDescriptionList, EuiPanel, EuiTitle } from '@elastic/eui';
-import { isDefined } from '@kbn/ml-is-defined';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import type {
-  AlertTableFlyoutComponent,
   AlertsTableFlyoutBaseProps,
+  AlertTableFlyoutComponent,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { get } from 'lodash';
 import React from 'react';
+import { type EuiDataGridColumn, EuiDescriptionList, EuiPanel, EuiTitle } from '@elastic/eui';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { RegisterFormatter } from './render_cell_value';
 
 const FlyoutHeader: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => {

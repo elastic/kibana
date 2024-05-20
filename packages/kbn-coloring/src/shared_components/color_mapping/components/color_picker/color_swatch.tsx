@@ -13,19 +13,19 @@ import {
   isColorDark,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { ColorPicker } from './color_picker';
 import { getAssignmentColor } from '../../color/color_handling';
 import { ColorMapping } from '../../config';
 import { getPalette } from '../../palettes';
 import { removeGradientColorStep } from '../../state/color_mapping';
-import { ColorPicker } from './color_picker';
 
-import { getValidColor } from '../../color/color_math';
 import { selectColorPickerVisibility } from '../../state/selectors';
 import { colorPickerVisibility, hideColorPickerVisibility } from '../../state/ui';
+import { getValidColor } from '../../color/color_math';
 
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];

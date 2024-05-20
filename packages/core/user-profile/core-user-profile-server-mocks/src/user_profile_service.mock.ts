@@ -7,9 +7,9 @@
  */
 
 import type {
-  UserProfileRequestHandlerContext,
   UserProfileServiceSetup,
   UserProfileServiceStart,
+  UserProfileRequestHandlerContext,
 } from '@kbn/core-user-profile-server';
 import type {
   InternalUserProfileServiceSetup,

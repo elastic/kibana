@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import {
+  getDependentVar,
+  getPredictionFieldName,
   ANALYSIS_CONFIG_TYPE,
   type ClassificationEvaluateResponse,
   type ConfusionMatrix,
   type DataFrameAnalyticsConfig,
-  getDependentVar,
-  getPredictionFieldName,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 
-import type { ClassificationMetricItem, ResultsSearchQuery } from '../../../../common/analytics';
+import type { ResultsSearchQuery, ClassificationMetricItem } from '../../../../common/analytics';
 import { isClassificationEvaluateResponse } from '../../../../common/analytics';
 
-import { loadDocsCount, loadEvalData } from '../../../../common';
+import { loadEvalData, loadDocsCount } from '../../../../common';
 
 import { isTrainingFilter } from './is_training_filter';
 
@@ -31,16 +31,13 @@ function getEvalutionMetricsItems(evalMetrics?: ClassificationEvaluateResponse['
   const accuracyMetrics = evalMetrics.accuracy?.classes || [];
   const recallMetrics = evalMetrics.recall?.classes || [];
 
-  const metricsMap = accuracyMetrics.reduce(
-    (acc, accuracyMetric) => {
-      acc[accuracyMetric.class_name] = {
-        className: accuracyMetric.class_name,
-        accuracy: accuracyMetric.value,
-      };
-      return acc;
-    },
-    {} as Record<string, ClassificationMetricItem>
-  );
+  const metricsMap = accuracyMetrics.reduce((acc, accuracyMetric) => {
+    acc[accuracyMetric.class_name] = {
+      className: accuracyMetric.class_name,
+      accuracy: accuracyMetric.value,
+    };
+    return acc;
+  }, {} as Record<string, ClassificationMetricItem>);
 
   recallMetrics.forEach((recallMetric) => {
     if (metricsMap[recallMetric.class_name] !== undefined) {

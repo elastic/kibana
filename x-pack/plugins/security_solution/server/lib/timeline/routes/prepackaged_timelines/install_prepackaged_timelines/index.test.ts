@@ -8,20 +8,20 @@
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
-  createMockConfig,
-  requestContextMock,
   serverMock,
+  requestContextMock,
+  createMockConfig,
 } from '../../../../detection_engine/routes/__mocks__';
 
 import {
-  mockCheckTimelinesStatusAfterInstallResult,
-  mockCheckTimelinesStatusBeforeInstallResult,
   mockGetCurrentUser,
+  mockCheckTimelinesStatusBeforeInstallResult,
+  mockCheckTimelinesStatusAfterInstallResult,
 } from '../../../__mocks__/import_timelines';
 import { installPrepackedTimelinesRequest } from '../../../__mocks__/request_responses';
 
-import { checkTimelinesStatus } from '../../../utils/check_timelines_status';
 import { installPrepackagedTimelines } from './helpers';
+import { checkTimelinesStatus } from '../../../utils/check_timelines_status';
 
 import { installPrepackedTimelinesRoute } from '.';
 

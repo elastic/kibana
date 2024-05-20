@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TimeUnitChar, formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
 import { JsonObject } from '@kbn/utility-types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PromiseType } from 'utility-types';
-import { UNNAMED_LOCATION } from '../../../../common/constants';
+import { formatDurationFromTimeUnitChar, TimeUnitChar } from '@kbn/observability-plugin/common';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { Ping } from '../../../../common/runtime_types/ping';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { createEsQuery } from '../../../../common/utils/es_search';
 import { UMElasticsearchQueryFn } from '../adapters';
+import { Ping } from '../../../../common/runtime_types/ping';
+import { createEsQuery } from '../../../../common/utils/es_search';
 import { UptimeEsClient } from '../lib';
+import { UNNAMED_LOCATION } from '../../../../common/constants';
 
 export interface GetMonitorStatusParams {
   filters?: JsonObject;

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { finalize, takeUntil } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs';
 import { Observable, timer } from 'rxjs';
+import type { Logger } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core/server';
 import {
-  MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
   MONITOR_EVENT_LOOP_THRESHOLD_START,
+  MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
   MONITOR_EVENT_LOOP_WARN_THRESHOLD,
 } from './constants';
 

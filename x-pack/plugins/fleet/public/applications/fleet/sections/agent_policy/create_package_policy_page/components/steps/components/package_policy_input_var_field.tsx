@@ -1,22 +1,3 @@
-import {
-  EuiButtonEmpty,
-  EuiCodeBlock,
-  EuiComboBox,
-  EuiFieldPassword,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTextArea,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -25,6 +6,25 @@ import { FormattedMessage } from '@kbn/i18n-react';
  */
 import React, { useState, memo, useMemo, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFormRow,
+  EuiSwitch,
+  EuiFieldText,
+  EuiText,
+  EuiFieldPassword,
+  EuiCodeBlock,
+  EuiTextArea,
+  EuiComboBox,
+  EuiPanel,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiIconTip,
+} from '@elastic/eui';
 import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/code-editor';
@@ -35,8 +35,8 @@ import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
 
-import { DatasetComponent } from './dataset_component';
 import { MultiTextInput } from './multi_text_input';
+import { DatasetComponent } from './dataset_component';
 
 const FixedHeightDiv = styled.div`
   height: 300px;

@@ -6,8 +6,8 @@
  */
 
 import { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
-import { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects } from '.';
 import { CANVAS as label } from '../../i18n';
+import { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects } from '.';
 
 export function loadSampleData(
   addSavedObjectsToSampleDataset: SampleDataRegistrySetup['addSavedObjectsToSampleDataset'],

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
 import { mount } from 'enzyme';
 import React from 'react';
 import { navTabsHostDetails } from '../../../../explore/hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { TabNavigationComponent } from './tab_navigation';
 import type { TabNavigationProps } from './types';
+import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
 
 jest.mock('@kbn/security-solution-navigation/src/context');
 

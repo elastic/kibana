@@ -6,25 +6,49 @@
  * Side Public License, v 1.
  */
 
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { Subscription } from 'rxjs';
+import { identity } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import {
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
-  PluginInitializerContext,
   PublicAppInfo,
 } from '@kbn/core/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { PersistableStateService, migrateToLatest } from '@kbn/kibana-utils-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { identity } from 'lodash';
-import { Subscription } from 'rxjs';
+import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
+import {
+  EmbeddableFactoryRegistry,
+  EmbeddableFactoryProvider,
+  EnhancementsRegistry,
+  EnhancementRegistryDefinition,
+  EnhancementRegistryItem,
+} from './types';
+import { bootstrap } from './bootstrap';
+import {
+  EmbeddableFactory,
+  EmbeddableInput,
+  EmbeddableOutput,
+  defaultEmbeddableFactoryProvider,
+  IEmbeddable,
+  SavedObjectEmbeddableInput,
+  registerReactEmbeddableSavedObject,
+  ReactEmbeddableSavedObject,
+  getReactEmbeddableSavedObjects,
+} from './lib';
+import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
+import { EmbeddableStateTransfer } from './lib/state_transfer';
+import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
+import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
+import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
 import {
   getExtractFunction,
   getInjectFunction,
@@ -32,24 +56,7 @@ import {
   getTelemetryFunction,
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
-import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../common/types';
-import { bootstrap } from './bootstrap';
 import { setKibanaServices } from './kibana_services';
-import {
-  EmbeddableFactory,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-  ReactEmbeddableSavedObject,
-  SavedObjectEmbeddableInput,
-  defaultEmbeddableFactoryProvider,
-  getReactEmbeddableSavedObjects,
-  registerReactEmbeddableSavedObject,
-} from './lib';
-import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
-import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
-import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
-import { EmbeddableStateTransfer } from './lib/state_transfer';
 import {
   DefaultEmbeddableApi,
   ReactEmbeddableFactory,
@@ -57,13 +64,6 @@ import {
   registerReactEmbeddableFactory,
 } from './react_embeddable_system';
 import { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
-import {
-  EmbeddableFactoryProvider,
-  EmbeddableFactoryRegistry,
-  EnhancementRegistryDefinition,
-  EnhancementRegistryItem,
-  EnhancementsRegistry,
-} from './types';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -110,7 +110,7 @@ export interface EmbeddableSetup {
    */
   registerReactEmbeddableFactory: <
     StateType extends object = object,
-    APIType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>,
+    APIType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
   >(
     type: string,
     getFactory: () => Promise<ReactEmbeddableFactory<StateType, APIType>>
@@ -122,7 +122,7 @@ export interface EmbeddableSetup {
   registerEmbeddableFactory: <
     I extends EmbeddableInput,
     O extends EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     id: string,
     factory: EmbeddableFactoryDefinition<I, O, E>
@@ -148,7 +148,7 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
    * @returns An iterator over all {@link ReactEmbeddableSavedObject}s that have been registered using {@link registerReactEmbeddableSavedObject}.
    */
   getReactEmbeddableSavedObjects: <
-    TSavedObjectAttributes extends FinderAttributes,
+    TSavedObjectAttributes extends FinderAttributes
   >() => IterableIterator<[string, ReactEmbeddableSavedObject<TSavedObjectAttributes>]>;
 
   /**
@@ -157,7 +157,7 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
@@ -175,7 +175,7 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
-    M extends unknown = unknown,
+    M extends unknown = unknown
   >(
     type: string,
     options: AttributeServiceOptions<A, M>
@@ -324,7 +324,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private registerEmbeddableFactory = <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     embeddableFactoryId: string,
     factory: EmbeddableFactoryDefinition<I, O, E>
@@ -344,7 +344,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private getEmbeddableFactory = <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     embeddableFactoryId: string
   ): EmbeddableFactory<I, O, E> => {

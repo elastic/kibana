@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useReducer } from 'react';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 

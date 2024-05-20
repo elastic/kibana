@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import {
-  API_VERSIONS,
-  ApiConfig,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+  ApiConfig,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import { i18n } from '@kbn/i18n';
-import { ClientMessage, Conversation } from '../../../assistant_context/types';
+import { Conversation, ClientMessage } from '../../../assistant_context/types';
 
 export interface BulkActionSummary {
   failed: number;

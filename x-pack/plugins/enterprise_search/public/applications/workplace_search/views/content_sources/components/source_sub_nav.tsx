@@ -13,15 +13,15 @@ import { EuiSideNavItemType } from '@elastic/eui';
 
 import { generateNavLink } from '../../../../shared/layout';
 import { AppLogic } from '../../../app_logic';
-import { CUSTOM_SERVICE_TYPE, NAV } from '../../../constants';
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../../constants';
 import {
-  SOURCE_CONTENT_PATH,
+  getContentSourcePath,
   SOURCE_DETAILS_PATH,
-  SOURCE_DISPLAY_SETTINGS_PATH,
+  SOURCE_CONTENT_PATH,
   SOURCE_SCHEMAS_PATH,
+  SOURCE_DISPLAY_SETTINGS_PATH,
   SOURCE_SETTINGS_PATH,
   SOURCE_SYNCHRONIZATION_PATH,
-  getContentSourcePath,
 } from '../../../routes';
 import { SourceLogic } from '../source_logic';
 

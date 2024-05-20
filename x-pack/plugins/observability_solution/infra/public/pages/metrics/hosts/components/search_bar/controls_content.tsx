@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   type ControlEmbeddable,
   ControlGroupAPI,
-  type ControlGroupInput,
   ControlGroupRenderer,
   type ControlInput,
   type ControlOutput,
+  type ControlGroupInput,
 } from '@kbn/controls-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React, { useCallback, useEffect, useRef } from 'react';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { Subscription } from 'rxjs';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useControlPanels } from '../../hooks/use_control_panels_url_state';
 import { ControlTitle } from './controls_title';
 

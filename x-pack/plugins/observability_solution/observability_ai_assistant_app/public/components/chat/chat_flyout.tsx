@@ -91,23 +91,21 @@ export function ChatFlyout({
   `;
 
   const sidebarClass = css`
-    max-width: ${
-      conversationsExpanded ? CONVERSATIONS_SIDEBAR_WIDTH : CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
-    }px;
-    min-width: ${
-      conversationsExpanded ? CONVERSATIONS_SIDEBAR_WIDTH : CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
-    }px;
+    max-width: ${conversationsExpanded
+      ? CONVERSATIONS_SIDEBAR_WIDTH
+      : CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED}px;
+    min-width: ${conversationsExpanded
+      ? CONVERSATIONS_SIDEBAR_WIDTH
+      : CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED}px;
     border-right: solid 1px ${euiTheme.border.color};
   `;
 
   const expandButtonContainerClassName = css`
     position: absolute;
     margin-top: 16px;
-    margin-left: ${
-      conversationsExpanded
-        ? CONVERSATIONS_SIDEBAR_WIDTH - CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
-        : 5
-    }px;
+    margin-left: ${conversationsExpanded
+      ? CONVERSATIONS_SIDEBAR_WIDTH - CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
+      : 5}px;
     z-index: 1;
   `;
 
@@ -131,11 +129,9 @@ export function ChatFlyout({
   const newChatButtonClassName = css`
     position: absolute;
     bottom: 30px;
-    margin-left: ${
-      conversationsExpanded
-        ? CONVERSATIONS_SIDEBAR_WIDTH - CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
-        : 5
-    }px;
+    margin-left: ${conversationsExpanded
+      ? CONVERSATIONS_SIDEBAR_WIDTH - CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
+      : 5}px;
     z-index: 1;
   `;
 

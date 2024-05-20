@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Criteria } from '@elastic/eui';
-import type { BoolQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
+import type { BoolQuery, Filter, Query, EsQueryConfig } from '@kbn/es-query';
 import { CspFinding } from '../../common/schemas/csp_finding';
 
 export type FindingsGroupByKind = 'default' | 'resource';

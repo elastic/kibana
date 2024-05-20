@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { renderHook } from '@testing-library/react-hooks';
+import { useHostIsolationAction } from './use_host_isolation_action';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   useAgentStatusHook,
   useGetAgentStatus,
   useGetSentinelOneAgentStatus,
 } from '../../../management/hooks/agents/use_get_agent_status';
-import { useHostIsolationAction } from './use_host_isolation_action';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../management/hooks/agents/use_get_agent_status');
 jest.mock('../../../common/hooks/use_experimental_features');
@@ -64,31 +64,31 @@ describe('useHostIsolationAction', () => {
                     },
                   ]
                 : agentTypeAlert === 'crowdstrike'
-                  ? [
-                      {
-                        category: 'event',
-                        field: 'event.module',
-                        values: ['crowdstrike'],
-                        originalValue: ['crowdstrike'],
-                        isObjectArray: false,
-                      },
-                      {
-                        category: 'crowdstrike',
-                        field: 'crowdstrike.event.DeviceId',
-                        values: ['expectedCrowdstrikeAgentId'],
-                        originalValue: ['expectedCrowdstrikeAgentId'],
-                        isObjectArray: false,
-                      },
-                    ]
-                  : [
-                      {
-                        category: 'agent',
-                        field: 'agent.id',
-                        values: ['some-agent-id'],
-                        originalValue: ['some-agent-id'],
-                        isObjectArray: false,
-                      },
-                    ],
+                ? [
+                    {
+                      category: 'event',
+                      field: 'event.module',
+                      values: ['crowdstrike'],
+                      originalValue: ['crowdstrike'],
+                      isObjectArray: false,
+                    },
+                    {
+                      category: 'crowdstrike',
+                      field: 'crowdstrike.event.DeviceId',
+                      values: ['expectedCrowdstrikeAgentId'],
+                      originalValue: ['expectedCrowdstrikeAgentId'],
+                      isObjectArray: false,
+                    },
+                  ]
+                : [
+                    {
+                      category: 'agent',
+                      field: 'agent.id',
+                      values: ['some-agent-id'],
+                      originalValue: ['some-agent-id'],
+                      isObjectArray: false,
+                    },
+                  ],
             isHostIsolationPanelOpen: false,
             onAddIsolationStatusClick: jest.fn(),
           }),

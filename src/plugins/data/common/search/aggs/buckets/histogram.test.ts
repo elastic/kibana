@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
 import { AggConfigs } from '../agg_configs';
+import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
 import { AggTypesDependencies } from '../agg_types';
-import { mockAggTypesDependencies, mockAggTypesRegistry } from '../test_helpers';
-import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { AutoBounds, IBucketHistogramAggConfig, getHistogramBucketAgg } from './histogram';
+import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';
+import { BucketAggType } from './bucket_agg_type';
+import { SerializableRecord } from '@kbn/utility-types';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: AggTypesDependencies;
@@ -145,16 +145,14 @@ describe('Histogram Agg', () => {
       },
     });
 
-    expect(
-      aggConfigs.aggs[0].toExpressionAst()?.chain[0].arguments.interval
-    ).toMatchInlineSnapshot(`
+    expect(aggConfigs.aggs[0].toExpressionAst()?.chain[0].arguments.interval)
+      .toMatchInlineSnapshot(`
       Array [
         1000,
       ]
     `);
-    expect(
-      aggConfigs2.aggs[0].toExpressionAst()?.chain[0].arguments.interval
-    ).toMatchInlineSnapshot(`
+    expect(aggConfigs2.aggs[0].toExpressionAst()?.chain[0].arguments.interval)
+      .toMatchInlineSnapshot(`
       Array [
         "auto",
       ]

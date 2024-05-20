@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
+import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '../../services/field_stats';
 import FieldStats, { FieldStatsWithKbnQuery } from './field_stats';
 

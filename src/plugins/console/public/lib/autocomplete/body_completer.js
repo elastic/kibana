@@ -7,14 +7,14 @@
  */
 
 import _ from 'lodash';
-import {
-  ConditionalProxy,
-  ConstantComponent,
-  GlobalOnlyComponent,
-  ObjectComponent,
-  SharedComponent,
-} from './components';
 import { WalkingState, walkTokenPath, wrapComponentWithDefaults } from './engine';
+import {
+  ConstantComponent,
+  SharedComponent,
+  ObjectComponent,
+  ConditionalProxy,
+  GlobalOnlyComponent,
+} from './components';
 
 function CompilingContext(endpointId, parametrizedComponentFactories) {
   this.parametrizedComponentFactories = parametrizedComponentFactories;

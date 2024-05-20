@@ -8,8 +8,8 @@
 import { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
-import { addInternalBasePath } from '..';
 import { RouteDependencies } from '../../../types';
+import { addInternalBasePath } from '..';
 
 const bodySchema = schema.object({
   indexName: schema.string(),

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { CustomIcon, IconStaticOptions } from '../../../../../../common/descriptor_types';
-import { StaticIconProperty } from '../../properties/static_icon_property';
 import { IconSelect } from './icon_select';
+import { StaticIconProperty } from '../../properties/static_icon_property';
 
 interface Props {
   customIcons: CustomIcon[];

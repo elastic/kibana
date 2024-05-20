@@ -9,19 +9,19 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
-import { TestProviders } from '../../../../../common/mock/test_providers';
 import { defaultRowRenderers } from '../../body/renderers';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
+import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock/test_providers';
 
 import type { Props as EqlTabContentComponentProps } from '.';
 import { EqlTabContentComponent } from '.';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),

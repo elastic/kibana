@@ -6,30 +6,30 @@
  */
 
 import type { EuiBasicTable } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
-  UtilityBar,
-  UtilityBarAction,
   UtilityBarGroup,
-  UtilityBarSection,
   UtilityBarText,
+  UtilityBar,
+  UtilityBarSection,
+  UtilityBarAction,
 } from '../../../common/components/utility_bar';
 
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { importTimelines } from '../../containers/api';
-import { useEditTimelineActions } from './edit_timeline_actions';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useEditTimelineBatchActions } from './edit_timeline_batch_actions';
+import { useEditTimelineActions } from './edit_timeline_actions';
 import { EditTimelineActions } from './export_timeline';
-import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import * as i18n from './translations';
-import type { ActionTimelineToShow, OpenTimelineProps, OpenTimelineResult } from './types';
+import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
+import type { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
 
 const QueryText = styled.span`
   white-space: normal;

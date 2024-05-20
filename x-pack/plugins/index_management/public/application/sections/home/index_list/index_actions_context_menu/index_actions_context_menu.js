@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React, { Component, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { every } from 'lodash';
 import {
   EuiButton,
   EuiCallOut,
-  EuiConfirmModal,
   EuiContextMenu,
   EuiFieldNumber,
   EuiForm,
   EuiFormRow,
   EuiPopover,
   EuiSpacer,
+  EuiConfirmModal,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { every } from 'lodash';
-import React, { Component, Fragment } from 'react';
 
-import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
-import { AppContext } from '../../../../app_context';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
+import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
+import { AppContext } from '../../../../app_context';
 
 export class IndexActionsContextMenu extends Component {
   static contextType = AppContext;

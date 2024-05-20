@@ -6,13 +6,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
-  ResponseActionStatus,
   ResponseActionsApiCommandNames,
+  ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { ActionListApiResponse } from '../../../../common/endpoint/types';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 export const getActionListMock = async ({
   agentTypes = ['endpoint'] as ResponseActionAgentType[],

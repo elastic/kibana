@@ -6,16 +6,16 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { createServices } from './common/services';
 import { startNavigation } from './navigation';
-import { setOnboardingSettings } from './onboarding';
+import { createServices } from './common/services';
+import { registerUpsellings } from './upselling/register_upsellings';
 import type {
   SecuritySolutionEssPluginSetup,
-  SecuritySolutionEssPluginSetupDeps,
   SecuritySolutionEssPluginStart,
+  SecuritySolutionEssPluginSetupDeps,
   SecuritySolutionEssPluginStartDeps,
 } from './types';
-import { registerUpsellings } from './upselling/register_upsellings';
+import { setOnboardingSettings } from './onboarding';
 
 export class SecuritySolutionEssPlugin
   implements

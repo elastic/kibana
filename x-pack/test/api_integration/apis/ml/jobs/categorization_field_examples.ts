@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
-import { USER } from '../../../../functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 const start = 1554463535770;
 const end = 1574316073914;

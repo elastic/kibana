@@ -9,8 +9,8 @@ import { takeLatest } from 'redux-saga/effects';
 import {
   getMonitorDetailsAction,
   getMonitorLocationsAction,
-  getMonitorLocationsActionFail,
   getMonitorLocationsActionSuccess,
+  getMonitorLocationsActionFail,
 } from '../actions/monitor';
 import { fetchMonitorDetails, fetchMonitorLocations } from '../api';
 import { fetchEffectFactory } from './fetch_effect';

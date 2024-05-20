@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getNetworkFromInfluencers } from '../influencers/get_network_from_influencers';
 import type { Anomalies, AnomaliesByNetwork, Anomaly } from '../types';
 import { isDestinationOrSource } from '../types';
+import { getNetworkFromInfluencers } from '../influencers/get_network_from_influencers';
 
 export const convertAnomaliesToNetwork = (
   anomalies: Anomalies | null,

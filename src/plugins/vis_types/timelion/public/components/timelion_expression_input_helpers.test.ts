@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { ITimelionFunction } from '../../common/types';
+import { SUGGESTION_TYPE, suggest } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { setIndexPatterns } from '../helpers/plugin_services';
-import { SUGGESTION_TYPE, suggest } from './timelion_expression_input_helpers';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { ITimelionFunction } from '../../common/types';
 
 describe('Timelion expression suggestions', () => {
   setIndexPatterns({} as DataViewsContract);

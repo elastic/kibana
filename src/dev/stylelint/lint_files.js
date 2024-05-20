@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import path from 'path';
-import { createFailError } from '@kbn/dev-cli-errors';
-import { safeLoad } from 'js-yaml';
 import stylelint from 'stylelint';
+import path from 'path';
+import { safeLoad } from 'js-yaml';
+import fs from 'fs';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 // load the include globs from .stylelintrc and convert them to regular expressions for filtering files
 const stylelintPath = path.resolve(__dirname, '..', '..', '..', '.stylelintrc');

@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiModal } from '@elastic/eui';
+import { EuiModal, EuiEmptyPrompt } from '@elastic/eui';
 
 import { GroupManagerModal } from './group_manager_modal';
 

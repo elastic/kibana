@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { encode } from '@kbn/rison';
 import Handlebars, {
   type CompileOptions,
   type HelperOptions,
@@ -13,7 +14,6 @@ import Handlebars, {
   compileFnName,
 } from '@kbn/handlebars';
 import { i18n } from '@kbn/i18n';
-import { encode } from '@kbn/rison';
 import { emptyLabel } from '../../../../common/empty_label';
 
 const handlebars = Handlebars.create();

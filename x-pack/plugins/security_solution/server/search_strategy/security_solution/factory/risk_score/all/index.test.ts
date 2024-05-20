@@ -8,17 +8,17 @@
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import type { IEsSearchResponse } from '@kbn/search-types';
-import { get } from 'lodash/fp';
 import { riskScore } from '.';
-import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
-import { RiskQueries } from '../../../../../../common/api/search_strategy';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { HostRiskScore } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../../common/search_strategy';
-import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import * as buildQuery from './query.risk_score.dsl';
+import { get } from 'lodash/fp';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
+import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
+import { RiskQueries } from '../../../../../../common/api/search_strategy';
 
 export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   rawResponse: {

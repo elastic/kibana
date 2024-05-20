@@ -7,17 +7,17 @@
  */
 
 import { EuiConfirmModal } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import moment from 'moment';
 import React, { useState } from 'react';
-import { IClickActionDescriptor } from '..';
-import extendSessionIcon from '../../icons/extend_session.svg';
+import moment from 'moment';
+import { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { UISession } from '../../types';
+import { IClickActionDescriptor } from '..';
 import { OnActionDismiss } from './types';
+import { UISession } from '../../types';
+import extendSessionIcon from '../../icons/extend_session.svg';
 
 interface ExtendButtonProps {
   searchSession: UISession;

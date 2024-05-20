@@ -1,16 +1,3 @@
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { formatDuration } from '@kbn/alerting-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -18,17 +5,30 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
  * 2.0.
  */
 import React, { useState, useEffect, useMemo } from 'react';
+import {
+  EuiText,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiTitle,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
+import { formatDuration } from '@kbn/alerting-plugin/common';
+import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
+import { RuleDefinitionProps } from '../../../../types';
 import { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleDefinitionProps } from '../../../../types';
-import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import {
   hasAllPrivilege,
   hasExecuteActionsCapability,
   hasShowActionsCapability,
 } from '../../../lib/capabilities';
-import { RuleEdit } from '../../rule_form';
 import { RuleActions } from './rule_actions';
+import { RuleEdit } from '../../rule_form';
 
 export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   rule,

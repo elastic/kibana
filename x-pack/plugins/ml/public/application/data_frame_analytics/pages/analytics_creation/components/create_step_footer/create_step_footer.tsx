@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import {
-  DATA_FRAME_TASK_STATE,
   type DataFrameAnalysisConfigType,
+  DATA_FRAME_TASK_STATE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
-import { useMlKibana } from '../../../../../contexts/kibana';
-import { ml } from '../../../../../services/ml_api_service';
 import { getDataFrameAnalyticsProgressPhase } from '../../../analytics_management/components/analytics_list/common';
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
+import { useMlKibana } from '../../../../../contexts/kibana';
+import { ml } from '../../../../../services/ml_api_service';
 import { BackToListPanel } from '../back_to_list_panel';
 import { ViewResultsPanel } from '../view_results_panel';
 import { ProgressStats } from './progress_stats';
+import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 

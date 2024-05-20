@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { LICENSE_OVERRIDES } from '../../license_checker';
 import { getInstalledPackages } from '../../npm';
+import { LICENSE_OVERRIDES } from '../../license_checker';
 
-import { generateBuildNoticeText, generateNoticeFromSource } from '../../notice';
-import { Task, write } from '../lib';
+import { write, Task } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
+import { generateNoticeFromSource, generateBuildNoticeText } from '../../notice';
 
 export const CreateNoticeFile: Task = {
   description: 'Generating NOTICE.txt file',

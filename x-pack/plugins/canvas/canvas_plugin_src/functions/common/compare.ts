@@ -6,7 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { getFunctionErrors, getFunctionHelp } from '../../../i18n';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Operation {
   EQ = 'eq',

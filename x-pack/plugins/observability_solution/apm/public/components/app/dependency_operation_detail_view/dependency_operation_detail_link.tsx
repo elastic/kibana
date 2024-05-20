@@ -1,5 +1,3 @@
-import { EuiLink } from '@elastic/eui';
-import { TypeOf } from '@kbn/typed-react-router-config';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { TypeOf } from '@kbn/typed-react-router-config';
  * 2.0.
  */
 import React from 'react';
+import { EuiLink } from '@elastic/eui';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { ApmRoutes } from '../../routing/apm_route_config';
 

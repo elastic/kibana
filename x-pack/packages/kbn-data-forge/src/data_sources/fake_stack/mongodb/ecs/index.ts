@@ -8,12 +8,12 @@
 import { MONGODB } from '../../common/constants';
 
 import base from './generated/elasticsearch/composable/component/base.json';
-import host from './generated/elasticsearch/composable/component/host.json';
 import log from './generated/elasticsearch/composable/component/log.json';
+import host from './generated/elasticsearch/composable/component/host.json';
 import mongodb from './generated/elasticsearch/composable/component/mongodb.json';
 
-import { IndexTemplateDef } from '../../../../types';
 import template from './generated/elasticsearch/composable/template.json';
+import { IndexTemplateDef } from '../../../../types';
 
 const ECS_VERSION = template._meta.ecs_version;
 

@@ -8,9 +8,9 @@
 jest.mock('axios', () => ({
   create: jest.fn(),
 }));
+import axios from 'axios';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import axios from 'axios';
 import { actionsConfigMock } from '../actions_config.mock';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 

@@ -44,7 +44,9 @@
             "tags": [],
             "label": "{\n    createPromise,\n    onResolve = noOp,\n    onReject = noOp,\n    cancelPreviousOn = 'never',\n    triggerOrThrow = 'whenMounted',\n  }",
             "description": [],
-            "signature": ["UseTrackedPromiseArgs<Arguments, Result>"],
+            "signature": [
+              "UseTrackedPromiseArgs<Arguments, Result>"
+            ],
             "path": "packages/kbn-use-tracked-promise/use_tracked_promise.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -57,7 +59,9 @@
             "tags": [],
             "label": "dependencies",
             "description": [],
-            "signature": ["React.DependencyList"],
+            "signature": [
+              "React.DependencyList"
+            ],
             "path": "packages/kbn-use-tracked-promise/use_tracked_promise.ts",
             "deprecated": false,
             "trackAdoption": false,

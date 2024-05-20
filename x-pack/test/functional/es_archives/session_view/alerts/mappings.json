@@ -2,7 +2,8 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".alerts-security.alerts-default": {},
+      ".alerts-security.alerts-default": {
+      },
       ".siem-signals-default": {
         "is_write_index": false
       }

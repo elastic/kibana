@@ -8,8 +8,12 @@
       "acknowledge": "__flag__",
       "type_query_string": ""
     },
-    "methods": ["POST"],
-    "patterns": ["_license/start_trial"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_license/start_trial"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/start-trial.html",
     "availability": {
       "stack": true,

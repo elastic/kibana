@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import sinon from 'sinon';
-import { DataFilters, DataRequestMeta } from '../../../../common/descriptor_types';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { DataRequestContext } from '../../../actions';
+import { DataRequestMeta, DataFilters } from '../../../../common/descriptor_types';
 
 export class MockSyncContext implements DataRequestContext {
   dataFilters: DataFilters;

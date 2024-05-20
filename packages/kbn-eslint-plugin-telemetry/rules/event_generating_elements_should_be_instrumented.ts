@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 
 import { checkNodeForExistingDataTestSubjProp } from '../helpers/check_node_for_existing_data_test_subj_prop';
+import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getAppName } from '../helpers/get_app_name';
 import { getFunctionName } from '../helpers/get_function_name';
-import { getIntentFromNode } from '../helpers/get_intent_from_node';
 
 export const EVENT_GENERATING_ELEMENTS = [
   'EuiButton',

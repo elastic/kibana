@@ -5,10 +5,10 @@
       "index": {
         "__template": {
           "names": [],
-          "privileges": []
-        },
+          "privileges": [] 
+        },        
         "names": [],
-        "privileges": []
+        "privileges": [] 
       },
       "application": {
         "__template": {
@@ -20,6 +20,6 @@
         "privileges": [],
         "resources": []
       }
-    }
+    }	
   }
 }

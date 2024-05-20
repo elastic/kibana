@@ -12,19 +12,19 @@ import moment from 'moment';
 import queryString from 'query-string';
 
 import {
-  EuiButton,
-  EuiDatePicker,
-  EuiDatePickerRange,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelect,
+  EuiDatePickerRange,
+  EuiDatePicker,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AnalyticsLogic } from '..';
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import { DEFAULT_END_DATE, DEFAULT_START_DATE, SERVER_DATE_FORMAT } from '../constants';
+import { DEFAULT_START_DATE, DEFAULT_END_DATE, SERVER_DATE_FORMAT } from '../constants';
 import { convertTagsToSelectOptions } from '../utils';
 
 export const AnalyticsFilters: React.FC = () => {

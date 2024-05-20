@@ -8,10 +8,10 @@
 import { FILE_FORMATS } from '../../../../../../common/constants';
 
 import {
-  CHARSET_OPTIONS,
+  TIMESTAMP_OPTIONS,
   DELIMITER_OPTIONS,
   QUOTE_OPTIONS,
-  TIMESTAMP_OPTIONS,
+  CHARSET_OPTIONS,
 } from './option_lists';
 
 function getOptions(list: string[]) {

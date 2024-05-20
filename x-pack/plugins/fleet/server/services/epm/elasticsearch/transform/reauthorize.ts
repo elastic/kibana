@@ -6,17 +6,17 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { sortBy, uniqBy } from 'lodash';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { Installation } from '../../../../../common';
-import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
+import type { Installation } from '../../../../../common';
+import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 
 import { retryTransientEsErrors } from '../retry';
 

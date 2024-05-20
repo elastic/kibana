@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { getApmIndexPatterns } from '../bundle/get_indices';
 
 export async function getDiagnosticsPrivileges({

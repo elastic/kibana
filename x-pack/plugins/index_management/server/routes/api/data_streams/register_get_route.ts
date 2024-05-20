@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { addBasePath } from '..';
 import { deserializeDataStream, deserializeDataStreamList } from '../../../../common/lib';
 import { EnhancedDataStreamFromEs } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '..';
 
 const enhanceDataStreams = ({
   dataStreams,

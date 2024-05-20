@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
-import { makeNestedLabel } from './lib/make_nested_label';
-import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { MetricAggType } from './metric_agg_type';
-import { METRIC_TYPES } from './metric_agg_types';
 import { aggSerialDiffFnName } from './serial_diff_fn';
+import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
+import { makeNestedLabel } from './lib/make_nested_label';
+import { METRIC_TYPES } from './metric_agg_types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
 export interface CommonAggParamsSerialDiff extends BaseAggParams {
   buckets_path?: string;

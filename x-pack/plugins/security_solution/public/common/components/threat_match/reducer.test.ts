@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getDefaultEmptyEntry } from './helpers';
+import type { ThreatMapEntries } from './types';
 import type { State } from './reducer';
 import { reducer } from './reducer';
-import type { ThreatMapEntries } from './types';
+import { getDefaultEmptyEntry } from './helpers';
+import type { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),

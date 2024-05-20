@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
+import { EuiHorizontalRule } from '@elastic/eui';
 
-import { ExtraSettings } from './extra';
 import { AdvancedDetectors } from './metric_selection';
 import { AdvancedDetectorsSummary } from './metric_selection_summary';
 import { AdvancedSettings } from './settings';
+import { ExtraSettings } from './extra';
 
 interface Props {
   isActive: boolean;

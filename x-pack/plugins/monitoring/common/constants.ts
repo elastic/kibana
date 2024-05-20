@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertParamType } from './enums';
 import { CommonAlertParamDetail, ExpressionConfig } from './types/alerts';
+import { AlertParamType } from './enums';
 import { validateDuration } from './validate_duration';
 
 /**

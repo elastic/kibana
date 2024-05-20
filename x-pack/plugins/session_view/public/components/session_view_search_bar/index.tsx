@@ -1,6 +1,3 @@
-import { EuiPagination, EuiSearchBar } from '@elastic/eui';
-import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,8 +5,11 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React, { useState, useCallback } from 'react';
-import { SessionViewTelemetryKey } from '../../types';
+import { EuiSearchBar, EuiPagination } from '@elastic/eui';
+import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useStyles } from './styles';
+import { SessionViewTelemetryKey } from '../../types';
 
 interface SessionViewSearchBarDeps {
   searchQuery: string;

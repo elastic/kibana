@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { Ast, fromExpression } from '@kbn/interpreter';
-import { SavedLensInput } from '../../../functions/external/saved_lens';
 import { toExpression } from './lens';
+import { SavedLensInput } from '../../../functions/external/saved_lens';
+import { fromExpression, Ast } from '@kbn/interpreter';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
 const baseEmbeddableInput = {
   id: 'elementId',

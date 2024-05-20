@@ -6,13 +6,13 @@
  */
 import { Logger } from '@kbn/core/server';
 import stats from 'stats-lite';
-import { RuleDomain } from '../application/rule/types';
 import {
-  RawRuleMonitoring,
   RuleMonitoring,
+  RawRuleMonitoring,
   RuleMonitoringHistory,
   RuleMonitoringLastRunMetrics,
 } from '../types';
+import { RuleDomain } from '../application/rule/types';
 
 const INITIAL_LAST_RUN_METRICS: RuleMonitoringLastRunMetrics = {
   duration: 0,

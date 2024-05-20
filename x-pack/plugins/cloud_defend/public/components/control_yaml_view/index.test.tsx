@@ -1,4 +1,3 @@
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,18 +5,19 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render } from '@testing-library/react';
 import '@kbn/code-editor-mock/jest_helper';
-import { ControlYamlView } from '.';
-import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../../common/constants';
-import {
-  MOCK_YAML_INVALID_ACTIONS,
-  MOCK_YAML_INVALID_CONFIGURATION,
-  MOCK_YAML_INVALID_STRING_ARRAY_CONDITION,
-  MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
-  getCloudDefendNewPolicyMock,
-} from '../../test/mocks';
 import { TestProvider } from '../../test/test_provider';
+import {
+  getCloudDefendNewPolicyMock,
+  MOCK_YAML_INVALID_CONFIGURATION,
+  MOCK_YAML_INVALID_ACTIONS,
+  MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
+  MOCK_YAML_INVALID_STRING_ARRAY_CONDITION,
+} from '../../test/mocks';
+import { ControlYamlView } from '.';
 import * as i18n from './translations';
+import { MAX_SELECTORS_AND_RESPONSES_PER_TYPE } from '../../common/constants';
 
 describe('<ControlYamlView />', () => {
   const onChange = jest.fn();

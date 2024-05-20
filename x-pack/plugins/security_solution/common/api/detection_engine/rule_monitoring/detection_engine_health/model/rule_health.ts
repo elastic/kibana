@@ -7,7 +7,7 @@
 
 import type { RuleResponse } from '../../../model';
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
-import type { HealthHistory, HealthOverviewStats } from './health_stats';
+import type { HealthOverviewStats, HealthHistory } from './health_stats';
 
 /**
  * Health calculation parameters for a given rule.

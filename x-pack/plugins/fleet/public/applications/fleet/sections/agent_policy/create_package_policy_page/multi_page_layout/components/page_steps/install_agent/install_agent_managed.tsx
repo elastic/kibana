@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiLink, EuiLoadingSpinner, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiText, EuiLink, EuiSteps, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
-import { useAgentVersion, useStartServices } from '../../../../../../../../../hooks';
 import { Error } from '../../../../../../../components';
+import { useStartServices, useAgentVersion } from '../../../../../../../../../hooks';
 
 import { CreatePackagePolicyBottomBar, NotObscuredByBottomBar } from '../..';
 import {
-  AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
+  AgentEnrollmentConfirmationStep,
 } from '../../../../../../../../../components/agent_enrollment_flyout/steps';
 import { ManualInstructions } from '../../../../../../../../../components/enrollment_instructions';
 

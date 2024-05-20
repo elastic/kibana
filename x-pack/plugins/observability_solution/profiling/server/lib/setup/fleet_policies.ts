@@ -9,8 +9,8 @@ import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services
 import {
   COLLECTOR_PACKAGE_POLICY_NAME,
   ELASTIC_CLOUD_APM_POLICY,
-  SYMBOLIZER_PACKAGE_POLICY_NAME,
   getApmPolicy,
+  SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from '@kbn/profiling-data-access-plugin/common';
 import { omit } from 'lodash';
 import { PackageInputType } from '../..';

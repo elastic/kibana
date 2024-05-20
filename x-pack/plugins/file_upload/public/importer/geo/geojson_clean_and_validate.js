@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import rewind from '@mapbox/geojson-rewind';
 import * as jsts from 'jsts';
+import rewind from '@mapbox/geojson-rewind';
 
 // The GeoJSON specification suggests limiting coordinate precision to six decimal places
 // See https://datatracker.ietf.org/doc/html/rfc7946#section-11.2

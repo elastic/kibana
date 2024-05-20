@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsAPIRequest, MetricsExplorerRequestBody } from '../../../../common/http_api';
+import { MetricsExplorerRequestBody, MetricsAPIRequest } from '../../../../common/http_api';
 import { convertRequestToMetricsAPIOptions } from './convert_request_to_metrics_api_options';
 
 const BASE_REQUEST: MetricsExplorerRequestBody = {

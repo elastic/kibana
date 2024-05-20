@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { CodeEditorProps } from '@kbn/code-editor';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { shallow } from 'enzyme';
 import React from 'react';
 import { of } from 'rxjs';
-import { SourceDocument } from '../components/source_document';
+import { shallow } from 'enzyme';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorProps } from '@kbn/code-editor';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { SourceDocument } from '../components/source_document';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');

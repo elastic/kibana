@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { screen, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
 import {
+  render,
   forNearestButton,
   makeUptimePermissionsCore,
-  render,
 } from '../../../lib/helper/rtl_helpers';
 import { ToggleAlertFlyoutButtonComponent } from './toggle_alert_flyout_button';
 import { ToggleFlyoutTranslations } from './translations';

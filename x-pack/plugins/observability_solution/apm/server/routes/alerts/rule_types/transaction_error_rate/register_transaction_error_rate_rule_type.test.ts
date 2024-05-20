@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createRuleTypeMocks } from '../../test_utils';
 import { registerTransactionErrorRateRuleType } from './register_transaction_error_rate_rule_type';
+import { createRuleTypeMocks } from '../../test_utils';
 
 describe('Transaction error rate alert', () => {
   it("doesn't send an alert when rate is less than threshold", async () => {

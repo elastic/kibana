@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import React, { PropsWithChildren } from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
+import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
 import { CustomIntegrationsServicesProvider } from './services';
 import { servicesFactory } from './services/stub';
-import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
 
 function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsSetup> {
   const mock: jest.Mocked<CustomIntegrationsSetup> = {

@@ -1,14 +1,3 @@
-import {
-  EuiBadge,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -16,13 +5,24 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { useEffect, useCallback, useMemo } from 'react';
-import type { ProcessEvent, ProcessEventAlert, ProcessEventAlertCategory } from '../../../common';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiIcon,
+  EuiText,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiPanel,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_ICONS } from '../../../common/constants';
-import { getAlertIconTooltipContent } from '../../../common/utils/alert_icon_tooltip_content';
-import { getAlertCategoryDisplayText } from '../../utils/alert_category_display_text';
+import type { ProcessEvent, ProcessEventAlert, ProcessEventAlertCategory } from '../../../common';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
+import { getAlertCategoryDisplayText } from '../../utils/alert_category_display_text';
+import { getAlertIconTooltipContent } from '../../../common/utils/alert_icon_tooltip_content';
 export interface ProcessTreeAlertDeps {
   alert: ProcessEvent;
   isInvestigated: boolean;

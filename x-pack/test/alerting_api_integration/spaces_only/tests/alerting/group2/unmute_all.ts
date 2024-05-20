@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   AlertUtils,
-  ObjectRemover,
   checkAAD,
-  getTestRuleData,
   getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
 } from '../../../../common/lib';
-import { Spaces } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUnmuteTests({ getService }: FtrProviderContext) {

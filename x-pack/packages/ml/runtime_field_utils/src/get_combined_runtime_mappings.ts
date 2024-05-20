@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { type RuntimeMappings, isRuntimeMappings } from './is_runtime_mappings';
+import { isRuntimeMappings, type RuntimeMappings } from './is_runtime_mappings';
 
 /**
  * Return a map of runtime_mappings for each of the data view field provided

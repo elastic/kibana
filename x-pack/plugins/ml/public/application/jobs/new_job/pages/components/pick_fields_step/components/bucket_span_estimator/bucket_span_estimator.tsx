@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
 import type { FC } from 'react';
 import React, { useState, useEffect, useContext } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton } from '@elastic/eui';
+import { MLCATEGORY } from '@kbn/ml-anomaly-utils';
 import { isAdvancedJobCreator } from '../../../../../common/job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
 
-import { ESTIMATE_STATUS, useEstimateBucketSpan } from './estimate_bucket_span';
+import { useEstimateBucketSpan, ESTIMATE_STATUS } from './estimate_bucket_span';
 
 interface Props {
   setEstimating(estimating: boolean): void;

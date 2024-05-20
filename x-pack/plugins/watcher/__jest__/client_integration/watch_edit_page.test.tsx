@@ -9,11 +9,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { getWatch } from '../../__fixtures__';
-import { API_BASE_PATH } from '../../common/constants';
 import { defaultWatch } from '../../public/application/models/watch';
-import { pageHelpers, setupEnvironment } from './helpers';
-import { WATCH, WATCH_ID } from './helpers/jest_constants';
+import { setupEnvironment, pageHelpers } from './helpers';
 import type { WatchEditTestBed } from './helpers/watch_edit_page.helpers';
+import { WATCH, WATCH_ID } from './helpers/jest_constants';
+import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.watchEditPage;
 

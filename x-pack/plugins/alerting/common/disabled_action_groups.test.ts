@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RecoveredActionGroup } from './builtin_action_groups';
 import { isActionGroupDisabledForActionTypeId } from './disabled_action_groups';
+import { RecoveredActionGroup } from './builtin_action_groups';
 
 test('returns false if action group id has no disabled types', () => {
   expect(isActionGroupDisabledForActionTypeId('enabledActionGroup', '.jira')).toBeFalsy();

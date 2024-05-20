@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import type { SavedQuery } from '@kbn/data-plugin/public';
-import { FilterManager } from '@kbn/data-plugin/public';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { HomePage } from '.';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import type { Filter } from '@kbn/es-query';
-import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
-import { TestProviders, createMockStore, mockGlobalState } from '../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { inputsActions } from '../../common/store/inputs';
 import {
+  setSearchBarFilter,
   setAbsoluteRangeDatePicker,
   setRelativeRangeDatePicker,
-  setSearchBarFilter,
 } from '../../common/store/inputs/actions';
-import { InputsModelId } from '../../common/store/inputs/constants';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { Filter } from '@kbn/es-query';
 import type { TimeRange, UrlInputsModel } from '../../common/store/inputs/model';
-import { timelineDefaults } from '../../timelines/store/defaults';
-import type { TimelineUrl } from '../../timelines/store/model';
-import { TopValuesPopoverService } from '../components/top_values_popover/top_values_popover_service';
 import { SecurityPageName } from '../types';
+import type { TimelineUrl } from '../../timelines/store/model';
+import { timelineDefaults } from '../../timelines/store/defaults';
+import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { TopValuesPopoverService } from '../components/top_values_popover/top_values_popover_service';
 
 jest.mock('../../common/store/inputs/actions');
 

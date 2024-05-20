@@ -12,10 +12,9 @@ import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
-import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import type {
-  AuthToolkit,
   AuthenticationHandler,
+  AuthToolkit,
   CustomBrandingSetup,
   ElasticsearchServiceSetup,
   HttpServiceSetup,
@@ -36,10 +35,13 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import type { UnauthorizedError } from '@kbn/es-errors';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { AuthenticationResult } from './authentication_result';
+import { AuthenticationService } from './authentication_service';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
@@ -53,8 +55,6 @@ import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
-import { AuthenticationResult } from './authentication_result';
-import { AuthenticationService } from './authentication_service';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;

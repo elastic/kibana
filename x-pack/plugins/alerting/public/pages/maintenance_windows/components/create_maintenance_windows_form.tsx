@@ -1,3 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import moment from 'moment';
+import {
+  FIELD_TYPES,
+  Form,
+  getUseField,
+  useForm,
+  useFormData,
+  UseMultiFields,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -11,44 +28,27 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
-import type { Filter } from '@kbn/es-query';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import {
-  FIELD_TYPES,
-  Form,
-  UseMultiFields,
-  getUseField,
-  useForm,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import moment from 'moment';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
-import { isScopedQueryError } from '../../../../common';
-import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
-import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
-import { useGetRuleTypes } from '../../../hooks/use_get_rule_types';
-import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenance_window';
-import { useUiSetting } from '../../../utils/kibana_react';
-import { convertToRRule } from '../helpers/convert_to_rrule';
-import * as i18n from '../translations';
-import { DatePickerRangeField } from './fields/date_picker_range_field';
-import { MaintenanceWindowCategorySelection } from './maintenance_window_category_selection';
-import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
-import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
-import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';
+import type { Filter } from '@kbn/es-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { FormProps, schema } from './schema';
+import * as i18n from '../translations';
+import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';
 import { SubmitButton } from './submit_button';
+import { convertToRRule } from '../helpers/convert_to_rrule';
+import { isScopedQueryError } from '../../../../common';
+import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
+import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenance_window';
+import { useGetRuleTypes } from '../../../hooks/use_get_rule_types';
+import { useUiSetting } from '../../../utils/kibana_react';
+import { DatePickerRangeField } from './fields/date_picker_range_field';
+import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
+import { MaintenanceWindowCategorySelection } from './maintenance_window_category_selection';
+import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
+import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 
 const UseField = getUseField({ component: Field });
 

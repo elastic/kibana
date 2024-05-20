@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import React, { Fragment, memo, useCallback, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import { GraphServices } from '../../application';
-import { colorChoices } from '../../helpers/style_choices';
-import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
-import { getEditUrl } from '../../services/url';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { SearchBar } from '../search_bar';
 import {
   GraphState,
   hasFieldsSelector,
   workspaceInitializedSelector,
 } from '../../state_management';
-import { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
-import { GraphWorkspaceSavedObject, Workspace } from '../../types';
-import { ControlPanel } from '../control_panel';
 import { FieldManager } from '../field_manager';
-import { GraphTitle } from '../graph_title';
-import { GraphVisualization } from '../graph_visualization';
-import { GuidancePanel } from '../guidance_panel';
-import { SearchBar } from '../search_bar';
+import { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';
+import { GuidancePanel } from '../guidance_panel';
+import { GraphTitle } from '../graph_title';
+import { GraphWorkspaceSavedObject, Workspace } from '../../types';
+import { GraphServices } from '../../application';
+import { ControlPanel } from '../control_panel';
+import { GraphVisualization } from '../graph_visualization';
+import { colorChoices } from '../../helpers/style_choices';
+import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
+import { getEditUrl } from '../../services/url';
 
 /**
  * Each component, which depends on `worksapce`

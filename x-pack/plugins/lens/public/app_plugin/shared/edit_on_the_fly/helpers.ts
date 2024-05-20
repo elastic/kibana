@@ -1,5 +1,3 @@
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,15 +5,17 @@ import type { AggregateQuery } from '@kbn/es-query';
  * 2.0.
  */
 import {
+  getIndexPatternFromESQLQuery,
   getESQLAdHocDataview,
   getESQLQueryColumns,
-  getIndexPatternFromESQLQuery,
 } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import { suggestionsApi } from '../../../lens_suggestions_api';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
+import { suggestionsApi } from '../../../lens_suggestions_api';
 
 export const getSuggestions = async (
   query: AggregateQuery,

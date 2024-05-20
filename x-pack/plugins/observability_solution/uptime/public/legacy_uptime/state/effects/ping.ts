@@ -6,7 +6,7 @@
  */
 
 import { takeLatest } from 'redux-saga/effects';
-import { getPingHistogram, getPings, getPingsFail, getPingsSuccess } from '../actions';
+import { getPingHistogram, getPings, getPingsSuccess, getPingsFail } from '../actions';
 import { fetchPingHistogram, fetchPings } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 

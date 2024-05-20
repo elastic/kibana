@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { type FC, type PropsWithChildren } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom/extend-expect';
 import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
-import type { CoreSetup } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import type { CoreSetup } from '@kbn/core/public';
 import { DataGrid, type UseIndexDataReturnType } from '@kbn/ml-data-grid';
-import type { SimpleQuery } from '@kbn/ml-query-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { SimpleQuery } from '@kbn/ml-query-utils';
 
 import { getMlSharedImports } from '../../shared_imports';
 
-import { useIndexData } from './use_index_data';
 import type { SearchItems } from './use_search_items';
+import { useIndexData } from './use_index_data';
 
 jest.mock('../../shared_imports');
 jest.mock('../app_dependencies');

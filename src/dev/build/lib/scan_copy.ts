@@ -10,7 +10,7 @@ import Fs from 'fs';
 import Fsp from 'fs/promises';
 import * as Rx from 'rxjs';
 
-import { assertAbsolute, fsReadDir$, mkdirp } from './fs';
+import { assertAbsolute, mkdirp, fsReadDir$ } from './fs';
 import { type DirRecord, type FileRecord, type Record, SomePath } from './fs_records';
 
 interface Options {

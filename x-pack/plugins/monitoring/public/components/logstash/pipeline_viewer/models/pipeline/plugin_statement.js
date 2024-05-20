@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginElement } from '../list/plugin_element';
 import { Statement } from './statement';
+import { PluginElement } from '../list/plugin_element';
 
 export class PluginStatement extends Statement {
   constructor(vertex) {

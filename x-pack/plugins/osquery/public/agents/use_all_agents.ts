@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 
 import type { Agent } from '@kbn/fleet-plugin/common';
-import { API_VERSIONS } from '../../common/constants';
 import type { processAggregations } from '../../common/utils/aggregations';
+import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 import { useOsqueryPolicies } from './use_osquery_policies';

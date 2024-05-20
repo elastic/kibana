@@ -5,57 +5,57 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { Logger, SavedObject } from '@kbn/core/server';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
+import { ByteSizeValue } from '@kbn/config-schema';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../../common';
-import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
-import { getActionsConfigurationUtilities } from '../actions_config';
-import { actionsConfigMock } from '../actions_config.mock';
-import { ActionsAuthorization } from '../authorization/actions_authorization';
-import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
-import {
-  AuthorizationMode,
-  bulkGetAuthorizationModeBySource,
-  getAuthorizationModeBySource,
-} from '../authorization/get_authorization_mode_by_source';
+import { ActionsClient } from './actions_client';
+import { ExecutorType, ActionType } from '../types';
 import {
   ActionExecutor,
-  ILicenseState,
   TaskRunnerFactory,
+  ILicenseState,
   asHttpRequestExecutionSource,
 } from '../lib';
-import { actionExecutorMock } from '../lib/action_executor.mock';
-import { ConnectorTokenClient } from '../lib/connector_token_client';
-import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
-import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
-import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { actionsConfigMock } from '../actions_config.mock';
+import { getActionsConfigurationUtilities } from '../actions_config';
 import { licenseStateMock } from '../lib/license_state.mock';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { actionExecutorMock } from '../lib/action_executor.mock';
+import { v4 as uuidv4 } from 'uuid';
+import { ActionsAuthorization } from '../authorization/actions_authorization';
+import {
+  getAuthorizationModeBySource,
+  AuthorizationMode,
+  bulkGetAuthorizationModeBySource,
+} from '../authorization/get_authorization_mode_by_source';
+import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
 import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
+import { ConnectorTokenClient } from '../lib/connector_token_client';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { Logger, SavedObject } from '@kbn/core/server';
+import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
+import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import { OAuthParams } from '../routes/get_oauth_access_token';
-import { ActionType, ExecutorType } from '../types';
-import { ActionsClient } from './actions_client';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
+import { estypes } from '@elastic/elasticsearch';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');

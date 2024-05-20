@@ -10,8 +10,8 @@ import React from 'react';
 
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 
-import { TokensFlexItem } from '../helpers';
 import * as i18n from './translations';
+import { TokensFlexItem } from '../helpers';
 
 export const nilOrUnSet = (value?: string | null) =>
   value == null || value.toLowerCase() === 'unset';

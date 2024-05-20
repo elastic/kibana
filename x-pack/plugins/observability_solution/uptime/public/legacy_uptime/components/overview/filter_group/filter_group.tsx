@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { EuiFilterGroup } from '@elastic/eui';
-import {
-  FieldValueSuggestions,
-  useInspectorContext,
-} from '@kbn/observability-shared-plugin/public';
-import { capitalize } from 'lodash';
 import React, { useCallback, useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { EuiFilterGroup } from '@elastic/eui';
 import styled from 'styled-components';
-import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../../common/constants/client_defaults';
-import { useUptimeDataView } from '../../../contexts/uptime_data_view_context';
-import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
-import { useGetUrlParams } from '../../../hooks';
+import { capitalize } from 'lodash';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import {
+  useInspectorContext,
+  FieldValueSuggestions,
+} from '@kbn/observability-shared-plugin/public';
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { SelectedFilters } from './selected_filters';
+import { useUptimeDataView } from '../../../contexts/uptime_data_view_context';
+import { useGetUrlParams } from '../../../hooks';
+import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../../common/constants/client_defaults';
+import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
 
 const Container = styled(EuiFilterGroup)`
   margin-bottom: 10px;

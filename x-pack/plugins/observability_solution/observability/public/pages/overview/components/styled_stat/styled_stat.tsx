@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiStat } from '@elastic/eui';
-import { EuiStatProps } from '@elastic/eui/src/components/stat/stat';
-import React from 'react';
 import styled from 'styled-components';
+import { EuiStat } from '@elastic/eui';
+import React from 'react';
+import { EuiStatProps } from '@elastic/eui/src/components/stat/stat';
 
 const Stat = styled(EuiStat)`
   .euiStat__title {

@@ -7,8 +7,8 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { Action } from './actions';
 import type { State } from './table_list_view_table';
+import type { Action } from './actions';
 
 export function getReducer<T extends UserContentCommonSchema>() {
   let sortColumnChanged = false;

@@ -6,7 +6,9 @@
         "parentPluginId": "savedObjects",
         "id": "def-public.SavedObjectSaveModal",
         "type": "Class",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectSaveModal",
         "description": [],
         "signature": [
@@ -195,7 +197,9 @@
             "tags": [],
             "label": "render",
             "description": [],
-            "signature": ["() => JSX.Element"],
+            "signature": [
+              "() => JSX.Element"
+            ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -281,7 +285,9 @@
             "tags": [],
             "label": "isTitleDuplicateConfirmed",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -294,7 +300,9 @@
             "tags": [],
             "label": "onTitleDuplicate",
             "description": [],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -324,7 +332,9 @@
             "tags": [],
             "label": "startServices",
             "description": [],
-            "signature": ["StartServices"],
+            "signature": [
+              "StartServices"
+            ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -338,10 +348,14 @@
         "parentPluginId": "savedObjects",
         "id": "def-public.isErrorNonFatal",
         "type": "Function",
-        "tags": ["return"],
+        "tags": [
+          "return"
+        ],
         "label": "isErrorNonFatal",
         "description": [],
-        "signature": ["(error: { message: string; }) => boolean"],
+        "signature": [
+          "(error: { message: string; }) => boolean"
+        ],
         "path": "src/plugins/saved_objects/public/saved_object/helpers/save_saved_object.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -425,7 +439,9 @@
         "parentPluginId": "savedObjects",
         "id": "def-public.saveWithConfirmation",
         "type": "Function",
-        "tags": ["resolved"],
+        "tags": [
+          "resolved"
+        ],
         "label": "saveWithConfirmation",
         "description": [
           "\nAttempts to create the current object using the serialized source. If an object already\nexists, a warning message requests an overwrite confirmation."
@@ -528,7 +544,9 @@
                 "tags": [],
                 "label": "getEsType",
                 "description": [],
-                "signature": ["() => string"],
+                "signature": [
+                  "() => string"
+                ],
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -565,7 +583,9 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": ["- options to pass to the saved object create method"],
+            "description": [
+              "- options to pass to the saved object create method"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-browser",
@@ -640,7 +660,9 @@
             "tags": [],
             "label": "startServices",
             "description": [],
-            "signature": ["StartServices"],
+            "signature": [
+              "StartServices"
+            ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -688,7 +710,9 @@
             "tags": [],
             "label": "Wrapper",
             "description": [],
-            "signature": ["React.FC<{ children?: React.ReactNode; }> | undefined"],
+            "signature": [
+              "React.FC<{ children?: React.ReactNode; }> | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -751,7 +775,9 @@
             "tags": [],
             "label": "onTitleDuplicate",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -790,7 +816,9 @@
             "tags": [],
             "label": "originatingApp",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -802,7 +830,9 @@
             "tags": [],
             "label": "getAppNameFromId",
             "description": [],
-            "signature": ["((appId: string) => string | undefined) | undefined"],
+            "signature": [
+              "((appId: string) => string | undefined) | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -814,7 +844,9 @@
                 "tags": [],
                 "label": "appId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -830,7 +862,9 @@
             "tags": [],
             "label": "originatingAppName",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -842,7 +876,9 @@
             "tags": [],
             "label": "returnToOriginSwitchLabel",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -854,7 +890,9 @@
             "tags": [],
             "label": "documentInfo",
             "description": [],
-            "signature": ["SaveModalDocumentInfo"],
+            "signature": [
+              "SaveModalDocumentInfo"
+            ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -877,7 +915,9 @@
             "tags": [],
             "label": "onClose",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -960,7 +1000,9 @@
         "parentPluginId": "savedObjects",
         "id": "def-public.SavedObject",
         "type": "Interface",
-        "tags": ["deprecated"],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObject",
         "description": [],
         "signature": [
@@ -1039,7 +1081,9 @@
             "tags": [],
             "label": "_source",
             "description": [],
-            "signature": ["{ [x: string]: unknown; }"],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1075,7 +1119,9 @@
                 "tags": [],
                 "label": "resp",
                 "description": [],
-                "signature": ["EsResponse"],
+                "signature": [
+                  "EsResponse"
+                ],
                 "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1102,7 +1148,11 @@
             "tags": [],
             "label": "creationOpts",
             "description": [],
-            "signature": ["(opts: ", "SavedObjectCreationOpts", ") => Record<string, unknown>"],
+            "signature": [
+              "(opts: ",
+              "SavedObjectCreationOpts",
+              ") => Record<string, unknown>"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1114,7 +1164,9 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": ["SavedObjectCreationOpts"],
+                "signature": [
+                  "SavedObjectCreationOpts"
+                ],
                 "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1130,7 +1182,9 @@
             "tags": [],
             "label": "defaults",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1142,7 +1196,9 @@
             "tags": [],
             "label": "delete",
             "description": [],
-            "signature": ["(() => Promise<{}>) | undefined"],
+            "signature": [
+              "(() => Promise<{}>) | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1156,7 +1212,9 @@
             "tags": [],
             "label": "destroy",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1170,7 +1228,9 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1184,7 +1244,9 @@
             "tags": [],
             "label": "getEsType",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1198,7 +1260,9 @@
             "tags": [],
             "label": "getFullPath",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1234,7 +1298,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1250,7 +1316,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1297,7 +1365,9 @@
             "tags": [],
             "label": "isTitleChanged",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1322,7 +1392,9 @@
             "tags": [],
             "label": "migrationVersion",
             "description": [],
-            "signature": ["Record<string, any> | undefined"],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1558,7 +1630,9 @@
             "tags": [],
             "label": "defaults",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1588,7 +1662,9 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": ["SavedObjectAttributesAndRefs"],
+                "signature": [
+                  "SavedObjectAttributesAndRefs"
+                ],
                 "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1642,7 +1718,9 @@
                 "tags": [],
                 "label": "object",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1680,7 +1758,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1692,7 +1772,9 @@
             "tags": [],
             "label": "init",
             "description": [],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1727,7 +1809,9 @@
             "tags": [],
             "label": "mapping",
             "description": [],
-            "signature": ["Record<string, any> | undefined"],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1739,7 +1823,9 @@
             "tags": [],
             "label": "migrationVersion",
             "description": [],
-            "signature": ["Record<string, any> | undefined"],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1751,7 +1837,9 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1785,7 +1873,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1820,8 +1910,12 @@
             "type": "Function",
             "tags": [],
             "label": "getId",
-            "description": ["\nId of the decorator"],
-            "signature": ["() => string"],
+            "description": [
+              "\nId of the decorator"
+            ],
+            "signature": [
+              "() => string"
+            ],
             "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1885,7 +1979,9 @@
             "description": [
               "\nDecorate the saved object instance. Can be used to add additional methods to it.\n"
             ],
-            "signature": ["(object: T) => void"],
+            "signature": [
+              "(object: T) => void"
+            ],
             "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1897,7 +1993,9 @@
                 "tags": [],
                 "label": "object",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1936,7 +2034,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nThe id of the decorator"],
+            "description": [
+              "\nThe id of the decorator"
+            ],
             "path": "src/plugins/saved_objects/public/saved_object/decorators/registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1960,7 +2060,9 @@
             "type": "Function",
             "tags": [],
             "label": "factory",
-            "description": ["\nThe factory to use to create the decorator"],
+            "description": [
+              "\nThe factory to use to create the decorator"
+            ],
             "signature": [
               "(services: ",
               "SavedObjectKibanaServices",
@@ -1986,7 +2088,9 @@
                 "tags": [],
                 "label": "services",
                 "description": [],
-                "signature": ["SavedObjectKibanaServices"],
+                "signature": [
+                  "SavedObjectKibanaServices"
+                ],
                 "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2014,7 +2118,9 @@
             "tags": [],
             "label": "confirmOverwrite",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2026,7 +2132,9 @@
             "tags": [],
             "label": "isTitleDuplicateConfirmed",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2038,7 +2146,9 @@
             "tags": [],
             "label": "onTitleDuplicate",
             "description": [],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2052,7 +2162,9 @@
             "tags": [],
             "label": "returnToOrigin",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2186,7 +2298,9 @@
             "tags": [],
             "label": "services",
             "description": [],
-            "signature": ["SavedObjectKibanaServices"],
+            "signature": [
+              "SavedObjectKibanaServices"
+            ],
             "path": "src/plugins/saved_objects/public/saved_object/decorators/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2203,7 +2317,9 @@
         "description": [
           "\nRepresents the result of trying to persist the saved object.\nContains `error` prop if something unexpected happened (e.g. network error).\nContains an `id` if persisting was successful. If `id` and\n`error` are undefined, persisting was not successful, but the\nmodal can still recover (e.g. the name of the saved object was already taken)."
         ],
-        "signature": ["{ id?: string | undefined; } | { error: Error; }"],
+        "signature": [
+          "{ id?: string | undefined; } | { error: Error; }"
+        ],
         "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -2226,7 +2342,9 @@
           "parentPluginId": "savedObjects",
           "id": "def-public.SavedObjectsStart.SavedObjectClass",
           "type": "Object",
-          "tags": ["deprecated"],
+          "tags": [
+            "deprecated"
+          ],
           "label": "SavedObjectClass",
           "description": [],
           "signature": [

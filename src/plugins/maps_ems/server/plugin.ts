@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from '@kbn/core-lifecycle-server';
-import { Plugin, PluginInitializerContext } from '@kbn/core-plugins-server';
 import { ILicense, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { EMSSettings, LICENSE_CHECK_ID } from '../common';
+import { Plugin, PluginInitializerContext } from '@kbn/core-plugins-server';
+import { CoreSetup } from '@kbn/core-lifecycle-server';
 import { MapConfig } from '../config';
+import { LICENSE_CHECK_ID, EMSSettings } from '../common';
 
 export interface MapsEmsPluginServerSetup {
   config: MapConfig;

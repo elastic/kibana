@@ -59,8 +59,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.datasetQuality.waitUntilSummaryPanelLoaded();
 
       await retry.try(async () => {
-        const summary =
-          await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
+        const summary = await PageObjects.datasetQuality.parseSummaryPanel(
+          excludeKeysFromServerless
+        );
         const { estimatedData, ...restOfSummary } = summary;
         expect(restOfSummary).to.eql({
           datasetHealthPoor: '1',

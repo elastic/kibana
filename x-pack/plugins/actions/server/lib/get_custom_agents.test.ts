@@ -6,12 +6,12 @@
  */
 
 import { Agent as HttpsAgent } from 'https';
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { actionsConfigMock } from '../actions_config.mock';
+import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { actionsConfigMock } from '../actions_config.mock';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const targetHost = 'elastic.co';

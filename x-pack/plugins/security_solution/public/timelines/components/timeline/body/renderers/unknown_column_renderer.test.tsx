@@ -11,12 +11,12 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { TimelineId } from '../../../../../../common/types/timeline';
-import { getEmptyValue } from '../../../../../common/components/empty_value';
-import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
-import { getValues } from './helpers';
+import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { unknownColumnRenderer } from './unknown_column_renderer';
+import { getValues } from './helpers';
+import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
+import { TimelineId } from '../../../../../../common/types/timeline';
 
 const mockTheme = getMockTheme({
   eui: {

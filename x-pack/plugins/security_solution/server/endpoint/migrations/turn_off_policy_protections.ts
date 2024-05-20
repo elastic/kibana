@@ -13,10 +13,10 @@ import {
   ensureOnlyEventCollectionIsAllowed,
   isPolicySetToEventCollectionOnly,
 } from '../../../common/endpoint/models/policy_config_helpers';
-import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
 import type { PolicyData } from '../../../common/endpoint/types';
-import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
+import { getPolicyDataForUpdate } from '../../../common/endpoint/service/policy';
+import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
 export const turnOffPolicyProtectionsIfNotSupported = async (
   esClient: ElasticsearchClient,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson } from '@kbn/repo-info';
 import semver from 'semver';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 export class EsVersion {
   static getDefault() {

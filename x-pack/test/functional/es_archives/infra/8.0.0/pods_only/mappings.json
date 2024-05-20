@@ -2,7 +2,8 @@
   "type": "index",
   "value": {
     "aliases": {
-      "metrics-fake_k8s": {}
+      "metrics-fake_k8s": {
+      }
     },
     "index": "high-cardinality-data-fake_k8s-2022-01-20",
     "mappings": {

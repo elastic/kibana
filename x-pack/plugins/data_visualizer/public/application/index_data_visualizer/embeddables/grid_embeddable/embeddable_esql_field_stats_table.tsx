@@ -5,19 +5,19 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
+import type { DataVisualizerTableState } from '../../../../../common/types';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
 
 import {
   getDefaultESQLDataVisualizerListState,
   useESQLDataVisualizerData,
 } from '../../hooks/esql/use_data_visualizer_esql_data';
-import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_results';
 import type {
   ESQLDataVisualizerGridEmbeddableState,
   ESQLDataVisualizerIndexBasedAppState,
 } from './types';
+import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_results';
 
 const restorableDefaults = getDefaultESQLDataVisualizerListState();
 

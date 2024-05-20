@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import React, { Suspense } from 'react';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 
 import { servicesReady } from '../plugin';
 import { DashboardListingProps } from './types';

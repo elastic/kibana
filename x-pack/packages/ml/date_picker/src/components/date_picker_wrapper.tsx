@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { debounce } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
+import { debounce } from 'lodash';
 
 import type { OnRefreshProps, OnTimeChangeProps } from '@elastic/eui';
 import {
+  useIsWithinMaxBreakpoint,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
   type EuiSuperDatePickerProps,
-  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
-import type { TimeHistoryContract } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { TimeHistoryContract } from '@kbn/data-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../hooks/use_timefilter';
+import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5000;

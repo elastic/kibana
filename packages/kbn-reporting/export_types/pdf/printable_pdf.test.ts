@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Writable } from 'stream';
 import * as Rx from 'rxjs';
+import { Writable } from 'stream';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';

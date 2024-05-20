@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { ErrorCallout } from '.';
 import { getListMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import { savedRuleMock } from '../../../rule_management/logic/mock';
 import { useDisassociateExceptionList } from '../../../rule_management/logic/use_disassociate_exception_list';
+import { ErrorCallout } from '.';
+import { savedRuleMock } from '../../../rule_management/logic/mock';
 
 jest.mock('../../../rule_management/logic/use_disassociate_exception_list');
 

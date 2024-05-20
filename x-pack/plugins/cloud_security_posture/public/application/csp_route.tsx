@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Route } from '@kbn/shared-ux-router';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import { type RouteProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { cloudPosturePages } from '../common/navigation/constants';
-import type { CspPageNavigationItem } from '../common/navigation/types';
 import { useSecuritySolutionContext } from './security_solution_context';
+import type { CspPageNavigationItem } from '../common/navigation/types';
 
 type CspRouteProps = Omit<RouteProps, 'render'> & CspPageNavigationItem;
 

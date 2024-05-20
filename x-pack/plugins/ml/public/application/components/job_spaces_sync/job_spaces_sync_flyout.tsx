@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiText,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import type { SyncResult, SyncSavedObjectResponse } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
-import { useToastNotificationService } from '../../services/toast_notification_service';
+import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { SyncList } from './sync_list';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 export interface Props {
   onClose: () => void;

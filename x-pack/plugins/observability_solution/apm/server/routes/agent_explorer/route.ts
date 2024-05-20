@@ -10,12 +10,12 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
+import { AgentExplorerAgentsResponse, getAgents } from './get_agents';
+import { AgentExplorerAgentInstancesResponse, getAgentInstances } from './get_agent_instances';
 import {
   AgentLatestVersionsResponse,
   fetchAgentsLatestVersion,
 } from './fetch_agents_latest_version';
-import { AgentExplorerAgentInstancesResponse, getAgentInstances } from './get_agent_instances';
-import { AgentExplorerAgentsResponse, getAgents } from './get_agents';
 
 const agentExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/get_agents_per_service',

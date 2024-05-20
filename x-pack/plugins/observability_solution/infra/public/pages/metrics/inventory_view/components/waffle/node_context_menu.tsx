@@ -9,24 +9,24 @@ import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
-import { findInventoryFields, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
+import React, { useMemo, useState } from 'react';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import {
-  ActionMenuDivider,
   Section,
-  SectionLink,
   SectionLinkProps,
-  SectionLinks,
-  SectionSubtitle,
   SectionTitle,
+  SectionSubtitle,
+  SectionLinks,
+  SectionLink,
+  ActionMenuDivider,
   useLinkProps,
 } from '@kbn/observability-shared-plugin/public';
-import React, { useMemo, useState } from 'react';
-import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
+import { findInventoryModel, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { useNodeDetailsRedirect } from '../../../../link_to';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';

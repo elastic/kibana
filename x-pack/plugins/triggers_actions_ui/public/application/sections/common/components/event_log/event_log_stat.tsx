@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 
 export const EventLogStat = ({
   title,

@@ -6,12 +6,12 @@
  */
 
 import {
-  validateCATrustedFingerPrint,
   validateESHosts,
-  validateKafkaHeaders,
-  validateKafkaHosts,
   validateLogstashHosts,
   validateYamlConfig,
+  validateCATrustedFingerPrint,
+  validateKafkaHeaders,
+  validateKafkaHosts,
 } from './output_form_validators';
 
 describe('Output form validation', () => {

@@ -9,9 +9,9 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { TimelineType } from '../../../../../../common/api/timeline';
 
 import {
-  createMockConfig,
-  requestContextMock,
   serverMock,
+  requestContextMock,
+  createMockConfig,
 } from '../../../../detection_engine/routes/__mocks__';
 
 import { mockGetCurrentUser, mockGetDraftTimelineValue } from '../../../__mocks__/import_timelines';

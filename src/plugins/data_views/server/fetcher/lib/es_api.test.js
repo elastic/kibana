@@ -12,7 +12,7 @@ import sinon from 'sinon';
 import { convertEsError } from './errors';
 import * as convertEsErrorNS from './errors';
 
-import { callFieldCapsApi, callIndexAliasApi } from './es_api';
+import { callIndexAliasApi, callFieldCapsApi } from './es_api';
 
 describe('server/index_patterns/service/lib/es_api', () => {
   describe('#callIndexAliasApi()', () => {

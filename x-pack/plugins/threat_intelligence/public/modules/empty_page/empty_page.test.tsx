@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
-import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
+import { render, screen } from '@testing-library/react';
 import { TestProvidersComponent } from '../../mocks/test_providers';
 import { DOCS_LINK_TEST_ID, EmptyPage, INTEGRATION_LINK_ID } from './empty_page';
+import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
+import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
 
 jest.mock('../../hooks/use_integrations_page_link');
 jest.mock('../../hooks/use_documentation_link');

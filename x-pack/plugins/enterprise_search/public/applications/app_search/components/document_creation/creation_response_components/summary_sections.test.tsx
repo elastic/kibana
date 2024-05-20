@@ -18,8 +18,8 @@ import { SummarySectionAccordion, SummarySectionEmpty } from './summary_section'
 
 import {
   InvalidDocumentsSummary,
-  SchemaFieldsSummary,
   ValidDocumentsSummary,
+  SchemaFieldsSummary,
 } from './summary_sections';
 
 describe('InvalidDocumentsSummary', () => {

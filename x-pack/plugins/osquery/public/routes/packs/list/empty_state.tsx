@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { OsqueryIcon } from '../../../components/osquery_icon';
+import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import { AddPackButton } from '../../../packs/add_pack_button';
+import { OsqueryIcon } from '../../../components/osquery_icon';
 import { LoadIntegrationAssetsButton } from './load_integration_assets';
-import { PRE_BUILT_MSG, PRE_BUILT_TITLE } from './translations';
+import { PRE_BUILT_TITLE, PRE_BUILT_MSG } from './translations';
 
 const PacksTableEmptyStateComponent = () => {
   const actions = useMemo(

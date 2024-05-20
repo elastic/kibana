@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import {
   InjectedMetadata,
   InjectedMetadataClusterInfo,
@@ -14,6 +13,7 @@ import {
   InjectedMetadataPlugin,
   InjectedMetadataTheme,
 } from '@kbn/core-injected-metadata-common-internal';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 /** @internal */
 export interface InjectedMetadataParams {

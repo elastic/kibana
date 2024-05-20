@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { parse } from 'query-string';
 import {
   EuiButton,
   EuiLink,
@@ -15,27 +17,25 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { parse } from 'query-string';
-import React, { useCallback, useEffect, useState } from 'react';
 
+import { useHistory, useLocation } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  GuideCardsClassic,
-  type GuideFilterValuesClassic,
-  GuideFiltersClassic,
-  guideCardsClassic,
-} from '@kbn/guided-onboarding/classic';
-import {
-  GuideCardConstants,
-  GuideCards,
-  GuideFilterValues,
-  GuideFilters,
-  guideCards,
-} from '@kbn/guided-onboarding/guide';
-import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { useHistory, useLocation } from 'react-router-dom';
+import {
+  GuideFilterValues,
+  GuideCards,
+  GuideFilters,
+  GuideCardConstants,
+  guideCards,
+} from '@kbn/guided-onboarding/guide';
+import {
+  GuideCardsClassic,
+  GuideFiltersClassic,
+  guideCardsClassic,
+  type GuideFilterValuesClassic,
+} from '@kbn/guided-onboarding/classic';
+import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 

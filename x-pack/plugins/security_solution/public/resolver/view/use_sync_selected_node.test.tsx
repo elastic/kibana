@@ -11,8 +11,8 @@ import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
-import { panAnimationDuration } from '../store/camera/scaling_constants';
 import { urlSearch } from '../test_utilities/url_search';
+import { panAnimationDuration } from '../store/camera/scaling_constants';
 
 const resolverComponentInstanceID = 'useSyncSelectedNodeTestInstanceId';
 

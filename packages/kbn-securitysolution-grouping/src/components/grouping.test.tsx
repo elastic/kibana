@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
-import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
-import { getTelemetryEvent } from '../telemetry/const';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Grouping } from './grouping';
+import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { getTelemetryEvent } from '../telemetry/const';
 
-import { host1Name, host2Name, mockGroupingProps } from './grouping.mock';
+import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn();

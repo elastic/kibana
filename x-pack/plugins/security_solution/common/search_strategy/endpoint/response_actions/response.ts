@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LogsEndpointActionResponse } from '../../../endpoint/types';
-import type { Inspect, Maybe, RequestBasicOptions, SortOrder } from './types';
+import type { SortOrder, Inspect, Maybe, RequestBasicOptions } from './types';
 
 export type ResultEdges<T = unknown> = estypes.SearchResponse<T>['hits']['hits'];
 

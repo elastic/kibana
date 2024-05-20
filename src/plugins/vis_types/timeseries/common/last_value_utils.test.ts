@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getLastValue, isEmptyValue, EMPTY_VALUE } from './last_value_utils';
 import { clone } from 'lodash';
-import { EMPTY_VALUE, getLastValue, isEmptyValue } from './last_value_utils';
 import { PanelDataArray } from './types/vis_data';
 
 describe('getLastValue(data)', () => {

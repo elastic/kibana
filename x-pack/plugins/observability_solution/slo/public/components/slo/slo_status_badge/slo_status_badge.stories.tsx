@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
-import { ComponentStory } from '@storybook/react';
 import React from 'react';
+import { ComponentStory } from '@storybook/react';
+import { EuiFlexGroup } from '@elastic/eui';
 
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
-import { buildSlo } from '../../../data/slo/slo';
 import { SloStatusBadge as Component, SloStatusProps } from './slo_status_badge';
+import { buildSlo } from '../../../data/slo/slo';
 
 export default {
   component: Component,

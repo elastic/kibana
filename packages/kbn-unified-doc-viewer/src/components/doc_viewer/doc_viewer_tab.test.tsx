@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 import { DocViewerTab } from './doc_viewer_tab';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 describe('DocViewerTab', () => {
   test('changing columns triggers an update', () => {

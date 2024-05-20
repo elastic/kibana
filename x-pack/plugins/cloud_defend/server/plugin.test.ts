@@ -12,36 +12,36 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import {
-  createArtifactsClientMock,
-  createMockAgentPolicyService,
-  createMockAgentService,
-  createMockPackageService,
   createPackagePolicyServiceMock,
+  createArtifactsClientMock,
+  createMockPackageService,
+  createMockAgentService,
+  createMockAgentPolicyService,
 } from '@kbn/fleet-plugin/server/mocks';
 
-import {
-  ElasticsearchClient,
-  RequestHandlerContext,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
-import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { CloudDefendPlugin } from './plugin';
+import { CloudDefendPluginStartDeps } from './types';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
+import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ExternalCallback,
   FleetStartContract,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
+import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import Chance from 'chance';
-import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
+import {
+  ElasticsearchClient,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import * as onPackagePolicyPostCreateCallback from './lib/fleet_util';
-import { CloudDefendPlugin } from './plugin';
-import { CloudDefendPluginStartDeps } from './types';
 
 const chance = new Chance();
 

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
 import type { ESSearchResponse } from '@kbn/es-types';
+import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
+import { IKibanaSearchRequest } from '@kbn/search-types';
 import {
   FetchDataParams,
   HasDataParams,
-  UXHasDataResponse,
   UxFetchDataResponse,
+  UXHasDataResponse,
 } from '@kbn/observability-plugin/public';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
-import { IKibanaSearchRequest } from '@kbn/search-types';
+import { inpQuery, transformINPResponse } from '../../../services/data/inp_query';
 import {
-  DEFAULT_RANKS,
   coreWebVitalsQuery,
   transformCoreWebVitalsResponse,
+  DEFAULT_RANKS,
 } from '../../../services/data/core_web_vitals_query';
-import { formatHasRumResult, hasRumDataQuery } from '../../../services/data/has_rum_data_query';
-import { inpQuery, transformINPResponse } from '../../../services/data/inp_query';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
+import { formatHasRumResult, hasRumDataQuery } from '../../../services/data/has_rum_data_query';
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 

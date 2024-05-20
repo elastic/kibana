@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { TimelineTabs } from '../../../../common/types/timeline';
-import { mockBrowserFields } from '../../containers/source/mock';
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
-import { useMountAppended } from '../../utils/use_mount_appended';
 import { EventFieldsBrowser } from './event_fields_browser';
+import { mockBrowserFields } from '../../containers/source/mock';
+import { useMountAppended } from '../../utils/use_mount_appended';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('../../lib/kibana');
 

@@ -6,6 +6,12 @@
     "id": "coreProviderPlugin",
     "server": false,
     "browser": true,
-    "optionalPlugins": ["corePluginA", "corePluginB", "coreHttp", "licensing", "globalSearchTest"]
+    "optionalPlugins": [
+      "corePluginA",
+      "corePluginB",
+      "coreHttp",
+      "licensing",
+      "globalSearchTest"
+    ]
   }
 }

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
+  createAction,
   ACTION_VISUALIZE_GEO_FIELD,
   VisualizeFieldContext,
-  createAction,
 } from '@kbn/ui-actions-plugin/public';
-import { APP_ID } from '../../common/constants';
 import { getUsageCollection } from '../kibana_services';
+import { APP_ID } from '../../common/constants';
 
-import { getCore, getVisualizeCapabilities } from '../kibana_services';
+import { getVisualizeCapabilities, getCore } from '../kibana_services';
 
 export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
   id: ACTION_VISUALIZE_GEO_FIELD,

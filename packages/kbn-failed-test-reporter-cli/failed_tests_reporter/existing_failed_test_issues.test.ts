@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { createStripAnsiSerializer } from '@kbn/jest-serializers';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { createStripAnsiSerializer } from '@kbn/jest-serializers';
 
-import { ExistingFailedTestIssues, FailedTestIssue } from './existing_failed_test_issues';
 import type { TestFailure } from './get_failures';
+import { ExistingFailedTestIssues, FailedTestIssue } from './existing_failed_test_issues';
 
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 

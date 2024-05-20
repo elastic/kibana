@@ -1,6 +1,3 @@
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +6,9 @@ import { act, renderHook } from '@testing-library/react-hooks';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render } from '@testing-library/react';
 
 import { useGrouping } from './use_grouping';
 

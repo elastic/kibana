@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { AggParam, IAggConfig, OptionedValueProp } from '@kbn/data-plugin/public';
+import { IAggConfig, AggParam, OptionedValueProp } from '@kbn/data-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 import { ComboBoxGroupedOptions } from '../utils';
-import { EditorVisState } from './sidebar/state/reducers';
 import { EditorConfig } from './utils';
+import { EditorVisState } from './sidebar/state/reducers';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it

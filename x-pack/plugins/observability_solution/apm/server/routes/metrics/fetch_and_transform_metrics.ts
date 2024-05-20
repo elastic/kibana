@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { Unionize } from 'utility-types';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationOptionsByType } from '@kbn/es-types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { euiLightVars as theme } from '@kbn/ui-theme';
-import { Unionize } from 'utility-types';
-import { APMConfig } from '../..';
-import { SERVICE_NAME } from '../../../common/es_fields/apm';
-import { environmentQuery, serviceNodeNameQuery } from '../../../common/utils/environment_query';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getVizColorForIndex } from '../../../common/viz_colors';
-import { ChartType, Coordinate, YUnit } from '../../../typings/timeseries';
 import {
   APMEventClient,
   APMEventESSearchRequest,
 } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { ChartBase } from './types';
+import { environmentQuery, serviceNodeNameQuery } from '../../../common/utils/environment_query';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
+import { ChartType, Coordinate, YUnit } from '../../../typings/timeseries';
+import { APMConfig } from '../..';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];

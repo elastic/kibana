@@ -6,30 +6,30 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { SavedObject } from '@kbn/core/server';
+import { RulesClient, ConstructorOptions } from '../rules_client';
 import {
-  loggingSystemMock,
   savedObjectsClientMock,
+  loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { fromKueryExpression } from '@kbn/es-query';
-import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
-import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
-import { getExecutionLogAggregation } from '../../lib/get_execution_log_aggregation';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import { SavedObject } from '@kbn/core/server';
 import { RawRule } from '../../types';
-import { ConstructorOptions, RulesClient } from '../rules_client';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
+import { getExecutionLogAggregation } from '../../lib/get_execution_log_aggregation';
+import { fromKueryExpression } from '@kbn/es-query';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();

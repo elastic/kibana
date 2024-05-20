@@ -7,11 +7,11 @@
 
 import { useEffect, useState } from 'react';
 
-import type { AgentPolicy, FleetServerAgent, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { find } from 'lodash';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import type { AgentPolicy, FleetServerAgent, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 
 interface IProps {
   agentId: string;

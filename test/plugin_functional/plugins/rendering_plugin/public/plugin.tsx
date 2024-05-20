@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 
 export class RenderingPlugin implements Plugin {
   public setup(core: CoreSetup) {

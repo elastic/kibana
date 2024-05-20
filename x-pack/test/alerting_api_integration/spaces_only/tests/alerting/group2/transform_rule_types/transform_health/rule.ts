@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import expect from '@kbn/expect';
+import { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
   ALERT_ACTION_GROUP,
   ALERT_INSTANCE_ID,
@@ -18,10 +19,9 @@ import {
   ALERT_STATUS,
   EVENT_ACTION,
 } from '@kbn/rule-data-utils';
-import { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 import { TRANSFORM_HEALTH_RESULTS } from '@kbn/transform-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
-import { ObjectRemover, getUrlPrefix } from '../../../../../../common/lib';
+import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { Spaces } from '../../../../../scenarios';
 
 const CONNECTOR_TYPE_ID = '.index';

@@ -5,22 +5,22 @@
  * 2.0.
  */
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
-import type { ComponentType, FC, PropsWithChildren } from 'react';
-import React from 'react';
-import TestRenderer from 'react-test-renderer';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
+import { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
+import type { Filter } from '@kbn/es-query';
+import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
+import { useKibana } from '../../lib/kibana';
+import type { State } from '../../store';
 import { TimelineId } from '../../../../common/types';
 import * as timelineActions from '../../../timelines/store/actions';
-import { useKibana } from '../../lib/kibana';
-import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
-import { TestProviders, createMockStore, mockGlobalState } from '../../mock';
-import type { State } from '../../store';
-import { useDiscoverInTimelineActions } from './use_discover_in_timeline_actions';
+import type { ComponentType, FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import TestRenderer from 'react-test-renderer';
 
 const { act } = TestRenderer;
 
@@ -134,7 +134,7 @@ startServicesMock.dataViews.get = jest.fn(
   async () =>
     ({
       getIndexPattern: jest.fn(),
-    }) as unknown as DataView
+    } as unknown as DataView)
 );
 
 describe('useDiscoverInTimelineActions', () => {

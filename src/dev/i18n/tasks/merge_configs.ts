@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { join, resolve } from 'path';
-import { arrayify, assignConfigFromPath } from '..';
+import { resolve, join } from 'path';
+import { assignConfigFromPath, arrayify } from '..';
 import { I18nCheckTaskContext } from '../types';
 
 export function mergeConfigs(additionalConfigPaths: string | string[] = []) {

@@ -8,7 +8,7 @@
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { TableSuggestion, Visualization } from '../../types';
-import { MetricVisualizationState, metricLabel, supportedDataTypes } from './visualization';
+import { metricLabel, MetricVisualizationState, supportedDataTypes } from './visualization';
 
 const MAX_BUCKETED_COLUMNS = 1;
 const MAX_METRIC_COLUMNS = 2; // primary and secondary metric

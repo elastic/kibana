@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { useRef, VFC } from 'react';
+import { DataProvider } from '@kbn/timelines-plugin/common';
+import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -12,15 +15,12 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { DataProvider } from '@kbn/timelines-plugin/common';
-import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
-import React, { useRef, VFC } from 'react';
+import { generateDataProvider } from '../utils/data_provider';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
-import { useAddToTimeline } from '../hooks/use_add_to_timeline';
-import { generateDataProvider } from '../utils/data_provider';
 import { useStyles } from './styles';
+import { useAddToTimeline } from '../hooks/use_add_to_timeline';
 import { TITLE } from './translations';
 
 const ICON_TYPE = 'timeline';

@@ -12,8 +12,8 @@ import {
   KNOWN_ESS_ROLE_DEFINITIONS,
   KNOWN_SERVERLESS_ROLE_DEFINITIONS,
 } from '@kbn/security-solution-plugin/common/test';
-import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
 import { setupUsers } from './setup_users';
+import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
 
 before(() => {
   cy.task('esArchiverLoad', { archiveName: 'auditbeat_single' });

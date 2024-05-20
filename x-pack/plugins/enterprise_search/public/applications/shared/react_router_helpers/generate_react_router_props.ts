@@ -12,7 +12,7 @@ import { EuiSideNavItemType } from '@elastic/eui';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 
-import { createHref, letBrowserHandleEvent } from '.';
+import { letBrowserHandleEvent, createHref } from '.';
 
 /**
  * Generates the `href` and `onClick` props for React-Router-friendly links

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { AlertingAuthorizationEntity, WriteOperations } from '../../authorization';
-import { RuleAttributes } from '../../data/rule/types';
-import { retryIfConflicts } from '../../lib/retry_if_conflicts';
-import { RULE_SAVED_OBJECT_TYPE, partiallyUpdateRule } from '../../saved_objects';
 import { RawRule } from '../../types';
-import { clearUnscheduledSnoozeAttributes } from '../common';
-import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
-import { updateMetaAttributes } from '../lib';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { retryIfConflicts } from '../../lib/retry_if_conflicts';
+import { partiallyUpdateRule, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
+import { updateMetaAttributes } from '../lib';
+import { clearUnscheduledSnoozeAttributes } from '../common';
+import { RuleAttributes } from '../../data/rule/types';
 
 export async function unmuteAll(
   context: RulesClientContext,

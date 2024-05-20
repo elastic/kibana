@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiRadio, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { cloneDeep } from 'lodash';
 import type { ChangeEventHandler } from 'react';
 import React, { memo, useMemo } from 'react';
-import { AntivirusRegistrationModes } from '../../../../../../../../common/endpoint/types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiRadio, EuiSpacer, EuiText } from '@elastic/eui';
+import { cloneDeep } from 'lodash';
 import { shouldEnableAntivirusRegistrationForSync } from '../../../../../../../../common/endpoint/utils/update_antivirus_registration_enabled';
-import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
+import { AntivirusRegistrationModes } from '../../../../../../../../common/endpoint/types';
 import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
-import type { PolicyFormComponentCommonProps } from '../../types';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { SettingCard } from '../setting_card';
+import type { PolicyFormComponentCommonProps } from '../../types';
 
 const CARD_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',

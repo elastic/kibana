@@ -7,10 +7,10 @@
  */
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { useDashboardListingTable } from './use_dashboard_listing_table';
 import { pluginServices } from '../../services/plugin_services';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardSavedObjectUserContent } from '../types';
-import { useDashboardListingTable } from './use_dashboard_listing_table';
 const clearStateMock = jest.fn();
 const getDashboardUrl = jest.fn();
 const goToDashboard = jest.fn();

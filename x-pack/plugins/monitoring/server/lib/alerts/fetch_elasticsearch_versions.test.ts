@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchElasticsearchVersions } from './fetch_elasticsearch_versions';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 jest.mock('../../static_globals', () => ({
   Globals: {

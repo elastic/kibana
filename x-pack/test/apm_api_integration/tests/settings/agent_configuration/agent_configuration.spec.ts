@@ -7,11 +7,11 @@
 
 import { inspect } from 'util';
 
-import { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configuration/configuration_types';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
 import expect from '@kbn/expect';
 import { omit, orderBy } from 'lodash';
+import { AgentConfigurationIntake } from '@kbn/apm-plugin/common/agent_configuration/configuration_types';
+import { AgentConfigSearchParams } from '@kbn/apm-plugin/server/routes/settings/agent_configuration/route';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { addAgentConfigEtagMetric } from './add_agent_config_metrics';
 

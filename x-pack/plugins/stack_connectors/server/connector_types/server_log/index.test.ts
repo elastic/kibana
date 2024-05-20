@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { validateParams } from '@kbn/actions-plugin/server/lib';
+import { Logger } from '@kbn/core/server';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { getConnectorType, ServerLogConnectorType, ServerLogConnectorTypeExecutorOptions } from '.';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { validateParams } from '@kbn/actions-plugin/server/lib';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ServerLogConnectorType, ServerLogConnectorTypeExecutorOptions, getConnectorType } from '.';
 
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 

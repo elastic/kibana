@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiTabs, EuiTab } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { PANEL_TYPES } from '../../../common/enums';
 import { TimeseriesVisParams } from '../../types';
 

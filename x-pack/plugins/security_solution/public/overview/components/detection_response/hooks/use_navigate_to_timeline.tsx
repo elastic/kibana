@@ -8,19 +8,19 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
-import { TimelineType } from '../../../../../common/api/timeline';
-import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
-import { TimelineId } from '../../../../../common/types/timeline';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { sourcererActions } from '../../../../common/store/sourcerer';
 import {
   getDataProvider,
   getDataProviderAnd,
 } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
-import { sourcererSelectors } from '../../../../common/store';
-import type { TimeRange } from '../../../../common/store/inputs/model';
-import { sourcererActions } from '../../../../common/store/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/actions';
+import { sourcererSelectors } from '../../../../common/store';
+import type { TimeRange } from '../../../../common/store/inputs/model';
 
 export interface Filter {
   field: string;

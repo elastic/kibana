@@ -6,8 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import Mustache from 'mustache';
 import { renderParameterTemplates } from './render';
+import Mustache from 'mustache';
 
 const params = {
   subAction: 'run',

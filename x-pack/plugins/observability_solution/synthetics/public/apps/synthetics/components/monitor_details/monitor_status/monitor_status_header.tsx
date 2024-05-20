@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 
-import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
 import { ConfigKey } from '../../../../../../common/runtime_types';
+import { MONITOR_HISTORY_ROUTE } from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
@@ -42,8 +42,8 @@ export const MonitorStatusHeader = ({
   const periodCaptionText = !!periodCaption
     ? periodCaption
     : isLast24Hours
-      ? labels.LAST_24_HOURS_LABEL
-      : '';
+    ? labels.LAST_24_HOURS_LABEL
+    : '';
 
   return (
     <EuiFlexGroup

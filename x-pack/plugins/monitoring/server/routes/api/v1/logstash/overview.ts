@@ -9,13 +9,13 @@ import {
   postLogstashOverviewRequestParamsRT,
   postLogstashOverviewRequestPayloadRT,
 } from '../../../../../common/http_api/logstash/post_logstash_overview';
-import { getLogstashDataset } from '../../../../lib/cluster/get_index_patterns';
-import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
-import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
-import { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_overview';
+import { MonitoringCore } from '../../../../types';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { getLogstashDataset } from '../../../../lib/cluster/get_index_patterns';
 
 export function logstashOverviewRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postLogstashOverviewRequestParamsRT);

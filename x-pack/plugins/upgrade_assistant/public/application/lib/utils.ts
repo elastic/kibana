@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fold, tryCatch } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { tryCatch, fold } from 'fp-ts/lib/Either';
 
 import { DEPRECATION_WARNING_UPPER_LIMIT } from '../../../common/constants';
 import { ReindexStep } from '../../../common/types';

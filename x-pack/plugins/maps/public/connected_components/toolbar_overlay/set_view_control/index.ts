@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { setGotoWithCenter } from '../../../actions';
-import { MapStoreState } from '../../../reducers/store';
-import { getMapCenter, getMapSettings, getMapZoom } from '../../../selectors/map_selectors';
+import { connect } from 'react-redux';
 import { SetViewControl } from './set_view_control';
+import { setGotoWithCenter } from '../../../actions';
+import { getMapZoom, getMapCenter, getMapSettings } from '../../../selectors/map_selectors';
+import { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {

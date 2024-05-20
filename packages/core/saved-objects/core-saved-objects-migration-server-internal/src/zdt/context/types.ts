@@ -7,19 +7,19 @@
  */
 
 import type {
-  ElasticsearchCapabilities,
   ElasticsearchClient,
+  ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
 import type { NodeRoles } from '@kbn/core-node-server';
-import type {
-  IDocumentMigrator,
-  SavedObjectsMigrationConfigType,
-  VirtualVersionMap,
-} from '@kbn/core-saved-objects-base-server-internal';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
+import type {
+  VirtualVersionMap,
+  SavedObjectsMigrationConfigType,
+  IDocumentMigrator,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
 
 /**

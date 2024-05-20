@@ -1,6 +1,3 @@
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,23 +5,26 @@ import { find } from 'lodash';
  * 2.0.
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
-import { ELASTICSEARCH_SYSTEM_ID, RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
-import { AlertsByName } from '../../../alerts/types';
+import { find } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
 import { Index } from '../../../components/elasticsearch/index/index.js';
-// @ts-ignore
-import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
+import { ComponentProps } from '../../route_init';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { useCharts } from '../../hooks/use_charts';
+import { ItemTemplate } from './item_template';
 // @ts-ignore
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
-import { SetupModeProps, SetupModeRenderer } from '../../../components/renderers/setup_mode';
-import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+// @ts-ignore
+import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
+import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { GlobalStateContext } from '../../contexts/global_state_context';
+import { ELASTICSEARCH_SYSTEM_ID, RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { useCharts } from '../../hooks/use_charts';
-import { ComponentProps } from '../../route_init';
-import { ItemTemplate } from './item_template';
 
 export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);

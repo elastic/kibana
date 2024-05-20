@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { DataStreamSpacesAdapter, FieldMap } from '@kbn/data-stream-adapter';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { Subject } from 'rxjs';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
-import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
-import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { conversationsFieldMap } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
-import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { AssistantResourceNames } from '../types';
+import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import {
   InitializationPromise,
   ResourceInstallationHelper,
@@ -25,6 +21,10 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
+import { conversationsFieldMap } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
+import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
+import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
+import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -301,8 +301,9 @@ export class AIAssistantService {
   ) {
     try {
       this.options.logger.debug(`Initializing spaceId level resources for AIAssistantService`);
-      const conversationsIndexName =
-        await this.conversationsDataStream.getInstalledSpaceName(spaceId);
+      const conversationsIndexName = await this.conversationsDataStream.getInstalledSpaceName(
+        spaceId
+      );
       if (!conversationsIndexName) {
         await this.conversationsDataStream.installSpace(spaceId);
       }
@@ -337,7 +338,9 @@ export class AIAssistantService {
       currentUser: null,
     });
 
-    const existingAnonymizationFields = await (await dataClient?.getReader()).search({
+    const existingAnonymizationFields = await (
+      await dataClient?.getReader()
+    ).search({
       body: {
         size: 1,
       },

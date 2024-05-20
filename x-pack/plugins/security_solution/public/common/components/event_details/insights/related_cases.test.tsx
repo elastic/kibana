@@ -8,13 +8,13 @@
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
-import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
 import { TestProviders } from '../../../mock';
+import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
+import { RelatedCases } from './related_cases';
+import { noCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
+import { CASES_LOADING, CASES_COUNT } from './translations';
 import { useTourContext } from '../../guided_onboarding_tour';
 import { AlertsCasesTourSteps } from '../../guided_onboarding_tour/tour_config';
-import { RelatedCases } from './related_cases';
-import { CASES_COUNT, CASES_LOADING } from './translations';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetRelatedCases = jest.fn();

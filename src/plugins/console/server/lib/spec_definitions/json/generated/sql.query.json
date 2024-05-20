@@ -7,8 +7,13 @@
       "pretty": "__flag__",
       "format": ""
     },
-    "methods": ["POST", "GET"],
-    "patterns": ["_sql"],
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "_sql"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-search-api.html",
     "availability": {
       "stack": true,

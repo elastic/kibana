@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiResizableButton } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
 
 export function ResizableButton({
   onMouseDownResizeHandler,

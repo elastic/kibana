@@ -9,11 +9,11 @@
 import { debounce } from 'lodash';
 import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-import { EuiDualRange, EuiDualRangeProps, EuiRangeTick, EuiToken, EuiToolTip } from '@elastic/eui';
+import { EuiRangeTick, EuiDualRange, EuiDualRangeProps, EuiToken, EuiToolTip } from '@elastic/eui';
 
 import { RangeValue } from '../../../common/range_slider/types';
-import { ControlError } from '../../control_group/component/control_error_component';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
+import { ControlError } from '../../control_group/component/control_error_component';
 
 import './range_slider.scss';
 import { MIN_POPOVER_WIDTH } from '../../constants';

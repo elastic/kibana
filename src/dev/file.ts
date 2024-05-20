@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { basename, dirname, extname, join, relative, resolve } from 'path';
+import { dirname, extname, join, relative, resolve, basename } from 'path';
 
 export class File {
   public readonly path: string;

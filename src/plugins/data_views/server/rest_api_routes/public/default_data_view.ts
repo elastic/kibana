@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { DataViewsService } from '../../../common';
-import {
-  INITIAL_REST_VERSION,
-  SERVICE_KEY,
-  SERVICE_KEY_LEGACY,
-  SERVICE_PATH,
-  SERVICE_PATH_LEGACY,
-} from '../../constants';
 import type {
-  DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
+  DataViewsServerPluginStart,
 } from '../../types';
 import { handleErrors } from './util/handle_errors';
+import {
+  SERVICE_PATH,
+  SERVICE_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+  INITIAL_REST_VERSION,
+} from '../../constants';
 
 interface GetDefaultArgs {
   dataViewsService: DataViewsService;

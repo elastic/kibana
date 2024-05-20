@@ -6,8 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { mockAnomalies } from '../mock';
 import { getIntervalFromAnomalies } from './get_interval_from_anomalies';
+import { mockAnomalies } from '../mock';
 
 describe('get_interval_from_anomalies', () => {
   let anomalies = cloneDeep(mockAnomalies);

@@ -10,7 +10,7 @@ import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { rerender } from '../../../test_helpers';
 

@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import moment from 'moment';
+import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
 import {
-  annotationLayerFunction,
-  axisExtentConfigFunction,
-  dataDecorationConfigFunction,
-  extendedAnnotationLayerFunction,
-  extendedDataLayerFunction,
+  xyVisFunction,
   layeredXyVisFunction,
+  extendedDataLayerFunction,
+  dataDecorationConfigFunction,
+  xAxisConfigFunction,
+  yAxisConfigFunction,
   legendConfigFunction,
-  referenceLineDecorationConfigFunction,
+  axisExtentConfigFunction,
   referenceLineFunction,
   referenceLineLayerFunction,
-  xAxisConfigFunction,
-  xyVisFunction,
-  yAxisConfigFunction,
+  annotationLayerFunction,
+  extendedAnnotationLayerFunction,
+  referenceLineDecorationConfigFunction,
 } from '../common/expression_functions';
-import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
-import { ExpressionXyPluginSetup, ExpressionXyPluginStart, SetupDeps } from './types';
+import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
 export interface XYPluginStartDependencies {
   data: DataPublicPluginStart;

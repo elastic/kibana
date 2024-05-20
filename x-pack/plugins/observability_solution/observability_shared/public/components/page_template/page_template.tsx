@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { EuiPageSectionProps, EuiSideNavItemType } from '@elastic/eui';
+import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
 import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
-import type { ApplicationStart } from '@kbn/core/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
+import { matchPath, useLocation } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
+import type { BehaviorSubject, Observable } from 'rxjs';
+import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import {
@@ -17,17 +20,14 @@ import {
   KibanaPageTemplateKibanaProvider,
 } from '@kbn/shared-ux-page-kibana-template';
 import type {
-  KibanaPageTemplateKibanaDependencies,
   KibanaPageTemplateProps,
+  KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
-import React, { useMemo } from 'react';
-import { matchPath, useLocation } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
-import type { BehaviorSubject, Observable } from 'rxjs';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { SearchBarPortal } from './search_bar_portal';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
-import { SearchBarPortal } from './search_bar_portal';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,

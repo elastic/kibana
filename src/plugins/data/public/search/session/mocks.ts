@@ -7,10 +7,10 @@
  */
 
 import { BehaviorSubject, of } from 'rxjs';
+import { ISessionsClient } from './sessions_client';
+import { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
 import type { SessionMeta } from './search_session_state';
-import { ISessionService } from './session_service';
-import { ISessionsClient } from './sessions_client';
 
 export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
   return {

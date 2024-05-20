@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { AttachmentActionType } from '../../../client/attachment_framework/types';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import {
-  createAppMockRenderer,
   noCasesPermissions,
   onlyDeleteCasesPermission,
+  createAppMockRenderer,
 } from '../../../common/mock';
 import { RegisteredAttachmentsPropertyActions } from './registered_attachments_property_actions';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 // Failing: See https://github.com/elastic/kibana/issues/174384
 describe.skip('RegisteredAttachmentsPropertyActions', () => {

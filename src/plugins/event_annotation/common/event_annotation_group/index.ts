@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common';
 import type { EventAnnotationOutput } from '../types';
 
 export interface EventAnnotationGroupOutput {

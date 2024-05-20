@@ -9,10 +9,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { getExecuteDetails } from '../../__fixtures__';
-import { API_BASE_PATH, WATCH_TYPES } from '../../common/constants';
-import { pageHelpers, setupEnvironment } from './helpers';
 import { WATCH_ID } from './helpers/jest_constants';
+import { getExecuteDetails } from '../../__fixtures__';
+import { WATCH_TYPES, API_BASE_PATH } from '../../common/constants';
+import { setupEnvironment, pageHelpers } from './helpers';
 import type { WatchCreateThresholdTestBed } from './helpers/watch_create_threshold_page.helpers';
 
 const WATCH_NAME = 'my_test_watch';

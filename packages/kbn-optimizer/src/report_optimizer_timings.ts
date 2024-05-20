@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { concatMap } from 'rxjs';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { ToolingLog } from '@kbn/tooling-log';
-import { concatMap } from 'rxjs';
 
-import { pipeClosure } from './common';
 import { OptimizerConfig } from './optimizer';
 import { OptimizerUpdate$ } from './run_optimizer';
+import { pipeClosure } from './common';
 
 export function reportOptimizerTimings(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {

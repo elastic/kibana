@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { getActionAgentType } from './get_action_agent_type';
+import { applyEsClientSearchMock } from '../../../mocks/utils.mock';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { applyEsClientSearchMock } from '../../../mocks/utils.mock';
-import { getActionAgentType } from './get_action_agent_type';
 
 describe('getActionAgentType()', () => {
   let esClientMock: ElasticsearchClientMock;

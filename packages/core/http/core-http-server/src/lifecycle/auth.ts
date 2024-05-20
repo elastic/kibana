@@ -7,10 +7,10 @@
  */
 
 import type {
+  ResponseHeaders,
   IKibanaResponse,
   KibanaRequest,
   LifecycleResponseFactory,
-  ResponseHeaders,
 } from '../router';
 
 /** @public */

@@ -7,9 +7,9 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { EsVersion } from '../es_version';
-import { Config } from './config';
 import { readConfigFile } from './config_loading';
+import { Config } from './config';
+import { EsVersion } from '../es_version';
 
 const log = new ToolingLog();
 const esVersion = new EsVersion('8.0.0');

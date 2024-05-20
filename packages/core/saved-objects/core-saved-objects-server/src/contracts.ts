@@ -8,9 +8,10 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  ISavedObjectsRepository,
   SavedObjectsClientContract,
+  ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectsSerializer } from './serialization';
 import type {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientProviderOptions,
@@ -18,12 +19,11 @@ import type {
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
 } from './client_factory';
-import type { ISavedObjectsExporter } from './export';
-import type { SavedObjectsExtensions } from './extensions/extensions';
-import type { ISavedObjectsImporter, SavedObjectsImporterOptions } from './import';
 import type { SavedObjectsType } from './saved_objects_type';
-import type { ISavedObjectsSerializer } from './serialization';
 import type { ISavedObjectTypeRegistry } from './type_registry';
+import type { ISavedObjectsExporter } from './export';
+import type { ISavedObjectsImporter, SavedObjectsImporterOptions } from './import';
+import type { SavedObjectsExtensions } from './extensions/extensions';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to

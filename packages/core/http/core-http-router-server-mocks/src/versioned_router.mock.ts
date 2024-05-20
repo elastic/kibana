@@ -7,12 +7,12 @@
  */
 
 import type {
-  AddVersionOpts,
-  KibanaResponseFactory,
-  RequestHandler,
+  VersionedRouter,
   VersionedRoute,
   VersionedRouteConfig,
-  VersionedRouter,
+  AddVersionOpts,
+  RequestHandler,
+  KibanaResponseFactory,
 } from '@kbn/core-http-server';
 
 export type MockedVersionedRoute = jest.Mocked<VersionedRoute>;

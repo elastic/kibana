@@ -7,14 +7,14 @@
 
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
-  CoreSetup,
-  DEFAULT_APP_CATEGORIES,
-  IRouter,
-  KibanaRequest,
-  Logger,
   Plugin,
   PluginInitializerContext,
+  CoreSetup,
+  Logger,
   SavedObjectsServiceStart,
+  IRouter,
+  KibanaRequest,
+  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
@@ -29,25 +29,25 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import {
+  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ELASTICSEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
-  ELASTICSEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
-  ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
-  ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
-  SEARCH_EXPERIENCES_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  SEARCH_EXPERIENCES_PLUGIN,
+  ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
+  ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
+  ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
 } from '../common/constants';
 
 import {
-  appSearchGuideConfig,
   appSearchGuideId,
-  databaseSearchGuideConfig,
-  databaseSearchGuideId,
-  websiteSearchGuideConfig,
   websiteSearchGuideId,
+  databaseSearchGuideId,
+  appSearchGuideConfig,
+  websiteSearchGuideConfig,
+  databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';

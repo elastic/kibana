@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { escapeKuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { Environment } from './environment_rt';
+import { escapeKuery } from '@kbn/es-query';
 import { SERVICE_ENVIRONMENT } from './es_fields/apm';
+import { Environment } from './environment_rt';
 
 export const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
 const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED' as const;

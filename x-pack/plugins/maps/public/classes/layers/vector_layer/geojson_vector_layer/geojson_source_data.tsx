@@ -18,11 +18,11 @@ import {
 } from '../../../../../common/descriptor_types';
 import { DataRequestContext } from '../../../../actions';
 import { IVectorSource } from '../../../sources/vector_source';
-import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
 import { DataRequestAbortError } from '../../../util/data_request';
 import { DataRequest } from '../../../util/data_request';
-import { assignFeatureIds } from './assign_feature_ids';
 import { getCentroidFeatures } from './get_centroid_features';
+import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
+import { assignFeatureIds } from './assign_feature_ids';
 
 export async function syncGeojsonSourceData({
   layerId,

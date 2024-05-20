@@ -10,8 +10,8 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import { errors } from '@elastic/elasticsearch';
 
-import { FilteringRule, FilteringRules, FilteringValidationState } from '../types/connectors';
 import { updateFiltering } from './update_filtering';
+import { FilteringRule, FilteringRules, FilteringValidationState } from '../types/connectors';
 
 describe('updateFiltering lib function', () => {
   const mockClient = {

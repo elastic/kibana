@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { EuiComboBox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { basicAggs } from '../../../../common/basic_aggs';
-import { calculateLabel } from '../../../../common/calculate_label';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { toPercentileNumber } from '../../../../common/to_percentile_number';
 import { calculateSiblings } from '../lib/calculate_siblings';
+import { calculateLabel } from '../../../../common/calculate_label';
+import { basicAggs } from '../../../../common/basic_aggs';
+import { toPercentileNumber } from '../../../../common/to_percentile_number';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
 function createTypeFilter(restrict, exclude = []) {
   return (metric) => {

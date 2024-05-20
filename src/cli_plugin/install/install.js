@@ -7,17 +7,17 @@
  */
 
 import Fs from 'fs';
-import path from 'path';
 import { promisify } from 'util';
+import path from 'path';
 
 import del from 'del';
 
-import { errorIfXPackInstall } from '../lib/error_if_x_pack';
-import { cleanArtifacts, cleanPrevious } from './cleanup';
 import { download } from './download';
-import { assertVersion, existingInstall } from './kibana';
+import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
+import { errorIfXPackInstall } from '../lib/error_if_x_pack';
+import { existingInstall, assertVersion } from './kibana';
 
 const mkdir = promisify(Fs.mkdir);
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { lazy, Suspense } from 'react';
-import { USAGE_COLLECTION_APP_NAME } from '../../common/constants';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { SessionViewIndex } from '../../common/types/v1';
 import { SessionViewDeps, SessionViewTelemetryKey } from '../types';
+import { USAGE_COLLECTION_APP_NAME } from '../../common/constants';
 
 // Initializing react-query
 const queryClient = new QueryClient();

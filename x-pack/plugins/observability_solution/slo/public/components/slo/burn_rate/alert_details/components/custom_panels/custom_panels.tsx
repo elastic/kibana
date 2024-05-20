@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
-import type { BurnRateAlert, BurnRateRule } from '../../types';
-import { getDataTimeRange } from '../../utils/time_range';
+import type { GetSLOResponse } from '@kbn/slo-schema';
 import { APMAlertDetails } from './apm/apm_alert_details';
-import type { APMTransactionDurationSLOResponse } from './apm/apm_alert_details';
 import { CustomKqlPanels } from './custom_kql/custom_kql_panels';
+import { getDataTimeRange } from '../../utils/time_range';
+import type { BurnRateAlert, BurnRateRule } from '../../types';
+import type { APMTransactionDurationSLOResponse } from './apm/apm_alert_details';
 
 interface Props {
   alert: BurnRateAlert;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EventLogStatusMetric } from '../../detections/rules/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { getInitialEventLogUsage } from '../../detections/rules/get_initial_usage';
 import {
@@ -16,7 +17,6 @@ import {
   getEventLogAllRules,
   getEventLogElasticRules,
 } from '../../detections/rules/get_metrics.mocks';
-import type { EventLogStatusMetric } from '../../detections/rules/types';
 import { getEventLogByTypeAndStatus } from '../get_event_log_by_type_and_status';
 
 describe('get_event_log_by_type_and_status', () => {

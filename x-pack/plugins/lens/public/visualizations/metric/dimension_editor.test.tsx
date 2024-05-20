@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import { euiLightVars } from '@kbn/ui-theme';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import faker from 'faker';
 import React from 'react';
-import { DatasourcePublicAPI } from '../..';
-import { createMockFramePublicAPI, generateActiveData } from '../../mocks';
+import { render, screen, waitFor } from '@testing-library/react';
+import faker from 'faker';
+import userEvent from '@testing-library/user-event';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { euiLightVars } from '@kbn/ui-theme';
+import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { VisualizationDimensionEditorProps } from '../../types';
+import { MetricVisualizationState } from './visualization';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
   SupportingVisType,
 } from './dimension_editor';
-import { MetricVisualizationState } from './visualization';
+import { DatasourcePublicAPI } from '../..';
+import { createMockFramePublicAPI, generateActiveData } from '../../mocks';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>

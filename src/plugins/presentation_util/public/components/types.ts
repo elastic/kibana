@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { monaco } from '@kbn/monaco';
 import type { MutableRefObject } from 'react';
+import type { monaco } from '@kbn/monaco';
 import type { CSSProperties, HTMLAttributes } from 'react';
 
 import type { ExpressionFunction } from '@kbn/expressions-plugin/common';

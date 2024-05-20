@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { STATUS, UNNAMED_LOCATION } from '../../../../../../common/constants';
-import { Ping } from '../../../../../../common/runtime_types';
 import { LocationLink } from '../../../common/location_link';
 import { MonitorStatusRow } from './monitor_status_row';
+import { Ping } from '../../../../../../common/runtime_types';
+import { STATUS, UNNAMED_LOCATION } from '../../../../../../common/constants';
 
 interface MonitorStatusListProps {
   /**

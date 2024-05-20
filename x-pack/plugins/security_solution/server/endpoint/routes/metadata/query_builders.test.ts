@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { get } from 'lodash';
+import { getESQueryHostMetadataByID, buildUnitedIndexQuery } from './query_builders';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
-import { EndpointSortableField } from '../../../../common/endpoint/types';
-import { buildUnitedIndexQuery, getESQueryHostMetadataByID } from './query_builders';
+import { get } from 'lodash';
 import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { EndpointSortableField } from '../../../../common/endpoint/types';
 
 describe('query builder', () => {
   describe('MetadataGetQuery', () => {

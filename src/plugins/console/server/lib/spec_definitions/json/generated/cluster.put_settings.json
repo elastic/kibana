@@ -6,11 +6,23 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "flat_settings": "__flag__",
-      "master_timeout": ["30s", "-1", "0"],
-      "timeout": ["30s", "-1", "0"]
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
-    "methods": ["PUT"],
-    "patterns": ["_cluster/settings"],
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_cluster/settings"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-update-settings.html",
     "availability": {
       "stack": true,

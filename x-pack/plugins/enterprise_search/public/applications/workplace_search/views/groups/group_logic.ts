@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 import { isEqual } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
@@ -92,7 +92,7 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
         onInitializeGroup: (_, group) => group,
         onGroupNameChanged: (_, group) => group,
         onGroupSourcesSaved: (_, group) => group,
-        resetGroup: () => ({}) as GroupDetails,
+        resetGroup: () => ({} as GroupDetails),
       },
     ],
     dataLoading: [

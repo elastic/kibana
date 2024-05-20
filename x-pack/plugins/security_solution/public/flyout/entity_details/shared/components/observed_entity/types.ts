@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AnomalyTableProviderChildrenProps } from '../../../../../common/components/ml/anomaly/anomaly_table_provider';
 import type { BasicEntityData } from '../entity_table/types';
+import type { AnomalyTableProviderChildrenProps } from '../../../../../common/components/ml/anomaly/anomaly_table_provider';
 
 export interface FirstLastSeenData {
   date: string | null | undefined;

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { after, before, expect, journey, step } from '@elastic/synthetics';
+import { before, after, expect, journey, step } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { recordVideo } from '../../helpers/record_video';
-import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import {
   addTestMonitor,
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
+import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey('OverviewScrolling', async ({ page, params }) => {
   recordVideo(page);

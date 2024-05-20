@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type {
-  UpsellingMessageId,
-  UpsellingSectionId,
-} from '@kbn/security-solution-upselling/service';
 import { useMemo } from 'react';
-import type React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { SecurityPageName } from '../../../common';
+import type React from 'react';
+import type {
+  UpsellingSectionId,
+  UpsellingMessageId,
+} from '@kbn/security-solution-upselling/service';
 import { useUpsellingService } from '../components/upselling_provider';
+import type { SecurityPageName } from '../../../common';
 
 export const useUpsellingComponent = (id: UpsellingSectionId): React.ComponentType | null => {
   const upselling = useUpsellingService();

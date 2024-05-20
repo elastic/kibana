@@ -7,10 +7,18 @@
       "pretty": "__flag__",
       "force": "__flag__",
       "delete_dest_index": "__flag__",
-      "timeout": ["30s", "-1", "0"]
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
-    "methods": ["DELETE"],
-    "patterns": ["_transform/{transform_id}"],
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_transform/{transform_id}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/delete-transform.html",
     "availability": {
       "stack": true,

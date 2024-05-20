@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { CENTER_ALIGNMENT, EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiBasicTableColumn, RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { asInteger } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../utils/style';
-import { ApmRoutes } from '../../routing/apm_route_config';
-import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { SparkPlot } from '../charts/spark_plot';
 import { ErrorDetailLink } from '../links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../links/apm/error_overview_link';
-import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { TimestampTooltip } from '../timestamp_tooltip';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
+import { ApmRoutes } from '../../routing/apm_route_config';
 
 const ErrorLink = euiStyled(ErrorOverviewLink)`
   ${truncate('100%')};

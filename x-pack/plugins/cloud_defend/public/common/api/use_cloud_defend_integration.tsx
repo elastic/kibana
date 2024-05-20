@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
-  type DefaultPackagesInstallationError,
-  type GetInfoResponse,
-  epmRouteService,
-} from '@kbn/fleet-plugin/common';
 import { useQuery } from '@tanstack/react-query';
+import {
+  epmRouteService,
+  type GetInfoResponse,
+  type DefaultPackagesInstallationError,
+} from '@kbn/fleet-plugin/common';
 import { INTEGRATION_PACKAGE_NAME } from '../../../common/constants';
 import { useKibana } from '../hooks/use_kibana';
 

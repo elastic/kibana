@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Pipeline } from '../../../../../common/types/risk_scores';
 
 export const createIngestPipeline = async ({

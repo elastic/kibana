@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { applyMiddleware, compose, createStore } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
 
 import { licenseManagement } from './reducers';

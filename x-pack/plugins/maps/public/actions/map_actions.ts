@@ -5,57 +5,37 @@
  * 2.0.
  */
 
+import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { AnyAction, Dispatch } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
+import turfBboxPolygon from '@turf/bbox-polygon';
+import turfBooleanContains from '@turf/boolean-contains';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { asyncForEach, asyncMap } from '@kbn/std';
-import turfBboxPolygon from '@turf/bbox-polygon';
-import turfBooleanContains from '@turf/boolean-contains';
 import { Geometry, Position } from 'geojson';
-import _ from 'lodash';
-import { AnyAction, Dispatch } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import { asyncForEach, asyncMap } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
-import { INITIAL_LOCATION } from '../../common/constants';
-import {
-  CustomIcon,
-  DrawState,
-  MapCenterAndZoom,
-  MapExtent,
-  MapSettings,
-  Timeslice,
-} from '../../common/descriptor_types';
-import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
-import { IVectorStyle } from '../classes/styles/vector/vector_style';
-import { expandToTileBoundaries, getTilesForExtent } from '../classes/util/geo_tile_utils';
-import { getToasts } from '../kibana_services';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { MapStoreState } from '../reducers/store';
+import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import {
   getDataFilters,
-  getEditState,
   getFilters,
-  getLayerById,
-  getLayerList,
   getMapSettings,
+  getWaitingForMapReadyLayerListRaw,
   getQuery,
-  getSearchSessionId,
-  getSearchSessionMapBuffer,
-  getSelectedLayerId,
   getTimeFilters,
   getTimeslice,
-  getWaitingForMapReadyLayerListRaw,
+  getLayerList,
+  getSearchSessionId,
+  getSearchSessionMapBuffer,
+  getLayerById,
+  getEditState,
+  getSelectedLayerId,
 } from '../selectors/map_selectors';
-import { getDeletedFeatureIds } from '../selectors/ui_selectors';
-import {
-  autoFitToBounds,
-  syncDataForAllLayers,
-  syncDataForLayerDueToDrawing,
-  syncDataForLayerId,
-} from './data_request_actions';
-import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import {
   CLEAR_GOTO,
   CLEAR_MOUSE_COORDINATES,
@@ -74,10 +54,30 @@ import {
   SET_QUERY,
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
-  UPDATE_EDIT_STATE,
   UPDATE_MAP_SETTING,
+  UPDATE_EDIT_STATE,
 } from './map_action_constants';
-import { SET_DRAW_MODE, clearDeletedFeatureIds, pushDeletedFeatureId } from './ui_actions';
+import {
+  autoFitToBounds,
+  syncDataForAllLayers,
+  syncDataForLayerDueToDrawing,
+  syncDataForLayerId,
+} from './data_request_actions';
+import { addLayer, addLayerWithoutDataSync } from './layer_actions';
+import {
+  CustomIcon,
+  DrawState,
+  MapCenterAndZoom,
+  MapExtent,
+  MapSettings,
+  Timeslice,
+} from '../../common/descriptor_types';
+import { INITIAL_LOCATION } from '../../common/constants';
+import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
+import { SET_DRAW_MODE, pushDeletedFeatureId, clearDeletedFeatureIds } from './ui_actions';
+import { expandToTileBoundaries, getTilesForExtent } from '../classes/util/geo_tile_utils';
+import { getToasts } from '../kibana_services';
+import { getDeletedFeatureIds } from '../selectors/ui_selectors';
 
 export function setMapInitError(errorMessage: string) {
   return {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { INDEX_PATTERN_BEATS } from '../../common/constants';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
+import { INDEX_PATTERN_BEATS } from '../../common/constants';
 
 const HITS_SIZE = 10000; // maximum hits to receive from ES with each search
 

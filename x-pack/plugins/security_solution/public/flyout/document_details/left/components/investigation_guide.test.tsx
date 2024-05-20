@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
-import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
-import { LeftPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { render } from '@testing-library/react';
 import { InvestigationGuide } from './investigation_guide';
-import { INVESTIGATION_GUIDE_LOADING_TEST_ID, INVESTIGATION_GUIDE_TEST_ID } from './test_ids';
+import { LeftPanelContext } from '../context';
+import { TestProviders } from '../../../../common/mock';
+import { INVESTIGATION_GUIDE_TEST_ID, INVESTIGATION_GUIDE_LOADING_TEST_ID } from './test_ids';
+import { mockContextValue } from '../mocks/mock_context';
+import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
 

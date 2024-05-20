@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
+import { screen, waitFor, within } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
 import { basicFileMock } from '../../containers/mock';
+import type { AppMockRenderer } from '../../common/mock';
 
-import userEvent from '@testing-library/user-event';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { createAppMockRenderer, mockedTestProvidersOwner } from '../../common/mock';
 import { FilesTable } from './files_table';
+import userEvent from '@testing-library/user-event';
 
 describe('FilesTable', () => {
   const onTableChange = jest.fn();

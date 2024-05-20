@@ -1,4 +1,3 @@
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +6,13 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
  * Side Public License, v 1.
  */
 import { renderHook } from '@testing-library/react-hooks';
+import { createSearchSessionMock } from '../../../__mocks__/search_session';
+import { useUrl } from './use_url';
 import {
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
 } from '../../../__mocks__/saved_search';
-import { createSearchSessionMock } from '../../../__mocks__/search_session';
-import { useUrl } from './use_url';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 function prepareTest(savedSearch: SavedSearch, path: string) {
   const { history } = createSearchSessionMock();

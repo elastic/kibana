@@ -5,43 +5,43 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
+import React, { useMemo, useEffect, useCallback } from 'react';
+import type { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import deepEqual from 'fast-deep-equal';
-import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
-import type { Dispatch } from 'redux';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
+import { InputsModelId } from '../../../../../common/store/inputs/constants';
+import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
+import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import type { ControlColumnProps } from '../../../../../../common/types';
+import { useTimelineEvents } from '../../../../containers';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { StatefulBody } from '../../body';
+import { Footer, footerHeight } from '../../footer';
+import { QueryTabHeader } from './header';
+import { calculateTotalPages } from '../../helpers';
+import { combineQueries } from '../../../../../common/lib/kuery';
+import { TimelineRefetch } from '../../refetch_timeline';
 import type {
   KueryFilterQueryKind,
   ToggleDetailPanel,
 } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { combineQueries } from '../../../../../common/lib/kuery';
-import type { State, inputsModel } from '../../../../../common/store';
+import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { isActiveTimeline } from '../../../../../helpers';
-import { useTimelineEvents } from '../../../../containers';
-import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
-import { timelineActions, timelineSelectors } from '../../../../store';
 import { timelineDefaults } from '../../../../store/defaults';
-import { StatefulBody } from '../../body';
-import { Footer, footerHeight } from '../../footer';
-import { calculateTotalPages } from '../../helpers';
-import { TimelineRefetch } from '../../refetch_timeline';
-import { QueryTabHeader } from './header';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { isActiveTimeline } from '../../../../../helpers';
 
 import type { TimelineModel } from '../../../../store/model';
 import { DetailsPanel } from '../../../side_panel';
@@ -53,14 +53,14 @@ import {
   StyledEuiFlyoutFooter,
   VerticalRule,
 } from '../shared/layout';
-import type { TimelineTabCommonProps } from '../shared/types';
-import { useTimelineColumns } from '../shared/use_timeline_columns';
-import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import {
   TIMELINE_EMPTY_EVENTS,
   isTimerangeSame,
   timelineEmptyTrailingControlColumns,
 } from '../shared/utils';
+import type { TimelineTabCommonProps } from '../shared/types';
+import { useTimelineColumns } from '../shared/use_timeline_columns';
+import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&

@@ -6,27 +6,27 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { Action, handleActions } from 'redux-actions';
+import { handleActions, Action } from 'redux-actions';
 import { call, put, select, takeLatest } from 'redux-saga/effects';
-import type { AppState } from '..';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnector } from '../../../../common/rules/types';
-import { simpleAlertEnabled } from '../../lib/alert_types/alert_messages';
-import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { createAsyncAction } from '../actions/utils';
+import { asyncInitState, handleAsyncAction } from '../reducers/utils';
+import type { AppState } from '..';
+import { AsyncInitState } from '../reducers/types';
+import { fetchEffectFactory } from '../effects/fetch_effect';
 import {
-  NewAlertParams,
   createAlert,
   disableAlertById,
   fetchAnomalyAlertRecords,
   fetchConnectors,
   fetchMonitorAlertRecords,
+  NewAlertParams,
 } from '../api/alerts';
-import { fetchEffectFactory } from '../effects/fetch_effect';
 import { kibanaService } from '../kibana_service';
-import { AsyncInitState } from '../reducers/types';
-import { asyncInitState, handleAsyncAction } from '../reducers/utils';
 import { monitorIdSelector } from '../selectors';
+import { AlertsResult, MonitorIdParam } from '../actions/types';
+import { simpleAlertEnabled } from '../../lib/alert_types/alert_messages';
 
 /**
  * TODO: Use actual AlertType Params type that's specific to Uptime instead of `any`

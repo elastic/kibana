@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFormRow } from '@elastic/eui';
 import React from 'react';
+import { EuiFormRow } from '@elastic/eui';
 
 import {
-  ExpressionInputProps,
   LazyExpressionInput,
+  ExpressionInputProps,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 

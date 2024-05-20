@@ -6,11 +6,11 @@
  */
 
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { getKqlFilter } from '../../common';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { SyntheticsServerSetup } from '../../../types';
-import { getKqlFilter } from '../../common';
-import { SyntheticsRestApiRouteFactory } from '../../types';
 
 type Payload = Array<{
   id: string;

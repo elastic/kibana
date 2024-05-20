@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip, IconType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip, EuiIcon, IconType } from '@elastic/eui';
 import { ProcessorStatus } from '../types';
 import { ErrorIcon, ErrorIgnoredIcon, SkippedIcon } from './shared';
 

@@ -9,14 +9,14 @@ import expect from '@kbn/expect';
 import { performance } from 'perf_hooks';
 
 import {
-  createAlertsIndex,
   createRule,
-  deleteAllAlerts,
+  createAlertsIndex,
   deleteAllRules,
-  getAlertsById,
+  deleteAllAlerts,
   getRuleForAlertTesting,
-  waitForAlertsToBePresent,
+  getAlertsById,
   waitForRuleSuccess,
+  waitForAlertsToBePresent,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

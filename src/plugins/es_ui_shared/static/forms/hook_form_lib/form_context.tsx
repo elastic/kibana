@@ -8,7 +8,7 @@
 
 import React, { createContext, useContext } from 'react';
 
-import { FormData, FormHook } from './types';
+import { FormHook, FormData } from './types';
 
 const FormContext = createContext<FormHook<any> | undefined>(undefined);
 

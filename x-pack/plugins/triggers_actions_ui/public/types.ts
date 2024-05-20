@@ -5,101 +5,101 @@
  * 2.0.
  */
 
+import type { Moment } from 'moment';
+import type { ComponentType, ReactNode, RefObject } from 'react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type {
+  IconType,
+  RecursivePartial,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridToolBarAdditionalControlsOptions,
+  EuiDataGridProps,
+  EuiDataGridRefProps,
+  EuiDataGridColumnCellAction,
+  EuiDataGridToolBarVisibilityOptions,
+  EuiSuperSelectOption,
+  EuiDataGridOnColumnResizeHandler,
+  EuiDataGridCellProps,
+  RenderCellValue,
+  EuiDataGridCellPopoverElementProps,
+} from '@elastic/eui';
+import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
+import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
+import { HttpSetup } from '@kbn/core/public';
+import { KueryNode } from '@kbn/es-query';
+import {
+  ActionType,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentTemplate,
+  ALERT_HISTORY_PREFIX,
+  AlertHistoryDefaultIndexName,
+  AsApiContract,
+} from '@kbn/actions-plugin/common';
+import {
+  ActionGroup,
+  RuleActionParam,
+  SanitizedRule as AlertingSanitizedRule,
+  ResolvedSanitizedRule,
+  RuleSystemAction,
+  RuleTaskState,
+  AlertSummary as RuleSummary,
+  ExecutionDuration,
+  AlertStatus,
+  RawAlertInstance,
+  AlertingFrameworkHealth,
+  RuleNotifyWhenType,
+  RuleTypeParams,
+  RuleTypeMetaData,
+  ActionVariable,
+  RuleLastRun,
+  MaintenanceWindow,
+  SanitizedRuleAction as RuleAction,
+} from '@kbn/alerting-plugin/common';
+import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  EuiDataGridCellPopoverElementProps,
-  EuiDataGridCellProps,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridColumnCellAction,
-  EuiDataGridOnColumnResizeHandler,
-  EuiDataGridProps,
-  EuiDataGridRefProps,
-  EuiDataGridToolBarAdditionalControlsOptions,
-  EuiDataGridToolBarVisibilityOptions,
-  EuiSuperSelectOption,
-  IconType,
-  RecursivePartial,
-  RenderCellValue,
-} from '@elastic/eui';
-import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
-import {
-  ALERT_HISTORY_PREFIX,
-  ActionType,
-  AlertHistoryDefaultIndexName,
-  AlertHistoryDocumentTemplate,
-  AlertHistoryEsIndexConnectorId,
-  AsApiContract,
-} from '@kbn/actions-plugin/common';
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import {
-  ActionGroup,
-  ActionVariable,
-  AlertStatus,
-  AlertingFrameworkHealth,
-  SanitizedRule as AlertingSanitizedRule,
-  ExecutionDuration,
-  MaintenanceWindow,
-  RawAlertInstance,
-  ResolvedSanitizedRule,
-  SanitizedRuleAction as RuleAction,
-  RuleActionParam,
-  RuleLastRun,
-  RuleNotifyWhenType,
-  AlertSummary as RuleSummary,
-  RuleSystemAction,
-  RuleTaskState,
-  RuleTypeMetaData,
-  RuleTypeParams,
-} from '@kbn/alerting-plugin/common';
-import type { BulkOperationError } from '@kbn/alerting-plugin/server';
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { DocLinksStart } from '@kbn/core/public';
-import { HttpSetup } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { KueryNode } from '@kbn/es-query';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import type { RuleCreationValidConsumer, ValidFeatureId } from '@kbn/rule-data-utils';
-import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { Moment } from 'moment';
-import type { ComponentType, ReactNode, RefObject } from 'react';
 import React from 'react';
-import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
+import { TypeRegistry } from './application/type_registry';
+import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
+import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
+import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
+import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
+import type {
+  RuleTagBadgeProps,
+  RuleTagBadgeOptions,
+} from './application/sections/rules_list/components/rule_tag_badge';
+import type {
+  RuleEventLogListProps,
+  RuleEventLogListOptions,
+} from './application/sections/rule_details/components/rule_event_log_list';
+import type { GlobalRuleEventLogListProps } from './application/sections/rule_details/components/global_rule_event_log_list';
+import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
-import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
-import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
-import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
 import type {
-  BrowserFieldItem,
-  CreateFieldComponent,
   FieldBrowserOptions,
-  FieldBrowserProps,
+  CreateFieldComponent,
   GetFieldTableColumns,
+  FieldBrowserProps,
+  BrowserFieldItem,
 } from './application/sections/field_browser/types';
-import type { GlobalRuleEventLogListProps } from './application/sections/rule_details/components/global_rule_event_log_list';
-import type {
-  RuleEventLogListOptions,
-  RuleEventLogListProps,
-} from './application/sections/rule_details/components/rule_event_log_list';
-import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
-import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
-import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
-import type {
-  RuleTagBadgeOptions,
-  RuleTagBadgeProps,
-} from './application/sections/rules_list/components/rule_tag_badge';
-import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
-import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
-import { TypeRegistry } from './application/type_registry';
+import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
+import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
+import { Case } from './application/sections/alerts_table/hooks/apis/bulk_get_cases';
+import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 
 export type { ActionVariables, RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 
@@ -177,7 +177,7 @@ export {
 export type ActionTypeIndex = Record<string, ActionType>;
 export type ActionTypeRegistryContract<
   ActionConnector = unknown,
-  ActionParams = unknown,
+  ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
 export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<AlertTableConfigRegistry>;
@@ -354,7 +354,7 @@ export type ActionConnector<Config = Record<string, unknown>, Secrets = Record<s
 
 export type ActionConnectorWithoutId<
   Config = Record<string, unknown>,
-  Secrets = Record<string, unknown>,
+  Secrets = Record<string, unknown>
 > = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
 
 export type ActionConnectorTableItem = ActionConnector & {
@@ -383,7 +383,7 @@ export interface RuleTableItem extends Rule {
 export interface RuleTypeParamsExpressionProps<
   Params extends RuleTypeParams = RuleTypeParams,
   MetaData = Record<string, unknown>,
-  ActionGroupIds extends string = string,
+  ActionGroupIds extends string = string
 > {
   id?: string;
   ruleParams: Params;
@@ -441,7 +441,7 @@ export enum EditConnectorTabs {
 
 export interface RuleEditProps<
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData extends RuleTypeMetaData = RuleTypeMetaData,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
 > {
   initialRule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
@@ -457,7 +457,7 @@ export interface RuleEditProps<
 
 export interface RuleAddProps<
   Params extends RuleTypeParams = RuleTypeParams,
-  MetaData extends RuleTypeMetaData = RuleTypeMetaData,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
 > {
   /**
    * ID of the feature this rule should be created for.

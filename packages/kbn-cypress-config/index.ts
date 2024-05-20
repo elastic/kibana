@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import wp from '@cypress/webpack-preprocessor';
-import { defineConfig } from 'cypress';
 import { v4 as uuid } from 'uuid';
+import { defineConfig } from 'cypress';
+import wp from '@cypress/webpack-preprocessor';
 
 export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
   return defineConfig({

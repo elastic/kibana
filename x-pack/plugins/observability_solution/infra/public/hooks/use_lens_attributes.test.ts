@@ -6,16 +6,16 @@
  */
 
 import 'jest-canvas-mock';
-import { CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { FilterStateStore } from '@kbn/es-query';
-import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
-import type { LensBaseLayer, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { renderHook } from '@testing-library/react-hooks';
-import type { InfraClientStartDeps } from '../types';
 import { useLensAttributes } from './use_lens_attributes';
+import { coreMock } from '@kbn/core/public/mocks';
+import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import type { InfraClientStartDeps } from '../types';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { FilterStateStore } from '@kbn/es-query';
+import type { LensBaseLayer, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSplitPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSplitPanel, EuiText } from '@elastic/eui';
 import * as i18n from './translations';
 
 const ButtonContainer = styled(EuiFlexGroup)`

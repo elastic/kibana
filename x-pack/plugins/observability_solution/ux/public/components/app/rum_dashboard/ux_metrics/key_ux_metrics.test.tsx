@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Matcher, render } from '@testing-library/react';
 import React from 'react';
+import { render, Matcher } from '@testing-library/react';
 import * as queryHook from '../../../../hooks/use_long_task_metrics_query';
 import { KeyUXMetrics } from './key_ux_metrics';
 

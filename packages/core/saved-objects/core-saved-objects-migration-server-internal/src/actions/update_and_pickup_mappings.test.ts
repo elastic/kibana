@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { updateAndPickupMappings } from './update_and_pickup_mappings';
 import { DEFAULT_TIMEOUT } from './constants';
 import { pickupUpdatedMappings } from './pickup_updated_mappings';
-import { updateAndPickupMappings } from './update_and_pickup_mappings';
 
 jest.mock('./catch_retryable_es_client_errors');
 jest.mock('./pickup_updated_mappings');

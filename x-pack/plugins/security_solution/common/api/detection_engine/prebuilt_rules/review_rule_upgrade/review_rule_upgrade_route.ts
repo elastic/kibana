@@ -6,8 +6,8 @@
  */
 
 import type { RuleObjectId, RuleSignatureId, RuleTagArray } from '../../model';
-import type { RuleResponse } from '../../model/rule_schema';
 import type { PartialRuleDiff } from '../model';
+import type { RuleResponse } from '../../model/rule_schema';
 
 export interface ReviewRuleUpgradeResponseBody {
   /** Aggregated info about all rules available for upgrade */

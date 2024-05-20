@@ -6,29 +6,29 @@
  */
 
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { AttackDiscoveryPage } from '.';
-import { ATTACK_DISCOVERY_PATH } from '../../../common/constants';
-import { UpsellingProvider } from '../../common/components/upselling_provider';
 import { TestProviders } from '../../common/mock';
 import { MockAssistantProvider } from '../../common/mock/mock_assistant_provider';
-import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
+import { ATTACK_DISCOVERY_PATH } from '../../../common/constants';
 import { mockHistory } from '../../common/utils/route/mocks';
+import { AttackDiscoveryPage } from '.';
+import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
+import { UpsellingProvider } from '../../common/components/upselling_provider';
 import { mockFindAnonymizationFieldsResponse } from '../mock/mock_find_anonymization_fields_response';
 import {
   getMockUseAttackDiscoveriesWithCachedAttackDiscoveries,
   getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading,
 } from '../mock/mock_use_attack_discovery';
-import { useAttackDiscovery } from '../use_attack_discovery';
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
+import { useAttackDiscovery } from '../use_attack_discovery';
 
 jest.mock('react-use', () => {
   const actual = jest.requireActual('react-use');

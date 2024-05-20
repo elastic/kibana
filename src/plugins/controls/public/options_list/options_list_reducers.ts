@@ -13,8 +13,8 @@ import { Filter } from '@kbn/es-query';
 
 import { isValidSearch } from '../../common/options_list/is_valid_search';
 import {
-  OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortingType,
+  OPTIONS_LIST_DEFAULT_SORT,
 } from '../../common/options_list/suggestions_sorting';
 import { OptionsListComponentState, OptionsListReduxState } from './types';
 

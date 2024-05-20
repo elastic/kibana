@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
-import React, { FunctionComponent, useEffect } from 'react';
 
 import {
   EuiFieldNumber,
@@ -16,17 +16,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
   EuiSelect,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { PhaseWithTiming } from '../../../../../../../../common/types';
 import { getFieldValidityAndErrorMessage, useFormData } from '../../../../../../../shared_imports';
-import { timeUnits } from '../../../../constants';
 import { UseField, useConfiguration, useGlobalFields } from '../../../../form';
 import { getPhaseMinAgeInMilliseconds } from '../../../../lib';
-import { getTimingLabelForPhase, getUnitsAriaLabelForPhase } from './util';
+import { timeUnits } from '../../../../constants';
+import { getUnitsAriaLabelForPhase, getTimingLabelForPhase } from './util';
 
 const i18nTexts = {
   rolloverToolTipDescription: i18n.translate(

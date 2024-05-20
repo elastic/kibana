@@ -1,12 +1,3 @@
-import type { NotificationsStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  MessageRole,
-  StreamingChatResponseEventType,
-  StreamingChatResponseEventWithoutError,
-} from '@kbn/observability-ai-assistant-plugin/common';
-import { ChatState } from '@kbn/observability-ai-assistant-plugin/public';
-import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,23 +6,32 @@ import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hoo
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import {
-  type RenderHookResult,
-  type WrapperComponent,
   act,
   renderHook,
+  type RenderHookResult,
+  type WrapperComponent,
 } from '@testing-library/react-hooks';
 import { merge } from 'lodash';
 import React, { PropsWithChildren } from 'react';
-import { Observable, Subject, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
+import {
+  MessageRole,
+  StreamingChatResponseEventType,
+  StreamingChatResponseEventWithoutError,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { ObservabilityAIAssistantAppServiceProvider } from '../context/observability_ai_assistant_app_service_provider';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import type { ObservabilityAIAssistantAppService } from '../service/create_app_service';
-import { createMockChatService } from '../utils/create_mock_chat_service';
 import {
+  useConversation,
   type UseConversationProps,
   type UseConversationResult,
-  useConversation,
 } from './use_conversation';
+import { ChatState } from '@kbn/observability-ai-assistant-plugin/public';
+import { createMockChatService } from '../utils/create_mock_chat_service';
+import { createUseChat } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_chat';
+import type { NotificationsStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 let hookResult: RenderHookResult<UseConversationProps, UseConversationResult>;
 

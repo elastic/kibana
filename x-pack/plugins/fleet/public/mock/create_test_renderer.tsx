@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { Router } from '@kbn/shared-ux-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { act, render as reactRender } from '@testing-library/react';
-import { type WrapperComponent, renderHook } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
+import type { RenderOptions, RenderResult } from '@testing-library/react';
+import { render as reactRender, act } from '@testing-library/react';
+import { renderHook, type WrapperComponent } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { Router } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { allowedExperimentalValues } from '../../common/experimental_features';
 
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
 import type { FleetConfigType } from '../plugin';
-import { ExperimentalFeaturesService } from '../services';
 import type { UIExtensionsStorage } from '../types';
+import { ExperimentalFeaturesService } from '../services';
 
-import { createStartServices } from './fleet_start_services';
 import { createConfigurationMock } from './plugin_configuration';
 import { createStartMock } from './plugin_interfaces';
+import { createStartServices } from './fleet_start_services';
 import type { MockedFleetStart, MockedFleetStartServices } from './types';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useDateFormat } from '../../../../hooks/use_date_format';
-import { PanelWithTitle } from '../common/components/panel_with_title';
-import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
-import { LastTestRunComponent } from '../monitor_details/monitor_summary/last_test_run';
-import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
-import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
-import { StepImage } from '../step_details_page/step_screenshot/step_image';
-import { StepDetails } from '../test_run_details/components/step_details';
 import { TestRunErrorInfo } from '../test_run_details/components/test_run_error_info';
-import { ErrorTimeline } from './components/error_timeline';
-import { FailedTestsList } from './components/failed_tests_list';
-import { useErrorDetailsBreadcrumbs } from './hooks/use_error_details_breadcrumbs';
-import { useErrorFailedTests } from './hooks/use_error_failed_tests';
+import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
+import { LastTestRunComponent } from '../monitor_details/monitor_summary/last_test_run';
 import { useStepDetails } from './hooks/use_step_details';
+import { StepDetails } from '../test_run_details/components/step_details';
+import { PanelWithTitle } from '../common/components/panel_with_title';
+import { useErrorFailedTests } from './hooks/use_error_failed_tests';
+import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { FailedTestsList } from './components/failed_tests_list';
+import { ErrorTimeline } from './components/error_timeline';
+import { useErrorDetailsBreadcrumbs } from './hooks/use_error_details_breadcrumbs';
+import { StepImage } from '../step_details_page/step_screenshot/step_image';
+import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
+import { useDateFormat } from '../../../../hooks/use_date_format';
 
 export function ErrorDetailsPage() {
   const { failedTests, loading } = useErrorFailedTests();

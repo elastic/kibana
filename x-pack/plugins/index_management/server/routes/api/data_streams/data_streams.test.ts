@@ -6,7 +6,7 @@
  */
 
 import { addBasePath } from '..';
-import { RequestMock, RouterMock, routeDependencies } from '../../../test/helpers';
+import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
 
 import { registerDataStreamRoutes } from '.';
 import { getEsWarningText } from './register_put_route';

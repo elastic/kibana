@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import type { DatasourceLayers, OperationDescriptor } from '../../types';
-import { GROUP_ID } from './constants';
-import type { GaugeVisualizationState } from './constants';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { getGaugeVisualization, isNumericDynamicMetric, isNumericMetric } from './visualization';
+import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import { GROUP_ID } from './constants';
+import type { DatasourceLayers, OperationDescriptor } from '../../types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { GaugeVisualizationState } from './constants';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function exampleState(): GaugeVisualizationState {
   return {

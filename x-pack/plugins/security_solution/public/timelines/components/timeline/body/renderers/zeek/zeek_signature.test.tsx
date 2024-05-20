@@ -9,22 +9,22 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { TestProviders, mockTimelineData } from '../../../../../../common/mock';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import {
-  DraggableZeekElement,
-  Link,
-  TotalVirusLinkSha,
   ZeekSignature,
-  constructDroppedValue,
-  defaultStringRenderer,
-  droppedStringRenderer,
   extractStateValue,
-  md5StringRenderer,
-  moduleStringRenderer,
+  constructDroppedValue,
+  TotalVirusLinkSha,
+  Link,
+  DraggableZeekElement,
   sha1StringRenderer,
+  md5StringRenderer,
+  droppedStringRenderer,
+  moduleStringRenderer,
+  defaultStringRenderer,
 } from './zeek_signature';
 
 jest.mock('../../../../../../common/lib/kibana');

@@ -7,14 +7,14 @@
 
 import axios from 'axios';
 
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { createExternalService } from './service';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
+import { ExternalServiceITOM } from '../lib/servicenow/types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { snExternalServiceConfig } from '../lib/servicenow/config';
 import { itomEventParams, serviceNowChoices } from '../lib/servicenow/mocks';
-import { ExternalServiceITOM } from '../lib/servicenow/types';
-import { createExternalService } from './service';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

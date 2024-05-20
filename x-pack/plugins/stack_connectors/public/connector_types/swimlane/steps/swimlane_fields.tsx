@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
-import { ButtonGroupField, ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
   FieldConfig,
-  UseField,
-  VALIDATION_TYPES,
   getFieldValidityAndErrorMessage,
+  UseField,
   useFormData,
+  VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { useMemo } from 'react';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ComboBoxField, ButtonGroupField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-import { isRequiredField, isValidFieldForConnector } from '../helpers';
 import * as i18n from '../translations';
 import {
   MappingConfigurationKeys,
   SwimlaneConnectorType,
   SwimlaneFieldMappingConfig,
 } from '../types';
+import { isRequiredField, isValidFieldForConnector } from '../helpers';
 
 const { emptyField } = fieldValidators;
 

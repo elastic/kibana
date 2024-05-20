@@ -7,6 +7,7 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
+import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import {
   DATE_NOW,
   LIST_ID,
@@ -15,7 +16,6 @@ import {
   TIE_BREAKER,
   USER,
 } from '../../../common/constants.mock';
-import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import { getSearchListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';
 
 import { getListItem } from './get_list_item';

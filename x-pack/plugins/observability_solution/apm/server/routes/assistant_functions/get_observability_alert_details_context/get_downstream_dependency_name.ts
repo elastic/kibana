@@ -7,14 +7,14 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
+import { termQuery } from '../../../../common/utils/term_query';
 import {
   EVENT_OUTCOME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   TRACE_ID,
 } from '../../../../common/es_fields/apm';
-import { RollupInterval } from '../../../../common/rollup';
-import { termQuery } from '../../../../common/utils/term_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { RollupInterval } from '../../../../common/rollup';
 
 export async function getDownstreamServiceResource({
   traceId,

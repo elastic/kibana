@@ -8,13 +8,13 @@
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue, transformRawData } from '@kbn/elastic-assistant-common';
-import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import { DynamicTool } from '@langchain/core/tools';
+import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { APP_UI_ID } from '../../../../common';
 import { getOpenAndAcknowledgedAlertsQuery } from './get_open_and_acknowledged_alerts_query';
 import { getRawDataOrDefault, sizeIsOutOfRange } from './helpers';
+import { APP_UI_ID } from '../../../../common';
 
 export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {
   alertsIndexPattern: string;

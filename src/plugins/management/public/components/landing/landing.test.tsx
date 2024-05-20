@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { AsyncTestBedConfig, TestBed, registerTestBed } from '@kbn/test-jest-helpers';
-import { merge } from 'lodash';
 import React from 'react';
+import { merge } from 'lodash';
+import { registerTestBed, AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
 
 import { AppContextProvider } from '../management_app/management_context';
 import { ManagementLandingPage } from './landing';

@@ -7,15 +7,15 @@
  */
 
 import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '@kbn/esql-ast';
-import type { ESQLRealField, ESQLVariable } from '../validation/types';
+import type { ESQLVariable, ESQLRealField } from '../validation/types';
 import { DOUBLE_BACKTICK, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
 import {
-  getFunctionDefinition,
-  isAssignment,
   isColumnItem,
+  isAssignment,
   isExpression,
-  isFunctionItem,
   isOptionItem,
+  isFunctionItem,
+  getFunctionDefinition,
 } from './helpers';
 
 function addToVariableOccurrencies(variables: Map<string, ESQLVariable[]>, instance: ESQLVariable) {

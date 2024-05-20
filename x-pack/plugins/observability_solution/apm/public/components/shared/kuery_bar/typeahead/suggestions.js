@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { isEmpty } from 'lodash';
 import { tint } from 'polished';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { unit } from '../../../../utils/style';
 import Suggestion from './suggestion';
 

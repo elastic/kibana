@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { EuiProgress } from '@elastic/eui';
 import { pick } from 'lodash/fp';
+import { EuiProgress } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, createContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
-import { TimelineType } from '../../../../common/api/timeline';
-import type { RowRenderer, TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import type { State } from '../../../common/store';
-import { sourcererSelectors } from '../../../common/store';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
-import { TimelineModalHeader } from '../modal/header';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { TimelineModalHeader } from '../modal/header';
+import type { TimelineId, RowRenderer, TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/api/timeline';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import type { State } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
-import { HideShowContainer, TimelineContainer } from './styles';
-import { TabsContent } from './tabs';
-import { TimelineTour } from './tour';
 import * as i18n from './translations';
+import { TabsContent } from './tabs';
+import { HideShowContainer, TimelineContainer } from './styles';
+import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
+import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
+import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
+import { sourcererSelectors } from '../../../common/store';
+import { TimelineTour } from './tour';
 import { defaultUdtHeaders } from './unified_components/default_headers';
 
 const TimelineTemplateBadge = styled.div`

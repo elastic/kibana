@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
-import { useObjectMetrics } from '../hooks/use_object_metrics';
 import { ColorPalette } from './color_palette';
+import { useObjectMetrics } from '../hooks/use_object_metrics';
 
 export const ObjectCountList = () => {
   const objectMetrics = useObjectMetrics();

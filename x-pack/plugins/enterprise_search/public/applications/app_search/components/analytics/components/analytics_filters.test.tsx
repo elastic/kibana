@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { mockKibanaValues, setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, mockKibanaValues } from '../../../../__mocks__/kea_logic';
 
 import React, { ReactElement } from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 import moment, { Moment } from 'moment';
 
-import { EuiButton, EuiDatePickerRange, EuiSelect } from '@elastic/eui';
+import { EuiSelect, EuiDatePickerRange, EuiButton } from '@elastic/eui';
 
-import { DEFAULT_END_DATE, DEFAULT_START_DATE } from '../constants';
+import { DEFAULT_START_DATE, DEFAULT_END_DATE } from '../constants';
 
 import { AnalyticsFilters } from '.';
 

@@ -7,10 +7,10 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useInsertTimeline } from '.';
-import { SecurityPageName } from '../../../app/types';
-import { useFormatUrl } from '../../../common/components/link_to';
 import { mockTimelineModel } from '../../../common/mock/timeline_results';
+import { useFormatUrl } from '../../../common/components/link_to';
+import { SecurityPageName } from '../../../app/types';
+import { useInsertTimeline } from '.';
 
 const mockDispatch = jest.fn();
 

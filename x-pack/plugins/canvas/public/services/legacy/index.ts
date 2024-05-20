@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AppUpdater, CoreSetup, CoreStart } from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
+import { CoreSetup, CoreStart, AppUpdater } from '@kbn/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../../plugin';
 import { searchServiceFactory } from './search';
 

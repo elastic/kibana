@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { useState, useEffect, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { DatatableColumn, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import React, { useState, useEffect, useCallback } from 'react';
+import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
 import { ResolvedArgProps, ResolvedColumns } from '../../../public/expression_types/arg';
-import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
 const { VisDimension: strings } = ArgumentStrings;
 

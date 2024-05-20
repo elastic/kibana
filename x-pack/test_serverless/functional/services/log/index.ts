@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogLevel, LogsSynthtraceEsClient, createLogger } from '@kbn/apm-synthtrace';
+import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function LogsSynthtraceProvider(context: FtrProviderContext) {

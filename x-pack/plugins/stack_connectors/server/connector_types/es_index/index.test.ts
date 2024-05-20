@@ -6,14 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertHistoryEsIndexConnectorId } from '@kbn/actions-plugin/common';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { validateConfig, validateParams } from '@kbn/actions-plugin/server/lib';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { Logger } from '@kbn/logging';
-import { loggerMock } from '@kbn/logging-mocks';
 import {
   ActionParamsType,
   ConnectorTypeConfigType,
@@ -21,6 +15,12 @@ import {
   ESIndexConnectorTypeExecutorOptions,
   getConnectorType,
 } from '.';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { loggerMock } from '@kbn/logging-mocks';
+import { Logger } from '@kbn/logging';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { AlertHistoryEsIndexConnectorId } from '@kbn/actions-plugin/common';
 
 const services = actionsMock.createServices();
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
@@ -123,9 +123,8 @@ describe('params validation', () => {
       documents: [{ rando: 'thing' }],
       indexOverride: null,
     };
-    expect(
-      validateParams(connectorType, params, { configurationUtilities })
-    ).toMatchInlineSnapshot(`
+    expect(validateParams(connectorType, params, { configurationUtilities }))
+      .toMatchInlineSnapshot(`
         Object {
           "documents": Array [
             Object {

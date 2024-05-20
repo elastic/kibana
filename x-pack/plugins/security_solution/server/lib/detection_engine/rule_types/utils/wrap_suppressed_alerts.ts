@@ -16,8 +16,8 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../config';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { CompleteRule } from '../../rule_schema';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
 

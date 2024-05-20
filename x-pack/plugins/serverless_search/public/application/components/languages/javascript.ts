@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
-import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
 
 export const javascriptDefinition: LanguageDefinition = {
@@ -20,7 +20,10 @@ const searchResult = await client.search({
 
 console.log(searchResult.hits.hits)
 `,
-  configureClient: ({ url, apiKey }) => `const { Client } = require('@elastic/elasticsearch-serverless');
+  configureClient: ({
+    url,
+    apiKey,
+  }) => `const { Client } = require('@elastic/elasticsearch-serverless');
 const client = new Client({
   node: '${url}',
   auth: {
@@ -67,7 +70,12 @@ console.log(result);
   aborted: false
 }
 */`,
-  ingestDataIndex: ({ apiKey, url, indexName, ingestPipeline }) => `const { Client } = require('@elastic/elasticsearch-serverless');
+  ingestDataIndex: ({
+    apiKey,
+    url,
+    indexName,
+    ingestPipeline,
+  }) => `const { Client } = require('@elastic/elasticsearch-serverless');
 const client = new Client({
   node: '${url}',
   auth: {

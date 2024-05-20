@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusPopoverButton } from './status_popover_button';
 

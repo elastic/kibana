@@ -9,7 +9,7 @@ import { deepFreeze } from '@kbn/std';
 
 import type { RouteMethod } from '@kbn/core-http-server';
 
-import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '../../../common';
+import { PACKAGE_POLICY_API_ROUTES, AGENT_API_ROUTES } from '../../../common';
 
 import { EPM_API_ROUTES } from '../../constants';
 

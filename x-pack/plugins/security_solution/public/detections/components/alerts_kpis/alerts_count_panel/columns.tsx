@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React from 'react';
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { GenericBuckets } from '../../../../../common/search_strategy/common';
 import type { FlattenedBucket } from '../../../../common/components/alerts_treemap/types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
-import { DEFAULT_STACK_BY_FIELD0_SIZE, DEFAULT_STACK_BY_FIELD1_SIZE } from './helpers';
+import type { GenericBuckets } from '../../../../../common/search_strategy/common';
 import * as i18n from './translations';
+import { DEFAULT_STACK_BY_FIELD0_SIZE, DEFAULT_STACK_BY_FIELD1_SIZE } from './helpers';
 
 export const getSingleGroupByAlertsCountTableColumns = ({
   defaultNumberFormat,

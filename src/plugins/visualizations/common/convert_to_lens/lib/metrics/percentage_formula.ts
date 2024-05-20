@@ -7,7 +7,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { ExtendedColumnConverterArgs, FormulaColumn, createFormulaColumn } from '../convert';
+import { createFormulaColumn, ExtendedColumnConverterArgs, FormulaColumn } from '../convert';
 import { getFormulaForAgg } from './formula';
 
 export const getPercentageColumnFormulaColumn = ({

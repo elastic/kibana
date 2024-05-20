@@ -36,7 +36,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -73,7 +75,9 @@
                 "tags": [],
                 "label": "{ uiSettings, analytics }",
                 "description": [],
-                "signature": ["SetupDeps"],
+                "signature": [
+                  "SetupDeps"
+                ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -112,7 +116,9 @@
                 "tags": [],
                 "label": "{\n    analytics,\n    i18n: i18nDep,\n    overlays,\n    theme,\n    targetDomElement,\n  }",
                 "description": [],
-                "signature": ["StartDeps"],
+                "signature": [
+                  "StartDeps"
+                ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -128,7 +134,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/notifications_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -144,7 +152,9 @@
         "type": "Class",
         "tags": [],
         "label": "ToastsApi",
-        "description": ["\nMethods for adding and removing global toast messages."],
+        "description": [
+          "\nMethods for adding and removing global toast messages."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-notifications-browser-internal",
@@ -173,7 +183,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -220,7 +232,9 @@
             "type": "Function",
             "tags": [],
             "label": "get$",
-            "description": ["Observable of the toast messages to show to the user."],
+            "description": [
+              "Observable of the toast messages to show to the user."
+            ],
             "signature": [
               "() => ",
               "Observable",
@@ -246,7 +260,9 @@
             "type": "Function",
             "tags": [],
             "label": "add",
-            "description": ["\nAdds a new toast to current array of toast.\n"],
+            "description": [
+              "\nAdds a new toast to current array of toast.\n"
+            ],
             "signature": [
               "(toastOrTitle: ",
               {
@@ -275,7 +291,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrTitle",
-                "description": ["- a {@link ToastInput }"],
+                "description": [
+                  "- a {@link ToastInput }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -291,7 +309,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["a {@link Toast }"]
+            "returnComment": [
+              "a {@link Toast }"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -299,7 +319,9 @@
             "type": "Function",
             "tags": [],
             "label": "remove",
-            "description": ["\nRemoves a toast from the current array of toasts if present."],
+            "description": [
+              "\nRemoves a toast from the current array of toasts if present."
+            ],
             "signature": [
               "(toastOrId: string | ",
               {
@@ -321,7 +343,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrId",
-                "description": ["- a {@link Toast } returned by {@link ToastsApi.add } or its id"],
+                "description": [
+                  "- a {@link Toast } returned by {@link ToastsApi.add } or its id"
+                ],
                 "signature": [
                   "string | ",
                   {
@@ -385,7 +409,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrTitle",
-                "description": ["- a {@link ToastInput }"],
+                "description": [
+                  "- a {@link ToastInput }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -406,7 +432,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["- a {@link ToastOptions }"],
+                "description": [
+                  "- a {@link ToastOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -423,7 +451,9 @@
                 "isRequired": false
               }
             ],
-            "returnComment": ["a {@link Toast }"]
+            "returnComment": [
+              "a {@link Toast }"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -470,7 +500,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrTitle",
-                "description": ["- a {@link ToastInput }"],
+                "description": [
+                  "- a {@link ToastInput }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -491,7 +523,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["- a {@link ToastOptions }"],
+                "description": [
+                  "- a {@link ToastOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -508,7 +542,9 @@
                 "isRequired": false
               }
             ],
-            "returnComment": ["a {@link Toast }"]
+            "returnComment": [
+              "a {@link Toast }"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -555,7 +591,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrTitle",
-                "description": ["- a {@link ToastInput }"],
+                "description": [
+                  "- a {@link ToastInput }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -576,7 +614,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["- a {@link ToastOptions }"],
+                "description": [
+                  "- a {@link ToastOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -593,7 +633,9 @@
                 "isRequired": false
               }
             ],
-            "returnComment": ["a {@link Toast }"]
+            "returnComment": [
+              "a {@link Toast }"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -640,7 +682,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "toastOrTitle",
-                "description": ["- a {@link ToastInput }"],
+                "description": [
+                  "- a {@link ToastInput }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -661,7 +705,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["- a {@link ToastOptions }"],
+                "description": [
+                  "- a {@link ToastOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -678,7 +724,9 @@
                 "isRequired": false
               }
             ],
-            "returnComment": ["a {@link Toast }"]
+            "returnComment": [
+              "a {@link Toast }"
+            ]
           },
           {
             "parentPluginId": "@kbn/core-notifications-browser-internal",
@@ -717,8 +765,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "error",
-                "description": ["- an `Error` instance."],
-                "signature": ["Error"],
+                "description": [
+                  "- an `Error` instance."
+                ],
+                "signature": [
+                  "Error"
+                ],
                 "path": "packages/core/notifications/core-notifications-browser-internal/src/toasts/toasts_api.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -730,7 +782,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["- {@link ErrorToastOptions }"],
+                "description": [
+                  "- {@link ErrorToastOptions }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-notifications-browser",
@@ -746,7 +800,9 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["a {@link Toast }"]
+            "returnComment": [
+              "a {@link Toast }"
+            ]
           }
         ],
         "initialIsOpen": false

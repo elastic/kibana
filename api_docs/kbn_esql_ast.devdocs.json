@@ -87,7 +87,10 @@
                 "tags": [],
                 "label": "recognizer",
                 "description": [],
-                "signature": ["Recognizer", "<any>"],
+                "signature": [
+                  "Recognizer",
+                  "<any>"
+                ],
                 "path": "packages/kbn-esql-ast/src/antlr_error_listener.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -100,7 +103,9 @@
                 "tags": [],
                 "label": "offendingSymbol",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/kbn-esql-ast/src/antlr_error_listener.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -113,7 +118,9 @@
                 "tags": [],
                 "label": "line",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-esql-ast/src/antlr_error_listener.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -126,7 +133,9 @@
                 "tags": [],
                 "label": "column",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-esql-ast/src/antlr_error_listener.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -139,7 +148,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-esql-ast/src/antlr_error_listener.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -152,7 +163,10 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": ["RecognitionException", " | undefined"],
+                "signature": [
+                  "RecognitionException",
+                  " | undefined"
+                ],
                 "path": "packages/kbn-esql-ast/src/antlr_error_listener.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -227,7 +241,9 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-esql-ast/src/ast_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -263,7 +279,9 @@
             "tags": [],
             "label": "inputStream",
             "description": [],
-            "signature": ["CharStream"],
+            "signature": [
+              "CharStream"
+            ],
             "path": "packages/kbn-esql-ast/src/antlr_facade.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -276,7 +294,10 @@
             "tags": [],
             "label": "errorListener",
             "description": [],
-            "signature": ["ErrorListener", "<any>"],
+            "signature": [
+              "ErrorListener",
+              "<any>"
+            ],
             "path": "packages/kbn-esql-ast/src/antlr_facade.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -314,7 +335,9 @@
             "tags": [],
             "label": "inputStream",
             "description": [],
-            "signature": ["CharStream"],
+            "signature": [
+              "CharStream"
+            ],
             "path": "packages/kbn-esql-ast/src/antlr_facade.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -327,7 +350,10 @@
             "tags": [],
             "label": "errorListener",
             "description": [],
-            "signature": ["ErrorListener", "<any>"],
+            "signature": [
+              "ErrorListener",
+              "<any>"
+            ],
             "path": "packages/kbn-esql-ast/src/antlr_facade.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -340,7 +366,10 @@
             "tags": [],
             "label": "parseListener",
             "description": [],
-            "signature": ["default", " | undefined"],
+            "signature": [
+              "default",
+              " | undefined"
+            ],
             "path": "packages/kbn-esql-ast/src/antlr_facade.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -425,7 +454,9 @@
             "tags": [],
             "label": "code",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -437,7 +468,9 @@
             "tags": [],
             "label": "severity",
             "description": [],
-            "signature": ["number | \"error\" | \"warning\""],
+            "signature": [
+              "number | \"error\" | \"warning\""
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -473,7 +506,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"column\""],
+            "signature": [
+              "\"column\""
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -520,7 +555,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"command\""],
+            "signature": [
+              "\"command\""
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -577,7 +614,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"mode\""],
+            "signature": [
+              "\"mode\""
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -613,7 +652,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"option\""],
+            "signature": [
+              "\"option\""
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -670,7 +711,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"function\""],
+            "signature": [
+              "\"function\""
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -753,7 +796,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"error\" | \"warning\""],
+            "signature": [
+              "\"error\" | \"warning\""
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -831,7 +876,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"source\""],
+            "signature": [
+              "\"source\""
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -843,7 +890,9 @@
             "tags": [],
             "label": "sourceType",
             "description": [],
-            "signature": ["\"index\" | \"policy\""],
+            "signature": [
+              "\"index\" | \"policy\""
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -879,7 +928,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"timeInterval\""],
+            "signature": [
+              "\"timeInterval\""
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -966,7 +1017,9 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1125,7 +1178,9 @@
         "tags": [],
         "label": "ROOT_STATEMENT",
         "description": [],
-        "signature": ["\"singleStatement\""],
+        "signature": [
+          "\"singleStatement\""
+        ],
         "path": "packages/kbn-esql-ast/src/antlr_facade.ts",
         "deprecated": false,
         "trackAdoption": false,

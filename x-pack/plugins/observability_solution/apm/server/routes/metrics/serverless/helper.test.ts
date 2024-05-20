@@ -5,9 +5,9 @@
  * 2.0.
  */
 import {
-  calcEstimatedCost,
   calcMemoryUsed,
   calcMemoryUsedRate,
+  calcEstimatedCost,
   convertComputeUsageToGbSec,
 } from './helper';
 

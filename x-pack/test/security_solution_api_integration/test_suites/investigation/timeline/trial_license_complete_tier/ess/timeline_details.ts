@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
 import {
-  TimelineEventsDetailsStrategyResponse,
   TimelineEventsQueries,
+  TimelineEventsDetailsStrategyResponse,
   TimelineKpiStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
-import { sortBy } from 'lodash';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';

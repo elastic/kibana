@@ -8,29 +8,29 @@
 import React, { useEffect } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import { i18n } from '@kbn/i18n';
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
 import { AppLogic } from '../../app_logic';
 
 import {
+  ENGINE_PATH,
   ENGINES_PATH,
   ENGINE_ANALYTICS_PATH,
-  ENGINE_API_LOGS_PATH,
-  ENGINE_CRAWLER_PATH,
-  ENGINE_CURATIONS_PATH,
   ENGINE_DOCUMENTS_PATH,
   ENGINE_DOCUMENT_DETAIL_PATH,
-  ENGINE_PATH,
-  ENGINE_RELEVANCE_TUNING_PATH,
-  ENGINE_RESULT_SETTINGS_PATH,
   ENGINE_SCHEMA_PATH,
-  ENGINE_SEARCH_UI_PATH,
-  ENGINE_SYNONYMS_PATH,
+  ENGINE_CRAWLER_PATH,
   META_ENGINE_SOURCE_ENGINES_PATH,
+  ENGINE_RELEVANCE_TUNING_PATH,
+  ENGINE_SYNONYMS_PATH,
+  ENGINE_CURATIONS_PATH,
+  ENGINE_RESULT_SETTINGS_PATH,
+  ENGINE_SEARCH_UI_PATH,
+  ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';

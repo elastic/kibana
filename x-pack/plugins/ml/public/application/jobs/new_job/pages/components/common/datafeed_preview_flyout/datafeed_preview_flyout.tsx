@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { Fragment, useState, useContext } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlyout,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiFlyoutBody,
+} from '@elastic/eui';
 
 import { JobCreatorContext } from '../../job_creator_context';
 import { DatafeedPreview } from './datafeed_preview';

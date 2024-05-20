@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { SPACES } from '../../common/lib/spaces';
 import {
   getTestScenarios,
   isUserAuthorizedAtSpace,
 } from '../../common/lib/saved_object_test_utils';
-import { SPACES } from '../../common/lib/spaces';
 import { TestUser } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { findTestSuiteFactory, getTestCases } from '../../common/suites/find';
 
 const {

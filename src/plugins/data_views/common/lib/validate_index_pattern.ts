@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CONTAINS_SPACES_KEY, ILLEGAL_CHARACTERS_KEY, ILLEGAL_CHARACTERS_VISIBLE } from './types';
+import { ILLEGAL_CHARACTERS_VISIBLE, CONTAINS_SPACES_KEY, ILLEGAL_CHARACTERS_KEY } from './types';
 
 function indexPatternContainsSpaces(indexPattern: string): boolean {
   return indexPattern.includes(' ');

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 /**
  * As internal user we check for existence of asset crititcality resources

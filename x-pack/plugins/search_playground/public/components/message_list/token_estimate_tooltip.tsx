@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiDescriptionList,
-  EuiI18nNumber,
-  EuiLink,
-  EuiPanel,
   EuiPopover,
-  EuiTextColor,
+  EuiPanel,
   useGeneratedHtmlId,
+  EuiLink,
+  EuiI18nNumber,
+  EuiDescriptionList,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { docLinks } from '../../../common/doc_links';
 import { useLLMsModels } from '../../hooks/use_llms_models';

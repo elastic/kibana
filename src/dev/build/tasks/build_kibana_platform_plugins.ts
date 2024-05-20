@@ -8,17 +8,17 @@
 
 import Path from 'path';
 
+import { REPO_ROOT } from '@kbn/repo-info';
+import { lastValueFrom } from 'rxjs';
 import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 import {
+  runOptimizer,
   OptimizerConfig,
   logOptimizerState,
   reportOptimizerTimings,
-  runOptimizer,
 } from '@kbn/optimizer';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { lastValueFrom } from 'rxjs';
 
-import { Task, deleteAll, read, write } from '../lib';
+import { Task, deleteAll, write, read } from '../lib';
 
 export const BuildKibanaPlatformPlugins: Task = {
   description: 'Building distributable versions of Kibana platform plugins',

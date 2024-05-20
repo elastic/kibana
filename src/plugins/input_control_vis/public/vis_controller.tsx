@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
 import React from 'react';
+import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 
 import { I18nStart } from '@kbn/core/public';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { Filter } from '@kbn/es-query';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { Filter } from '@kbn/es-query';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
-import { ListControl } from './control/list_control_factory';
-import { RangeControl } from './control/range_control_factory';
 import { getLineageMap } from './lineage';
+import { RangeControl } from './control/range_control_factory';
+import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
 import { InputControlVisParams } from './types';
 

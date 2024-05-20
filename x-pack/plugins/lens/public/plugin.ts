@@ -5,129 +5,129 @@
  * 2.0.
  */
 
-import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import {
-  ContentManagementPublicSetup,
-  ContentManagementPublicStart,
-} from '@kbn/content-management-plugin/public';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import type {
-  EventAnnotationPluginStart,
-  EventAnnotationServiceType,
-} from '@kbn/event-annotation-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   ExpressionsServiceSetup,
   ExpressionsSetup,
   ExpressionsStart,
 } from '@kbn/expressions-plugin/public';
-import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
-import {
-  ACTION_VISUALIZE_FIELD,
-  UiActionsStart,
-  VISUALIZE_FIELD_TRIGGER,
-  VisualizeFieldContext,
-} from '@kbn/ui-actions-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
-import type {
-  UsageCollectionSetup,
-  UsageCollectionStart,
-} from '@kbn/usage-collection-plugin/public';
 import {
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   VisualizationsSetup,
   VisualizationsStart,
 } from '@kbn/visualizations-plugin/public';
-import {
-  AGG_BASED_VISUALIZATION_TRIGGER,
-  VISUALIZE_EDITOR_TRIGGER,
-} from '@kbn/visualizations-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type {
-  FormBasedDatasourceSetupPlugins,
+  EventAnnotationPluginStart,
+  EventAnnotationServiceType,
+} from '@kbn/event-annotation-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import {
+  UiActionsStart,
+  ACTION_VISUALIZE_FIELD,
+  VISUALIZE_FIELD_TRIGGER,
+  VisualizeFieldContext,
+} from '@kbn/ui-actions-plugin/public';
+import {
+  VISUALIZE_EDITOR_TRIGGER,
+  AGG_BASED_VISUALIZATION_TRIGGER,
+} from '@kbn/visualizations-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
+import type {
   FormBasedDatasource as FormBasedDatasourceType,
+  FormBasedDatasourceSetupPlugins,
   FormulaPublicApi,
 } from './datasources/form_based';
 import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/text_based';
-import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 
 import type {
-  DatatableVisualizationPluginSetupPlugins,
-  DatatableVisualization as DatatableVisualizationType,
-} from './visualizations/datatable';
-import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
-import type { HeatmapVisualization as HeatmapVisualizationType } from './visualizations/heatmap';
+  XyVisualization as XyVisualizationType,
+  XyVisualizationPluginSetupPlugins,
+} from './visualizations/xy';
 import type {
-  LegacyMetricVisualizationPluginSetupPlugins,
   LegacyMetricVisualization as LegacyMetricVisualizationType,
+  LegacyMetricVisualizationPluginSetupPlugins,
 } from './visualizations/legacy_metric';
 import type { MetricVisualization as MetricVisualizationType } from './visualizations/metric';
 import type {
-  PieVisualizationPluginSetupPlugins,
+  DatatableVisualization as DatatableVisualizationType,
+  DatatableVisualizationPluginSetupPlugins,
+} from './visualizations/datatable';
+import type {
   PieVisualization as PieVisualizationType,
+  PieVisualizationPluginSetupPlugins,
 } from './visualizations/partition';
+import type { HeatmapVisualization as HeatmapVisualizationType } from './visualizations/heatmap';
+import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
 import type { TagcloudVisualization as TagcloudVisualizationType } from './visualizations/tagcloud';
-import type {
-  XyVisualizationPluginSetupPlugins,
-  XyVisualization as XyVisualizationType,
-} from './visualizations/xy';
 
-import { APP_ID, NOT_INTERNATIONALIZED_PRODUCT_NAME, getEditPath } from '../common/constants';
+import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
-import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboard_visualize_panel_actions';
-import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
-import { CreateESQLPanelAction } from './trigger_actions/open_lens_config/create_action';
-import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
-import { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action';
-import {
-  IN_APP_EMBEDDABLE_EDIT_TRIGGER,
-  inAppEmbeddableEditTrigger,
-} from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
-import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
-import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
-import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import type {
-  EditorFrameSetup,
-  LensTopNavMenuEntryGenerator,
-  Suggestion,
   Visualization,
   VisualizationType,
+  EditorFrameSetup,
+  LensTopNavMenuEntryGenerator,
   VisualizeEditorContext,
+  Suggestion,
 } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
+import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
+import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
+import { CreateESQLPanelAction } from './trigger_actions/open_lens_config/create_action';
+import {
+  inAppEmbeddableEditTrigger,
+  IN_APP_EMBEDDABLE_EDIT_TRIGGER,
+} from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
+import { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action';
+import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
+import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
+import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
+import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboard_visualize_panel_actions';
 
-import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
-import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { LensByValueInput, LensEmbeddableInput } from './embeddable';
-import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
+import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
+import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
+import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
-import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
-import { ChartInfoApi } from './chart_info_api';
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
+import { ChartInfoApi } from './chart_info_api';
+import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
+import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
 import {
   CONTENT_ID,

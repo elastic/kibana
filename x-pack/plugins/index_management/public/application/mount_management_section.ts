@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import SemVer from 'semver/classes/semver';
+import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import SemVer from 'semver/classes/semver';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
 import { AppDependencies } from './app_context';
-import { UiMetricService } from './services';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
+import { UiMetricService } from './services';
 
 import { renderApp } from '.';
+import { setUiMetricService } from './services/api';
+import { notificationService } from './services/notification';
+import { httpService } from './services/http';
 import { ExtensionsService } from '../services/extensions_service';
 import { StartDependencies } from '../types';
-import { setUiMetricService } from './services/api';
-import { httpService } from './services/http';
-import { notificationService } from './services/notification';
 
 function initSetup({
   usageCollection,

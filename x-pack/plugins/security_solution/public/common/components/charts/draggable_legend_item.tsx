@@ -11,10 +11,10 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
-import { useUiSetting$ } from '../../lib/kibana';
-import { hasValueToDisplay } from '../../utils/validators';
 import { DefaultDraggable } from '../draggables';
+import { useUiSetting$ } from '../../lib/kibana';
 import { EMPTY_VALUE_LABEL } from './translation';
+import { hasValueToDisplay } from '../../utils/validators';
 
 const CountFlexItem = styled(EuiFlexItem)`
   ${({ theme }) => `margin-right: ${theme.eui.euiSizeS};`}

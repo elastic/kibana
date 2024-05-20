@@ -7,18 +7,18 @@
 
 import { act } from 'react-dom/test-utils';
 import {
-  APPS_WITH_DEPRECATION_LOGS,
-  DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
-  DEPRECATION_LOGS_INDEX,
-  DEPRECATION_LOGS_ORIGIN_FIELD,
-  DEPRECATION_LOGS_SOURCE_ID,
-} from '../../../common/constants';
-import { DeprecationLoggingStatus } from '../../../common/types';
-import { advanceTime, setupEnvironment } from '../helpers';
-import {
   EsDeprecationLogsTestBed,
   setupESDeprecationLogsPage,
 } from './es_deprecation_logs.helpers';
+import { setupEnvironment, advanceTime } from '../helpers';
+import { DeprecationLoggingStatus } from '../../../common/types';
+import {
+  DEPRECATION_LOGS_INDEX,
+  DEPRECATION_LOGS_SOURCE_ID,
+  DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
+  APPS_WITH_DEPRECATION_LOGS,
+  DEPRECATION_LOGS_ORIGIN_FIELD,
+} from '../../../common/constants';
 
 // Once the logs team register the kibana locators in their app, we should be able
 // to remove this mock and follow a similar approach to how discover link is tested.

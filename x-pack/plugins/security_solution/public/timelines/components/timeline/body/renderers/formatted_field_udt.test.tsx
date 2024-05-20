@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { mockTimelineData } from '../../../../../common/mock';
 import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import { getFormattedFields } from './formatted_field_udt';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 describe('formatted_fields_udt', () => {
   describe('getFormattedFields', () => {

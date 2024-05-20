@@ -15,11 +15,11 @@ import type { Metric, Series } from '../../../../common/types';
 import { AdditionalArgs } from '../../types';
 import { createColumn, getFormat } from './column';
 import {
+  PercentileRanksColumn,
   Column,
+  PercentileRanksColumnWithExtendedMeta,
   CommonColumnConverterArgs,
   PercentileColumn,
-  PercentileRanksColumn,
-  PercentileRanksColumnWithExtendedMeta,
 } from './types';
 
 export const isPercentileRanksColumnWithMeta = (

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiForm, EuiSpacer } from '@elastic/eui';
 import React, { FC, PropsWithChildren } from 'react';
+import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { FormMonitorType, SyntheticsMonitor } from '../types';
-import { formatDefaultFormValues, getDefaultFormFields } from './defaults';
-import { Disclaimer } from './disclaimer';
+import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
+import { Disclaimer } from './disclaimer';
 
 export const MonitorForm: FC<
   PropsWithChildren<{

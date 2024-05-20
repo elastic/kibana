@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 
-import { i18n } from '@kbn/i18n';
-import { StopInput } from '../stop_input';
-import { ColorStops } from './color_stops';
 import {
-  DEFAULT_CUSTOM_COLOR,
   addCategoricalRow,
   isCategoricalStopsInvalid,
+  DEFAULT_CUSTOM_COLOR,
 } from './color_stops_utils';
+import { i18n } from '@kbn/i18n';
+import { ColorStops } from './color_stops';
+import { StopInput } from '../stop_input';
 
 export const ColorStopsCategorical = ({
   colorStops = [{ stop: '', color: DEFAULT_CUSTOM_COLOR }],

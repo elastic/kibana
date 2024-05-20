@@ -67,7 +67,9 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["\nThe title of the application."],
+            "description": [
+              "\nThe title of the application."
+            ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -101,7 +103,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "status",
-            "description": ["\nThe initial status of the application.\nDefaulting to `accessible`"],
+            "description": [
+              "\nThe initial status of the application.\nDefaulting to `accessible`"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
@@ -120,7 +124,10 @@
             "parentPluginId": "@kbn/core-application-browser",
             "id": "def-common.App.visibleIn",
             "type": "Array",
-            "tags": ["default", "note"],
+            "tags": [
+              "default",
+              "note"
+            ],
             "label": "visibleIn",
             "description": [
               "\nOptional list of locations where the app is visible.\n\nAccepts the following values:\n- \"globalSearch\": the link will appear in the global search bar\n- \"home\": the link will appear on the Kibana home page\n- \"kibanaOverview\": the link will appear in the Kibana overview page\n- \"sideNav\": the link will appear in the side navigation.\n  Note: \"sideNav\" will be deprecated when we change the navigation to \"solutions\" style.\n"
@@ -148,7 +155,9 @@
             "description": [
               "\nAllow to define the default path a user should be directed to when navigating to the app.\nWhen defined, this value will be used as a default for the `path` option when calling {@link ApplicationStart.navigateToApp | navigateToApp}`,\nand will also be appended to the {@link ChromeNavLink | application navLink} in the navigation bar."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -184,7 +193,9 @@
             "type": "Object",
             "tags": [],
             "label": "capabilities",
-            "description": ["\nCustom capabilities defined by the app."],
+            "description": [
+              "\nCustom capabilities defined by the app."
+            ],
             "signature": [
               "Partial<",
               {
@@ -209,7 +220,9 @@
             "description": [
               "\nHide the UI chrome when the application is mounted. Defaults to `false`.\nTakes precedence over chrome service visibility settings."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -287,7 +300,9 @@
             "description": [
               "\nOverride the application's routing path from `/app/${id}`.\nMust be unique across registered applications. Should not include the\nbase path from HTTP."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -301,7 +316,9 @@
             "description": [
               "\nIf set to true, the application's route will only be checked against an exact match. Defaults to `false`.\n"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -315,7 +332,9 @@
             "description": [
               "Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL."
             ],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -388,8 +407,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "text",
-                "description": ["The text to display in the confirmation message"],
-                "signature": ["string"],
+                "description": [
+                  "The text to display in the confirmation message"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -401,8 +424,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "title",
-                "description": ["(optional) title to display in the confirmation message"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "(optional) title to display in the confirmation message"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -414,8 +441,12 @@
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
-                "description": ["(optional) to know that the user want to stay on the page"],
-                "signature": ["(() => void) | undefined"],
+                "description": [
+                  "(optional) to know that the user want to stay on the page"
+                ],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -427,8 +458,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "confirmButtonText",
-                "description": ["(optional) text for the confirmation button"],
-                "signature": ["string | undefined"],
+                "description": [
+                  "(optional) text for the confirmation button"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -534,7 +569,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -546,7 +583,9 @@
             "tags": [],
             "label": "confirmButtonText",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -572,7 +611,9 @@
             "tags": [],
             "label": "callback",
             "description": [],
-            "signature": ["(() => void) | undefined"],
+            "signature": [
+              "(() => void) | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -636,7 +677,9 @@
             "type": "Function",
             "tags": [],
             "label": "register",
-            "description": ["\nRegister an mountable application to the system."],
+            "description": [
+              "\nRegister an mountable application to the system."
+            ],
             "signature": [
               "<HistoryLocationState = unknown>(app: ",
               {
@@ -658,7 +701,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "app",
-                "description": ["- an {@link App }"],
+                "description": [
+                  "- an {@link App }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-application-browser",
@@ -750,7 +795,9 @@
             "type": "Object",
             "tags": [],
             "label": "capabilities",
-            "description": ["\nGets the read-only capabilities."],
+            "description": [
+              "\nGets the read-only capabilities."
+            ],
             "signature": [
               "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; }"
             ],
@@ -789,7 +836,9 @@
             "type": "Function",
             "tags": [],
             "label": "navigateToApp",
-            "description": ["\nNavigate to a given app\n"],
+            "description": [
+              "\nNavigate to a given app\n"
+            ],
             "signature": [
               "(appId: string, options?: ",
               {
@@ -812,7 +861,9 @@
                 "tags": [],
                 "label": "appId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -824,7 +875,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["- navigation options"],
+                "description": [
+                  "- navigation options"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-application-browser",
@@ -876,7 +929,9 @@
                 "description": [
                   "- an absolute URL, an absolute path or a relative path, to navigate to."
                 ],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -888,7 +943,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["- navigation options"],
+                "description": [
+                  "- navigation options"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-application-browser",
@@ -930,7 +987,9 @@
                 "tags": [],
                 "label": "appId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/application/core-application-browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -954,7 +1013,9 @@
                     "tags": [],
                     "label": "path",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "packages/core/application/core-application-browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -966,7 +1027,9 @@
                     "tags": [],
                     "label": "absolute",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "packages/core/application/core-application-browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -978,7 +1041,9 @@
                     "tags": [],
                     "label": "deepLinkId",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "packages/core/application/core-application-browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -997,7 +1062,10 @@
             "description": [
               "\nAn observable that emits the current application id and each subsequent id update."
             ],
-            "signature": ["Observable", "<string | undefined>"],
+            "signature": [
+              "Observable",
+              "<string | undefined>"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1011,7 +1079,10 @@
             "description": [
               "\nAn observable that emits the current path#hash and each subsequent update using the global history instance"
             ],
-            "signature": ["Observable", "<string>"],
+            "signature": [
+              "Observable",
+              "<string>"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1046,8 +1117,12 @@
             "type": "Object",
             "tags": [],
             "label": "element",
-            "description": ["\nThe container element to render the application into."],
-            "signature": ["HTMLElement"],
+            "description": [
+              "\nThe container element to render the application into."
+            ],
+            "signature": [
+              "HTMLElement"
+            ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1079,7 +1154,9 @@
             "parentPluginId": "@kbn/core-application-browser",
             "id": "def-common.AppMountParameters.appBasePath",
             "type": "string",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "appBasePath",
             "description": [
               "\nThe route path for configuring navigation to the application.\nThis string should not include the base path from HTTP.\n"
@@ -1250,7 +1327,9 @@
         "type": "Interface",
         "tags": [],
         "label": "AppNavOptions",
-        "description": ["\nApp navigation menu options"],
+        "description": [
+          "\nApp navigation menu options"
+        ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1264,7 +1343,9 @@
             "description": [
               "\nAn ordinal used to sort nav links relative to one another for display."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1275,8 +1356,12 @@
             "type": "string",
             "tags": [],
             "label": "tooltip",
-            "description": ["\nA tooltip shown when hovering over app link."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nA tooltip shown when hovering over app link."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1290,7 +1375,9 @@
             "description": [
               "\nA EUI iconType that will be used for the app's icon. This icon\ntakes precedence over the `icon` property."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1304,7 +1391,9 @@
             "description": [
               "\nA URL to an image file used as an icon. Used as a fallback\nif `euiIconType` is not provided."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1334,7 +1423,9 @@
             "description": [
               "\noptional {@link App.deepLinks | deep link} id inside the application to navigate to.\nIf an additional {@link NavigateToAppOptions.path | path} is defined it will be appended to the deep link path."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1348,7 +1439,9 @@
             "description": [
               "\noptional path inside application to deep link to.\nIf undefined, will use {@link App.defaultPath | the app's default path} as default."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1359,8 +1452,12 @@
             "type": "Unknown",
             "tags": [],
             "label": "state",
-            "description": ["\noptional state to forward to the application"],
-            "signature": ["unknown"],
+            "description": [
+              "\noptional state to forward to the application"
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1374,7 +1471,9 @@
             "description": [
               "\nif true, will not create a new history entry when navigating (using `replace` instead of `push`)"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1388,7 +1487,9 @@
             "description": [
               "\nif true, will open the app in new tab, will share session information via window.open if base"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1399,8 +1500,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "skipAppLeave",
-            "description": ["\nif true, will bypass the default onAppLeave behavior"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nif true, will bypass the default onAppLeave behavior"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1427,8 +1532,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "skipAppLeave",
-            "description": ["\nif true, will bypass the default onAppLeave behavior"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nif true, will bypass the default onAppLeave behavior"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1442,7 +1551,9 @@
             "description": [
               "\nif true will force a full page reload/refresh/assign, overriding the outcome of other url checks against current the location (effectively using `window.location.assign` instead of `push`)"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1453,8 +1564,12 @@
             "type": "Unknown",
             "tags": [],
             "label": "state",
-            "description": ["\noptional state to forward to the application"],
-            "signature": ["unknown"],
+            "description": [
+              "\noptional state to forward to the application"
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1517,8 +1632,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "basePath",
-                "description": ["the URL path scope for the sub history"],
-                "signature": ["string"],
+                "description": [
+                  "the URL path scope for the sub history"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1552,7 +1671,10 @@
                 "tags": [],
                 "label": "location",
                 "description": [],
-                "signature": ["LocationDescriptorObject", "<HistoryLocationState>"],
+                "signature": [
+                  "LocationDescriptorObject",
+                  "<HistoryLocationState>"
+                ],
                 "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1576,7 +1698,9 @@
                     "tags": [],
                     "label": "prependBasePath",
                     "description": [],
-                    "signature": ["boolean | undefined"],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
                     "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1597,7 +1721,9 @@
         "type": "Enum",
         "tags": [],
         "label": "AppLeaveActionType",
-        "description": ["\nPossible type of actions on application leave.\n"],
+        "description": [
+          "\nPossible type of actions on application leave.\n"
+        ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1609,7 +1735,9 @@
         "type": "Enum",
         "tags": [],
         "label": "AppStatus",
-        "description": ["\nAccessibility status of an application.\n"],
+        "description": [
+          "\nAccessibility status of an application.\n"
+        ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1680,8 +1808,12 @@
         "type": "Type",
         "tags": [],
         "label": "AppDeepLinkLocations",
-        "description": ["The places in the UI where a deepLink can be shown"],
-        "signature": ["\"home\" | \"kibanaOverview\" | \"globalSearch\" | \"sideNav\""],
+        "description": [
+          "The places in the UI where a deepLink can be shown"
+        ],
+        "signature": [
+          "\"home\" | \"kibanaOverview\" | \"globalSearch\" | \"sideNav\""
+        ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1777,7 +1909,9 @@
             "tags": [],
             "label": "nextAppId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1791,7 +1925,9 @@
         "type": "Type",
         "tags": [],
         "label": "AppMount",
-        "description": ["\nA mount function called when the user navigates to this app's route.\n"],
+        "description": [
+          "\nA mount function called when the user navigates to this app's route.\n"
+        ],
         "signature": [
           "(params: ",
           {
@@ -1832,7 +1968,9 @@
             "type": "Object",
             "tags": [],
             "label": "params",
-            "description": ["{@link AppMountParameters }"],
+            "description": [
+              "{@link AppMountParameters }"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-application-browser",
@@ -1859,7 +1997,9 @@
         "description": [
           "\nA function called when an application should be unmounted from the page. This function should be synchronous."
         ],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/core/application/core-application-browser/src/app_mount.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1914,7 +2054,9 @@
         "type": "Type",
         "tags": [],
         "label": "AppUpdater",
-        "description": ["\nUpdater for applications.\nsee {@link ApplicationSetup}"],
+        "description": [
+          "\nUpdater for applications.\nsee {@link ApplicationSetup}"
+        ],
         "signature": [
           "(app: ",
           {
@@ -2010,7 +2152,9 @@
         "type": "Type",
         "tags": [],
         "label": "PublicAppInfo",
-        "description": ["\nPublic information about a registered {@link App | application}\n"],
+        "description": [
+          "\nPublic information about a registered {@link App | application}\n"
+        ],
         "signature": [
           "Omit<",
           {

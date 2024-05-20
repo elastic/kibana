@@ -6,11 +6,11 @@
  */
 import { IRouter, Logger } from '@kbn/core/server';
 import { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
-import { registerAlertStatusRoute } from './alert_status_route';
-import { registerAlertsRoute } from './alerts_route';
-import { registerGetTotalIOBytesRoute } from './get_total_io_bytes_route';
-import { registerIOEventsRoute } from './io_events_route';
 import { registerProcessEventsRoute } from './process_events_route';
+import { registerAlertsRoute } from './alerts_route';
+import { registerAlertStatusRoute } from './alert_status_route';
+import { registerIOEventsRoute } from './io_events_route';
+import { registerGetTotalIOBytesRoute } from './get_total_io_bytes_route';
 
 export const registerRoutes = (
   router: IRouter,

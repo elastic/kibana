@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { MonitorDuration } from './monitor_duration/monitor_duration_container';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { PingHistogram } from './ping_histogram/ping_histogram_container';
+import { MonitorDuration } from './monitor_duration/monitor_duration_container';
 
 interface MonitorChartsProps {
   monitorId: string;

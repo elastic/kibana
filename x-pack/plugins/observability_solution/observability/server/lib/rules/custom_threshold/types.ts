@@ -23,7 +23,7 @@ import {
   Group,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../../../common/custom_threshold_rule/types';
-import { FIRED_ACTION, FIRED_ACTIONS_ID, NO_DATA_ACTION, NO_DATA_ACTIONS_ID } from './constants';
+import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 
 export enum AlertStates {

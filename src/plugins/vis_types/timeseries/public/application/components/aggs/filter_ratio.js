@@ -8,25 +8,25 @@
 
 import PropTypes from 'prop-types';
 import React, { useCallback, useMemo } from 'react';
-import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
-import { createChangeHandler } from '../lib/create_change_handler';
-import { createSelectHandler } from '../lib/create_select_handler';
-import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
+import { AggRow } from './agg_row';
+import { createChangeHandler } from '../lib/create_change_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 import {
+  htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFormRow,
   EuiSpacer,
-  htmlIdGenerator,
+  EuiFormRow,
 } from '@elastic/eui';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getDataStart } from '../../../services';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
+import { getDataStart } from '../../../services';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 
 const isFieldHistogram = (fields, indexPattern, field) => {

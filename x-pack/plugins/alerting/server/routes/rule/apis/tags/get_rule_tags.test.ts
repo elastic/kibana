@@ -6,10 +6,10 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { rulesClientMock } from '../../../../rules_client.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
 import { getRuleTagsRoute } from './get_rule_tags';
 
 const rulesClient = rulesClientMock.create();

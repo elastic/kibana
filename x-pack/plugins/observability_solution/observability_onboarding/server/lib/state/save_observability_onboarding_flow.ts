@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 import {
   OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
   ObservabilityOnboardingFlow,

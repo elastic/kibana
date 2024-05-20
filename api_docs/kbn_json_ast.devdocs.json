@@ -26,7 +26,9 @@
         "tags": [],
         "label": "addReferences",
         "description": [],
-        "signature": ["(source: string, refsToAdd: string[]) => string"],
+        "signature": [
+          "(source: string, refsToAdd: string[]) => string"
+        ],
         "path": "packages/kbn-json-ast/src/references.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +40,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -51,7 +55,9 @@
             "tags": [],
             "label": "refsToAdd",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/kbn-json-ast/src/references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -82,7 +88,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/props.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -95,7 +103,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/props.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -112,7 +122,9 @@
         "tags": [],
         "label": "removeAllReferences",
         "description": [],
-        "signature": ["(source: string) => string"],
+        "signature": [
+          "(source: string) => string"
+        ],
         "path": "packages/kbn-json-ast/src/references.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -124,7 +136,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -141,7 +155,9 @@
         "tags": [],
         "label": "removeCompilerOption",
         "description": [],
-        "signature": ["(source: string, name: string) => string"],
+        "signature": [
+          "(source: string, name: string) => string"
+        ],
         "path": "packages/kbn-json-ast/src/compiler_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -153,7 +169,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -166,7 +184,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -199,7 +219,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/props.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -212,7 +234,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/props.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -236,7 +260,9 @@
                 "tags": [],
                 "label": "node",
                 "description": [],
-                "signature": ["babel.types.ObjectExpression | undefined"],
+                "signature": [
+                  "babel.types.ObjectExpression | undefined"
+                ],
                 "path": "packages/kbn-json-ast/src/props.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -254,7 +280,9 @@
         "tags": [],
         "label": "removeReferences",
         "description": [],
-        "signature": ["(source: string, refs: string[]) => string"],
+        "signature": [
+          "(source: string, refs: string[]) => string"
+        ],
         "path": "packages/kbn-json-ast/src/references.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -266,7 +294,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -279,7 +309,9 @@
             "tags": [],
             "label": "refs",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/kbn-json-ast/src/references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -296,7 +328,9 @@
         "tags": [],
         "label": "replaceReferences",
         "description": [],
-        "signature": ["(source: string, replacements: [path: string, pkgId: string][]) => string"],
+        "signature": [
+          "(source: string, replacements: [path: string, pkgId: string][]) => string"
+        ],
         "path": "packages/kbn-json-ast/src/references.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -308,7 +342,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -321,7 +357,9 @@
             "tags": [],
             "label": "replacements",
             "description": [],
-            "signature": ["[path: string, pkgId: string][]"],
+            "signature": [
+              "[path: string, pkgId: string][]"
+            ],
             "path": "packages/kbn-json-ast/src/references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -338,7 +376,9 @@
         "tags": [],
         "label": "setCompilerOption",
         "description": [],
-        "signature": ["(source: string, name: string, value: any) => string"],
+        "signature": [
+          "(source: string, name: string, value: any) => string"
+        ],
         "path": "packages/kbn-json-ast/src/compiler_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -350,7 +390,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -363,7 +405,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -376,7 +420,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-json-ast/src/compiler_options.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -393,7 +439,9 @@
         "tags": [],
         "label": "setExtends",
         "description": [],
-        "signature": ["(jsonc: string, value: string) => string"],
+        "signature": [
+          "(jsonc: string, value: string) => string"
+        ],
         "path": "packages/kbn-json-ast/src/extends.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -405,7 +453,9 @@
             "tags": [],
             "label": "jsonc",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/extends.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -418,7 +468,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/extends.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -449,7 +501,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/props.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -462,7 +516,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/props.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -475,7 +531,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-json-ast/src/props.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -501,7 +559,9 @@
                 "description": [
                   "by default, if the key isn't already in the json, it will be added at the bottom. Set this to true to add the key at the top instead"
                 ],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/kbn-json-ast/src/props.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -515,7 +575,9 @@
                 "description": [
                   "by default, if the key isn't already in the json, it will be added at the bottom. Set this to an existing property node to have the key added after this node"
                 ],
-                "signature": ["babel.types.ObjectProperty | undefined"],
+                "signature": [
+                  "babel.types.ObjectProperty | undefined"
+                ],
                 "path": "packages/kbn-json-ast/src/props.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -529,7 +591,9 @@
                 "description": [
                   "In order to set the property an object other than the root object, parse the source and pass the node of the desired object here (make sure to also pass spaces)"
                 ],
-                "signature": ["babel.types.ObjectExpression | undefined"],
+                "signature": [
+                  "babel.types.ObjectExpression | undefined"
+                ],
                 "path": "packages/kbn-json-ast/src/props.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -543,7 +607,9 @@
                 "description": [
                   "This overrides the default \"  \" spacing used for multi line or new properties that are added"
                 ],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-json-ast/src/props.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -560,8 +626,12 @@
         "type": "Function",
         "tags": [],
         "label": "snip",
-        "description": ["\nReplace or remove specific points of the source code"],
-        "signature": ["(source: string, snips: Snip[]) => string"],
+        "description": [
+          "\nReplace or remove specific points of the source code"
+        ],
+        "signature": [
+          "(source: string, snips: Snip[]) => string"
+        ],
         "path": "packages/kbn-json-ast/src/snip.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -573,7 +643,9 @@
             "tags": [],
             "label": "source",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-json-ast/src/snip.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -586,7 +658,9 @@
             "tags": [],
             "label": "snips",
             "description": [],
-            "signature": ["Snip[]"],
+            "signature": [
+              "Snip[]"
+            ],
             "path": "packages/kbn-json-ast/src/snip.ts",
             "deprecated": false,
             "trackAdoption": false,

@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { AnyAction, Reducer, Store } from 'redux';
+import { cameraReducer } from './reducer';
+import type { Store, AnyAction, Reducer } from 'redux';
 import { createStore } from 'redux';
+import type { AnalyzerById, CameraState, AABB } from '../../types';
+import { viewableBoundingBox, inverseProjectionMatrix, scalingFactor } from './selectors';
+import { expectVectorsToBeClose } from './test_helpers';
+import { scaleToZoom } from './scale_to_zoom';
 import { applyMatrix3 } from '../../models/vector2';
-import type { AABB, AnalyzerById, CameraState } from '../../types';
 import { EMPTY_RESOLVER } from '../helpers';
 import {
-  userClickedZoomIn,
+  userSetZoomLevel,
   userClickedZoomOut,
-  userMovedPointer,
+  userClickedZoomIn,
+  userZoomed,
   userSetPositionOfCamera,
   userSetRasterSize,
-  userSetZoomLevel,
-  userZoomed,
+  userMovedPointer,
 } from './action';
-import { cameraReducer } from './reducer';
-import { scaleToZoom } from './scale_to_zoom';
-import { inverseProjectionMatrix, scalingFactor, viewableBoundingBox } from './selectors';
-import { expectVectorsToBeClose } from './test_helpers';
 
 describe('zooming', () => {
   let store: Store<AnalyzerById, AnyAction>;

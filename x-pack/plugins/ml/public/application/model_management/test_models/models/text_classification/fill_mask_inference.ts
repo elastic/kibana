@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+import type { estypes } from '@elastic/elasticsearch';
 import { map } from 'rxjs';
-import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
-import { INPUT_TYPE, InferenceBase } from '../inference_base';
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
+import { InferenceBase, INPUT_TYPE } from '../inference_base';
+import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
+import { processResponse, processInferenceResult } from './common';
 import { getGeneralInputComponent } from '../text_input';
-import type { RawTextClassificationResponse, TextClassificationResponse } from './common';
-import { processInferenceResult, processResponse } from './common';
 import { getFillMaskOutputComponent } from './fill_mask_output';
+import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 
 const DEFAULT_MASK_TOKEN = '[MASK]';
 

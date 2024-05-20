@@ -41,7 +41,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<AnalyticsServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<AnalyticsServiceContract>"
+            ],
             "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

@@ -15,8 +15,8 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { SourcesPanelSidebar } from './sources_panel/sources_panel_sidebar';
 import { SummarizationPanel } from './summarization_panel/summarization_panel';
 

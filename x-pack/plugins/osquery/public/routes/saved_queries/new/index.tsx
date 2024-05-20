@@ -6,14 +6,14 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
-import { useCreateSavedQuery } from '../../../saved_queries/use_create_saved_query';
+import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { NewSavedQueryForm } from './form';
+import { useCreateSavedQuery } from '../../../saved_queries/use_create_saved_query';
 
 const NewSavedQueryPageComponent = () => {
   useBreadcrumbs('saved_query_new');

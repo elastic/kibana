@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { APP_ID, ASSISTANT_FEATURE_ID } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
+import { APP_ID, ASSISTANT_FEATURE_ID } from '../constants';
 
 export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   id: ASSISTANT_FEATURE_ID,

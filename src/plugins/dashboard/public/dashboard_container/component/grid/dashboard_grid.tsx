@@ -9,20 +9,20 @@
 import 'react-resizable/css/styles.css';
 import 'react-grid-layout/css/styles.css';
 
-import classNames from 'classnames';
 import { pick } from 'lodash';
+import classNames from 'classnames';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
-import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
-import { useDashboardContainer } from '../../embeddable/dashboard_container';
-import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useDashboardGridSettings } from './use_dashboard_grid_settings';
+import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { useDashboardPerformanceTracker } from './use_dashboard_performance_tracker';
+import { getPanelLayoutsAreEqual } from '../../state/diffing/dashboard_diffing_utils';
+import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
 
 export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   const dashboard = useDashboardContainer();

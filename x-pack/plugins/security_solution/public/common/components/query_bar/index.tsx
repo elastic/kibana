@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import deepEqual from 'fast-deep-equal';
 
+import type { DataViewBase, Filter, Query, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery, DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { convertToQueryType } from './convert_to_query_type';
 

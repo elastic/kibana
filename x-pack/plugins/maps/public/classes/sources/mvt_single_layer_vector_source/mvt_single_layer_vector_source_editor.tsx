@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { Component, ChangeEvent } from 'react';
+import _ from 'lodash';
 import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
-import React, { Component, ChangeEvent } from 'react';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import {
   MVTFieldDescriptor,

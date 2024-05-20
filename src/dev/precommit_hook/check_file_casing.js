@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { basename, relative } from 'path';
+import { relative, basename } from 'path';
 
 import { dim } from 'chalk';
 
@@ -16,9 +16,9 @@ import { matchesAnyGlob } from '../globs';
 import {
   IGNORE_DIRECTORY_GLOBS,
   IGNORE_FILE_GLOBS,
+  TEMPORARILY_IGNORED_PATHS,
   KEBAB_CASE_DIRECTORY_GLOBS,
   REMOVE_EXTENSION,
-  TEMPORARILY_IGNORED_PATHS,
 } from './casing_check_config';
 
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;

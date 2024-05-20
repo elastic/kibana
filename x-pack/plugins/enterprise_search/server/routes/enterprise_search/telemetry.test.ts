@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MockRouter, mockDependencies, mockLogger } from '../../__mocks__';
+import { MockRouter, mockLogger, mockDependencies } from '../../__mocks__';
 
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 

@@ -7,9 +7,18 @@
     "id": "fileUpload",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["data", "usageCollection"],
-    "optionalPlugins": ["security"],
-    "requiredBundles": ["kibanaReact"],
-    "extraPublicDirs": ["common"]
+    "requiredPlugins": [
+      "data",
+      "usageCollection"
+    ],
+    "optionalPlugins": [
+      "security"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

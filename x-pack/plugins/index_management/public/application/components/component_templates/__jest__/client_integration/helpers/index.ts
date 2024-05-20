@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { setup as componentTemplateDetailsSetup } from './component_template_details.helpers';
 import { setup as componentTemplatesListSetup } from './component_template_list.helpers';
+import { setup as componentTemplateDetailsSetup } from './component_template_details.helpers';
 
 export { nextTick, getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 

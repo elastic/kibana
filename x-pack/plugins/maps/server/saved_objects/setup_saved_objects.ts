@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { mapValues } from 'lodash';
 import type { CoreSetup, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { SavedObjectMigrationMap } from '@kbn/core/server';
-import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { mapValues } from 'lodash';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { APP_ICON, getFullPath } from '../../common/constants';
 import { CONTENT_ID } from '../../common/content_management';
-import type { MapAttributes } from '../../common/content_management';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
 import { migrateDataViewsPersistedState } from '../../common/migrations/migrate_data_view_persisted_state';
+import type { MapAttributes } from '../../common/content_management';
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export function setupSavedObjects(

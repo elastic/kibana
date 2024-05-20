@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fsp from 'fs/promises';
+import Path from 'path';
 
+import JSON5 from 'json5';
+import { safeLoad, safeDump } from 'js-yaml';
 import { asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
-import { safeDump, safeLoad } from 'js-yaml';
-import JSON5 from 'json5';
 
-import { Config, createZipFile, downloadToDisk, read, unzipBuffer } from '../../lib';
+import { read, downloadToDisk, unzipBuffer, createZipFile, Config } from '../../lib';
 
 // Package storage v2 url
 export const PACKAGE_STORAGE_REGISTRY_URL = 'https://epr.elastic.co';

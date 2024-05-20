@@ -1,4 +1,3 @@
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
  * 2.0.
  */
 import yaml from 'js-yaml';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { Truthy } from 'lodash';
-import { Response, Selector } from '..';
 import { INTEGRATION_PACKAGE_NAME } from '../constants';
+import { Selector, Response } from '..';
 
 /**
  * @example

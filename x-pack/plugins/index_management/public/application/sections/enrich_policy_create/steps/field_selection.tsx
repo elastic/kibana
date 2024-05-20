@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiSpacer,
-} from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
-import React, { useEffect, useState } from 'react';
 import {
-  ComboBoxField,
-  FIELD_TYPES,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiIconTip,
+  EuiSpacer,
+  EuiComboBoxOptionOption,
+  EuiCallOut,
+} from '@elastic/eui';
+import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
+import {
+  useForm,
   Form,
+  fieldValidators,
   FormSchema,
   UseField,
-  fieldValidators,
-  useForm,
+  FIELD_TYPES,
+  ComboBoxField,
 } from '../../../../shared_imports';
 
-import type { FieldItem, IndexWithFields } from '../../../../../common';
+import type { IndexWithFields, FieldItem } from '../../../../../common';
 import { getFieldsFromIndices } from '../../../services/api';
-import { DraftPolicy, useCreatePolicyContext } from '../create_policy_context';
+import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
 
 interface Props {
   onNext: () => void;

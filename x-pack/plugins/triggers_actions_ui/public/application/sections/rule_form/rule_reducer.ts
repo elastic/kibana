@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import {
-  AlertDelay,
-  AlertsFilter,
-  IntervalSchedule,
-  RuleActionAlertsFilterProperty,
-  RuleActionParam,
-  SanitizedRuleAction,
-} from '@kbn/alerting-plugin/common';
 import { SavedObjectAttribute } from '@kbn/core/public';
 import { isEqual } from 'lodash';
-import { isEmpty } from 'lodash/fp';
 import { Reducer } from 'react';
-import { DEFAULT_FREQUENCY } from '../../../common/constants';
+import {
+  RuleActionParam,
+  IntervalSchedule,
+  RuleActionAlertsFilterProperty,
+  AlertsFilter,
+  AlertDelay,
+  SanitizedRuleAction,
+} from '@kbn/alerting-plugin/common';
+import { isEmpty } from 'lodash/fp';
 import { ActionTypeRegistryContract, Rule, RuleUiAction } from '../../../types';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export type InitialRule = Partial<Rule> &
   Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
@@ -33,7 +33,7 @@ interface CommandType<
     | 'setRuleActionProperty'
     | 'setRuleActionFrequency'
     | 'setRuleActionAlertsFilter'
-    | 'setAlertDelayProperty',
+    | 'setAlertDelayProperty'
 > {
   type: T;
 }

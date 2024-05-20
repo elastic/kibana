@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { ThemeProvider } from 'styled-components';
 
-import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
-import { useLink } from '../../../../../hooks';
 import type { Agent } from '../../../../../types';
+import { useLink } from '../../../../../hooks';
+import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 
 import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
 

@@ -37,8 +37,12 @@
             "type": "Function",
             "tags": [],
             "label": "getLocale",
-            "description": ["\nReturn the locale currently in use."],
-            "signature": ["() => string"],
+            "description": [
+              "\nReturn the locale currently in use."
+            ],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/core/i18n/core-i18n-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -51,8 +55,12 @@
             "type": "Function",
             "tags": [],
             "label": "getTranslationFiles",
-            "description": ["\nReturn the absolute paths to translation files currently in use."],
-            "signature": ["() => string[]"],
+            "description": [
+              "\nReturn the absolute paths to translation files currently in use."
+            ],
+            "signature": [
+              "() => string[]"
+            ],
             "path": "packages/core/i18n/core-i18n-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -65,8 +73,12 @@
             "type": "Function",
             "tags": [],
             "label": "getTranslationHash",
-            "description": ["\nReturns the hash generated from the current translations."],
-            "signature": ["() => string"],
+            "description": [
+              "\nReturns the hash generated from the current translations."
+            ],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/core/i18n/core-i18n-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,

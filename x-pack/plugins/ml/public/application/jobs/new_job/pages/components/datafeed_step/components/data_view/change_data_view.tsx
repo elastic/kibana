@@ -8,37 +8,37 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiButtonEmpty,
   EuiModal,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
+  EuiButton,
+  EuiCallOut,
   EuiSpacer,
+  EuiModalHeader,
+  EuiLoadingSpinner,
+  EuiModalHeaderTitle,
+  EuiModalBody,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 
+import { JobCreatorContext } from '../../../job_creator_context';
+import type { AdvancedJobCreator } from '../../../../../common/job_creator';
+import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
 import type {
   CombinedJob,
   Datafeed,
 } from '../../../../../../../../../common/types/anomaly_detection_jobs';
 import type { DatafeedValidationResponse } from '../../../../../../../../../common/types/job_validation';
-import type { AdvancedJobCreator } from '../../../../../common/job_creator';
-import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
-import { JobCreatorContext } from '../../../job_creator_context';
 
 import {
-  useMlApiContext,
   useMlKibana,
+  useMlApiContext,
   useNavigateToPath,
 } from '../../../../../../../contexts/kibana';
 

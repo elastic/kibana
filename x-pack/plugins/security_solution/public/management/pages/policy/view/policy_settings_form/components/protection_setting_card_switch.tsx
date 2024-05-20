@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
 import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import React, { useCallback } from 'react';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import type { PolicyFormComponentCommonProps } from '../types';
+import { useLicense } from '../../../../../../common/hooks/use_license';
 import type {
   ImmutableArray,
   PolicyConfig,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import { useLicense } from '../../../../../../common/hooks/use_license';
-import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { LinuxPolicyProtection, MacPolicyProtection, PolicyProtection } from '../../../types';
-import type { PolicyFormComponentCommonProps } from '../types';
 
 export interface ProtectionSettingCardSwitchProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;

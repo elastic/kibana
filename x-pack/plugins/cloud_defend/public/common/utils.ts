@@ -1,4 +1,3 @@
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,19 +5,20 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import { uniq } from 'lodash';
-import { Response, Selector, SelectorCondition, SelectorType } from '../../common';
+import { i18n } from '@kbn/i18n';
 import { errorBlockActionRequiresTargetFilePath } from '../components/control_general_view/translations';
 import {
-  DefaultFileResponse,
   DefaultFileSelector,
-  DefaultProcessResponse,
   DefaultProcessSelector,
+  DefaultFileResponse,
+  DefaultProcessResponse,
   SelectorConditionsMap,
 } from '../types';
+import { Selector, Response, SelectorType, SelectorCondition } from '../../common';
 import {
-  FIM_OPERATIONS,
   MAX_CONDITION_VALUE_LENGTH_BYTES,
   MAX_SELECTORS_AND_RESPONSES_PER_TYPE,
+  FIM_OPERATIONS,
 } from './constants';
 
 export function getSelectorTypeIcon(type: SelectorType) {

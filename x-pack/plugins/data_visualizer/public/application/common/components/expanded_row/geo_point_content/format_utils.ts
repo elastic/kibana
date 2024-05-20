@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { Feature, Point } from 'geojson';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { LAYER_TYPE, SOURCE_TYPES } from '@kbn/maps-plugin/common';
-import type { Feature, Point } from 'geojson';
 import { DEFAULT_GEO_REGEX } from './geo_point_content';
 
 export const convertWKTGeoToLonLat = (

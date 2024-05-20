@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { IKibanaSearchRequest } from '@kbn/search-types';
 import { map } from 'rxjs';
+import { IKibanaSearchRequest } from '@kbn/search-types';
 import { ParsedDataSearchRequestDescriptor } from './types';
 
 export const flattenDataSearchResponseDescriptor = <
   Request extends IKibanaSearchRequest,
-  Response,
+  Response
 >({
   abortController,
   options,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MockRouter, mockDependencies, mockRequestHandler } from '../../__mocks__';
+import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
 import { registerCredentialsRoutes } from './credentials';
 

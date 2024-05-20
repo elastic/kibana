@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import { pick, range } from 'lodash';
+import Path from 'path';
 import '../jest_matchers';
 import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { createType } from '../test_utils';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { createModelVersionTestBed } from '@kbn/core-test-helpers-model-versions';
-import { createType } from '../test_utils';
 
 export const logFilePath = Path.join(__dirname, 'sor_higher.test.log');
 

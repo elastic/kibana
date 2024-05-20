@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../../env_var_names_constants';
-import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 import { deleteAllDocuments } from './elasticsearch';
+import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 
 export const API_AUTH = Object.freeze({
   user: Cypress.env(ELASTICSEARCH_USERNAME),

@@ -8,11 +8,9 @@
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { Filter } from '@kbn/es-query';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import { History } from 'history';
-import { createDataViewDataSource } from '../../../../common/data_sources';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import {
@@ -20,6 +18,8 @@ import {
   getDiscoverAppStateContainer,
   isEqualState,
 } from './discover_app_state_container';
+import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { createDataViewDataSource } from '../../../../common/data_sources';
 
 let history: History;
 let state: DiscoverAppStateContainer;

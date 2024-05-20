@@ -8,11 +8,11 @@
 import { produce } from 'immer';
 
 import { SerializedPolicy } from '../../../../../common/types';
-import { determineDataTierAllocationType, isUsingDefaultRollover } from '../../../lib';
 import { splitSizeAndUnits } from '../../../lib/policies';
-import { CLOUD_DEFAULT_REPO } from '../constants';
+import { determineDataTierAllocationType, isUsingDefaultRollover } from '../../../lib';
 import { getDefaultRepository } from '../lib';
 import { FormInternal } from '../types';
+import { CLOUD_DEFAULT_REPO } from '../constants';
 
 export const createDeserializer =
   (isCloudEnabled: boolean) =>

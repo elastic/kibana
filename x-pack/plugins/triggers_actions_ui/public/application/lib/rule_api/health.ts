@@ -1,5 +1,3 @@
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { AlertingFrameworkHealth, AlertsHealth } from '@kbn/alerting-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { AlertingFrameworkHealth, AlertsHealth } from '@kbn/alerting-plugin/comm
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import { AlertingFrameworkHealth, AlertsHealth } from '@kbn/alerting-plugin/common';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 
 const rewriteAlertingFrameworkHealth: RewriteRequestCase<AlertsHealth> = ({

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type {
+  RouteMethod,
+  VersionedRouteConfig,
   AddVersionOpts,
   IKibanaResponse,
   RouteConfigOptions,
-  RouteMethod,
-  VersionedRouteConfig,
 } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { RequestHandler } from '@kbn/core/server';
 import type { MaybePromise } from '@kbn/utility-types';
 
@@ -25,11 +25,11 @@ type FleetAuthzRouterConfigParam = FleetAuthzRequirements | ((userAuthz: FleetAu
 
 type FleetAuthzRouteRegistrar<
   Method extends RouteMethod,
-  Context extends RequestHandlerContext = RequestHandlerContext,
+  Context extends RequestHandlerContext = RequestHandlerContext
 > = (config: FleetRouteConfig<Method>) => FleetVersionedRoute<Method, Context>;
 
 export interface FleetAuthzRouteConfig<
-  T extends FleetAuthzRouterConfigParam = FleetAuthzRouterConfigParam,
+  T extends FleetAuthzRouterConfigParam = FleetAuthzRouterConfigParam
 > {
   fleetAuthz?: T;
 }
@@ -53,7 +53,7 @@ export type FleetRouteConfig<Method extends RouteMethod> = FleetVersionedRouteCo
  * Interface replacing the native VersionedRouter to handle fleetAuthz
  */
 export interface FleetVersionedRouter<
-  TContext extends FleetRequestHandlerContext = FleetRequestHandlerContext,
+  TContext extends FleetRequestHandlerContext = FleetRequestHandlerContext
 > {
   get: FleetAuthzRouteRegistrar<'get', TContext>;
   delete: FleetAuthzRouteRegistrar<'delete', TContext>;
@@ -66,7 +66,7 @@ export interface FleetVersionedRouter<
  * Fleet router that handles versions and authorizations when registering routes
  */
 export interface FleetAuthzRouter<
-  TContext extends FleetRequestHandlerContext = FleetRequestHandlerContext,
+  TContext extends FleetRequestHandlerContext = FleetRequestHandlerContext
 > {
   versioned: FleetVersionedRouter<TContext>;
 }
@@ -104,7 +104,7 @@ export type FleetHandler<P, Q, B, Context extends RequestHandlerContext> = (
  */
 export interface FleetVersionedRoute<
   Method extends RouteMethod = RouteMethod,
-  Context extends RequestHandlerContext = RequestHandlerContext,
+  Context extends RequestHandlerContext = RequestHandlerContext
 > {
   addVersion<P = unknown, Q = unknown, B = unknown>(
     options: FleetAddVersionOpts<P, Q, B>,

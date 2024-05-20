@@ -9,7 +9,10 @@
 import { Subject } from 'rxjs';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import type { License } from '@kbn/licensing-plugin/common/license';
+import type { AwaitedProperties } from '@kbn/utility-types';
 import type { KibanaRequest, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -17,45 +20,32 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { License } from '@kbn/licensing-plugin/common/license';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import type { AwaitedProperties } from '@kbn/utility-types';
+import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 
-import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
-import { CaseStatuses } from '@kbn/cases-components';
-import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
-import { omit, set } from 'lodash';
-import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
+import { LicenseService } from '../../../../common/license';
 import {
-  ENDPOINT_ACTIONS_INDEX,
-  EXECUTE_ROUTE,
-  GET_FILE_ROUTE,
-  GET_PROCESSES_ROUTE,
-  ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
+  UNISOLATE_HOST_ROUTE_V2,
+  ENDPOINT_ACTIONS_INDEX,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
+  GET_PROCESSES_ROUTE,
+  ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
-  UNISOLATE_HOST_ROUTE_V2,
+  GET_FILE_ROUTE,
+  EXECUTE_ROUTE,
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   ActionDetails,
+  ResponseActionApiResponse,
   HostMetadata,
   LogsEndpointAction,
-  ResponseActionApiResponse,
   ResponseActionRequestBody,
 } from '../../../../common/endpoint/types';
+import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
-import { LicenseService } from '../../../../common/license';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
-import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type { HttpApiTestSetupMock } from '../../mocks';
 import {
@@ -66,14 +56,24 @@ import {
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
-import { getResponseActionsClient as _getResponseActionsClient } from '../../services';
-import * as ActionDetailsService from '../../services/actions/action_details_by_id';
-import { ResponseActionsClientError } from '../../services/actions/clients/errors';
-import { responseActionsClientMock } from '../../services/actions/clients/mocks';
-import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
-import { createHapiReadableStreamMock } from '../../services/actions/mocks';
 import { legacyMetadataSearchResponseMock } from '../metadata/support/test_support';
 import { registerResponseActionRoutes } from './response_actions';
+import * as ActionDetailsService from '../../services/actions/action_details_by_id';
+import { CaseStatuses } from '@kbn/cases-components';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { getResponseActionsClient as _getResponseActionsClient } from '../../services';
+import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
+import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
+import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';
+import { createHapiReadableStreamMock } from '../../services/actions/mocks';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { omit, set } from 'lodash';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { responseActionsClientMock } from '../../services/actions/clients/mocks';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
+import { ResponseActionsClientError } from '../../services/actions/clients/errors';
 
 jest.mock('../../services', () => {
   const realModule = jest.requireActual('../../services');
@@ -286,7 +286,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           agents: [AgentID],
@@ -303,7 +305,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           user_id: testUser.username,
@@ -319,7 +323,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ comment }),
@@ -342,7 +348,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           action_id: expect.any(String),
@@ -367,7 +375,9 @@ describe('Response actions', () => {
         version: '2023-10-31',
       });
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           timeout: 300,
@@ -386,7 +396,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           agents: [agentId],
@@ -401,7 +413,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -418,7 +432,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -435,7 +451,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -452,7 +470,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -469,7 +489,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -486,7 +508,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -503,7 +527,9 @@ describe('Response actions', () => {
       });
 
       await expect(
-        (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+        (
+          await endpointAppContextService.getFleetActionsClient()
+        ).create as jest.Mock
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -525,7 +551,9 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -558,7 +586,9 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -592,7 +622,9 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -628,7 +660,9 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -663,7 +697,9 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -696,7 +732,9 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -731,7 +769,9 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -767,7 +807,9 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
@@ -805,7 +847,9 @@ describe('Response actions', () => {
         );
 
         await expect(
-          (await endpointAppContextService.getFleetActionsClient()).create as jest.Mock
+          (
+            await endpointAppContextService.getFleetActionsClient()
+          ).create as jest.Mock
         ).toHaveBeenCalledWith(
           expect.objectContaining({
             signed: {

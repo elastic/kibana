@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiProgress, useEuiTheme } from '@elastic/eui';
-import { PanelLoader } from '@kbn/panel-loader';
-import classNames from 'classnames';
 import React, { useRef } from 'react';
+import classNames from 'classnames';
+import { PanelLoader } from '@kbn/panel-loader';
+import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { ExpressionRenderError } from '../types';
 import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';

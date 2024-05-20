@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ThemeService } from '@kbn/charts-plugin/public/services';
 import { themeServiceMock } from '@kbn/core/public/mocks';
+import { ThemeService } from '@kbn/charts-plugin/public/services';
 
 const theme = new ThemeService();
 theme.init(themeServiceMock.createSetupContract({ darkMode: false }));

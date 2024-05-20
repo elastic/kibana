@@ -7,8 +7,8 @@
 
 import { takeLeading } from 'redux-saga/effects';
 import { indexStatusAction } from '../actions';
-import { fetchIndexStatus } from '../api/index_status';
 import { fetchEffectFactory } from './fetch_effect';
+import { fetchIndexStatus } from '../api/index_status';
 
 export function* fetchIndexStatusEffect() {
   yield takeLeading(

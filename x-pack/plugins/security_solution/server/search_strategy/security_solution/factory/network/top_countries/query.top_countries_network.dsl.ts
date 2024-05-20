@@ -6,13 +6,13 @@
  */
 
 import type { NetworkTopCountriesRequestOptions } from '../../../../../../common/api/search_strategy';
+import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { assertUnreachable } from '../../../../../../common/utility_types';
 import type { Direction } from '../../../../../../common/search_strategy';
 import {
   FlowTargetSourceDest,
   NetworkTopTablesFields,
 } from '../../../../../../common/search_strategy';
-import { assertUnreachable } from '../../../../../../common/utility_types';
-import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 const getCountAgg = (flowTarget: FlowTargetSourceDest) => ({
   top_countries_count: {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import {
   SavedObjectMigrationContext,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
-import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import { RawRule } from '../../types';
 

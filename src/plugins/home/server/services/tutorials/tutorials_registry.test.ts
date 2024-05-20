@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
-import { httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { TutorialsRegistry } from './tutorials_registry';
+import { coreMock } from '@kbn/core/server/mocks';
+import { CoreSetup } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 import {
-  ScopedTutorialContextFactory,
   TutorialProvider,
   TutorialSchema,
   TutorialsCategory,
+  ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 
 const INVALID_TUTORIAL: TutorialSchema = {
   id: 'test',

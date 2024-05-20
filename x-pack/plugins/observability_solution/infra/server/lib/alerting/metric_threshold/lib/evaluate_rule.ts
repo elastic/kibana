@@ -6,17 +6,17 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
 import moment from 'moment';
+import type { Logger } from '@kbn/logging';
+import { isCustom } from './metric_expression_params';
 import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { CUSTOM_EQUATION_I18N, DOCUMENT_COUNT_I18N } from '../../common/messages';
-import { AdditionalContext } from '../../common/utils';
-import { MissingGroupsRecord, checkMissingGroups } from './check_missing_group';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
-import { isCustom } from './metric_expression_params';
+import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
+import { AdditionalContext } from '../../common/utils';
 
 export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];
@@ -106,10 +106,10 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
               criterion.aggType === 'count'
                 ? DOCUMENT_COUNT_I18N
                 : isCustom(criterion) && criterion.label
-                  ? criterion.label
-                  : criterion.aggType === 'custom'
-                    ? CUSTOM_EQUATION_I18N
-                    : criterion.metric,
+                ? criterion.label
+                : criterion.aggType === 'custom'
+                ? CUSTOM_EQUATION_I18N
+                : criterion.metric,
             currentValue: result.value,
             timestamp: moment(calculatedTimerange.end).toISOString(),
             shouldFire: result.trigger,

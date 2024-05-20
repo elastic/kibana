@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   InjectedMetadataService,
   InternalInjectedMetadataSetup,
 } from '@kbn/core-injected-metadata-browser-internal';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalInjectedMetadataSetup> = {

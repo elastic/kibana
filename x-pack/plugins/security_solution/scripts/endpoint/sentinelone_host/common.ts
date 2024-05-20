@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
+import type { KbnClient } from '@kbn/test';
+import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import { dump } from '../common/utils';
 import { type RuleResponse } from '../../../common/api/detection_engine';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
-import type { HostVm } from '../common/types';
-import { dump } from '../common/utils';
 import type {
+  S1SitesListApiResponse,
   S1AgentPackage,
   S1AgentPackageListApiResponse,
-  S1SitesListApiResponse,
 } from './types';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import type { HostVm } from '../common/types';
 
 import { createConnector, fetchConnectorByType } from '../common/connectors_services';
 import { createRule, findRules } from '../common/detection_rules_services';

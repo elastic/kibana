@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
+import { TestBed } from '@kbn/test-jest-helpers';
 import { Phase } from '../../../common/types';
-import { createFormSetValueAction } from './form_set_value_action';
 import { createFormToggleAction } from './form_toggle_action';
+import { createFormSetValueAction } from './form_set_value_action';
 
 const createFormCheckboxAction =
   (testBed: TestBed, dataTestSubject: string) => async (checked: boolean) => {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 import { setupGetValueSuggestions } from './value';
+import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { KueryNode } from '@kbn/es-query';

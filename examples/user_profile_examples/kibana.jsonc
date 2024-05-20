@@ -7,6 +7,10 @@
     "id": "userProfileExamples",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["developerExamples", "security", "spaces"]
+    "requiredPlugins": [
+      "developerExamples",
+      "security",
+      "spaces"
+    ]
   }
 }

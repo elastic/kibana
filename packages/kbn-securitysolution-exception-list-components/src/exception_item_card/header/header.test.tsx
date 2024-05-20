@@ -8,9 +8,9 @@
 
 import React from 'react';
 
-import { fireEvent, render } from '@testing-library/react';
-import { ExceptionItemCardHeader } from '.';
 import { getExceptionListItemSchemaMock } from '../../mocks/exception_list_item_schema.mock';
+import { ExceptionItemCardHeader } from '.';
+import { fireEvent, render } from '@testing-library/react';
 import { actions, handleDelete, handleEdit } from '../../mocks/header.mock';
 
 describe('ExceptionItemCardHeader', () => {

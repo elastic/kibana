@@ -1,4 +1,3 @@
-import type { CoreSetup } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,18 +5,19 @@ import type { CoreSetup } from '@kbn/core/public';
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import type { CoreSetup } from '@kbn/core/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { SloPublicPluginsStart, SloPublicStart } from '..';
-import { COMMON_SLO_GROUPING } from '../embeddable/slo/common/constants';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   ADD_SLO_ERROR_BUDGET_ACTION_ID,
   SLO_ERROR_BUDGET_ID,
 } from '../embeddable/slo/error_budget/constants';
+import { SloPublicPluginsStart, SloPublicStart } from '..';
+import { COMMON_SLO_GROUPING } from '../embeddable/slo/common/constants';
 export function createAddErrorBudgetPanelAction(
   getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
 ): UiActionsActionDefinition<EmbeddableApiContext> {

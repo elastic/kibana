@@ -7,12 +7,12 @@
 
 import React from 'react';
 import {
-  CellActionsMode,
   SecurityCellActions,
+  CellActionsMode,
   SecurityCellActionsTrigger,
 } from '../../cell_actions';
-import { Spacer } from '../../page';
 import type { Anomaly } from '../types';
+import { Spacer } from '../../page';
 import { getScoreString } from './score_health';
 
 export const ScoreComponent = ({

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/core/server';
 import { cryptoFactory } from './crypto';
 
 export const decryptJobHeaders = async (

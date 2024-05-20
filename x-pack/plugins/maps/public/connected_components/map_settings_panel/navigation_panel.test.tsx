@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
-import { INITIAL_LOCATION } from '../../../common/constants';
-import { getDefaultMapSettings } from '../../reducers/map/default_map_settings';
 import { NavigationPanel } from './navigation_panel';
+import { getDefaultMapSettings } from '../../reducers/map/default_map_settings';
+import { INITIAL_LOCATION } from '../../../common/constants';
 
 const defaultProps = {
   center: { lat: 0, lon: 0 },

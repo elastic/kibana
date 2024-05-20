@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import { useSearch, useSearchStrategy } from '.';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';
-import { of, throwError } from 'rxjs';
 import type {
   FactoryQueryTypes,
   StrategyRequestInputType,
 } from '../../../../common/search_strategy';
+import { of, throwError } from 'rxjs';
 
 jest.mock('@kbn/securitysolution-hook-utils');
 

@@ -14,16 +14,16 @@ import {
   RULE_NAME,
 } from '../../../../screens/alerts_detection_rules';
 import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../../../screens/lists';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import {
-  MISSING_PRIVILEGES_CALLOUT,
   dismissCallOut,
   getCallOut,
   waitForCallOutToBeShown,
+  MISSING_PRIVILEGES_CALLOUT,
 } from '../../../../tasks/common/callouts';
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
 // TODO: https://github.com/elastic/kibana/issues/161540

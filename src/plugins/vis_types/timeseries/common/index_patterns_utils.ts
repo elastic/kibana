@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { uniq } from 'lodash';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { DataViewNotFoundError } from './errors';
-import type { FetchedIndexPattern, IndexPatternValue, Panel } from './types';
+import type { Panel, IndexPatternValue, FetchedIndexPattern } from './types';
 
 export const isStringTypeIndexPattern = (
   indexPatternValue: IndexPatternValue

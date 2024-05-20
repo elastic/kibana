@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "getMockDataSet",
-        "description": ["\nCustomize the Sample Data Set mock."],
+        "description": [
+          "\nCustomize the Sample Data Set mock."
+        ],
         "signature": [
           "(params?: Partial<",
           "SampleDataSet",
@@ -46,7 +48,11 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["Partial<", "SampleDataSet", ">"],
+            "signature": [
+              "Partial<",
+              "SampleDataSet",
+              ">"
+            ],
             "path": "packages/home/sample_data_card/src/mocks/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -188,7 +194,9 @@
         "type": "Function",
         "tags": [],
         "label": "SampleDataCardKibanaProvider",
-        "description": ["\nKibana-specific Provider that maps dependencies to services."],
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
           {
@@ -316,7 +324,9 @@
             "tags": [],
             "label": "dataViews",
             "description": [],
-            "signature": ["{ clearCache: () => void; }"],
+            "signature": [
+              "{ clearCache: () => void; }"
+            ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -330,7 +340,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Props",
-        "description": ["\nProps for the `SampleDataCard` component."],
+        "description": [
+          "\nProps for the `SampleDataCard` component."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/home-sample-data-card",
@@ -359,8 +371,12 @@
             "type": "Object",
             "tags": [],
             "label": "sampleDataSet",
-            "description": ["A Sample Data Set to display."],
-            "signature": ["SampleDataSet"],
+            "description": [
+              "A Sample Data Set to display."
+            ],
+            "signature": [
+              "SampleDataSet"
+            ],
             "path": "packages/home/sample_data_card/src/sample_data_card.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -374,7 +390,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Services",
-        "description": ["\nA list of services that are consumed by this component."],
+        "description": [
+          "\nA list of services that are consumed by this component."
+        ],
         "path": "packages/home/sample_data_card/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -386,7 +404,9 @@
             "tags": [],
             "label": "addBasePath",
             "description": [],
-            "signature": ["(path: string) => string"],
+            "signature": [
+              "(path: string) => string"
+            ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -398,7 +418,9 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -414,7 +436,9 @@
             "tags": [],
             "label": "getAppNavigationHandler",
             "description": [],
-            "signature": ["(path: string) => React.MouseEventHandler<Element>"],
+            "signature": [
+              "(path: string) => React.MouseEventHandler<Element>"
+            ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -426,7 +450,9 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -442,7 +468,9 @@
             "tags": [],
             "label": "installSampleDataSet",
             "description": [],
-            "signature": ["(id: string, defaultIndex: string) => Promise<void>"],
+            "signature": [
+              "(id: string, defaultIndex: string) => Promise<void>"
+            ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -454,7 +482,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -467,7 +497,9 @@
                 "tags": [],
                 "label": "defaultIndex",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -483,7 +515,9 @@
             "tags": [],
             "label": "notifyError",
             "description": [],
-            "signature": ["(notification: NotifyInput) => void"],
+            "signature": [
+              "(notification: NotifyInput) => void"
+            ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -496,7 +530,9 @@
                 "tags": [],
                 "label": "notification",
                 "description": [],
-                "signature": ["string | NotifyInputFields"],
+                "signature": [
+                  "string | NotifyInputFields"
+                ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -510,7 +546,9 @@
             "tags": [],
             "label": "notifySuccess",
             "description": [],
-            "signature": ["(notification: NotifyInput) => void"],
+            "signature": [
+              "(notification: NotifyInput) => void"
+            ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -523,7 +561,9 @@
                 "tags": [],
                 "label": "notification",
                 "description": [],
-                "signature": ["string | NotifyInputFields"],
+                "signature": [
+                  "string | NotifyInputFields"
+                ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -537,7 +577,9 @@
             "tags": [],
             "label": "removeSampleDataSet",
             "description": [],
-            "signature": ["(id: string, defaultIndex: string) => Promise<void>"],
+            "signature": [
+              "(id: string, defaultIndex: string) => Promise<void>"
+            ],
             "path": "packages/home/sample_data_card/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -549,7 +591,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -562,7 +606,9 @@
                 "tags": [],
                 "label": "defaultIndex",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/home/sample_data_card/src/services.tsx",
                 "deprecated": false,
                 "trackAdoption": false,

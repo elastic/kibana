@@ -7,7 +7,9 @@
  */
 
 import '../table.scss';
+import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
+import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
 import {
   SHOW_MULTIFIELDS,
   formatFieldValue,
@@ -15,9 +17,7 @@ import {
   getShouldShowFieldHandler,
   isNestedFieldParent,
 } from '@kbn/discover-utils';
-import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useMemo } from 'react';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 
@@ -79,8 +79,8 @@ export const DocViewerLegacyTable = ({
       const fieldType = isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
-          ? getFieldIconType(fieldMapping)
-          : undefined;
+        ? getFieldIconType(fieldMapping)
+        : undefined;
       const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);
       return {
         action: {

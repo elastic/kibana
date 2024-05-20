@@ -7,10 +7,10 @@
  */
 
 import type {
-  SavedObjectsModelChange,
   SavedObjectsModelVersion,
+  SavedObjectsModelChange,
 } from '@kbn/core-saved-objects-server';
-import { getVersionAddedFields, getVersionAddedMappings } from './version_mapping_changes';
+import { getVersionAddedMappings, getVersionAddedFields } from './version_mapping_changes';
 
 const createVersion = (changes: SavedObjectsModelChange[]): SavedObjectsModelVersion => {
   return {

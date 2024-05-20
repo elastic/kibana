@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import * as React from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -16,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as React from 'react';
 
 export const Label: React.FC<{ learnMoreUrl?: string }> = ({ learnMoreUrl }) => {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);

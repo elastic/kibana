@@ -12,8 +12,8 @@ import { Store } from 'redux';
 import type { AddToTimelineButtonProps } from './actions/add_to_timeline';
 import type { ColumnToggleProps } from './actions/column_toggle';
 import type { CopyProps } from './actions/copy';
+import type { HoverActionComponentProps, FilterValueFnArgs } from './actions/types';
 import type { OverflowButtonProps } from './actions/overflow';
-import type { FilterValueFnArgs, HoverActionComponentProps } from './actions/types';
 
 export interface HoverActionsConfig {
   getAddToTimelineButton: (

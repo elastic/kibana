@@ -14,11 +14,11 @@ import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { AggName } from '../../../common/types/aggregations';
 import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
-import type { PivotAgg, PivotSupportedAggs } from '../../../common/types/pivot_aggs';
+import type { PivotSupportedAggs, PivotAgg } from '../../../common/types/pivot_aggs';
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
-import type { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
+import type { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
 import type { PivotAggsConfigTopMetrics } from '../sections/create_transform/components/step_define/common/top_metrics_agg/types';
 
 export function isPivotSupportedAggs(arg: unknown): arg is PivotSupportedAggs {
@@ -95,7 +95,7 @@ export const SORT_DIRECTION = {
   DESC: 'desc',
 } as const;
 
-export type SortDirection = (typeof SORT_DIRECTION)[keyof typeof SORT_DIRECTION];
+export type SortDirection = typeof SORT_DIRECTION[keyof typeof SORT_DIRECTION];
 
 export const SORT_MODE = {
   MIN: 'min',
@@ -119,9 +119,9 @@ const SORT_NUMERIC_FIELD_TYPES = [
   ES_FIELD_TYPES.DATE_NANOS,
 ] as const;
 
-export type SortNumericFieldType = (typeof SORT_NUMERIC_FIELD_TYPES)[number];
+export type SortNumericFieldType = typeof SORT_NUMERIC_FIELD_TYPES[number];
 
-export type SortMode = (typeof SORT_MODE)[keyof typeof SORT_MODE];
+export type SortMode = typeof SORT_MODE[keyof typeof SORT_MODE];
 
 export const TOP_METRICS_SPECIAL_SORT_FIELDS = {
   _SCORE: '_score',

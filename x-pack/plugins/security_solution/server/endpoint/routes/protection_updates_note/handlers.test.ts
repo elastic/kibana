@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
 
+import {
+  createMockEndpointAppContextServiceSetupContract,
+  createMockEndpointAppContextServiceStartContract,
+  createRouteHandlerContext,
+} from '../../mocks';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
-import {
-  createMockEndpointAppContextServiceSetupContract,
-  createMockEndpointAppContextServiceStartContract,
-  createRouteHandlerContext,
-} from '../../mocks';
 import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
+import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 
 const mockedSOSuccessfulFindResponse = {
   total: 1,

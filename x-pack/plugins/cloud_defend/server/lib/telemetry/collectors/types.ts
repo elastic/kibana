@@ -20,11 +20,11 @@
 // I guess the intermediate import/export is causing problems
 // for now we will just point to the current version (v1)
 import type {
-  Response,
-  ResponseAction,
   Selector,
-  SelectorCondition,
+  Response,
   SelectorType,
+  SelectorCondition,
+  ResponseAction,
 } from '../../../../common/v1';
 
 export interface CloudDefendUsage {

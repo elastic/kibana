@@ -12,9 +12,9 @@ jest.mock('./helpers', () => ({
   buildPointSeriesData: jest.fn(() => ({})),
 }));
 
-import { buildPointSeriesData } from './helpers';
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './response_handler';
+import { buildPointSeriesData } from './helpers';
 
 describe('response_handler', () => {
   describe('vislibSeriesResponseHandler', () => {

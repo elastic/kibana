@@ -8,11 +8,11 @@
 
 import { type IEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { pluginServices } from '../../services';
 import { getDataControlFieldRegistry } from '../editor/data_control_editor_tools';
+import { type ControlGroupContainer } from './control_group_container';
+import { pluginServices } from '../../services';
 import { CONTROL_GROUP_TYPE } from '../types';
 import { ControlsPanels } from '../types';
-import { type ControlGroupContainer } from './control_group_container';
 
 export const getNextPanelOrder = (panels?: ControlsPanels) => {
   let nextOrder = 0;

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { createListItem, deleteListItem, findListItems, patchListItem } from '.';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import {
-  getCreateListItemResponseMock,
-  getDeletedListItemResponseMock,
   getFoundListSchemaMock,
+  getCreateListItemResponseMock,
   getUpdatedListItemResponseMock,
+  getDeletedListItemResponseMock,
 } from './mocks/response';
 
 describe('Value list item API', () => {

@@ -6,15 +6,15 @@
  */
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
-import React, { useCallback, useMemo } from 'react';
 import type { SelectedPromptContext } from '../assistant/prompt_context/types';
-import { ContextEditor } from './context_editor';
 import { BatchUpdateListItem } from './context_editor/types';
-import { ContextEditorFlyout } from './context_editor_flyout';
 import { getIsDataAnonymizable, updateSelectedPromptContext } from './helpers';
 import { ReadOnlyContextViewer } from './read_only_context_viewer';
+import { ContextEditorFlyout } from './context_editor_flyout';
+import { ContextEditor } from './context_editor';
 import { ReplacementsContextViewer } from './replacements_context_viewer';
 import { Stats } from './stats';
 

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import React, { Component } from 'react';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
-  getAccessor,
   getColumnByAccessor,
+  getAccessor,
   getFormatByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
-import React, { Component } from 'react';
-import { MetricOptions, VisParams } from '../../common/types';
 import { getFormatService, getPaletteService } from '../services';
+import { VisParams, MetricOptions } from '../../common/types';
+import { MetricVisValue } from './metric_value';
 import { formatValue, shouldApplyColor } from '../utils';
 import { needsLightText } from '../utils/palette';
-import { MetricVisValue } from './metric_value';
 import { withAutoScale } from './with_auto_scale';
 
 import './metric.scss';

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { getApmEvents } from './bundle/get_apm_events';
 import { getDataStreams } from './bundle/get_data_streams';
-import { getExistingApmIndexTemplates } from './bundle/get_existing_index_templates';
-import { getIndexTemplatesByIndexPattern } from './bundle/get_index_templates_by_index_pattern';
-import { getIndicesStates } from './bundle/get_indices_states';
 import { getNonDataStreamIndices } from './bundle/get_non_data_stream_indices';
 import { getElasticsearchVersion } from './get_elasticsearch_version';
+import { getIndexTemplatesByIndexPattern } from './bundle/get_index_templates_by_index_pattern';
+import { getExistingApmIndexTemplates } from './bundle/get_existing_index_templates';
+import { getIndicesStates } from './bundle/get_indices_states';
+import { getApmEvents } from './bundle/get_apm_events';
 import { getApmIndexTemplates } from './helpers/get_apm_index_template_names';
-import { getDiagnosticsPrivileges } from './helpers/get_diagnostic_privileges';
 import { handleExceptions } from './helpers/handle_exceptions';
+import { getDiagnosticsPrivileges } from './helpers/get_diagnostic_privileges';
 
 const DEFEAULT_START = Date.now() - 60 * 5 * 1000; // 5 minutes
 const DEFAULT_END = Date.now();

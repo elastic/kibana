@@ -12,10 +12,10 @@ import { Observable } from 'rxjs';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 
-import { AggExpressionType, AggsStart, aggCountFnName } from '../../aggs';
+import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 
 import { KibanaContext } from '../kibana_context_type';

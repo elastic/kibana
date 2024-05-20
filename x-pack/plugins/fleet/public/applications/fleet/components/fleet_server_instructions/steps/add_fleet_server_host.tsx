@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import React, { useState, useCallback } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
 import {
+  EuiSwitch,
   EuiButton,
   EuiCallOut,
   EuiCode,
-  EuiFieldText,
   EuiForm,
   EuiFormErrorText,
-  EuiFormRow,
   EuiLink,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
+  EuiFormRow,
+  EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useCallback } from 'react';
 
 import type { FleetServerHost } from '../../../types';
 
-import { useLink, useStartServices } from '../../../hooks';
+import { useStartServices, useLink } from '../../../hooks';
+import type { FleetServerHostForm } from '../hooks';
 import { MultiRowInput } from '../../../sections/settings/components/multi_row_input';
 import { FleetServerHostSelect } from '../components';
-import type { FleetServerHostForm } from '../hooks';
 
 export const getAddFleetServerHostStep = ({
   fleetServerHostForm,

@@ -1,5 +1,3 @@
-import { Logger } from '@kbn/core/server';
-import { SavedObjectReference } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,14 +5,16 @@ import { SavedObjectReference } from '@kbn/core/server';
  * 2.0.
  */
 import { isEmpty } from 'lodash';
-import { RuleAttributes, RuleExecutionStatusAttributes } from '../../../data/rule/types';
+import { Logger } from '@kbn/core/server';
+import { SavedObjectReference } from '@kbn/core/server';
+import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
-import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
+import { RuleDomain, Monitoring, RuleParams } from '../types';
+import { PartialRule, SanitizedRule } from '../../../types';
+import { RuleAttributes, RuleExecutionStatusAttributes } from '../../../data/rule/types';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import { injectReferencesIntoParams } from '../../../rules_client/common';
-import { PartialRule, SanitizedRule } from '../../../types';
-import { ruleExecutionStatusValues } from '../constants';
-import { Monitoring, RuleDomain, RuleParams } from '../types';
+import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
 import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,

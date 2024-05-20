@@ -1,10 +1,3 @@
-import type {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
-  HorizontalAlignment,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { sortBy } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,13 +5,20 @@ import { sortBy } from 'lodash';
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import * as commonI18n from '../translations';
+import { sortBy } from 'lodash';
+import type {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  HorizontalAlignment,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import * as myI18n from './translations';
+import * as commonI18n from '../translations';
 
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model';
-import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { getRulesTableColumn } from '../utils';
 import { LinkRuleSwitch } from './link_rule_switch';
+import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model';
 
 export interface ExceptionsAddToRulesComponentProps {
   initiallySelectedRules?: RuleResponse[];
@@ -28,10 +28,7 @@ export const useAddToRulesTable = ({
   initiallySelectedRules,
   onRuleSelectionChange,
 }: ExceptionsAddToRulesComponentProps) => {
-  const {
-    data: { rules } = { rules: [], total: 0 },
-    isFetched,
-  } = useFindRules({
+  const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRules({
     filterOptions: {
       filter: '',
       showCustomRules: false,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../types';
+import expect from '@kbn/expect';
 import { ASSETS_ENDPOINT } from './constants';
+import { FtrProviderContext } from '../types';
 import { generateServicesData } from './helpers';
 
 const SERVICES_ASSETS_ENDPOINT = `${ASSETS_ENDPOINT}/services`;

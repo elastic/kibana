@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
+import moment from 'moment';
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiPopover,
+  EuiText,
+  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
-  EuiSpacer,
-  EuiText,
   EuiTextAlign,
-  EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { SnoozeSchedule } from '../../../../../types';
 import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../../lib/i18n_month_day_date';
@@ -28,8 +28,8 @@ import {
   OPEN_SNOOZE_PANEL_ARIA_LABEL,
   SNOOZE_FAILED_MESSAGE,
   SNOOZE_SUCCESS_MESSAGE,
-  UNITS_TRANSLATION,
   UNSNOOZE_SUCCESS_MESSAGE,
+  UNITS_TRANSLATION,
 } from './translations';
 import { RulesListNotifyBadgeProps } from './types';
 
@@ -278,8 +278,8 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       typeof disabled === 'string'
         ? disabled
         : isPopoverOpen || showTooltipInline
-          ? undefined
-          : snoozeTimeLeft;
+        ? undefined
+        : snoozeTimeLeft;
     return (
       <EuiToolTip
         title={

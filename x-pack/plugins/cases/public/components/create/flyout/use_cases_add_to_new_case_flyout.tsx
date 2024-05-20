@@ -7,9 +7,9 @@
 
 import type React from 'react';
 import { useCallback, useMemo } from 'react';
+import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { CaseUI } from '../../../containers/types';
-import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import type { CreateCaseFlyoutProps } from './create_case_flyout';

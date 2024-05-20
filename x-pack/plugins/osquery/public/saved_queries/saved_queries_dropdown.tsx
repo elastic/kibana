@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiComboBox, EuiFormRow, EuiTextColor } from '@elastic/eui';
 import { find } from 'lodash/fp';
+import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
-import { OsquerySchemaLink } from '../components/osquery_schema_link';
+import { useWatch, useFormContext } from 'react-hook-form';
 import { QUERIES_DROPDOWN_LABEL, QUERIES_DROPDOWN_SEARCH_FIELD_LABEL } from './constants';
+import { OsquerySchemaLink } from '../components/osquery_schema_link';
 
-import type { SavedQuerySO } from '../routes/saved_queries/list';
 import { useSavedQueries } from './use_saved_queries';
+import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 const euiCodeBlockCss = {
   '.euiCodeBlock__line': {

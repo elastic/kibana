@@ -6,13 +6,13 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
 import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
-import { Globals } from '../../static_globals';
-import { getElasticsearchDataset, getIndexPatterns } from '../cluster/get_index_patterns';
+import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 
 type TopHitType = ElasticsearchResponseHit & {
   _source: { index_stats?: Partial<ElasticsearchIndexStats> };

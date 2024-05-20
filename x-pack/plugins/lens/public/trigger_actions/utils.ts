@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { DOC_TYPE } from '../../common/constants';
 import type { Embeddable } from '../embeddable';
+import { DOC_TYPE } from '../../common/constants';
 
 export function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embeddable {
   return embeddable.type === DOC_TYPE;

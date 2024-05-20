@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from '@kbn/core/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { useEffect, useRef, useState } from 'react';
 import { getSeverity } from './api';
 import * as i18n from './translations';
 

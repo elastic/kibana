@@ -8,8 +8,8 @@
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { ExpressionValueSearchContext } from './kibana_context_type';
-import { kibanaTimerangeFunction } from './timerange';
 import { functionWrapper } from './utils';
+import { kibanaTimerangeFunction } from './timerange';
 
 describe('interpreter/functions#timerange', () => {
   const fn = functionWrapper(kibanaTimerangeFunction);

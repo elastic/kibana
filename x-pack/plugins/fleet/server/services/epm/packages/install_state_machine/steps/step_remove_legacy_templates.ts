@@ -7,8 +7,8 @@
 
 import { removeLegacyTemplates } from '../../../elasticsearch/template/remove_legacy';
 
-import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
+import { withPackageSpan } from '../../utils';
 
 export async function stepRemoveLegacyTemplates(context: InstallContext) {
   const { esClient, packageInstallContext, logger } = context;

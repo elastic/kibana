@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { AggExpressionFunctionArgs, AggExpressionType, BUCKET_TYPES } from '..';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggTermsFnName = 'aggTerms';
 

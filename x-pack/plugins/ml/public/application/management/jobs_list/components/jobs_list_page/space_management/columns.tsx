@@ -1,5 +1,3 @@
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,15 +5,17 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { TrainedModelLink } from '../../../../../model_management/model_link';
+import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 import type {
   AnalyticsManagementItems,
   AnomalyDetectionManagementItems,
   TrainedModelsManagementItems,
 } from '../../../../../../../common/types/management';
-import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
-import { DFAnalyticsJobIdLink } from '../../../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
 import { AnomalyDetectionJobIdLink } from '../../../../../jobs/jobs_list/components/jobs_list/job_id_link';
-import { TrainedModelLink } from '../../../../../model_management/model_link';
+import { DFAnalyticsJobIdLink } from '../../../../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_columns';
 
 export function getColumns(mlSavedObjectType: MlSavedObjectType) {
   switch (mlSavedObjectType) {

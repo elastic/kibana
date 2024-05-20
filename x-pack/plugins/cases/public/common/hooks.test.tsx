@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
 
+import { TestProviders } from './mock';
 import { useIsMainApplication } from './hooks';
 import { useApplication } from './lib/kibana/use_application';
-import { TestProviders } from './mock';
 
 jest.mock('./lib/kibana/use_application');
 

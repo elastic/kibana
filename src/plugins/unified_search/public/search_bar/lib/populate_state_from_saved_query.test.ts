@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataPublicPluginStart, SavedQuery } from '@kbn/data-plugin/public';
+import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { DataPublicPluginStart, SavedQuery } from '@kbn/data-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { mockFilter } from '../../mocks/get_stub_filter';
-import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 
 describe('populateStateFromSavedQuery', () => {
   let dataMock: jest.Mocked<DataPublicPluginStart>;

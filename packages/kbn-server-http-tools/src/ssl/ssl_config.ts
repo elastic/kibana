@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { isEqual } from 'lodash';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { constants as cryptoConstants } from 'crypto';
 import { readFileSync } from 'fs';
-import { TypeOf, schema } from '@kbn/config-schema';
-import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
-import { isEqual } from 'lodash';
 
 const protocolMap = new Map<string, number>([
   ['TLSv1', cryptoConstants.SSL_OP_NO_TLSv1],

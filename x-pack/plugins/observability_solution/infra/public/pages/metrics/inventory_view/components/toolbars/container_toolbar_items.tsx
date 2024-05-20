@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { containerSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import React from 'react';
+import { containerSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 

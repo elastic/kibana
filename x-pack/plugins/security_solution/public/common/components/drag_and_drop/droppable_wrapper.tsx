@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DraggableChildrenFn } from '@hello-pangea/dnd';
-import { Droppable } from '@hello-pangea/dnd';
 import { rgba } from 'polished';
 import React, { useCallback } from 'react';
+import type { DraggableChildrenFn } from '@hello-pangea/dnd';
+import { Droppable } from '@hello-pangea/dnd';
 import styled from 'styled-components';
 
 interface Props {

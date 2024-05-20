@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
+import { getKibanas } from '../../../../lib/kibana/get_kibanas';
+import { handleError } from '../../../../lib/errors';
+import { MonitoringCore } from '../../../../types';
 import {
   postKibanaInstancesRequestParamsRT,
   postKibanaInstancesRequestPayloadRT,
   postKibanaInstancesResponsePayloadRT,
 } from '../../../../../common/http_api/kibana';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { handleError } from '../../../../lib/errors';
-import { getKibanas } from '../../../../lib/kibana/get_kibanas';
-import { MonitoringCore } from '../../../../types';
-import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 
 export function kibanaInstancesRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postKibanaInstancesRequestParamsRT);

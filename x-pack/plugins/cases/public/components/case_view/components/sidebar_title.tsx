@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { EuiTitle } from '@elastic/eui';
 
 interface SidebarTitleProps {
   title: string;

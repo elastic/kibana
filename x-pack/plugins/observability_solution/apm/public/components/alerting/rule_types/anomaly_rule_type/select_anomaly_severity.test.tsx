@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { SelectAnomalySeverity } from './select_anomaly_severity';
 
 function Wrapper({ children }: { children?: ReactNode }) {

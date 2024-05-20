@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useSelector } from 'react-redux';
-import { Ping } from '../../../../../common/runtime_types';
+import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { selectDynamicSettings } from '../../../state/selectors';
+import { Ping } from '../../../../../common/runtime_types';
 
 export const useStdErrorLogs = ({
   monitorId,

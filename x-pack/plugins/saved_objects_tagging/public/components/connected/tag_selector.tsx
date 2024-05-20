@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { TagSelectorComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { TagSelectorComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { TagsCapabilities } from '../../../common';
-import { ITagsCache } from '../../services';
 import { TagSelector } from '../base';
+import { ITagsCache } from '../../services';
 import { CreateModalOpener } from '../edition_modal';
 
 interface GetConnectedTagSelectorOptions {

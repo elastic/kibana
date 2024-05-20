@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { CommonProps } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { memo, useMemo } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiPageSection,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {

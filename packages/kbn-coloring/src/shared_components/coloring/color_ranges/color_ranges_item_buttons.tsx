@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { Dispatch, useCallback, useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiIconProps } from '@elastic/eui';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 
-import type { CustomPaletteParams, PaletteContinuity } from '../../../palettes';
+import type { PaletteContinuity, CustomPaletteParams } from '../../../palettes';
 
 import { isLastItem } from './utils';
 
+import type { ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
 import { ColorRangesContext } from './color_ranges_context';
-import type { ColorRange, ColorRangeAccessor, ColorRangesActions } from './types';
 
 export interface ColorRangesItemButtonProps {
   index: number;

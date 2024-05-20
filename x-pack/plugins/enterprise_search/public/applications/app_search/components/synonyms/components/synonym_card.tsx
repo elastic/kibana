@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions } from 'kea';
 
-import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiButton } from '@elastic/eui';
 
 import { SynonymsLogic } from '..';
 import { MANAGE_BUTTON_LABEL } from '../../../../shared/constants';

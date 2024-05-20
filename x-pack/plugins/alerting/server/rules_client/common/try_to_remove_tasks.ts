@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 export const tryToRemoveTasks = async ({

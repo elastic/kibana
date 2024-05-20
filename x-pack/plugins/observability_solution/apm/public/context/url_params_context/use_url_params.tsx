@@ -6,7 +6,7 @@
  */
 import type { Assign } from '@kbn/utility-types';
 import { omit } from 'lodash';
-import { useContext, useMemo } from 'react';
+import { useMemo, useContext } from 'react';
 import type { ApmUrlParams } from './types';
 import { UrlParamsContext } from './url_params_context';
 

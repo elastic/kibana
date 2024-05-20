@@ -168,7 +168,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/chart_expressions/common/color_categories.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -187,7 +189,9 @@
         "description": [
           "\nGet an override specification and returns a props object to use directly with the Component"
         ],
-        "signature": ["(overrides: O | undefined, componentName: K) => { [k: string]: unknown; }"],
+        "signature": [
+          "(overrides: O | undefined, componentName: K) => { [k: string]: unknown; }"
+        ],
         "path": "src/plugins/chart_expressions/common/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -198,8 +202,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "overrides",
-            "description": ["Overrides object"],
-            "signature": ["O | undefined"],
+            "description": [
+              "Overrides object"
+            ],
+            "signature": [
+              "O | undefined"
+            ],
             "path": "src/plugins/chart_expressions/common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -211,15 +219,21 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "componentName",
-            "description": ["name of the Component to look for (i.e. \"settings\", \"axisX\")"],
-            "signature": ["K"],
+            "description": [
+              "name of the Component to look for (i.e. \"settings\", \"axisX\")"
+            ],
+            "signature": [
+              "K"
+            ],
             "path": "src/plugins/chart_expressions/common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["an props object to use directly with the component"],
+        "returnComment": [
+          "an props object to use directly with the component"
+        ],
         "initialIsOpen": false
       },
       {
@@ -354,7 +368,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["\"chartSize\""],
+            "signature": [
+              "\"chartSize\""
+            ],
             "path": "src/plugins/chart_expressions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -400,7 +416,9 @@
             "tags": [],
             "label": "maxDimensions",
             "description": [],
-            "signature": ["ChartSizeDimensions | undefined"],
+            "signature": [
+              "ChartSizeDimensions | undefined"
+            ],
             "path": "src/plugins/chart_expressions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -412,7 +430,9 @@
             "tags": [],
             "label": "minDimensions",
             "description": [],
-            "signature": ["ChartSizeDimensions | undefined"],
+            "signature": [
+              "ChartSizeDimensions | undefined"
+            ],
             "path": "src/plugins/chart_expressions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -424,7 +444,9 @@
             "tags": [],
             "label": "aspectRatio",
             "description": [],
-            "signature": ["{ x: number; y: number; } | undefined"],
+            "signature": [
+              "{ x: number; y: number; } | undefined"
+            ],
             "path": "src/plugins/chart_expressions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -465,7 +487,9 @@
         "tags": [],
         "label": "Simplify",
         "description": [],
-        "signature": ["{ [KeyType in keyof T]: T[KeyType]; }"],
+        "signature": [
+          "{ [KeyType in keyof T]: T[KeyType]; }"
+        ],
         "path": "src/plugins/chart_expressions/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,

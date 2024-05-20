@@ -25,7 +25,9 @@
         "type": "Function",
         "tags": [],
         "label": "getColorMode",
-        "description": ["\nGiven a `KibanaTheme`, provide a color mode for use with EUI."],
+        "description": [
+          "\nGiven a `KibanaTheme`, provide a color mode for use with EUI."
+        ],
         "signature": [
           "(theme: ",
           {
@@ -48,7 +50,9 @@
             "type": "Object",
             "tags": [],
             "label": "theme",
-            "description": ["KibanaTheme"],
+            "description": [
+              "KibanaTheme"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/react-kibana-context-common",
@@ -64,7 +68,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": ["EuiThemeColorModeStandard"],
+        "returnComment": [
+          "EuiThemeColorModeStandard"
+        ],
         "initialIsOpen": false
       }
     ],
@@ -88,7 +94,9 @@
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
-            "description": ["is dark mode enabled or not"],
+            "description": [
+              "is dark mode enabled or not"
+            ],
             "path": "packages/react/kibana_context/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -159,7 +167,9 @@
             "tags": [],
             "label": "darkMode",
             "description": [],
-            "signature": ["false"],
+            "signature": [
+              "false"
+            ],
             "path": "packages/react/kibana_context/common/index.ts",
             "deprecated": false,
             "trackAdoption": false

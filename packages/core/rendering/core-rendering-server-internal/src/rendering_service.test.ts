@@ -7,28 +7,28 @@
  */
 
 import {
-  bootstrapRendererMock,
-  getBrowserLoggingConfigMock,
-  getCommonStylesheetPathsMock,
-  getScriptPathsMock,
-  getSettingValueMock,
-  getThemeStylesheetPathsMock,
   registerBootstrapRouteMock,
+  bootstrapRendererMock,
+  getSettingValueMock,
+  getCommonStylesheetPathsMock,
+  getThemeStylesheetPathsMock,
+  getScriptPathsMock,
+  getBrowserLoggingConfigMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
 
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { AuthStatus } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { RenderingService } from './rendering_service';
 import {
-  mockRenderingPrebootDeps,
   mockRenderingServiceParams,
+  mockRenderingPrebootDeps,
   mockRenderingSetupDeps,
 } from './test_helpers/params';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
+import { RenderingService } from './rendering_service';
+import { AuthStatus } from '@kbn/core-http-server';
 
 const BUILD_DATE = '2023-05-15T23:12:09+0000';
 const INJECTED_METADATA = {
@@ -60,7 +60,7 @@ function renderTestCases(
   getRender: () => Promise<
     [
       InternalRenderingServicePreboot['render'] | InternalRenderingServiceSetup['render'],
-      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps,
+      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps
     ]
   >
 ) {
@@ -301,7 +301,7 @@ function renderDarkModeTestCases(
   getRender: () => Promise<
     [
       InternalRenderingServicePreboot['render'] | InternalRenderingServiceSetup['render'],
-      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps,
+      typeof mockRenderingPrebootDeps | typeof mockRenderingSetupDeps
     ]
   >
 ) {

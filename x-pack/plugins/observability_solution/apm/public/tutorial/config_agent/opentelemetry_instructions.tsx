@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButtonIcon,
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiBasicTableColumn,
+  EuiButtonIcon,
   copyToClipboard,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { ValuesType } from 'utility-types';
 
 interface Props {

@@ -9,8 +9,8 @@
 import { readFile } from 'fs/promises';
 import { get, omit } from 'lodash';
 import fetch from 'node-fetch';
-import { CloudServiceResponse } from './cloud_response';
 import { CloudService } from './cloud_service';
+import { CloudServiceResponse } from './cloud_response';
 
 // We explicitly call out the version, 2016-09-02, rather than 'latest' to avoid unexpected changes
 const SERVICE_ENDPOINT = 'http://169.254.169.254/2016-09-02/dynamic/instance-identity/document';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { statusColors } from '../common/constants';
 
 interface Props {

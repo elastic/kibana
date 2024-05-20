@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { computeSummaryRowForColumn, getFinalSummaryConfiguration } from './summary';
 
 describe('Summary row helpers', () => {

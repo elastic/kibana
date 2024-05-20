@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { TableId } from '@kbn/securitysolution-data-table';
+import { useMemo } from 'react';
+import { get, noop } from 'lodash/fp';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { TableId } from '@kbn/securitysolution-data-table';
-import { get, noop } from 'lodash/fp';
-import { useMemo } from 'react';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useAddBulkToTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 
 /**

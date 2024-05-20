@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiHealth } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { EuiHealth } from '@elastic/eui';
 import { JourneyStep, NetworkEvent } from '../../../../../../../common/runtime_types';
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
 import { getSeriesAndDomain, getSidebarItems } from '../../common/network_data/data_formatting';
-import { LegendItem, SidebarItem } from '../../common/network_data/types';
+import { SidebarItem, LegendItem } from '../../common/network_data/types';
 import { RenderItem, WaterfallDataEntry } from '../../common/network_data/types';
-import { MarkerItems, WaterfallProvider } from './context/waterfall_context';
-import { WaterfallChart } from './waterfall_chart';
 import { useFlyout } from './waterfall_flyout/use_flyout';
 import { WaterfallFlyout } from './waterfall_flyout/waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
+import { MarkerItems, WaterfallProvider } from './context/waterfall_context';
+import { WaterfallChart } from './waterfall_chart';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return (

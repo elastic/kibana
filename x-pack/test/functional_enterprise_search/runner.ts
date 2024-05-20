@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import Url from 'url';
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
-import { cleanupEnterpriseSearch, setupEnterpriseSearch } from './enterprise_search_server';
+import { setupEnterpriseSearch, cleanupEnterpriseSearch } from './enterprise_search_server';
 
 import type { FtrProviderContext } from './ftr_provider_context';
 

@@ -13,9 +13,9 @@ import React, { FC } from 'react';
 import { CommonXYDataLayerConfig } from '../../../common';
 import {
   DatatablesWithFormatInfo,
+  getMetaFromSeriesId,
   LayersAccessorsTitles,
   LayersFieldFormats,
-  getMetaFromSeriesId,
 } from '../../helpers';
 import { XDomain } from '../x_domain';
 import { EndzoneTooltipHeader } from './endzone_tooltip_header';

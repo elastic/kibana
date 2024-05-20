@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import type * as rt from 'io-ts';
 import type { Transform } from 'stream';
-import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { createConcatStream, createMapStream, createSplitStream } from '@kbn/utils';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import type * as rt from 'io-ts';
+import { createConcatStream, createSplitStream, createMapStream } from '@kbn/utils';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
-  createLimitStream,
-  filterExportedCounts,
   parseNdjsonStrings,
+  filterExportedCounts,
+  createLimitStream,
 } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 
+import type { ImportTimelineResponse } from './types';
 import { ImportTimelinesSchemaRt } from '../../../../../../common/api/timeline';
 import { throwErrors } from '../../../utils/common';
-import type { ImportTimelineResponse } from './types';
 
 type ErrorFactory = (message: string) => Error;
 

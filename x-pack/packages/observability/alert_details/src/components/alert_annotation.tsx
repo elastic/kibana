@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import React from 'react';
 
 interface Props {
   alertStart: number;

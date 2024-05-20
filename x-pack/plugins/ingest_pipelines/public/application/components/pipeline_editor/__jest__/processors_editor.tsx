@@ -9,15 +9,15 @@ import React from 'react';
 
 import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { LocationDescriptorObject } from 'history';
-import { PipelineEditor, ProcessorsEditorContextProvider, Props } from '..';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ProcessorsEditorContextProvider, Props, PipelineEditor } from '..';
 
 import {
-  apiService,
   breadcrumbService,
-  documentationService,
   uiMetricService,
+  documentationService,
+  apiService,
 } from '../../../services';
 
 const history = scopedHistoryMock.create();

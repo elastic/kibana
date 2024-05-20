@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useState, useCallback } from 'react';
 
 export const LOCAL_STORAGE_DISMISS_GUIDED_SETUP_PROGRESS_KEY = 'DISMISS_GUIDED_SETUP_PROGRESS';
 

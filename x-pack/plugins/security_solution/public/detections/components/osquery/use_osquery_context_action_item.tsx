@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { useKibana } from '../../../common/lib/kibana';
 import { getOsqueryActionItem } from './osquery_action_item';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface IProps {
   handleClick: () => void;

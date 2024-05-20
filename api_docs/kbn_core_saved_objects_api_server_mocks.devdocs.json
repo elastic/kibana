@@ -79,7 +79,11 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<", "ISavedObjectsClientProvider", ">"],
+            "signature": [
+              "() => jest.Mocked<",
+              "ISavedObjectsClientProvider",
+              ">"
+            ],
             "path": "packages/core/saved-objects/core-saved-objects-api-server-mocks/src/scoped_client_provider.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

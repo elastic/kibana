@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import type { Query, TimeRange, Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useKibanaHeader } from '../../../../../hooks/use_kibana_header';
-import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { HostLimitOptions } from '../../types';
 import { ControlsContent } from './controls_content';
+import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
 import { LimitOptions } from './limit_options';
+import { HostLimitOptions } from '../../types';
 
 export const UnifiedSearchBar = () => {
   const {

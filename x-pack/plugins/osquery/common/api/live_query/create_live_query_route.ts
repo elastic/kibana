@@ -8,11 +8,11 @@
 import * as t from 'io-ts';
 
 import {
-  arrayQueries,
   ecsMappingOrUndefined,
+  savedQueryIdOrUndefined,
   packIdOrUndefined,
   queryOrUndefined,
-  savedQueryIdOrUndefined,
+  arrayQueries,
   timeoutOrUndefined,
 } from '@kbn/osquery-io-ts-types';
 

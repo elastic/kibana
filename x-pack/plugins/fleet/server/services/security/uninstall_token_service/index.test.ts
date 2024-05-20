@@ -26,9 +26,9 @@ import type {
 } from '../../../../common/types/models/uninstall_token';
 
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../../../constants';
-import { type MockedFleetAppContext, createAppContextStartContractMock } from '../../../mocks';
-import { agentPolicyService } from '../../agent_policy';
+import { createAppContextStartContractMock, type MockedFleetAppContext } from '../../../mocks';
 import { appContextService } from '../../app_context';
+import { agentPolicyService } from '../../agent_policy';
 
 import { UninstallTokenService, type UninstallTokenServiceInterface } from '.';
 

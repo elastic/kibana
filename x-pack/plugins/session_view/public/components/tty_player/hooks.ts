@@ -6,32 +6,32 @@
  */
 import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
+import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { SearchAddon } from './xterm_search';
 import { useEuiTheme } from '../../hooks';
 import { renderTruncatedMsg } from './ansi_helpers';
-import { SearchAddon } from './xterm_search';
 
 import type {
   IOLine,
+  ProcessStartMarker,
   ProcessEvent,
   ProcessEventResults,
   ProcessEventsPage,
-  ProcessStartMarker,
 } from '../../../common';
 import {
-  CURRENT_API_VERSION,
-  DEFAULT_TTY_COLS,
-  DEFAULT_TTY_FONT_SIZE,
-  DEFAULT_TTY_PLAYSPEED_MS,
-  DEFAULT_TTY_ROWS,
-  IO_EVENTS_PER_PAGE,
   IO_EVENTS_ROUTE,
+  IO_EVENTS_PER_PAGE,
   QUERY_KEY_IO_EVENTS,
-  TTY_LINES_PRE_SEEK,
+  DEFAULT_TTY_PLAYSPEED_MS,
+  DEFAULT_TTY_FONT_SIZE,
+  DEFAULT_TTY_ROWS,
+  DEFAULT_TTY_COLS,
   TTY_LINE_SPLITTER_REGEX,
+  TTY_LINES_PRE_SEEK,
+  CURRENT_API_VERSION,
 } from '../../../common/constants';
 
 export const useFetchIOEvents = (

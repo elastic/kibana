@@ -191,7 +191,7 @@
       "searchable": true,
       "aggregatable": true,
       "readFromDocValues": true,
-      "subType": { "multi": { "parent": "machine.os" } }
+      "subType":{ "multi":{ "parent": "machine.os" } }
     },
     {
       "name": "geo.src",

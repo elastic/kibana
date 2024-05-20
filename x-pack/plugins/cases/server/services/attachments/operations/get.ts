@@ -5,37 +5,30 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   SavedObject,
   SavedObjectsBulkResponse,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { isSOError } from '../../../common/error';
+import { decodeOrThrow } from '../../../common/runtime_types';
+import type {
+  AttachmentPersistedAttributes,
+  AttachmentTransformedAttributes,
+  AttachmentSavedObjectTransformed,
+} from '../../../common/types/attachments';
+import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_ALERTS_PER_CASE,
   MAX_DOCS_PER_PAGE,
 } from '../../../../common/constants';
-import type { AlertAttachmentAttributes, AttachmentTotals } from '../../../../common/types/domain';
-import { AlertAttachmentAttributesRt, AttachmentType } from '../../../../common/types/domain';
 import { buildFilter, combineFilters } from '../../../client/utils';
-import { isSOError } from '../../../common/error';
-import { partitionByCaseAssociation } from '../../../common/partitioning';
-import { getCaseReferenceId } from '../../../common/references';
-import { decodeOrThrow } from '../../../common/runtime_types';
-import type { AttachmentSavedObject } from '../../../common/types';
-import type {
-  AttachmentPersistedAttributes,
-  AttachmentSavedObjectTransformed,
-  AttachmentTransformedAttributes,
-} from '../../../common/types/attachments';
-import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments';
-import {
-  injectAttachmentAttributesAndHandleErrors,
-  injectAttachmentSOAttributesFromRefs,
-} from '../../so_references';
+import type { AlertAttachmentAttributes, AttachmentTotals } from '../../../../common/types/domain';
+import { AttachmentType, AlertAttachmentAttributesRt } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
@@ -43,6 +36,13 @@ import type {
   GetAttachmentArgs,
   ServiceContext,
 } from '../types';
+import {
+  injectAttachmentAttributesAndHandleErrors,
+  injectAttachmentSOAttributesFromRefs,
+} from '../../so_references';
+import { partitionByCaseAssociation } from '../../../common/partitioning';
+import type { AttachmentSavedObject } from '../../../common/types';
+import { getCaseReferenceId } from '../../../common/references';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}

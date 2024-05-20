@@ -6,38 +6,38 @@
  * Side Public License, v 1.
  */
 
+import React, { useMemo, useCallback } from 'react';
+import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutResizable,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFlyoutResizable,
-  EuiPagination,
-  EuiPortal,
-  EuiSpacer,
   EuiTitle,
+  EuiSpacer,
+  EuiPortal,
+  EuiPagination,
   keys,
+  EuiButtonEmpty,
   useEuiTheme,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { get } from 'lodash';
-import React, { useMemo, useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
-import { useDiscoverCustomization } from '../../customizations';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
+import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
 import { useFlyoutActions } from './use_flyout_actions';
+import { useDiscoverCustomization } from '../../customizations';
+import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;

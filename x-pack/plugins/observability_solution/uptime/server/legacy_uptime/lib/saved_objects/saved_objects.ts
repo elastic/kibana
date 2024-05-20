@@ -11,10 +11,10 @@ import {
   SavedObjectsServiceSetup,
 } from '@kbn/core/server';
 
-import { UptimeConfig } from '../../../../common/config';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../../constants/settings';
 import { DynamicSettingsAttributes } from '../../../runtime_types/settings';
 import { UMSavedObjectsQueryFn } from '../adapters';
+import { UptimeConfig } from '../../../../common/config';
 import { settingsObjectId, umDynamicSettings } from './uptime_settings';
 
 export const registerUptimeSavedObjects = (savedObjectsService: SavedObjectsServiceSetup) => {

@@ -11,10 +11,10 @@
  */
 
 import type { MlSeverityType } from './anomaly_severity';
-import { ML_ANOMALY_SEVERITY_TYPES } from './anomaly_severity_types';
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
-import { ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
+import { ML_ANOMALY_SEVERITY_TYPES } from './anomaly_severity_types';
 import type { MlAnomaliesTableRecord, MlAnomalyRecordDoc } from './types';
+import { ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from './detector_rule';
 
 /**
  * Enum of entity field types
@@ -37,7 +37,7 @@ export const ML_ENTITY_FIELD_OPERATIONS = {
  * Union type of entity field operations
  */
 export type MlEntityFieldOperation =
-  (typeof ML_ENTITY_FIELD_OPERATIONS)[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
+  typeof ML_ENTITY_FIELD_OPERATIONS[keyof typeof ML_ENTITY_FIELD_OPERATIONS];
 
 /**
  * Interface of an entity field

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getPatchRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { getPatchRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
 
-import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
+import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import {
   getEmptyFindResult,
-  getFindResultWithSingleHit,
-  getPatchRequest,
   getRuleMock,
+  getPatchRequest,
+  getFindResultWithSingleHit,
   nonRuleFindResult,
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';

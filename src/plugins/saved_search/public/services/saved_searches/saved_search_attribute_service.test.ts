@@ -7,25 +7,25 @@
  */
 
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { AttributeService, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { getSavedSearchAttributeService } from './saved_search_attribute_service';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { omit } from 'lodash';
+import { AttributeService, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { saveSearchSavedObject } from './save_saved_searches';
 import {
   SavedSearchByValueAttributes,
   SearchByReferenceInput,
   SearchByValueInput,
   toSavedSearch,
 } from '.';
+import { omit } from 'lodash';
 import {
   type GetSavedSearchDependencies,
   getSearchSavedObject,
 } from '../../../common/service/get_saved_searches';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
-import { saveSearchSavedObject } from './save_saved_searches';
-import { getSavedSearchAttributeService } from './saved_search_attribute_service';
 
 const mockServices = {
   contentManagement: contentManagementMock.createStartContract().client,

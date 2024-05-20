@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
-import { FontValue } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
 import React, { FC, useState } from 'react';
+import PropTypes from 'prop-types';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FontValue } from '@kbn/expressions-plugin/common';
 
-import { ColorPickerPopover } from '../color_picker_popover';
 import { FontPicker } from '../font_picker';
+import { ColorPickerPopover } from '../color_picker_popover';
 import { fontSizes } from './font_sizes';
 
 const strings = {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 import {
-  type EuiBreadcrumbsProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  type EuiBreadcrumbsProps,
   type EuiPageHeaderProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

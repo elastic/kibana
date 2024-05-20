@@ -1,4 +1,3 @@
-import type { AnalyticsNoDataPageProps } from '@kbn/shared-ux-page-analytics-no-data-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +6,11 @@ import type { AnalyticsNoDataPageProps } from '@kbn/shared-ux-page-analytics-no-
  * Side Public License, v 1.
  */
 import React from 'react';
+import type { AnalyticsNoDataPageProps } from '@kbn/shared-ux-page-analytics-no-data-types';
 
 import useObservable from 'react-use/lib/useObservable';
-import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 import { useServices } from './services';
+import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 
 /**
  * An entire page that can be displayed when Kibana "has no data", specifically for Analytics.  Uses

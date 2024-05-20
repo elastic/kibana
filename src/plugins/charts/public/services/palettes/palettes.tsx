@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
+import chroma from 'chroma-js';
+import { i18n } from '@kbn/i18n';
 import {
   euiPaletteColorBlind,
-  euiPaletteColorBlindBehindText,
-  euiPaletteComplementary,
   euiPaletteCool,
+  euiPaletteGray,
+  euiPaletteRed,
+  euiPaletteGreen,
+  euiPaletteWarm,
   euiPaletteForStatus,
   euiPaletteForTemperature,
-  euiPaletteGray,
-  euiPaletteGreen,
-  euiPaletteRed,
-  euiPaletteWarm,
+  euiPaletteComplementary,
+  euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
-import { i18n } from '@kbn/i18n';
-import chroma from 'chroma-js';
 import { flatten, zip } from 'lodash';
 import { ChartsPluginSetup, createColorPalette as createLegacyColorPalette } from '../..';
+import { lightenColor } from './lighten_color';
 import { LegacyColorsService } from '../legacy_colors';
 import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';
-import { lightenColor } from './lighten_color';
 
 function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
   const colors = euiPaletteColorBlind({ rotations: 2 });

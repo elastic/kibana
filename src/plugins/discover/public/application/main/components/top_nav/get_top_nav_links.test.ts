@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { getTopNavLinks } from './get_top_nav_links';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
-import { getTopNavLinks } from './get_top_nav_links';
 
 const services = {
   capabilities: {

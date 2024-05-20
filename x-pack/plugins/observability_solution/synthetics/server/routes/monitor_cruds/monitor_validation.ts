@@ -1,6 +1,3 @@
-import { i18n } from '@kbn/i18n';
-import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { isLeft } from 'fp-ts/lib/Either';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,9 +5,16 @@ import { isLeft } from 'fp-ts/lib/Either';
  * 2.0.
  */
 import * as t from 'io-ts';
+import { i18n } from '@kbn/i18n';
+import { isLeft } from 'fp-ts/lib/Either';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
-import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config';
+import { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
+import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import {
   BrowserFieldsCodec,
   CodeEditorMode,
@@ -27,10 +31,6 @@ import {
   SyntheticsMonitor,
   TCPFieldsCodec,
 } from '../../../common/runtime_types';
-import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
-import { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,

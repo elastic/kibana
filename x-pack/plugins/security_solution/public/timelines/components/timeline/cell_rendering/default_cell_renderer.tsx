@@ -8,11 +8,11 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import type { CellValueElementProps } from '.';
-import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 import { useGetMappedNonEcsValue } from '../body/data_driven_columns';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
+import type { CellValueElementProps } from '.';
+import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 
 const StyledContent = styled.div<{ $isDetails: boolean }>`
   padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};

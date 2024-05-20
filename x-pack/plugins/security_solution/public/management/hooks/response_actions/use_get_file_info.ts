@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
-import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
+import { useHttp } from '../../../common/lib/kibana/hooks';
 import type {
   ActionDetails,
   ActionFileInfoApiResponse,
   MaybeImmutable,
 } from '../../../../common/endpoint/types';
-import { useHttp } from '../../../common/lib/kibana/hooks';
-import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
+import { ACTION_AGENT_FILE_INFO_ROUTE } from '../../../../common/endpoint/constants';
 
 /**
  * Retrieves information about a file that was uploaded by the endpoint as a result of a `get-file` action

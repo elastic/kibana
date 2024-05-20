@@ -1,12 +1,12 @@
 {
   "attributes": {
-    "timeFieldName": "@timestamp",
-    "title": "epoch-millis*"
+      "timeFieldName": "@timestamp",
+      "title": "epoch-millis*"
   },
   "coreMigrationVersion": "8.0.0",
   "id": "epoch-millis",
   "migrationVersion": {
-    "index-pattern": "7.11.0"
+      "index-pattern": "7.11.0"
   },
   "references": [],
   "type": "index-pattern",

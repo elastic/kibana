@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiPopover,
   EuiFilterButton,
   EuiFilterSelectItem,
   EuiHealth,
-  EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
-import { RuleLastRunOutcomeValues, RuleLastRunOutcomes } from '@kbn/alerting-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
-import { getOutcomeHealthColor } from '../../../../common/lib';
+import { RuleLastRunOutcomes, RuleLastRunOutcomeValues } from '@kbn/alerting-plugin/common';
 import { rulesLastRunOutcomeTranslationMapping } from '../translations';
+import { getOutcomeHealthColor } from '../../../../common/lib';
 
 const sortedRuleLastRunOutcomeValues = [...RuleLastRunOutcomeValues].sort();
 

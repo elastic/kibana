@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Series } from '../../../../../common/types';
 import type { TableSearchRequest } from './types';
+import type { Series } from '../../../../../common/types';
 
 export function calculateAggRoot(doc: TableSearchRequest, column: Series) {
   return `aggs.pivot.aggs.${column.id}.aggs`;

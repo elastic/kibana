@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React, { memo, useEffect, useMemo } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo, useEffect, useMemo } from 'react';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
-import type { CommandExecutionComponentProps } from '../types';
-import { ConsoleCodeBlock } from './console_code_block';
 import { UnsupportedMessageCallout } from './unsupported_message_callout';
+import type { CommandExecutionComponentProps } from '../types';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { ConsoleCodeBlock } from './console_code_block';
 
 export const UnknownCommand = memo<CommandExecutionComponentProps>(({ command, setStatus }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());

@@ -9,19 +9,19 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { TableId } from '@kbn/securitysolution-data-table';
 import {
-  TestProviders,
   createMockStore,
   mockGlobalState,
   mockIndexPattern,
+  TestProviders,
 } from '../../../../common/mock';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { HostsTableType, HostsType } from '../../store/model';
-import { hostDetailsPagePath } from '../types';
 import { HostDetailsTabs } from './details_tabs';
+import { hostDetailsPagePath } from '../types';
+import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
+import { HostsType, HostsTableType } from '../../store/model';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');

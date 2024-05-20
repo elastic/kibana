@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
-import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { set } from '@kbn/safer-lodash-set';
+import { Readable } from 'stream';
 import { encode } from 'cbor-x';
-import * as cborx from 'cbor-x';
-import { FileDocument } from '../../../../file_client/file_metadata_client/adapters/es_index';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FileDocument } from '../../../../file_client/file_metadata_client/adapters/es_index';
+import * as cborx from 'cbor-x';
+import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

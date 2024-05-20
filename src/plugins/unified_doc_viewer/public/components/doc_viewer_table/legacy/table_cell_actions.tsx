@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import React from 'react';
-import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
-import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
+import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
+import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 
 interface TableActionsProps {
   field: string;

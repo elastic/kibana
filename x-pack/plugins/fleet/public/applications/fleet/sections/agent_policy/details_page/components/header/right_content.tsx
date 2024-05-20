@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
+import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiI18nNumber,
+  EuiFlexItem,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
   EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
 
-import { FLEET_SERVER_PACKAGE } from '../../../../../../../../common/constants';
-import { AddAgentHelpPopover } from '../../../../../components';
 import { useAuthz, useLink } from '../../../../../hooks';
 import type { AgentPolicy } from '../../../../../types';
 import { AgentPolicyActionMenu, LinkedAgentCount } from '../../../components';
+import { AddAgentHelpPopover } from '../../../../../components';
+import { FLEET_SERVER_PACKAGE } from '../../../../../../../../common/constants';
 
 export interface HeaderRightContentProps {
   isLoading: boolean;

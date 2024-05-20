@@ -6,19 +6,19 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { isDefined } from '@kbn/ml-is-defined';
+import type {
+  FieldStatsServices,
+  FieldStatsProps,
+} from '@kbn/unified-field-list/src/components/field_stats';
 import {
   FieldPopover,
   FieldPopoverHeader,
 } from '@kbn/unified-field-list/src/components/field_popover';
-import type {
-  FieldStatsProps,
-  FieldStatsServices,
-} from '@kbn/unified-field-list/src/components/field_stats';
-import React, { useCallback, useMemo, useState } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { FieldStatsContent } from './field_stats_content';
 

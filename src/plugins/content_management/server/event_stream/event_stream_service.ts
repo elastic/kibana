@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TimedItemBuffer } from '@kbn/bfetch-plugin/common';
 import type { CoreSetup } from '@kbn/core/server';
+import { TimedItemBuffer } from '@kbn/bfetch-plugin/common';
 import type {
   EventStreamClient,
   EventStreamClientFactory,

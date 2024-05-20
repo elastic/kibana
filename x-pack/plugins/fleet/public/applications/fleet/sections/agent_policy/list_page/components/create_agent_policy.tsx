@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import type { EuiFlyoutProps } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiFlyoutProps } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
-import { DevtoolsRequestFlyoutButton } from '../../../../components';
-import { sendCreateAgentPolicy, useAuthz, useStartServices } from '../../../../hooks';
-import { ExperimentalFeaturesService } from '../../../../services';
-import type { AgentPolicy, NewAgentPolicy } from '../../../../types';
+import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
+import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
+import { DevtoolsRequestFlyoutButton } from '../../../../components';
 import { generateCreateAgentPolicyDevToolsRequest } from '../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};

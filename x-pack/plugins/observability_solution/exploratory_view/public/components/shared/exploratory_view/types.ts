@@ -8,21 +8,21 @@
 import type { PaletteOutput } from '@kbn/coloring';
 import type { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import type {
+  LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   FieldBasedIndexPatternColumn,
-  LastValueIndexPatternColumn,
-  MetricState,
-  OperationType,
   SeriesType,
+  OperationType,
   YConfig,
+  MetricState,
 } from '@kbn/lens-plugin/public';
 
+import type { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   FieldFormatParams as BaseFieldFormatParams,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import type { PersistableFilter } from '@kbn/lens-plugin/common';
 import { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { FORMULA_COLUMN } from './configurations/constants';
 

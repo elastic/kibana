@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { useState, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { orderBy } from 'lodash';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -12,14 +15,11 @@ import {
   EuiHealth,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { orderBy } from 'lodash';
-import React, { useState, useMemo } from 'react';
 
 import { SnapshotRestore } from '../../../../../../common/types';
+import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import { FormattedDateTime } from '../../../../components';
-import { UIM_RESTORE_LIST_EXPAND_INDEX } from '../../../../constants';
 import { ShardsTable } from './shards_table';
 
 interface Props {
@@ -90,16 +90,13 @@ export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restor
   };
 
   const itemIdToExpandedRowMap = useMemo(() => {
-    return restores.reduce(
-      (acc, restore) => {
-        const { index, shards } = restore;
-        if (expandedIndices[index]) {
-          acc[index] = <ShardsTable shards={shards} />;
-        }
-        return acc;
-      },
-      {} as { [key: string]: JSX.Element }
-    );
+    return restores.reduce((acc, restore) => {
+      const { index, shards } = restore;
+      if (expandedIndices[index]) {
+        acc[index] = <ShardsTable shards={shards} />;
+      }
+      return acc;
+    }, {} as { [key: string]: JSX.Element });
   }, [expandedIndices, restores]);
 
   const columns: Array<EuiBasicTableColumn<SnapshotRestore>> = [

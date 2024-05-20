@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { bfetchPluginMock } from '@kbn/bfetch-plugin/server/mocks';
 import {
-  elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
+  elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
+import { bfetchPluginMock } from '@kbn/bfetch-plugin/server/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/server/mocks';
 
 export function getMockedRouterDeps() {

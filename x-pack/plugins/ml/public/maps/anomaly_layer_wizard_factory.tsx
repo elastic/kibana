@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import type { StartServicesAccessor } from '@kbn/core/public';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { LayerWizard, RenderWizardArguments } from '@kbn/maps-plugin/public';
 import { LAYER_TYPE } from '@kbn/maps-plugin/common';
 import type {
   VectorLayerDescriptor,
   VectorStylePropertiesDescriptor,
 } from '@kbn/maps-plugin/common/descriptor_types';
-import type { LayerWizard, RenderWizardArguments } from '@kbn/maps-plugin/public';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
-import React from 'react';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import { CUSTOM_COLOR_RAMP } from './util';
+import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
 import type { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalySource } from './anomaly_source';
-import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
-import { CUSTOM_COLOR_RAMP } from './util';
 
 import { HttpService } from '../application/services/http_service';
-import type { MlApiServices } from '../application/services/ml_api_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
+import type { MlApiServices } from '../application/services/ml_api_service';
 
 export const ML_ANOMALY = 'ML_ANOMALIES';
 

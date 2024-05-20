@@ -13,9 +13,9 @@ import { NoDataConfigPageStorybookMock } from '@kbn/shared-ux-page-no-data-confi
 import type { NoDataConfigPageStorybookParams } from '@kbn/shared-ux-page-no-data-config-mocks';
 
 import type {
+  NoDataConfig,
   KibanaPageTemplateProps,
   KibanaPageTemplateServices,
-  NoDataConfig,
 } from '@kbn/shared-ux-page-kibana-template-types';
 
 export type NoDataConfigArguments = Pick<

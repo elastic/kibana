@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type {
-  AnalyticsServiceStart,
   ApplicationStart,
   Capabilities,
   ChromeStart,
-  DocLinksStart,
-  ExecutionContextSetup,
   HttpStart,
-  I18nStart,
   IUiSettingsClient,
   OverlayStart,
   SavedObjectsStart,
+  DocLinksStart,
   ThemeServiceStart,
+  ExecutionContextSetup,
+  AnalyticsServiceStart,
+  I18nStart,
 } from '@kbn/core/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { TypesStart } from './vis_types';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');

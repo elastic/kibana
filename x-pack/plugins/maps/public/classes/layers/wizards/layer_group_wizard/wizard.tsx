@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, Component } from 'react';
-import { DEFAULT_LAYER_GROUP_LABEL, LayerGroup } from '../../layer_group';
+import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 import { RenderWizardArguments } from '../layer_wizard_registry';
+import { DEFAULT_LAYER_GROUP_LABEL, LayerGroup } from '../../layer_group';
 
 interface State {
   label: string;

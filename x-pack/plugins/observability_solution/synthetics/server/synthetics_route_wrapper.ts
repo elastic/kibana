@@ -7,11 +7,11 @@
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isEmpty } from 'lodash';
-import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
-import { UptimeEsClient, isTestUser } from './lib';
-import { SyntheticsRouteWrapper } from './routes/types';
-import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
+import { isTestUser, UptimeEsClient } from './lib';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
+import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
+import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
+import { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   uptimeRoute,

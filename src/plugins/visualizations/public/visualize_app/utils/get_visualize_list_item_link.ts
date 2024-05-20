@@ -7,11 +7,11 @@
  */
 
 import { ApplicationStart } from '@kbn/core/public';
-import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getUISettings } from '../../services';
+import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '../../../common/constants';
 
 export const getVisualizeListItemLink = (
   application: ApplicationStart,

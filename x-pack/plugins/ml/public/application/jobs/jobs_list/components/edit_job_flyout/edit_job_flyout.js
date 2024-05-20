@@ -5,38 +5,38 @@
  * 2.0.
  */
 
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { cloneDeep, isEqual, pick } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
-  EuiTabbedContent,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTabbedContent,
+  EuiConfirmModal,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { cloneDeep, isEqual, pick } from 'lodash';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
 
-import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { JobDetails, Detectors, Datafeed } from './tabs';
+import { saveJob } from './edit_utils';
+import { loadFullJob } from '../utils';
+import { validateModelMemoryLimit, validateGroupNames } from '../validate_job';
+import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
+import { ml } from '../../../../services/ml_api_service';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
 import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../components/custom_urls';
-import { ml } from '../../../../services/ml_api_service';
-import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
-import { loadFullJob } from '../utils';
-import { validateGroupNames, validateModelMemoryLimit } from '../validate_job';
-import { saveJob } from './edit_utils';
-import { Datafeed, Detectors, JobDetails } from './tabs';
 
 const { collapseLiteralStrings } = XJson;
 

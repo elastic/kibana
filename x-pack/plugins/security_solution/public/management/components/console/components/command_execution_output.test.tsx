@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
 import React from 'react';
 import type { ConsoleProps } from '..';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../mocks';
+import { act } from '@testing-library/react';
 import type { CommandExecutionComponentProps } from '../types';
 
 describe('When using CommandExecutionOutput component', () => {

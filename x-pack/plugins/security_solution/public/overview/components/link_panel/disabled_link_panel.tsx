@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { LinkButton } from '../../../common/components/links';
 import { InnerLinkPanel } from './inner_link_panel';
 import type { LinkPanelListItem, LinkPanelViewProps } from './types';
+import { LinkButton } from '../../../common/components/links';
 
 interface DisabledLinkPanelProps {
   bodyCopy: string;

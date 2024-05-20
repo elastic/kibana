@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { Pipeline } from '../../../../../common/types';
-import { ViewApiRequestFlyout, useFormContext, useKibana } from '../../../../shared_imports';
+import { useFormContext, ViewApiRequestFlyout, useKibana } from '../../../../shared_imports';
 
 import { ReadProcessorsFunction } from '../types';
 

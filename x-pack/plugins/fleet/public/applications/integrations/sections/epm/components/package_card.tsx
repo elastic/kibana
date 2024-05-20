@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import styled from 'styled-components';
 import {
   EuiBadge,
   EuiButton,
@@ -15,8 +17,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
-import styled from 'styled-components';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
@@ -32,8 +32,8 @@ import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../screens/home';
 
 import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../components';
+import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
-import { useIsGuidedOnboardingActive, useStartServices } from '../../../hooks';
 
 export type PackageCardProps = IntegrationCardItem;
 

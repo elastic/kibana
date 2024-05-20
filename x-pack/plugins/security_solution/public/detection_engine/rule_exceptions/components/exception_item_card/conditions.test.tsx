@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../common/mock';
 import { ExceptionItemCardConditions } from './conditions';

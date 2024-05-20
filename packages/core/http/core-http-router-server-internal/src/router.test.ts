@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { isConfigSchema, schema } from '@kbn/config-schema';
-import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { createRequestMock } from '@kbn/hapi-mocks/src/request';
 import { Router, type RouterOptions } from './router';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { isConfigSchema, schema } from '@kbn/config-schema';
 import { createFooValidation } from './router.test.util';
+import { createRequestMock } from '@kbn/hapi-mocks/src/request';
+import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
 
 const mockResponse: any = {
   code: jest.fn().mockImplementation(() => mockResponse),

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertExpressionPopover } from '../alert_expression_popover';
-import { AlertFieldNumber } from '../alert_field_number';
 import * as labels from '../translations';
-import { TimeRangeOption, TimeUnitSelectable } from './time_unit_selectable';
+import { AlertFieldNumber } from '../alert_field_number';
 import { timeExpLabels } from './translations';
+import { TimeUnitSelectable, TimeRangeOption } from './time_unit_selectable';
 
 interface Props {
   defaultTimerangeCount?: number;

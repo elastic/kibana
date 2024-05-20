@@ -7,12 +7,12 @@
 import { createAction } from '@reduxjs/toolkit';
 import { createAsyncAction } from '../utils/actions';
 
-import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 import {
   MonitorOverviewFlyoutConfig,
   MonitorOverviewPageState,
   MonitorOverviewState,
 } from './models';
+import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 
 export const fetchMonitorOverviewAction = createAsyncAction<
   MonitorOverviewPageState,

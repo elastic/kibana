@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { errors as esErrors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { handleEsError } from '../../shared_imports';
+import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
-import { MockRouter, createMockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
+import { handleEsError } from '../../shared_imports';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),

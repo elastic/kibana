@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { mount } from 'enzyme';
+import { RouteComponentProps } from 'react-router-dom';
 import { ScopedHistory } from '@kbn/core/public';
 import { scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mount } from 'enzyme';
-import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { mockManagementPlugin } from '../../../../../mocks';
 
 import { Header } from './header';

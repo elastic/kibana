@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { getAdvancedButton } from '../../screens/integrations';
-import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
-import { ServerlessRoleName } from '../../support/roles';
+import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
   fillInQueryTimeout,
@@ -17,7 +15,9 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
-import { navigateTo } from '../../tasks/navigation';
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import { getAdvancedButton } from '../../screens/integrations';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

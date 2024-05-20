@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { PureComponent, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React, { PureComponent, Fragment } from 'react';
 
 import {
   EuiButton,
@@ -33,16 +33,16 @@ import {
 import { indexPatterns } from '@kbn/data-plugin/public';
 
 import { extractQueryParams, indices } from '../../shared_imports';
+import { routing } from '../services/routing';
+import { getRemoteClusterName } from '../services/get_remote_cluster_name';
 import { API_STATUS } from '../constants';
+import { SectionError } from './section_error';
+import { AutoFollowPatternIndicesPreview } from './auto_follow_pattern_indices_preview';
+import { RemoteClustersFormField } from './remote_clusters_form_field';
 import {
   validateAutoFollowPattern,
   validateLeaderIndexPattern,
 } from '../services/auto_follow_pattern_validators';
-import { getRemoteClusterName } from '../services/get_remote_cluster_name';
-import { routing } from '../services/routing';
-import { AutoFollowPatternIndicesPreview } from './auto_follow_pattern_indices_preview';
-import { RemoteClustersFormField } from './remote_clusters_form_field';
-import { SectionError } from './section_error';
 
 import { AutoFollowPatternRequestFlyout } from './auto_follow_pattern_request_flyout';
 

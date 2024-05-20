@@ -7,17 +7,17 @@
 
 import { SavedObjectsBulkResponse, SavedObjectsClientContract } from '@kbn/core/server';
 import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { ActionsConfigurationUtilities } from './actions_config';
-import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
-import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
-import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
-import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 import {
-  ActionTaskExecutorParams,
+  RawAction,
   ActionTypeRegistryContract,
   InMemoryConnector,
-  RawAction,
+  ActionTaskExecutorParams,
 } from './types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
+import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
+import { ActionsConfigurationUtilities } from './actions_config';
+import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;

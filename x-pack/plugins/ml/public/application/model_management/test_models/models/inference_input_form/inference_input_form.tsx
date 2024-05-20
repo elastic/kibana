@@ -8,10 +8,10 @@
 import type { FC } from 'react';
 import React from 'react';
 
-import type { InferrerType } from '..';
 import { INPUT_TYPE } from '../inference_base';
-import { IndexInputForm } from './index_input';
 import { TextInputForm } from './text_input';
+import { IndexInputForm } from './index_input';
+import type { InferrerType } from '..';
 
 interface Props {
   inferrer: InferrerType;

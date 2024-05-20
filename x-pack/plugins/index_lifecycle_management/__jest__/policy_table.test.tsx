@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 import moment from 'moment-timezone';
 import React, { ReactElement } from 'react';
+import { ReactWrapper } from 'enzyme';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
 import { PolicyFromES } from '../common/types';
 import { PolicyList } from '../public/application/sections/policy_list/policy_list';
-import { PolicyListContextProvider } from '../public/application/sections/policy_list/policy_list_context';
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { KibanaContextProvider } from '../public/shared_imports';
+import { PolicyListContextProvider } from '../public/application/sections/policy_list/policy_list_context';
 
 initHttp(httpServiceMock.createSetupContract());
 initUiMetric(usageCollectionPluginMock.createSetupContract());

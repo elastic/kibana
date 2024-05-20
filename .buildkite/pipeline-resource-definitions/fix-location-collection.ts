@@ -1,5 +1,4 @@
 #!/usr/bin/env ts-node-script
-import { execSync } from 'child_process';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,8 +7,9 @@ import { execSync } from 'child_process';
  * Side Public License, v 1.
  */
 import fs from 'fs';
-import path from 'path';
 import jsYaml from 'js-yaml';
+import path from 'path';
+import { execSync } from 'child_process';
 
 const EXCLUDE_LIST = ['locations.yml', '_template/template.yml'];
 const REPO_FILES_BASE = 'https://github.com/elastic/kibana/blob/main';

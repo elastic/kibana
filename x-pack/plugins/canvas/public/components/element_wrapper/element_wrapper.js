@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
-import { ElementContent } from '../element_content';
+import PropTypes from 'prop-types';
 import { Positionable } from '../positionable';
+import { ElementContent } from '../element_content';
 
 export const ElementWrapper = (props) => {
   const { renderable, transformMatrix, width, height, state, handlers } = props;

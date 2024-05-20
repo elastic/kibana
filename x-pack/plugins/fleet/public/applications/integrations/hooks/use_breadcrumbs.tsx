@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { useRef } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
-import type { DynamicPagePathValues, Page } from '../constants';
+import type { Page, DynamicPagePathValues } from '../constants';
 import { INTEGRATIONS_BASE_PATH, pagePathGetters } from '../constants';
 
 import { useStartServices } from '.';

@@ -12,12 +12,12 @@ import { KBN_FIELD_TYPES } from '../../..';
 import { AggTypesDependencies } from '../agg_types';
 import { BaseAggParams } from '../types';
 
+import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass } from './lib/get_response_agg_config_class';
 import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
-import { MetricAggType } from './metric_agg_type';
-import { METRIC_TYPES } from './metric_agg_types';
 import { aggPercentileRanksFnName } from './percentile_ranks_fn';
 import { getPercentileValue } from './percentiles_get_value';
+import { METRIC_TYPES } from './metric_agg_types';
 
 export interface AggParamsPercentileRanks extends BaseAggParams {
   field: string;

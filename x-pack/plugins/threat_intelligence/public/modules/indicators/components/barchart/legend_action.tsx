@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useState, VFC } from 'react';
 import {
   EuiButtonIcon,
   EuiComboBoxOptionOption,
@@ -13,11 +14,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import moment from 'moment';
-import React, { useState, VFC } from 'react';
+import { CopyToClipboardContextMenu } from '../common/copy_to_clipboard';
 import { FilterInContextMenu } from '../../../query_bar/components/filter_in';
 import { FilterOutContextMenu } from '../../../query_bar/components/filter_out';
 import { AddToTimelineContextMenu } from '../../../timeline/components/add_to_timeline';
-import { CopyToClipboardContextMenu } from '../common/copy_to_clipboard';
 import {
   COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
   FILTER_IN_BUTTON_TEST_ID,

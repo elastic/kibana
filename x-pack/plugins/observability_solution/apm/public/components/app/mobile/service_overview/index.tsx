@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiFlexGroup,
   EuiFlexGroupProps,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
@@ -15,26 +16,25 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
-import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
-import { LatencyChart } from '../../../shared/charts/latency_chart';
-import { TransactionsTable } from '../../../shared/transactions_table';
-import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { ServiceOverviewThroughputChart } from '../../service_overview/service_overview_throughput_chart';
-import { GeoMap } from './geo_map';
+import { TransactionsTable } from '../../../shared/transactions_table';
 import { MostUsedCharts } from './most_used_charts';
-import { MobileLocationStats } from './stats/location_stats';
+import { GeoMap } from './geo_map';
+import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
+import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
+import { LatencyChart } from '../../../shared/charts/latency_chart';
+import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
+import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 import { MobileStats } from './stats/stats';
+import { MobileLocationStats } from './stats/location_stats';
+import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.

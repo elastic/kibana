@@ -8,17 +8,6 @@
 import expect from '@kbn/expect';
 
 import {
-  createAlertsIndex,
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-  getAlertsById,
-  getRuleForAlertTesting,
-  waitForAlertsToBePresent,
-  waitForRuleSuccess,
-} from '../../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
-import {
   createListsIndex,
   deleteAllExceptions,
   deleteListsIndex,
@@ -26,6 +15,17 @@ import {
   importTextFile,
 } from '../../../../../../lists_and_exception_lists/utils';
 import { createRuleWithExceptionEntries } from '../../../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+  getAlertsById,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+} from '../../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

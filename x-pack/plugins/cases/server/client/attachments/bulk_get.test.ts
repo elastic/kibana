@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import { mockCaseComments } from '../../mocks';
-import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { createCasesClientMockArgs, createCasesClientMock } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {

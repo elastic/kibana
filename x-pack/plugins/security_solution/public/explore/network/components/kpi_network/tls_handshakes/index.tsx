@@ -7,9 +7,9 @@
 
 import React from 'react';
 
+import type { StatItems } from '../../../../components/stat_items';
 import { kpiTlsHandshakesLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/network/kpi_tls_handshakes';
 import { KpiBaseComponent } from '../../../../components/kpi';
-import type { StatItems } from '../../../../components/stat_items';
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 

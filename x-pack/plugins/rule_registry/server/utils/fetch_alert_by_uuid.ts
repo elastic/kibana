@@ -6,8 +6,8 @@
  */
 
 import { PublicContract } from '@kbn/utility-types';
-import { ALERT_UUID } from '../../common/technical_rule_data_field_names';
 import { IRuleDataClient } from '../rule_data_client';
+import { ALERT_UUID } from '../../common/technical_rule_data_field_names';
 
 type RuleDataClient = PublicContract<IRuleDataClient>;
 

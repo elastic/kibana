@@ -9,8 +9,8 @@
 import React from 'react';
 
 import { EuiContextMenuPanel, useEuiTheme } from '@elastic/eui';
-import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
+import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
 import { getControlButtonTitle } from '../../_dashboard_app_strings';
 import { AddDataControlButton } from './add_data_control_button';

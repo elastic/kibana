@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createCoreRouteHandlerContextParamsMock } from './test_helpers';
 
 describe('#elasticsearch', () => {

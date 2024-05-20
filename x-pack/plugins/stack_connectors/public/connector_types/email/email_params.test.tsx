@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
-import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 import EmailParamsFields from './email_params';
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),

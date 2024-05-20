@@ -7,10 +7,10 @@
  */
 
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
-import type { IndexPatternValue, Metric } from '../../../../common/types';
+import type { Metric, IndexPatternValue } from '../../../../common/types';
 import type { VisFields } from '../../lib/fetch_fields';
 
 // this function checks if metric has numeric value result

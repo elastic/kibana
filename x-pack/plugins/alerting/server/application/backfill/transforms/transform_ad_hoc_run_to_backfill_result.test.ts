@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { SavedObject } from '@kbn/core/server';
 import { adHocRunStatus } from '../../../../common/constants';
-import { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { transformAdHocRunToBackfillResult } from './transform_ad_hoc_run_to_backfill_result';
 
 function getMockAdHocRunAttributes({

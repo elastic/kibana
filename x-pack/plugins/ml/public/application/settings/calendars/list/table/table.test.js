@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
-import { MemoryRouter } from 'react-router-dom';
 import { CalendarsListTable } from './table';
+import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('../../../../contexts/kibana/use_create_url', () => ({
   useCreateAndNavigateToMlLink: jest.fn(),

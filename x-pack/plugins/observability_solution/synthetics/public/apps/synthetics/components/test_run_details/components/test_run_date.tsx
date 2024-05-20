@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { StepPageNavigation } from '../../step_details_page/step_page_nav';
 
 export const TestRunDate = () => {

@@ -11,8 +11,8 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -21,22 +21,22 @@ import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 
-import { ADD_INFERENCE_PIPELINE_STEPS } from '../../components/ml_inference/constants';
-import { useFetchPipelines } from '../../components/ml_inference/hooks/use_fetch_pipelines';
+import type { ModelItem } from '../models_list';
 import type { AddInferencePipelineSteps } from '../../components/ml_inference/types';
-import { validateInferencePipelineConfigurationStep } from '../../components/ml_inference/validation';
+import { ADD_INFERENCE_PIPELINE_STEPS } from '../../components/ml_inference/constants';
 import { AddInferencePipelineFooter } from '../../components/shared';
 import { AddInferencePipelineHorizontalSteps } from '../../components/shared';
+import { getInitialState } from './state';
+import { PipelineDetails } from './pipeline_details';
+import { TestTrainedModel } from './test_trained_model';
 import { OnFailureConfiguration } from '../../components/shared';
 import { ReviewAndCreatePipeline } from '../../components/shared';
 import { useMlApiContext } from '../../contexts/kibana';
-import type { ModelItem } from '../models_list';
-import { useTestTrainedModelsContext } from '../test_models/test_trained_models_context';
 import { getPipelineConfig } from './get_pipeline_config';
-import { PipelineDetails } from './pipeline_details';
-import { getInitialState } from './state';
+import { validateInferencePipelineConfigurationStep } from '../../components/ml_inference/validation';
 import { type InferecePipelineCreationState } from './state';
-import { TestTrainedModel } from './test_trained_model';
+import { useFetchPipelines } from '../../components/ml_inference/hooks/use_fetch_pipelines';
+import { useTestTrainedModelsContext } from '../test_models/test_trained_models_context';
 
 export interface CreatePipelineForModelFlyoutProps {
   onClose: (refreshList?: boolean) => void;

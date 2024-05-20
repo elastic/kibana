@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PaletteRegistry } from '@kbn/coloring';
 import { toExpression as toExpressionString } from '@kbn/interpreter';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { SavedLensInput } from '../../../functions/external/saved_lens';
 
 export function toExpression(input: SavedLensInput, palettes?: PaletteRegistry): string {

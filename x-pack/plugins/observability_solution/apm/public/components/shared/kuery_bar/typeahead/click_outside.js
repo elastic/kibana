@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 export default class ClickOutside extends Component {
   componentDidMount() {

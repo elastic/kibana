@@ -7,60 +7,60 @@
  */
 
 import {
-  mockCollectMultiNamespaceReferences,
-  mockDeleteLegacyUrlAliases,
+  pointInTimeFinderMock,
   mockGetCurrentTime,
-  mockGetSearchDsl,
-  mockInternalBulkResolve,
   mockPreflightCheckForCreate,
   mockUpdateObjectsSpaces,
-  pointInTimeFinderMock,
+  mockGetSearchDsl,
+  mockCollectMultiNamespaceReferences,
+  mockInternalBulkResolve,
+  mockDeleteLegacyUrlAliases,
 } from './repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { SavedObjectsRepository } from './repository';
+import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
-  SavedObjectsBulkUpdateObject,
   SavedObjectsResolveResponse,
+  SavedObjectsBulkUpdateObject,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  ISavedObjectsEncryptionExtension,
-  ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectsEncryptionExtension,
   SavedObject,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import { loggerMock } from '@kbn/logging-mocks';
 import { kibanaMigratorMock } from '../mocks';
-import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import {
-  CUSTOM_INDEX_TYPE,
-  DEFAULT_SPACE,
-  ENCRYPTED_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
-  MULTI_NAMESPACE_TYPE,
-  bulkCreateSuccess,
-  bulkDeleteSuccess,
-  bulkGetSuccess,
-  bulkUpdateSuccess,
-  checkConflictsSuccess,
-  createDocumentMigrator,
   createRegistry,
+  createDocumentMigrator,
+  mappings,
+  DEFAULT_SPACE,
   createSpySerializer,
+  mockTimestamp,
+  CUSTOM_INDEX_TYPE,
+  getMockGetResponse,
+  updateSuccess,
   deleteSuccess,
+  removeReferencesToSuccess,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  checkConflictsSuccess,
+  MULTI_NAMESPACE_TYPE,
+  bulkGetSuccess,
+  bulkCreateSuccess,
+  bulkUpdateSuccess,
   findSuccess,
   generateIndexPatternSearchResults,
-  getMockGetResponse,
-  mappings,
-  mockTimestamp,
-  removeReferencesToSuccess,
-  setupAuthorizeFind,
+  bulkDeleteSuccess,
+  ENCRYPTED_TYPE,
   setupAuthorizeFunc,
-  updateSuccess,
+  setupAuthorizeFind,
 } from '../test_helpers/repository.test.common';
-import { SavedObjectsRepository } from './repository';
+import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
 const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 

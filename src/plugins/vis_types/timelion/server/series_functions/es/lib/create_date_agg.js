@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES, search } from '@kbn/data-plugin/server';
 import { buildAggBody } from './agg_body';
+import { search, METRIC_TYPES } from '@kbn/data-plugin/server';
 
 const { dateHistogramInterval } = search.aggs;
 

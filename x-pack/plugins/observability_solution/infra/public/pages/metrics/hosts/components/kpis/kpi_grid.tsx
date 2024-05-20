@@ -1,5 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +5,12 @@ import { EuiSpacer } from '@elastic/eui';
  * 2.0.
  */
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { HostMetricsDocsLink } from '../../../../../components/lens';
-import { HostCountKpi } from './host_count_kpi';
 import { KpiCharts } from './kpi_charts';
+import { HostCountKpi } from './host_count_kpi';
 
 export const KPIGrid = () => {
   return (

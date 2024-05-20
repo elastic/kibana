@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiCode, EuiText, type EuiTourStepProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiText, EuiCode, type EuiTourStepProps } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { HEADER_NAVIGATION_BUTTON_TEST_ID } from '../../../shared/components/test_ids';
-import {
-  INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID,
-  INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID,
-} from '../../left/tabs/test_ids';
-import { RULE_SUMMARY_BUTTON_TEST_ID } from '../../right/components/test_ids';
 import { OVERVIEW_TAB_LABEL_TEST_ID } from '../../right/test_ids';
+import { RULE_SUMMARY_BUTTON_TEST_ID } from '../../right/components/test_ids';
+import {
+  INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID,
+  INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID,
+} from '../../left/tabs/test_ids';
 
 export const FLYOUT_TOUR_CONFIG_ANCHORS = {
   OVERVIEW_TAB: OVERVIEW_TAB_LABEL_TEST_ID,

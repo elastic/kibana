@@ -8,7 +8,7 @@
 
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlEmbeddable, ControlFactory, ControlInput, ControlOutput } from '../../types';
+import { ControlEmbeddable, ControlFactory, ControlOutput, ControlInput } from '../../types';
 
 export type ControlsServiceFactory = PluginServiceFactory<ControlsServiceType>;
 
@@ -22,7 +22,7 @@ export interface ControlsServiceType {
   getControlFactory: <
     I extends ControlInput = ControlInput,
     O extends ControlOutput = ControlOutput,
-    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>,
+    E extends ControlEmbeddable<I, O> = ControlEmbeddable<I, O>
   >(
     type: string
   ) => EmbeddableFactory<I, O, E>;

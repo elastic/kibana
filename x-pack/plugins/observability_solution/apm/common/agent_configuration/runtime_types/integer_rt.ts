@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { either } from 'fp-ts/lib/Either';
 import { getRangeTypeMessage } from './get_range_type_message';
 
 export function getIntegerRt({

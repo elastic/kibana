@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AnyAction, Reducer } from 'redux';
+import type { Reducer, AnyAction } from 'redux';
 import * as networkActions from './actions';
 import * as networkModel from './model';
-import type { NetworkState } from './reducer';
 import * as networkSelectors from './selectors';
+import type { NetworkState } from './reducer';
 
 export { networkActions, networkModel, networkSelectors };
 export * from './reducer';

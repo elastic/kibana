@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { getEditUrl } from '../services/url';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { CoreStart } from '@kbn/core/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { GraphStore } from '../state_management';
 import { GraphWorkspaceSavedObject, Workspace } from '../types';
 import { getEmptyWorkspace, getSavedWorkspace } from './saved_workspace_utils';
+import { getEditUrl } from '../services/url';
 
 export interface UseWorkspaceLoaderProps {
   store: GraphStore;

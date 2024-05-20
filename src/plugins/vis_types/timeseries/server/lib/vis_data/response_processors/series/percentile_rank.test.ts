@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Panel, Series } from '../../../../../common/types';
 import { percentileRank } from './percentile_rank';
+import type { Panel, Series } from '../../../../../common/types';
 
 describe('percentile_rank(resp, panel, series, meta, extractFields)', () => {
   let panel: Panel;

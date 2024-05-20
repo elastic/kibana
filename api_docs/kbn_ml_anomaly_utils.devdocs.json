@@ -28,7 +28,9 @@
         "description": [
           "\nReturns the value on a scale of 1 to 5, from a log based scaled value for an\nanomaly score explanation impact field, such as anomaly_characteristics_impact,\nsingle_bucket_impact or multi_bucket_impact."
         ],
-        "signature": ["(score: number) => number"],
+        "signature": [
+          "(score: number) => number"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -39,15 +41,21 @@
             "type": "number",
             "tags": [],
             "label": "score",
-            "description": ["value from an impact field from the anomaly_score_explanation."],
-            "signature": ["number"],
+            "description": [
+              "value from an impact field from the anomaly_score_explanation."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["numeric value on an integer scale of 1 (low) to 5 (high)."],
+        "returnComment": [
+          "numeric value on an integer scale of 1 (low) to 5 (high)."
+        ],
         "initialIsOpen": false
       },
       {
@@ -88,7 +96,9 @@
             "type": "Object",
             "tags": [],
             "label": "record",
-            "description": ["- anomaly record result for which to obtain the entity field list."],
+            "description": [
+              "- anomaly record result for which to obtain the entity field list."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -137,7 +147,9 @@
             "type": "Object",
             "tags": [],
             "label": "record",
-            "description": ["- anomaly record result for which to obtain the entity field name."],
+            "description": [
+              "- anomaly record result for which to obtain the entity field name."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -186,7 +198,9 @@
             "type": "Object",
             "tags": [],
             "label": "record",
-            "description": ["- anomaly record result for which to obtain the entity field value."],
+            "description": [
+              "- anomaly record result for which to obtain the entity field value."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -211,8 +225,12 @@
         "type": "Function",
         "tags": [],
         "label": "getFormattedSeverityScore",
-        "description": ["\nReturns formatted severity score."],
-        "signature": ["(score: number) => string"],
+        "description": [
+          "\nReturns formatted severity score."
+        ],
+        "signature": [
+          "(score: number) => string"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/get_formatted_severity_score.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -226,7 +244,9 @@
             "description": [
               "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
             ],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/get_formatted_severity_score.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -268,7 +288,9 @@
             "description": [
               "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
             ],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/get_severity.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -287,7 +309,9 @@
         "description": [
           "\nReturns a severity RGB color (one of critical, major, minor, warning, low or blank)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
         ],
-        "signature": ["(normalizedScore: number) => string"],
+        "signature": [
+          "(normalizedScore: number) => string"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/get_severity_color.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -301,7 +325,9 @@
             "description": [
               "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
             ],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/get_severity_color.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -343,7 +369,9 @@
             "description": [
               "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
             ],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/get_severity_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -385,7 +413,9 @@
             "description": [
               "- A normalized score between 0-100, which is based on the probability of the anomalousness of this record"
             ],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -401,7 +431,9 @@
         "type": "Function",
         "tags": [],
         "label": "isCategorizationAnomaly",
-        "description": ["\nReturns whether the anomaly is in a categorization analysis."],
+        "description": [
+          "\nReturns whether the anomaly is in a categorization analysis."
+        ],
         "signature": [
           "(anomaly: ",
           {
@@ -423,7 +455,9 @@
             "type": "Object",
             "tags": [],
             "label": "anomaly",
-            "description": ["Anomaly table record"],
+            "description": [
+              "Anomaly table record"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -448,8 +482,12 @@
         "type": "Function",
         "tags": [],
         "label": "isMlKibanaUrlConfigWithTimeRange",
-        "description": ["\nType guard to idenfity MlKibanaUrlConfigWithTimeRange.\n"],
-        "signature": ["(arg: unknown) => boolean"],
+        "description": [
+          "\nType guard to idenfity MlKibanaUrlConfigWithTimeRange.\n"
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -460,15 +498,21 @@
             "type": "Unknown",
             "tags": [],
             "label": "arg",
-            "description": ["The unknown type to be evaluated"],
-            "signature": ["unknown"],
+            "description": [
+              "The unknown type to be evaluated"
+            ],
+            "signature": [
+              "unknown"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": ["whether arg is of type MlKibanaUrlConfigWithTimeRange"],
+        "returnComment": [
+          "whether arg is of type MlKibanaUrlConfigWithTimeRange"
+        ],
         "initialIsOpen": false
       },
       {
@@ -501,7 +545,9 @@
             "type": "Object",
             "tags": [],
             "label": "anomaly",
-            "description": ["Anomaly table record"],
+            "description": [
+              "Anomaly table record"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -550,7 +596,9 @@
             "type": "Object",
             "tags": [],
             "label": "record",
-            "description": ["- anomaly record result"],
+            "description": [
+              "- anomaly record result"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -578,7 +626,9 @@
         "description": [
           "\nReturns whether actual values should be displayed for a record with the specified function description.\nNote that the 'function' field in a record contains what the user entered e.g. 'high_count',\nwhereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'."
         ],
-        "signature": ["(functionDescription: string) => boolean"],
+        "signature": [
+          "(functionDescription: string) => boolean"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -589,8 +639,12 @@
             "type": "string",
             "tags": [],
             "label": "functionDescription",
-            "description": ["- function_description value for the anomaly record"],
-            "signature": ["string"],
+            "description": [
+              "- function_description value for the anomaly record"
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -609,7 +663,9 @@
         "description": [
           "\nReturns whether typical values should be displayed for a record with the specified function description.\nNote that the 'function' field in a record contains what the user entered e.g. 'high_count',\nwhereas the 'function_description' field holds a ML-built display hint for function e.g. 'count'."
         ],
-        "signature": ["(functionDescription: string) => boolean"],
+        "signature": [
+          "(functionDescription: string) => boolean"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -620,8 +676,12 @@
             "type": "string",
             "tags": [],
             "label": "functionDescription",
-            "description": ["- function_description value for the anomaly record"],
-            "signature": ["string"],
+            "description": [
+              "- function_description value for the anomaly record"
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -639,7 +699,9 @@
         "type": "Interface",
         "tags": [],
         "label": "AggFieldNamePair",
-        "description": ["\nDefinition for a pair of aggregation and field name."],
+        "description": [
+          "\nDefinition for a pair of aggregation and field name."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -650,7 +712,9 @@
             "type": "string",
             "tags": [],
             "label": "agg",
-            "description": ["\nThe aggregation definition."],
+            "description": [
+              "\nThe aggregation definition."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -661,7 +725,9 @@
             "type": "string",
             "tags": [],
             "label": "field",
-            "description": ["\nThe field name"],
+            "description": [
+              "\nThe field name"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -672,8 +738,12 @@
             "type": "Object",
             "tags": [],
             "label": "by",
-            "description": ["\nOptional by-field configuration"],
-            "signature": ["{ field: string | null; value: string | null; } | undefined"],
+            "description": [
+              "\nOptional by-field configuration"
+            ],
+            "signature": [
+              "{ field: string | null; value: string | null; } | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -684,8 +754,12 @@
             "type": "Object",
             "tags": [],
             "label": "over",
-            "description": ["\nOptional over-field configuration"],
-            "signature": ["{ field: string | null; value: string | null; } | undefined"],
+            "description": [
+              "\nOptional over-field configuration"
+            ],
+            "signature": [
+              "{ field: string | null; value: string | null; } | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -696,8 +770,12 @@
             "type": "Object",
             "tags": [],
             "label": "partition",
-            "description": ["\nOptional partition-field configuration"],
-            "signature": ["{ field: string | null; value: string | null; } | undefined"],
+            "description": [
+              "\nOptional partition-field configuration"
+            ],
+            "signature": [
+              "{ field: string | null; value: string | null; } | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -708,8 +786,12 @@
             "type": "string",
             "tags": [],
             "label": "excludeFrequent",
-            "description": ["\nOptional exclude frequent."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional exclude frequent."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -723,7 +805,9 @@
         "type": "Interface",
         "tags": [],
         "label": "AggFieldPair",
-        "description": ["\nDefinition for a pair of aggregation and field."],
+        "description": [
+          "\nDefinition for a pair of aggregation and field."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -734,7 +818,9 @@
             "type": "Object",
             "tags": [],
             "label": "agg",
-            "description": ["\nThe aggregation."],
+            "description": [
+              "\nThe aggregation."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -754,7 +840,9 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": ["\nThe field."],
+            "description": [
+              "\nThe field."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -774,7 +862,9 @@
             "type": "Object",
             "tags": [],
             "label": "by",
-            "description": ["\nOptional by-field configuration."],
+            "description": [
+              "\nOptional by-field configuration."
+            ],
             "signature": [
               "{ field: ",
               {
@@ -796,7 +886,9 @@
             "type": "Object",
             "tags": [],
             "label": "over",
-            "description": ["\nOptional over-field configuration"],
+            "description": [
+              "\nOptional over-field configuration"
+            ],
             "signature": [
               "{ field: ",
               {
@@ -818,7 +910,9 @@
             "type": "Object",
             "tags": [],
             "label": "partition",
-            "description": ["\nOptional partition field configuration"],
+            "description": [
+              "\nOptional partition field configuration"
+            ],
             "signature": [
               "{ field: ",
               {
@@ -840,8 +934,12 @@
             "type": "string",
             "tags": [],
             "label": "excludeFrequent",
-            "description": ["\nOptional exclude frequent."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nOptional exclude frequent."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -855,7 +953,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Aggregation",
-        "description": ["\nAggregation definition."],
+        "description": [
+          "\nAggregation definition."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -866,7 +966,9 @@
             "type": "Enum",
             "tags": [],
             "label": "id",
-            "description": ["\nThe aggregation id."],
+            "description": [
+              "\nThe aggregation id."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -886,7 +988,9 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["\nThe aggregation title."],
+            "description": [
+              "\nThe aggregation title."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -897,7 +1001,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "kibanaName",
-            "description": ["\nThe Kibana name for the aggregation."],
+            "description": [
+              "\nThe Kibana name for the aggregation."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -918,7 +1024,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "dslName",
-            "description": ["\nThe ES DSL name for the aggregation."],
+            "description": [
+              "\nThe ES DSL name for the aggregation."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -939,8 +1047,12 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["\nThe metric agg type."],
-            "signature": ["\"metrics\""],
+            "description": [
+              "\nThe metric agg type."
+            ],
+            "signature": [
+              "\"metrics\""
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -951,8 +1063,12 @@
             "type": "Object",
             "tags": [],
             "label": "mlModelPlotAgg",
-            "description": ["\nThe model plot agg definition."],
-            "signature": ["{ min: string; max: string; }"],
+            "description": [
+              "\nThe model plot agg definition."
+            ],
+            "signature": [
+              "{ min: string; max: string; }"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -963,8 +1079,12 @@
             "type": "Array",
             "tags": [],
             "label": "fieldIds",
-            "description": ["\nOptional array of field ids."],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "\nOptional array of field ids."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -975,7 +1095,9 @@
             "type": "Array",
             "tags": [],
             "label": "fields",
-            "description": ["\nOptional array or fields."],
+            "description": [
+              "\nOptional array or fields."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -999,7 +1121,9 @@
         "type": "Interface",
         "tags": [],
         "label": "Field",
-        "description": ["\nField definition"],
+        "description": [
+          "\nField definition"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1010,7 +1134,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nThe field id"],
+            "description": [
+              "\nThe field id"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1021,7 +1147,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["\nThe field name"],
+            "description": [
+              "\nThe field name"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1032,7 +1160,9 @@
             "type": "Enum",
             "tags": [],
             "label": "type",
-            "description": ["\nThe field type is based on ES field types."],
+            "description": [
+              "\nThe field type is based on ES field types."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/field-types",
@@ -1052,7 +1182,9 @@
             "type": "boolean",
             "tags": [],
             "label": "aggregatable",
-            "description": ["\nFlag whether the field is aggregatable."],
+            "description": [
+              "\nFlag whether the field is aggregatable."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1063,7 +1195,9 @@
             "type": "boolean",
             "tags": [],
             "label": "counter",
-            "description": ["\nFlag for counter."],
+            "description": [
+              "\nFlag for counter."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1074,7 +1208,9 @@
             "type": "Array",
             "tags": [],
             "label": "aggIds",
-            "description": ["\nOptional array of AggId."],
+            "description": [
+              "\nOptional array of AggId."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -1095,7 +1231,9 @@
             "type": "Array",
             "tags": [],
             "label": "aggs",
-            "description": ["\nOptional array fo aggregations."],
+            "description": [
+              "\nOptional array fo aggregations."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -1116,8 +1254,13 @@
             "type": "Object",
             "tags": [],
             "label": "runtimeField",
-            "description": ["\nOptional runtime field."],
-            "signature": ["MappingRuntimeField", " | undefined"],
+            "description": [
+              "\nOptional runtime field."
+            ],
+            "signature": [
+              "MappingRuntimeField",
+              " | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1179,7 +1322,9 @@
             "type": "string",
             "tags": [],
             "label": "rowId",
-            "description": ["\nUnique identifier for the table row."],
+            "description": [
+              "\nUnique identifier for the table row."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1190,7 +1335,9 @@
             "type": "string",
             "tags": [],
             "label": "jobId",
-            "description": ["\nIdentifier for the anomaly detection job."],
+            "description": [
+              "\nIdentifier for the anomaly detection job."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1230,7 +1377,9 @@
             "description": [
               "\nThe entity name of the anomaly, looking first for a by_field, then over_field,\nthen partition_field, returning undefined if none of these fields are present."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1241,8 +1390,12 @@
             "type": "Any",
             "tags": [],
             "label": "entityValue",
-            "description": ["\nThe value of the entity field."],
-            "signature": ["any"],
+            "description": [
+              "\nThe value of the entity field."
+            ],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1256,7 +1409,9 @@
             "description": [
               "\nIf influencers was specified in the detector configuration, this array contains influencers\nthat contributed to or were to blame for an anomaly."
             ],
-            "signature": ["{ [key: string]: any; }[] | undefined"],
+            "signature": [
+              "{ [key: string]: any; }[] | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1267,8 +1422,12 @@
             "type": "Array",
             "tags": [],
             "label": "actual",
-            "description": ["\nThe actual value for the anomaly."],
-            "signature": ["number[] | undefined"],
+            "description": [
+              "\nThe actual value for the anomaly."
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1282,7 +1441,9 @@
             "description": [
               "\nProperty used by the table to sort anomalies by their actual value,\nwhich is a single numeric value rather than the underlying arrays."
             ],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1293,8 +1454,12 @@
             "type": "Array",
             "tags": [],
             "label": "typical",
-            "description": ["\nThe typical value for the anomaly."],
-            "signature": ["number[] | undefined"],
+            "description": [
+              "\nThe typical value for the anomaly."
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1308,7 +1473,9 @@
             "description": [
               "\nProperty used by the table to sort anomalies by their typical value,\nwhich is a single numeric value rather than the underlying arrays."
             ],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1322,7 +1489,9 @@
             "description": [
               "\nProperty used by the table to sort anomalies by the description of how the\nactual value compares to the typical value."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1359,7 +1528,9 @@
             "description": [
               "\nReturns true if the anomaly record represented by the table row is for a time series\nwhich can be plotted by the ML UI in an anomaly chart."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1373,7 +1544,9 @@
             "description": [
               "\nReturns true if the anomaly record represented by the table row can be shown in the maps plugin"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1384,7 +1557,9 @@
             "type": "boolean",
             "tags": [],
             "label": "modelPlotEnabled",
-            "description": ["\nReturns true if the job has the model plot enabled"],
+            "description": [
+              "\nReturns true if the job has the model plot enabled"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1428,7 +1603,9 @@
             "type": "string",
             "tags": [],
             "label": "detector",
-            "description": ["\nThe detector name."],
+            "description": [
+              "\nThe detector name."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1439,8 +1616,12 @@
             "type": "number",
             "tags": [],
             "label": "rulesLength",
-            "description": ["\nThe length of the rule."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe length of the rule."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1454,7 +1635,9 @@
         "type": "Interface",
         "tags": [],
         "label": "MlAnomalyCategorizerStatsDoc",
-        "description": ["\nAnomaly record document for categorizer stats."],
+        "description": [
+          "\nAnomaly record document for categorizer stats."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1468,7 +1651,9 @@
             "description": [
               "\nIndex signature to cover dynamic attributes added to the record depending on the fields being analyzed.\nFor example, if the job is analyzing hostname as a by field, then a field hostname is added to the result document."
             ],
-            "signature": ["[key: string]:  any"],
+            "signature": [
+              "[key: string]:  any"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1479,7 +1664,9 @@
             "type": "string",
             "tags": [],
             "label": "job_id",
-            "description": ["\nThe identifier for the anomaly detection job."],
+            "description": [
+              "\nThe identifier for the anomaly detection job."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1490,8 +1677,12 @@
             "type": "string",
             "tags": [],
             "label": "result_type",
-            "description": ["\nThe type of the result document."],
-            "signature": ["\"categorizer_stats\""],
+            "description": [
+              "\nThe type of the result document."
+            ],
+            "signature": [
+              "\"categorizer_stats\""
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1505,7 +1696,9 @@
             "description": [
               "\nThe field used to segment the analysis.\nWhen you use this property, you have completely independent baselines for each value of this field."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1516,8 +1709,12 @@
             "type": "string",
             "tags": [],
             "label": "partition_field_value",
-            "description": ["\nThe value of the partition field."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe value of the partition field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1528,7 +1725,9 @@
             "type": "number",
             "tags": [],
             "label": "categorized_doc_count",
-            "description": ["\nThe number of documents."],
+            "description": [
+              "\nThe number of documents."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1539,7 +1738,9 @@
             "type": "number",
             "tags": [],
             "label": "total_category_count",
-            "description": ["\nThe total number of categories."],
+            "description": [
+              "\nThe total number of categories."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1550,7 +1751,9 @@
             "type": "number",
             "tags": [],
             "label": "frequent_category_count",
-            "description": ["\nThe number of frequent categories."],
+            "description": [
+              "\nThe number of frequent categories."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1561,7 +1764,9 @@
             "type": "number",
             "tags": [],
             "label": "rare_category_count",
-            "description": ["\nThe number of rare categories."],
+            "description": [
+              "\nThe number of rare categories."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1572,7 +1777,9 @@
             "type": "number",
             "tags": [],
             "label": "dead_category_count",
-            "description": ["\nThe number of dead categories."],
+            "description": [
+              "\nThe number of dead categories."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1583,7 +1790,9 @@
             "type": "number",
             "tags": [],
             "label": "failed_category_count",
-            "description": ["\nThe number of failed categories."],
+            "description": [
+              "\nThe number of failed categories."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1594,8 +1803,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "categorization_status",
-            "description": ["\nThe categorization status."],
-            "signature": ["\"ok\" | \"warn\""],
+            "description": [
+              "\nThe categorization status."
+            ],
+            "signature": [
+              "\"ok\" | \"warn\""
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1606,7 +1819,9 @@
             "type": "number",
             "tags": [],
             "label": "log_time",
-            "description": ["\nThe log time."],
+            "description": [
+              "\nThe log time."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1649,7 +1864,9 @@
             "description": [
               "\nIndex signature to cover dynamic attributes added to the record depending on the fields being analyzed.\nFor example, if the job is analyzing hostname as a by field, then a field hostname is added to the result document."
             ],
-            "signature": ["[key: string]:  any"],
+            "signature": [
+              "[key: string]:  any"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1660,7 +1877,9 @@
             "type": "string",
             "tags": [],
             "label": "job_id",
-            "description": ["\nThe identifier for the anomaly detection job."],
+            "description": [
+              "\nThe identifier for the anomaly detection job."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1778,7 +1997,9 @@
             "description": [
               "\nThe field used to segment the analysis.\nWhen you use this property, you have completely independent baselines for each value of this field."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1789,8 +2010,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "partition_field_value",
-            "description": ["\nThe value of the partition field."],
-            "signature": ["string | number | undefined"],
+            "description": [
+              "\nThe value of the partition field."
+            ],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1830,7 +2055,9 @@
             "description": [
               "\nCertain functions require a field to operate on, for example, sum().\nFor those functions, this value is the name of the field to be analyzed."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1844,7 +2071,9 @@
             "description": [
               "\nThe typical value for the bucket, according to analytical modeling."
             ],
-            "signature": ["number[] | undefined"],
+            "signature": [
+              "number[] | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1855,8 +2084,12 @@
             "type": "Array",
             "tags": [],
             "label": "actual",
-            "description": ["\nThe actual value for the bucket."],
-            "signature": ["number[] | undefined"],
+            "description": [
+              "\nThe actual value for the bucket."
+            ],
+            "signature": [
+              "number[] | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1893,7 +2126,9 @@
             "description": [
               "\nThe field used to split the data. In particular, this property is used for analyzing the splits\nwith respect to their own history. It is used for finding unusual values in the context of the split."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1904,8 +2139,12 @@
             "type": "string",
             "tags": [],
             "label": "by_field_value",
-            "description": ["\nThe value of the by field."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe value of the by field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1919,7 +2158,9 @@
             "description": [
               "\nThe field used to split the data. In particular, this property is used for analyzing\nthe splits with respect to the history of all splits.\nIt is used for finding unusual values in the population of all splits."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1930,8 +2171,12 @@
             "type": "string",
             "tags": [],
             "label": "over_field_value",
-            "description": ["\nThe value of the over field."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe value of the over field."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1961,7 +2206,9 @@
             "description": [
               "\nAn indication of how strongly an anomaly is multi bucket or single bucket.\nThe value is on a scale of -5.0 to +5.0 where -5.0 means the anomaly is\npurely single bucket and +5.0 means the anomaly is purely multi bucket."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1972,7 +2219,9 @@
             "type": "Object",
             "tags": [],
             "label": "anomaly_score_explanation",
-            "description": ["\nAn explanation for the anomaly score"],
+            "description": [
+              "\nAn explanation for the anomaly score"
+            ],
             "signature": [
               "{ anomaly_type?: \"spike\" | \"dip\" | undefined; anomaly_length?: number | undefined; single_bucket_impact?: number | undefined; multi_bucket_impact?: number | undefined; anomaly_characteristics_impact?: number | undefined; lower_confidence_bound?: number | undefined; typical_value?: number | undefined; upper_confidence_bound?: number | undefined; high_variance_penalty?: boolean | undefined; incomplete_bucket_penalty?: boolean | undefined; multimodal_distribution?: boolean | undefined; } | undefined"
             ],
@@ -2019,7 +2268,9 @@
             "type": "string",
             "tags": [],
             "label": "earliest",
-            "description": ["\nThe `earliest` timestamp."],
+            "description": [
+              "\nThe `earliest` timestamp."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2030,7 +2281,9 @@
             "type": "string",
             "tags": [],
             "label": "latest",
-            "description": ["\nThe `latest` timestamp."],
+            "description": [
+              "\nThe `latest` timestamp."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2044,7 +2297,9 @@
         "type": "Interface",
         "tags": [],
         "label": "MlEntityField",
-        "description": ["\nInterface of an entity field"],
+        "description": [
+          "\nInterface of an entity field"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2055,7 +2310,9 @@
             "type": "string",
             "tags": [],
             "label": "fieldName",
-            "description": ["\nThe field name"],
+            "description": [
+              "\nThe field name"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2066,8 +2323,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldValue",
-            "description": ["\nThe field value"],
-            "signature": ["string | number | undefined"],
+            "description": [
+              "\nThe field value"
+            ],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2078,7 +2339,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldType",
-            "description": ["\nOptional field type"],
+            "description": [
+              "\nOptional field type"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -2099,7 +2362,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "operation",
-            "description": ["\nOptional entity field operation"],
+            "description": [
+              "\nOptional entity field operation"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -2120,8 +2385,12 @@
             "type": "number",
             "tags": [],
             "label": "cardinality",
-            "description": ["\nOptional cardinality of field"],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nOptional cardinality of field"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2148,7 +2417,9 @@
             "type": "string",
             "tags": [],
             "label": "influencer_field_name",
-            "description": ["\nThe field name of the influencer."],
+            "description": [
+              "\nThe field name of the influencer."
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2162,7 +2433,9 @@
             "description": [
               "\nThe entities that influenced, contributed to, or were to blame for the anomaly."
             ],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2176,7 +2449,9 @@
         "type": "Interface",
         "tags": [],
         "label": "MlKibanaUrlConfig",
-        "description": ["\nExtended interface for custom URLs including an optional time range."],
+        "description": [
+          "\nExtended interface for custom URLs including an optional time range."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-anomaly-utils",
@@ -2197,8 +2472,12 @@
             "type": "string",
             "tags": [],
             "label": "time_range",
-            "description": ["\nThe optional time range for the custom URL configuration"],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe optional time range for the custom URL configuration"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2210,7 +2489,9 @@
             "tags": [],
             "label": "is_custom_time_range",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/custom_urls.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2224,7 +2505,9 @@
         "type": "Interface",
         "tags": [],
         "label": "MlSeverityType",
-        "description": ["\nInterface for severity types to be used in ML_ANOMALY_SEVERITY_TYPES."],
+        "description": [
+          "\nInterface for severity types to be used in ML_ANOMALY_SEVERITY_TYPES."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/anomaly_severity.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2235,7 +2518,9 @@
             "type": "Enum",
             "tags": [],
             "label": "id",
-            "description": ["\nOne of ML_ANOMALY_SEVERITY"],
+            "description": [
+              "\nOne of ML_ANOMALY_SEVERITY"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -2255,7 +2540,9 @@
             "type": "string",
             "tags": [],
             "label": "label",
-            "description": ["\nTranslated ML_ANOMALY_SEVERITY"],
+            "description": [
+              "\nTranslated ML_ANOMALY_SEVERITY"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_severity.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2269,7 +2556,9 @@
         "type": "Interface",
         "tags": [],
         "label": "NewJobCaps",
-        "description": ["\nJob caps for a new job."],
+        "description": [
+          "\nJob caps for a new job."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2280,7 +2569,9 @@
             "type": "Array",
             "tags": [],
             "label": "fields",
-            "description": ["\nArray of fields."],
+            "description": [
+              "\nArray of fields."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -2301,7 +2592,9 @@
             "type": "Array",
             "tags": [],
             "label": "aggs",
-            "description": ["\nArray of aggregations."],
+            "description": [
+              "\nArray of aggregations."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
@@ -2325,7 +2618,9 @@
         "type": "Interface",
         "tags": [],
         "label": "NewJobCapsResponse",
-        "description": ["\nJob caps response for a new job."],
+        "description": [
+          "\nJob caps response for a new job."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2336,7 +2631,9 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[indexPattern: string]: NewJobCaps",
-            "description": ["\nIndex pattern"],
+            "description": [
+              "\nIndex pattern"
+            ],
             "signature": [
               "[indexPattern: string]:  ",
               {
@@ -2362,7 +2659,9 @@
         "type": "Enum",
         "tags": [],
         "label": "ES_AGGREGATION",
-        "description": ["\nEnum for ES aggregatins."],
+        "description": [
+          "\nEnum for ES aggregatins."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2374,7 +2673,9 @@
         "type": "Enum",
         "tags": [],
         "label": "KIBANA_AGGREGATION",
-        "description": ["\nEnum for Kibana aggregations."],
+        "description": [
+          "\nEnum for Kibana aggregations."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2414,7 +2715,9 @@
         "type": "Enum",
         "tags": [],
         "label": "ML_DETECTOR_RULE_ACTION",
-        "description": ["\nEnum ML_DETECTOR_RULE_ACTION"],
+        "description": [
+          "\nEnum ML_DETECTOR_RULE_ACTION"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2426,7 +2729,9 @@
         "type": "Enum",
         "tags": [],
         "label": "ML_DETECTOR_RULE_APPLIES_TO",
-        "description": ["\nEnum ML_DETECTOR_RULE_APPLIES_TO"],
+        "description": [
+          "\nEnum ML_DETECTOR_RULE_APPLIES_TO"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2438,7 +2743,9 @@
         "type": "Enum",
         "tags": [],
         "label": "ML_DETECTOR_RULE_FILTER_TYPE",
-        "description": ["\nEnum ML_DETECTOR_RULE_FILTER_TYPE"],
+        "description": [
+          "\nEnum ML_DETECTOR_RULE_FILTER_TYPE"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2450,7 +2757,9 @@
         "type": "Enum",
         "tags": [],
         "label": "ML_DETECTOR_RULE_OPERATOR",
-        "description": ["\nEnum ML_DETECTOR_RULE_OPERATOR"],
+        "description": [
+          "\nEnum ML_DETECTOR_RULE_OPERATOR"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2462,7 +2771,9 @@
         "type": "Enum",
         "tags": [],
         "label": "ML_ENTITY_FIELD_TYPE",
-        "description": ["\nEnum of entity field types"],
+        "description": [
+          "\nEnum of entity field types"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2474,7 +2785,9 @@
         "type": "Enum",
         "tags": [],
         "label": "ML_JOB_AGGREGATION",
-        "description": ["\nEnum for ML job aggregations."],
+        "description": [
+          "\nEnum for ML job aggregations."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/aggregation_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2491,7 +2804,9 @@
         "description": [
           "\nElasticsearch field showing number of documents aggregated in a single summary field for\npre-aggregated data. For use as summary_count_field_name in datafeeds which do not use aggregations."
         ],
-        "signature": ["\"_doc_count\""],
+        "signature": [
+          "\"_doc_count\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2503,7 +2818,9 @@
         "type": "Type",
         "tags": [],
         "label": "AggId",
-        "description": ["\nAggId is an alias of ML_JOB_AGGREGATION"],
+        "description": [
+          "\nAggId is an alias of ML_JOB_AGGREGATION"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-anomaly-utils",
@@ -2527,7 +2844,9 @@
         "description": [
           "\nFor use as summary_count_field_name in datafeeds which use aggregations."
         ],
-        "signature": ["\"doc_count\""],
+        "signature": [
+          "\"doc_count\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2539,8 +2858,12 @@
         "type": "string",
         "tags": [],
         "label": "EVENT_RATE_FIELD_ID",
-        "description": ["\nEVENT_RATE_FIELD_ID"],
-        "signature": ["\"__ml_event_rate_count__\""],
+        "description": [
+          "\nEVENT_RATE_FIELD_ID"
+        ],
+        "signature": [
+          "\"__ml_event_rate_count__\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2552,8 +2875,12 @@
         "type": "Type",
         "tags": [],
         "label": "FieldId",
-        "description": ["\nField id"],
-        "signature": ["string"],
+        "description": [
+          "\nField id"
+        ],
+        "signature": [
+          "string"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2565,8 +2892,12 @@
         "type": "Type",
         "tags": [],
         "label": "InfluencersFilterQuery",
-        "description": ["\nAlias for QueryDslQueryContainer"],
-        "signature": ["QueryDslQueryContainer"],
+        "description": [
+          "\nAlias for QueryDslQueryContainer"
+        ],
+        "signature": [
+          "QueryDslQueryContainer"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/es_client.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2578,8 +2909,12 @@
         "type": "string",
         "tags": [],
         "label": "METRIC_AGG_TYPE",
-        "description": ["\nMETRIC_AGG_TYPE"],
-        "signature": ["\"metrics\""],
+        "description": [
+          "\nMETRIC_AGG_TYPE"
+        ],
+        "signature": [
+          "\"metrics\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2594,7 +2929,9 @@
         "description": [
           "\nList of detector functions which don't support rules with numeric conditions."
         ],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/detector_rule.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2606,8 +2943,12 @@
         "type": "string",
         "tags": [],
         "label": "ML_JOB_ID",
-        "description": ["\nMachine learning job id attribute name."],
-        "signature": ["\"job_id\""],
+        "description": [
+          "\nMachine learning job id attribute name."
+        ],
+        "signature": [
+          "\"job_id\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2619,8 +2960,12 @@
         "type": "string",
         "tags": [],
         "label": "ML_PARTITION_FIELD_VALUE",
-        "description": ["\nMachine learning partition field value attribute name."],
-        "signature": ["\"partition_field_value\""],
+        "description": [
+          "\nMachine learning partition field value attribute name."
+        ],
+        "signature": [
+          "\"partition_field_value\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2632,7 +2977,9 @@
         "type": "Array",
         "tags": [],
         "label": "ML_SEVERITY_COLOR_RAMP",
-        "description": ["\nSeverity color ramp."],
+        "description": [
+          "\nSeverity color ramp."
+        ],
         "signature": [
           "{ stop: ",
           {
@@ -2655,7 +3002,9 @@
         "type": "Type",
         "tags": [],
         "label": "MLAnomalyDoc",
-        "description": ["\nAlias of MlAnomalyRecordDoc"],
+        "description": [
+          "\nAlias of MlAnomalyRecordDoc"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-anomaly-utils",
@@ -2676,8 +3025,12 @@
         "type": "Type",
         "tags": [],
         "label": "MlAnomalyResultType",
-        "description": ["\nThe type of the anomaly result, such as bucket, influencer or record."],
-        "signature": ["\"bucket\" | \"record\" | \"influencer\""],
+        "description": [
+          "\nThe type of the anomaly result, such as bucket, influencer or record."
+        ],
+        "signature": [
+          "\"bucket\" | \"record\" | \"influencer\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2689,8 +3042,12 @@
         "type": "string",
         "tags": [],
         "label": "MLCATEGORY",
-        "description": ["\nMLCATEGORY"],
-        "signature": ["\"mlcategory\""],
+        "description": [
+          "\nMLCATEGORY"
+        ],
+        "signature": [
+          "\"mlcategory\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2702,8 +3059,12 @@
         "type": "Type",
         "tags": [],
         "label": "MlEntityFieldOperation",
-        "description": ["\nUnion type of entity field operations"],
-        "signature": ["\"+\" | \"-\""],
+        "description": [
+          "\nUnion type of entity field operations"
+        ],
+        "signature": [
+          "\"+\" | \"-\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2715,8 +3076,12 @@
         "type": "Type",
         "tags": [],
         "label": "MlEntityFieldType",
-        "description": ["\nUnion type for entity field types."],
-        "signature": ["\"partition_field\" | \"over_field\" | \"by_field\""],
+        "description": [
+          "\nUnion type for entity field types."
+        ],
+        "signature": [
+          "\"partition_field\" | \"over_field\" | \"by_field\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2728,7 +3093,9 @@
         "type": "Array",
         "tags": [],
         "label": "mlJobAggregations",
-        "description": ["\nML job aggregation definitions."],
+        "description": [
+          "\nML job aggregation definitions."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-anomaly-utils",
@@ -2774,7 +3141,9 @@
         "type": "Type",
         "tags": [],
         "label": "MlJobFieldType",
-        "description": ["\nUnion type for ML_JOB_FIELD_TYPES"],
+        "description": [
+          "\nUnion type for ML_JOB_FIELD_TYPES"
+        ],
         "signature": [
           "\"number\" | \"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\""
         ],
@@ -2789,8 +3158,12 @@
         "type": "Type",
         "tags": [],
         "label": "MlPartitionFieldsType",
-        "description": ["\nUnion type for partitiion field types."],
-        "signature": ["\"partition_field\" | \"over_field\" | \"by_field\""],
+        "description": [
+          "\nUnion type for partitiion field types."
+        ],
+        "signature": [
+          "\"partition_field\" | \"over_field\" | \"by_field\""
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2802,7 +3175,9 @@
         "type": "Type",
         "tags": [],
         "label": "MlRecordForInfluencer",
-        "description": ["\nMlRecordForInfluencer, an alias based on MlAnomalyRecordDoc."],
+        "description": [
+          "\nMlRecordForInfluencer, an alias based on MlAnomalyRecordDoc."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-anomaly-utils",
@@ -2823,7 +3198,9 @@
         "type": "Type",
         "tags": [],
         "label": "MlUrlConfig",
-        "description": ["\nUnion type of different custom URL configurations"],
+        "description": [
+          "\nUnion type of different custom URL configurations"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-anomaly-utils",
@@ -2845,8 +3222,12 @@
         "type": "Array",
         "tags": [],
         "label": "OMIT_FIELDS",
-        "description": ["\nList of system fields we don't want to display."],
-        "signature": ["string[]"],
+        "description": [
+          "\nList of system fields we don't want to display."
+        ],
+        "signature": [
+          "string[]"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2858,7 +3239,9 @@
         "type": "Type",
         "tags": [],
         "label": "RollupFields",
-        "description": ["\nRollup fields are a nested record of field ids and ES aggregations."],
+        "description": [
+          "\nRollup fields are a nested record of field ids and ES aggregations."
+        ],
         "signature": [
           "{ [x: string]: [Record<\"agg\", ",
           {
@@ -2881,7 +3264,9 @@
         "type": "Type",
         "tags": [],
         "label": "SparseDataAggregation",
-        "description": ["\nType definition of SPARSE_DATA_AGGREGATIONS values."],
+        "description": [
+          "\nType definition of SPARSE_DATA_AGGREGATIONS values."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-anomaly-utils",
@@ -2943,7 +3328,9 @@
         "type": "Type",
         "tags": [],
         "label": "SplitField",
-        "description": ["\nSplit field can be Field or null."],
+        "description": [
+          "\nSplit field can be Field or null."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/ml-anomaly-utils",
@@ -2980,8 +3367,12 @@
             "type": "Function",
             "tags": [],
             "label": "toES",
-            "description": ["\ntransform from ML to ES agg type"],
-            "signature": ["(oldAggType: string) => string"],
+            "description": [
+              "\ntransform from ML to ES agg type"
+            ],
+            "signature": [
+              "(oldAggType: string) => string"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2992,8 +3383,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "oldAggType",
-                "description": ["the aggregation type to be transformed"],
-                "signature": ["string"],
+                "description": [
+                  "the aggregation type to be transformed"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3008,8 +3403,12 @@
             "type": "Function",
             "tags": [],
             "label": "toML",
-            "description": ["\ntransform from ES to ML agg type"],
-            "signature": ["(oldAggType: string) => string"],
+            "description": [
+              "\ntransform from ES to ML agg type"
+            ],
+            "signature": [
+              "(oldAggType: string) => string"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3020,8 +3419,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "oldAggType",
-                "description": ["the aggregation type to be transformed"],
-                "signature": ["string"],
+                "description": [
+                  "the aggregation type to be transformed"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3039,7 +3442,9 @@
         "type": "Object",
         "tags": [],
         "label": "ML_ANOMALY_RESULT_TYPE",
-        "description": ["\nCustom enum for anomaly result type"],
+        "description": [
+          "\nCustom enum for anomaly result type"
+        ],
         "signature": [
           "{ readonly BUCKET: \"bucket\"; readonly RECORD: \"record\"; readonly INFLUENCER: \"influencer\"; }"
         ],
@@ -3054,8 +3459,12 @@
         "type": "Object",
         "tags": [],
         "label": "ML_ENTITY_FIELD_OPERATIONS",
-        "description": ["\nCustom enum of entity field operations"],
-        "signature": ["{ readonly ADD: \"+\"; readonly REMOVE: \"-\"; }"],
+        "description": [
+          "\nCustom enum of entity field operations"
+        ],
+        "signature": [
+          "{ readonly ADD: \"+\"; readonly REMOVE: \"-\"; }"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/anomaly_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3067,7 +3476,9 @@
         "type": "Object",
         "tags": [],
         "label": "ML_JOB_FIELD_TYPES",
-        "description": ["\nCustom enum for ML job field types"],
+        "description": [
+          "\nCustom enum for ML job field types"
+        ],
         "signature": [
           "{ readonly BOOLEAN: \"boolean\"; readonly DATE: \"date\"; readonly GEO_POINT: \"geo_point\"; readonly GEO_SHAPE: \"geo_shape\"; readonly IP: \"ip\"; readonly KEYWORD: \"keyword\"; readonly NUMBER: \"number\"; readonly TEXT: \"text\"; readonly UNKNOWN: \"unknown\"; }"
         ],
@@ -3082,8 +3493,12 @@
         "type": "Object",
         "tags": [],
         "label": "ML_PARTITION_FIELDS",
-        "description": ["\nArray of partition fields."],
-        "signature": ["readonly [\"partition_field\", \"over_field\", \"by_field\"]"],
+        "description": [
+          "\nArray of partition fields."
+        ],
+        "signature": [
+          "readonly [\"partition_field\", \"over_field\", \"by_field\"]"
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3189,7 +3604,9 @@
         "type": "Object",
         "tags": [],
         "label": "mlCategory",
-        "description": ["\nDefinition for an ml category."],
+        "description": [
+          "\nDefinition for an ml category."
+        ],
         "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3200,7 +3617,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["/**\n   * id `mlcategory` id\n   */"],
+            "description": [
+              "/**\n   * id `mlcategory` id\n   */"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3211,7 +3630,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": ["/**\n   * name `mlcategory`\n   */"],
+            "description": [
+              "/**\n   * name `mlcategory`\n   */"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3222,7 +3643,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["/**\n   * type `keyword`\n   */"],
+            "description": [
+              "/**\n   * type `keyword`\n   */"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/field-types",
@@ -3243,8 +3666,12 @@
             "type": "boolean",
             "tags": [],
             "label": "aggregatable",
-            "description": ["/**\n   * non-aggregatable\n   */"],
-            "signature": ["false"],
+            "description": [
+              "/**\n   * non-aggregatable\n   */"
+            ],
+            "signature": [
+              "false"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3255,8 +3682,12 @@
             "type": "boolean",
             "tags": [],
             "label": "counter",
-            "description": ["/**\n   * no counter\n   */"],
-            "signature": ["false"],
+            "description": [
+              "/**\n   * no counter\n   */"
+            ],
+            "signature": [
+              "false"
+            ],
             "path": "x-pack/packages/ml/anomaly_utils/fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3270,7 +3701,9 @@
         "type": "Object",
         "tags": [],
         "label": "SPARSE_DATA_AGGREGATIONS",
-        "description": ["\nCustom enum for sparse data aggregations."],
+        "description": [
+          "\nCustom enum for sparse data aggregations."
+        ],
         "signature": [
           "readonly [",
           {

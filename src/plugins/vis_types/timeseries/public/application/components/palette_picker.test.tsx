@@ -1,7 +1,3 @@
-import { EuiColorPalettePicker } from '@elastic/eui';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,8 +6,12 @@ import { ReactWrapper } from 'enzyme';
  * Side Public License, v 1.
  */
 import React from 'react';
-import { PALETTES } from '../../../common/enums';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ReactWrapper } from 'enzyme';
 import { PalettePicker, PalettePickerProps } from './palette_picker';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { EuiColorPalettePicker } from '@elastic/eui';
+import { PALETTES } from '../../../common/enums';
 
 describe('PalettePicker', function () {
   let props: PalettePickerProps;

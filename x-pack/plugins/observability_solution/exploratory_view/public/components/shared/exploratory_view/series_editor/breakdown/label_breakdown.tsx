@@ -6,12 +6,12 @@
  */
 
 import { EuiComboBox, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LABEL_FIELDS_BREAKDOWN } from '../../configurations/constants';
+import { i18n } from '@kbn/i18n';
+import { SeriesConfig, SeriesUrl } from '../../types';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesConfig, SeriesUrl } from '../../types';
+import { LABEL_FIELDS_BREAKDOWN } from '../../configurations/constants';
 
 interface Props {
   seriesId: number;

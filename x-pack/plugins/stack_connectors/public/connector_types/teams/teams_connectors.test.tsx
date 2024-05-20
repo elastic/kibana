@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act, render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { ConnectorFormTestProvider } from '../lib/test_utils';
 import TeamsActionFields from './teams_connectors';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
+import userEvent from '@testing-library/user-event';
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 describe('TeamsActionFields renders', () => {

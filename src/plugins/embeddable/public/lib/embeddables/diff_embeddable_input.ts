@@ -7,7 +7,7 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { omit, pick } from 'lodash';
+import { pick, omit } from 'lodash';
 import { EmbeddableInput } from '.';
 
 // list out the keys from the EmbeddableInput type to allow lodash to pick them later
@@ -42,11 +42,11 @@ const genericInputKeysToCompare = [
 // type used to ensure that only keys present in EmbeddableInput are extracted
 type GenericEmbedableInputToCompare = Pick<
   EmbeddableInput,
-  (typeof genericInputKeysToCompare)[number]
+  typeof genericInputKeysToCompare[number]
 >;
 
 export const omitGenericEmbeddableInput = <
-  I extends Partial<EmbeddableInput> = Partial<EmbeddableInput>,
+  I extends Partial<EmbeddableInput> = Partial<EmbeddableInput>
 >(
   input: I
 ): Omit<I, keyof EmbeddableInput> => omit(input, allGenericInputKeys);

@@ -16,7 +16,7 @@
 
 import { TracksOverlays } from '@kbn/presentation-containers';
 import { inspector } from '../../kibana_services';
-import { InspectPanelAction, InspectPanelActionApi } from './inspect_panel_action';
+import { InspectPanelActionApi, InspectPanelAction } from './inspect_panel_action';
 
 describe('Inspect panel action', () => {
   let action: InspectPanelAction;

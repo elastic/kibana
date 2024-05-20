@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DockerContainerMetricsDocument, dockerContainer } from './docker_container';
-import { HostMetricsDocument, host } from './host';
-import { K8sContainerMetricsDocument, k8sContainer } from './k8s_container';
-import { PodMetricsDocument, pod } from './pod';
+import { dockerContainer, DockerContainerMetricsDocument } from './docker_container';
+import { host, HostMetricsDocument } from './host';
+import { k8sContainer, K8sContainerMetricsDocument } from './k8s_container';
+import { pod, PodMetricsDocument } from './pod';
 
 export type InfraDocument =
   | HostMetricsDocument

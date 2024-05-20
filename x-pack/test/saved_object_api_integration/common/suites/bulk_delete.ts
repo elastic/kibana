@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
-import { expectResponses, getTestTitle, getUrlPrefix } from '../lib/saved_object_test_utils';
 import { SPACES } from '../lib/spaces';
+import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface BulkDeleteTestDefinition extends TestDefinition {
   request: { type: string; id: string; force?: boolean };

@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import moment from 'moment';
+import { uniq, get } from 'lodash';
 import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPanel,
-  EuiScreenReaderOnly,
   EuiSpacer,
+  EuiScreenReaderOnly,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { get, uniq } from 'lodash';
-import moment from 'moment';
-import React, { Fragment } from 'react';
-import { formatTimestampToDuration } from '../../../../common';
-import { APM_SYSTEM_ID } from '../../../../common/constants';
-import { SetupModeFeature } from '../../../../common/enums';
-import type { AlertsByName } from '../../../alerts/types';
-import type { Pagination, Sorting, TableChange } from '../../../application/hooks/use_table';
-import { formatMetric } from '../../../lib/format_number';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
-import { SetupModeBadge } from '../../setup_mode/badge';
-import { ListingCallOut } from '../../setup_mode/listing_callout';
-import type { SetupMode } from '../../setup_mode/types';
 import { EuiMonitoringTable } from '../../table';
 import { Status } from './status';
+import { formatMetric } from '../../../lib/format_number';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { formatTimestampToDuration } from '../../../../common';
+import { APM_SYSTEM_ID } from '../../../../common/constants';
+import { ListingCallOut } from '../../setup_mode/listing_callout';
+import { SetupModeBadge } from '../../setup_mode/badge';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
+import type { AlertsByName } from '../../../alerts/types';
+import type { Sorting, Pagination, TableChange } from '../../../application/hooks/use_table';
+import type { SetupMode } from '../../setup_mode/types';
 
 function getColumns(setupMode: SetupMode, cgroup: unknown) {
   const memoryField = cgroup

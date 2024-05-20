@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useState } from 'react';
 
 import { SerializedPolicy } from '../../../../../common/types';
 

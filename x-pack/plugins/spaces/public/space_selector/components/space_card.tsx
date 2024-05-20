@@ -11,7 +11,7 @@ import { EuiCard, EuiLoadingSpinner, EuiTextColor } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 
 import type { Space } from '../../../common';
-import { ENTER_SPACE_PATH, addSpaceIdToPath } from '../../../common';
+import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.

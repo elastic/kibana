@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { HeatmapPublicConfig } from '../config';
-import { setDataViewsStart } from './services';
+import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
 import { heatmapVisType } from './vis_type';
+import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface VisTypeHeatmapSetupDependencies {

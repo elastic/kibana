@@ -11,10 +11,7 @@
  * Transformation errors happen when a transform function throws an error for an unsanitized saved object
  */
 export class TransformSavedObjectDocumentError extends Error {
-  constructor(
-    public readonly originalError: Error,
-    public readonly version: string
-  ) {
+  constructor(public readonly originalError: Error, public readonly version: string) {
     super(`Migration function for version ${version} threw an error`);
     appendCauseStack(this, originalError);
   }

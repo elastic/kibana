@@ -6,9 +6,9 @@
  */
 
 import { shallow } from 'enzyme';
-import { noop } from 'lodash/fp';
 import React from 'react';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
+import { noop } from 'lodash/fp';
 
 /**
  * NOTE: This component is currently not shown in the UI as custom search queries

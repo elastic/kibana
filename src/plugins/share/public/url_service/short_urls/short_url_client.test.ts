@@ -14,12 +14,12 @@ import {
   UrlService,
 } from '../../../common/url_service';
 import {
-  LEGACY_SHORT_URL_LOCATOR_ID,
   LegacyShortUrlLocatorDefinition,
   LegacyShortUrlLocatorParams,
+  LEGACY_SHORT_URL_LOCATOR_ID,
 } from '../../../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../../../common/url_service/locators/short_url_redirect_locator';
-import { BrowserShortUrlClient, BrowserShortUrlClientHttp } from './short_url_client';
+import { BrowserShortUrlClientHttp, BrowserShortUrlClient } from './short_url_client';
 import {
   BrowserShortUrlClientFactory,
   BrowserShortUrlClientFactoryCreateParams,

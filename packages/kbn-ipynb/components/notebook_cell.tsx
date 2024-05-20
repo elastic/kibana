@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiCodeBlock, EuiMarkdownFormat, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { EuiMarkdownFormat, EuiCodeBlock, EuiTitle } from '@elastic/eui';
 
 import { NotebookCellType } from '../types';
 import { combineSource } from '../utils';
@@ -17,8 +17,8 @@ export const NotebookCell = ({ cell, language }: { cell: NotebookCellType; langu
   const content = cell.source
     ? combineSource(cell.source)
     : cell.input
-      ? combineSource(cell.input)
-      : null;
+    ? combineSource(cell.input)
+    : null;
 
   if (!content) return null;
 

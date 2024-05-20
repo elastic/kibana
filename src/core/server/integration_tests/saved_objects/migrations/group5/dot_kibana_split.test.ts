@@ -7,25 +7,25 @@
  */
 
 import Path from 'path';
-import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
-import {
-  ALL_SAVED_OBJECT_INDICES,
-  type ISavedObjectTypeRegistry,
-  MAIN_SAVED_OBJECT_INDEX,
-  type SavedObjectsType,
-} from '@kbn/core-saved-objects-server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
-  type KibanaMigratorTestKit,
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsType,
+  MAIN_SAVED_OBJECT_INDEX,
+  ALL_SAVED_OBJECT_INDICES,
+} from '@kbn/core-saved-objects-server';
+import { DEFAULT_INDEX_TYPES_MAP } from '@kbn/core-saved-objects-base-server-internal';
+import {
   clearLog,
-  currentVersion,
-  getAggregatedTypesCount,
-  getAggregatedTypesCountAllIndices,
-  getCurrentVersionTypeRegistry,
-  getEsClient,
-  getKibanaMigratorTestKit,
-  overrideTypeRegistry,
   startElasticsearch,
+  getKibanaMigratorTestKit,
+  getCurrentVersionTypeRegistry,
+  overrideTypeRegistry,
+  getAggregatedTypesCount,
+  currentVersion,
+  type KibanaMigratorTestKit,
+  getEsClient,
+  getAggregatedTypesCountAllIndices,
 } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
 import '../jest_matchers';
@@ -173,9 +173,8 @@ describe('split .kibana index into multiple system indices', () => {
         })
       );
 
-      expect(
-        indicesInfo[`.kibana_${currentVersion}_001`].mappings?._meta?.indexTypesMap
-      ).toMatchInlineSnapshot(`
+      expect(indicesInfo[`.kibana_${currentVersion}_001`].mappings?._meta?.indexTypesMap)
+        .toMatchInlineSnapshot(`
         Object {
           ".kibana": Array [
             "action",

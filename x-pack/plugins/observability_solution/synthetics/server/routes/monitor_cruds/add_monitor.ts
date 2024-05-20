@@ -7,12 +7,12 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
-import { SyntheticsRestApiRouteFactory } from '../types';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
-import { mapSavedObjectToMonitor } from './helper';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
+import { mapSavedObjectToMonitor } from './helper';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',

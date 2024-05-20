@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useQueryClient } from '@tanstack/react-query';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 
-import { useAgentPolicies } from '../agent_policies/use_agent_policies';
-import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
-import { PACKS_ID } from './constants';
+import { useAgentPolicies } from '../agent_policies/use_agent_policies';
 import { ConfirmDeployAgentPolicyModal } from './form/confirmation_modal';
-import type { PackSavedObject } from './types';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useUpdatePack } from './use_update_pack';
+import { PACKS_ID } from './constants';
+import type { PackSavedObject } from './types';
 
 const euiLoadingSpinnerCss = ({ euiTheme }: UseEuiTheme) => ({
   marginRight: euiTheme.size.s,

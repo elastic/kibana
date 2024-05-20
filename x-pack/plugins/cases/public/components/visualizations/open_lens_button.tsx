@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { OPEN_IN_VISUALIZATION } from './translations';

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,11 +22,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
 
-import { useStartServices } from '../../../../hooks';
 import type { Agent } from '../../../../types';
+import { useStartServices } from '../../../../hooks';
 
 export const AgentDetailsJsonFlyout = memo<{ agent: Agent; onClose: () => void }>(
   ({ agent, onClose }) => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
 import type { AlertViewSelection } from '../chart_select/helpers';
+import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
 export interface AlertsSettings {
   alertViewSelection: AlertViewSelection;
   countTableStackBy0: string;

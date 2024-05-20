@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiExpression, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   ageThreshold: number;

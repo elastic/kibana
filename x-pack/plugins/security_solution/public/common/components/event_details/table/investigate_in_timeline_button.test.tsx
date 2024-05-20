@@ -8,8 +8,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../../mock';
 import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
+import { TestProviders } from '../../../mock';
 import { getDataProvider } from './use_action_cell_data_provider';
 
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';

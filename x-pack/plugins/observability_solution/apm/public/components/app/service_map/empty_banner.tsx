@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React, { useContext, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React, { useContext, useEffect, useState } from 'react';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useTheme } from '../../../hooks/use_theme';
 import { CytoscapeContext } from './cytoscape';
+import { useTheme } from '../../../hooks/use_theme';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 const EmptyBannerContainer = euiStyled.div`
   margin: ${({ theme }) => theme.eui.euiSizeS};

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
 import type { EventHit } from '../search_strategy';
 import { getDataFromFieldsHits, getDataSafety } from './field_formatters';
+import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
 
 describe('Events Details Helpers', () => {
   const fields: EventHit['fields'] = eventHit.fields;

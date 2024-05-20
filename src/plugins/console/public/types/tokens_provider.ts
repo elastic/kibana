@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Position } from './core_editor';
 import { Token } from './token';
+import { Position } from './core_editor';
 
 /**
  * Describes a kind of object that provides tokens.

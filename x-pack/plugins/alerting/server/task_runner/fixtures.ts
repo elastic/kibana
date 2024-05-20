@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { SavedObject } from '@kbn/core/server';
 import {
-  RecoveredActionGroup,
   Rule,
+  RuleTypeParams,
+  RecoveredActionGroup,
+  RuleMonitoring,
   RuleLastRunOutcomeOrderMap,
   RuleLastRunOutcomes,
-  RuleMonitoring,
-  RuleTypeParams,
   SanitizedRule,
   SanitizedRuleAction,
 } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
-import { EVENT_LOG_ACTIONS } from '../plugin';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 import { RawRule } from '../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 interface GeneratorParams {
   [key: string]: string | number | boolean | undefined | object[] | boolean[] | object;

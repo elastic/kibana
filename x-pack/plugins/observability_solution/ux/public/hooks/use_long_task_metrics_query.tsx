@@ -8,9 +8,9 @@
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
 import { useDataView } from '../components/app/rum_dashboard/local_uifilters/use_data_view';
-import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
-import { callDateMath } from '../services/data/call_date_math';
 import { longTaskMetricsQuery } from '../services/data/long_task_metrics_query';
+import { callDateMath } from '../services/data/call_date_math';
+import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 
 export function useLongTaskMetricsQuery() {
   const {

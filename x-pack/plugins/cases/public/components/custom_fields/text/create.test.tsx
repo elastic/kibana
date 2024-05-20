@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
-import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
 import { FormTestComponent } from '../../../common/test_utils';
-import { customFieldsConfigurationMock } from '../../../containers/mock';
 import { Create } from './create';
+import { customFieldsConfigurationMock } from '../../../containers/mock';
+import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
 
 describe('Create ', () => {
   const onSubmit = jest.fn();

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
+import React from 'react';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import {
   AdvancedUiActionsStart,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   UiActionsEnhancedDrilldownDefinition as Drilldown,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import React from 'react';
+import { CollectConfigProps, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 
 import { CollectConfigContainer } from './components';
 import { txtGoToDashboard } from './i18n';

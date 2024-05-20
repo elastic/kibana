@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react-hooks';
 import moment from 'moment';
+import { act } from '@testing-library/react-hooks';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 

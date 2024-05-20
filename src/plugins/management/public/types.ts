@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities, ScopedHistory, ThemeServiceStart } from '@kbn/core/public';
+import { Observable } from 'rxjs';
+import { ScopedHistory, Capabilities, ThemeServiceStart } from '@kbn/core/public';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
-import { Observable } from 'rxjs';
-import type { ManagementAppLocatorParams } from '../common/locator';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
+import type { ManagementAppLocatorParams } from '../common/locator';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;

@@ -11,8 +11,8 @@ import { TestProviders } from '../../../../../../common/mock';
 import {
   mockEndgameAdminLogon,
   mockEndgameExplicitUserLogon,
-  mockEndgameUserLogoff,
   mockEndgameUserLogon,
+  mockEndgameUserLogoff,
 } from '../../../../../../common/mock/mock_endgame_ecs_data';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type {
-  HttpResponseOptions,
+  RouteConfig,
   IKibanaResponse,
+  ResponseHeaders,
+  HttpResponseOptions,
   KibanaResponseFactory,
   RequestHandler,
-  ResponseHeaders,
-  RouteConfig,
 } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 
 /**
  * Allows to configure HTTP response parameters
@@ -88,7 +88,7 @@ export type HttpResourcesRequestHandler<
   P = unknown,
   Q = unknown,
   B = unknown,
-  Context extends RequestHandlerContext = RequestHandlerContext,
+  Context extends RequestHandlerContext = RequestHandlerContext
 > = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
 
 /**

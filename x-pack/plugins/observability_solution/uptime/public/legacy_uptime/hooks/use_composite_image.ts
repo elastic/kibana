@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { composeScreenshotRef } from '../lib/helper/compose_screenshot_images';
 import {
-  ScreenshotBlockCache,
   ScreenshotRefImageData,
+  ScreenshotBlockCache,
   StoreScreenshotBlock,
   isPendingBlock,
 } from '../../../common/runtime_types';
-import { composeScreenshotRef } from '../lib/helper/compose_screenshot_images';
 import { fetchBlocksAction } from '../state/reducers/synthetics';
 import { syntheticsSelector } from '../state/selectors';
 

@@ -6,20 +6,20 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import type {
   FieldConfig,
   ValidationConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { isEmpty } from 'lodash';
 import type { ConnectorTypeFields } from '../../common/types/domain';
 import { ConnectorTypes } from '../../common/types/domain';
-import type { CaseUser, CaseUsers } from '../../common/ui/types';
 import type { CasesPublicStartDependencies } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import type { CaseActionConnector } from './types';
-import type { CaseUserWithProfileInfo } from './user_profiles/types';
+import type { CaseUser, CaseUsers } from '../../common/ui/types';
 import { convertToCaseUserWithProfileInfo } from './user_profiles/user_converter';
+import type { CaseUserWithProfileInfo } from './user_profiles/types';
 
 export const getConnectorById = (
   id: string,

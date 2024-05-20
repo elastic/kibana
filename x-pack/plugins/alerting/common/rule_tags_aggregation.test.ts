@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatRuleTagsAggregationResult, getRuleTagsAggregation } from './rule_tags_aggregation';
+import { getRuleTagsAggregation, formatRuleTagsAggregationResult } from './rule_tags_aggregation';
 
 describe('getRuleTagsAggregation', () => {
   it('should return aggregation with default params', () => {

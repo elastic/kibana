@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
-import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { navigateToCasesApp } from '../../../../shared/lib/cases';
+import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { navigateToCasesApp } from '../../../../shared/lib/cases';
 
 const owner = OBSERVABILITY_OWNER;
 

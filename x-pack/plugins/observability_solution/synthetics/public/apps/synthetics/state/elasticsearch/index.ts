@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESSearchResponse } from '@kbn/es-types';
 import { createReducer } from '@reduxjs/toolkit';
+import { ESSearchResponse } from '@kbn/es-types';
 
 import { IHttpSerializedFetchError } from '..';
 import { executeEsQueryAction } from './actions';

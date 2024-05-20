@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiLink, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiLink, EuiText } from '@elastic/eui';
 
 interface LocationLinkProps {
   location?: string | null;

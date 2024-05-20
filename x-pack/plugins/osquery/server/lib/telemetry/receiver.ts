@@ -6,24 +6,24 @@
  */
 
 import type {
+  Logger,
   CoreStart,
   ElasticsearchClient,
-  Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type {
   AgentClient,
   AgentPolicyServiceInterface,
-  PackagePolicyClient,
   PackageService,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
+import type { OsqueryAppContextService } from '../osquery_app_context_services';
 import type { PackSavedObject, SavedQuerySavedObject } from '../../common/types';
 import { getPrebuiltSavedQueryIds } from '../../routes/saved_query/utils';
-import type { OsqueryAppContextService } from '../osquery_app_context_services';
 
 export class TelemetryReceiver {
   // @ts-expect-error used as part of this

@@ -1,5 +1,3 @@
-import { EuiDualRange, EuiFormRow, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
-import { action } from '@storybook/addon-actions';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import { action } from '@storybook/addon-actions';
  * Side Public License, v 1.
  */
 import React, { useEffect } from 'react';
+import { EuiSpacer, EuiDualRange, EuiText, EuiTextColor, EuiFormRow } from '@elastic/eui';
+import { action } from '@storybook/addon-actions';
 
 import { useFormData } from '../../hooks';
 import { UseMultiFields } from '../use_multi_fields';

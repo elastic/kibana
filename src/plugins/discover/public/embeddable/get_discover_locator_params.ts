@@ -7,7 +7,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { PublishesSavedObjectId, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { PublishesUnifiedSearch, PublishesSavedObjectId } from '@kbn/presentation-publishing';
 import type { DiscoverAppLocatorParams } from '../../common';
 import { HasSavedSearch } from './types';
 

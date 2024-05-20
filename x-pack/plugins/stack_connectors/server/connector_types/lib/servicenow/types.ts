@@ -7,28 +7,28 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
+import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
-import { SNProductsConfigValue } from '../../../../common/servicenow_config';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
-  ExecutorParamsSchemaITOM,
   ExecutorParamsSchemaITSM,
-  ExecutorParamsSchemaSIR,
-  ExecutorSubActionAddEventParamsSchema,
-  ExecutorSubActionCloseIncidentParamsSchema,
   ExecutorSubActionCommonFieldsParamsSchema,
-  ExecutorSubActionGetChoicesParamsSchema,
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
   ExecutorSubActionPushParamsSchemaITSM,
-  ExecutorSubActionPushParamsSchemaSIR,
-  ExternalIncidentServiceConfigurationBaseSchema,
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
+  ExecutorParamsSchemaSIR,
+  ExecutorSubActionPushParamsSchemaSIR,
+  ExecutorSubActionGetChoicesParamsSchema,
+  ExecutorParamsSchemaITOM,
+  ExecutorSubActionAddEventParamsSchema,
+  ExternalIncidentServiceConfigurationBaseSchema,
+  ExecutorSubActionCloseIncidentParamsSchema,
 } from './schema';
+import { SNProductsConfigValue } from '../../../../common/servicenow_config';
 
 export type { SNProductsConfigValue, SNProductsConfig } from '../../../../common/servicenow_config';
 

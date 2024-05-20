@@ -9,7 +9,7 @@ import { mockFlashMessageHelpers, setMockActions } from '../../../../../../__moc
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiFieldText, EuiSelect } from '@elastic/eui';
 

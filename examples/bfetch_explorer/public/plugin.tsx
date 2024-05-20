@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '@kbn/bfetch-plugin/public';
-import { CoreSetup, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
 

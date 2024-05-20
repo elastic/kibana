@@ -1,4 +1,3 @@
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
  * 2.0.
  */
 import moment from 'moment';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEventCount } from './get_event_count';
 
 describe('getEventCount', () => {

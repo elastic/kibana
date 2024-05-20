@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Panel } from '../../../../common/types';
 import { DefaultSearchCapabilities } from './default_search_capabilities';
+import type { Panel } from '../../../../common/types';
 
 describe('DefaultSearchCapabilities', () => {
   let defaultSearchCapabilities: DefaultSearchCapabilities;

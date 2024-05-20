@@ -6,10 +6,10 @@
  */
 
 import { createCopyToClipboardActionFactory as genericCreateCopyToClipboardActionFactory } from '@kbn/cell-actions/actions';
-import type { StartServices } from '../../../../types';
-import { SecurityCellActionType } from '../../constants';
-import type { SecurityCellAction } from '../../types';
 import { fieldHasCellActions } from '../../utils';
+import type { StartServices } from '../../../../types';
+import type { SecurityCellAction } from '../../types';
+import { SecurityCellActionType } from '../../constants';
 
 export const createCopyToClipboardCellActionFactory = ({
   services,

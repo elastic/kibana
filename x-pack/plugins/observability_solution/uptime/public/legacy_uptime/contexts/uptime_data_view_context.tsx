@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import React, { createContext, useContext, FC, PropsWithChildren } from 'react';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { useHasData } from '../components/overview/empty_state/use_has_data';
 
 export const UptimeDataViewContext = createContext({} as DataView);

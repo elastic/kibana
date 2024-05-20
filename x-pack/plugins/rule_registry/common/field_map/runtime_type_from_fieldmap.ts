@@ -1,7 +1,3 @@
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
-import { either } from 'fp-ts/lib/Either';
-import * as t from 'io-ts';
-import { mapValues, pickBy } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +5,10 @@ import { mapValues, pickBy } from 'lodash';
  * 2.0.
  */
 import { Optional } from 'utility-types';
+import { mapValues, pickBy } from 'lodash';
+import { either } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 
 const NumberFromString = new t.Type(
   'NumberFromString',

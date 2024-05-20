@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { getInitialInterval } from './get_initial_interval';
+import { DEFAULT_RULE_INTERVAL } from '../../constants';
 
 describe('getInitialInterval', () => {
   test('should return DEFAULT_RULE_INTERVAL if minimumScheduleInterval is undefined', () => {

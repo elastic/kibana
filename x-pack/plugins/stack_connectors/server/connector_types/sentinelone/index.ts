@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../../../common/sentinelone/constants';
 import {
   SentinelOneConfigSchema,
   SentinelOneSecretsSchema,
 } from '../../../common/sentinelone/schema';
 import { SentinelOneConfig, SentinelOneSecrets } from '../../../common/sentinelone/types';
-import { renderParameterTemplates } from './render';
 import { SentinelOneConnector } from './sentinelone';
+import { renderParameterTemplates } from './render';
 
 export const getSentinelOneConnectorType = (): SubActionConnectorType<
   SentinelOneConfig,

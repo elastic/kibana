@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 import type { FC } from 'react';
 import React from 'react';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 import { useKibana } from '../hooks/use_kibana';
 
 /**

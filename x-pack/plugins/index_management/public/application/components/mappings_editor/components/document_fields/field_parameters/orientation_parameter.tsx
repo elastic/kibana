@@ -9,10 +9,10 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { PARAMETERS_OPTIONS } from '../../../constants';
-import { getFieldConfig } from '../../../lib';
-import { Field, UseField } from '../../../shared_imports';
 import { EditFieldFormRow } from '../fields/edit_field';
+import { UseField, Field } from '../../../shared_imports';
+import { getFieldConfig } from '../../../lib';
+import { PARAMETERS_OPTIONS } from '../../../constants';
 
 export const OrientationParameter = ({ defaultToggleValue }: { defaultToggleValue: boolean }) => (
   <EditFieldFormRow

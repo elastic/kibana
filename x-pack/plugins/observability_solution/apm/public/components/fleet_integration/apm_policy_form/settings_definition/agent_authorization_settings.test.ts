@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isSettingsFormValid } from '../settings_form/utils';
 import { getAgentAuthorizationSettings } from './agent_authorization_settings';
+import { isSettingsFormValid } from '../settings_form/utils';
 
 describe('apm-fleet-apm-integration', () => {
   describe('isAgentAuthorizationFormValid', () => {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { FieldBrowserComponent } from './field_browser';
-import { FIELD_BROWSER_WIDTH } from './helpers';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mockBrowserFields } from './mock';
+import { FIELD_BROWSER_WIDTH } from './helpers';
+import { FieldBrowserComponent } from './field_browser';
 import type { FieldBrowserProps } from './types';
 
 const defaultProps: FieldBrowserProps = {

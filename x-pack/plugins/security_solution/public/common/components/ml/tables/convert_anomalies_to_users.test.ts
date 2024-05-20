@@ -6,8 +6,8 @@
  */
 
 import { mockAnomalies } from '../mock';
-import type { AnomaliesByUser } from '../types';
 import { convertAnomaliesToUsers, getUserNameFromEntity } from './convert_anomalies_to_users';
+import type { AnomaliesByUser } from '../types';
 
 describe('convert_anomalies_to_users', () => {
   test('it returns expected anomalies from a user', () => {

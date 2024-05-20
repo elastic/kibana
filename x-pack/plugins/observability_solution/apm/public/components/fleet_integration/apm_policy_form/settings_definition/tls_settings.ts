@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { OPTIONAL_LABEL, REQUIRED_LABEL, isSettingsFormValid } from '../settings_form/utils';
 import { PackagePolicyVars, SettingsRow } from '../typings';
+import { isSettingsFormValid, OPTIONAL_LABEL, REQUIRED_LABEL } from '../settings_form/utils';
 
 const TLS_ENABLED_KEY = 'tls_enabled';
 

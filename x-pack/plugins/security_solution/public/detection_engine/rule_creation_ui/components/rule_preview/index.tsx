@@ -5,38 +5,38 @@
  * 2.0.
  */
 
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import dateMath from '@kbn/datemath';
 import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiSpacer,
   EuiSuperDatePicker,
   EuiSuperUpdateButton,
   EuiText,
   EuiTitle,
+  EuiFormRow,
 } from '@elastic/eui';
-import dateMath from '@kbn/datemath';
+import moment from 'moment';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 import { isEqual } from 'lodash';
-import moment from 'moment';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import * as i18n from './translations';
+import { usePreviewRoute } from './use_preview_route';
+import { PreviewHistogram } from './preview_histogram';
+import { PreviewLogs } from './preview_logs';
+import { useKibana } from '../../../../common/lib/kibana';
+import { LoadingHistogram } from './loading_histogram';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { useKibana } from '../../../../common/lib/kibana';
 import type {
   AboutStepRule,
   DefineStepRule,
   ScheduleStepRule,
   TimeframePreviewOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import { LoadingHistogram } from './loading_histogram';
-import { PreviewHistogram } from './preview_histogram';
-import { PreviewLogs } from './preview_logs';
-import * as i18n from './translations';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
-import { usePreviewRoute } from './use_preview_route';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
 

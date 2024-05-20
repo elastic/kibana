@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import type { AlertAgent, AlertsAction, AlertWithAgent } from './types';
 import type { ProcessesParams } from '../../../../common/api/detection_engine';
-import type { AlertAgent, AlertWithAgent, AlertsAction } from './types';
 
 interface ProcessAlertsAcc {
   [key: string]: Record<string, AlertsAction>;

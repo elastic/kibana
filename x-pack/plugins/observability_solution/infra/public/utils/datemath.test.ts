@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
 import {
-  convertDate,
+  isValidDatemath,
   datemathToEpochMillis,
   extendDatemath,
-  isValidDatemath,
+  convertDate,
   normalizeDate,
 } from './datemath';
+import sinon from 'sinon';
 
 describe('isValidDatemath()', () => {
   it('Returns `false` for empty strings', () => {

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import React, { ReactElement } from 'react';
+import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
-import { AggregateQuery, Query } from '@kbn/es-query';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
-import { TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItems } from './top_nav_menu_items';
+import { TopNavMenuBadgeProps, TopNavMenuBadges } from './top_nav_menu_badges';
 
 export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> = Omit<
   StatefulSearchBarProps<QT>,

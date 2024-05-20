@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsNamespaceType } from '@kbn/core/public';
 import type { SavedObjectError } from '@kbn/core/types';
+import type { SavedObjectsNamespaceType } from '@kbn/core/public';
 
 /** Domain interfaces */
 

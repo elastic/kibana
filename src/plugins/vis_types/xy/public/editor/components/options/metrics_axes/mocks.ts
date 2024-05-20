@@ -8,19 +8,19 @@
 
 import { Position } from '@elastic/charts';
 
-import { Style } from '@kbn/charts-plugin/public';
 import { Vis } from '@kbn/visualizations-plugin/public';
+import { Style } from '@kbn/charts-plugin/public';
 
-import { ChartType } from '../../../../../common';
 import {
-  AxisType,
-  CategoryAxis,
+  ValueAxis,
+  SeriesParam,
   ChartMode,
   InterpolationMode,
   ScaleType,
-  SeriesParam,
-  ValueAxis,
+  AxisType,
+  CategoryAxis,
 } from '../../../../types';
+import { ChartType } from '../../../../../common';
 
 const defaultValueAxisId = 'ValueAxis-1';
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { memo, useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadio, EuiSpacer } from '@elastic/eui';
 import type {
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
-import React, { memo, useEffect, useMemo } from 'react';
-import { useGetProtectionsUnavailableComponent } from '../../../policy_settings_form/hooks/use_get_protections_unavailable_component';
 import type { EndpointPreset } from '../constants';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from '../constants';
-import { DATA_COLLECTION, DATA_COLLECTION_HELP_TEXT } from '../translations';
 import { HelpTextWithPadding } from './help_text_with_padding';
+import { DATA_COLLECTION, DATA_COLLECTION_HELP_TEXT } from '../translations';
+import { useGetProtectionsUnavailableComponent } from '../../../policy_settings_form/hooks/use_get_protections_unavailable_component';
 
 const NOOP = () => {};
 

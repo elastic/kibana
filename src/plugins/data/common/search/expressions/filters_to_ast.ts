@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FILTERS, Filter, fromCombinedFilter } from '@kbn/es-query';
+import { Filter, FILTERS, fromCombinedFilter } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { ExpressionFunctionKibanaFilter } from './kibana_filter';
 

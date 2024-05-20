@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import React, { useCallback, Dispatch, useContext } from 'react';
+import { EuiFlexGroup, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 
 import { DistributeEquallyIcon } from '../assets/distribute_equally';
 
-import { ColorRangesContext } from './color_ranges_context';
 import type { ColorRangesActions } from './types';
+import { ColorRangesContext } from './color_ranges_context';
 
 export interface ColorRangesExtraActionsProps {
   dispatch: Dispatch<ColorRangesActions>;

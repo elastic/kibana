@@ -18,22 +18,9 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-  SnapshotMetricTypeRT,
-  awsEC2SnapshotMetricTypes,
-  awsRDSSnapshotMetricTypes,
-  awsS3SnapshotMetricTypes,
-  awsSQSSnapshotMetricTypes,
-  containerSnapshotMetricTypes,
-  findInventoryModel,
-  hostSnapshotMetricTypes,
-  podSnapshotMetricTypes,
-} from '@kbn/metrics-data-access-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   ForLastExpression,
@@ -52,6 +39,19 @@ import React, {
   PropsWithChildren,
 } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import {
+  findInventoryModel,
+  awsEC2SnapshotMetricTypes,
+  awsRDSSnapshotMetricTypes,
+  awsS3SnapshotMetricTypes,
+  awsSQSSnapshotMetricTypes,
+  containerSnapshotMetricTypes,
+  hostSnapshotMetricTypes,
+  podSnapshotMetricTypes,
+  InventoryItemType,
+  SnapshotMetricType,
+  SnapshotMetricTypeRT,
+} from '@kbn/metrics-data-access-plugin/common';
 import {
   Comparator,
   FilterQuery,

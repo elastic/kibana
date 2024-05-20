@@ -9,8 +9,8 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { pick } from 'lodash';
 import {
-  TechnicalRuleFieldMap,
   technicalRuleFieldMap,
+  TechnicalRuleFieldMap,
 } from './assets/field_maps/technical_rule_field_map';
 import { runtimeTypeFromFieldMap } from './field_map';
 

@@ -9,12 +9,12 @@ import React, { PureComponent } from 'react';
 import { ElementWrapper } from '../../element_wrapper';
 import {
   AlignmentGuide,
-  BorderConnection,
-  BorderResizeHandle,
   DragBoxAnnotation,
   HoverAnnotation,
-  RotationHandle,
   TooltipAnnotation,
+  RotationHandle,
+  BorderConnection,
+  BorderResizeHandle,
 } from '../../layout_annotations';
 import { WorkpadShortcuts } from '../../workpad_shortcuts';
 import { interactiveWorkpadPagePropTypes } from '../prop_types';
@@ -81,7 +81,7 @@ export class InteractiveWorkpadPage extends PureComponent {
         }}
         data-test-subj="canvasWorkpadPage"
         className={`canvasPage kbn-resetFocusState canvasInteractivePage ${className}`}
-        data-shared-items-container={true}
+        data-shared-items-container
         style={{ ...pageStyle, height, width, cursor }}
         onKeyDown={onKeyDown}
         onMouseMove={onMouseMove}

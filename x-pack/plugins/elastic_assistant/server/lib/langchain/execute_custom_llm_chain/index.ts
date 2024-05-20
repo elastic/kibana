@@ -7,22 +7,22 @@
 import agent, { Span } from 'elastic-apm-node';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 
+import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
+import { ToolInterface } from '@langchain/core/tools';
+import { streamFactory } from '@kbn/ml-response-stream/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { RetrievalQAChain } from 'langchain/chains';
 import {
   ActionsClientChatOpenAI,
   ActionsClientLlm,
 } from '@kbn/elastic-assistant-common/impl/language_models';
 import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
-import { streamFactory } from '@kbn/ml-response-stream/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { ToolInterface } from '@langchain/core/tools';
-import { RetrievalQAChain } from 'langchain/chains';
-import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
-import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
-import { AssistantToolParams } from '../../../types';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
+import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
-import { APMTracer } from '../tracers/apm_tracer';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
+import { APMTracer } from '../tracers/apm_tracer';
+import { AssistantToolParams } from '../../../types';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**

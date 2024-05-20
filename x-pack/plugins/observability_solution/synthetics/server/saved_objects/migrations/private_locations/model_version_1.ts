@@ -1,7 +1,3 @@
-import {
-  SavedObjectModelTransformationFn,
-  SavedObjectsModelVersion,
-} from '@kbn/core-saved-objects-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +5,10 @@ import {
  * 2.0.
  */
 import * as t from 'io-ts';
+import {
+  SavedObjectModelTransformationFn,
+  SavedObjectsModelVersion,
+} from '@kbn/core-saved-objects-server';
 import { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
 
 export const PrivateLocationAttributesCodecLegacy = t.intersection([

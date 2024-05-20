@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
-import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
 import { useSearchItems } from '../../hooks/use_search_items';
-import { BREADCRUMB_SECTION, breadcrumbService, docTitleService } from '../../services/navigation';
+import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
+import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard } from './components/wizard';
 

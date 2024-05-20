@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DefaultStringBooleanFalse } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { DefaultStringBooleanFalse } from '@kbn/securitysolution-io-ts-types';
 
 export const GetIndexStatsParams = t.type({
   pattern: t.string,

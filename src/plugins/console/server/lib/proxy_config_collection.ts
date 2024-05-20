@@ -7,8 +7,8 @@
  */
 
 import type { Agent } from 'http';
-import { parse as parseUrl } from 'url';
 import { defaultsDeep } from 'lodash';
+import { parse as parseUrl } from 'url';
 
 import { ProxyConfig } from './proxy_config';
 

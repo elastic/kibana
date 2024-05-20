@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { ReactWrapper, mount } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import { mountWithIntl } from './mount_with_i18n';

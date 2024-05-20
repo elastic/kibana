@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { FC } from 'react';
-import React, { useState } from 'react';
 
 import { useEnabledFeatures } from '../../../contexts/ml';
 import type { ExportJobsFlyoutContentProps } from './export_jobs_flyout_content';

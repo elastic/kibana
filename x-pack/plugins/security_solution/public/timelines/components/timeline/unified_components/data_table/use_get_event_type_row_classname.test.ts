@@ -1,4 +1,3 @@
-import { renderHook } from '@testing-library/react-hooks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { renderHook } from '@testing-library/react-hooks';
  * 2.0.
  */
 import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
+import { renderHook } from '@testing-library/react-hooks';
 
 const mockOddEqlEvent = {
   _id: 'test-eql-alert',

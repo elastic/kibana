@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { ValueLabelConfig } from '../../common/types';
 
 const valueLabelsOptions: Array<{

@@ -6,7 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { camelCase, get, isArray, isObject, omit } from 'lodash';
+import { isArray, camelCase, isObject, omit, get } from 'lodash';
 import type {
   AttachmentRequest,
   CaseResolveResponse,
@@ -19,10 +19,10 @@ import {
 } from '../../common/utils/attachments';
 import { isCommentUserAction } from '../../common/utils/user_actions';
 import type {
-  AttachmentUI,
-  CaseUI,
   CasesFindResponseUI,
   CasesUI,
+  CaseUI,
+  AttachmentUI,
   ResolvedCase,
 } from '../containers/types';
 

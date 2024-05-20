@@ -17,12 +17,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadBlob } from '../../../../common/utils/download_blob';
-import { buildAnnotationsFromError } from '../helpers';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { ValidatedFile } from '../types';
+import { buildAnnotationsFromError } from '../helpers';
 
 export interface AssetCriticalityValidationStepProps {
   validatedFile: ValidatedFile;

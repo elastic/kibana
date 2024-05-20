@@ -178,5 +178,7 @@
       "job_id": "v3_linux_anomalous_network_activity"
     }
   ],
-  "tags": ["security"]
+  "tags": [
+    "security"
+  ]
 }

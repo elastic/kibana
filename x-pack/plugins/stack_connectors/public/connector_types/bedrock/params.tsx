@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   ActionConnectorMode,
   JsonEditorWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { DEFAULT_BEDROCK_MODEL, SUB_ACTION } from '../../../common/bedrock/constants';
+import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_BODY } from './constants';
 import * as i18n from './translations';
+import { DEFAULT_BEDROCK_MODEL, SUB_ACTION } from '../../../common/bedrock/constants';
 import { BedrockActionParams } from './types';
 
 const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActionParams>> = ({

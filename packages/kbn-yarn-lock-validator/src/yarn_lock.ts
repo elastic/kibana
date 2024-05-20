@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fsp from 'fs/promises';
+import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 // @ts-expect-error published types are worthless

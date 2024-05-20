@@ -82,7 +82,9 @@
             "tags": [],
             "label": "docs",
             "description": [],
-            "signature": ["{ text: string; url: string; } | undefined"],
+            "signature": [
+              "{ text: string; url: string; } | undefined"
+            ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -94,7 +96,9 @@
             "tags": [],
             "label": "completedGuideRedirectLocation",
             "description": [],
-            "signature": ["{ appID: string; path: string; } | undefined"],
+            "signature": [
+              "{ appID: string; path: string; } | undefined"
+            ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -169,7 +173,9 @@
             "tags": [],
             "label": "isActive",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -348,7 +354,9 @@
             "tags": [],
             "label": "location",
             "description": [],
-            "signature": ["{ appID: string; path: string; } | undefined"],
+            "signature": [
+              "{ appID: string; path: string; } | undefined"
+            ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -381,7 +389,9 @@
             "tags": [],
             "label": "integration",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -454,7 +464,9 @@
             "tags": [],
             "label": "isLinkExternal",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -487,7 +499,9 @@
         "tags": [],
         "label": "GuideParams",
         "description": [],
-        "signature": ["{ [x: string]: string; }"],
+        "signature": [
+          "{ [x: string]: string; }"
+        ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -502,7 +516,9 @@
         "description": [
           "\nAllowed states for a guide:\n not_started: Guide has not been started\n in_progress: At least one step in the guide has been started\n ready_to_complete: All steps have been completed, but the \"Continue using Elastic\" button has not been clicked\n complete: All steps and the guide have been completed"
         ],
-        "signature": ["\"complete\" | \"not_started\" | \"in_progress\" | \"ready_to_complete\""],
+        "signature": [
+          "\"complete\" | \"not_started\" | \"in_progress\" | \"ready_to_complete\""
+        ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -7,31 +7,31 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionApiResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
-  ALERTS_AS_DATA_FIND_URL,
-  DETECTION_ENGINE_ALERTS_INDEX_URL,
-  DETECTION_ENGINE_INDEX_URL,
-  DETECTION_ENGINE_PRIVILEGES_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  DETECTION_ENGINE_INDEX_URL,
+  DETECTION_ENGINE_PRIVILEGES_URL,
+  ALERTS_AS_DATA_FIND_URL,
+  DETECTION_ENGINE_ALERTS_INDEX_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { HostInfo, ResponseActionApiResponse } from '../../../../../common/endpoint/types';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { KibanaServices } from '../../../../common/lib/kibana';
-import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import type {
-  AlertSearchResponse,
-  AlertsIndex,
   BasicSignals,
-  CasesFromAlertsResponse,
-  CheckSignalIndex,
   Privilege,
   QueryAlerts,
-  UpdateAlertStatusByIdsProps,
+  AlertSearchResponse,
+  AlertsIndex,
   UpdateAlertStatusByQueryProps,
+  CasesFromAlertsResponse,
+  CheckSignalIndex,
+  UpdateAlertStatusByIdsProps,
 } from './types';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 
 /**
  * Fetch Alerts by providing a query

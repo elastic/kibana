@@ -7,44 +7,44 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { IVectorLayer } from '../vector_layer';
+import { GeoJsonVectorLayer } from '../geojson_vector_layer';
+import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
+import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
+import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
+import { IStyleProperty } from '../../../styles/vector/properties/style_property';
 import {
-  AGG_TYPE,
   COUNT_PROP_NAME,
-  FIELD_ORIGIN,
   GRID_RESOLUTION,
-  LAYER_STYLE_TYPE,
   LAYER_TYPE,
+  AGG_TYPE,
   RENDER_AS,
   STYLE_TYPE,
   VECTOR_STYLES,
+  LAYER_STYLE_TYPE,
+  FIELD_ORIGIN,
 } from '../../../../../common/constants';
+import { ESGeoGridSource } from '../../../sources/es_geo_grid_source/es_geo_grid_source';
+import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
+import { IESSource } from '../../../sources/es_source';
+import { ISource } from '../../../sources/source';
+import { DataRequestContext } from '../../../../actions';
+import { DataRequestAbortError } from '../../../util/data_request';
 import {
   CustomIcon,
-  DynamicStylePropertyOptions,
+  VectorStyleDescriptor,
   SizeDynamicOptions,
+  DynamicStylePropertyOptions,
   StylePropertyOptions,
   Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
-  VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
-import { DataRequestContext } from '../../../../actions';
-import { LICENSED_FEATURES } from '../../../../licensed_features';
-import { ESGeoGridSource } from '../../../sources/es_geo_grid_source/es_geo_grid_source';
-import { ESSearchSource } from '../../../sources/es_search_source/es_search_source';
-import { IESSource } from '../../../sources/es_source';
-import { isSearchSourceAbortError } from '../../../sources/es_source/es_source';
-import { ISource } from '../../../sources/source';
 import { IVectorSource } from '../../../sources/vector_source';
-import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
-import { IStyleProperty } from '../../../styles/vector/properties/style_property';
-import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
-import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
-import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
-import { DataRequestAbortError } from '../../../util/data_request';
-import { GeoJsonVectorLayer } from '../geojson_vector_layer';
-import { IVectorLayer } from '../vector_layer';
+import { LICENSED_FEATURES } from '../../../../licensed_features';
+import { ESSearchSource } from '../../../sources/es_search_source/es_search_source';
+import { isSearchSourceAbortError } from '../../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 

@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { CasesByAlertIDParams } from '@kbn/cases-plugin/server/client/cases/get';
-import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
-import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { Logger } from '@kbn/logging';
-import { set } from 'lodash';
-import {
-  ENDPOINT_ACTIONS_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
-} from '../../../../../../common/endpoint/constants';
-import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
-import type {
-  ActionDetails,
-  EndpointActionDataParameterTypes,
-  EndpointActionResponseDataOutput,
-  LogsEndpointAction,
-  LogsEndpointActionResponse,
-} from '../../../../../../common/endpoint/types';
-import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
-import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
-import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
-import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
-import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
-import { responseActionsClientMock } from '../mocks';
+// eslint-disable-next-line max-classes-per-file
+import type { ResponseActionsClient } from './types';
 import type {
   ResponseActionsClientUpdateCasesOptions,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientWriteActionResponseToEndpointIndexOptions,
 } from './base_response_actions_client';
 import { HOST_NOT_ENROLLED, ResponseActionsClientImpl } from './base_response_actions_client';
-// eslint-disable-next-line max-classes-per-file
-import type { ResponseActionsClient } from './types';
+import type {
+  ActionDetails,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
+  EndpointActionDataParameterTypes,
+} from '../../../../../../common/endpoint/types';
+import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
+import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
+import type { CasesByAlertIDParams } from '@kbn/cases-plugin/server/client/cases/get';
+import type { Logger } from '@kbn/logging';
+import { getActionDetailsById as _getActionDetailsById } from '../../action_details_by_id';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../../../common/endpoint/constants';
+import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
+import { set } from 'lodash';
+import { responseActionsClientMock } from '../mocks';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
+import { isActionSupportedByAgentType as _isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -717,7 +717,7 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   public async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-    TMeta extends {} = {},
+    TMeta extends {} = {}
   >(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       TParameters,
@@ -731,7 +731,7 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   }
 
   public async writeActionResponseToEndpointIndex<
-    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
   >(
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {

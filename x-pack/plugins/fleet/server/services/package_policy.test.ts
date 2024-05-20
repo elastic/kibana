@@ -5,47 +5,47 @@
  * 2.0.
  */
 
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+  httpServerMock,
+  coreMock,
+} from '@kbn/core/server/mocks';
+import { produce } from 'immer';
 import type {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  httpServerMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import { produce } from 'immer';
 
 import { PackagePolicyMocks } from '../mocks/package_policy.mocks';
 
-import { createPackagePolicyMock } from '../../common/mocks';
 import type {
   PackageInfo,
-  PackagePolicy,
-  PackagePolicyInputStream,
   PackagePolicySOAttributes,
-  PostPackagePolicyDeleteCallback,
-  PostPackagePolicyPostCreateCallback,
   PostPackagePolicyPostDeleteCallback,
   RegistryDataStream,
+  PackagePolicyInputStream,
+  PackagePolicy,
+  PostPackagePolicyPostCreateCallback,
+  PostPackagePolicyDeleteCallback,
 } from '../types';
+import { createPackagePolicyMock } from '../../common/mocks';
 
-import type { PostPackagePolicyCreateCallback, PutPackagePolicyUpdateCallback } from '..';
+import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } from '..';
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
-import { packageToPackagePolicy } from '../../common/services';
 import type {
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   InputsOverride,
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackagePolicyPackage,
-  PostDeletePackagePoliciesResponse,
+  DeletePackagePoliciesResponse,
 } from '../../common/types';
+import { packageToPackagePolicy } from '../../common/services';
 
 import {
   FleetError,
@@ -57,20 +57,20 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
 
-import { appContextService } from './app_context';
 import {
+  preconfigurePackageInputs,
+  updatePackageInputs,
+  packagePolicyService,
   _applyIndexPrivileges,
   _compilePackagePolicyInputs,
   _validateRestrictedFieldsNotModifiedOrThrow,
-  packagePolicyService,
-  preconfigurePackageInputs,
-  updatePackageInputs,
 } from './package_policy';
+import { appContextService } from './app_context';
 
-import { agentPolicyService } from './agent_policy';
-import { auditLoggingService } from './audit_logging';
 import { getPackageInfo } from './epm/packages';
 import { sendTelemetryEvents } from './upgrade_sender';
+import { auditLoggingService } from './audit_logging';
+import { agentPolicyService } from './agent_policy';
 
 const mockedSendTelemetryEvents = sendTelemetryEvents as jest.MockedFunction<
   typeof sendTelemetryEvents

@@ -5,34 +5,33 @@
  * 2.0.
  */
 
+import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import styled from 'styled-components';
+import { uniq } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiSpacer,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { uniq } from 'lodash';
-import React, { useState, Fragment, memo, useMemo, useEffect, useRef } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { useRouteMatch } from 'react-router-dom';
-import styled from 'styled-components';
 
 import { useQuery } from '@tanstack/react-query';
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import { sendGetDataStreams, useConfig } from '../../../../../../../../hooks';
+import { useConfig, sendGetDataStreams } from '../../../../../../../../hooks';
 
 import {
   getRegistryDataStreamAssetBaseName,
   mapPackageReleaseToIntegrationCardRelease,
 } from '../../../../../../../../../common/services';
 
-import { InlineReleaseBadge } from '../../../../../../components';
 import type {
   NewPackagePolicy,
   NewPackagePolicyInputStream,
@@ -40,15 +39,16 @@ import type {
   RegistryStreamWithDataStream,
   RegistryVarsEntry,
 } from '../../../../../../types';
+import { InlineReleaseBadge } from '../../../../../../components';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
-import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings';
 import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelines';
+import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings';
 
 import { useIndexTemplateExists } from '../../datastream_hooks';
 
-import { useDataStreamId } from './hooks';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
+import { useDataStreamId } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
 
 const ScrollAnchor = styled.div`

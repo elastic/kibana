@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { VFC } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -12,10 +13,9 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { VFC } from 'react';
-import { Indicator } from '../../../../common/types/indicator';
 import { useFilterInOut } from '../hooks/use_filter_in_out';
 import { FilterOut } from '../utils/filter';
+import { Indicator } from '../../../../common/types/indicator';
 import { FILTER_OUT_TITLE } from './translations';
 
 const ICON_TYPE = 'minusInCircle';

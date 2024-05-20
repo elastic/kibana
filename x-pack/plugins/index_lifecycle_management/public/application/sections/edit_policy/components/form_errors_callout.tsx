@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { useFormErrorsContext } from '../form';
 

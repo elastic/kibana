@@ -6,9 +6,9 @@
  */
 
 import { faker } from '@faker-js/faker';
-import { memoize, range, sample } from 'lodash';
-import { replaceMetricsWithShapes } from '../../lib/replace_metrics_with_shapes';
+import { sample, range, memoize } from 'lodash';
 import { GeneratorFunction } from '../../types';
+import { replaceMetricsWithShapes } from '../../lib/replace_metrics_with_shapes';
 
 export { indexTemplate } from './ecs';
 

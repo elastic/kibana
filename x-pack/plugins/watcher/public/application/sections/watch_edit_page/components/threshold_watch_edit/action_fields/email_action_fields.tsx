@@ -9,8 +9,8 @@ import React, { Fragment } from 'react';
 
 import { EuiComboBox, EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EmailAction } from '../../../../../../../common/types/action_types';
 import { ErrableFormRow } from '../../../../../components/form_errors';
+import { EmailAction } from '../../../../../../../common/types/action_types';
 
 interface Props {
   action: EmailAction;

@@ -7,14 +7,14 @@
 
 import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 
-import type { ExperimentalFeatures } from '../../../../../common';
-import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { getSuppressionMaxSignalsWarning } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   WrapSuppressedHits,
 } from '../types';
-import { getSuppressionMaxSignalsWarning } from './utils';
+import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
@@ -24,9 +24,9 @@ interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndB
   experimentalFeatures: ExperimentalFeatures;
 }
 
-import { bulkCreateSuppressedAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
 import type { SearchAfterAndBulkCreateFactoryParams } from './search_after_bulk_create_factory';
 import { searchAfterAndBulkCreateFactory } from './search_after_bulk_create_factory';
+import { bulkCreateSuppressedAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
 
 /**
  * search_after through documents and re-index using bulk endpoint

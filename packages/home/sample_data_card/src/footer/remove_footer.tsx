@@ -1,5 +1,3 @@
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,11 +6,13 @@ import { i18n } from '@kbn/i18n';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import { useRemove } from '../hooks';
-import type { UseRemoveParams } from '../hooks';
 import { ViewButton } from './view_button';
+import type { UseRemoveParams } from '../hooks';
 import type { Props as ViewButtonProps } from './view_button';
 
 /**

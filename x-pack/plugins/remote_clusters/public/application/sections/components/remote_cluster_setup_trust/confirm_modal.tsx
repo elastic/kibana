@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import React, { useState, FormEvent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
+  EuiText,
+  EuiSpacer,
   EuiButtonEmpty,
-  EuiCheckbox,
   EuiForm,
   EuiFormRow,
   EuiModal,
@@ -16,13 +20,9 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSpacer,
-  EuiText,
+  EuiCheckbox,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, FormEvent } from 'react';
 
 interface ModalProps {
   closeModal: () => void;

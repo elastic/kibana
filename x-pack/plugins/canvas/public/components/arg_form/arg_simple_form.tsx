@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { ReactNode, MouseEventHandler } from 'react';
+import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
-import React, { ReactNode, MouseEventHandler } from 'react';
 
-import { IconType, TooltipIcon } from '../tooltip_icon';
+import { TooltipIcon, IconType } from '../tooltip_icon';
 
 const strings = {
   getRemoveAriaLabel: () =>

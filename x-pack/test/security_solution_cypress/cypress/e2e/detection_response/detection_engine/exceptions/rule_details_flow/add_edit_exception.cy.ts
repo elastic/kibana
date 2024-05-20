@@ -9,42 +9,11 @@ import { getException, getExceptionList } from '../../../../../objects/exception
 import { getNewRule } from '../../../../../objects/rule';
 
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../../../screens/alerts';
-import {
-  ADD_TO_SHARED_LIST_RADIO_INPUT,
-  CLOSE_ALERTS_CHECKBOX,
-  CONFIRM_BTN,
-  EXCEPTION_CARD_ITEM_CONDITIONS,
-  EXCEPTION_CARD_ITEM_NAME,
-  EXCEPTION_ITEM_CONTAINER,
-  EXCEPTION_ITEM_VIEWER_CONTAINER,
-  FIELD_INPUT_PARENT,
-  NO_EXCEPTIONS_EXIST_PROMPT,
-  NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT,
-  VALUES_MATCH_ANY_INPUT,
-} from '../../../../../screens/exceptions';
+import { createRule } from '../../../../../tasks/api_calls/rules';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../../../tasks/alerts';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
-import {
-  createExceptionList,
-  createExceptionListItem,
-  deleteExceptionLists,
-} from '../../../../../tasks/api_calls/exceptions';
-import { createRule } from '../../../../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
-import {
-  addExceptionConditions,
-  addExceptionFlyoutItemName,
-  editException,
-  editExceptionFlyoutItemName,
-  selectAddToRuleRadio,
-  selectBulkCloseAlerts,
-  selectSharedListToAddExceptionTo,
-  submitEditedExceptionItem,
-  submitNewExceptionItem,
-} from '../../../../../tasks/exceptions';
 import { login } from '../../../../../tasks/login';
 import {
   addExceptionFlyoutFromViewerHeader,
@@ -57,6 +26,37 @@ import {
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../../../tasks/rule_details';
+import {
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
+  editException,
+  editExceptionFlyoutItemName,
+  selectAddToRuleRadio,
+  selectBulkCloseAlerts,
+  selectSharedListToAddExceptionTo,
+  submitEditedExceptionItem,
+  submitNewExceptionItem,
+} from '../../../../../tasks/exceptions';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import {
+  NO_EXCEPTIONS_EXIST_PROMPT,
+  EXCEPTION_ITEM_VIEWER_CONTAINER,
+  NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT,
+  CLOSE_ALERTS_CHECKBOX,
+  CONFIRM_BTN,
+  ADD_TO_SHARED_LIST_RADIO_INPUT,
+  EXCEPTION_ITEM_CONTAINER,
+  VALUES_MATCH_ANY_INPUT,
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_CARD_ITEM_CONDITIONS,
+  FIELD_INPUT_PARENT,
+} from '../../../../../screens/exceptions';
+import {
+  createExceptionList,
+  createExceptionListItem,
+  deleteExceptionLists,
+} from '../../../../../tasks/api_calls/exceptions';
+import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(

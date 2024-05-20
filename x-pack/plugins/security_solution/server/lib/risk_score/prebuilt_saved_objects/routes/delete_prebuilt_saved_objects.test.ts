@@ -7,10 +7,10 @@
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { PREBUILT_SAVED_OBJECTS_BULK_DELETE } from '../../../../../common/constants';
 import {
-  mockGetCurrentUser,
-  requestContextMock,
-  requestMock,
   serverMock,
+  requestContextMock,
+  mockGetCurrentUser,
+  requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { deletePrebuiltSavedObjectsRoute } from './delete_prebuilt_saved_objects';
 

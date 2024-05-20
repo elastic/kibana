@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { RequestStatus } from '../../../../common/adapters';
 import { Request } from '../../../../common/adapters/request/types';
 import { InspectorViewProps } from '../../../types';
 
-import { disambiguateRequestNames } from './disambiguate_request_names';
-import { RequestDetails } from './request_details';
 import { RequestSelector } from './request_selector';
+import { RequestDetails } from './request_details';
+import { disambiguateRequestNames } from './disambiguate_request_names';
 
 function getInitialRequest(requests: Request[], initialRequestId?: string) {
   const initialRequest = initialRequestId

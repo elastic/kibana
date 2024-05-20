@@ -1,11 +1,3 @@
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  type EuiLinkAnchorProps,
-  type EuiLinkButtonProps,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,6 +5,14 @@ import { css } from '@emotion/react';
  * 2.0.
  */
 import React from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  type EuiLinkButtonProps,
+  type EuiLinkAnchorProps,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { LinkAnchor } from '../links';
 import type { NavigationLink } from '../types';
 import { getKibanaLinkProps } from './utils';

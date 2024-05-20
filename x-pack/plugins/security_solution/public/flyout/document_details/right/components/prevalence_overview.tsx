@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
-import React, { useCallback, useMemo } from 'react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { usePrevalence } from '../../shared/hooks/use_prevalence';
+import { PREVALENCE_TEST_ID } from './test_ids';
+import { useRightPanelContext } from '../context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { useRightPanelContext } from '../context';
 import { InsightsSummaryRow } from './insights_summary_row';
-import { PREVALENCE_TEST_ID } from './test_ids';
 
 const PERCENTAGE_THRESHOLD = 0.1; // we show the prevalence if its value is below 10%
 const DEFAULT_FROM = 'now-30d';

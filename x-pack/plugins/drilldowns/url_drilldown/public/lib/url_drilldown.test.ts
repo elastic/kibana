@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { BehaviorSubject } from 'rxjs';
 import { IExternalUrl } from '@kbn/core/public';
+import { UrlDrilldown, Config } from './url_drilldown';
 import {
-  CONTEXT_MENU_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
   ValueClickContext,
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { of } from '@kbn/kibana-utils-plugin/common';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { BehaviorSubject } from 'rxjs';
 import { createPoint, rowClickData } from './test/data';
-import { Config, UrlDrilldown } from './url_drilldown';
+import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 
 const mockDataPoints = [
   {

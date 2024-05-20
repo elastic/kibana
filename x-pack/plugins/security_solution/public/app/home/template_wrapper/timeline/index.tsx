@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
 import React from 'react';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { useResolveRedirect } from '../../../../common/hooks/use_resolve_redirect';
+import { noop } from 'lodash/fp';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineWrapper } from '../../../../timelines/wrapper';
+import { useResolveRedirect } from '../../../../common/hooks/use_resolve_redirect';
 
 /**
  * Adding timeline to the Security Solution plugin

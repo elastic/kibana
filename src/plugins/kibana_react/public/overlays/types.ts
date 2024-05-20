@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
 import * as React from 'react';
+import { CoreStart } from '@kbn/core/public';
 
 export interface KibanaReactOverlays {
   openFlyout: (

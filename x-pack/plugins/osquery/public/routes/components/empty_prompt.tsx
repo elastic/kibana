@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { PERMISSION_DENIED } from '../../shared_components/osquery_action/translations';
 
 const EmptyPromptComponent = () => (

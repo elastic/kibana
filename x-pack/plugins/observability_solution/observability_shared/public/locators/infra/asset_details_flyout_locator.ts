@@ -1,5 +1,3 @@
-import rison from '@kbn/rison';
-import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
  * 2.0.
  */
 import { SerializableRecord } from '@kbn/utility-types';
+import rison from '@kbn/rison';
+import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 
 export type AssetDetailsFlyoutLocator = LocatorPublic<AssetDetailsFlyoutLocatorParams>;
 

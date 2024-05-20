@@ -19,9 +19,9 @@ import {
   SavedObjectSaveOpts,
   StartServices,
 } from '../../types';
-import { SavedObjectDecorator } from '../decorators';
 import { applyESResp } from './apply_es_resp';
 import { saveSavedObject } from './save_saved_object';
+import { SavedObjectDecorator } from '../decorators';
 
 const applyDecorators = (
   object: SavedObject,

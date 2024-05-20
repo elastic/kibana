@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import tinycolor from 'tinycolor2';
 import {
-  EuiColorPalettePickerPaletteProps,
   colorPalette as colorPaletteGenerator,
-  euiPaletteColorBlind,
-  euiPaletteCool,
   euiPaletteForStatus,
   euiPaletteForTemperature,
-  euiPaletteGray,
-  euiPaletteGreen,
-  euiPaletteRed,
+  euiPaletteCool,
   euiPaletteWarm,
+  euiPaletteRed,
+  euiPaletteGreen,
+  euiPaletteGray,
+  euiPaletteColorBlind,
+  EuiColorPalettePickerPaletteProps,
 } from '@elastic/eui';
-import tinycolor from 'tinycolor2';
 import { PercentilesFieldMeta } from '../../../common/descriptor_types';
 
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';

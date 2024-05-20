@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type {
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
-} from '@kbn/core-saved-objects-api-server';
+import {
+  SavedObjectsErrorHelpers,
+  type SavedObject,
+  type SavedObjectSanitizedDoc,
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   decodeRequestVersion,
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
-import {
-  type SavedObject,
-  type SavedObjectSanitizedDoc,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core-saved-objects-server';
-import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import type {
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core-saved-objects-api-server';
+import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { isValidRequest } from '../utils';
-import type { ApiExecutionContext } from './types';
 import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
+import type { ApiExecutionContext } from './types';
 
 export interface PerformUpdateParams<T = unknown> {
   type: string;

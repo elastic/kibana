@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TimeBuckets, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useMemo } from 'react';
+import { TimeBuckets, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useKibana } from '../utils/kibana_react';
 
 export const useTimeBuckets = () => {

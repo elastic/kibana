@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { useMutation } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import type { MaintenanceWindow } from '../../common';
 
-import { UpdateParams, updateMaintenanceWindow } from '../services/maintenance_windows_api/update';
 import { useKibana } from '../utils/kibana_react';
+import { updateMaintenanceWindow, UpdateParams } from '../services/maintenance_windows_api/update';
 
 interface UseUpdateMaintenanceWindowProps {
   onError?: (error: IHttpFetchError<KibanaServerError>) => void;

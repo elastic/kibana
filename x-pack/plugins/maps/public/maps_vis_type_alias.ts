@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import type { VisualizationStage } from '@kbn/visualizations-plugin/public';
+import type { MapItem } from '../common/content_management';
 import {
-  APP_ICON,
   APP_ID,
+  APP_ICON,
   APP_NAME,
+  getEditPath,
   MAP_PATH,
   MAP_SAVED_OBJECT_TYPE,
-  getEditPath,
 } from '../common/constants';
-import type { MapItem } from '../common/content_management';
 import { getMapClient } from './content_management';
 
 export function getMapsVisTypeAlias() {

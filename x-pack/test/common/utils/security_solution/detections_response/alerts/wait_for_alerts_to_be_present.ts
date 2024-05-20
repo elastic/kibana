@@ -8,8 +8,8 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-import { waitFor } from '../wait_for';
 import { getAlertsByIds } from './get_alerts_by_ids';
+import { waitFor } from '../wait_for';
 
 /**
  * Waits for the signal hits to be greater than the supplied number

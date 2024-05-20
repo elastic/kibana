@@ -8,13 +8,13 @@ import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/publ
 
 import { ObservabilityAIAssistantPlugin } from './plugin';
 import type {
-  ConfigSchema,
-  ObservabilityAIAssistantChatService,
-  ObservabilityAIAssistantPluginSetupDependencies,
-  ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
+  ObservabilityAIAssistantPluginSetupDependencies,
+  ObservabilityAIAssistantPluginStartDependencies,
+  ConfigSchema,
   ObservabilityAIAssistantService,
+  ObservabilityAIAssistantChatService,
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from './types';

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
 import React, {
   useState,
   createContext,
@@ -17,6 +16,7 @@ import React, {
   FC,
   PropsWithChildren,
 } from 'react';
+import { EuiFlexGroup, EuiFlexGroupProps } from '@elastic/eui';
 
 import './flyout_panels.scss';
 

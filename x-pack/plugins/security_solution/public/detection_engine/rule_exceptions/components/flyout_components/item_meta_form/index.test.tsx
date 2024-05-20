@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFieldText } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { EuiFieldText } from '@elastic/eui';
 
 import { ExceptionsFlyoutMeta } from '.';
 import { TestProviders } from '../../../../../common/mock';

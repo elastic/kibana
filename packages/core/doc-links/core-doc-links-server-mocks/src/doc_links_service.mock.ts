@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { DocLinksService } from '@kbn/core-doc-links-server-internal';
-import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { DocLinksService } from '@kbn/core-doc-links-server-internal';
 
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
 

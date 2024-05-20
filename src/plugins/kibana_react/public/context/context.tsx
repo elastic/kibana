@@ -7,9 +7,9 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { createNotifications } from '../notifications';
-import { createReactOverlays } from '../overlays';
 import { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './types';
+import { createReactOverlays } from '../overlays';
+import { createNotifications } from '../notifications';
 
 const { useMemo, useContext, createElement, createContext } = React;
 

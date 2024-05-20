@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
 import { useMlKibana } from '../../../../contexts/kibana';
+import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
 
 export const DocsLink: FC<{ currentTabId: MlSavedObjectType }> = ({ currentTabId }) => {
   const {

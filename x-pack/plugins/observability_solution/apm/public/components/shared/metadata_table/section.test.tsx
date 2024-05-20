@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { expectTextsInDocument } from '../../../utils/test_helpers';
+import { render } from '@testing-library/react';
 import { Section } from './section';
+import { expectTextsInDocument } from '../../../utils/test_helpers';
 
 describe('Section', () => {
   it('shows "empty state message" if no data is available', () => {

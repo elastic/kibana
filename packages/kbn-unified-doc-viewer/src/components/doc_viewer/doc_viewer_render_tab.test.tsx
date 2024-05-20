@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
-import type { DocViewRenderProps } from '../../types';
+import { mount } from 'enzyme';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
+import type { DocViewRenderProps } from '../../types';
 
 test('Mounting and unmounting DocViewerRenderTab', () => {
   const unmountFn = jest.fn();

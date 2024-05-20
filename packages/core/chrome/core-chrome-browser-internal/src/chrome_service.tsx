@@ -6,40 +6,40 @@
  * Side Public License, v 1.
  */
 
+import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
+import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, type Observable, ReplaySubject, combineLatest, merge, of } from 'rxjs';
-import { filter, map, mergeMap, takeUntil } from 'rxjs';
 
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
+import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { type DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
-  AppDeepLinkId,
+  ChromeNavLink,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
-  ChromeNavLink,
-  ChromeSetProjectBreadcrumbsParams,
-  ChromeStyle,
   ChromeUserBanner,
+  ChromeStyle,
+  ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
-} from '@kbn/core-chrome-browser';
-import type {
-  ChromeHelpMenuLink,
-  SideNavComponent as ISideNavComponent,
+  AppDeepLinkId,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { type DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
-import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type {
+  SideNavComponent as ISideNavComponent,
+  ChromeHelpMenuLink,
+} from '@kbn/core-chrome-browser';
 
 import { Logger } from '@kbn/logging';
 import { DocTitleService } from './doc_title';
@@ -47,9 +47,9 @@ import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { RecentlyAccessedService } from './recently_accessed';
+import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
-import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -288,7 +288,7 @@ export class ChromeService {
     function initProjectNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
-      ChildrenId extends string = Id,
+      ChildrenId extends string = Id
     >(id: string, navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
       validateChromeStyle();
       projectNavigation.initNavigation(id, navigationTree$);

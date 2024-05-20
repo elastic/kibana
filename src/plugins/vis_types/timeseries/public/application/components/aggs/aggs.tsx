@@ -10,12 +10,12 @@ import React, { PureComponent } from 'react';
 
 import { EuiDraggable, EuiDroppable } from '@elastic/eui';
 
-import type { Panel, SanitizedFieldType, Series } from '../../../../common/types';
-import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
+import { Agg } from './agg';
 // @ts-ignore
 import { handleAdd, handleDelete } from '../lib/collection_actions';
 import { newMetricAggFn } from '../lib/new_metric_agg_fn';
-import { Agg } from './agg';
+import type { Panel, Series, SanitizedFieldType } from '../../../../common/types';
+import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
 const DROPPABLE_ID = 'aggs_dnd';
 

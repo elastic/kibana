@@ -8,17 +8,17 @@
 import React from 'react';
 
 import {
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
+  EuiEmptyPrompt,
+  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { docLinks } from '../doc_links';
 
-import { ENABLE_USERS_LINK, NO_USERS_DESCRIPTION, NO_USERS_TITLE } from './constants';
+import { NO_USERS_TITLE, NO_USERS_DESCRIPTION, ENABLE_USERS_LINK } from './constants';
 
 const USERS_DOCS_URL = `${docLinks.enterpriseSearchUsersAccess}`;
 

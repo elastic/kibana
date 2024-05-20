@@ -6,8 +6,8 @@
  */
 
 import { createTestConfig } from '../../../config.base';
-import { kbnServerArgs } from '../../common/fleet/default_setup';
 import { services } from '../apm_api_integration/common/services';
+import { kbnServerArgs } from '../../common/fleet/default_setup';
 
 export default createTestConfig({
   serverlessProject: 'oblt',

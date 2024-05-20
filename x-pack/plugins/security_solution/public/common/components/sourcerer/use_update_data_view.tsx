@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React, { useCallback } from 'react';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
-import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
-import { RefreshButton } from './refresh_button';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import * as i18n from './translations';
+import { RefreshButton } from './refresh_button';
+import { useAppToasts } from '../../hooks/use_app_toasts';
+import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 
 export const useUpdateDataView = (
   onOpenAndReset: () => void

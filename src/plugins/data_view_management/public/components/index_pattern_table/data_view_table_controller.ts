@@ -7,11 +7,11 @@
  */
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { isEqual } from 'lodash';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { stateSelectorFactory } from '../state_helpers';
-import { IndexPatternTableItem } from '../types';
+import { isEqual } from 'lodash';
 import { getIndexPatterns } from '../utils';
+import { IndexPatternTableItem } from '../types';
+import { stateSelectorFactory } from '../state_helpers';
 
 export interface DataViewTableControllerState {
   isLoadingDataViews: boolean;

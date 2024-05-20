@@ -8,9 +8,9 @@
 
 import moment from 'moment';
 
-import { InvalidEsCalendarIntervalError } from '../../../utils';
-import { autoInterval } from '../../_interval_options';
 import { TimeBuckets, TimeBucketsConfig } from './time_buckets';
+import { autoInterval } from '../../_interval_options';
+import { InvalidEsCalendarIntervalError } from '../../../utils';
 
 describe('TimeBuckets', () => {
   const timeBucketConfig: TimeBucketsConfig = {

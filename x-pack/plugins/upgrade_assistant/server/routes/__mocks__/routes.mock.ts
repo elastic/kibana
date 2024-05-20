@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { RequestHandler, RequestHandlerContext } from '@kbn/core/server';
 import {
-  deprecationsServiceMock,
   elasticsearchServiceMock,
   savedObjectsClientMock,
+  deprecationsServiceMock,
 } from '@kbn/core/server/mocks';
-import { AwaitedProperties } from '@kbn/utility-types';
 
 export const savedObjectsClient = savedObjectsClientMock.create();
 export const routeHandlerContextMock = {

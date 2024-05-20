@@ -1,5 +1,3 @@
-import { ObservabilityLogsAIAssistantFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
-import { dynamic } from '@kbn/shared-ux-utility';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import { dynamic } from '@kbn/shared-ux-utility';
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { ObservabilityLogsAIAssistantFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
 import { LogAIAssistantDocument, LogAIAssistantProps } from './log_ai_assistant';
 
 export const LogAIAssistant = dynamic(() => import('./log_ai_assistant'));

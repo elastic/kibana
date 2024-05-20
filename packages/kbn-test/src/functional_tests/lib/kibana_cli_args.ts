@@ -7,9 +7,9 @@
  */
 
 import Path from 'path';
-import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Package } from '@kbn/repo-packages';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 /**
  * These aliases are used to ensure the values for different flags are collected in a single set.

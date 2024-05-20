@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { HttpError, Status } from '../../../../../../../common/types/api';
+import { Status, HttpError } from '../../../../../../../common/types/api';
 import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';

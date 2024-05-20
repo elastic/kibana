@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Simulate, act } from 'react-dom/test-utils';
-import useObservable from 'react-use/lib/useObservable';
-import { Subject } from 'rxjs';
+import { act, Simulate } from 'react-dom/test-utils';
+import { useGlobalUiSetting$, useUiSetting$ } from './use_ui_setting';
 import { createKibanaReactContext } from '../context';
 import { KibanaServices } from '../context/types';
-import { useGlobalUiSetting$, useUiSetting$ } from './use_ui_setting';
+import { Subject } from 'rxjs';
+import { coreMock } from '@kbn/core/public/mocks';
+import useObservable from 'react-use/lib/useObservable';
 
 jest.mock('react-use/lib/useObservable');
 const useObservableSpy = useObservable as any as jest.SpyInstance;

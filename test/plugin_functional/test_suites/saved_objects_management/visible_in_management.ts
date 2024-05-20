@@ -7,10 +7,10 @@
  */
 
 import { join } from 'path';
-import { SavedObject } from '@kbn/core/server';
 import expect from '@kbn/expect';
-import type { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common/types';
 import type { Response } from 'supertest';
+import { SavedObject } from '@kbn/core/server';
+import type { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common/types';
 import type { PluginFunctionalProviderContext } from '../../services';
 
 function parseNdJson(input: string): Array<SavedObject<any>> {

@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { API_VERSIONS, UNINSTALL_TOKEN_ROUTES } from '../../../common/constants';
+import { UNINSTALL_TOKEN_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetConfigType } from '../../config';
 
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import type { FleetAuthzRouter } from '../../services/security';
 import {
   GetUninstallTokenRequestSchema,
   GetUninstallTokensMetadataRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
 import { getUninstallTokenHandler, getUninstallTokensMetadataHandler } from './handlers';
 

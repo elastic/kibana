@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButtonEmpty,
@@ -25,8 +25,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { indexPatterns } from '@kbn/data-plugin/public';
 import { CronEditor } from '@kbn/es-ui-shared-plugin/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 
 import { indices } from '../../../../shared_imports';
 import { documentationLinks } from '../../../services/documentation_links';

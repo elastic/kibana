@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useState } from 'react';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
-  SnapshotCustomMetricInput,
   SnapshotMetricInput,
+  SnapshotCustomMetricInput,
 } from '../../../../common/http_api/snapshot_api';
 
 export const useInventoryAlertPrefill = () => {

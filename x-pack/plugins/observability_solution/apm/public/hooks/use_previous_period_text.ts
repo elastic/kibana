@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { getComparisonOptions } from '../components/shared/time_comparison/get_comparison_options';
+import { i18n } from '@kbn/i18n';
 import { useAnyOfApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
+import { getComparisonOptions } from '../components/shared/time_comparison/get_comparison_options';
 
 const fallbackPreviousPeriodText = i18n.translate(
   'xpack.apm.chart.comparison.defaultPreviousPeriodLabel',

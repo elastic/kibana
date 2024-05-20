@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { set } from '@kbn/safer-lodash-set';
 import { constant, get } from 'lodash';
-import { IErrorObject, Rule, RuleUiAction, UserConfiguredActionConnector } from '../../types';
+import { i18n } from '@kbn/i18n';
+import { UserConfiguredActionConnector, IErrorObject, Rule, RuleUiAction } from '../../types';
 
 const filterQueryRequiredError = i18n.translate(
   'xpack.triggersActionsUI.sections.actionTypeForm.error.requiredFilterQuery',

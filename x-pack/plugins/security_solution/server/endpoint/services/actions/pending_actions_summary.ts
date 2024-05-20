@@ -7,11 +7,11 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getActionList } from '..';
+import type { EndpointMetadataService } from '../metadata';
 import type {
   ActionListApiResponse,
   EndpointPendingActions,
 } from '../../../../common/endpoint/types';
-import type { EndpointMetadataService } from '../metadata';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
@@ -86,13 +86,10 @@ export const getPendingActionsSummary = async (
         if (!endpointMetadataLastUpdated) {
           endpointMetadataLastUpdated = (
             await metadataService.findHostMetadataForFleetAgents(esClient, agentIDs)
-          ).reduce(
-            (acc, endpointMetadata) => {
-              acc[endpointMetadata.elastic.agent.id] = new Date(endpointMetadata.event.created);
-              return acc;
-            },
-            {} as Record<string, Date>
-          );
+          ).reduce((acc, endpointMetadata) => {
+            acc[endpointMetadata.elastic.agent.id] = new Date(endpointMetadata.event.created);
+            return acc;
+          }, {} as Record<string, Date>);
         }
 
         const lastEndpointMetadataEventTimestamp = endpointMetadataLastUpdated[agentID];

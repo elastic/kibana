@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getFilteredIndices } from '.';
 import { ExtensionsService } from '../../../services';
+import { getFilteredIndices } from '.';
 // @ts-ignore
 import { defaultTableState } from '../reducers/table_state';
 import { setExtensionsService } from './extension_service';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import moment from 'moment-timezone';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 
 import { TimeseriesChart } from './timeseries_chart';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactNode } from 'react';
 import React, { memo, useMemo } from 'react';
+import { EuiCallOut, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { GET_ISOLATION_SUCCESS_MESSAGE, GET_UNISOLATION_SUCCESS_MESSAGE } from './translations';
 import { useCasesFromAlerts } from '../../../../detections/containers/detection_engine/alerts/use_cases_from_alerts';
 import { CaseDetailsLink } from '../../links';
-import { GET_ISOLATION_SUCCESS_MESSAGE, GET_UNISOLATION_SUCCESS_MESSAGE } from './translations';
 
 export interface EndpointIsolateSuccessProps {
   hostName: string;

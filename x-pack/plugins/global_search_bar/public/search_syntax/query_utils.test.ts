@@ -6,7 +6,7 @@
  */
 
 import { Query } from '@elastic/eui';
-import { applyAliases, getFieldValueMap, getSearchTerm } from './query_utils';
+import { getSearchTerm, getFieldValueMap, applyAliases } from './query_utils';
 import { FilterValues } from './types';
 
 describe('getSearchTerm', () => {

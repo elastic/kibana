@@ -6,24 +6,22 @@
  */
 
 import type { ISavedObjectsRepository, SavedObjectsFindResponse } from '@kbn/core/server';
-import { fromKueryExpression } from '@kbn/es-query';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { fromKueryExpression } from '@kbn/es-query';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   OWNERS,
 } from '../../../common/constants';
-import type { CasePersistedAttributes } from '../../common/types/case';
-import { CasePersistedStatus } from '../../common/types/case';
 import type {
-  AttachmentAggregationResult,
-  CaseAggregationResult,
-  CasesTelemetry,
   CollectTelemetryDataParams,
-  FileAttachmentAggregationResults,
-  LatestDates,
+  CasesTelemetry,
   ReferencesAggregation,
+  LatestDates,
+  CaseAggregationResult,
+  AttachmentAggregationResult,
+  FileAttachmentAggregationResults,
 } from '../types';
 import {
   findValueInBuckets,
@@ -37,6 +35,8 @@ import {
   getReferencesAggregationQuery,
   getSolutionValues,
 } from './utils';
+import type { CasePersistedAttributes } from '../../common/types/case';
+import { CasePersistedStatus } from '../../common/types/case';
 
 export const getLatestCasesDates = async ({
   savedObjectsClient,

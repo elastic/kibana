@@ -7,9 +7,9 @@
 
 import {
   DATE_PICKER_APPLY_BUTTON_TIMELINE,
-  DATE_PICKER_START_DATE_POPOVER_BUTTON,
   GET_DATE_PICKER_END_DATE_POPOVER_BUTTON,
   GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
+  DATE_PICKER_START_DATE_POPOVER_BUTTON,
   GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
 } from '../../../screens/date_picker';
 import { HOSTS_NAMES } from '../../../screens/hosts/all_hosts';
@@ -19,22 +19,22 @@ import {
   EXPLORE_PANEL_BTN,
   HOSTS,
   KQL_INPUT,
-  LOADING_INDICATOR,
   NETWORK,
+  LOADING_INDICATOR,
   openNavigationPanel as toggleNavigationPanel,
 } from '../../../screens/security_header';
 import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../../screens/timeline';
 
+import { login } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import {
-  setEndDate,
-  setStartDate,
   updateDates,
+  setStartDate,
+  setEndDate,
   updateTimelineDates,
 } from '../../../tasks/date_picker';
 import { openFirstHostDetails, waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 import { openAllHosts } from '../../../tasks/hosts/main';
-import { login } from '../../../tasks/login';
-import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { waitForIpsTableToBeLoaded } from '../../../tasks/network/flows';
 import {

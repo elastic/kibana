@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mockProcessMap } from '../mocks/constants/session_view_process.mock';
 import { sortProcesses } from './sort_processes';
+import { mockProcessMap } from '../mocks/constants/session_view_process.mock';
 
 describe('sortProcesses(a, b)', () => {
   it('sorts processes in ascending order by start time', () => {

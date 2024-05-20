@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { mapValues } from 'lodash';
 import {
-  ExpressionFunctionDefinition,
   ExpressionValueBoxed,
   typeSpecs,
+  ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import { mapValues } from 'lodash';
 
-type DefaultFnResultType = (typeof typeSpecs)[number] &
+type DefaultFnResultType = typeof typeSpecs[number] &
   ExpressionFunctionDefinition<
     string,
     any,

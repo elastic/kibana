@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import React from 'react';
-import { RightPanelContext } from '../context';
-import { useExpandSection } from '../hooks/use_expand_section';
-import { mockContextValue } from '../mocks/mock_context';
-import { ResponseSection } from './response_section';
 import {
   RESPONSE_BUTTON_TEST_ID,
   RESPONSE_SECTION_CONTENT_TEST_ID,
   RESPONSE_SECTION_HEADER_TEST_ID,
 } from './test_ids';
+import { RightPanelContext } from '../context';
+import { mockContextValue } from '../mocks/mock_context';
+import { ResponseSection } from './response_section';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { useExpandSection } from '../hooks/use_expand_section';
 
 jest.mock('../hooks/use_expand_section');
 

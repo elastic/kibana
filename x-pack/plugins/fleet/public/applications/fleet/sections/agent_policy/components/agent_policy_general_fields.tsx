@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactElement } from 'react';
 import React, { useState } from 'react';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
-import type { AgentPolicy, NewAgentPolicy } from '../../../types';
+import type { NewAgentPolicy, AgentPolicy } from '../../../types';
 
 import type { ValidationResults } from './agent_policy_validation';
 

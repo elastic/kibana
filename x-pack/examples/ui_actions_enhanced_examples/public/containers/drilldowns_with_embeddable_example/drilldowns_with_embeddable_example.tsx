@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
-  EuiButton,
-  EuiCode,
-  EuiContextMenu,
-  EuiContextMenuPanelDescriptor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiPopover,
-  EuiSpacer,
   EuiText,
+  EuiSpacer,
+  EuiContextMenuPanelDescriptor,
+  EuiButton,
+  EuiPopover,
+  EuiContextMenu,
+  EuiFlyout,
+  EuiCode,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { EmbeddableRoot, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
-import React from 'react';
-import { useUiActions } from '../../context';
+import { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
 import { ButtonEmbeddable } from '../../embeddables/button_embeddable';
-import { SampleApp1ClickContext, SampleMlJob } from '../../triggers';
+import { useUiActions } from '../../context';
 
 export const job: SampleMlJob = {
   job_id: '123',

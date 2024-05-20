@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
+import React from 'react';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { getActivePaletteName } from '@kbn/coloring';
+import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 export function PalettePicker({
   palettes,

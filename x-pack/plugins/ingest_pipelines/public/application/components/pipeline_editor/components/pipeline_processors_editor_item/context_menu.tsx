@@ -8,7 +8,7 @@
 import classNames from 'classnames';
 import React, { FunctionComponent, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiContextMenuItem, EuiContextMenuPanel, EuiPopover, EuiButtonIcon } from '@elastic/eui';
 
 import { i18nTexts } from './i18n_texts';
 

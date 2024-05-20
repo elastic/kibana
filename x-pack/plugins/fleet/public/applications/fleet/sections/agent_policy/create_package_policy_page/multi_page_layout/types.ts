@@ -8,12 +8,12 @@
 import type React from 'react';
 
 import type {
+  RegistryPolicyTemplate,
+  PackageInfo,
   AgentPolicy,
-  DownloadSource,
   EnrollmentAPIKey,
   FleetProxy,
-  PackageInfo,
-  RegistryPolicyTemplate,
+  DownloadSource,
 } from '../../../../types';
 
 export interface MultiPageStep {

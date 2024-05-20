@@ -6,18 +6,18 @@
  */
 
 import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { SessionView } from '.';
-import { GET_TOTAL_IO_BYTES_ROUTE, PROCESS_EVENTS_ROUTE } from '../../../common/constants';
 import {
   TEST_PROCESS_INDEX,
   TEST_SESSION_START_TIME,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/session_view_process_events.mock';
 import { sessionViewProcessEventsMergedMock } from '../../../common/mocks/responses/session_view_process_events_merged.mock';
-import { useDateFormat } from '../../hooks';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { SessionView } from '.';
+import userEvent from '@testing-library/user-event';
+import { useDateFormat } from '../../hooks';
+import { GET_TOTAL_IO_BYTES_ROUTE, PROCESS_EVENTS_ROUTE } from '../../../common/constants';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;

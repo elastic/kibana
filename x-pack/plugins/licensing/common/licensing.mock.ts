@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ILicense, PublicLicense, PublicFeatures } from './types';
 import { License } from './license';
-import { ILicense, PublicFeatures, PublicLicense } from './types';
 
 function createLicense({
   license = {},

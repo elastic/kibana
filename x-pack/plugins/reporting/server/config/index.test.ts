@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { config } from '.';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { configDeprecationsMock } from '@kbn/core/server/mocks';
-import { config } from '.';
 
 const CONFIG_PATH = 'xpack.reporting';
 

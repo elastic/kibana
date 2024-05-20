@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { DetailPanelMetadataTab } from '.';
-import type {
-  ProcessEventCloud,
-  ProcessEventContainer,
-  ProcessEventHost,
-  ProcessEventOrchestrator,
-} from '../../../common';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import type {
+  ProcessEventHost,
+  ProcessEventContainer,
+  ProcessEventOrchestrator,
+  ProcessEventCloud,
+} from '../../../common';
+import { DetailPanelMetadataTab } from '.';
 
 const TEST_ARCHITECTURE = 'x86_64';
 const TEST_HOSTNAME = 'host-james-fleet-714-2';

@@ -9,33 +9,33 @@ import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { invariant } from '../../../../../common/utils/invariant';
 import type { ConfigType } from '../../../../config';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginCoreStartDependencies,
   SecuritySolutionPluginSetupDependencies,
   SecuritySolutionPluginStartDependencies,
 } from '../../../../plugin_contract';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
 
 import type { IDetectionEngineHealthClient } from './detection_engine_health/detection_engine_health_client_interface';
-import { createRuleExecutionLogClientForExecutors } from './rule_execution_log/client_for_executors/client';
-import type { IRuleExecutionLogForExecutors } from './rule_execution_log/client_for_executors/client_interface';
-import { createRuleExecutionLogClientForRoutes } from './rule_execution_log/client_for_routes/client';
 import type { IRuleExecutionLogForRoutes } from './rule_execution_log/client_for_routes/client_interface';
+import { createRuleExecutionLogClientForRoutes } from './rule_execution_log/client_for_routes/client';
+import type { IRuleExecutionLogForExecutors } from './rule_execution_log/client_for_executors/client_interface';
+import { createRuleExecutionLogClientForExecutors } from './rule_execution_log/client_for_executors/client';
 
+import { registerEventLogProvider } from './event_log/register_event_log_provider';
 import { createDetectionEngineHealthClient } from './detection_engine_health/detection_engine_health_client';
 import { createEventLogHealthClient } from './detection_engine_health/event_log/event_log_health_client';
 import { createRuleObjectsHealthClient } from './detection_engine_health/rule_objects/rule_objects_health_client';
 import { createRuleSpacesClient } from './detection_engine_health/rule_spaces/rule_spaces_client';
-import { registerEventLogProvider } from './event_log/register_event_log_provider';
 import { createEventLogReader } from './rule_execution_log/event_log/event_log_reader';
 import { createEventLogWriter } from './rule_execution_log/event_log/event_log_writer';
 import { fetchRuleExecutionSettings } from './rule_execution_log/execution_settings/fetch_rule_execution_settings';
 import type {
-  DetectionEngineHealthClientParams,
-  IRuleMonitoringService,
   RuleExecutionLogClientForExecutorsParams,
   RuleExecutionLogClientForRoutesParams,
+  IRuleMonitoringService,
+  DetectionEngineHealthClientParams,
 } from './service_interface';
 
 export const createRuleMonitoringService = (

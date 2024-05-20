@@ -10,10 +10,10 @@ import type { Optional } from 'utility-types';
 
 import type { ESTermQuery } from '../../../../../common/typed_json';
 
-import type { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 import type { NavTab } from '../../../../common/components/navigation/types';
-import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
+import type { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 import type { networkModel } from '../../store';
+import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 
 export interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   endDate: string;

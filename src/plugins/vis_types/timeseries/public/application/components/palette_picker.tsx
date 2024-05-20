@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiColorPalettePicker } from '@elastic/eui';
-import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
-import { getActivePaletteName } from '@kbn/coloring';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { PALETTES } from '../../../common/enums';
-import { computeGradientFinalColor } from '../lib/compute_gradient_final_color';
+import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
+import { getActivePaletteName } from '@kbn/coloring';
+import { EuiColorPalettePicker } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { rainbowColors } from '../lib/rainbow_colors';
+import { computeGradientFinalColor } from '../lib/compute_gradient_final_color';
+import { PALETTES } from '../../../common/enums';
 
 export interface PalettePickerProps {
   activePalette?: PaletteOutput;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiBadgeProps } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core-application-browser';
 import { FunctionComponent, ReactNode } from 'react';
+import { ApplicationStart } from '@kbn/core-application-browser';
+import { EuiBadgeProps } from '@elastic/eui';
 import { IndexDetailsTab } from '../home_sections';
 import { Index } from '../types';
 

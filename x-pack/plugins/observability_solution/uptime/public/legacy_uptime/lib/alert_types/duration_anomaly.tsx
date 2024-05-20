@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React from 'react';
+import moment from 'moment';
 
-import { ALERT_END, ALERT_REASON, ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_REASON } from '@kbn/rule-data-utils';
 
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import { AlertTypeInitializer } from '.';
+import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 import { DurationAnomalyTranslations } from '../../../../common/rules/legacy_uptime/translations';
-import { getMonitorRouteFromMonitorId } from '../../../../common/utils/get_monitor_url';
 
 const { defaultActionMessage, defaultRecoveryMessage, description } = DurationAnomalyTranslations;
 const DurationAnomalyAlert = React.lazy(() => import('./lazy_wrapper/duration_anomaly'));

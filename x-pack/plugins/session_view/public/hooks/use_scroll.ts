@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { useEffect } from 'react';
+import _ from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../common/constants';
 
 const SCROLL_END_BUFFER_HEIGHT = 20;

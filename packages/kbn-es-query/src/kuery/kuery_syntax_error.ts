@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { repeat, uniq } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 const endOfInputText = i18n.translate('esQuery.kql.errors.endOfInputText', {
   defaultMessage: 'end of input',

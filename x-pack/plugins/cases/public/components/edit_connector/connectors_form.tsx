@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import {
   Form,
   UseField,
   useForm,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useMemo } from 'react';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import type { CaseConnector, ConnectorTypeFields } from '../../../common/types/domain';
 import type { CaseConnectors, CaseUI } from '../../../common/ui/types';
-import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
-import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import type { CaseActionConnector } from '../types';
 import {
@@ -28,7 +25,10 @@ import {
   getConnectorsFormSerializer,
   getConnectorsFormValidators,
 } from '../utils';
+import { ConnectorSelector } from '../connector_selector/form';
+import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import * as i18n from './translations';
+import type { ConnectorTypeFields, CaseConnector } from '../../../common/types/domain';
 
 interface Props {
   caseData: CaseUI;

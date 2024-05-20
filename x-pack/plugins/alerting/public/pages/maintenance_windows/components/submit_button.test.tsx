@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
+import { fireEvent, waitFor } from '@testing-library/react';
 
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { SubmitButton } from './submit_button';
 import type { FormProps } from './schema';
 import { schema } from './schema';
-import { SubmitButton } from './submit_button';
+import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 
 describe('SubmitButton', () => {
   const onSubmit = jest.fn();

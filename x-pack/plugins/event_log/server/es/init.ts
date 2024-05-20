@@ -9,8 +9,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
 import { groupBy } from 'lodash';
 import pRetry, { FailedAttemptError } from 'p-retry';
-import { EsContext } from './context';
 import { getIndexTemplate } from './documents';
+import { EsContext } from './context';
 
 const MAX_RETRY_DELAY = 30000;
 

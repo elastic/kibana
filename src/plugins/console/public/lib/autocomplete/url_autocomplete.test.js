@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { ListComponent, URL_PATH_END_MARKER, UrlPatternMatcher } from './components';
+import { URL_PATH_END_MARKER, UrlPatternMatcher, ListComponent } from './components';
 import { populateContext } from './engine';
 
 describe('Url autocomplete', () => {

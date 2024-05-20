@@ -7,8 +7,8 @@
  */
 
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { setExpressions } from './services';
 import { ExpressionsStart } from './types';
+import { setExpressions } from './services';
 
 export interface StartDeps {
   expressions: ExpressionsStart;

@@ -22,8 +22,8 @@ import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { getExceptionList } from './get_exception_list';
 import { transformSavedObjectsToFoundExceptionListItem } from './utils';
+import { getExceptionList } from './get_exception_list';
 import { getExceptionListsItemFilter } from './utils/get_exception_lists_item_filter';
 
 interface FindExceptionListItemsPointInTimeFinderOptions {

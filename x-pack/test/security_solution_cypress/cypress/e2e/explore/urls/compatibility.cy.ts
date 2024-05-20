@@ -8,15 +8,15 @@
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
+import { ALERTS_URL, CREATE_RULE_URL } from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+import { ABSOLUTE_DATE_RANGE } from '../../../urls/state';
 import {
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
   GET_DATE_PICKER_END_DATE_POPOVER_BUTTON,
 } from '../../../screens/date_picker';
-import { editRuleUrl } from '../../../urls/edit_rule';
-import { ALERTS_URL, CREATE_RULE_URL } from '../../../urls/navigation';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
-import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
-import { ABSOLUTE_DATE_RANGE } from '../../../urls/state';
+import { editRuleUrl } from '../../../urls/edit_rule';
 
 const LEGACY_DETECTIONS_URL_1 = '/app/siem#/detections';
 const LEGACY_DETECTIONS_URL_2 = '/app/security/detections';

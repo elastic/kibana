@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiConfirmModal } from '@elastic/eui';
 
-import { arrify } from '../../../common/services/utils';
 import { deleteAutoFollowPattern } from '../store/actions';
+import { arrify } from '../../../common/services/utils';
 
 class AutoFollowPatternDeleteProviderUi extends PureComponent {
   state = {

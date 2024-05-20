@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
+import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/mock';
 import {
   createCase,
   createComment,
+  getCasesByAlert,
   deleteAllCaseItems,
   getAuthWithSuperUser,
-  getCasesByAlert,
 } from '../../../../common/lib/api';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/mock';
 import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export

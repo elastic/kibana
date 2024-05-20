@@ -11,8 +11,8 @@ import { RangeValues } from '@kbn/vis-default-editor-plugin/public';
 import { gaugeVisType } from '@kbn/vis-type-gauge-plugin/public';
 import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 
-import { toExpressionAst } from './to_ast';
 import { Alignment, GaugeType } from './types';
+import { toExpressionAst } from './to_ast';
 
 export interface Gauge extends ColorSchemaParams {
   backStyle: 'Full';

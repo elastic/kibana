@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { resetRetryState, delayRetryState } from './retry_state';
 import { State } from '../state';
-import { delayRetryState, resetRetryState } from './retry_state';
 
 const createState = (parts: Record<string, any>) => {
   return parts as State;

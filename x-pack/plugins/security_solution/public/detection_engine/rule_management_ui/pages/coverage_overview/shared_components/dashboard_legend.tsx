@@ -6,12 +6,12 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiFacetButton,
-  EuiFlexGroup,
+  EuiBetaBadge,
   EuiPanel,
-  EuiSpacer,
+  EuiFlexGroup,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { coverageOverviewCardColorThresholds, coverageOverviewLegendWidth } from '../constants';

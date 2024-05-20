@@ -6,7 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { pageObjects, services } from './ftr_provider_context';
+import { services, pageObjects } from './ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

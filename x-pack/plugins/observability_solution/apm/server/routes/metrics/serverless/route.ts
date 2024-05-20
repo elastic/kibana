@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
 import {
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
 } from '@kbn/observability-plugin/common';
-import * as t from 'io-ts';
-import { Coordinate } from '../../../../typings/timeseries';
-import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt, transactionDataSourceRt } from '../../default_api_types';
-import { FetchAndTransformMetrics } from '../fetch_and_transform_metrics';
+import { getServerlessAgentMetricsCharts } from './get_serverless_agent_metrics_chart';
 import {
   ActiveInstanceOverview,
   getServerlessActiveInstancesOverview,
 } from './get_active_instances_overview';
-import { getActiveInstancesTimeseries } from './get_active_instances_timeseries';
-import { getServerlessAgentMetricsCharts } from './get_serverless_agent_metrics_chart';
 import {
-  ServerlessFunctionsOverviewResponse,
   getServerlessFunctionsOverview,
+  ServerlessFunctionsOverviewResponse,
 } from './get_serverless_functions_overview';
 import {
   AWSLambdaPriceFactor,
-  ServerlessSummaryResponse,
   getServerlessSummary,
+  ServerlessSummaryResponse,
 } from './get_serverless_summary';
+import { getActiveInstancesTimeseries } from './get_active_instances_timeseries';
+import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
+import { FetchAndTransformMetrics } from '../fetch_and_transform_metrics';
+import { Coordinate } from '../../../../typings/timeseries';
 
 const serverlessMetricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',

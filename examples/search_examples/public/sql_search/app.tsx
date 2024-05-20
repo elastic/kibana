@@ -15,20 +15,20 @@ import {
   EuiForm,
   EuiPageTemplate,
   EuiPanel,
-  EuiSpacer,
   EuiSuperUpdateButton,
   EuiText,
   EuiTextArea,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
 import {
   SQL_SEARCH_STRATEGY,
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
 } from '@kbn/data-plugin/common';
-import { DataPublicPluginStart, isRunningResponse } from '@kbn/data-plugin/public';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];

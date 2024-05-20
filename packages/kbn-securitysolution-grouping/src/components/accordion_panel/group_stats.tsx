@@ -15,11 +15,11 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import React, { useCallback, useMemo, useState } from 'react';
+import { Filter } from '@kbn/es-query';
+import { StatRenderer } from '../types';
 import { statsContainerCss } from '../styles';
 import { TAKE_ACTION } from '../translations';
-import { StatRenderer } from '../types';
 
 interface GroupStatsProps<T> {
   bucketKey: string;

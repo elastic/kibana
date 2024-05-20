@@ -9,19 +9,19 @@
 import React, { useEffect, useState } from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
+import { emptyField } from '../../helpers/field_validators';
+import { ComboBoxField } from '../../components';
+import { Form, UseField, UseArray } from '../components';
 import {
-  FieldConfig,
-  FieldHook,
-  FormHook,
   FormSubmitHandler,
   OnUpdateHandler,
-  VALIDATION_TYPES,
+  FormHook,
+  FieldHook,
   ValidationFunc,
+  FieldConfig,
+  VALIDATION_TYPES,
 } from '..';
-import { ComboBoxField } from '../../components';
-import { emptyField } from '../../helpers/field_validators';
-import { Form, UseArray, UseField } from '../components';
-import { TestBed, getRandomString, registerTestBed } from '../shared_imports';
 import { useForm } from './use_form';
 
 interface MyForm {

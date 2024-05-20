@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -17,14 +18,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
-import { sendCreateAgentPolicy, useAuthz, useStartServices } from '../../../hooks';
+import { sendCreateAgentPolicy, useStartServices, useAuthz } from '../../../hooks';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../common/services/generate_new_agent_policy';
 

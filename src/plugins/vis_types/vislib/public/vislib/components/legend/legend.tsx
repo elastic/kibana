@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
-import { compact, every, isUndefined, map, uniqBy } from 'lodash';
 import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
+import classNames from 'classnames';
+import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
-import { EuiIcon, EuiPopoverProps, htmlIdGenerator, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
+import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
 import { getDataActions } from '../../../services';
-import { BasicVislibParams } from '../../../types';
-import { VisLegendItem } from './legend_item';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
+import { VisLegendItem } from './legend_item';
+import { BasicVislibParams } from '../../../types';
 
 export interface VisLegendProps {
   vislibVis: any;

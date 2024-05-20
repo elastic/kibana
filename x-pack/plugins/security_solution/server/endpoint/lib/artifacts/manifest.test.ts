@@ -8,7 +8,7 @@
 import type { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import type { InternalArtifactCompleteSchema } from '../../schemas';
 import { getArtifactId } from './common';
-import { Manifest, isEmptyManifestDiff } from './manifest';
+import { isEmptyManifestDiff, Manifest } from './manifest';
 import { getMockArtifacts, toArtifactRecords } from './mocks';
 
 describe('manifest', () => {

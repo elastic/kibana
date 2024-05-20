@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
-  DATASET_QUALITY_LOCATOR_ID,
-  DatasetQualityLocatorParams,
-} from '@kbn/deeplinks-observability/locators';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import {
+  DatasetQualityLocatorParams,
+  DATASET_QUALITY_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
 import { DatasetQualityLocatorDependencies } from './types';
 import { constructDatasetQualityLocatorPath } from './utils';
 

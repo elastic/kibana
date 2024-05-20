@@ -9,9 +9,9 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { documentationService } from '../../../../../services/documentation';
 import { ParameterName } from '../../../types';
 import { EditFieldFormRow } from '../fields/edit_field';
+import { documentationService } from '../../../../../services/documentation';
 
 interface Props {
   configPath?: ParameterName;

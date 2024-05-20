@@ -7,8 +7,8 @@
  */
 
 import { DataViewBase } from '../../es_query';
-import { fields } from '../stubs/fields.mocks';
 import { buildExistsFilter, getExistsFilterField } from './exists_filter';
+import { fields } from '../stubs/fields.mocks';
 
 describe('exists filter', function () {
   const indexPattern: DataViewBase = {

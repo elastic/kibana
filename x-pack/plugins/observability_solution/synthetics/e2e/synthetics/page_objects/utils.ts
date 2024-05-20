@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Page, expect } from '@elastic/synthetics';
+import { expect, Page } from '@elastic/synthetics';
 
 export async function isEuiFormFieldInValid(locator: ReturnType<Page['locator']>) {
   const elementHandle = await locator.elementHandle();

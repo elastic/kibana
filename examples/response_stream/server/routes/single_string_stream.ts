@@ -9,8 +9,8 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 
-import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 import { simpleStringStreamRequestBodySchema } from '../../common/api/simple_string_stream';
+import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 
 function timeout(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

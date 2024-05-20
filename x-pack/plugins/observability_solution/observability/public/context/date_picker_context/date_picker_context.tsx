@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { parse } from 'query-string';
 import React, { createContext, useState, useMemo, useCallback } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
-import { ObservabilityPublicPluginsStart, fromQuery, toQuery } from '../..';
+import { useLocation, useHistory } from 'react-router-dom';
+import { parse } from 'query-string';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { fromQuery, ObservabilityPublicPluginsStart, toQuery } from '../..';
 import { getAbsoluteTime } from '../../utils/date';
 
 export interface DatePickerContextValue {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
-import { waitFor } from '@testing-library/react';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
+import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
+import { ObservabilityAlertSearchBarProps, Services } from './types';
+import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { render } from '../../utils/test_helper';
-import { ObservabilityAlertSearchBar } from './alert_search_bar';
-import { ObservabilityAlertSearchBarProps, Services } from './types';
 
 const getAlertsSearchBarMock = jest.fn();
 const ALERT_SEARCH_BAR_DATA_TEST_SUBJ = 'alerts-search-bar';

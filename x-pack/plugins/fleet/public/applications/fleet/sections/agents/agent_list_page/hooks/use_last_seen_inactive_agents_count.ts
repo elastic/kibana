@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useStartServices } from '../../../../../../hooks';
 

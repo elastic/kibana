@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TelemetryAggregatedStats } from './get_stats_with_xpack';
 import { isClusterOptedIn } from './is_cluster_opted_in';
+import type { TelemetryAggregatedStats } from './get_stats_with_xpack';
 
 const createMockClusterUsage = (plugins: unknown) => {
   return {

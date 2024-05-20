@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
-import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
-import { ExpandablePanel } from './expandable_panel';
+import { render } from '@testing-library/react';
 import {
-  EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_LEFT_SECTION_TEST_ID,
   EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID,
+  EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from './test_ids';
+import { ThemeProvider } from 'styled-components';
+import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
+import { ExpandablePanel } from './expandable_panel';
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 const TEST_ID = 'test-id';

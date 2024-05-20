@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { i18n } from '@kbn/i18n';
 import type { FieldDefinition } from '@kbn/management-settings-types';
-import { UnsavedFieldChange } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { UnsavedFieldChange } from '@kbn/management-settings-types';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { useServices } from './services';
 
 export interface UseSaveParameters {

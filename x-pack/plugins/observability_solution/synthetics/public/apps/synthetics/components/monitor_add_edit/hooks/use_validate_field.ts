@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComponentProps, useEffect, useState } from 'react';
+import { useEffect, useState, ComponentProps } from 'react';
 import { Controller, ControllerFieldState, useFormContext } from 'react-hook-form';
 import { FieldMeta, FormConfig } from '../types';
 

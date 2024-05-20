@@ -6,8 +6,8 @@
  */
 
 import { TemplateDeserialized, TemplateSerialized } from '@kbn/index-management-plugin/common';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { API_BASE_PATH } from '../constants';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function templatesApi(getService: FtrProviderContext['getService']) {
   const supertest = getService('supertest');

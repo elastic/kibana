@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
-import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
-import { AttachmentRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import {
-  ActionsAttachmentPayload,
-  AlertAttachmentPayload,
-  Attachment,
-  AttachmentType,
   Case,
-  CaseSeverity,
+  AttachmentType,
   CaseStatuses,
-  ExternalReferenceNoSOAttachmentPayload,
-  ExternalReferenceSOAttachmentPayload,
+  CaseSeverity,
   ExternalReferenceStorageType,
   FileAttachmentMetadata,
-  PersistableStateAttachmentPayload,
+  AlertAttachmentPayload,
   UserCommentAttachmentPayload,
+  ActionsAttachmentPayload,
+  ExternalReferenceNoSOAttachmentPayload,
+  ExternalReferenceSOAttachmentPayload,
+  PersistableStateAttachmentPayload,
+  Attachment,
 } from '@kbn/cases-plugin/common/types/domain';
+import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
+import { AttachmentRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 /**

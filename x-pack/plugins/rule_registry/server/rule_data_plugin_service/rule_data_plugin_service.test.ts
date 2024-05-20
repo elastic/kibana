@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { type Subject, ReplaySubject } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
+import { RuleDataService } from './rule_data_plugin_service';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { ReplaySubject, type Subject } from 'rxjs';
+import { Dataset } from './index_options';
 import { RuleDataClient } from '../rule_data_client/rule_data_client';
 import { createRuleDataClientMock as mockCreateRuleDataClient } from '../rule_data_client/rule_data_client.mock';
-import { Dataset } from './index_options';
-import { RuleDataService } from './rule_data_plugin_service';
 
-import type { DataStreamAdapter } from '@kbn/alerting-plugin/server';
 import { createDataStreamAdapterMock } from '@kbn/alerting-plugin/server/mocks';
+import type { DataStreamAdapter } from '@kbn/alerting-plugin/server';
 
 jest.mock('../rule_data_client/rule_data_client', () => ({
   RuleDataClient: jest.fn().mockImplementation(() => mockCreateRuleDataClient()),

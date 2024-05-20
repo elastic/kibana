@@ -7,19 +7,19 @@
  */
 
 import Path from 'path';
-import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import fs from 'fs/promises';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../jest_matchers';
+import { SavedObjectsModelVersionMap, SavedObject } from '@kbn/core-saved-objects-server';
+import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import { delay, createType } from '../test_utils';
+import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
 import {
-  SavedObjectTypeRegistry,
   SavedObjectsSerializer,
+  SavedObjectTypeRegistry,
   modelVersionToVirtualVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { getOutdatedDocumentsQuery } from '@kbn/core-saved-objects-migration-server-internal/src/zdt/utils';
-import { SavedObject, SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { createType, delay } from '../test_utils';
 
 export const logFilePath = Path.join(__dirname, 'outdated_doc_query.test.log');
 

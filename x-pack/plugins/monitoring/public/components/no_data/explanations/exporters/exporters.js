@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiCode, EuiHorizontalRule, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { EuiCode, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { ChangesNeeded, CloudDeployment } from '../../blurbs';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function ExplainExporters({ reason }) {
   const { context, property, data } = reason;

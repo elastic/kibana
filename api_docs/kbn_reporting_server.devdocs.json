@@ -71,7 +71,9 @@
             "tags": [],
             "label": "jobContentEncoding",
             "description": [],
-            "signature": ["\"base64\" | \"csv\" | undefined"],
+            "signature": [
+              "\"base64\" | \"csv\" | undefined"
+            ],
             "path": "packages/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -83,7 +85,9 @@
             "tags": [],
             "label": "jobContentExtension",
             "description": [],
-            "signature": ["\"csv\" | \"png\" | \"pdf\""],
+            "signature": [
+              "\"csv\" | \"png\" | \"pdf\""
+            ],
             "path": "packages/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -134,7 +138,9 @@
                 "tags": [],
                 "label": "jobParams",
                 "description": [],
-                "signature": ["JobParamsType"],
+                "signature": [
+                  "JobParamsType"
+                ],
                 "path": "packages/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -238,7 +244,9 @@
                 "tags": [],
                 "label": "payload",
                 "description": [],
-                "signature": ["TaskPayloadType"],
+                "signature": [
+                  "TaskPayloadType"
+                ],
                 "path": "packages/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -250,7 +258,9 @@
                 "tags": [],
                 "label": "taskInstanceFields",
                 "description": [],
-                "signature": ["{ startedAt: Date | null; retryAt: Date | null; }"],
+                "signature": [
+                  "{ startedAt: Date | null; retryAt: Date | null; }"
+                ],
                 "path": "packages/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -282,7 +292,9 @@
                 "tags": [],
                 "label": "stream",
                 "description": [],
-                "signature": ["Writable"],
+                "signature": [
+                  "Writable"
+                ],
                 "path": "packages/kbn-reporting/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -310,7 +322,9 @@
             "tags": [],
             "label": "setupDeps",
             "description": [],
-            "signature": ["SetupDepsType"],
+            "signature": [
+              "SetupDepsType"
+            ],
             "path": "packages/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -322,7 +336,9 @@
             "tags": [],
             "label": "startDeps",
             "description": [],
-            "signature": ["StartDepsType"],
+            "signature": [
+              "StartDepsType"
+            ],
             "path": "packages/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -363,7 +379,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -474,7 +492,9 @@
             "tags": [],
             "label": "setup",
             "description": [],
-            "signature": ["(setupDeps: SetupDepsType) => void"],
+            "signature": [
+              "(setupDeps: SetupDepsType) => void"
+            ],
             "path": "packages/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -486,7 +506,9 @@
                 "tags": [],
                 "label": "setupDeps",
                 "description": [],
-                "signature": ["SetupDepsType"],
+                "signature": [
+                  "SetupDepsType"
+                ],
                 "path": "packages/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -502,7 +524,9 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": ["(startDeps: StartDepsType) => void"],
+            "signature": [
+              "(startDeps: StartDepsType) => void"
+            ],
             "path": "packages/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -514,7 +538,9 @@
                 "tags": [],
                 "label": "startDeps",
                 "description": [],
-                "signature": ["StartDepsType"],
+                "signature": [
+                  "StartDepsType"
+                ],
                 "path": "packages/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -726,7 +752,9 @@
                 "tags": [],
                 "label": "spaceId",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-reporting/server/export_type.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -763,7 +791,10 @@
             "tags": [],
             "label": "getServerInfo",
             "description": [],
-            "signature": ["() => ", "ReportingServerInfo"],
+            "signature": [
+              "() => ",
+              "ReportingServerInfo"
+            ],
             "path": "packages/kbn-reporting/server/export_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -782,7 +813,10 @@
         "tags": [],
         "label": "cryptoFactory",
         "description": [],
-        "signature": ["(encryptionKey: string | undefined) => ", "Crypto"],
+        "signature": [
+          "(encryptionKey: string | undefined) => ",
+          "Crypto"
+        ],
         "path": "packages/kbn-reporting/server/crypto.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -794,7 +828,9 @@
             "tags": [],
             "label": "encryptionKey",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/server/crypto.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -833,7 +869,9 @@
             "tags": [],
             "label": "encryptionKey",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/server/decrypt_job_headers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -846,7 +884,9 @@
             "tags": [],
             "label": "headers",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-reporting/server/decrypt_job_headers.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -955,7 +995,9 @@
             "tags": [],
             "label": "serverInfo",
             "description": [],
-            "signature": ["ReportingServerInfo"],
+            "signature": [
+              "ReportingServerInfo"
+            ],
             "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -968,7 +1010,9 @@
             "tags": [],
             "label": "spaceId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -981,7 +1025,9 @@
             "tags": [],
             "label": "forceNow",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-reporting/server/get_full_redirect_app_url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1021,7 +1067,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["T"],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1282,7 +1330,9 @@
             "description": [
               "\nUsed to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls"
             ],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1310,7 +1360,9 @@
             "tags": [],
             "label": "min",
             "description": [],
-            "signature": ["string | number | Date | null | undefined"],
+            "signature": [
+              "string | number | Date | null | undefined"
+            ],
             "path": "packages/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1322,7 +1374,9 @@
             "tags": [],
             "label": "max",
             "description": [],
-            "signature": ["string | number | Date | null | undefined"],
+            "signature": [
+              "string | number | Date | null | undefined"
+            ],
             "path": "packages/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1365,7 +1419,9 @@
         "tags": [],
         "label": "API_USAGE_COUNTER_TYPE",
         "description": [],
-        "signature": ["\"reportingApi\""],
+        "signature": [
+          "\"reportingApi\""
+        ],
         "path": "packages/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1378,7 +1434,9 @@
         "tags": [],
         "label": "API_USAGE_ERROR_TYPE",
         "description": [],
-        "signature": ["\"reportingApiError\""],
+        "signature": [
+          "\"reportingApiError\""
+        ],
         "path": "packages/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1430,7 +1488,9 @@
             "tags": [],
             "label": "jobParams",
             "description": [],
-            "signature": ["JobParamsType"],
+            "signature": [
+              "JobParamsType"
+            ],
             "path": "packages/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1495,7 +1555,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"reporting\""],
+        "signature": [
+          "\"reporting\""
+        ],
         "path": "packages/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1508,7 +1570,9 @@
         "tags": [],
         "label": "REPORTING_SYSTEM_INDEX",
         "description": [],
-        "signature": ["\".reporting\""],
+        "signature": [
+          "\".reporting\""
+        ],
         "path": "packages/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1521,7 +1585,9 @@
         "tags": [],
         "label": "REPORTING_TRANSACTION_TYPE",
         "description": [],
-        "signature": ["\"reporting\""],
+        "signature": [
+          "\"reporting\""
+        ],
         "path": "packages/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1597,7 +1663,9 @@
             "tags": [],
             "label": "payload",
             "description": [],
-            "signature": ["TaskPayloadType"],
+            "signature": [
+              "TaskPayloadType"
+            ],
             "path": "packages/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1609,7 +1677,9 @@
             "tags": [],
             "label": "taskInstanceFields",
             "description": [],
-            "signature": ["{ startedAt: Date | null; retryAt: Date | null; }"],
+            "signature": [
+              "{ startedAt: Date | null; retryAt: Date | null; }"
+            ],
             "path": "packages/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1641,7 +1711,9 @@
             "tags": [],
             "label": "stream",
             "description": [],
-            "signature": ["Writable"],
+            "signature": [
+              "Writable"
+            ],
             "path": "packages/kbn-reporting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1656,7 +1728,9 @@
         "tags": [],
         "label": "UNVERSIONED_VERSION",
         "description": [],
-        "signature": ["\"7.14.0\""],
+        "signature": [
+          "\"7.14.0\""
+        ],
         "path": "packages/kbn-reporting/server/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

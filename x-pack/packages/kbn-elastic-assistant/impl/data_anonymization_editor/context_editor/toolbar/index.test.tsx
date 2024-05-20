@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
 
 import { Toolbar } from '.';
 import * as i18n from '../translations';

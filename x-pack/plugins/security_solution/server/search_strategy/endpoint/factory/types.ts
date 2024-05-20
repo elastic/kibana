@@ -6,13 +6,13 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type {
   EndpointFactoryQueryTypes,
   EndpointStrategyParseResponseType,
   EndpointStrategyRequestType,
   EndpointStrategyResponseType,
 } from '../../../../common/search_strategy/endpoint';
+import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 
 export interface EndpointFactory<T extends EndpointFactoryQueryTypes> {
   buildDsl: (

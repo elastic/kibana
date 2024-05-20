@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { I18nProvider } from '@kbn/i18n-react';
 import { DecoratorFn } from '@storybook/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { PluginServiceRegistry } from '@kbn/presentation-util-plugin/public';
-import { CanvasPluginServices, pluginServices } from '../../public/services';
+import { pluginServices, CanvasPluginServices } from '../../public/services';
+import { pluginServiceProviders, StorybookParams } from '../../public/services/storybook';
 import { LegacyServicesProvider } from '../../public/services/legacy';
 import { startServices } from '../../public/services/legacy/stubs';
-import { StorybookParams, pluginServiceProviders } from '../../public/services/storybook';
 
 export const servicesContextDecorator = (): DecoratorFn => {
   const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices, StorybookParams>(

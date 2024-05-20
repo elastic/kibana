@@ -8,17 +8,17 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   ENGINE_ANALYTICS_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH,
+  ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH,
+  ENGINE_ANALYTICS_RECENT_QUERIES_PATH,
   ENGINE_ANALYTICS_QUERY_DETAILS_PATH,
   ENGINE_ANALYTICS_QUERY_DETAIL_PATH,
-  ENGINE_ANALYTICS_RECENT_QUERIES_PATH,
-  ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH,
-  ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH,
-  ENGINE_ANALYTICS_TOP_QUERIES_PATH,
-  ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH,
 } from '../../routes';
 import { generateEnginePath, getEngineBreadcrumbs } from '../engine';
 import { NotFound } from '../not_found';
@@ -26,12 +26,12 @@ import { NotFound } from '../not_found';
 import { ANALYTICS_TITLE } from './constants';
 import {
   Analytics,
-  QueryDetail,
-  RecentQueries,
   TopQueries,
-  TopQueriesNoClicks,
   TopQueriesNoResults,
+  TopQueriesNoClicks,
   TopQueriesWithClicks,
+  RecentQueries,
+  QueryDetail,
 } from './views';
 
 export const AnalyticsRouter: React.FC = () => {

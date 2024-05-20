@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiHorizontalRule, EuiFlexItem, EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useStartServices } from '../../../../hooks';
 

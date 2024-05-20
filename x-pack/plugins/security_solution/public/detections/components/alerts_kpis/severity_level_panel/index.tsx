@@ -8,11 +8,11 @@
 import { EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { v4 as uuid } from 'uuid';
+import type { ChartsPanelProps } from '../alerts_summary_charts_panel/types';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
-import { severityAggregations } from '../alerts_summary_charts_panel/aggregations';
-import type { ChartsPanelProps } from '../alerts_summary_charts_panel/types';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
+import { severityAggregations } from '../alerts_summary_charts_panel/aggregations';
 import { getIsAlertsBySeverityData } from './helpers';
 import { SeverityLevelChart } from './severity_level_chart';
 import * as i18n from './translations';

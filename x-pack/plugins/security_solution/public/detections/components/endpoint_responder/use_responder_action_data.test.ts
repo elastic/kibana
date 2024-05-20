@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
-import { HostStatus } from '../../../../common/endpoint/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useGetEndpointDetails } from '../../../management/hooks';
 import { useResponderActionData } from './use_responder_action_data';
+import { renderHook } from '@testing-library/react-hooks';
+import { useGetEndpointDetails } from '../../../management/hooks';
+import { HostStatus } from '../../../../common/endpoint/types';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../management/hooks', () => ({

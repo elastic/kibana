@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiIcon,
-  EuiSpacer,
   EuiTitle,
+  EuiSpacer,
+  EuiComboBox,
+  EuiIcon,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { useGetUrlParams, useUrlParams } from '../../hooks';
-import { useInitApp } from '../../hooks/use_init_app';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SettingsFormProps } from '../../pages/settings';
 import { connectorsSelector } from '../../state/alerts/alerts';
-import { fetchActionTypes } from '../../state/api/alerts';
 import { AddConnectorFlyout } from './add_connector_flyout';
-import { DefaultEmail } from './default_email';
+import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { alertFormI18n } from './translations';
+import { useInitApp } from '../../hooks/use_init_app';
+import { DefaultEmail } from './default_email';
+import { fetchActionTypes } from '../../state/api/alerts';
 
 type ConnectorOption = EuiComboBoxOptionOption<string>;
 

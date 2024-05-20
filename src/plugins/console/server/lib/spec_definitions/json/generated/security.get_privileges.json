@@ -6,7 +6,9 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["GET"],
+    "methods": [
+      "GET"
+    ],
     "patterns": [
       "_security/privilege",
       "_security/privilege/{application}",

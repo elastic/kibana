@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities } from '@kbn/core/types';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { renderHook } from '@testing-library/react-hooks';
+import { useColumns } from './use_data_grid_columns';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { configMock } from '../../__mocks__/config';
 import { dataViewsMock } from '../../__mocks__/data_views';
-import { useColumns } from './use_data_grid_columns';
+import { Capabilities } from '@kbn/core/types';
 
 describe('useColumns', () => {
   const defaultProps = {

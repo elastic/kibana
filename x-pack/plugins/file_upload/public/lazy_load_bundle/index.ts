@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FeatureCollection } from 'geojson';
 import { HttpStart } from '@kbn/core/public';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { FeatureCollection } from 'geojson';
-import React from 'react';
-import { IndexNameFormProps } from '..';
 import { IImporter, ImportFactoryOptions } from '../importer';
 import { getHttp } from '../kibana_services';
+import { IndexNameFormProps } from '..';
 
 export interface FileUploadGeoResults {
   indexPatternId: string;

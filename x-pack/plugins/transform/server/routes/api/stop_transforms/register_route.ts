@@ -6,8 +6,8 @@
  */
 
 import {
-  type StopTransformsRequestSchema,
   stopTransformsRequestSchema,
+  type StopTransformsRequestSchema,
 } from '../../../../common/api_schemas/stop_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 

@@ -11,10 +11,10 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 
 export interface DataViewSelectorProps {
   kibanaDataViews: Record<string, DataViewListItem>;

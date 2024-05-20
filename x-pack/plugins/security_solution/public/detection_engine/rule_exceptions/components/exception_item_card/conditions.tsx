@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import React, { memo, useMemo, useCallback } from 'react';
 import {
-  EuiBadge,
   EuiExpression,
+  EuiToken,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBadge,
   EuiPanel,
-  EuiToken,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import type {
   EntryExists,
   EntryList,
@@ -24,12 +26,10 @@ import type {
   NonEmptyNestedEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import React, { memo, useMemo, useCallback } from 'react';
-import styled from 'styled-components';
 import { ShowValueListModal } from '../../../../value_list/components/show_value_list_modal';
 
-import { ValueWithSpaceWarning } from '../value_with_space_warning';
 import * as i18n from './translations';
+import { ValueWithSpaceWarning } from '../value_with_space_warning';
 
 const OS_LABELS = Object.freeze({
   linux: i18n.OS_LINUX,

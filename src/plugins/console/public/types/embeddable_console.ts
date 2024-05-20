@@ -1,5 +1,3 @@
-import type { CoreStart } from '@kbn/core/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
  * Side Public License, v 1.
  */
 import type { ComponentType, MouseEventHandler } from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Dispatch } from 'react';
 
 export interface EmbeddableConsoleDependencies {

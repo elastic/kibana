@@ -9,9 +9,9 @@ import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logi
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiButton, EuiButtonEmpty, EuiModal, EuiModalFooter } from '@elastic/eui';
+import { EuiModal, EuiModalFooter, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { rerender } from '../../../../../test_helpers';
 

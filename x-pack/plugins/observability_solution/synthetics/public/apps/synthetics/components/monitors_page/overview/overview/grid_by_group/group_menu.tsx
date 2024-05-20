@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiHorizontalRule,
-  EuiPanel,
+  EuiContextMenuItem,
   EuiPopover,
-  EuiText,
   useGeneratedHtmlId,
+  EuiPanel,
+  EuiText,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import { ORDER_BY_TITLE } from '../sort_menu';
 import { GROUP_TITLE } from './group_fields';
+import { ORDER_BY_TITLE } from '../sort_menu';
 
 interface Option {
   label: string;

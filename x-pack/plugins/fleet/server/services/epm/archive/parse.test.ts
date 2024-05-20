@@ -15,17 +15,17 @@ import { PackageInvalidArchiveError } from '../../../errors';
 import { appContextService } from '../..';
 
 import {
+  parseDefaultIngestPipeline,
+  parseDataStreamElasticsearchEntry,
+  parseTopLevelElasticsearchEntry,
   _generatePackageInfoFromPaths,
   parseAndVerifyArchive,
   parseAndVerifyDataStreams,
-  parseAndVerifyInputs,
-  parseAndVerifyPolicyTemplates,
-  parseAndVerifyReadme,
   parseAndVerifyStreams,
   parseAndVerifyVars,
-  parseDataStreamElasticsearchEntry,
-  parseDefaultIngestPipeline,
-  parseTopLevelElasticsearchEntry,
+  parseAndVerifyPolicyTemplates,
+  parseAndVerifyInputs,
+  parseAndVerifyReadme,
 } from './parse';
 
 jest.mock('../../app_context');

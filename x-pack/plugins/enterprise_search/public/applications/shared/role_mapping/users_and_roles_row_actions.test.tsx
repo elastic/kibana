@@ -12,8 +12,8 @@ import { shallow } from 'enzyme';
 import { EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
 
 import {
-  REMOVE_ROLE_MAPPING_BUTTON,
   REMOVE_ROLE_MAPPING_TITLE,
+  REMOVE_ROLE_MAPPING_BUTTON,
   ROLE_MODAL_TEXT,
 } from './constants';
 

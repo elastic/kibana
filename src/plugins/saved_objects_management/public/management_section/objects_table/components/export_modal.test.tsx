@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ExportModal } from './export_modal';
 
 describe('ExportModal', () => {

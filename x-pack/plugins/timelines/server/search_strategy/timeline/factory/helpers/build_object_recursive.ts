@@ -6,8 +6,8 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { get } from 'lodash/fp';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { Fields } from '../../../../../common/search_strategy';
 import { toStringArray } from '../../../../../common/utils/to_array';
 import { getNestedParentPath } from './get_nested_parent_path';

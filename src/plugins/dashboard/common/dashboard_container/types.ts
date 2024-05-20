@@ -6,27 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { RefreshInterval } from '@kbn/data-plugin/common';
 import {
-  EmbeddableInput,
-  PanelState,
-  SavedObjectEmbeddableInput,
   ViewMode,
+  PanelState,
+  EmbeddableInput,
+  SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/common';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/common';
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
-import { GridData } from '../content_management';
 import { DashboardOptions } from '../types';
+import { GridData } from '../content_management';
 
 export interface DashboardPanelMap {
   [key: string]: DashboardPanelState;
 }
 
 export interface DashboardPanelState<
-  TEmbeddableInput extends
-    | EmbeddableInput
-    | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 > extends PanelState<TEmbeddableInput> {
   readonly gridData: GridData;
   panelRefName?: string;

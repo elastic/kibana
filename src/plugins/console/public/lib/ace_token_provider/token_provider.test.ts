@@ -15,7 +15,7 @@ import $ from 'jquery';
 // this lib. We also need to import application specific mocks which is not ideal.
 // In this situation, the token provider lib knows about app models in tests, which it really shouldn't. Should create
 // a better sandbox in future.
-import { SenseEditor, create } from '../../application/models/sense_editor';
+import { create, SenseEditor } from '../../application/models/sense_editor';
 
 import { Position, Token, TokensProvider } from '../../types';
 

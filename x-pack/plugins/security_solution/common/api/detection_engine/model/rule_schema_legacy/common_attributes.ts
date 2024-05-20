@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { max_signals, threat } from '@kbn/securitysolution-io-ts-alerting-types';
-import { listArray } from '@kbn/securitysolution-io-ts-list-types';
-import { NonEmptyArray, NonEmptyString, UUID, version } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { listArray } from '@kbn/securitysolution-io-ts-list-types';
+import { NonEmptyString, version, UUID, NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
+import { max_signals, threat } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export type RuleObjectId = t.TypeOf<typeof RuleObjectId>;
 export const RuleObjectId = UUID;

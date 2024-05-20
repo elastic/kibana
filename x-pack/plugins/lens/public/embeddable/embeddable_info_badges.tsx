@@ -6,13 +6,13 @@
  */
 
 import {
-  EuiButtonEmpty,
-  EuiHorizontalRule,
   EuiPopover,
-  EuiTitle,
   EuiToolTip,
-  useEuiFontSize,
+  EuiHorizontalRule,
+  EuiTitle,
   useEuiTheme,
+  EuiButtonEmpty,
+  useEuiFontSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';

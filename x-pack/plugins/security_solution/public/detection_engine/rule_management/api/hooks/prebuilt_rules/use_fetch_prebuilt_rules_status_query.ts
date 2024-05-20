@@ -1,5 +1,3 @@
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +5,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
  * 2.0.
  */
 import { useCallback } from 'react';
+import type { UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { PrebuiltRulesStatusStats } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { getPrebuiltRulesStatus } from '../../api';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
+import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 
 export const PREBUILT_RULES_STATUS_QUERY_KEY = ['GET', GET_PREBUILT_RULES_STATUS_URL];
 

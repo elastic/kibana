@@ -6,7 +6,15 @@
     "id": "testingEmbeddedLens",
     "server": false,
     "browser": true,
-    "configPath": ["testing_embedded_lens"],
-    "requiredPlugins": ["lens", "data", "embeddable", "developerExamples", "kibanaReact"]
+    "configPath": [
+      "testing_embedded_lens"
+    ],
+    "requiredPlugins": [
+      "lens",
+      "data",
+      "embeddable",
+      "developerExamples",
+      "kibanaReact"
+    ]
   }
 }

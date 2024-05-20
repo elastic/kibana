@@ -131,7 +131,9 @@
             "tags": [],
             "label": "FIND_TIME",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -143,7 +145,9 @@
             "tags": [],
             "label": "TRY_TIME",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -155,7 +159,9 @@
             "tags": [],
             "label": "WAIT_FOR_EXISTS_TIME",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -169,7 +175,9 @@
             "description": [
               "\nGet a promise that resolves with `true` when an element exists, if the element doesn't exist\nyet it will wait until the element does exist. If we wait until the timeout and the element\nstill doesn't exist the promise will resolve with `false`.\n\nThis method is intended to quickly answer the question \"does this testSubject exist\". Its\n2.5 second timeout responds quickly, making it a good candidate for putting inside\n`retry.waitFor()` loops.\n\nWhen `options.timeout` is not passed the `timeouts.waitForExists` config is used as\nthe timeout. The default value for that config is currently 2.5 seconds (in ms).\n\nIf the element is hidden it is not treated as \"existing\", unless `options.allowHidden`\nis set to `true`."
             ],
-            "signature": ["(selector: string, options?: ExistsOptions) => Promise<boolean>"],
+            "signature": [
+              "(selector: string, options?: ExistsOptions) => Promise<boolean>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -181,7 +189,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -194,7 +204,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["ExistsOptions"],
+                "signature": [
+                  "ExistsOptions"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -226,7 +238,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -239,7 +253,9 @@
                 "tags": [],
                 "label": "existsOptions",
                 "description": [],
-                "signature": ["ExistsOptions | undefined"],
+                "signature": [
+                  "ExistsOptions | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -257,7 +273,9 @@
             "description": [
               "\nGet a promise that resolves when an element no longer exists, if the element does exist\nit will wait until the element does not exist. If we wait until the timeout and the element\nstill exists the promise will reject.\n\nThis method is intended to quickly assert that an element does not exist. Its\n2.5 second timeout responds quickly.\n\nWhen `options.timeout` is not passed the `timeouts.waitForExists` config is used as\nthe timeout. The default value for that config is currently 2.5 seconds.\n\nIf the element is hidden but still in the DOM it is treated as \"existing\", unless `options.allowHidden`\nis set to `true`."
             ],
-            "signature": ["(selector: string, options?: ExistsOptions) => Promise<void>"],
+            "signature": [
+              "(selector: string, options?: ExistsOptions) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -269,7 +287,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -282,7 +302,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["ExistsOptions"],
+                "signature": [
+                  "ExistsOptions"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -298,7 +320,9 @@
             "tags": [],
             "label": "stringExistsInCodeBlockOrFail",
             "description": [],
-            "signature": ["(codeBlockSelector: string, stringToFind: string) => Promise<void>"],
+            "signature": [
+              "(codeBlockSelector: string, stringToFind: string) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -310,7 +334,9 @@
                 "tags": [],
                 "label": "codeBlockSelector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -323,7 +349,9 @@
                 "tags": [],
                 "label": "stringToFind",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -339,7 +367,9 @@
             "tags": [],
             "label": "append",
             "description": [],
-            "signature": ["(selector: string, text: string) => Promise<void>"],
+            "signature": [
+              "(selector: string, text: string) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -351,7 +381,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -364,7 +396,9 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -404,7 +438,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -466,7 +502,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -518,7 +556,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -531,7 +571,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -544,7 +586,9 @@
                 "tags": [],
                 "label": "topOffset",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -560,7 +604,9 @@
             "tags": [],
             "label": "pressEnter",
             "description": [],
-            "signature": ["(selector: string, timeout?: number) => Promise<void>"],
+            "signature": [
+              "(selector: string, timeout?: number) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -572,7 +618,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -585,7 +633,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -601,7 +651,9 @@
             "tags": [],
             "label": "doubleClick",
             "description": [],
-            "signature": ["(selector: string, timeout?: number) => Promise<void>"],
+            "signature": [
+              "(selector: string, timeout?: number) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -613,7 +665,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -626,7 +680,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -664,7 +720,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -731,7 +789,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -798,7 +858,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -857,7 +919,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -870,7 +934,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -908,7 +974,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -921,7 +989,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -937,7 +1007,9 @@
             "tags": [],
             "label": "getAttributeAll",
             "description": [],
-            "signature": ["(selector: string, attribute: string) => Promise<string[]>"],
+            "signature": [
+              "(selector: string, attribute: string) => Promise<string[]>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -949,7 +1021,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -962,7 +1036,9 @@
                 "tags": [],
                 "label": "attribute",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -992,7 +1068,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1005,7 +1083,9 @@
                 "tags": [],
                 "label": "attribute",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1050,7 +1130,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1063,7 +1145,9 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1076,7 +1160,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["SetValueOptions"],
+                "signature": [
+                  "SetValueOptions"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1089,7 +1175,9 @@
                 "tags": [],
                 "label": "topOffset",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1105,7 +1193,9 @@
             "tags": [],
             "label": "selectValue",
             "description": [],
-            "signature": ["(selector: string, value: string) => Promise<void>"],
+            "signature": [
+              "(selector: string, value: string) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1117,7 +1207,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1130,7 +1222,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1146,7 +1240,9 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "signature": ["(selector: string) => Promise<boolean>"],
+            "signature": [
+              "(selector: string) => Promise<boolean>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1158,7 +1254,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1174,7 +1272,9 @@
             "tags": [],
             "label": "isDisplayed",
             "description": [],
-            "signature": ["(selector: string, timeout?: number | undefined) => Promise<boolean>"],
+            "signature": [
+              "(selector: string, timeout?: number | undefined) => Promise<boolean>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1186,7 +1286,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1199,7 +1301,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1215,7 +1319,9 @@
             "tags": [],
             "label": "isSelected",
             "description": [],
-            "signature": ["(selector: string) => Promise<boolean>"],
+            "signature": [
+              "(selector: string) => Promise<boolean>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1227,7 +1333,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1243,7 +1351,9 @@
             "tags": [],
             "label": "isSelectedAll",
             "description": [],
-            "signature": ["(selectorAll: string) => Promise<boolean[]>"],
+            "signature": [
+              "(selectorAll: string) => Promise<boolean[]>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1255,7 +1365,9 @@
                 "tags": [],
                 "label": "selectorAll",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1271,7 +1383,9 @@
             "tags": [],
             "label": "getVisibleText",
             "description": [],
-            "signature": ["(selector: string) => Promise<string>"],
+            "signature": [
+              "(selector: string) => Promise<string>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1283,7 +1397,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1299,7 +1415,9 @@
             "tags": [],
             "label": "getVisibleTextAll",
             "description": [],
-            "signature": ["(selectorAll: string) => Promise<string[]>"],
+            "signature": [
+              "(selectorAll: string) => Promise<string[]>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1311,7 +1429,9 @@
                 "tags": [],
                 "label": "selectorAll",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1327,7 +1447,9 @@
             "tags": [],
             "label": "moveMouseTo",
             "description": [],
-            "signature": ["(selector: string) => Promise<void>"],
+            "signature": [
+              "(selector: string) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1339,7 +1461,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1402,7 +1526,9 @@
             "tags": [],
             "label": "waitForAttributeToChange",
             "description": [],
-            "signature": ["(selector: string, attribute: string, value: string) => Promise<void>"],
+            "signature": [
+              "(selector: string, attribute: string, value: string) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1414,7 +1540,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1427,7 +1555,9 @@
                 "tags": [],
                 "label": "attribute",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1440,7 +1570,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1456,7 +1588,9 @@
             "tags": [],
             "label": "waitForHidden",
             "description": [],
-            "signature": ["(selector: string, timeout?: number | undefined) => Promise<void>"],
+            "signature": [
+              "(selector: string, timeout?: number | undefined) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1468,7 +1602,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1481,7 +1617,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1497,7 +1635,9 @@
             "tags": [],
             "label": "waitForEnabled",
             "description": [],
-            "signature": ["(selector: string, timeout?: number) => Promise<boolean>"],
+            "signature": [
+              "(selector: string, timeout?: number) => Promise<boolean>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1509,7 +1649,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1522,7 +1664,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1538,7 +1682,9 @@
             "tags": [],
             "label": "getCssSelector",
             "description": [],
-            "signature": ["(selector: string) => string"],
+            "signature": [
+              "(selector: string) => string"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1550,7 +1696,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1580,7 +1728,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1611,7 +1761,9 @@
             "tags": [],
             "label": "isChecked",
             "description": [],
-            "signature": ["(selector: string) => Promise<boolean>"],
+            "signature": [
+              "(selector: string) => Promise<boolean>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1623,7 +1775,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1639,7 +1793,9 @@
             "tags": [],
             "label": "setCheckbox",
             "description": [],
-            "signature": ["(selector: string, state: \"check\" | \"uncheck\") => Promise<void>"],
+            "signature": [
+              "(selector: string, state: \"check\" | \"uncheck\") => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1651,7 +1807,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1664,7 +1822,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["\"check\" | \"uncheck\""],
+                "signature": [
+                  "\"check\" | \"uncheck\""
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1727,7 +1887,9 @@
             "tags": [],
             "label": "setEuiSwitch",
             "description": [],
-            "signature": ["(selector: string, state: \"check\" | \"uncheck\") => Promise<void>"],
+            "signature": [
+              "(selector: string, state: \"check\" | \"uncheck\") => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1739,7 +1901,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1752,7 +1916,9 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "signature": ["\"check\" | \"uncheck\""],
+                "signature": [
+                  "\"check\" | \"uncheck\""
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1867,7 +2033,10 @@
                 "tags": [],
                 "label": "locator",
                 "description": [],
-                "signature": ["By", " | null"],
+                "signature": [
+                  "By",
+                  " | null"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1880,7 +2049,9 @@
                 "tags": [],
                 "label": "driver",
                 "description": [],
-                "signature": ["WebDriver"],
+                "signature": [
+                  "WebDriver"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1893,7 +2064,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1906,7 +2079,9 @@
                 "tags": [],
                 "label": "fixedHeaderHeight",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1964,7 +2139,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1976,7 +2153,9 @@
                 "tags": [],
                 "label": "_webElement",
                 "description": [],
-                "signature": ["WebElement"],
+                "signature": [
+                  "WebElement"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1989,7 +2168,10 @@
                 "tags": [],
                 "label": "locator",
                 "description": [],
-                "signature": ["By", " | null"],
+                "signature": [
+                  "By",
+                  " | null"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2002,7 +2184,9 @@
                 "tags": [],
                 "label": "driver",
                 "description": [],
-                "signature": ["WebDriver"],
+                "signature": [
+                  "WebDriver"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2015,7 +2199,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2028,7 +2214,9 @@
                 "tags": [],
                 "label": "fixedHeaderHeight",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2083,12 +2271,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.isDisplayed",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "isDisplayed",
             "description": [
               "\nReturns whether or not the element would be visible to an actual user. This means\nthat the following types of elements are considered to be not displayed:\n\n - Elements with display: none\n - Elements with visibility: hidden\n - Elements positioned outside of the viewport that cannot be scrolled into view\n - Elements with opacity: 0\n - Elements with no offsetWidth or offsetHeight\n\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isDisplayed\n"
             ],
-            "signature": ["() => Promise<boolean>"],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2099,12 +2291,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.isEnabled",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "isEnabled",
             "description": [
               "\nTests whether this element is enabled, as dictated by the disabled attribute.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isEnabled\n"
             ],
-            "signature": ["() => Promise<boolean>"],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2115,12 +2311,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.isSelected",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "isSelected",
             "description": [
               "\nTests whether this element is selected.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isSelected\n"
             ],
-            "signature": ["() => Promise<boolean>"],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2131,12 +2331,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.click",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "click",
             "description": [
               "\nClicks on this element.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#click\n"
             ],
-            "signature": ["(topOffset?: number | undefined) => Promise<void>"],
+            "signature": [
+              "(topOffset?: number | undefined) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2148,7 +2352,9 @@
                 "tags": [],
                 "label": "topOffset",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2161,10 +2367,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.focus",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "focus",
-            "description": ["\nFocuses this element.\n"],
-            "signature": ["() => Promise<void>"],
+            "description": [
+              "\nFocuses this element.\n"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2175,12 +2387,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.openHref",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "openHref",
             "description": [
               "\nIf possible, opens 'href' of this element directly through the URL\n"
             ],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2191,10 +2407,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.elementHasClass",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "elementHasClass",
-            "description": ["\nCheck if webelement wrapper has a specific class.\n"],
-            "signature": ["(className: string) => Promise<boolean>"],
+            "description": [
+              "\nCheck if webelement wrapper has a specific class.\n"
+            ],
+            "signature": [
+              "(className: string) => Promise<boolean>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2206,7 +2428,9 @@
                 "tags": [],
                 "label": "className",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2219,12 +2443,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.clearValue",
             "type": "Function",
-            "tags": ["default"],
+            "tags": [
+              "default"
+            ],
             "label": "clearValue",
             "description": [
               "\nClear the value of this element. This command has no effect if the underlying DOM element\nis neither a text INPUT element nor a TEXTAREA element.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear\n"
             ],
-            "signature": ["(options?: ClearOptions) => Promise<void>"],
+            "signature": [
+              "(options?: ClearOptions) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2235,8 +2463,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["option to clear input with JS: `arguments[0].value=''`"],
-                "signature": ["ClearOptions"],
+                "description": [
+                  "option to clear input with JS: `arguments[0].value=''`"
+                ],
+                "signature": [
+                  "ClearOptions"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2249,10 +2481,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.clearValueWithKeyboard",
             "type": "Function",
-            "tags": ["default"],
+            "tags": [
+              "default"
+            ],
             "label": "clearValueWithKeyboard",
-            "description": ["\nClear the value of this element using Keyboard"],
-            "signature": ["(options?: TypeOptions) => Promise<void>"],
+            "description": [
+              "\nClear the value of this element using Keyboard"
+            ],
+            "signature": [
+              "(options?: TypeOptions) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2263,8 +2501,12 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": ["to input characters one by one"],
-                "signature": ["TypeOptions"],
+                "description": [
+                  "to input characters one by one"
+                ],
+                "signature": [
+                  "TypeOptions"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2280,7 +2522,9 @@
             "tags": [],
             "label": "selectValueWithKeyboard",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2291,12 +2535,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.type",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "type",
             "description": [
               "\nTypes a key sequence on the DOM element represented by this instance. Modifier keys\n(SHIFT, CONTROL, ALT, META) are stateful; once a modifier is processed in the key sequence,\nthat key state is toggled until one of the following occurs:\n\nThe modifier key is encountered again in the sequence. At this point the state of the key is\ntoggled (along with the appropriate keyup/down events).\nThe input.Key.NULL key is encountered in the sequence. When this key is encountered, all\nmodifier keys current in the down state are released (with accompanying keyup events). The NULL\nkey can be used to simulate common keyboard shortcuts.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#sendKeys\n"
             ],
-            "signature": ["(value: string | string[], options?: TypeOptions) => Promise<void>"],
+            "signature": [
+              "(value: string | string[], options?: TypeOptions) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2308,7 +2556,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string | string[]"],
+                "signature": [
+                  "string | string[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2321,7 +2571,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["TypeOptions"],
+                "signature": [
+                  "TypeOptions"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2353,7 +2605,9 @@
                 "tags": [],
                 "label": "keys",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2366,12 +2620,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.getAttribute",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getAttribute",
             "description": [
               "\nRetrieves the current value of the given attribute of this element. Will return the current\nvalue, even if it has been modified after the page has been loaded. More exactly, this method\nwill return the value of the given attribute, unless that attribute is not present, in which\ncase the value of the property with the same name is returned. If neither value is set, null\nis returned (for example, the \"value\" property of a textarea element). The \"style\" attribute\nis converted as best can be to a text representation with a trailing semi-colon.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getAttribute\n"
             ],
-            "signature": ["(name: string) => Promise<string | null>"],
+            "signature": [
+              "(name: string) => Promise<string | null>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2383,7 +2641,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2396,12 +2656,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.getComputedStyle",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getComputedStyle",
             "description": [
               "\nRetrieves the value of a computed style property for this instance. If the element inherits\nthe named style from its parent, the parent will be queried for its value. Where possible,\ncolor values will be converted to their hex representation (e.g. #00ff00 instead of rgb(0, 255, 0)).\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getCssValue\n"
             ],
-            "signature": ["(propertyName: string) => Promise<string>"],
+            "signature": [
+              "(propertyName: string) => Promise<string>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2413,7 +2677,9 @@
                 "tags": [],
                 "label": "propertyName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2426,12 +2692,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.getVisibleText",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getVisibleText",
             "description": [
               "\nGet the visible (i.e. not hidden by CSS) innerText of this element, including sub-elements,\nwithout any leading or trailing whitespace.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getText\n"
             ],
-            "signature": ["() => Promise<string>"],
+            "signature": [
+              "() => Promise<string>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2458,7 +2728,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.getPosition",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getPosition",
             "description": [
               "\nReturns an object describing an element's location, in pixels relative to the document element,\nand the element's size in pixels.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getRect\n"
@@ -2476,7 +2748,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.getSize",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getSize",
             "description": [
               "\nReturns an object describing an element's location, in pixels relative to the document element,\nand the element's size in pixels.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getRect\n"
@@ -2494,12 +2768,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.moveMouseTo",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "moveMouseTo",
             "description": [
               "\nMoves the remote environment’s mouse cursor to the current element with optional offset\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move"
             ],
-            "signature": ["(options?: { xOffset: number; yOffset: number; }) => Promise<void>"],
+            "signature": [
+              "(options?: { xOffset: number; yOffset: number; }) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2511,7 +2789,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["{ xOffset: number; yOffset: number; }"],
+                "signature": [
+                  "{ xOffset: number; yOffset: number; }"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2524,12 +2804,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.clickMouseButton",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "clickMouseButton",
             "description": [
               "\nInserts an action for moving the mouse to element center, unless optional offset is provided.\nThen adds an action for left-click (down/up) with the mouse.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click\n"
             ],
-            "signature": ["(options?: { xOffset: number; yOffset: number; }) => Promise<void>"],
+            "signature": [
+              "(options?: { xOffset: number; yOffset: number; }) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2541,7 +2825,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["{ xOffset: number; yOffset: number; }"],
+                "signature": [
+                  "{ xOffset: number; yOffset: number; }"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2554,12 +2840,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.doubleClick",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "doubleClick",
             "description": [
               "\nInserts action for performing a double left-click with the mouse.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#doubleClick"
             ],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2570,7 +2860,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.findByCssSelector",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "findByCssSelector",
             "description": [
               "\nGets the first element inside this element matching the given CSS selector.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement\n"
@@ -2597,7 +2889,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2610,7 +2904,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.findAllByCssSelector",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "findAllByCssSelector",
             "description": [
               "\nGets all elements inside this element matching the given CSS selector.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement\n"
@@ -2637,7 +2933,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2650,7 +2948,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2663,7 +2963,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.findByTestSubject",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "findByTestSubject",
             "description": [
               "\nGets the first element inside this element matching the given data-test-subj selector.\n"
@@ -2690,7 +2992,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2703,7 +3007,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.findAllByTestSubject",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "findAllByTestSubject",
             "description": [
               "\nGets all elements inside this element matching the given data-test-subj selector.\n"
@@ -2730,7 +3036,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2743,7 +3051,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2756,7 +3066,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.findByClassName",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "findByClassName",
             "description": [
               "\nGets the first element inside this element matching the given CSS class name.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement\n"
@@ -2783,7 +3095,9 @@
                 "tags": [],
                 "label": "className",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2796,7 +3110,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.findAllByClassName",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "findAllByClassName",
             "description": [
               "\nGets all elements inside this element matching the given CSS class name.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement\n"
@@ -2823,7 +3139,9 @@
                 "tags": [],
                 "label": "className",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2836,7 +3154,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2882,7 +3202,9 @@
                 "tags": [],
                 "label": "tagName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2928,7 +3250,9 @@
                 "tags": [],
                 "label": "tagName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2941,7 +3265,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2954,7 +3280,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.findByXpath",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "findByXpath",
             "description": [
               "\nGets the first element inside this element matching the given XPath selector.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement\n"
@@ -2981,7 +3309,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2994,7 +3324,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.findAllByXpath",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "findAllByXpath",
             "description": [
               "\nGets all elements inside this element matching the given XPath selector.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement\n"
@@ -3021,7 +3353,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3034,7 +3368,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3047,7 +3383,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.findByPartialLinkText",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "findByPartialLinkText",
             "description": [
               "\nGets the first element inside this element matching the given partial link text.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement\n"
@@ -3074,7 +3412,9 @@
                 "tags": [],
                 "label": "linkText",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3087,7 +3427,9 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.findAllByPartialLinkText",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "findAllByPartialLinkText",
             "description": [
               "\nGets all elements inside this element matching the given partial link text.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement\n"
@@ -3114,7 +3456,9 @@
                 "tags": [],
                 "label": "linkText",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3127,7 +3471,9 @@
                 "tags": [],
                 "label": "timeout",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3140,12 +3486,16 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.waitForDeletedByCssSelector",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "waitForDeletedByCssSelector",
             "description": [
               "\nWaits for all elements inside this element matching the given CSS selector to be destroyed.\n"
             ],
-            "signature": ["(selector: string, implicitTimeout?: number) => Promise<void>"],
+            "signature": [
+              "(selector: string, implicitTimeout?: number) => Promise<void>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3157,7 +3507,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3170,7 +3522,9 @@
                 "tags": [],
                 "label": "implicitTimeout",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3183,9 +3537,13 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.scrollIntoView",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "scrollIntoView",
-            "description": ["\nScroll the element into view\n"],
+            "description": [
+              "\nScroll the element into view\n"
+            ],
             "signature": [
               "(scrollIntoViewOptions?: ScrollIntoViewOptions | undefined) => Promise<void>"
             ],
@@ -3200,7 +3558,9 @@
                 "tags": [],
                 "label": "scrollIntoViewOptions",
                 "description": [],
-                "signature": ["ScrollIntoViewOptions | undefined"],
+                "signature": [
+                  "ScrollIntoViewOptions | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3213,7 +3573,10 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.scrollIntoViewIfNecessary",
             "type": "Function",
-            "tags": ["nonstandard", "return"],
+            "tags": [
+              "nonstandard",
+              "return"
+            ],
             "label": "scrollIntoViewIfNecessary",
             "description": [
               "\nScroll the element into view if it is not already, avoiding the fixed header if necessary\nThis method is a variation of the scrollIntoView method, where we only scroll into an element\nif it is not part of the \"scrollable view\".\nThis implies a specific behavior, since the \"scrollable view\" of the view is identified by\nthe `document.scrollingElement`, which always results to the html or body tag.\n\nUse cases:\n- An element (a section, a footer) is not visible in the whole page and we need to scroll into it.\n- An element is covered by the fixed header and we need to scroll into it ensuring is not covered.\n\nIn case you have a scrollable list smaller that the size of the HTML document and you need\nto scroll into an element of that list, prefer using the `.scrollIntoView` method.\n"
@@ -3247,9 +3610,14 @@
             "parentPluginId": "@kbn/ftr-common-functional-ui-services",
             "id": "def-common.WebElementWrapper.parseDomContent",
             "type": "Function",
-            "tags": ["nonstandard", "return"],
+            "tags": [
+              "nonstandard",
+              "return"
+            ],
             "label": "parseDomContent",
-            "description": ["\nGets element innerHTML and wrap it up with cheerio\n"],
+            "description": [
+              "\nGets element innerHTML and wrap it up with cheerio\n"
+            ],
             "signature": [
               "() => Promise<",
               {
@@ -3273,8 +3641,12 @@
             "type": "Function",
             "tags": [],
             "label": "takeScreenshot",
-            "description": ["\nCreates the screenshot of the element\n"],
-            "signature": ["() => Promise<Buffer>"],
+            "description": [
+              "\nCreates the screenshot of the element\n"
+            ],
+            "signature": [
+              "() => Promise<Buffer>"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3305,7 +3677,9 @@
             "tags": [],
             "label": "[index: number]: Element",
             "description": [],
-            "signature": ["[index: number]:  cheerio.Element"],
+            "signature": [
+              "[index: number]:  cheerio.Element"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3374,7 +3748,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3412,7 +3788,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3425,7 +3803,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3441,7 +3821,9 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": ["{ (): any; (name: string): any; (name: string, value: any): any; }"],
+            "signature": [
+              "{ (): any; (name: string): any; (name: string, value: any): any; }"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3455,7 +3837,9 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": ["{ (): any; (name: string): any; (name: string, value: any): any; }"],
+            "signature": [
+              "{ (): any; (name: string): any; (name: string, value: any): any; }"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3467,7 +3851,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3483,7 +3869,9 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": ["{ (): any; (name: string): any; (name: string, value: any): any; }"],
+            "signature": [
+              "{ (): any; (name: string): any; (name: string, value: any): any; }"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3495,7 +3883,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3508,7 +3898,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3570,7 +3962,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3607,7 +4001,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3653,7 +4049,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3699,7 +4097,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3715,7 +4115,9 @@
             "tags": [],
             "label": "hasClass",
             "description": [],
-            "signature": ["(className: string) => boolean"],
+            "signature": [
+              "(className: string) => boolean"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3727,7 +4129,9 @@
                 "tags": [],
                 "label": "className",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3764,7 +4168,9 @@
                 "tags": [],
                 "label": "classNames",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3858,7 +4264,9 @@
                 "tags": [],
                 "label": "className",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3912,7 +4320,9 @@
                 "tags": [],
                 "label": "func",
                 "description": [],
-                "signature": ["(index: number, className: string) => string"],
+                "signature": [
+                  "(index: number, className: string) => string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3974,7 +4384,9 @@
                 "tags": [],
                 "label": "className",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4036,7 +4448,9 @@
                 "tags": [],
                 "label": "className",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4049,7 +4463,9 @@
                 "tags": [],
                 "label": "toggleSwitch",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4111,7 +4527,9 @@
                 "tags": [],
                 "label": "toggleSwitch",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4188,7 +4606,9 @@
                 "tags": [],
                 "label": "toggleSwitch",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4226,7 +4646,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4264,7 +4686,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4302,7 +4726,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["cheerio.Element[]"],
+                "signature": [
+                  "cheerio.Element[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4386,7 +4812,9 @@
                 "tags": [],
                 "label": "func",
                 "description": [],
-                "signature": ["(index: number, element: cheerio.Element) => boolean"],
+                "signature": [
+                  "(index: number, element: cheerio.Element) => boolean"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4402,7 +4830,9 @@
             "tags": [],
             "label": "serialize",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4416,7 +4846,9 @@
             "tags": [],
             "label": "serializeArray",
             "description": [],
-            "signature": ["() => { name: string; value: string; }[]"],
+            "signature": [
+              "() => { name: string; value: string; }[]"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4468,7 +4900,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4567,7 +5001,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4604,7 +5040,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4666,7 +5104,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4679,7 +5119,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4741,7 +5183,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4754,7 +5198,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4837,7 +5283,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4875,7 +5323,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4913,7 +5363,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4926,7 +5378,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5004,7 +5458,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5041,7 +5497,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5119,7 +5577,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5181,7 +5641,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5194,7 +5656,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5256,7 +5720,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5269,7 +5735,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5352,7 +5820,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5389,7 +5859,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5467,7 +5939,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5529,7 +6003,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5542,7 +6018,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5604,7 +6082,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5617,7 +6097,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5700,7 +6182,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5737,7 +6221,9 @@
                 "tags": [],
                 "label": "start",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5750,7 +6236,9 @@
                 "tags": [],
                 "label": "end",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5787,7 +6275,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5824,7 +6314,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5884,7 +6376,9 @@
                 "tags": [],
                 "label": "func",
                 "description": [],
-                "signature": ["(index: number, element: cheerio.Element) => any"],
+                "signature": [
+                  "(index: number, element: cheerio.Element) => any"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5921,7 +6415,9 @@
                 "tags": [],
                 "label": "func",
                 "description": [],
-                "signature": ["(index: number, element: cheerio.Element) => any"],
+                "signature": [
+                  "(index: number, element: cheerio.Element) => any"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5999,7 +6495,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6163,7 +6661,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6241,7 +6741,9 @@
                 "tags": [],
                 "label": "elements",
                 "description": [],
-                "signature": ["cheerio.Element[]"],
+                "signature": [
+                  "cheerio.Element[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6319,7 +6821,9 @@
                 "tags": [],
                 "label": "func",
                 "description": [],
-                "signature": ["(index: number, element: cheerio.Element) => boolean"],
+                "signature": [
+                  "(index: number, element: cheerio.Element) => boolean"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6389,7 +6893,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6537,7 +7043,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6607,7 +7115,9 @@
                 "tags": [],
                 "label": "func",
                 "description": [],
-                "signature": ["(index: number, element: cheerio.Element) => boolean"],
+                "signature": [
+                  "(index: number, element: cheerio.Element) => boolean"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6690,7 +7200,9 @@
                 "tags": [],
                 "label": "index",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6706,7 +7218,9 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": ["{ (): any[]; (index: number): any; }"],
+            "signature": [
+              "{ (): any[]; (index: number): any; }"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6720,7 +7234,9 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": ["{ (): any[]; (index: number): any; }"],
+            "signature": [
+              "{ (): any[]; (index: number): any; }"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6732,7 +7248,9 @@
                 "tags": [],
                 "label": "index",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6794,7 +7312,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6941,7 +7461,9 @@
                 "tags": [],
                 "label": "selectorOrHtml",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7019,7 +7541,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7032,7 +7556,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Document"],
+                "signature": [
+                  "Document"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7110,7 +7636,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7188,7 +7716,9 @@
                 "tags": [],
                 "label": "elements",
                 "description": [],
-                "signature": ["cheerio.Element[]"],
+                "signature": [
+                  "cheerio.Element[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7352,7 +7882,9 @@
                 "tags": [],
                 "label": "filter",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7528,7 +8060,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7541,173 +8075,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
-                "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
-            "id": "def-common.CustomCheerio.append",
-            "type": "Function",
-            "tags": [],
-            "label": "append",
-            "description": [],
-            "signature": [
-              "{ (content: string, ...contents: any[]): ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-ui-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
-                "section": "def-common.CustomCheerio",
-                "text": "CustomCheerio"
-              },
-              "; (content: Document, ...contents: any[]): ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-ui-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
-                "section": "def-common.CustomCheerio",
-                "text": "CustomCheerio"
-              },
-              "; (content: Document[], ...contents: any[]): ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-ui-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
-                "section": "def-common.CustomCheerio",
-                "text": "CustomCheerio"
-              },
-              "; (content: ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-ui-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
-                "section": "def-common.CustomCheerio",
-                "text": "CustomCheerio"
-              },
-              ", ...contents: any[]): ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-ui-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
-                "section": "def-common.CustomCheerio",
-                "text": "CustomCheerio"
-              },
-              "; }"
-            ],
-            "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
-                "id": "def-common.CustomCheerio.append.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "content",
-                "description": [],
-                "signature": ["Document"],
-                "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
-                "id": "def-common.CustomCheerio.append.$2",
-                "type": "Array",
-                "tags": [],
-                "label": "contents",
-                "description": [],
-                "signature": ["any[]"],
-                "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
-            "id": "def-common.CustomCheerio.append",
-            "type": "Function",
-            "tags": [],
-            "label": "append",
-            "description": [],
-            "signature": [
-              "{ (content: string, ...contents: any[]): ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-ui-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
-                "section": "def-common.CustomCheerio",
-                "text": "CustomCheerio"
-              },
-              "; (content: Document, ...contents: any[]): ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-ui-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
-                "section": "def-common.CustomCheerio",
-                "text": "CustomCheerio"
-              },
-              "; (content: Document[], ...contents: any[]): ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-ui-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
-                "section": "def-common.CustomCheerio",
-                "text": "CustomCheerio"
-              },
-              "; (content: ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-ui-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
-                "section": "def-common.CustomCheerio",
-                "text": "CustomCheerio"
-              },
-              ", ...contents: any[]): ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-ui-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
-                "section": "def-common.CustomCheerio",
-                "text": "CustomCheerio"
-              },
-              "; }"
-            ],
-            "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
-                "id": "def-common.CustomCheerio.append.$1",
-                "type": "Array",
-                "tags": [],
-                "label": "content",
-                "description": [],
-                "signature": ["Document[]"],
-                "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
-                "id": "def-common.CustomCheerio.append.$2",
-                "type": "Array",
-                "tags": [],
-                "label": "contents",
-                "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7778,6 +8148,180 @@
                 "label": "content",
                 "description": [],
                 "signature": [
+                  "Document"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.CustomCheerio.append.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "contents",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.CustomCheerio.append",
+            "type": "Function",
+            "tags": [],
+            "label": "append",
+            "description": [],
+            "signature": [
+              "{ (content: string, ...contents: any[]): ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.CustomCheerio",
+                "text": "CustomCheerio"
+              },
+              "; (content: Document, ...contents: any[]): ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.CustomCheerio",
+                "text": "CustomCheerio"
+              },
+              "; (content: Document[], ...contents: any[]): ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.CustomCheerio",
+                "text": "CustomCheerio"
+              },
+              "; (content: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.CustomCheerio",
+                "text": "CustomCheerio"
+              },
+              ", ...contents: any[]): ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.CustomCheerio",
+                "text": "CustomCheerio"
+              },
+              "; }"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.CustomCheerio.append.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "content",
+                "description": [],
+                "signature": [
+                  "Document[]"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.CustomCheerio.append.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "contents",
+                "description": [],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.CustomCheerio.append",
+            "type": "Function",
+            "tags": [],
+            "label": "append",
+            "description": [],
+            "signature": [
+              "{ (content: string, ...contents: any[]): ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.CustomCheerio",
+                "text": "CustomCheerio"
+              },
+              "; (content: Document, ...contents: any[]): ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.CustomCheerio",
+                "text": "CustomCheerio"
+              },
+              "; (content: Document[], ...contents: any[]): ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.CustomCheerio",
+                "text": "CustomCheerio"
+              },
+              "; (content: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.CustomCheerio",
+                "text": "CustomCheerio"
+              },
+              ", ...contents: any[]): ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.CustomCheerio",
+                "text": "CustomCheerio"
+              },
+              "; }"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.CustomCheerio.append.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "content",
+                "description": [],
+                "signature": [
                   {
                     "pluginId": "@kbn/ftr-common-functional-ui-services",
                     "scope": "common",
@@ -7798,7 +8342,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7868,7 +8414,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7881,7 +8429,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7951,7 +8501,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["Document"],
+                "signature": [
+                  "Document"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7964,7 +8516,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8034,7 +8588,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["Document[]"],
+                "signature": [
+                  "Document[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8047,7 +8603,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8138,7 +8696,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8208,7 +8768,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8221,7 +8783,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8291,7 +8855,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["Document"],
+                "signature": [
+                  "Document"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8304,7 +8870,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8374,7 +8942,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["Document[]"],
+                "signature": [
+                  "Document[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8387,7 +8957,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8478,7 +9050,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8540,7 +9114,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8602,7 +9178,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["Document"],
+                "signature": [
+                  "Document"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8742,7 +9320,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8755,7 +9335,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8825,7 +9407,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["Document"],
+                "signature": [
+                  "Document"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8838,7 +9422,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8908,7 +9494,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["Document[]"],
+                "signature": [
+                  "Document[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -8921,7 +9509,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9012,7 +9602,9 @@
                 "tags": [],
                 "label": "contents",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9074,7 +9666,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9136,7 +9730,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["Document"],
+                "signature": [
+                  "Document"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9243,7 +9839,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9329,7 +9927,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9415,7 +10015,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9501,7 +10103,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["cheerio.Element[]"],
+                "signature": [
+                  "cheerio.Element[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9775,7 +10379,9 @@
                 "tags": [],
                 "label": "html",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9837,7 +10443,9 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9899,7 +10507,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -9961,7 +10571,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["Document"],
+                "signature": [
+                  "Document"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10101,7 +10713,9 @@
                 "tags": [],
                 "label": "propertyName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10171,7 +10785,9 @@
                 "tags": [],
                 "label": "propertyNames",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10241,7 +10857,9 @@
                 "tags": [],
                 "label": "propertyName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10254,7 +10872,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10324,7 +10944,9 @@
                 "tags": [],
                 "label": "propertyName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10337,7 +10959,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10407,7 +11031,9 @@
                 "tags": [],
                 "label": "propertyName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10420,7 +11046,9 @@
                 "tags": [],
                 "label": "func",
                 "description": [],
-                "signature": ["(index: number, value: string) => string"],
+                "signature": [
+                  "(index: number, value: string) => string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10490,7 +11118,9 @@
                 "tags": [],
                 "label": "propertyName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10503,7 +11133,9 @@
                 "tags": [],
                 "label": "func",
                 "description": [],
-                "signature": ["(index: number, value: string) => number"],
+                "signature": [
+                  "(index: number, value: string) => number"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10573,7 +11205,9 @@
                 "tags": [],
                 "label": "properties",
                 "description": [],
-                "signature": ["Record<string, any>"],
+                "signature": [
+                  "Record<string, any>"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10657,7 +11291,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10694,7 +11330,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10734,7 +11372,9 @@
             "tags": [],
             "label": "xml",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10771,7 +11411,9 @@
             "tags": [],
             "label": "contains",
             "description": [],
-            "signature": ["(container: cheerio.Element, contained: cheerio.Element) => boolean"],
+            "signature": [
+              "(container: cheerio.Element, contained: cheerio.Element) => boolean"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -10783,7 +11425,9 @@
                 "tags": [],
                 "label": "container",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10796,7 +11440,9 @@
                 "tags": [],
                 "label": "contained",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10826,7 +11472,9 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10839,7 +11487,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["Document | undefined"],
+                "signature": [
+                  "Document | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10852,7 +11502,9 @@
                 "tags": [],
                 "label": "keepScripts",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10890,7 +11542,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["cheerio.CheerioParserOptions | undefined"],
+                "signature": [
+                  "cheerio.CheerioParserOptions | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10928,7 +11582,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -10941,7 +11597,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["cheerio.CheerioParserOptions | undefined"],
+                "signature": [
+                  "cheerio.CheerioParserOptions | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11000,7 +11658,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["cheerio.CheerioParserOptions | undefined"],
+                "signature": [
+                  "cheerio.CheerioParserOptions | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11038,7 +11698,9 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": ["cheerio.Element"],
+                "signature": [
+                  "cheerio.Element"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11051,7 +11713,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["cheerio.CheerioParserOptions | undefined"],
+                "signature": [
+                  "cheerio.CheerioParserOptions | undefined"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11088,7 +11752,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11125,7 +11791,9 @@
                 "tags": [],
                 "label": "selector",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/custom_cheerio_api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -11213,7 +11881,9 @@
             "tags": [],
             "label": "timeout",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11244,7 +11914,9 @@
         "tags": [],
         "label": "Browser",
         "description": [],
-        "signature": ["BrowserService"],
+        "signature": [
+          "BrowserService"
+        ],
         "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -11446,7 +12118,9 @@
                 "tags": [],
                 "label": "offline",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/remote/network_profiles.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11504,7 +12178,9 @@
                 "tags": [],
                 "label": "offline",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/remote/network_profiles.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11562,7 +12238,9 @@
                 "tags": [],
                 "label": "offline",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/remote/network_profiles.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11620,7 +12298,9 @@
                 "tags": [],
                 "label": "offline",
                 "description": [],
-                "signature": ["true"],
+                "signature": [
+                  "true"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/remote/network_profiles.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -11678,7 +12358,9 @@
                 "tags": [],
                 "label": "offline",
                 "description": [],
-                "signature": ["false"],
+                "signature": [
+                  "false"
+                ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/remote/network_profiles.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -12470,7 +13152,10 @@
             "tags": [],
             "label": "toasts",
             "description": [],
-            "signature": ["typeof ", "ToastsService"],
+            "signature": [
+              "typeof ",
+              "ToastsService"
+            ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/all.ts",
             "deprecated": false,
             "trackAdoption": false

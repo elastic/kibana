@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
-import React from 'react';
 import type { RowRenderer } from '../../../../../../common/types';
-import { TestProviders, mockTimelineData } from '../../../../../common/mock';
+import React from 'react';
+import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { StatefulRowRenderer } from '../../body/events/stateful_row_renderer';
 import type { TimelineEventDetailRowProps } from './timeline_event_detail_row';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
+import { render } from '@testing-library/react';
 import { useTimelineUnifiedDataTableContext } from './use_timeline_unified_data_table_context';
 
 const mockData = structuredClone(mockTimelineData);

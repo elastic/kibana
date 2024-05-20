@@ -11,24 +11,24 @@ import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';
-import { validateQuery } from '@kbn/visualization-ui-components';
 import fastIsEqual from 'fast-deep-equal';
+import { validateQuery } from '@kbn/visualization-ui-components';
 import { DataViewsState } from '../../state_management';
-import { DatasourcePublicAPI, FramePublicAPI } from '../../types';
+import { FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import {
-  SeriesType,
-  XYAnnotationLayerConfig,
-  XYDataLayerConfig,
-  XYLayerConfig,
-  XYReferenceLineLayerConfig,
-  YConfig,
   visualizationTypes,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  SeriesType,
+  YConfig,
+  XYAnnotationLayerConfig,
 } from './types';
 import {
   getDataLayers,
   isAnnotationsLayer,
-  isByReferenceAnnotationsLayer,
   isDataLayer,
+  isByReferenceAnnotationsLayer,
 } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {

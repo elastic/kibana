@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -14,13 +13,14 @@ import {
   PluginInitializerContext,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { PiePublicConfig } from '../config';
-import { setDataViewsStart } from './services';
 import { pieVisType } from './vis_type';
+import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface VisTypePieSetupDependencies {

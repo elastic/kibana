@@ -9,8 +9,8 @@ import { TagAttributes } from '../../../common/types';
 import {
   TagValidation,
   validateTagColor,
-  validateTagDescription,
   validateTagName,
+  validateTagDescription,
 } from '../../../common/validation';
 
 export const validateTag = (attributes: TagAttributes): TagValidation => {

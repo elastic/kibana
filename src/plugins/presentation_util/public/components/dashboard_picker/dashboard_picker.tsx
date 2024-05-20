@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { css } from '@emotion/react';
 import { debounce } from 'lodash';
+import { css } from '@emotion/react';
 import React, { useState, useEffect, useMemo } from 'react';
 
 import {
-  EuiFieldSearch,
-  EuiHighlight,
-  EuiInputPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
   EuiText,
   useEuiTheme,
+  EuiSelectable,
+  EuiInputPopover,
+  EuiPopoverTitle,
+  EuiFieldSearch,
+  EuiHighlight,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
 import { pluginServices } from '../../services';
 

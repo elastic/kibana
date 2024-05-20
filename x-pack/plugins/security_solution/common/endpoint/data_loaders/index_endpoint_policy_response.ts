@@ -6,9 +6,9 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { POLICY_RESPONSE_INDEX } from '../constants';
 import type { HostPolicyResponse } from '../types';
 import { wrapErrorAndRejectPromise } from './utils';
+import { POLICY_RESPONSE_INDEX } from '../constants';
 
 export interface IndexedEndpointPolicyResponse {
   policyResponses: HostPolicyResponse[];

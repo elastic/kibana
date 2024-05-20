@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from '@kbn/core/public';
-import type { MockedKeys } from '@kbn/utility-types-jest';
-import { of } from 'rxjs';
-import { EqlExpressionFunctionDefinition } from '../../../common/search/expressions';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { getEql } from './eql';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { EqlExpressionFunctionDefinition } from '../../../common/search/expressions';
+import { StartServicesAccessor } from '@kbn/core/public';
+import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import { of } from 'rxjs';
 
 jest.mock('@kbn/i18n', () => {
   return {

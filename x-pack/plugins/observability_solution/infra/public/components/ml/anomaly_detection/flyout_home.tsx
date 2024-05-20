@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useState, useCallback, useEffect, useContext } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,30 +18,28 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiSpacer,
-  EuiTab,
   EuiTabs,
+  EuiTab,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { FeatureFeedbackButton, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import moment from 'moment';
-import React, { useState, useCallback, useEffect, useContext } from 'react';
-import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
-import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
-import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
-import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
-import { LoadingPrompt } from '../../loading_page';
+import { css } from '@emotion/react';
 import {
   MissingResultsPrivilegesPrompt,
   MissingSetupPrivilegesPrompt,
 } from '../../logging/log_analysis_setup';
-import { SubscriptionSplashPrompt } from '../../subscription_splash_content';
+import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
+import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
+import { LoadingPrompt } from '../../loading_page';
 import { AnomaliesTable } from './anomalies_table/anomalies_table';
+import { SubscriptionSplashPrompt } from '../../subscription_splash_content';
+import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
+import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
 
 interface Props {
   hasSetupCapabilities: boolean;
@@ -104,8 +104,8 @@ export const FlyoutHome = (props: Props) => {
     props.hideJobType || (hostJobSummaries.length > 0 && k8sJobSummaries.length === 0)
       ? 'host'
       : hostJobSummaries.length === 0 && k8sJobSummaries.length > 0
-        ? 'pod'
-        : undefined;
+      ? 'pod'
+      : undefined;
 
   if (!hasInfraMLCapabilities) {
     return <SubscriptionSplashPrompt />;

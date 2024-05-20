@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { addQueryParam, encodeQuery, encodeUriQuery } from './encode_uri_query';
+import { encodeUriQuery, encodeQuery, addQueryParam } from './encode_uri_query';
 
 export const url = {
   encodeQuery,

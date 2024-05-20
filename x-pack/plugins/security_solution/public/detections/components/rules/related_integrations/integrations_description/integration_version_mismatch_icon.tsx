@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { EuiIconTip } from '@elastic/eui';
 import type { IntegrationDetails } from '../integration_details';
 import * as i18n from '../translations';
 

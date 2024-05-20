@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { countBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { useLoadRuleTypesQuery } from '../../common/hooks';
-import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
+import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
 
 export interface RuleTypeModalComponentProps {
   http: HttpStart;

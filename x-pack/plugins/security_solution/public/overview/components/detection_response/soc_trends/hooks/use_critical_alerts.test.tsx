@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { TestProviders } from '../../../../../common/mock';
-import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
-import * as i18n from '../translations';
 import type { UseCriticalAlerts } from './use_critical_alerts';
 import { useCriticalAlerts } from './use_critical_alerts';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { TestProviders } from '../../../../../common/mock';
+import * as i18n from '../translations';
+import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_query');
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

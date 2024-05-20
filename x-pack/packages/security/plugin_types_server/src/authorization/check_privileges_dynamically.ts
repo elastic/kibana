@@ -7,8 +7,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
-  CheckPrivilegesOptions,
   CheckPrivilegesPayload,
+  CheckPrivilegesOptions,
   CheckPrivilegesResponse,
 } from './check_privileges';
 

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { VALUE_LISTS_ROW, VALUE_LISTS_TABLE } from '../../../../screens/lists';
-import { refreshIndex } from '../../../../tasks/api_calls/elasticsearch';
-import {
-  KNOWN_VALUE_LIST_FILES,
-  closeValueListsModal,
-  createListsIndex,
-  deleteValueLists,
-  deleteValueListsFile,
-  exportValueList,
-  importValueList,
-  openValueListsModal,
-  selectValueListType,
-  selectValueListsFile,
-  uploadValueList,
-  waitForListsIndex,
-  waitForValueListsModalToBeLoaded,
-} from '../../../../tasks/lists';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
+import {
+  createListsIndex,
+  waitForValueListsModalToBeLoaded,
+  openValueListsModal,
+  selectValueListsFile,
+  uploadValueList,
+  selectValueListType,
+  closeValueListsModal,
+  importValueList,
+  deleteValueListsFile,
+  exportValueList,
+  waitForListsIndex,
+  deleteValueLists,
+  KNOWN_VALUE_LIST_FILES,
+} from '../../../../tasks/lists';
+import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW } from '../../../../screens/lists';
+import { refreshIndex } from '../../../../tasks/api_calls/elasticsearch';
 
 describe('value lists management modal', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

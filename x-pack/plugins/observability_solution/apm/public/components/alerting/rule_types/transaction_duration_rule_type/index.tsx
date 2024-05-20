@@ -6,24 +6,18 @@
  */
 
 import { EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { defaults, map, omit } from 'lodash';
+import React, { useCallback, useEffect } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ForLastExpression, TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
-import { defaults, map, omit } from 'lodash';
-import React, { useCallback, useEffect } from 'react';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../../common/es_fields/apm';
-import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import { SearchConfigurationType } from '../../../../../common/rules/schema';
+import { AggregationType } from '../../../../../common/rules/apm_rule_types';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
@@ -31,24 +25,30 @@ import {
   getMaxY,
   getResponseTimeTickFormatter,
 } from '../../../shared/charts/transaction_charts/helper';
-import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
-import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
-import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { ChartPreview } from '../../ui_components/chart_preview';
+import {
+  EnvironmentField,
+  IsAboveField,
+  ServiceField,
+  TransactionTypeField,
+  TransactionNameField,
+} from '../../utils/fields';
+import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
+import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
+import { PopoverExpression } from '../../ui_components/popover_expression';
+import { APMRuleGroupBy } from '../../ui_components/apm_rule_group_by';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/es_fields/apm';
 import {
   ErrorState,
   LoadingState,
   NoDataState,
 } from '../../ui_components/chart_preview/chart_preview_helper';
-import { PopoverExpression } from '../../ui_components/popover_expression';
-import {
-  EnvironmentField,
-  IsAboveField,
-  ServiceField,
-  TransactionNameField,
-  TransactionTypeField,
-} from '../../utils/fields';
-import { AlertMetadata, getIntervalAndTimeRange } from '../../utils/helper';
+import { ApmRuleKqlFilter } from '../../ui_components/apm_rule_kql_filter';
 
 export interface TransactionDurationRuleParams {
   aggregationType: AggregationType;

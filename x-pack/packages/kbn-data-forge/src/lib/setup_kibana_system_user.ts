@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { Config } from '../types';
+import { Client } from '@elastic/elasticsearch';
 import { elasticsearchErrorHandler } from './elasticsearch_error_handler';
+import { Config } from '../types';
 
 export async function setupKibanaSystemUser(config: Config, client: Client, logger: ToolingLog) {
   await client.security

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
+  NodeService,
   InternalNodeServicePreboot,
   InternalNodeServiceStart,
-  NodeService,
 } from '@kbn/core-node-server-internal';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 const createInternalPrebootContractMock = () => {
   const prebootContract: jest.Mocked<InternalNodeServicePreboot> = {

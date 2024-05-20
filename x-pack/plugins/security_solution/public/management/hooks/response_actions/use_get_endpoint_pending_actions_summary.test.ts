@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useQuery as _useQuery } from '@tanstack/react-query';
-import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { useGetEndpointPendingActionsSummary } from './use_get_endpoint_pending_actions_summary';
+import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+import { useQuery as _useQuery } from '@tanstack/react-query';
+import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 
 const useQueryMock = _useQuery as jest.Mock;
 

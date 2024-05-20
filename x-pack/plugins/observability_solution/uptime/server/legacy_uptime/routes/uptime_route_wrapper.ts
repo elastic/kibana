@@ -6,8 +6,8 @@
  */
 
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
-import { UptimeEsClient } from '../lib/lib';
 import { UMKibanaRouteWrapper } from './types';
+import { UptimeEsClient } from '../lib/lib';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,

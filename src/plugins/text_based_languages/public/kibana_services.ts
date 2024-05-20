@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { IndexManagementPluginSetup } from '@kbn/index-management';
-import { BehaviorSubject } from 'rxjs';
 
 export let core: CoreStart;
 

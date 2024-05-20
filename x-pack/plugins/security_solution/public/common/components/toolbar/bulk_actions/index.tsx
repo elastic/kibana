@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';

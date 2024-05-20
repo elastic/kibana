@@ -6,27 +6,27 @@
  */
 
 import {
-  BLOCK_LIST_VALUE_INPUT,
-  FLYOUT_ADD_TO_BLOCK_LIST_ITEM,
-  INDICATORS_TABLE_ADD_TO_BLOCK_LIST_BUTTON_ICON,
-  SAVED_BLOCK_LIST_DESCRIPTION,
-  SAVED_BLOCK_LIST_NAME,
-} from '../screens/blocklist';
-import {
-  fillBlocklistForm,
-  openAddToBlockListFlyoutFromTable,
-  openAddToBlocklistFromFlyout,
-} from '../tasks/blocklist';
-import {
   closeFlyout,
   navigateToThreatIntelligence,
   openFlyout,
   openFlyoutTakeAction,
   openIndicatorsTableMoreActions,
 } from '../tasks/common';
+import {
+  fillBlocklistForm,
+  openAddToBlockListFlyoutFromTable,
+  openAddToBlocklistFromFlyout,
+} from '../tasks/blocklist';
 import { navigateToBlocklist } from '../tasks/common';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { login, visit } from '../tasks/login';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import {
+  BLOCK_LIST_VALUE_INPUT,
+  FLYOUT_ADD_TO_BLOCK_LIST_ITEM,
+  INDICATORS_TABLE_ADD_TO_BLOCK_LIST_BUTTON_ICON,
+  SAVED_BLOCK_LIST_DESCRIPTION,
+  SAVED_BLOCK_LIST_NAME,
+} from '../screens/blocklist';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 

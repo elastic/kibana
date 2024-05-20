@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import type { AggregateQuery, Query } from '@kbn/es-query';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
-import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
-import { ReactWrapper } from 'enzyme';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import { DiscoverServices } from '../../build_services';
-import { FlyoutCustomization, useDiscoverCustomization } from '../../customizations';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import { DiscoverServices } from '../../build_services';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
+import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
+import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
+import { FlyoutCustomization, useDiscoverCustomization } from '../../customizations';
 
 const mockFlyoutCustomization: FlyoutCustomization = {
   id: 'flyout',

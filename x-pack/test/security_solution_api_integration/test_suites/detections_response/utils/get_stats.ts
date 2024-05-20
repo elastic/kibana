@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
+import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type SuperTest from 'supertest';
 
-import { getDetectionMetricsFromBody } from './get_detection_metrics_from_body';
 import { getStatsUrl } from './get_stats_url';
+import { getDetectionMetricsFromBody } from './get_detection_metrics_from_body';
 
 /**
  * Gets the stats from the stats endpoint.

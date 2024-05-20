@@ -1,4 +1,3 @@
-import { EuiTabProps } from '../../types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { EuiTabProps } from '../../types';
  * 2.0.
  */
 import { getSelectedTabContent } from './helpers';
+import { EuiTabProps } from '../../types';
 
 const TABS: EuiTabProps[] = [
   {

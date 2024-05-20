@@ -6,8 +6,9 @@
  */
 
 import { EuiFieldNumber, EuiFormRow, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { Validation } from '../../../../../../../common/types';
 import {
   BandwidthLimitKey,
   ConfigKey,
@@ -15,9 +16,8 @@ import {
   ThrottlingConfig,
   ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
-import { Validation } from '../../../../../../../common/types';
-import { OptionalLabel } from '../optional_label';
 import { ThrottlingExceededMessage } from './throttling_exceeded_callout';
+import { OptionalLabel } from '../optional_label';
 
 export const ThrottlingUploadField = ({
   readOnly,

@@ -14,8 +14,8 @@
 
 import path from 'path';
 
-import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { Journey } from '@kbn/journeys';
 
 import { extractor } from './extractor';

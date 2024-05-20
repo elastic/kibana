@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { mockHttpRequest, pageHelpers } from './helpers';
+import { pageHelpers, mockHttpRequest } from './helpers';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { first } from 'lodash';
 import { act } from 'react-dom/test-utils';
+import { first } from 'lodash';
+import { coreMock } from '@kbn/core/public/mocks';
 import { setHttp } from '../../crud_app/services';
 import { JOBS } from './helpers/constants';
 

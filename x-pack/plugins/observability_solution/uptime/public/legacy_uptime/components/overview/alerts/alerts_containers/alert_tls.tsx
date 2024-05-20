@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback, useEffect } from 'react';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
+import { useSnapShotCount } from './use_snap_shot';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
 import { TLSParams } from '../../../../../../common/runtime_types/alerts/tls';
-import { getDynamicSettings } from '../../../../state/actions/dynamic_settings';
-import { selectDynamicSettings } from '../../../../state/selectors';
-import { AlertQueryBar } from '../alert_query_bar/query_bar';
 import { AlertTlsComponent } from '../alert_tls';
+import { selectDynamicSettings } from '../../../../state/selectors';
+import { getDynamicSettings } from '../../../../state/actions/dynamic_settings';
+import { AlertQueryBar } from '../alert_query_bar/query_bar';
 import { AlertMonitorCount } from '../monitor_status_alert/alert_monitor_status';
-import { useSnapShotCount } from './use_snap_shot';
 
 export const AlertTls: React.FC<{
   id?: string;

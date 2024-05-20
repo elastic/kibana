@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
+import { EuiPanel } from '@elastic/eui';
 
 import { reduxDecorator } from '../../../../storybook';
 
 import { argTypes } from '../../../services/storybook';
 import { getSomeWorkpads } from '../../../services/stubs/workpad';
-import { WorkpadsContext } from './my_workpads';
 import { WorkpadTable as Component } from './workpad_table';
+import { WorkpadsContext } from './my_workpads';
 
 const { workpadCount } = argTypes;
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { useFetcher, isPending, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { CLIENT_GEO_COUNTRY_NAME } from '../../../../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../../../hooks/use_fetcher';
-import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
 import { MetricItem } from './metric_item';
+import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
 
 const formatDifference = (value: number) => {
   return value > 0 ? '+' + value.toFixed(0) + '%' : value.toFixed(0) + '%';

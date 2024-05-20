@@ -10,7 +10,7 @@ import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { CrawlerOverview } from './crawler_overview';
 import { CrawlerRouter } from './crawler_router';

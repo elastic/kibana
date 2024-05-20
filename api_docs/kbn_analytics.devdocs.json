@@ -36,7 +36,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -72,7 +74,9 @@
             "tags": [],
             "label": "serializeKey",
             "description": [],
-            "signature": ["({ appId, viewId }: ApplicationKey) => string"],
+            "signature": [
+              "({ appId, viewId }: ApplicationKey) => string"
+            ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -84,7 +88,9 @@
                 "tags": [],
                 "label": "{ appId, viewId }",
                 "description": [],
-                "signature": ["ApplicationKey"],
+                "signature": [
+                  "ApplicationKey"
+                ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -100,7 +106,9 @@
             "tags": [],
             "label": "updateViewClickCounter",
             "description": [],
-            "signature": ["(viewId: string) => void"],
+            "signature": [
+              "(viewId: string) => void"
+            ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -112,7 +120,9 @@
                 "tags": [],
                 "label": "viewId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -128,7 +138,9 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -142,7 +154,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -156,7 +170,9 @@
             "tags": [],
             "label": "setCurrentAppId",
             "description": [],
-            "signature": ["(appId: string) => void"],
+            "signature": [
+              "(appId: string) => void"
+            ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -168,7 +184,9 @@
                 "tags": [],
                 "label": "appId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -184,7 +202,9 @@
             "tags": [],
             "label": "trackApplicationViewUsage",
             "description": [],
-            "signature": ["(viewId: string) => void"],
+            "signature": [
+              "(viewId: string) => void"
+            ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -196,7 +216,9 @@
                 "tags": [],
                 "label": "viewId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -212,7 +234,9 @@
             "tags": [],
             "label": "pauseTrackingAll",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -226,7 +250,9 @@
             "tags": [],
             "label": "resumeTrackingAll",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -240,7 +266,9 @@
             "tags": [],
             "label": "flushTrackedView",
             "description": [],
-            "signature": ["(viewId: string) => void"],
+            "signature": [
+              "(viewId: string) => void"
+            ],
             "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -252,7 +280,9 @@
                 "tags": [],
                 "label": "viewId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-analytics/src/application_usage_tracker.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -293,7 +323,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -329,7 +361,9 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -357,7 +391,9 @@
                 "tags": [],
                 "label": "appName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -370,7 +406,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -383,7 +421,9 @@
                 "tags": [],
                 "label": "eventNames",
                 "description": [],
-                "signature": ["string | string[]"],
+                "signature": [
+                  "string | string[]"
+                ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -396,7 +436,9 @@
                 "tags": [],
                 "label": "count",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -412,7 +454,9 @@
             "tags": [],
             "label": "reportUserAgent",
             "description": [],
-            "signature": ["(appName: string) => void"],
+            "signature": [
+              "(appName: string) => void"
+            ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -424,7 +468,9 @@
                 "tags": [],
                 "label": "appName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -440,7 +486,11 @@
             "tags": [],
             "label": "reportApplicationUsage",
             "description": [],
-            "signature": ["(appUsageReport: ", "ApplicationUsageMetric", ") => void"],
+            "signature": [
+              "(appUsageReport: ",
+              "ApplicationUsageMetric",
+              ") => void"
+            ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -452,7 +502,9 @@
                 "tags": [],
                 "label": "appUsageReport",
                 "description": [],
-                "signature": ["ApplicationUsageMetric"],
+                "signature": [
+                  "ApplicationUsageMetric"
+                ],
                 "path": "packages/kbn-analytics/src/reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -468,7 +520,9 @@
             "tags": [],
             "label": "sendReports",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -527,7 +581,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -587,7 +643,9 @@
             "tags": [],
             "label": "clearReport",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -601,7 +659,9 @@
             "tags": [],
             "label": "isReportEmpty",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -641,7 +701,12 @@
                 "tags": [],
                 "label": "newMetrics",
                 "description": [],
-                "signature": ["Metric", " | ", "Metric", "[]"],
+                "signature": [
+                  "Metric",
+                  " | ",
+                  "Metric",
+                  "[]"
+                ],
                 "path": "packages/kbn-analytics/src/report.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -657,7 +722,11 @@
             "tags": [],
             "label": "createMetricKey",
             "description": [],
-            "signature": ["(metric: ", "Metric", ") => string"],
+            "signature": [
+              "(metric: ",
+              "Metric",
+              ") => string"
+            ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -669,7 +738,9 @@
                 "tags": [],
                 "label": "metric",
                 "description": [],
-                "signature": ["Metric"],
+                "signature": [
+                  "Metric"
+                ],
                 "path": "packages/kbn-analytics/src/report.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -702,7 +773,9 @@
             "tags": [],
             "label": "reportVersion",
             "description": [],
-            "signature": ["3"],
+            "signature": [
+              "3"
+            ],
             "path": "packages/kbn-analytics/src/report.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -852,7 +925,9 @@
             "tags": [],
             "label": "checkInterval",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -864,7 +939,9 @@
             "tags": [],
             "label": "debug",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -876,7 +953,9 @@
             "tags": [],
             "label": "storageKey",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-analytics/src/reporter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -912,7 +991,9 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": ["(key: string) => T | undefined"],
+            "signature": [
+              "(key: string) => T | undefined"
+            ],
             "path": "packages/kbn-analytics/src/storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -924,7 +1005,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-analytics/src/storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -940,7 +1023,9 @@
             "tags": [],
             "label": "set",
             "description": [],
-            "signature": ["(key: string, value: T) => S"],
+            "signature": [
+              "(key: string, value: T) => S"
+            ],
             "path": "packages/kbn-analytics/src/storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -952,7 +1037,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-analytics/src/storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -965,7 +1052,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "packages/kbn-analytics/src/storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -981,7 +1070,9 @@
             "tags": [],
             "label": "remove",
             "description": [],
-            "signature": ["(key: string) => T | undefined"],
+            "signature": [
+              "(key: string) => T | undefined"
+            ],
             "path": "packages/kbn-analytics/src/storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -993,7 +1084,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-analytics/src/storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1009,7 +1102,9 @@
             "tags": [],
             "label": "clear",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-analytics/src/storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1145,7 +1240,9 @@
         "tags": [],
         "label": "UiCounterMetricType",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "packages/kbn-analytics/src/metrics/ui_counter.ts",
         "deprecated": false,
         "trackAdoption": false,

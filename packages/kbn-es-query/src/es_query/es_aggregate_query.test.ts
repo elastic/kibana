@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAggregateQueryMode, isOfAggregateQueryType, isOfQueryType } from './es_aggregate_query';
+import { isOfQueryType, isOfAggregateQueryType, getAggregateQueryMode } from './es_aggregate_query';
 
 describe('esql query helpers', () => {
   describe('isOfQueryType', () => {

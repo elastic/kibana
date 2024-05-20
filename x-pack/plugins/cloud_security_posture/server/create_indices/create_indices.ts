@@ -14,8 +14,8 @@ import {
   BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
 } from '../../common/constants';
-import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import { createPipelineIfNotExists } from './create_processor';
+import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import { latestFindingsPipelineIngestConfig, scorePipelineIngestConfig } from './ingest_pipelines';
 import { latestIndexConfigs } from './latest_indices';
 import { IndexConfig, IndexTemplateParams } from './types';

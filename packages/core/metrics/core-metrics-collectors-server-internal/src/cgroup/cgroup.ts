@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { MetricsCollector } from '@kbn/core-metrics-server';
 import type { Logger } from '@kbn/logging';
+import type { MetricsCollector } from '@kbn/core-metrics-server';
 
-import { GROUP_CPU, GROUP_CPUACCT } from './constants';
-import { gatherInfo } from './gather_info';
-import { OsCgroupMetrics } from './types';
 import { gatherV1CgroupMetrics } from './v1';
 import { gatherV2CgroupMetrics } from './v2';
+import { gatherInfo } from './gather_info';
+import { GROUP_CPU, GROUP_CPUACCT } from './constants';
+import { OsCgroupMetrics } from './types';
 
 interface OsCgroupMetricsCollectorOptions {
   logger: Logger;

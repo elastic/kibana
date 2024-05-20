@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import {
-  type AppContextTestRender,
   createAppRootMockRenderer,
+  type AppContextTestRender,
 } from '../../../../common/mock/endpoint';
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
+import { MANAGEMENT_PATH } from '../../../../../common/constants';
 
 describe('Users filter', () => {
   let render: (

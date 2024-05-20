@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiProgress, EuiText } from '@elastic/eui';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
-import React, { Component, Fragment } from 'react';
-import { hasImportPermission } from '../api';
-import { ImportResults } from '../importer';
-import { GeoFileImporter } from '../importer/geo';
 import { getDataViewsService } from '../kibana_services';
-import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
 import { GeoUploadForm, OnFileSelectParameters } from './geo_upload_form';
 import { ImportCompleteView } from './import_complete_view';
+import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
+import { ImportResults } from '../importer';
+import { GeoFileImporter } from '../importer/geo';
+import { hasImportPermission } from '../api';
 import { getPartialImportMessage } from './utils';
 
 enum PHASE {

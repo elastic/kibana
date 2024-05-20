@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
-import moment from 'moment-timezone';
 import React from 'react';
-import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
-import { TestProvidersComponent } from '../../../../common/mock';
+import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { SEVERITY_VALUE_TEST_ID, FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { EventHeaderTitle } from './event_header_title';
-import { FLYOUT_EVENT_HEADER_TITLE_TEST_ID, SEVERITY_VALUE_TEST_ID } from './test_ids';
+import moment from 'moment-timezone';
+import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
+import { mockContextValue } from '../mocks/mock_context';
+import { TestProvidersComponent } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 

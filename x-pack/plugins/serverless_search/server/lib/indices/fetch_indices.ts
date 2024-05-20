@@ -8,7 +8,7 @@
 import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isNotNullish } from '../../../common/utils/is_not_nullish';
-import { isClosed, isHidden } from '../../utils/index_utils';
+import { isHidden, isClosed } from '../../utils/index_utils';
 
 export async function fetchIndices(
   client: ElasticsearchClient,

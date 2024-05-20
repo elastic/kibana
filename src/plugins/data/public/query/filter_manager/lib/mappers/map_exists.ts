@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FILTERS, Filter, isExistsFilter } from '@kbn/es-query';
 import { get } from 'lodash';
+import { Filter, isExistsFilter, FILTERS } from '@kbn/es-query';
 
 export const mapExists = (filter: Filter) => {
   if (isExistsFilter(filter)) {

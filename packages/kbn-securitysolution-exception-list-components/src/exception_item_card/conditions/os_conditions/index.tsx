@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiExpression } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
+import { EuiExpression } from '@elastic/eui';
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import * as i18n from '../../translations';
 import { OS_LABELS } from '../conditions.config';
+import * as i18n from '../../translations';
 
 export interface OsConditionsProps {
   dataTestSubj?: string;

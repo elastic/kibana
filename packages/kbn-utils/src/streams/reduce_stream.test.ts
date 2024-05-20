@@ -7,7 +7,7 @@
  */
 
 import { Transform } from 'stream';
-import { createListStream, createPromiseFromStreams, createReduceStream } from '.';
+import { createReduceStream, createPromiseFromStreams, createListStream } from '.';
 
 const promiseFromEvent = (name: string, emitter: Transform) =>
   new Promise((resolve) => emitter.on(name, () => resolve(name)));

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiIcon, EuiImage, EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import { EuiFlexGrid, EuiFlexItem, EuiLink, EuiImage, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { CanvasAsset } from '../../../types';
 

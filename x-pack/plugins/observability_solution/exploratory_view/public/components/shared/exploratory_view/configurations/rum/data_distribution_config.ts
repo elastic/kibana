@@ -8,11 +8,12 @@
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
-  LABEL_FIELDS_FILTER,
-  RECORDS_PERCENTAGE_FIELD,
   REPORT_METRIC_FIELD,
+  RECORDS_PERCENTAGE_FIELD,
   ReportTypes,
+  LABEL_FIELDS_FILTER,
 } from '../constants';
+import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
@@ -38,12 +39,11 @@ import {
   FCP_LABEL,
   INP_LABEL,
   LCP_LABEL,
-  PAGES_LOADED_LABEL,
   PAGE_LOAD_TIME_LABEL,
+  PAGES_LOADED_LABEL,
   TBT_LABEL,
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
-import { buildPhraseFilter } from '../utils';
 
 export function getRumDistributionConfig({ dataView }: ConfigProps): SeriesConfig {
   return {

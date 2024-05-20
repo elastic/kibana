@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ALL_VALUE, FetchHistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
-import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
+import { ALL_VALUE, FetchHistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
 
 export interface UseFetchHistoricalSummaryResponse {
   data: FetchHistoricalSummaryResponse | undefined;

@@ -7,23 +7,23 @@
 
 import { HttpSetup } from '@kbn/core/public';
 
-import { API_BASE_PATH } from '../../../common/constants';
 import { FieldCopyAction, Pipeline } from '../../../common/types';
+import { API_BASE_PATH } from '../../../common/constants';
 import {
+  UseRequestConfig,
   SendRequestConfig,
   SendRequestResponse,
-  UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../shared_imports';
+import { UiMetricService } from './ui_metric';
 import {
   UIM_PIPELINE_CREATE,
+  UIM_PIPELINE_UPDATE,
   UIM_PIPELINE_DELETE,
   UIM_PIPELINE_DELETE_MANY,
   UIM_PIPELINE_SIMULATE,
-  UIM_PIPELINE_UPDATE,
 } from '../constants';
-import { UiMetricService } from './ui_metric';
 
 export class ApiService {
   private client: HttpSetup | undefined;

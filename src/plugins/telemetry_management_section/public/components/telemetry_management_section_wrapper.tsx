@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
 import { DocLinksStart } from '@kbn/core/public';
 import { RegistryComponentProps } from '@kbn/management-settings-section-registry';
-import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
-import React, { lazy, Suspense } from 'react';
 import type TelemetryManagementSection from './telemetry_management_section';
 
 export type TelemetryManagementSectionWrapperProps = Omit<

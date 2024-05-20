@@ -1,4 +1,3 @@
-import { API_ERROR } from '../translations';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +5,12 @@ import { API_ERROR } from '../translations';
  * 2.0.
  */
 import { getStreamObservable } from './stream_observable';
+import { API_ERROR } from '../translations';
 
+import type { PromptObservableState } from './types';
+import { Subject } from 'rxjs';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
-import { Subject } from 'rxjs';
-import type { PromptObservableState } from './types';
 describe('getStreamObservable', () => {
   const mockReader = {
     read: jest.fn(),

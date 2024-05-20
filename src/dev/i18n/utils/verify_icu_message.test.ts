@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { checkEnglishOnly, verifyICUMessage } from './verify_icu_message';
+import { verifyICUMessage, checkEnglishOnly } from './verify_icu_message';
 
 describe('verifyICUMessage', () => {
   it('passes on plain text', () => {

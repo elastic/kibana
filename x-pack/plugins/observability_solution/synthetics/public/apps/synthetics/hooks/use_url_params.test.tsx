@@ -7,11 +7,11 @@
 
 import DateMath from '@kbn/datemath';
 import userEvent from '@testing-library/user-event';
-import React, { useState, Fragment } from 'react';
-import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../common/constants/synthetics/client_defaults';
-import { SyntheticsRefreshContext } from '../contexts';
 import { render } from '../utils/testing';
-import { SyntheticsUrlParamsHook, useUrlParams } from './use_url_params';
+import React, { useState, Fragment } from 'react';
+import { useUrlParams, SyntheticsUrlParamsHook } from './use_url_params';
+import { SyntheticsRefreshContext } from '../contexts';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../common/constants/synthetics/client_defaults';
 const { AUTOREFRESH_INTERVAL_SECONDS } = CLIENT_DEFAULTS_SYNTHETICS;
 
 interface MockUrlParamsComponentProps {

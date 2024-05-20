@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
 import { useQuery } from '@tanstack/react-query';
+import { RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { getQueryDelaySettings } from '../lib/rule_api/get_query_delay_settings';
 

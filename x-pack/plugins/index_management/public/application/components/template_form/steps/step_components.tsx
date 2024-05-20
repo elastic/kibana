@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { useState, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButtonEmpty,
+  EuiTitle,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useCallback } from 'react';
 
 import { ComponentTemplateListItem } from '../../../../../common';
 import { Forms } from '../../../../shared_imports';

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import * as React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
+import ActionsConnectorsList from './actions_connectors_list';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { useKibana } from '../../../../common/lib/kibana';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import ActionsConnectorsList from './actions_connectors_list';
+import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
-import { times } from 'lodash';
 import { ActionConnector, GenericValidationResult } from '../../../../types';
+import { times } from 'lodash';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -332,18 +332,16 @@ describe('actions_connectors_list', () => {
           config: {},
         }))
       );
-      expect(
-        wrapper.find('[data-test-subj="actionsTable"]').first().prop('pagination')
-      ).toMatchInlineSnapshot(`
+      expect(wrapper.find('[data-test-subj="actionsTable"]').first().prop('pagination'))
+        .toMatchInlineSnapshot(`
       Object {
         "initialPageIndex": 0,
         "pageIndex": 0,
       }
     `);
       wrapper.find('[data-test-subj="pagination-button-1"]').last().simulate('click');
-      expect(
-        wrapper.find('[data-test-subj="actionsTable"]').first().prop('pagination')
-      ).toMatchInlineSnapshot(`
+      expect(wrapper.find('[data-test-subj="actionsTable"]').first().prop('pagination'))
+        .toMatchInlineSnapshot(`
       Object {
         "initialPageIndex": 0,
         "pageIndex": 1,

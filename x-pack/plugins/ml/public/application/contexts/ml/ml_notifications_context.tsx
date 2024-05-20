@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { useStorage } from '@kbn/ml-local-storage';
-import moment from 'moment';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useContext, useState, useEffect } from 'react';
 import { combineLatest, timer } from 'rxjs';
-import { map, retry, switchMap, tap } from 'rxjs';
-import type { NotificationsCountResponse } from '../../../../common/types/notifications';
+import { switchMap, map, tap, retry } from 'rxjs';
+import moment from 'moment';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { useStorage } from '@kbn/ml-local-storage';
+import { useMlKibana } from '../kibana';
 import {
   ML_NOTIFICATIONS_LAST_CHECKED_AT,
   type MlStorageKey,
   type TMlStorageMapped,
 } from '../../../../common/types/storage';
 import { useAsObservable } from '../../hooks';
-import { useMlKibana } from '../kibana';
+import type { NotificationsCountResponse } from '../../../../common/types/notifications';
 
 const NOTIFICATIONS_CHECK_INTERVAL = 60000;
 

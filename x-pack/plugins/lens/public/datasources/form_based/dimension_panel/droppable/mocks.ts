@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { IndexPatternMap, OperationMetadata } from '../../../../types';
+import { FormBasedLayer } from '../../types';
 import { documentField } from '../../document_field';
+import { IndexPatternMap, OperationMetadata } from '../../../../types';
 import {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -14,7 +15,6 @@ import {
   TermsIndexPatternColumn,
 } from '../../operations';
 import { getFieldByNameFactory } from '../../pure_helpers';
-import { FormBasedLayer } from '../../types';
 jest.mock('../../../../id_generator');
 
 export const mockDataViews = (): IndexPatternMap => {

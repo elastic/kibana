@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { shallow, mount } from 'enzyme';
 
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   StepRuleDescription,
   addFilterStateIfNotThere,
   buildListItems,
   getDescriptionItem,
 } from '.';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
-import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
 } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import * as i18n from './translations';
 
-import { createLicenseServiceMock } from '../../../../../common/license/mocks';
-import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { schema } from '../step_about_rule/schema';
 import type { ListItems } from './types';
+import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 
 jest.mock('../../../../common/lib/kibana');
 

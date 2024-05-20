@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiText,
+  EuiCallOut,
+  EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { useAppContext } from '../../../../app_context';
 import {
-  UIM_ML_SNAPSHOT_DELETE_CLICK,
-  UIM_ML_SNAPSHOT_UPGRADE_CLICK,
   uiMetricService,
+  UIM_ML_SNAPSHOT_UPGRADE_CLICK,
+  UIM_ML_SNAPSHOT_DELETE_CLICK,
 } from '../../../../lib/ui_metric';
-import { DeprecationBadge, DeprecationFlyoutLearnMoreLink } from '../../../shared';
+import { useAppContext } from '../../../../app_context';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
 import { MlSnapshotContext } from './context';
 import { SnapshotState } from './use_snapshot_state';
 

@@ -15,7 +15,7 @@ import { EuiBadge } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../test_helpers';
 
-import { CrawlEvent, CrawlType, CrawlerStatus } from '../types';
+import { CrawlEvent, CrawlerStatus, CrawlType } from '../types';
 
 import { CrawlEventTypeBadge } from './crawl_event_type_badge';
 

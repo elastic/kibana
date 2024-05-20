@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiFieldSearch,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { HttpSetup } from '@kbn/core/public';
+import React, { useState, Fragment, useEffect, useCallback, ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiSpacer,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiText,
+  EuiFieldSearch,
+  EuiFormRow,
+} from '@elastic/eui';
+import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
+  getFields,
   COMPARATORS,
+  builtInComparators,
+  OfExpression,
+  ThresholdExpression,
   ForLastExpression,
   GroupByExpression,
-  OfExpression,
-  RuleTypeParamsExpressionProps,
-  ThresholdExpression,
   WhenExpression,
   builtInAggregationTypes,
-  builtInComparators,
-  getFields,
+  RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useState, Fragment, useEffect, useCallback, ChangeEvent } from 'react';
-import { IndexThresholdRuleParams } from './types';
 import { ThresholdVisualization } from './visualization';
+import { IndexThresholdRuleParams } from './types';
 import './expression.scss';
 import { IndexSelectPopover } from '../components/index_select_popover';
 

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { FEATURE_STATES_NONE_OPTION } from '../../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlexItem,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
 import { SnapshotConfig } from '../../../../../common/types';
+import { FEATURE_STATES_NONE_OPTION } from '../../../../../common/constants';
 import { CollapsibleFeatureStatesList } from '../../collapsible_lists';
 
 export const PolicyFeatureStatesSummary: React.FunctionComponent<SnapshotConfig> = ({

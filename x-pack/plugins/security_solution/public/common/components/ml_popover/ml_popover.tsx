@@ -6,20 +6,18 @@
  */
 
 import {
-  EuiCallOut,
   EuiHeaderSectionItemButton,
+  EuiCallOut,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MLJobsAwaitingNodeWarning, MlNodeAvailableWarningShared } from '@kbn/ml-plugin/public';
 import React, { useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
+import { MLJobsAwaitingNodeWarning, MlNodeAvailableWarningShared } from '@kbn/ml-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { filterJobs } from './helpers';
-import { useEnableDataFeed } from './hooks/use_enable_data_feed';
-import { useSecurityJobs } from './hooks/use_security_jobs';
 import { JobsTableFilters } from './jobs_table/filters/jobs_table_filters';
 import { JobsTable } from './jobs_table/jobs_table';
 import { ShowingCount } from './jobs_table/showing_count';
@@ -27,6 +25,8 @@ import { PopoverDescription } from './popover_description';
 import * as i18n from './translations';
 import type { JobsFilters, SecurityJob } from './types';
 import { UpgradeContents } from './upgrade_contents';
+import { useSecurityJobs } from './hooks/use_security_jobs';
+import { useEnableDataFeed } from './hooks/use_enable_data_feed';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;

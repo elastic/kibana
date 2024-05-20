@@ -1,5 +1,3 @@
-import { EuiButton, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +5,11 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import { EuiButton, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AlertTypeCount } from '../../../common';
-import { ALERT_ICONS } from '../../../common/constants';
 import { useButtonStyles } from './use_button_styles';
+import { ALERT_ICONS } from '../../../common/constants';
 
 const MAX_ALERT_COUNT = 99;
 

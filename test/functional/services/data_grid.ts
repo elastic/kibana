@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { chunk } from 'lodash';
 import { Key } from 'selenium-webdriver';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export interface TabbedGridData {
@@ -577,8 +577,8 @@ export class DataGridService extends FtrService {
           decoration: decoration.includes('underline')
             ? 'added'
             : decoration.includes('line-through')
-              ? 'removed'
-              : undefined,
+            ? 'removed'
+            : undefined,
           value: await segment.getVisibleText(),
         };
       })

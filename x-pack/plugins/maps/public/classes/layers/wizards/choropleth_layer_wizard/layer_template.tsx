@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FileLayer } from '@elastic/ems-client';
 import {
   EuiComboBox,
@@ -15,26 +18,23 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Component } from 'react';
+import { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
+import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
-import { inputStrings } from '../../../../connected_components/input_strings';
 import { getGeoFields, getSourceFields, getTermsFields } from '../../../../index_pattern_util';
+import { getEmsFileLayers } from '../../../../util';
 import {
   getIndexPatternSelectComponent,
   getIndexPatternService,
 } from '../../../../kibana_services';
-import { getEmsFileLayers } from '../../../../util';
-import { RenderWizardArguments } from '../layer_wizard_registry';
 import {
   createEmsChoroplethLayerDescriptor,
   createEsChoroplethLayerDescriptor,
 } from './create_choropleth_layer_descriptor';
+import { inputStrings } from '../../../../connected_components/input_strings';
 
 export enum BOUNDARIES_SOURCE {
   ELASTICSEARCH = 'ELASTICSEARCH',

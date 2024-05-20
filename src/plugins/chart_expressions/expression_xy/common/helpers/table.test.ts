@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
-import { createSampleDatatableWithRows } from '../__mocks__';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { normalizeTable } from './table';
+import { createSampleDatatableWithRows } from '../__mocks__';
 
 describe('#normalizeTable', () => {
   it('should convert row values from date string to number if xAccessor related to `date` column', () => {

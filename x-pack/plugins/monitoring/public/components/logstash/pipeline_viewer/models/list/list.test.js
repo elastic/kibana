@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IfStatement } from '../pipeline/if_statement';
-import { PluginStatement } from '../pipeline/plugin_statement';
-import { ElseElement } from './else_element';
-import { IfElement } from './if_element';
 import { List } from './list';
+import { PluginStatement } from '../pipeline/plugin_statement';
+import { IfStatement } from '../pipeline/if_statement';
 import { PluginElement } from './plugin_element';
+import { IfElement } from './if_element';
+import { ElseElement } from './else_element';
 
 describe('pipelineToList', () => {
   let pipeline;

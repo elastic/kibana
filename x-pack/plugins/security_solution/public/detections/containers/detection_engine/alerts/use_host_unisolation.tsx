@@ -8,8 +8,8 @@
 import { useCallback, useState } from 'react';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { createHostUnIsolation } from './api';
 import { HOST_ISOLATION_FAILURE } from './translations';
+import { createHostUnIsolation } from './api';
 
 interface HostUnisolationStatus {
   loading: boolean;

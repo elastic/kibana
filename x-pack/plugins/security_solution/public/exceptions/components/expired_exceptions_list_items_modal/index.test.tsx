@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { fireEvent, render } from '@testing-library/react';
 import { IncludeExpiredExceptionsModal } from '.';
+import { fireEvent, render } from '@testing-library/react';
 
 describe('IncludeExpiredExceptionsModal', () => {
   const handleCloseModal = jest.fn();

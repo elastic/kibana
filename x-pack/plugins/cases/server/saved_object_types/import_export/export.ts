@@ -12,6 +12,10 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsExportTransformContext,
 } from '@kbn/core/server';
+import type {
+  CaseUserActionWithoutReferenceIds,
+  AttachmentAttributesWithoutRefs,
+} from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -19,13 +23,9 @@ import {
   MAX_DOCS_PER_PAGE,
   SAVED_OBJECT_TYPES,
 } from '../../../common/constants';
-import type {
-  AttachmentAttributesWithoutRefs,
-  CaseUserActionWithoutReferenceIds,
-} from '../../../common/types/domain';
+import { defaultSortField } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import type { CasePersistedAttributes } from '../../common/types/case';
-import { defaultSortField } from '../../common/utils';
 
 export async function handleExport({
   context,

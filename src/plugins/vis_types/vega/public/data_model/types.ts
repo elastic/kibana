@@ -9,8 +9,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Assign } from '@kbn/utility-types';
 import { Spec } from 'vega';
-import { EmsFileParser } from './ems_file_parser';
 import { EsQueryParser } from './es_query_parser';
+import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 
 interface Body {

@@ -7,6 +7,9 @@
  */
 
 import './_action_bar.scss';
+import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiFieldNumber,
@@ -15,12 +18,9 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useEffect } from 'react';
-import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
-import { SurrDocType } from '../../services/context';
 import { ActionBarWarning } from './action_bar_warning';
+import { SurrDocType } from '../../services/context';
+import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
 
 export interface ActionBarProps {
   /**

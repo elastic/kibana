@@ -10,47 +10,47 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { SemVer } from 'semver';
 
-import { BuildFlavor, ConfigService, Env } from '@kbn/config';
+import { defaultsDeep } from 'lodash';
+import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
+import { ConfigService, Env, BuildFlavor } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
+import {
+  SavedObjectConfig,
+  type SavedObjectsConfigType,
+  type SavedObjectsMigrationConfigType,
+  SavedObjectTypeRegistry,
+  type IKibanaMigrator,
+  type MigrationResult,
+  type IndexTypesMap,
+} from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
   ElasticsearchConfig,
   type ElasticsearchConfigType,
   getCapabilitiesFromClient,
 } from '@kbn/core-elasticsearch-server-internal';
+import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
-import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
-import {
-  type IKibanaMigrator,
-  type IndexTypesMap,
-  type MigrationResult,
-  SavedObjectConfig,
-  SavedObjectTypeRegistry,
-  type SavedObjectsConfigType,
-  type SavedObjectsMigrationConfigType,
-} from '@kbn/core-saved-objects-base-server-internal';
-import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { defaultsDeep } from 'lodash';
-import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 
-import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { NodeRoles } from '@kbn/core-node-server';
-import { registerServiceConfig } from '@kbn/core-root-server-internal';
-import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import {
   ALL_SAVED_OBJECT_INDICES,
   ISavedObjectTypeRegistry,
   SavedObjectsType,
 } from '@kbn/core-saved-objects-server';
-import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
-import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
-import type { LoggerFactory } from '@kbn/logging';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
-import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
+import type { LoggerFactory } from '@kbn/logging';
+import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { registerServiceConfig } from '@kbn/core-root-server-internal';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import type { NodeRoles } from '@kbn/core-node-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 import { delay } from './test_utils';
+import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 

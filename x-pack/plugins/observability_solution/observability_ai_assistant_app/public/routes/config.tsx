@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Outlet, createRouter } from '@kbn/typed-react-router-config';
+import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
 import { Redirect } from 'react-router-dom';

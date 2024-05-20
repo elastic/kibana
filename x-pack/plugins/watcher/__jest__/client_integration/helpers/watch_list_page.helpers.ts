@@ -7,15 +7,15 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { HttpSetup } from '@kbn/core/public';
 import {
-  AsyncTestBedConfig,
-  TestBed,
-  findTestSubject,
   registerTestBed,
+  findTestSubject,
+  TestBed,
+  AsyncTestBedConfig,
 } from '@kbn/test-jest-helpers';
-import { REFRESH_INTERVALS, ROUTES } from '../../../common/constants';
+import { HttpSetup } from '@kbn/core/public';
 import { WatchListPage } from '../../../public/application/sections/watch_list_page';
+import { ROUTES, REFRESH_INTERVALS } from '../../../common/constants';
 import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: AsyncTestBedConfig = {

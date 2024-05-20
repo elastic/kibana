@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getShapeRenderer } from '..';
 import { Shape } from '../../../common/types';
 

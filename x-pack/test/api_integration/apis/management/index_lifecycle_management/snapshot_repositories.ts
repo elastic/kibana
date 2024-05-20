@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { CLOUD_REPOSITORY_NAME } from './constants';
 import { registerSnapshotRepositoriesHelpers } from './snapshot_repositories.helpers';
+import { CLOUD_REPOSITORY_NAME } from './constants';
 
 const repositoryName = 'test_repository';
 

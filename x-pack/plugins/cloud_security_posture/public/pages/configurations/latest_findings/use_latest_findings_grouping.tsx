@@ -1,4 +1,3 @@
-import { Filter, buildEsQuery } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,37 +6,38 @@ import { Filter, buildEsQuery } from '@kbn/es-query';
  */
 import { getGroupingQuery } from '@kbn/securitysolution-grouping';
 import {
+  GroupingAggregation,
   GroupPanelRenderer,
   GroupStatsRenderer,
-  GroupingAggregation,
-  NamedAggregation,
   isNoneGroup,
+  NamedAggregation,
   parseGroupingQuery,
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
-import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
-import { Evaluation } from '../../../../common/types_old';
-import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import {
   FINDINGS_GROUPING_OPTIONS,
   LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
-import { getFilters } from '../utils/get_filters';
-import {
-  FINDINGS_UNIT,
-  MISCONFIGURATIONS_GROUPS_UNIT,
-  defaultGroupingOptions,
-  getDefaultQuery,
-  groupingTitle,
-} from './constants';
-import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
+import { Evaluation } from '../../../../common/types_old';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
   FindingsGroupingAggregation,
   FindingsRootGroupingAggregation,
   useGroupedFindings,
 } from './use_grouped_findings';
+import {
+  FINDINGS_UNIT,
+  groupingTitle,
+  defaultGroupingOptions,
+  getDefaultQuery,
+  MISCONFIGURATIONS_GROUPS_UNIT,
+} from './constants';
+import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
+import { getFilters } from '../utils/get_filters';
+import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
+import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 const getTermAggregation = (key: keyof FindingsGroupingAggregation, field: string) => ({
   [key]: {

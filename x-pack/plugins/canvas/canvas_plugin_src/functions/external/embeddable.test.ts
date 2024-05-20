@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { encode } from '../../../common/lib/embeddable_dataurl';
-import { ExpressionValueFilter } from '../../../types';
 import { embeddableFunctionFactory } from './embeddable';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
+import { ExpressionValueFilter } from '../../../types';
+import { encode } from '../../../common/lib/embeddable_dataurl';
 
 const filterContext: ExpressionValueFilter = {
   type: 'filter',

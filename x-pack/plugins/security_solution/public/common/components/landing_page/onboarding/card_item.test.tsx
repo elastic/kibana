@@ -1,4 +1,3 @@
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
+import { render } from '@testing-library/react';
 import { CardItem } from './card_item';
 import type { ExpandedCardSteps, StepId } from './types';
 
-import { OverviewSteps, QuickStartSectionCardsId, SectionId } from './types';
+import { QuickStartSectionCardsId, SectionId, OverviewSteps } from './types';
 jest.mock('./card_step');
 
 describe('CardItemComponent', () => {

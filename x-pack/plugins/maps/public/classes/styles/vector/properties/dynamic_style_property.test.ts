@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { type RawValue, VECTOR_STYLES } from '../../../../../common/constants';
+import { DynamicStyleProperty, percentilesValuesToFieldMeta } from './dynamic_style_property';
 import type { IField } from '../../../fields/field';
 import type { IVectorLayer } from '../../../layers/vector_layer';
-import { DynamicStyleProperty, percentilesValuesToFieldMeta } from './dynamic_style_property';
+import { type RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 
 describe('percentilesValuesToFieldMeta', () => {
   test('should return null when values is not defined', () => {

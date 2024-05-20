@@ -6,27 +6,27 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  Event,
-  RelatedEventInfo,
-  Tree,
-  TreeNode,
-  categoryMapping,
-} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
+import { NodeID } from '@kbn/security-solution-plugin/server/endpoint/routes/resolver/tree/utils';
 import {
-  entityIDSafeVersion,
-  eventIDSafeVersion,
-  parentEntityIDSafeVersion,
-  timestampAsDateSafeVersion,
-  timestampSafeVersion,
-} from '@kbn/security-solution-plugin/common/endpoint/models/event';
-import {
+  SafeResolverEvent,
   ResolverNode,
   ResolverSchema,
-  SafeResolverEvent,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { NodeID } from '@kbn/security-solution-plugin/server/endpoint/routes/resolver/tree/utils';
+import {
+  parentEntityIDSafeVersion,
+  entityIDSafeVersion,
+  eventIDSafeVersion,
+  timestampSafeVersion,
+  timestampAsDateSafeVersion,
+} from '@kbn/security-solution-plugin/common/endpoint/models/event';
+import {
+  Event,
+  Tree,
+  TreeNode,
+  RelatedEventInfo,
+  categoryMapping,
+} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 
 /**
  * Schema used for the /tree api post requests that uses the ancestry

@@ -12,10 +12,10 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { asyncMap } from '@kbn/std';
 import React, { Component } from 'react';
+import { asyncMap } from '@kbn/std';
+import { i18n } from '@kbn/i18n';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { ITermJoinSource } from '../../sources/join_sources';
 
 interface Props {

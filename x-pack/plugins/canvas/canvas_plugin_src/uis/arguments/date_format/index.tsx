@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Assign } from '@kbn/utility-types';
-import moment from 'moment';
 import React from 'react';
-import { ArgumentStrings } from '../../../../i18n';
+import moment from 'moment';
+import { Assign } from '@kbn/utility-types';
+import { DateFormatArgInput, Props as ComponentProps } from './date_format';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentFactory } from '../../../../types/arguments';
-import { Props as ComponentProps, DateFormatArgInput } from './date_format';
+import { ArgumentStrings } from '../../../../i18n';
 
 import { SetupInitializer } from '../../../plugin';
 
@@ -19,9 +19,8 @@ const { DateFormat: strings } = ArgumentStrings;
 
 const getDateFormatArgInput =
   (defaultDateFormats: ComponentProps['dateFormats']) =>
-  (props: Assign<ComponentProps, { dateFormats?: ComponentProps['dateFormats'] }>) => (
-    <DateFormatArgInput dateFormats={defaultDateFormats} {...props} />
-  );
+  (props: Assign<ComponentProps, { dateFormats?: ComponentProps['dateFormats'] }>) =>
+    <DateFormatArgInput dateFormats={defaultDateFormats} {...props} />;
 
 export const dateFormatInitializer: SetupInitializer<ArgumentFactory<ComponentProps>> = (
   core,

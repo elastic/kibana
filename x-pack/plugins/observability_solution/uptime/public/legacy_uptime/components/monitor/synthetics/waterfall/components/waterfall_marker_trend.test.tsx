@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React from 'react';
-import { JourneyStep } from '../../../../../../../common/runtime_types';
 import { render } from '../../../../../lib/helper/rtl_helpers';
-import { TestWrapper } from './waterfall_marker_test_helper';
 import { WaterfallMarkerTrend } from './waterfall_marker_trend';
+import moment from 'moment';
+import { JourneyStep } from '../../../../../../../common/runtime_types';
+import { TestWrapper } from './waterfall_marker_test_helper';
 
 describe('<WaterfallMarkerTrend />', () => {
   const mockDiff = jest.fn();

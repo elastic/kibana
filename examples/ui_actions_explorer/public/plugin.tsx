@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
-  COUNTRY_TRIGGER,
   PHONE_TRIGGER,
   USER_TRIGGER,
-  createEditUserAction,
-  createTriggerPhoneTriggerAction,
+  COUNTRY_TRIGGER,
   lookUpWeatherAction,
+  viewInMapsAction,
+  createEditUserAction,
   makePhoneCallAction,
   showcasePluggability,
-  viewInMapsAction,
+  createTriggerPhoneTriggerAction,
 } from './actions/actions';
 import image from './ui_actions.png';
 

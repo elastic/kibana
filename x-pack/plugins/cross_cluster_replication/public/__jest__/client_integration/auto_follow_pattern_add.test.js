@@ -7,7 +7,7 @@
 
 import { indexPatterns } from '@kbn/data-plugin/public';
 import './mocks';
-import { getRandomString, nextTick, pageHelpers, setupEnvironment } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.autoFollowPatternAdd;
 

@@ -6,8 +6,8 @@
  */
 
 import type {
-  AggregationsCustomCategorizeTextAnalyzer,
   QueryDslQueryContainer,
+  AggregationsCustomCategorizeTextAnalyzer,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import type { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';

@@ -1,4 +1,3 @@
-import { DataView } from '@kbn/data-views-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
  * 2.0.
  */
 import { createContext, useContext } from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 interface DataViewContextValue {
   dataView: DataView;

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { Capabilities, OverlayStart } from '@kbn/core/public';
+import React from 'react';
+import { shallow } from 'enzyme';
+import { WorkspaceLayoutComponent } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { shallow } from 'enzyme';
-import React from 'react';
-import { WorkspaceLayoutComponent } from '.';
-import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import {
   GraphSavePolicy,
   GraphWorkspaceSavedObject,
   IndexPatternProvider,
   Workspace,
 } from '../../types';
+import { OverlayStart, Capabilities } from '@kbn/core/public';
+import { SharingSavedObjectProps } from '../../helpers/use_workspace_loader';
 import { GraphVisualization } from '../graph_visualization';
 
 jest.mock('react-router-dom', () => {

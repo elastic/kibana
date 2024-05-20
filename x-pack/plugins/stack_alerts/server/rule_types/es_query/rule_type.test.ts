@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
+import { v4 as uuidv4 } from 'uuid';
+import type { Writable } from '@kbn/utility-types';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
-import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import type { Writable } from '@kbn/utility-types';
-import { v4 as uuidv4 } from 'uuid';
-import { Comparator } from '../../../common/comparator_types';
-import { ActionContext } from './action_context';
-import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { getRuleType } from './rule_type';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
+import { ActionContext } from './action_context';
+import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import {
-  OnlyEsQueryRuleParams,
   OnlyEsqlQueryRuleParams,
+  OnlyEsQueryRuleParams,
   OnlySearchSourceRuleParams,
 } from './types';
+import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { Comparator } from '../../../common/comparator_types';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();

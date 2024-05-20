@@ -31,12 +31,12 @@ import { ManageCrawlsPopover } from './components/manage_crawls_popover/manage_c
 import { CrawlerLogic } from './crawler_logic';
 import { CrawlerOverview } from './crawler_overview';
 import {
-  CrawlEventFromServer,
-  CrawlType,
   CrawlerDomainFromServer,
   CrawlerPolicies,
   CrawlerRules,
   CrawlerStatus,
+  CrawlEventFromServer,
+  CrawlType,
 } from './types';
 
 const domains: CrawlerDomainFromServer[] = [

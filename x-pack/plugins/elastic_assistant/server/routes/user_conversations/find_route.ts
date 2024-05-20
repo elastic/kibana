@@ -12,16 +12,16 @@ import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   FindConversationsRequestQuery,
   FindConversationsResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen';
-import { transformESSearchToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
-import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 import { buildResponse } from '../utils';
+import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
+import { transformESSearchToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
+import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
 
 export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned

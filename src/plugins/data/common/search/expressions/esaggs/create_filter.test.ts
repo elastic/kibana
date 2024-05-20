@@ -11,8 +11,8 @@ import { BytesFormat, FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/
 import { AggConfigs, IAggConfig } from '../../aggs';
 import { mockAggTypesRegistry } from '../../aggs/test_helpers';
 
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { createFilter } from './create_filter';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('createFilter', () => {
   let table: Datatable;

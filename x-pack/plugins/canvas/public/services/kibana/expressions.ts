@@ -1,9 +1,3 @@
-import {
-  ExpressionAstExpression,
-  ExpressionExecutionParams,
-  ExpressionValue,
-} from '@kbn/expressions-plugin/common';
-import { ExpressionsServiceStart } from '@kbn/expressions-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,12 +5,18 @@ import { ExpressionsServiceStart } from '@kbn/expressions-plugin/public';
  * 2.0.
  */
 import { fromExpression, getType } from '@kbn/interpreter';
-import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import {
+  ExpressionAstExpression,
+  ExpressionExecutionParams,
+  ExpressionValue,
+} from '@kbn/expressions-plugin/common';
 import { pluck } from 'rxjs';
+import { ExpressionsServiceStart } from '@kbn/expressions-plugin/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { buildEmbeddableFilters } from '../../../common/lib/build_embeddable_filters';
 import { CanvasStartDeps } from '../../plugin';
-import { CanvasNotifyService } from '../notify';
 import { CanvasFiltersService } from './filters';
+import { CanvasNotifyService } from '../notify';
 
 interface Options {
   castToRender?: boolean;

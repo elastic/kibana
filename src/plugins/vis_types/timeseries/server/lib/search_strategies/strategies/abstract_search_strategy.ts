@@ -1,5 +1,3 @@
-import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { omit } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,7 +6,9 @@ import { omit } from 'lodash';
  * Side Public License, v 1.
  */
 import { tap } from 'rxjs';
+import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';

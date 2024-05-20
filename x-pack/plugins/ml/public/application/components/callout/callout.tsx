@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CalloutMessage } from '../../../../common/constants/validation';
 import { VALIDATION_STATUS } from '../../../../common/constants/validation';
 

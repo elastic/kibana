@@ -6,23 +6,23 @@
  */
 import {
   EuiEmptyPrompt,
+  EuiLoadingLogo,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayout,
-  EuiLink,
-  EuiLoadingLogo,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, sortBy } from 'lodash';
 import React, { useState, useCallback } from 'react';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import { BetaBadge } from '../../../shared/beta_badge';
-import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
-import { ServiceGroupSaveButton } from '../service_group_save';
 import { ServiceGroupsListItems } from './service_groups_list';
 import { Sort } from './sort';
+import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
+import { ServiceGroupSaveButton } from '../service_group_save';
+import { BetaBadge } from '../../../shared/beta_badge';
 
 export type ServiceGroupsSortType = 'recently_added' | 'alphabetical';
 

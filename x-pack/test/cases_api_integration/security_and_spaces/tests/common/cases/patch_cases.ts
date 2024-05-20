@@ -8,45 +8,52 @@
 import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   AttachmentType,
   CaseCustomFields,
+  Cases,
   CaseSeverity,
   CaseStatuses,
-  Cases,
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
-  createAlertsIndex,
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-  getAlertsByIds,
-  getQueryAlertIds,
-  getRuleForAlertTesting,
-  waitForAlertsToBePresent,
-  waitForRuleSuccess,
-} from '../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  calculateDuration,
+  defaultUser,
+  getPostCaseRequest,
+  postCaseReq,
+  postCaseResp,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
+import {
+  deleteAllCaseItems,
+  getSignalsWithES,
+  setStatus,
   createCase,
   createComment,
-  createConfiguration,
-  delay,
-  deleteAllCaseItems,
-  findCases,
-  getCaseUserActions,
-  getConfigurationRequest,
-  getSignalsWithES,
-  removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromUserAction,
-  setStatus,
-  superUserSpace1Auth,
   updateCase,
+  removeServerGeneratedPropertiesFromCase,
+  findCases,
+  superUserSpace1Auth,
+  delay,
+  calculateDuration,
+  getCaseUserActions,
+  removeServerGeneratedPropertiesFromUserAction,
+  createConfiguration,
+  getConfigurationRequest,
 } from '../../../../common/lib/api';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+  getRuleForAlertTesting,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
+  createRule,
+  getQueryAlertIds,
+} from '../../../../../common/utils/security_solution';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -57,13 +64,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import {
-  defaultUser,
-  getPostCaseRequest,
-  postCaseReq,
-  postCaseResp,
-  postCommentUserReq,
-} from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

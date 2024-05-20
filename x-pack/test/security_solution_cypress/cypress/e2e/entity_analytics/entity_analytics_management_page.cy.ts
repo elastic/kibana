@@ -6,37 +6,37 @@
  */
 
 import {
+  PAGE_TITLE,
   HOST_RISK_PREVIEW_TABLE,
   HOST_RISK_PREVIEW_TABLE_ROWS,
-  LOCAL_QUERY_BAR_SELECTOR,
-  PAGE_TITLE,
-  RISK_PREVIEW_ERROR,
-  RISK_SCORE_ERROR_PANEL,
-  RISK_SCORE_STATUS,
   USER_RISK_PREVIEW_TABLE,
   USER_RISK_PREVIEW_TABLE_ROWS,
+  RISK_PREVIEW_ERROR,
+  LOCAL_QUERY_BAR_SELECTOR,
+  RISK_SCORE_ERROR_PANEL,
+  RISK_SCORE_STATUS,
 } from '../../screens/entity_analytics_management';
 
-import { getNewRule } from '../../objects/rule';
-import {
-  deleteRiskEngineConfiguration,
-  interceptRiskInitError,
-  interceptRiskPreviewError,
-  interceptRiskPreviewSuccess,
-} from '../../tasks/api_calls/risk_engine';
 import { deleteRiskScore, installRiskScoreModule } from '../../tasks/api_calls/risk_scores';
-import { createRule } from '../../tasks/api_calls/rules';
-import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
-import {
-  previewErrorButtonClick,
-  riskEngineStatusChange,
-  upgradeRiskEngine,
-} from '../../tasks/entity_analytics';
+import { RiskScoreEntity } from '../../tasks/risk_scores/common';
 import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
-import { RiskScoreEntity } from '../../tasks/risk_scores/common';
-import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../urls/navigation';
+import { getNewRule } from '../../objects/rule';
+import { createRule } from '../../tasks/api_calls/rules';
+import {
+  deleteRiskEngineConfiguration,
+  interceptRiskPreviewError,
+  interceptRiskPreviewSuccess,
+  interceptRiskInitError,
+} from '../../tasks/api_calls/risk_engine';
+import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
+import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
+import {
+  riskEngineStatusChange,
+  upgradeRiskEngine,
+  previewErrorButtonClick,
+} from '../../tasks/entity_analytics';
 
 describe(
   'Entity analytics management page',

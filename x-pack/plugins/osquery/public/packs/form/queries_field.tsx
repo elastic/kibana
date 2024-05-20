@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { isEmpty, findIndex, indexOf, pickBy, uniq, map } from 'lodash';
 import type { EuiComboBoxProps } from '@elastic/eui';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
+import { produce } from 'immer';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
-import { produce } from 'immer';
-import { findIndex, indexOf, isEmpty, map, pickBy, uniq } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
-import { useController, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
+import { useController, useFormContext, useWatch, useFieldArray } from 'react-hook-form';
 
 import { QUERY_TIMEOUT } from '../../../common/constants';
 import { PackQueriesTable } from '../pack_queries_table';
-import { getSupportedPlatforms } from '../queries/platforms/helpers';
 import { QueryFlyout } from '../queries/query_flyout';
-import type { PackQueryFormData } from '../queries/use_pack_query_form';
 import { OsqueryPackUploader } from './pack_uploader';
+import { getSupportedPlatforms } from '../queries/platforms/helpers';
+import type { PackQueryFormData } from '../queries/use_pack_query_form';
 
 interface QueriesFieldProps {
   euiFieldProps: EuiComboBoxProps<{}>;

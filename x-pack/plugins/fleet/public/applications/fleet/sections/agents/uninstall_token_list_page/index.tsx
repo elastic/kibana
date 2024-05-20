@@ -13,32 +13,32 @@ import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
-import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
+import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
 import { EmptyPolicyNameHint } from '../../../../../components/uninstall_command_flyout/empty_policy_name_hint';
 
-import type { UninstallTokenMetadata } from '../../../../../../common/types/models/uninstall_token';
-import type { GetUninstallTokenResponse } from '../../../../../../common/types/rest_spec/uninstall_token';
 import { ApiKeyField } from '../../../../../components/api_key_field';
+import type { UninstallTokenMetadata } from '../../../../../../common/types/models/uninstall_token';
 import {
   sendGetUninstallToken,
   useGetUninstallTokens,
 } from '../../../../../hooks/use_request/uninstall_tokens';
-import { UninstallCommandFlyout } from '../../../components';
 import { useBreadcrumbs, usePagination } from '../../../hooks';
 import { DefaultLayout } from '../../../layouts';
+import type { GetUninstallTokenResponse } from '../../../../../../common/types/rest_spec/uninstall_token';
+import { UninstallCommandFlyout } from '../../../components';
 
 import {
   ACTIONS_TITLE,
   CREATED_AT_TITLE,
+  VIEW_UNINSTALL_COMMAND_LABEL,
   POLICY_ID_TITLE,
-  POLICY_NAME_TITLE,
-  SEARCH_BY_POLICY_ID_OR_NAME_HINT,
   SEARCH_BY_POLICY_ID_OR_NAME_PLACEHOLDER,
   TOKEN_TITLE,
-  VIEW_UNINSTALL_COMMAND_LABEL,
+  POLICY_NAME_TITLE,
+  SEARCH_BY_POLICY_ID_OR_NAME_HINT,
 } from './translations';
 
 const TextField = ({ text, dataTestSubj }: { text: string; dataTestSubj?: string }) => (

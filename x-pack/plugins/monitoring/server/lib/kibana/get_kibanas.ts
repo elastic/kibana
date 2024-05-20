@@ -12,7 +12,7 @@ import { LegacyRequest } from '../../types';
 import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { KibanaMetric } from '../metrics';
-import { KibanaInfo, buildKibanaInfo } from './build_kibana_info';
+import { buildKibanaInfo, KibanaInfo } from './build_kibana_info';
 import { isKibanaStatusStale } from './is_kibana_status_stale';
 
 interface Kibana {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { GroupSloCustomInput, SingleSloCustomInput } from './types';
 import { SloPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';
-import type { GroupSloCustomInput, SingleSloCustomInput } from './types';
 export async function openSloConfiguration(
   coreStart: CoreStart,
   pluginStart: SloPublicPluginsStart,

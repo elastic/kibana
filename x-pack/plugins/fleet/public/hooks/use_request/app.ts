@@ -7,9 +7,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { API_VERSIONS } from '../../../common/constants';
 import { appRoutesService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../types';
+import { API_VERSIONS } from '../../../common/constants';
 
 import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 

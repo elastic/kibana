@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { NumberList, NumberListProps } from './number_list';
 import { NumberRow } from './number_row';

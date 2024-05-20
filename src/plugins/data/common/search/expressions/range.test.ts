@@ -7,8 +7,8 @@
  */
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { rangeFunction } from './range';
 import { functionWrapper } from './utils';
+import { rangeFunction } from './range';
 
 describe('interpreter/functions#range', () => {
   const fn = functionWrapper(rangeFunction);

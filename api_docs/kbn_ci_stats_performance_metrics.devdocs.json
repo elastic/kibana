@@ -26,7 +26,9 @@
         "tags": [],
         "label": "reporter",
         "description": [],
-        "signature": ["(options: ReporterOptions) => Promise<void>"],
+        "signature": [
+          "(options: ReporterOptions) => Promise<void>"
+        ],
         "path": "packages/kbn-ci-stats-performance-metrics/src/reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +40,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["ReporterOptions"],
+            "signature": [
+              "ReporterOptions"
+            ],
             "path": "packages/kbn-ci-stats-performance-metrics/src/reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,7 +59,9 @@
         "tags": [],
         "label": "runCli",
         "description": [],
-        "signature": ["() => Promise<void>"],
+        "signature": [
+          "() => Promise<void>"
+        ],
         "path": "packages/kbn-ci-stats-performance-metrics/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,

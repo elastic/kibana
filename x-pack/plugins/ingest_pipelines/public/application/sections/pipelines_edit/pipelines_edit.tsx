@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React, { useState, useEffect } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiPageHeader,
+  EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiPageHeader,
   EuiPageTemplate,
-  EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 
 import { Pipeline } from '../../../../common/types';
-import { SectionLoading, attemptToURIDecode, useKibana } from '../../../shared_imports';
+import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_imports';
 
+import { getListPath } from '../../services/navigation';
 import { PipelineForm } from '../../components';
 import { useRedirectToPathOrRedirectPath } from '../../hooks';
-import { getListPath } from '../../services/navigation';
 
 interface MatchParams {
   name: string;

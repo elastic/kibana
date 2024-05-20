@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiLink, EuiText } from '@elastic/eui';
 
 import { useBasePath } from '../../lib/kibana';
 

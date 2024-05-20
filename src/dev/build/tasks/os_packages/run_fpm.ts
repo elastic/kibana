@@ -10,7 +10,7 @@ import { resolve } from 'path';
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { Build, Config, exec } from '../../lib';
+import { exec, Config, Build } from '../../lib';
 
 export async function runFpm(
   config: Config,

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
+import { AbstractStorybookMock, ArgumentParams } from '@kbn/shared-ux-storybook-mock';
 import { of } from 'rxjs';
-import type { ExitFullScreenButtonServices, ExitFullScreenButtonProps as Props } from '../types';
+import type { ExitFullScreenButtonProps as Props, ExitFullScreenButtonServices } from '../types';
 
 type PropArguments = Pick<Props, 'toggleChrome'>;
 

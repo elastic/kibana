@@ -7,8 +7,8 @@
  */
 
 import { Lifecycle, Request, ResponseToolkit, Util } from '@hapi/hapi';
-import Hoek from '@hapi/hoek';
 import { ValidationError } from 'joi';
+import Hoek from '@hapi/hoek';
 
 /**
  * Hapi extends the ValidationError interface to add this output key with more data.

@@ -9,13 +9,13 @@ import { EuiSpacer, EuiTab } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { RightPanelPaths } from '.';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import type { RightPanelTabType } from './tabs';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
 import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
 import { useRightPanelContext } from './context';
-import type { RightPanelTabType } from './tabs';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 
 export interface PanelHeaderProps {
   /**

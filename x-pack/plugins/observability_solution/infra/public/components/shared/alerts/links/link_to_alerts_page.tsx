@@ -1,7 +1,3 @@
-import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { encode } from '@kbn/rison';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +5,10 @@ import { encode } from '@kbn/rison';
  * 2.0.
  */
 import React from 'react';
+import { encode } from '@kbn/rison';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { ALERTS_PATH } from '../constants';
 

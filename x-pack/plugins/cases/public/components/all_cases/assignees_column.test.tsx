@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';

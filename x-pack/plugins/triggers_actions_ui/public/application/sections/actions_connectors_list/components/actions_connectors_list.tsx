@@ -5,57 +5,57 @@
  * 2.0.
  */
 
+import { ClassNames } from '@emotion/react';
+import React, { useState, useEffect } from 'react';
 import {
-  Criteria,
-  EuiBadge,
-  EuiBetaBadge,
+  EuiInMemoryTable,
   EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiEmptyPrompt,
+  EuiLink,
+  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
-  EuiInMemoryTable,
-  EuiLink,
-  EuiPageTemplate,
+  EuiBetaBadge,
   EuiToolTip,
+  EuiButtonIcon,
+  EuiEmptyPrompt,
+  Criteria,
+  EuiButtonEmpty,
+  EuiBadge,
+  EuiPageTemplate,
 } from '@elastic/eui';
-import { ClassNames } from '@emotion/react';
-import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import { omit } from 'lodash';
-import React, { useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
-import { deleteActions, loadActionTypes, loadAllActions } from '../../../lib/action_connector_api';
+import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
-  hasExecuteActionsCapability,
   hasSaveActionsCapability,
+  hasExecuteActionsCapability,
 } from '../../../lib/capabilities';
+import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { checkActionTypeEnabled } from '../../../lib/check_action_type_enabled';
 import './actions_connectors_list.scss';
-import {
-  connectorDeprecatedMessage,
-  deprecatedMessage,
-} from '../../../../common/connectors_selection';
-import { useKibana } from '../../../../common/lib/kibana';
 import {
   ActionConnector,
   ActionConnectorTableItem,
   ActionTypeIndex,
   EditConnectorTabs,
 } from '../../../../types';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
-import { routeToConnectors } from '../../../constants';
-import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
-import { getCurrentDocTitle } from '../../../lib/doc_title';
+import { useKibana } from '../../../../common/lib/kibana';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import {
+  connectorDeprecatedMessage,
+  deprecatedMessage,
+} from '../../../../common/connectors_selection';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
+import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { getCurrentDocTitle } from '../../../lib/doc_title';
+import { routeToConnectors } from '../../../constants';
 
 interface EditConnectorProps {
   initialConnector?: ActionConnector;

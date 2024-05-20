@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import { storiesOf } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { storiesOf } from '@storybook/react';
-import React from 'react';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import {
   mockManagedUserData,

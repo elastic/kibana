@@ -20,8 +20,7 @@ export const RANDOM_SAMPLER_OPTION = {
   OFF: 'off',
 } as const;
 
-export type RandomSamplerOption =
-  (typeof RANDOM_SAMPLER_OPTION)[keyof typeof RANDOM_SAMPLER_OPTION];
+export type RandomSamplerOption = typeof RANDOM_SAMPLER_OPTION[keyof typeof RANDOM_SAMPLER_OPTION];
 
 export const RANDOM_SAMPLER_SELECT_OPTIONS: Array<{
   value: RandomSamplerOption;

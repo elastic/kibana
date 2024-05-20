@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import {
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
   EuiTitle,
+  EuiPanel,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiButtonIcon,
+  EuiSpacer,
+  EuiCallOut,
+  EuiHorizontalRule,
+  EuiFormRow,
 } from '@elastic/eui';
 
-import type { Detector } from '../../../../../../../../../common/types/anomaly_detection_jobs';
-import { detectorToString } from '../../../../../../../util/string_utils';
+import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import type { Validation } from '../../../../../common/job_validator';
-import { JobCreatorContext } from '../../../job_creator_context';
+import { detectorToString } from '../../../../../../../util/string_utils';
+import type { Detector } from '../../../../../../../../../common/types/anomaly_detection_jobs';
 
 interface Props {
   isActive: boolean;

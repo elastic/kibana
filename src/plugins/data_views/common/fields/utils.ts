@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DataViewFieldBase, IFieldSubTypeMulti, IFieldSubTypeNested } from '@kbn/es-query';
 import { getFilterableKbnTypeNames } from '@kbn/field-types';
+import { DataViewFieldBase, IFieldSubTypeNested, IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '.';
 
 const filterableTypes = getFilterableKbnTypeNames();

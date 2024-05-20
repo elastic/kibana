@@ -7,8 +7,8 @@
  */
 
 import React, { createContext, FC } from 'react';
-import { IApplicationUsageTracker } from '../../plugin';
 import { TrackApplicationViewComponent } from './track_application_view_component';
+import { IApplicationUsageTracker } from '../../plugin';
 import { TrackApplicationViewProps } from './types';
 
 export const ApplicationUsageContext = createContext<IApplicationUsageTracker | undefined>(

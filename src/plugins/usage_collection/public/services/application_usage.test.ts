@@ -8,8 +8,8 @@
 
 import { Subject } from 'rxjs';
 
-import { createApplicationUsageTrackerMock } from '../mocks';
 import { trackApplicationUsageChange } from './application_usage';
+import { createApplicationUsageTrackerMock } from '../mocks';
 
 describe('application_usage', () => {
   test('report an appId change', () => {

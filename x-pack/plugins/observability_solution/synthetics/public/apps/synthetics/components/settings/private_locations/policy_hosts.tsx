@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHealth,
-  EuiSuperSelect,
   EuiSuperSelectProps,
+  EuiSuperSelect,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
-import { useSelector } from 'react-redux';
 
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { selectAgentPolicies } from '../../../state/private_locations';

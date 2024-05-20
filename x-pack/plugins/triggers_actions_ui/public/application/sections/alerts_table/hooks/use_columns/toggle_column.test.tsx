@@ -15,9 +15,8 @@ describe('toggleColumn', () => {
   };
 
   it('formats only the cases column correctly', async () => {
-    expect(
-      toggleColumn({ column: casesColumn, columns, defaultColumns: [] })
-    ).toMatchInlineSnapshot(`
+    expect(toggleColumn({ column: casesColumn, columns, defaultColumns: [] }))
+      .toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "test-column",
@@ -34,9 +33,8 @@ describe('toggleColumn', () => {
   it('does not format the cases column if the displayText is defined', async () => {
     const casesColumnWithDisplayText = { ...casesColumn, displayAsText: 'My Cases label' };
 
-    expect(
-      toggleColumn({ column: casesColumnWithDisplayText, columns, defaultColumns: [] })
-    ).toMatchInlineSnapshot(`
+    expect(toggleColumn({ column: casesColumnWithDisplayText, columns, defaultColumns: [] }))
+      .toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "test-column",

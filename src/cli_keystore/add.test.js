@@ -25,13 +25,13 @@ jest.mock('fs', () => ({
   writeFileSync: jest.fn(),
 }));
 
-import { PassThrough } from 'stream';
 import sinon from 'sinon';
+import { PassThrough } from 'stream';
 
 import { Keystore } from '../cli/keystore';
-import * as prompt from '../cli/keystore/utils/prompt';
-import { Logger } from '../cli/logger';
 import { add } from './add';
+import { Logger } from '../cli/logger';
+import * as prompt from '../cli/keystore/utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('add', () => {

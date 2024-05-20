@@ -1,5 +1,3 @@
-import { IpAddress } from '@kbn/data-plugin/common';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +5,10 @@ import type { DataViewField } from '@kbn/data-views-plugin/public';
  * 2.0.
  */
 import dateMath from '@kbn/datemath';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
+import { IpAddress } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { Provider } from './use_insight_data_providers';
 
 export function validateProvider(

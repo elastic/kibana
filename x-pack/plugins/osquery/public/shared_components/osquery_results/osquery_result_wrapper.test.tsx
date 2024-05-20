@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render } from '@testing-library/react';
+import { QueryClientProvider } from '@tanstack/react-query';
 
-import * as useLiveQueryDetails from '../../actions/use_live_query_details';
-import { useKibana } from '../../common/lib/kibana';
 import { queryClient } from '../../query_client';
+import { useKibana } from '../../common/lib/kibana';
+import * as useLiveQueryDetails from '../../actions/use_live_query_details';
 import { PERMISSION_DENIED } from '../osquery_action/translations';
 import { OsqueryActionResult } from './osquery_result_wrapper';
 import {
+  defaultLiveQueryDetails,
   DETAILS_ID,
   DETAILS_QUERY,
   DETAILS_TIMESTAMP,
-  defaultLiveQueryDetails,
   getMockedKibanaConfig,
 } from './test_utils';
 

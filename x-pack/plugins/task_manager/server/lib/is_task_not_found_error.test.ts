@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { isTaskSavedObjectNotFoundError } from './is_task_not_found_error';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
-import { isTaskSavedObjectNotFoundError } from './is_task_not_found_error';
 
 describe('isTaskSavedObjectNotFoundError', () => {
   test('identifies SavedObjects Not Found errors', () => {

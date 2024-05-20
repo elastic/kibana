@@ -7,7 +7,7 @@
 
 import { Registry } from '@kbn/interpreter';
 import { Datasource } from './datasource';
-import type { DatasourceProps, Datasource as DatasourceType } from './datasource';
+import type { Datasource as DatasourceType, DatasourceProps } from './datasource';
 
 class DatasourceRegistry extends Registry<DatasourceProps, DatasourceType> {
   wrapper(obj: DatasourceProps): DatasourceType {

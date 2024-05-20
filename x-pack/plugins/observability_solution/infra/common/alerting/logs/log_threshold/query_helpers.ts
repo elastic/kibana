@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { Comparator, CountCriteria, Criterion, ExecutionTimeRange, RuleParams } from '.';
+import { RuleParams, Comparator, CountCriteria, Criterion, ExecutionTimeRange } from '.';
 
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 

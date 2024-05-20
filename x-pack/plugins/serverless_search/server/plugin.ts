@@ -6,30 +6,30 @@
  */
 
 import type {
-  CoreSetup,
-  CoreStart,
   IRouter,
   Logger,
-  Plugin,
   PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  CoreStart,
 } from '@kbn/core/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
 import { registerIndicesRoutes } from './routes/indices_routes';
 
-import { registerTelemetryUsageCollector } from './collectors/connectors/telemetry';
 import type { ServerlessSearchConfig } from './config';
-import { registerConnectorsRoutes } from './routes/connectors_routes';
-import { registerIngestPipelineRoutes } from './routes/ingest_pipeline_routes';
-import { registerMappingRoutes } from './routes/mapping_routes';
 import type {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginStart,
   SetupDependencies,
   StartDependencies,
 } from './types';
+import { registerConnectorsRoutes } from './routes/connectors_routes';
+import { registerTelemetryUsageCollector } from './collectors/connectors/telemetry';
+import { registerMappingRoutes } from './routes/mapping_routes';
+import { registerIngestPipelineRoutes } from './routes/ingest_pipeline_routes';
 
 export interface RouteDependencies {
   http: CoreSetup<StartDependencies>['http'];

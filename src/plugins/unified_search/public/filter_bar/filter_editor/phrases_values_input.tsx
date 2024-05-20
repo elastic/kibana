@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { WithEuiThemeProps, withEuiTheme } from '@elastic/eui';
-import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { uniq } from 'lodash';
 import React from 'react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
-import { MIDDLE_TRUNCATION_PROPS } from './lib/helpers';
-import { PhraseSuggestorProps, PhraseSuggestorUI } from './phrase_suggestor';
+import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { phrasesValuesComboboxCss } from './phrases_values_input.styles';
+import { MIDDLE_TRUNCATION_PROPS } from './lib/helpers';
 
 interface Props {
   values?: string[];

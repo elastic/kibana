@@ -6,11 +6,11 @@
  */
 
 import {
-  IKibanaResponse,
   IRouter,
-  KibanaRequest,
-  KibanaResponseFactory,
   RequestHandlerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
 } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 

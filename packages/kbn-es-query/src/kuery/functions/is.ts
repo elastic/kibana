@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isUndefined } from 'lodash';
-import type { DataViewBase, DataViewFieldBase, KueryQueryOptions } from '../../..';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getPhraseScript } from '../../filters';
-import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
+import { getFields } from './utils/get_fields';
+import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
+import { getFullFieldNameNode } from './utils/get_full_field_name_node';
+import type { DataViewBase, DataViewFieldBase, KueryQueryOptions } from '../../..';
 import type { KqlFunctionNode, KqlLiteralNode, KqlWildcardNode } from '../node_types';
 import type { KqlContext } from '../types';
-import { getFields } from './utils/get_fields';
-import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';

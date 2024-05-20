@@ -7,18 +7,18 @@
  */
 
 import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiHorizontalRule,
   EuiPopover,
   EuiPopoverTitle,
   PopoverAnchorPosition,
+  EuiContextMenuItem,
   toSentenceCase,
+  EuiHorizontalRule,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { DocLinksStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
 export const strings = {
   getSwitchLanguageButtonText: () =>

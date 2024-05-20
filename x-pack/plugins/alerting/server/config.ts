@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
-import { parseDuration, validateDurationSchema } from './lib';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { validateDurationSchema, parseDuration } from './lib';
 
 export const DEFAULT_MAX_ALERTS = 1000;
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;

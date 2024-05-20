@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 
+import { FormTestComponent } from '../../../common/test_utils';
+import { Edit } from './edit';
+import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../../common/constants';
 import type { CaseCustomFieldText } from '../../../../common/types/domain';
-import { FormTestComponent } from '../../../common/test_utils';
-import { customFieldsConfigurationMock, customFieldsMock } from '../../../containers/mock';
 import { POPULATED_WITH_DEFAULT } from '../translations';
-import { Edit } from './edit';
 
 describe('Edit ', () => {
   const onSubmit = jest.fn();

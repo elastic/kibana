@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { NewAgentPolicy, AgentPolicy } from '../types';
 import {
-  FLEET_APM_PACKAGE,
-  FLEET_ENDPOINT_PACKAGE,
   FLEET_SERVER_PACKAGE,
+  FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
+  FLEET_ENDPOINT_PACKAGE,
 } from '../constants';
-import type { AgentPolicy, NewAgentPolicy } from '../types';
 
 export function policyHasFleetServer(
   agentPolicy: Pick<AgentPolicy, 'package_policies' | 'has_fleet_server'>

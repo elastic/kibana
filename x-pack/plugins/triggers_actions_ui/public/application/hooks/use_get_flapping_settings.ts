@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common';
 import { useQuery } from '@tanstack/react-query';
+import { RulesSettingsFlapping } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { getFlappingSettings } from '../lib/rule_api/get_flapping_settings';
 

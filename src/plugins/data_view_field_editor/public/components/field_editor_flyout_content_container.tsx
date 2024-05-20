@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { CoreStart, DocLinksStart, NotificationsStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState, useMemo } from 'react';
+import { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { BehaviorSubject } from 'rxjs';
-import { pluginName } from '../constants';
-import { ApiService, getLinks } from '../lib';
 import {
-  DataPublicPluginStart,
-  DataView,
   DataViewField,
+  DataView,
+  DataPublicPluginStart,
+  UsageCollectionStart,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
   RuntimeType,
-  UsageCollectionStart,
 } from '../shared_imports';
-import type { Field, InternalFieldType, PluginStart } from '../types';
-import { FieldEditorProvider } from './field_editor_context';
+import type { Field, PluginStart, InternalFieldType } from '../types';
+import { pluginName } from '../constants';
+import { getLinks, ApiService } from '../lib';
 import {
   FieldEditorFlyoutContent,
   Props as FieldEditorFlyoutContentProps,
 } from './field_editor_flyout_content';
+import { FieldEditorProvider } from './field_editor_context';
 import { FieldPreviewProvider } from './preview';
 import { PreviewController } from './preview/preview_controller';
 

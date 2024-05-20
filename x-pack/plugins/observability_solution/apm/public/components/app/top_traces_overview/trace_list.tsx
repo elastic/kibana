@@ -7,23 +7,23 @@
 
 import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TypeOf } from '@kbn/typed-react-router-config';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ApmRoutes } from '../../routing/apm_route_config';
 import { asMillisecondDuration, asTransactionRate } from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS, FetcherResult } from '../../../hooks/use_fetcher';
+import { FetcherResult, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../utils/style';
-import { ApmRoutes } from '../../routing/apm_route_config';
 import { EmptyMessage } from '../../shared/empty_message';
 import { ImpactBar } from '../../shared/impact_bar';
-import { ServiceLink } from '../../shared/links/apm/service_link';
 import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail_link';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
+import { ServiceLink } from '../../shared/links/apm/service_link';
 import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
+import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
 const StyledTransactionLink = euiStyled(TransactionDetailLink)`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
@@ -132,10 +132,7 @@ const noItemsMessage = (
 );
 
 export function TraceList({ response }: Props) {
-  const {
-    data: { items } = { items: [] },
-    status,
-  } = response;
+  const { data: { items } = { items: [] }, status } = response;
   const { onPageReady } = usePerformanceContext();
 
   const { query } = useApmParams('/traces');

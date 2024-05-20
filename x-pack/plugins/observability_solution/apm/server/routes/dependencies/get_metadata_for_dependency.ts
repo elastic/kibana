@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/es_fields/apm';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { maybe } from '../../../common/utils/maybe';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface MetadataForDependencyResponse {

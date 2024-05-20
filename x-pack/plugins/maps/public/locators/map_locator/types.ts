@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { LayerDescriptor } from '../../../common/descriptor_types';
 
 export interface MapsAppLocatorParams extends SerializableRecord {

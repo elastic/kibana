@@ -6,10 +6,10 @@
  */
 import { range } from 'lodash';
 
-import { appContextService } from '../../..';
-import type { PackageInstallContext, RegistryDataStream } from '../../../../../common/types';
 import { createAppContextStartContractMock } from '../../../../mocks';
+import { appContextService } from '../../..';
 import { loadDatastreamsFieldsFromYaml } from '../../fields/field';
+import type { PackageInstallContext, RegistryDataStream } from '../../../../../common/types';
 
 import { prepareTemplate, prepareToInstallTemplates } from './install';
 

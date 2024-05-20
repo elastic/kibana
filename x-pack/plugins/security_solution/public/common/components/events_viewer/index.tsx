@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { Filter } from '@kbn/es-query';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
-  DataTableComponent,
   dataTableActions,
+  DataTableComponent,
   defaultHeaders,
   getEventIdToDataMapping,
 } from '@kbn/securitysolution-data-table';
@@ -22,6 +16,13 @@ import type {
   TableId,
   ViewSelection,
 } from '@kbn/securitysolution-data-table';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import React, { useRef, useCallback, useMemo, useEffect, useState, useContext } from 'react';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch, useSelector } from 'react-redux';
+import { ThemeContext } from 'styled-components';
+import type { Filter } from '@kbn/es-query';
 import type {
   DeprecatedCellValueElementProps,
   DeprecatedRowRenderer,
@@ -29,11 +30,11 @@ import type {
   EntityType,
 } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
-import React, { useRef, useCallback, useMemo, useEffect, useState, useContext } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch, useSelector } from 'react-redux';
-import { ThemeContext } from 'styled-components';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
+import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
   ControlColumnProps,
   OnRowSelected,
@@ -42,35 +43,23 @@ import type {
   SetEventsLoading,
 } from '../../../../common/types';
 import type { RowRenderer } from '../../../../common/types/timeline';
-import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
-import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
-import { GraphOverlay } from '../../../timelines/components/graph_overlay';
-import type { Sort } from '../../../timelines/components/timeline/body/sort';
-import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
-import {
-  useSessionView,
-  useSessionViewNavigation,
-} from '../../../timelines/components/timeline/tabs/session/use_session_view';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import type { SetQuery } from '../../containers/use_global_time/types';
-import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
-import { useKibana } from '../../lib/kibana';
+import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { InputsModelId } from '../../store/inputs/constants';
-import type { SourcererScopeName } from '../../store/sourcerer/model';
-import type { AlertWorkflowStatus } from '../../types';
-import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
 import { InspectButtonContainer } from '../inspect';
-import { useQueryInspector } from '../page/manage_query';
-import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
-import { defaultUnit } from '../toolbar/unit';
-import { getCombinedFilterQuery, getDefaultViewSelection } from './helpers';
-import { RightTopMenu } from './right_top_menu';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { eventsViewerSelector } from './selectors';
-import { EmptyTable, TableContext, TableLoading } from './shared';
-import { StatefulEventContext } from './stateful_event_context';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import { useKibana } from '../../lib/kibana';
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
+import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
+import {
+  useSessionViewNavigation,
+  useSessionView,
+} from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import {
   EventsContainerLoading,
   FullScreenContainer,
@@ -78,8 +67,19 @@ import {
   ScrollableFlexItem,
   StyledEuiPanel,
 } from './styles';
-import { useAlertBulkActions } from './use_alert_bulk_actions';
+import { getDefaultViewSelection, getCombinedFilterQuery } from './helpers';
 import { useTimelineEvents } from './use_timelines_events';
+import { TableContext, EmptyTable, TableLoading } from './shared';
+import type { AlertWorkflowStatus } from '../../types';
+import { useQueryInspector } from '../page/manage_query';
+import type { SetQuery } from '../../containers/use_global_time/types';
+import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
+import { RightTopMenu } from './right_top_menu';
+import { useAlertBulkActions } from './use_alert_bulk_actions';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import { StatefulEventContext } from './stateful_event_context';
+import { defaultUnit } from '../toolbar/unit';
+import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 
 const storage = new Storage(localStorage);
 

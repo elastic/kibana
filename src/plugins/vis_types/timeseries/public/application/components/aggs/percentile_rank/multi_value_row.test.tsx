@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ColorPicker } from '../../color_picker';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { MultiValueRow } from './multi_value_row';
+import { ColorPicker } from '../../color_picker';
 
 describe('MultiValueRow', () => {
   const model = {

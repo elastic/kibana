@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiButton, EuiRadio, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
+import { useEuiTheme, EuiButton, EuiRadio, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export interface CspRadioGroupProps {
   disabled?: boolean;

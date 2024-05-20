@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsGetConfigFn } from '../../../common';
 import { DateNanosFormat } from './date_nanos_server';
+import { FieldFormatsGetConfigFn } from '../../../common';
 
 describe('Date Nanos Format: Server side edition', () => {
   let convert: Function;

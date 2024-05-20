@@ -6,8 +6,8 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { AlertSummaryWidgetProps } from '../application/sections/alert_summary_widget';
 import { AlertSummaryWidgetLoader } from '../application/sections/alert_summary_widget/components';
+import { AlertSummaryWidgetProps } from '../application/sections/alert_summary_widget';
 import { AlertSummaryWidgetDependencies } from '../application/sections/alert_summary_widget/types';
 
 const AlertSummaryWidgetLazy: React.FC<AlertSummaryWidgetProps & AlertSummaryWidgetDependencies> =

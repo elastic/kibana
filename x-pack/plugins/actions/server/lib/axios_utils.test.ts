@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { Agent as HttpsAgent } from 'https';
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import axios, { AxiosInstance } from 'axios';
+import { Agent as HttpsAgent } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { actionsConfigMock } from '../actions_config.mock';
+import { Logger } from '@kbn/core/server';
 import {
   addTimeZoneToDate,
-  createAxiosResponse,
-  getErrorMessage,
-  patch,
   request,
+  patch,
+  getErrorMessage,
   throwIfResponseIsNotValid,
+  createAxiosResponse,
 } from './axios_utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
 
 const TestUrl = 'https://elastic.co/foo/bar/baz';

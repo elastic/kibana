@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -14,7 +15,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import React from 'react';
 import styled from 'styled-components';
 import * as i18n from '../translations';
 

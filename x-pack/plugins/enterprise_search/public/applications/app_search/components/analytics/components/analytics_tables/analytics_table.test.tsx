@@ -11,7 +11,7 @@ import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
-import { EuiBadge, EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBasicTable, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../../test_helpers';
 

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { FC } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -13,11 +14,10 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { FC } from 'react';
-import { actionButtonCss } from '../filter_item.styles';
 import { Tooltip } from '../tooltip';
 import { strings } from './action_strings';
 import { FilterItemActionsProps } from './types';
+import { actionButtonCss } from '../filter_item.styles';
 
 export const FilterItemActions: FC<FilterItemActionsProps & { minimizePaddings?: boolean }> = ({
   disabled = false,

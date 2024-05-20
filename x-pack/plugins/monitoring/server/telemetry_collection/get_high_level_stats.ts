@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { createQuery } from './create_query';
 import {
-  APM_SYSTEM_ID,
-  BEATS_SYSTEM_ID,
-  INDEX_PATTERN_BEATS,
   INDEX_PATTERN_KIBANA,
+  INDEX_PATTERN_BEATS,
   INDEX_PATTERN_LOGSTASH,
   KIBANA_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
+  APM_SYSTEM_ID,
   LOGSTASH_SYSTEM_ID,
   TELEMETRY_QUERY_SOURCE,
 } from '../../common/constants';
-import { createQuery } from './create_query';
 
 export interface ClusterCloudStats {
   name: string;
@@ -267,7 +267,7 @@ export async function getHighLevelStats(
 }
 
 export async function fetchHighLevelStats<
-  T extends { cluster_uuid?: string } = { cluster_uuid?: string },
+  T extends { cluster_uuid?: string } = { cluster_uuid?: string }
 >(
   callCluster: ElasticsearchClient,
   clusterUuids: string[],

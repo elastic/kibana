@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import React, { type FC, useState, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -14,10 +14,10 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { i18n } from '@kbn/i18n';
+import { type SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { debounce } from 'lodash';
-import React, { type FC, useState, useCallback, useMemo, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';

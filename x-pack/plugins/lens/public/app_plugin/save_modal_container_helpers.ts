@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
-import type { LensEmbeddableInput } from '../embeddable';
 import type { LensAppServices } from './types';
+import type { LensEmbeddableInput } from '../embeddable';
+import { LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 
 export const redirectToDashboard = ({
   embeddableInput,

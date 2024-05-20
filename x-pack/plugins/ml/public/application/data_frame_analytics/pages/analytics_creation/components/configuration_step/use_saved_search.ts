@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useState, useEffect } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
 import {
   buildEsQuery,
@@ -14,7 +15,6 @@ import {
   toElasticsearchQuery,
 } from '@kbn/es-query';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { useEffect, useState } from 'react';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { useDataSource } from '../../../../../contexts/ml';
 

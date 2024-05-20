@@ -1,5 +1,3 @@
-import type { Logger } from '@kbn/core/server';
-import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,23 +5,25 @@ import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
  * 2.0.
  */
 import { sha256 } from 'js-sha256';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import type { MonitorUpdateEvent } from '../../telemetry/types';
 
-import { scheduleToMilli } from '../../../common/lib/schedule_to_time';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 import {
-  ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
+  MONITOR_UPDATE_CHANNEL,
+  MONITOR_CURRENT_CHANNEL,
+  MONITOR_ERROR_EVENTS_CHANNEL,
+} from '../../telemetry/constants';
+import { MonitorErrorEvent } from '../../telemetry/types';
+import {
   MonitorFields,
+  EncryptedSyntheticsMonitorAttributes,
+  ConfigKey,
   ServiceLocationErrors,
   SourceType,
 } from '../../../common/runtime_types';
-import {
-  MONITOR_CURRENT_CHANNEL,
-  MONITOR_ERROR_EVENTS_CHANNEL,
-  MONITOR_UPDATE_CHANNEL,
-} from '../../telemetry/constants';
-import { TelemetryEventsSender } from '../../telemetry/sender';
-import { MonitorErrorEvent } from '../../telemetry/types';
+import { scheduleToMilli } from '../../../common/lib/schedule_to_time';
 
 export function sendTelemetryEvents(
   logger: Logger,

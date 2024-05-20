@@ -6,27 +6,27 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { css } from '@emotion/react';
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
-  EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCode,
-  EuiContextMenuItem,
+  EuiPopover,
   EuiContextMenuPanel,
-  EuiCopy,
+  EuiContextMenuItem,
+  EuiText,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHeaderLinks,
+  EuiCode,
+  EuiCopy,
+  EuiButtonIcon,
+  EuiBadge,
   EuiHorizontalRule,
-  EuiPopover,
-  EuiSpacer,
-  EuiText,
+  EuiButton,
+  EuiHeaderLinks,
   useEuiTheme,
 } from '@elastic/eui';
 

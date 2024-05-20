@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { DRAW_MODE } from '../../../../../../common/constants';
-import {
-  fitToLayerExtent,
-  hideTOCDetails,
-  setDrawMode,
-  setSelectedLayer,
-  showTOCDetails,
-  toggleLayerVisible,
-  updateDrawState,
-  updateFlyout,
-} from '../../../../../actions';
-import { getInspectorAdapters } from '../../../../../reducers/non_serializable_instances';
+import { connect } from 'react-redux';
+import { TOCEntry, OwnProps, ReduxDispatchProps, ReduxStateProps } from './toc_entry';
 import { MapStoreState } from '../../../../../reducers/store';
 import { FLYOUT_STATE } from '../../../../../reducers/ui';
 import {
-  getEditState,
   getMapZoom,
-  getSelectedLayer,
   hasDirtyState,
+  getSelectedLayer,
+  getEditState,
 } from '../../../../../selectors/map_selectors';
 import {
-  getFlyoutDisplay,
   getIsReadOnly,
   getOpenTOCDetails,
+  getFlyoutDisplay,
 } from '../../../../../selectors/ui_selectors';
-import { OwnProps, ReduxDispatchProps, ReduxStateProps, TOCEntry } from './toc_entry';
+import { getInspectorAdapters } from '../../../../../reducers/non_serializable_instances';
+import {
+  fitToLayerExtent,
+  setSelectedLayer,
+  updateFlyout,
+  hideTOCDetails,
+  showTOCDetails,
+  toggleLayerVisible,
+  setDrawMode,
+  updateDrawState,
+} from '../../../../../actions';
+import { DRAW_MODE } from '../../../../../../common/constants';
 
 function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   const flyoutDisplay = getFlyoutDisplay(state);

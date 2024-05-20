@@ -17,9 +17,9 @@ import {
 } from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../../../../common/components/drag_and_drop/helpers';
 import { GoogleLink, ReputationLink } from '../../../../../../common/components/links';
+import { Provider } from '../../../data_providers/provider';
 import type { QueryOperator } from '../../../data_providers/data_provider';
 import { IS_OPERATOR } from '../../../data_providers/data_provider';
-import { Provider } from '../../../data_providers/provider';
 
 import * as i18n from './translations';
 

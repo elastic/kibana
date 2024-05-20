@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { MouseEvent, useEffect } from 'react';
-import {
-  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
-  MANAGEMENT_APP_ID,
-  MaintenanceWindowDeepLinkIds,
-} from '../../common';
 import { useKibana } from '../utils/kibana_react';
 import { useNavigation } from './use_navigation';
+import {
+  MANAGEMENT_APP_ID,
+  MaintenanceWindowDeepLinkIds,
+  MAINTENANCE_WINDOW_DEEP_LINK_IDS,
+} from '../../common';
 
 const breadcrumbTitle: Record<MaintenanceWindowDeepLinkIds, string> = {
   [MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows]: i18n.translate(

@@ -10,8 +10,8 @@ import React, { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 
-import { ClientPluginsStart } from '../../../../../../plugin';
 import { useRefreshedRange } from '../../../../hooks';
+import { ClientPluginsStart } from '../../../../../../plugin';
 import * as labels from '../labels';
 
 export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] }) => {

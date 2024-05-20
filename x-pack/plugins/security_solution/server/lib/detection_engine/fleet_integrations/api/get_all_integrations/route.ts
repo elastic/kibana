@@ -6,14 +6,14 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
+import { buildSiemResponse } from '../../../routes/utils';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { GetAllIntegrationsResponse } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { GET_ALL_INTEGRATIONS_URL } from '../../../../../../common/api/detection_engine/fleet_integrations';
-import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { buildSiemResponse } from '../../../routes/utils';
 import { extractIntegrations } from './extract_integrations';
-import { sortIntegrationsByStatus } from './sort_integrations_by_status';
 import { sortPackagesBySecurityCategory } from './sort_packages_by_security_category';
+import { sortIntegrationsByStatus } from './sort_integrations_by_status';
 
 /**
  * Returns an array of Fleet integrations and their packages

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import deepFreeze from 'deep-freeze-strict';
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs';
+import deepFreeze from 'deep-freeze-strict';
 import {
-  BaseState,
-  PureSelectorsToSelectors,
-  PureTransition,
   PureTransitionsToTransitions,
+  PureTransition,
   ReduxLikeStateContainer,
+  PureSelectorsToSelectors,
+  BaseState,
 } from './types';
 
 const $$observable = (typeof Symbol === 'function' && (Symbol as any).observable) || '@@observable';
@@ -87,7 +87,7 @@ export function createStateContainer<State extends BaseState, PureTransitions ex
 export function createStateContainer<
   State extends BaseState,
   PureTransitions extends object,
-  PureSelectors extends object,
+  PureSelectors extends object
 >(
   defaultState: State,
   pureTransitions: PureTransitions,
@@ -100,7 +100,7 @@ export function createStateContainer<
 export function createStateContainer<
   State extends BaseState,
   PureTransitions extends object,
-  PureSelectors extends object,
+  PureSelectors extends object
 >(
   defaultState: State,
   pureTransitions: PureTransitions = {} as PureTransitions, // TODO: https://github.com/elastic/kibana/issues/54439

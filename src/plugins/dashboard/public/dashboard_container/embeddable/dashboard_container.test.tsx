@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
+  CONTACT_CARD_EMBEDDABLE,
   EMPTY_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import type { TimeRange } from '@kbn/es-query';

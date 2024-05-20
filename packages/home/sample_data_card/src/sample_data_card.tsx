@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import { SampleDataCard as Component, Props as ComponentProps } from './sample_data_card.component';

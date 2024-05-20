@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiSpacer, EuiTextColor, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiSpacer, EuiAccordion, EuiTextColor, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { css } from '@emotion/react';
 import { AdvancedOption } from '../operations/definitions';
 
 export function AdvancedOptions(props: { options: AdvancedOption[] }) {

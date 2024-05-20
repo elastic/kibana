@@ -15,7 +15,7 @@ import { EmptyMessage } from '../empty_message';
 import { ITableColumn, ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import { SpanMetricGroup, getSpanMetricColumns } from './get_span_metric_columns';
+import { getSpanMetricColumns, SpanMetricGroup } from './get_span_metric_columns';
 
 export type DependenciesItem = Omit<ConnectionStatsItemWithComparisonData, 'location'> & {
   name: string;

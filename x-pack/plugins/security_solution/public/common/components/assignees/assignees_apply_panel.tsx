@@ -10,11 +10,11 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import type { AlertAssignees } from '../../../../common/api/detection_engine';
-import { AssigneesSelectable } from './assignees_selectable';
-import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
 import * as i18n from './translations';
 import type { AssigneesIdsSelection } from './types';
 import { removeNoAssigneesSelection } from './utils';
+import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
+import { AssigneesSelectable } from './assignees_selectable';
 
 export interface AssigneesApplyPanelProps {
   /**

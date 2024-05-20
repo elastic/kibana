@@ -1,4 +1,3 @@
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
  * 2.0.
  */
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 
 export async function getSuggestionsWithTermsAggregation({
   fieldName,

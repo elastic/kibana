@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import React from 'react';
+import { noop } from 'lodash';
 import { css } from '@emotion/css';
+import { EuiPanel } from '@elastic/eui';
 import { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   ChatActionClickHandler,
   MessageText,
   TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { noop } from 'lodash';
-import React from 'react';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 
 interface Props {

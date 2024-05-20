@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useState } from 'react';
+import type { Assign } from '@kbn/utility-types';
 import {
-  DragDropContextProps,
-  EuiDragDropContext,
+  EuiPanel,
   EuiDraggable,
   EuiDroppable,
-  EuiPanel,
   EuiPanelProps,
+  EuiDragDropContext,
+  DragDropContextProps,
   euiDragDropReorder,
   useEuiTheme,
 } from '@elastic/eui';
-import type { Assign } from '@kbn/utility-types';
-import React, { useCallback, useState } from 'react';
 import { DefaultBucketContainer } from './default_bucket_container';
 import type { BucketContainerProps } from './types';
 

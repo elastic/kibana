@@ -8,13 +8,13 @@
 import { chartData as mockChartData } from './__mocks__/mock_chart_data_rare';
 import seriesConfig from './__mocks__/mock_series_config_rare.json';
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 
-import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
-import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
+import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
+import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
 
 const utilityProps = {
   timeBuckets: timeBucketsMock,

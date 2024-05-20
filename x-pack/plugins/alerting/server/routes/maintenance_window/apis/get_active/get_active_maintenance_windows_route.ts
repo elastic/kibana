@@ -6,16 +6,16 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 import { ILicenseState } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH,
 } from '../../../../types';
-import { verifyAccessAndContext } from '../../../lib';
+import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 
-import { GetActiveMaintenanceWindowsResponseV1 } from '../../../../../common/routes/maintenance_window/apis/get_active';
 import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
+import { GetActiveMaintenanceWindowsResponseV1 } from '../../../../../common/routes/maintenance_window/apis/get_active';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 
 export const getActiveMaintenanceWindowsRoute = (

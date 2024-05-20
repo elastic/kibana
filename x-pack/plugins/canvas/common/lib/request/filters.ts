@@ -6,11 +6,11 @@
  */
 
 import {
-  CanvasExactlyFilter,
-  CanvasLuceneFilter,
-  CanvasTimeFilter,
-  ExpressionValueFilter,
   FilterType,
+  ExpressionValueFilter,
+  CanvasTimeFilter,
+  CanvasLuceneFilter,
+  CanvasExactlyFilter,
 } from '../../../types';
 
 /*

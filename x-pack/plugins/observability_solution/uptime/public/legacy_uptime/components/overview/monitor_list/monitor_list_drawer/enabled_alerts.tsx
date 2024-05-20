@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useContext } from 'react';
 import {
   EuiCallOut,
   EuiDescriptionList,
@@ -15,9 +16,8 @@ import {
 } from '@elastic/eui';
 import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import { i18n } from '@kbn/i18n';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useContext } from 'react';
 import styled from 'styled-components';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { UptimeSettingsContext } from '../../../../contexts';
 import { getUrlForAlert } from '../../../../lib/alert_types/common';
 

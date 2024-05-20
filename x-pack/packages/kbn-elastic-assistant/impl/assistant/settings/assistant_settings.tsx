@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiIcon,
-  EuiKeyPadMenu,
-  EuiKeyPadMenuItem,
   EuiModal,
   EuiModalFooter,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
   EuiPage,
   EuiPageBody,
   EuiPageSidebar,
   EuiSplitPanel,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { css } from '@emotion/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
+import { css } from '@emotion/react';
+import { AIConnector } from '../../connectorland/connector_selector';
+import { Conversation, Prompt, QuickPrompt } from '../../..';
+import * as i18n from './translations';
+import { useAssistantContext } from '../../assistant_context';
+import { TEST_IDS } from '../constants';
+import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
 import {
   AnonymizationSettings,
   ConversationSettings,
@@ -31,13 +37,7 @@ import {
   QuickPromptSettings,
   SystemPromptSettings,
 } from '.';
-import { Conversation, Prompt, QuickPrompt } from '../../..';
-import { useAssistantContext } from '../../assistant_context';
-import { AIConnector } from '../../connectorland/connector_selector';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
-import { TEST_IDS } from '../constants';
-import * as i18n from './translations';
-import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;

@@ -132,7 +132,9 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -144,7 +146,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<ElasticsearchServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<ElasticsearchServiceContract>"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -158,7 +162,9 @@
             "tags": [],
             "label": "createInternalPreboot",
             "description": [],
-            "signature": ["() => MockedElasticSearchServicePreboot"],
+            "signature": [
+              "() => MockedElasticSearchServicePreboot"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -172,7 +178,9 @@
             "tags": [],
             "label": "createPreboot",
             "description": [],
-            "signature": ["() => MockedElasticSearchServicePreboot"],
+            "signature": [
+              "() => MockedElasticSearchServicePreboot"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -186,7 +194,9 @@
             "tags": [],
             "label": "createInternalSetup",
             "description": [],
-            "signature": ["() => MockedInternalElasticSearchServiceSetup"],
+            "signature": [
+              "() => MockedInternalElasticSearchServiceSetup"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -223,7 +233,9 @@
             "tags": [],
             "label": "createInternalStart",
             "description": [],
-            "signature": ["() => MockedInternalElasticsearchServiceStart"],
+            "signature": [
+              "() => MockedInternalElasticsearchServiceStart"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -290,7 +302,9 @@
                 "tags": [],
                 "label": "parts",
                 "description": [],
-                "signature": ["{ serverless?: boolean | undefined; }"],
+                "signature": [
+                  "{ serverless?: boolean | undefined; }"
+                ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-server-mocks/src/elasticsearch_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

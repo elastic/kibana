@@ -6,10 +6,10 @@
  */
 
 import { CASES_URL } from '../../../../common/constants';
-import type { caseApiV1 } from '../../../../common/types/api';
-import type { caseDomainV1 } from '../../../../common/types/domain';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { caseApiV1 } from '../../../../common/types/api';
+import type { caseDomainV1 } from '../../../../common/types/domain';
 
 export const patchCaseRoute = createCasesRoute({
   method: 'patch',

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import type { CustomAssetsAccordionProps, PackageAssetsComponent } from '@kbn/fleet-plugin/public';
 import { CustomAssetsAccordion } from '@kbn/fleet-plugin/public';
-import { APP_PATH } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { APP_PATH } from '../../../../../../common/constants';
 
 export const EndpointCustomAssetsExtension: PackageAssetsComponent = () => {
   const { http } = useKibana().services;

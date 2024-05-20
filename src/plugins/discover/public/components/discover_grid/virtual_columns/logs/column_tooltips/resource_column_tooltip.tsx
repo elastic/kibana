@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import React from 'react';
-import * as constants from '../../../../../../common/data_types/logs/constants';
+import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
+import type { CustomGridColumnProps } from '@kbn/unified-data-table';
+import { euiThemeVars } from '@kbn/ui-theme';
 import {
   resourceHeaderTooltipParagraph,
   resourceLabel,
 } from '../../../../data_types/logs/translations';
-import { FieldWithToken } from './field_with_token';
+import * as constants from '../../../../../../common/data_types/logs/constants';
 import { TooltipButton } from './tooltip_button';
+import { FieldWithToken } from './field_with_token';
 
 const spacingCSS = css`
   margin-bottom: ${euiThemeVars.euiSizeS};

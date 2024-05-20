@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server';
 import { EcsEvent } from '@kbn/core/server';
 import { AuditEvent } from '@kbn/security-plugin/server';
+import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server';
 import { ArrayElement } from '@kbn/utility-types';
 
 export enum AlertAuditAction {
@@ -49,8 +49,8 @@ export function alertAuditEvent({ action, id, outcome, error }: AlertAuditEventP
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-      ? `User is ${progressive} ${doc}`
-      : `User has ${past} ${doc}`;
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
   const type = eventTypes[action];
 
   return {

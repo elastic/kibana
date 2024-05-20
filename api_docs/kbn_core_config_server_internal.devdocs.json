@@ -69,7 +69,9 @@
             "tags": [],
             "label": "configService",
             "description": [],
-            "signature": ["ConfigService"],
+            "signature": [
+              "ConfigService"
+            ],
             "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -82,7 +84,10 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": ["ConfigValidateParameters", " | undefined"],
+            "signature": [
+              "ConfigValidateParameters",
+              " | undefined"
+            ],
             "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
             "trackAdoption": false,

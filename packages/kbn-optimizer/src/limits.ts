@@ -9,13 +9,13 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import { CiStatsMetric } from '@kbn/ci-stats-reporter';
-import { createFailError } from '@kbn/dev-cli-errors';
-import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import Yaml from 'js-yaml';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { ToolingLog } from '@kbn/tooling-log';
+import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
-import { Limits, OptimizerConfig } from './optimizer';
+import { OptimizerConfig, Limits } from './optimizer';
 
 const DEFAULT_BUDGET = 15000;
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
 import type { GetRuleExecutionEventsResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {

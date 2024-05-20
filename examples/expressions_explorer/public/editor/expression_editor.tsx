@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CodeEditor } from '@kbn/code-editor';
 import React from 'react';
+import { CodeEditor } from '@kbn/code-editor';
 
 interface Props {
   value: string;

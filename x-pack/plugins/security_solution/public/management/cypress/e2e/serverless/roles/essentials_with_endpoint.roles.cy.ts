@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { EndpointArtifactPageId } from '../../../screens';
-import {
-  ensureArtifactPageAuthzAccess,
-  ensureEndpointListPageAuthzAccess,
-  ensureFleetPermissionDeniedScreen,
-  ensurePolicyDetailsPageAuthzAccess,
-  ensurePolicyListPageAuthzAccess,
-  getArtifactListEmptyStateAddButton,
-  getEndpointManagementPageList,
-  getEndpointManagementPageMap,
-  getFleetAgentListTable,
-  getNoPrivilegesPage,
-  visitFleetAgentList,
-} from '../../../screens';
 import type { CyIndexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
-import { ROLE, login } from '../../../tasks/login';
+import { login, ROLE } from '../../../tasks/login';
+import type { EndpointArtifactPageId } from '../../../screens';
+import {
+  getNoPrivilegesPage,
+  getArtifactListEmptyStateAddButton,
+  getEndpointManagementPageMap,
+  getEndpointManagementPageList,
+  ensureArtifactPageAuthzAccess,
+  ensureEndpointListPageAuthzAccess,
+  ensurePolicyListPageAuthzAccess,
+  ensureFleetPermissionDeniedScreen,
+  getFleetAgentListTable,
+  visitFleetAgentList,
+  ensurePolicyDetailsPageAuthzAccess,
+} from '../../../screens';
 
 // FLAKY: https://github.com/elastic/kibana/issues/170985
 describe.skip(

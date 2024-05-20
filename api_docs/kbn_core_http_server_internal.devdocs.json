@@ -24,7 +24,9 @@
         "type": "Class",
         "tags": [],
         "label": "CspConfig",
-        "description": ["\nCSP configuration for use in Kibana."],
+        "description": [
+          "\nCSP configuration for use in Kibana."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server-internal",
@@ -73,7 +75,9 @@
             "tags": [],
             "label": "#directives",
             "description": [],
-            "signature": ["CspDirectives"],
+            "signature": [
+              "CspDirectives"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -153,7 +157,9 @@
         "type": "Class",
         "tags": [],
         "label": "ExternalUrlConfig",
-        "description": ["\nExternal Url configuration for use in Kibana."],
+        "description": [
+          "\nExternal Url configuration for use in Kibana."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server-internal",
@@ -345,7 +351,9 @@
             "tags": [],
             "label": "oas",
             "description": [],
-            "signature": ["{ enabled: boolean; }"],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -357,7 +365,9 @@
             "tags": [],
             "label": "securityResponseHeaders",
             "description": [],
-            "signature": ["{ [x: string]: string | string[]; }"],
+            "signature": [
+              "{ [x: string]: string | string[]; }"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -369,7 +379,9 @@
             "tags": [],
             "label": "customResponseHeaders",
             "description": [],
-            "signature": ["{ [x: string]: string | string[]; }"],
+            "signature": [
+              "{ [x: string]: string | string[]; }"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -401,7 +413,9 @@
             "tags": [],
             "label": "basePath",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -413,7 +427,9 @@
             "tags": [],
             "label": "publicBaseUrl",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -436,7 +452,9 @@
             "tags": [],
             "label": "cdn",
             "description": [],
-            "signature": ["CdnConfig"],
+            "signature": [
+              "CdnConfig"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -522,7 +540,9 @@
             "tags": [],
             "label": "xsrf",
             "description": [],
-            "signature": ["{ disableProtection: boolean; allowlist: string[]; }"],
+            "signature": [
+              "{ disableProtection: boolean; allowlist: string[]; }"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -534,7 +554,9 @@
             "tags": [],
             "label": "requestId",
             "description": [],
-            "signature": ["{ allowFromAnyIp: boolean; ipAllowlist: string[]; }"],
+            "signature": [
+              "{ allowFromAnyIp: boolean; ipAllowlist: string[]; }"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -562,7 +584,9 @@
             "tags": [],
             "label": "shutdownTimeout",
             "description": [],
-            "signature": ["moment.Duration"],
+            "signature": [
+              "moment.Duration"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -619,7 +643,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -631,7 +657,9 @@
                 "tags": [],
                 "label": "coreContext",
                 "description": [],
-                "signature": ["CoreContext"],
+                "signature": [
+                  "CoreContext"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -644,7 +672,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -657,7 +687,10 @@
                 "tags": [],
                 "label": "shutdownTimeout$",
                 "description": [],
-                "signature": ["Observable", "<moment.Duration>"],
+                "signature": [
+                  "Observable",
+                  "<moment.Duration>"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -673,7 +706,9 @@
             "tags": [],
             "label": "isListening",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -705,7 +740,9 @@
                 "tags": [],
                 "label": "{\n    config$,\n    executionContext,\n  }",
                 "description": [],
-                "signature": ["HttpServerSetupOptions"],
+                "signature": [
+                  "HttpServerSetupOptions"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -721,7 +758,9 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -735,7 +774,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -783,7 +824,9 @@
                 "tags": [],
                 "label": "{ pluginId }",
                 "description": [],
-                "signature": ["GetRoutersOptions"],
+                "signature": [
+                  "GetRoutersOptions"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -801,7 +844,9 @@
         "type": "Class",
         "tags": [],
         "label": "StaticAssets",
-        "description": ["\nConvention is for trailing slashes in pathnames are stripped."],
+        "description": [
+          "\nConvention is for trailing slashes in pathnames are stripped."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server-internal",
@@ -830,7 +875,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -842,7 +889,9 @@
                 "tags": [],
                 "label": "{ basePath, cdnConfig, shaDigest }",
                 "description": [],
-                "signature": ["StaticAssetsParams"],
+                "signature": [
+                  "StaticAssetsParams"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -858,7 +907,9 @@
             "tags": [],
             "label": "isUsingCdn",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -874,7 +925,9 @@
             "description": [
               "\nReturns a href (hypertext reference) intended to be used as the base for constructing\nother hrefs to static assets."
             ],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -888,7 +941,9 @@
             "tags": [],
             "label": "getPluginAssetHref",
             "description": [],
-            "signature": ["(pluginName: string, assetPath: string) => string"],
+            "signature": [
+              "(pluginName: string, assetPath: string) => string"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -900,7 +955,9 @@
                 "tags": [],
                 "label": "pluginName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -913,7 +970,9 @@
                 "tags": [],
                 "label": "assetPath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -929,7 +988,9 @@
             "tags": [],
             "label": "prependServerPath",
             "description": [],
-            "signature": ["(path: string) => string"],
+            "signature": [
+              "(path: string) => string"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -941,7 +1002,9 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -957,7 +1020,9 @@
             "tags": [],
             "label": "prependPublicUrl",
             "description": [],
-            "signature": ["(pathname: string) => string"],
+            "signature": [
+              "(pathname: string) => string"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -969,7 +1034,9 @@
                 "tags": [],
                 "label": "pathname",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -985,7 +1052,9 @@
             "tags": [],
             "label": "getPluginServerPath",
             "description": [],
-            "signature": ["(pluginName: string, assetPath: string) => string"],
+            "signature": [
+              "(pluginName: string, assetPath: string) => string"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -997,7 +1066,9 @@
                 "tags": [],
                 "label": "pluginName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1010,7 +1081,9 @@
                 "tags": [],
                 "label": "assetPath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1093,8 +1166,12 @@
             "type": "Object",
             "tags": [],
             "label": "server",
-            "description": ["- hapi server to create SessionStorage for"],
-            "signature": ["Server"],
+            "description": [
+              "- hapi server to create SessionStorage for"
+            ],
+            "signature": [
+              "Server"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/cookie_session_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1106,7 +1183,9 @@
             "type": "Object",
             "tags": [],
             "label": "cookieOptions",
-            "description": ["- cookies configuration"],
+            "description": [
+              "- cookies configuration"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -1129,7 +1208,9 @@
             "tags": [],
             "label": "basePath",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/cookie_session_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1159,7 +1240,9 @@
             "tags": [],
             "label": "getHrefBase",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1175,7 +1258,9 @@
             "description": [
               "\nReturns true if a CDN has been configured and should be used to serve static assets.\nShould only be used in scenarios where different behavior has to be used when CDN is enabled or not."
             ],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1191,7 +1276,9 @@
             "description": [
               "\nIntended for use by server code rendering UI or generating links to static assets\nthat will ultimately be called from the browser and must respect settings like\nserverBasePath"
             ],
-            "signature": ["(pluginName: string, assetPath: string) => string"],
+            "signature": [
+              "(pluginName: string, assetPath: string) => string"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1203,7 +1290,9 @@
                 "tags": [],
                 "label": "pluginName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1216,7 +1305,9 @@
                 "tags": [],
                 "label": "assetPath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1234,7 +1325,9 @@
             "description": [
               "\nIntended for use by server code wanting to register static assets against Kibana\nas server paths"
             ],
-            "signature": ["(pluginName: string, assetPath: string) => string"],
+            "signature": [
+              "(pluginName: string, assetPath: string) => string"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1246,7 +1339,9 @@
                 "tags": [],
                 "label": "pluginName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1259,7 +1354,9 @@
                 "tags": [],
                 "label": "assetPath",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1274,8 +1371,12 @@
             "type": "Function",
             "tags": [],
             "label": "prependServerPath",
-            "description": ["\nSimilar to getPluginServerPath, but not plugin-scoped"],
-            "signature": ["(pathname: string) => string"],
+            "description": [
+              "\nSimilar to getPluginServerPath, but not plugin-scoped"
+            ],
+            "signature": [
+              "(pathname: string) => string"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1287,7 +1388,9 @@
                 "tags": [],
                 "label": "pathname",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1300,12 +1403,16 @@
             "parentPluginId": "@kbn/core-http-server-internal",
             "id": "def-common.InternalStaticAssets.prependPublicUrl",
             "type": "Function",
-            "tags": ["note"],
+            "tags": [
+              "note"
+            ],
             "label": "prependPublicUrl",
             "description": [
               "\nWill append the given path segment to the configured public path.\n"
             ],
-            "signature": ["(pathname: string) => string"],
+            "signature": [
+              "(pathname: string) => string"
+            ],
             "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1317,7 +1424,9 @@
                 "tags": [],
                 "label": "pathname",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/core/http/core-http-server-internal/src/static_assets/static_assets.ts",
                 "deprecated": false,
                 "trackAdoption": false,

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { LegacyMetricState } from '../../../../common/types';
-import { AlignOptions } from './align_options';
 import { SizeOptions } from './size_options';
+import { AlignOptions } from './align_options';
 
 export interface TitlePositionProps {
   state: LegacyMetricState;

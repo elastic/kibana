@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import moment from 'moment';
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
@@ -47,9 +47,9 @@ export class RequestHandler {
     private context: ReportingRequestHandlerContext,
     private path: string,
     private req: KibanaRequest<
-      TypeOf<(typeof validation)['params']>,
-      TypeOf<(typeof validation)['query']>,
-      TypeOf<(typeof validation)['body']>
+      TypeOf<typeof validation['params']>,
+      TypeOf<typeof validation['query']>,
+      TypeOf<typeof validation['body']>
     >,
     private res: KibanaResponseFactory,
     private logger: Logger

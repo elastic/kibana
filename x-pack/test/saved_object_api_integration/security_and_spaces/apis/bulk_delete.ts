@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { getTestScenarios, testCaseFailures } from '../../common/lib/saved_object_test_utils';
 import { SPACES } from '../../common/lib/spaces';
+import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  BulkDeleteTestDefinition,
-  TEST_CASES as CASES,
   bulkDeleteTestSuiteFactory,
+  TEST_CASES as CASES,
+  BulkDeleteTestDefinition,
 } from '../../common/suites/bulk_delete';
 
 const {

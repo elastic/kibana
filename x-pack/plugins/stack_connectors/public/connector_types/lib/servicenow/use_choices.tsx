@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup, IToasts } from '@kbn/core/public';
 import { useCallback, useMemo, useState } from 'react';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { Choice, Fields } from './types';

@@ -10,8 +10,8 @@ import { skip } from 'rxjs';
 
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 
-import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainer } from '../../dashboard_container';
+import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardCreationOptions } from '../../dashboard_container_factory';
 import { newSession$ } from './new_session';
 

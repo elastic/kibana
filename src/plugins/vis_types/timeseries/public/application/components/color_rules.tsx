@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
+import React, { Component, Fragment } from 'react';
 import {
+  htmlIdGenerator,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldNumber,
+  EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
-  WithEuiThemeProps,
-  htmlIdGenerator,
+  EuiComboBoxOptionOption,
   withEuiTheme,
+  WithEuiThemeProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { Operator } from '../../../common/operators_utils';
-import { TimeseriesVisParams } from '../../types';
-import { tsvbEditorRowStyles } from '../styles/common.styles';
 import { AddDeleteButtons } from './add_delete_buttons';
-import { ColorPicker, ColorPickerProps } from './color_picker';
 import { collectionActions } from './lib/collection_actions';
+import { ColorPicker, ColorPickerProps } from './color_picker';
+import { TimeseriesVisParams } from '../../types';
+import { Operator } from '../../../common/operators_utils';
+import { tsvbEditorRowStyles } from '../styles/common.styles';
 
 export interface ColorRulesProps extends WithEuiThemeProps {
   name: keyof TimeseriesVisParams;

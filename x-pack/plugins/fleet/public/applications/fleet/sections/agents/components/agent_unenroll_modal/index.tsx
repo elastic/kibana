@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiCheckbox, EuiConfirmModal, EuiFormFieldset, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiConfirmModal, EuiFormFieldset, EuiCheckbox, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { Agent } from '../../../../types';
 import {
   sendPostAgentUnenroll,
   sendPostBulkAgentUnenroll,
   useStartServices,
 } from '../../../../hooks';
-import type { Agent } from '../../../../types';
 
 interface Props {
   onClose: () => void;

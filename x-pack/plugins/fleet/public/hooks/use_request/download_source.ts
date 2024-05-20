@@ -14,7 +14,7 @@ import type {
 
 import { API_VERSIONS } from '../../../common/constants';
 
-import { sendRequest, useRequest } from './use_request';
+import { useRequest, sendRequest } from './use_request';
 
 export function useGetDownloadSources() {
   return useRequest<GetDownloadSourceResponse>({

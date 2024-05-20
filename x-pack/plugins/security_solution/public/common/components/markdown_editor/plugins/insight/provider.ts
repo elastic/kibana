@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { flatten } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import {
-  BooleanRelation,
   FILTERS,
   isCombinedFilter,
-  isExistsFilter,
+  isRangeFilter,
   isPhraseFilter,
   isPhrasesFilter,
-  isRangeFilter,
+  isExistsFilter,
+  BooleanRelation,
 } from '@kbn/es-query';
 import type { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
-import { flatten } from 'lodash';
 
 export interface Provider {
   field: string;

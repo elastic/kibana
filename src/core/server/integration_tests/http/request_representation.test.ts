@@ -10,14 +10,14 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
 
-import { inspect } from 'util';
+import supertest from 'supertest';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import type { HttpService } from '@kbn/core-http-server-internal';
+import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { createHttpService } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import supertest from 'supertest';
+import { inspect } from 'util';
 
 let server: HttpService;
 

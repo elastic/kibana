@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EUI_MODAL_CANCEL_BUTTON, EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function ConfirmDeleteModal({
   cancelDeletePipelines,

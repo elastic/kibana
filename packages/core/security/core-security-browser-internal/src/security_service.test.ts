@@ -11,9 +11,9 @@ import {
   getDefaultSecurityImplementationMock,
 } from './security_service.test.mocks';
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
-import { loggerMock } from '@kbn/logging-mocks';
 import { SecurityService } from './security_service';
 
 const createStubInternalContract = (): CoreSecurityDelegateContract => {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiProvider } from '@elastic/eui';
 import React, { FC } from 'react';
-import { RendererSpec } from '../../types';
-import { CanvasShareableStateProvider, initialCanvasShareableState } from '../context';
-import { renderFunctions } from '../supported_renderers';
+import { EuiProvider } from '@elastic/eui';
 import { CanvasRenderedWorkpad, CanvasShareableState, Stage } from '../types';
+import { RendererSpec } from '../../types';
+import { initialCanvasShareableState, CanvasShareableStateProvider } from '../context';
 import { Canvas } from './canvas';
+import { renderFunctions } from '../supported_renderers';
 
 interface Props {
   /**

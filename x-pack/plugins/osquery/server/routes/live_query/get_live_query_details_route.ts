@@ -6,28 +6,28 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { every, map, mapKeys, pick, reduce } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
-import { PLUGIN_ID } from '../../../common';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type {
   GetLiveQueryDetailsRequestParamsSchema,
   GetLiveQueryDetailsRequestQuerySchema,
 } from '../../../common/api';
-import { API_VERSIONS } from '../../../common/constants';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { API_VERSIONS } from '../../../common/constants';
+import { PLUGIN_ID } from '../../../common';
 import { getActionResponses } from './utils';
 
-import {
-  getLiveQueryDetailsRequestParamsSchema,
-  getLiveQueryDetailsRequestQuerySchema,
-} from '../../../common/api';
 import type {
   ActionDetailsRequestOptions,
   ActionDetailsStrategyResponse,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
+import {
+  getLiveQueryDetailsRequestParamsSchema,
+  getLiveQueryDetailsRequestQuerySchema,
+} from '../../../common/api';
 
 export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.versioned

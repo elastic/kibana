@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
-import { EuiBadgeProps } from '@elastic/eui/src/components/badge/badge';
-import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useState } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiBadgeProps } from '@elastic/eui/src/components/badge/badge';
 
 export interface TagsListProps {
   onClick?: (tag: string) => void;

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { createMockStore, mockTimelineData, TestProviders } from '../../../../../common/mock';
+import React from 'react';
+import { TimelineDataTable } from '.';
+import { defaultUdtHeaders } from '../default_headers';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import React from 'react';
-import type { ComponentProps } from 'react';
-import { TimelineDataTable } from '.';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types';
-import type { ExpandedDetailTimeline } from '../../../../../../common/types';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
-import { TestProviders, createMockStore, mockTimelineData } from '../../../../../common/mock';
-import { timelineActions } from '../../../../store';
+import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
-import { defaultUdtHeaders } from '../default_headers';
+import { mockSourcererScope } from '../../../../../common/containers/sourcerer/mocks';
+import { timelineActions } from '../../../../store';
+import type { ExpandedDetailTimeline } from '../../../../../../common/types';
 
 jest.mock('../../../../../common/containers/sourcerer');
 

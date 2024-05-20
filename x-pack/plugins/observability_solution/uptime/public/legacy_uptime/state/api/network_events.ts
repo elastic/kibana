@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { API_URLS } from '../../../../common/constants';
+import { apiService } from './utils';
+import { FetchNetworkEventsParams } from '../actions/network_events';
 import {
   SyntheticsNetworkEventsApiResponse,
   SyntheticsNetworkEventsApiResponseType,
 } from '../../../../common/runtime_types';
-import { FetchNetworkEventsParams } from '../actions/network_events';
-import { apiService } from './utils';
+import { API_URLS } from '../../../../common/constants';
 
 export async function fetchNetworkEvents(
   params: FetchNetworkEventsParams

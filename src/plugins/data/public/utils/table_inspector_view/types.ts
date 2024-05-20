@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import React from 'react';
+import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 
 type DataViewColumnRender = (value: string, _item: DatatableRow) => React.ReactNode | string;
 

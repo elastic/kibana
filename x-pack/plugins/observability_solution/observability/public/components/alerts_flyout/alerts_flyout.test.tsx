@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import React, { ComponentProps } from 'react';
+import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import type { TopAlert } from '../../typings/alerts';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { AlertsFlyout } from './alerts_flyout';
+import type { TopAlert } from '../../typings/alerts';
 
 const rawAlert = {} as ComponentProps<typeof AlertsFlyout>['rawAlert'];
 

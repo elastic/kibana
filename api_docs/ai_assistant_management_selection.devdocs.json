@@ -52,7 +52,12 @@
           "tags": [],
           "label": "aiAssistantType$",
           "description": [],
-          "signature": ["Observable", "<", "AIAssistantType", ">"],
+          "signature": [
+            "Observable",
+            "<",
+            "AIAssistantType",
+            ">"
+          ],
           "path": "src/plugins/ai_assistant_management/selection/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import { IBasePath } from '@kbn/core-http-server';
-import { i18n } from '@kbn/i18n';
-import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import moment from 'moment/moment';
-import { Cert } from '../../../common/runtime_types';
-import { ALERT_DETAILS_URL } from '../action_variables';
-import { tlsTranslations } from '../translations';
+import { IBasePath } from '@kbn/core-http-server';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { i18n } from '@kbn/i18n';
 import { TLSLatestPing } from './tls_rule_executor';
+import { ALERT_DETAILS_URL } from '../action_variables';
+import { Cert } from '../../../common/runtime_types';
+import { tlsTranslations } from '../translations';
 interface TLSContent {
   summary: string;
   status?: string;

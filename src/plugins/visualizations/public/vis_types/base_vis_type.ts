@@ -9,9 +9,9 @@
 import { defaultsDeep } from 'lodash';
 
 import type { VisParams } from '../types';
-import { Schemas } from './schemas';
 import type { VisTypeDefinition, VisTypeOptions } from './types';
 import { VisGroups } from './vis_groups_enum';
+import { Schemas } from './schemas';
 
 const defaultOptions: VisTypeOptions = {
   showTimePicker: true,

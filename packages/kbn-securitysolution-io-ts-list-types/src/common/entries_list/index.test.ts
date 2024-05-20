@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { EntryList, entriesList } from '.';
+import { left } from 'fp-ts/lib/Either';
 import { getEntryListMock } from './index.mock';
+import { entriesList, EntryList } from '.';
 
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual, uniqWith } from 'lodash';
+import { uniqWith, isEqual } from 'lodash';
 
 import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
 

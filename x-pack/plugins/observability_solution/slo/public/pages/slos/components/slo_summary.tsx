@@ -1,6 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,9 +5,12 @@ import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-sche
  * 2.0.
  */
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useSloFormattedSummary } from '../hooks/use_slo_summary';
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloSparkline } from './slo_sparkline';
 
 export interface Props {

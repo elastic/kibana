@@ -7,7 +7,7 @@
  */
 
 import { pickBy } from 'lodash';
-import type { FileJSON, FileMetadata } from '../../common/types';
+import type { FileMetadata, FileJSON } from '../../common/types';
 
 export function serializeJSON<M = unknown>(attrs: Partial<FileJSON>): Partial<FileMetadata<M>> {
   const {

@@ -2,7 +2,9 @@
   "config": {
     "id": "fq_outlier_1222",
     "source": {
-      "index": ["farequote-2019"],
+      "index": [
+        "farequote-2019"
+      ],
       "query": {
         "match_all": {}
       }

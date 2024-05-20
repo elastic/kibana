@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import type { estypes } from '@elastic/elasticsearch';
+import { createHash } from 'crypto';
 import { v5 as uuidv5 } from 'uuid';
 
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
@@ -17,10 +17,10 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleRangeTuple, SignalSearchResponse } from '../types';
 import type {
-  ThresholdAlertState,
-  ThresholdMultiBucketAggregationResult,
   ThresholdSignalHistory,
+  ThresholdAlertState,
   ThresholdSingleBucketAggregationResult,
+  ThresholdMultiBucketAggregationResult,
 } from './types';
 
 /**
@@ -93,7 +93,7 @@ export const getThresholdTermsHash = (
 };
 
 export const searchResultHasAggs = <
-  T extends ThresholdSingleBucketAggregationResult | ThresholdMultiBucketAggregationResult,
+  T extends ThresholdSingleBucketAggregationResult | ThresholdMultiBucketAggregationResult
 >(
   obj: SignalSearchResponse<Record<estypes.AggregateName, estypes.AggregationsAggregate>>
 ): obj is T => obj?.aggregations != null;

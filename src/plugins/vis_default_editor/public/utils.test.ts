@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AggGroupNames } from '@kbn/data-plugin/public';
 import { groupAndSortBy } from './utils';
+import { AggGroupNames } from '@kbn/data-plugin/public';
 
 const aggs = [
   {

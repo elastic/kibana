@@ -7,18 +7,18 @@
 
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Document } from '@langchain/core/documents';
-import { BaseLanguageModel } from '@langchain/core/language_models/base';
-import { BaseMessage } from '@langchain/core/messages';
-import { BytesOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate, PromptTemplate } from '@langchain/core/prompts';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
+import { BytesOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
 import {
-  Message as VercelChatMessage,
   createStreamDataTransformer,
   experimental_StreamData,
+  Message as VercelChatMessage,
 } from 'ai';
-import { renderTemplate } from '../utils/render_template';
+import { BaseLanguageModel } from '@langchain/core/language_models/base';
+import { BaseMessage } from '@langchain/core/messages';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
+import { renderTemplate } from '../utils/render_template';
 
 import { AssistClient } from '../utils/assist';
 import { getCitations } from '../utils/get_citations';

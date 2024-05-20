@@ -7,16 +7,16 @@
  */
 
 import path from 'path';
+import { unlink } from 'fs/promises';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
-import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import {
-  type TestElasticsearchUtils,
-  createRootWithCorePlugins,
   createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { unlink } from 'fs/promises';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
 const logFilePath = path.join(__dirname, '7.7.2_xpack_100k.log');
 

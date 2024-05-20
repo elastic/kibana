@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink } from '@elastic/eui';
 
-import { documentationService } from '../../../../../services/documentation';
-import { getFieldConfig } from '../../../lib';
-import { Field, UseField } from '../../../shared_imports';
 import { EditFieldFormRow } from '../fields/edit_field';
+import { UseField, Field } from '../../../shared_imports';
+import { getFieldConfig } from '../../../lib';
+import { documentationService } from '../../../../../services/documentation';
 
 interface Props {
   defaultToggleValue: boolean;

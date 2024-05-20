@@ -6,18 +6,18 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import {
-  getConversationMock,
-  getCreateConversationSchemaMock,
-  getQueryConversationParams,
-} from '../../__mocks__/conversations_schema.mock';
-import { getCreateConversationRequest, requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
-import { getBasicEmptySearchResponse, getEmptyFindResult } from '../../__mocks__/response';
 import { serverMock } from '../../__mocks__/server';
 import { createConversationRoute } from './create_route';
+import { getBasicEmptySearchResponse, getEmptyFindResult } from '../../__mocks__/response';
+import { getCreateConversationRequest, requestMock } from '../../__mocks__/request';
+import {
+  getCreateConversationSchemaMock,
+  getConversationMock,
+  getQueryConversationParams,
+} from '../../__mocks__/conversations_schema.mock';
+import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Create conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;

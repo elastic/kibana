@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { NotFoundPage } from '../../../app/404';
 import { MANAGEMENT_ROUTING_EVENT_FILTERS_PATH } from '../../common/constants';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import React, { FC } from 'react';
+import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
-import React, { FC } from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { HomeRoute } from './home';
-import { ExportWorkpadRoute, WorkpadRoute } from './workpad';
+import { WorkpadRoute, ExportWorkpadRoute } from './workpad';
 
 const isHashPath = (hash: string) => {
   return hash.indexOf('#/') === 0;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 export interface Dimension {
   accessor: number;

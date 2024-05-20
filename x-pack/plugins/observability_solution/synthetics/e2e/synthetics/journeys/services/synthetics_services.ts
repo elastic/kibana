@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import axios from 'axios';
 import type { Client } from '@elastic/elasticsearch';
 import { KbnClient } from '@kbn/test';
-import axios from 'axios';
 import pMap from 'p-map';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
 import { firstDownHit, getUpHit } from './data/sample_docs';
 

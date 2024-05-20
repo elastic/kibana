@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { BreadcrumbService } from './application/services/breadcrumbs';
-import { CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart } from './types';
 
 export class CloudDataMigrationPlugin
   implements Plugin<void, void, CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart>

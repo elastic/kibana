@@ -6,12 +6,12 @@
  */
 
 import {
-  type TransformIdParamSchema,
   transformIdParamSchema,
+  type TransformIdParamSchema,
 } from '../../../../common/api_schemas/common';
 import {
-  type GetTransformStatsQuerySchema,
   getTransformStatsQuerySchema,
+  type GetTransformStatsQuerySchema,
 } from '../../../../common/api_schemas/transforms_stats';
 import { addInternalBasePath } from '../../../../common/constants';
 

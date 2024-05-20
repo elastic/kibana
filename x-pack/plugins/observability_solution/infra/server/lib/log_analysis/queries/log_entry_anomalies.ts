@@ -6,19 +6,19 @@
  */
 
 import * as rt from 'io-ts';
+import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
+import {
+  createJobIdsFilters,
+  createTimeRangeFilters,
+  createResultTypeFilters,
+  defaultRequestParameters,
+  createDatasetsFilters,
+} from './common';
 import {
   AnomaliesSort,
   LogEntryAnomalyDatasets,
   Pagination,
 } from '../../../../common/log_analysis';
-import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
-import {
-  createDatasetsFilters,
-  createJobIdsFilters,
-  createResultTypeFilters,
-  createTimeRangeFilters,
-  defaultRequestParameters,
-} from './common';
 
 // TODO: Reassess validity of this against ML docs
 const TIEBREAKER_FIELD = '_doc';

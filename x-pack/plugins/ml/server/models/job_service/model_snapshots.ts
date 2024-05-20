@@ -6,13 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
-import type { MlClient } from '../../lib/ml_client';
+import { datafeedsProvider } from './datafeeds';
 import type { FormCalendar } from '../calendar';
 import { CalendarManager } from '../calendar';
-import { datafeedsProvider } from './datafeeds';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelSnapshotsResponse {
   count: number;

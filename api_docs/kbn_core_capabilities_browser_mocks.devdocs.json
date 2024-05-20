@@ -67,7 +67,11 @@
             "tags": [],
             "label": "createStartContract",
             "description": [],
-            "signature": ["() => jest.Mocked<", "CapabilitiesStart", ">"],
+            "signature": [
+              "() => jest.Mocked<",
+              "CapabilitiesStart",
+              ">"
+            ],
             "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

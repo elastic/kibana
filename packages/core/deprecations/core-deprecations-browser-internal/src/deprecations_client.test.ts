@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { DeprecationsClient } from './deprecations_client';
+import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 
 describe('DeprecationsClient', () => {
   const http = httpServiceMock.createSetupContract();

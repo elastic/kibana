@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import type { PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react-hooks';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
-import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import type { Rule, RulesSnoozeSettingsMap } from '../../../../rule_management/logic';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
+import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import type { RulesTableState } from './rules_table_context';
 import { RulesTableContextProvider, useRulesTableContext } from './rules_table_context';
 import {

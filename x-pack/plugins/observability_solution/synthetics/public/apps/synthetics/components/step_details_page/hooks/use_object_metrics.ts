@@ -7,9 +7,9 @@
 
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { networkEventsSelector } from '../../../state/network_events/selectors';
-import { MIME_FILTERS, MimeType, MimeTypesMap } from '../common/network_data/types';
 import { usePreviousObjectMetrics } from './use_prev_object_metrics';
+import { MIME_FILTERS, MimeType, MimeTypesMap } from '../common/network_data/types';
+import { networkEventsSelector } from '../../../state/network_events/selectors';
 
 export const useObjectMetrics = () => {
   const { checkGroupId, stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();

@@ -1,5 +1,3 @@
-import { promisify } from 'util';
-import { unzip } from 'zlib';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +5,11 @@ import { unzip } from 'zlib';
  * 2.0.
  */
 import { CoreStart, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { promisify } from 'util';
+import { unzip } from 'zlib';
 import { Artifact } from '@kbn/fleet-plugin/server';
-import { APMPluginStartDependencies } from '../../types';
 import { SourceMap } from '../source_maps/route';
+import { APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getPackagePolicyWithSourceMap } from './get_package_policy_decorators';
 

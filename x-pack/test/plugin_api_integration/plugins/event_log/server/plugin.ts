@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
+import { Plugin, CoreSetup, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { IEventLogService, IEventLogClientService } from '@kbn/event-log-plugin/server';
 import {
-  getEventLogByIdsRoute,
-  getEventLogRoute,
-  getProviderActionsRoute,
-  isEventLogServiceEnabledRoute,
-  isEventLogServiceLoggingEntriesRoute,
-  isIndexingEntriesRoute,
-  isProviderActionRegisteredRoute,
   logEventRoute,
   registerProviderActionsRoute,
+  isProviderActionRegisteredRoute,
+  getProviderActionsRoute,
+  isIndexingEntriesRoute,
+  isEventLogServiceLoggingEntriesRoute,
+  isEventLogServiceEnabledRoute,
+  getEventLogRoute,
+  getEventLogByIdsRoute,
 } from './init_routes';
 
 // this plugin's dependendencies

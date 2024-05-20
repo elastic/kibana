@@ -8,6 +8,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { KueryNode, nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
+import type { EsClient, EsEventStreamEventDto } from './types';
 import type {
   EventStreamClient,
   EventStreamClientFilterOptions,
@@ -17,8 +18,7 @@ import type {
 } from '../types';
 import { EsEventStreamNames } from './es_event_stream_names';
 import { EsEventStreamInitializer } from './init/es_event_stream_initializer';
-import type { EsClient, EsEventStreamEventDto } from './types';
-import { dtoToEvent, eventToDto } from './util';
+import { eventToDto, dtoToEvent } from './util';
 
 export interface EsEventStreamClientDependencies {
   baseName: string;

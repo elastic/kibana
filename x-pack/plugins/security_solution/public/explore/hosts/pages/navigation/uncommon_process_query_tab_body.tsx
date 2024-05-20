@@ -7,11 +7,11 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
+import { useUncommonProcesses, ID } from '../../containers/uncommon_processes';
+import type { HostsComponentsQueryProps } from './types';
+import { UncommonProcessTable } from '../../components/uncommon_process_table';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { UncommonProcessTable } from '../../components/uncommon_process_table';
-import { ID, useUncommonProcesses } from '../../containers/uncommon_processes';
-import type { HostsComponentsQueryProps } from './types';
 
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 

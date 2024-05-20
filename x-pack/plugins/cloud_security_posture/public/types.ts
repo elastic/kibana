@@ -6,25 +6,25 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import { CoreStart, ToastsStart } from '@kbn/core/public';
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { CoreStart, ToastsStart } from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
 

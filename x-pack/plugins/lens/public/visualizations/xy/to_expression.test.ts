@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { Ast, fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { getXyVisualization, XYState } from './xy_visualization';
+import { OperationDescriptor } from '../../types';
+import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { Ast, fromExpression } from '@kbn/interpreter';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { defaultReferenceLineColor } from './color_assignment';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
-import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { OperationDescriptor } from '../../types';
-import { defaultReferenceLineColor } from './color_assignment';
-import { XYState, getXyVisualization } from './xy_visualization';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({

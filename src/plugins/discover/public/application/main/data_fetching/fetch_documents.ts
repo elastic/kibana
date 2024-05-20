@@ -1,7 +1,3 @@
-import { ISearchSource, isRunningResponse } from '@kbn/data-plugin/public';
-import { DataViewType } from '@kbn/data-views-plugin/public';
-import { buildDataTableRecordList } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,11 +6,15 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { filter, map } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
-import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
+import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { RecordsFetchResponse } from '../../types';
+import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 import { FetchDeps } from './fetch_all';
 
 /**

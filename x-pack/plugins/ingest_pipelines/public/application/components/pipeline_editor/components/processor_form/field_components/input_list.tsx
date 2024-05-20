@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiText,
-} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiFieldText,
+  EuiFormRow,
+  EuiText,
+} from '@elastic/eui';
 
 import {
-  ArrayItem,
   UseField,
+  ArrayItem,
   ValidationFunc,
   getFieldValidityAndErrorMessage,
 } from '../../../../../../shared_imports';

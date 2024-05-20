@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { registryMock, managerMock } from './plugin.test.mocks';
+import { SharePlugin } from './plugin';
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { anonymousAccessMock } from '../common/anonymous_access/index.mock';
-import { SharePlugin } from './plugin';
-import { managerMock, registryMock } from './plugin.test.mocks';
 
 describe('SharePlugin', () => {
   beforeEach(() => {

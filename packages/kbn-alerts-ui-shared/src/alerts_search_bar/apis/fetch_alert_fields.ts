@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { HttpSetup } from '@kbn/core/public';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
 
 export async function fetchAlertFields({

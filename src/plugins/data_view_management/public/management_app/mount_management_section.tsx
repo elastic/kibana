@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
-import { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { StartServicesAccessor } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
-  CreateEditFieldContainer,
-  EditIndexPatternContainer,
   IndexPatternTableWithRouter,
+  EditIndexPatternContainer,
+  CreateEditFieldContainer,
 } from '../components';
 import {
-  IndexPatternManagementSetupDependencies,
-  IndexPatternManagementStart,
   IndexPatternManagementStartDependencies,
+  IndexPatternManagementStart,
+  IndexPatternManagementSetupDependencies,
 } from '../plugin';
 import { IndexPatternManagmentContext } from '../types';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TransportRequestOptions, TransportRequestParams } from '@elastic/transport';
+import type { TransportRequestParams, TransportRequestOptions } from '@elastic/transport';
 import type { TransportOptions } from '@elastic/transport/lib/Transport';
 
 export const transportConstructorMock: jest.MockedFunction<(options: TransportOptions) => void> =

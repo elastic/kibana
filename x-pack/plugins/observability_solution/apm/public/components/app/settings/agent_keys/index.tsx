@@ -1,16 +1,3 @@
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ApiKey } from '@kbn/security-plugin/common/model';
-import { isEmpty } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -18,14 +5,27 @@ import { isEmpty } from 'lodash';
  * 2.0.
  */
 import React, { Fragment, useState } from 'react';
-import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiText,
+  EuiSpacer,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { ApiKey } from '@kbn/security-plugin/common/model';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { PermissionDenied } from './prompts/permission_denied';
+import { ApiKeysNotEnabled } from './prompts/api_keys_not_enabled';
 import { AgentKeysTable } from './agent_keys_table';
 import { CreateAgentKeyFlyout } from './create_agent_key';
 import { AgentKeyCallOut } from './create_agent_key/agent_key_callout';
-import { ApiKeysNotEnabled } from './prompts/api_keys_not_enabled';
-import { PermissionDenied } from './prompts/permission_denied';
+import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const INITIAL_DATA = {
   areApiKeysEnabled: false,
@@ -38,16 +38,14 @@ export function AgentKeys() {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [createdAgentKey, setCreatedAgentKey] = useState<CreateApiKeyResponse>();
 
-  const {
-    data: { areApiKeysEnabled, canManage } = INITIAL_DATA,
-    status: privilegesStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /internal/apm/agent_keys/privileges');
-    },
-    [],
-    { showToastOnError: false }
-  );
+  const { data: { areApiKeysEnabled, canManage } = INITIAL_DATA, status: privilegesStatus } =
+    useFetcher(
+      (callApmApi) => {
+        return callApmApi('GET /internal/apm/agent_keys/privileges');
+      },
+      [],
+      { showToastOnError: false }
+    );
 
   const {
     data,

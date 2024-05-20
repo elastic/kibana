@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React, { Fragment } from 'react';
+import { shallow } from 'enzyme';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
 
 const kibanaMock = {

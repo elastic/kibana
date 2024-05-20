@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
-import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
+import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
 import {
-  type DeleteDataFrameAnalyticsWithIndexStatus,
   JOB_MAP_NODE_TYPES,
+  type DeleteDataFrameAnalyticsWithIndexStatus,
 } from '@kbn/ml-data-frame-analytics-utils';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { dataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
 import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
-import { dataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
 
-import { ML_INTERNAL_BASE_PATH, type MlFeatures } from '../../common/constants/app';
+import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import type { MlClient } from '../lib/ml_client';
-import { getAuthorizationHeader } from '../lib/request_authorization';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
-import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
-import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
-import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
-import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
 import type { RouteInitialization } from '../types';
 import {
-  type PutDataFrameAnalyticsResponseSchema,
+  dataFrameAnalyticsJobConfigSchema,
+  dataFrameAnalyticsJobUpdateSchema,
   dataFrameAnalyticsEvaluateSchema,
   dataFrameAnalyticsExplainSchema,
   dataFrameAnalyticsIdSchema,
-  dataFrameAnalyticsJobConfigSchema,
-  dataFrameAnalyticsJobUpdateSchema,
-  dataFrameAnalyticsJobsExistSchema,
   dataFrameAnalyticsMapQuerySchema,
+  stopsDataFrameAnalyticsJobQuerySchema,
+  deleteDataFrameAnalyticsJobSchema,
+  dataFrameAnalyticsJobsExistSchema,
+  dataFrameAnalyticsQuerySchema,
   dataFrameAnalyticsNewJobCapsParamsSchema,
   dataFrameAnalyticsNewJobCapsQuerySchema,
-  dataFrameAnalyticsQuerySchema,
-  deleteDataFrameAnalyticsJobSchema,
-  stopsDataFrameAnalyticsJobQuerySchema,
+  type PutDataFrameAnalyticsResponseSchema,
 } from './schemas/data_frame_analytics_schema';
+import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
+import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
+import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
+import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
+import { getAuthorizationHeader } from '../lib/request_authorization';
+import type { MlClient } from '../lib/ml_client';
 
 function getExtendedMap(
   mlClient: MlClient,

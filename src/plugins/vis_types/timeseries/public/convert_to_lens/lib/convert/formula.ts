@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import {
-  FormulaColumn as BaseFormulaColumn,
   FormulaParams,
+  FormulaColumn as BaseFormulaColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { v4 as uuidv4 } from 'uuid';
+import { CommonColumnConverterArgs, CommonColumnsConverterArgs, FormulaColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
-import { AdditionalArgs } from '../../types';
 import { getFormulaEquivalent, getPipelineSeriesFormula } from '../metrics';
 import { createColumn, getFormat } from './column';
-import { CommonColumnConverterArgs, CommonColumnsConverterArgs, FormulaColumn } from './types';
+import { AdditionalArgs } from '../../types';
 
 type OtherFormulaAggregations =
   | typeof TSVB_METRIC_TYPES.POSITIVE_ONLY

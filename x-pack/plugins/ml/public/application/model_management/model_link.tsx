@@ -8,8 +8,8 @@
 import { EuiLink } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { ML_PAGES } from '../../../common/constants/locator';
 import { useMlLink } from '../contexts/kibana';
+import { ML_PAGES } from '../../../common/constants/locator';
 
 export interface TrainedModelLinkProps {
   id: string;

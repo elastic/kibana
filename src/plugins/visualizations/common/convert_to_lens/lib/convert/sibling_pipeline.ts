@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { convertToSchemaConfig } from '../../../vis_schemas';
 import { convertMetricToColumns } from '../metrics';
 import { AggBasedColumn, ExtendedColumnConverterArgs, SiblingPipelineMetric } from './types';
+import { convertToSchemaConfig } from '../../../vis_schemas';
 
 export const convertToSiblingPipelineColumns = (
   columnConverterArgs: ExtendedColumnConverterArgs<SiblingPipelineMetric>

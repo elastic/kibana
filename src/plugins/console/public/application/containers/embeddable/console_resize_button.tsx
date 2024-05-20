@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiResizableButton, EuiThemeComputed, keys, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
+import { EuiResizableButton, useEuiTheme, keys, EuiThemeComputed } from '@elastic/eui';
 
 const CONSOLE_MIN_HEIGHT = 200;
 

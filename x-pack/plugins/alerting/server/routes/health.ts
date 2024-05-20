@@ -8,13 +8,13 @@
 import { IRouter } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ILicenseState } from '../lib';
-import { getSecurityHealth } from '../lib/get_security_health';
+import { RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
-  AlertingFrameworkHealth,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
+  AlertingFrameworkHealth,
 } from '../types';
-import { RewriteResponseCase, verifyAccessAndContext } from './lib';
+import { getSecurityHealth } from '../lib/get_security_health';
 
 const rewriteBodyRes: RewriteResponseCase<AlertingFrameworkHealth> = ({
   isSufficientlySecure,

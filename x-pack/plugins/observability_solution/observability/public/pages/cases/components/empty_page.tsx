@@ -7,14 +7,14 @@
 
 import {
   EuiButton,
-  EuiCard,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   IconType,
+  EuiCard,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { MouseEventHandler, ReactNode, useMemo } from 'react';
+import { css } from '@emotion/react';
 
 interface EmptyPageActions {
   icon?: IconType;

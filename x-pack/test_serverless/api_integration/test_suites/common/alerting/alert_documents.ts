@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { unset } from 'lodash';
 import {
   ALERT_ACTION_GROUP,
-  ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
@@ -17,7 +17,6 @@ import {
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -37,12 +36,13 @@ import {
   SPACE_IDS,
   TAGS,
   VERSION,
+  ALERT_CONSECUTIVE_MATCHES,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { unset } from 'lodash';
-import { ObjectRemover } from '../../../../shared/lib';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createEsQueryRule } from './helpers/alerting_api_helper';
 import { waitForAlertInIndex, waitForNumRuleRuns } from './helpers/alerting_wait_for_helpers';
+import { ObjectRemover } from '../../../../shared/lib';
 
 const OPEN_OR_ACTIVE = new Set(['open', 'active']);
 

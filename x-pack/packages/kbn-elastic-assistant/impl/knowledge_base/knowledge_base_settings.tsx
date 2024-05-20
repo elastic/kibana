@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import {
-  EuiBetaBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
-  EuiHealth,
+  EuiTitle,
+  EuiText,
   EuiHorizontalRule,
-  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiSwitch,
   EuiSwitchEvent,
-  EuiText,
-  EuiTitle,
+  EuiLink,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiButtonEmpty,
   EuiToolTip,
+  EuiSwitch,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 
 import { AlertsSettings } from '../alerts/settings/alerts_settings';
-import type { KnowledgeBaseConfig } from '../assistant/types';
 import { useAssistantContext } from '../assistant_context';
+import type { KnowledgeBaseConfig } from '../assistant/types';
 import * as i18n from './translations';
 import { useDeleteKnowledgeBase } from './use_delete_knowledge_base';
 import { useKnowledgeBaseStatus } from './use_knowledge_base_status';

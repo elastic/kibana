@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { SNAPSHOT_REPOSITORY_NAME } from './constants';
 import { registerSnapshotPoliciesHelpers } from './snapshot_policies.helpers';
 import { registerSnapshotRepositoriesHelpers } from './snapshot_repositories.helpers';
+import { SNAPSHOT_REPOSITORY_NAME } from './constants';
 
 const snapshotPolicyName = 'test_snapshot_policy';
 export default function ({ getService }: FtrProviderContext) {

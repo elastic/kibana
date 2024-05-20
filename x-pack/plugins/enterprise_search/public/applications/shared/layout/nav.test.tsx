@@ -13,7 +13,7 @@ jest.mock('../../enterprise_search_content/components/search_index/indices/indic
   useIndicesNav: () => [],
 }));
 
-import { mockKibanaValues, setMockValues } from '../../__mocks__/kea_logic';
+import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { EuiSideNavItemType } from '@elastic/eui';
 
@@ -21,9 +21,9 @@ import { DEFAULT_PRODUCT_FEATURES } from '../../../../common/constants';
 import { ProductAccess } from '../../../../common/types';
 
 import {
-  useEnterpriseSearchAnalyticsNav,
-  useEnterpriseSearchApplicationNav,
   useEnterpriseSearchNav,
+  useEnterpriseSearchApplicationNav,
+  useEnterpriseSearchAnalyticsNav,
 } from './nav';
 
 const DEFAULT_PRODUCT_ACCESS: ProductAccess = {

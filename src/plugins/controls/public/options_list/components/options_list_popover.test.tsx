@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { RenderResult, render, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { render, RenderResult, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { ControlOutput, OptionsListEmbeddableInput } from '../..';
-import { mockOptionsListEmbeddable } from '../../../common/mocks';
 import { pluginServices } from '../../services';
-import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
+import { mockOptionsListEmbeddable } from '../../../common/mocks';
+import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
+import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
 import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
 
 describe('Options list popover', () => {

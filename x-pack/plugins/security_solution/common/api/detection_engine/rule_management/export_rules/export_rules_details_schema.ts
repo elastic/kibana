@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import { exportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
-import * as t from 'io-ts';
 
 const exportRulesDetails = {
   exported_count: t.number,

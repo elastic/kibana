@@ -6,8 +6,8 @@
  */
 
 import {
-  LogRetention,
   LogRetentionOptions,
+  LogRetention,
   LogRetentionPolicy,
   LogRetentionServer,
   LogRetentionServerPolicy,

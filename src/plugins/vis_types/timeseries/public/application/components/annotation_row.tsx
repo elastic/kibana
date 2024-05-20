@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useEffect, useCallback, useMemo, ChangeEvent } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiCode,
   EuiComboBoxOptionOption,
@@ -17,25 +19,23 @@ import {
   htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useEffect, useCallback, useMemo, ChangeEvent } from 'react';
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { Query } from '@kbn/es-query';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getDataViewsStart } from '../../services';
 
+import { AddDeleteButtons } from './add_delete_buttons';
+import { ColorPicker } from './color_picker';
+import { FieldSelect } from './aggs/field_select';
+import { IndexPatternSelect, IndexPatternSelectProps } from './lib/index_pattern_select';
+import { QueryBarWrapper } from './query_bar_wrapper';
+import { YesNo } from './yes_no';
 import {
   fetchIndexPattern,
   isDataViewTypeIndexPattern,
 } from '../../../common/index_patterns_utils';
-import { AddDeleteButtons } from './add_delete_buttons';
-import { FieldSelect } from './aggs/field_select';
-import { ColorPicker } from './color_picker';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
-import { IndexPatternSelect, IndexPatternSelectProps } from './lib/index_pattern_select';
-import { QueryBarWrapper } from './query_bar_wrapper';
-import { YesNo } from './yes_no';
 
 import { IconSelect } from './icon_select/icon_select';
 

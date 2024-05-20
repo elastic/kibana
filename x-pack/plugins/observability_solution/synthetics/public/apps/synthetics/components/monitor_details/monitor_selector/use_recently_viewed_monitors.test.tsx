@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import * as localStorageModule from 'react-use/lib/useLocalStorage';
 import { fetchMonitorManagementList } from '../../../state';
 
-import { MONITOR_ROUTE } from '../../../../../../common/constants';
-import { WrappedHelper } from '../../../utils/testing';
 import * as useMonitorQueryModule from '../hooks/use_monitor_query_id';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
+import { WrappedHelper } from '../../../utils/testing';
+import { MONITOR_ROUTE } from '../../../../../../common/constants';
 
 jest.mock('../../../state', () => ({
   ...jest.requireActual('../../../state'),

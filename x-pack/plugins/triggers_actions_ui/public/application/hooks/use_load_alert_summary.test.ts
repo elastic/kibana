@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { renderHook } from '@testing-library/react-hooks';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { useKibana } from '../../common/lib/kibana';
 import {
   mockedAlertSummaryResponse,

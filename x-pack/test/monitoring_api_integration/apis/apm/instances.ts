@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getTestRunner } from '../../utils/test_runner';
 
-import instanceResponse from '../../fixtures/apm/instance.json';
 import instancesResponse from '../../fixtures/apm/instances.json';
+import instanceResponse from '../../fixtures/apm/instance.json';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

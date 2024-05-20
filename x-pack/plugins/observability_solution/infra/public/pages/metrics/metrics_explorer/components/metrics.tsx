@@ -9,10 +9,10 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState } from 'react';
-import { Color, colorTransformer } from '../../../../../common/color_palette';
+import { colorTransformer, Color } from '../../../../../common/color_palette';
 import { MetricsExplorerMetric } from '../../../../../common/http_api/metrics_explorer';
-import { DerivedIndexPattern } from '../../../../containers/metrics_source';
 import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
+import { DerivedIndexPattern } from '../../../../containers/metrics_source';
 
 interface Props {
   autoFocus?: boolean;

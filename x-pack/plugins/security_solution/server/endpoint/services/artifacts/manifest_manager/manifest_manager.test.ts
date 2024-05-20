@@ -6,43 +6,43 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import {
-  Manifest,
-  ManifestConstants,
-  getArtifactId,
-  translateToEndpointExceptions,
-} from '../../../lib/artifacts';
-import {
-  createPackagePolicyWithConfigMock,
-  getMockArtifacts,
-  toArtifactRecords,
-} from '../../../lib/artifacts/mocks';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
 import type {
   InternalArtifactCompleteSchema,
   InternalArtifactSchema,
   InternalManifestSchema,
 } from '../../../schemas/artifacts';
-import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
+import {
+  createPackagePolicyWithConfigMock,
+  getMockArtifacts,
+  toArtifactRecords,
+} from '../../../lib/artifacts/mocks';
+import {
+  getArtifactId,
+  Manifest,
+  ManifestConstants,
+  translateToEndpointExceptions,
+} from '../../../lib/artifacts';
 
 import {
   buildManifestManagerContextMock,
   mockFindExceptionListItemResponses,
 } from './manifest_manager.mock';
 
+import { ManifestManager } from './manifest_manager';
+import type { EndpointArtifactClientInterface } from '../artifact_client';
+import { InvalidInternalManifestError } from '../errors';
+import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { Artifact } from '@kbn/fleet-plugin/server';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types/src/response/exception_list_item_schema';
 import {
   createFetchAllArtifactsIterableMock,
   generateArtifactMock,
 } from '@kbn/fleet-plugin/server/services/artifacts/mocks';
-import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types/src/response/exception_list_item_schema';
-import { EndpointError } from '../../../../../common/endpoint/errors';
-import type { EndpointArtifactClientInterface } from '../artifact_client';
-import { InvalidInternalManifestError } from '../errors';
-import { ManifestManager } from './manifest_manager';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());

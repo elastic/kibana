@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
-import { FilterManager } from '@kbn/data-plugin/public';
-import type { DataViewBase } from '@kbn/es-query';
-import deepEqual from 'fast-deep-equal';
-import type { ChangeEvent, FC } from 'react';
+import type { FC, ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
+import { EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import type { DataViewBase } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
 
+import type { FieldHook } from '../../../../shared_imports';
+import { FilterBar } from '../../../../common/components/filter_bar';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import * as i18n from './translations';
+import { EqlQueryBarFooter } from './footer';
+import { getValidationResults } from './validators';
 import type {
   EqlOptionsData,
   EqlOptionsSelected,
   FieldsEqlOptions,
 } from '../../../../../common/search_strategy';
-import { FilterBar } from '../../../../common/components/filter_bar';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import type { FieldHook } from '../../../../shared_imports';
-import { EqlQueryBarFooter } from './footer';
-import * as i18n from './translations';
-import { getValidationResults } from './validators';
 
 const TextArea = styled(EuiTextArea)`
   display: block;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { isEmpty } from 'lodash';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { MlGenericUrlState } from '../../../common/types/locator';
 
 export function extractParams<UrlState>(urlState: UrlState) {

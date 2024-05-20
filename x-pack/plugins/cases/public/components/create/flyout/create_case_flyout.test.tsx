@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 
+import { CreateCaseFlyout } from './create_case_flyout';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { waitForComponentToUpdate } from '../../../common/test_utils';
+import { useGetTags } from '../../../containers/use_get_tags';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import { connectorsMock } from '../../../containers/mock';
-import { useGetTags } from '../../../containers/use_get_tags';
 import { useAvailableCasesOwners } from '../../app/use_available_owners';
+import { connectorsMock } from '../../../containers/mock';
 import { useCaseConfigureResponse } from '../../configure_cases/__mock__';
-import { CreateCaseFlyout } from './create_case_flyout';
+import { waitForComponentToUpdate } from '../../../common/test_utils';
 
 jest.mock('../../../containers/use_get_tags');
 jest.mock('../../../containers/configure/use_get_supported_action_connectors');

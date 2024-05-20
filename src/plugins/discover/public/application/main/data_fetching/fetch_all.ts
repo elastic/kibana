@@ -1,4 +1,3 @@
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,31 +7,32 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
  */
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { isEqual } from 'lodash';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
-import { DiscoverServices } from '../../../build_services';
-import { FetchStatus } from '../../types';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { isEqual } from 'lodash';
+import type { DiscoverAppState } from '../state_management/discover_app_state_container';
+import { updateVolatileSearchSource } from './update_search_source';
+import { getRawRecordType } from '../utils/get_raw_record_type';
 import {
   checkHitCount,
   sendCompleteMsg,
   sendErrorMsg,
   sendErrorTo,
-  sendLoadingMoreFinishedMsg,
-  sendLoadingMoreMsg,
   sendLoadingMsg,
+  sendLoadingMoreMsg,
+  sendLoadingMoreFinishedMsg,
   sendResetMsg,
 } from '../hooks/use_saved_search_messages';
-import type { DiscoverAppState } from '../state_management/discover_app_state_container';
+import { fetchDocuments } from './fetch_documents';
+import { FetchStatus } from '../../types';
 import {
   DataMsg,
   RecordRawType,
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
-import { InternalState } from '../state_management/discover_internal_state_container';
-import { getRawRecordType } from '../utils/get_raw_record_type';
-import { fetchDocuments } from './fetch_documents';
+import { DiscoverServices } from '../../../build_services';
 import { fetchTextBased } from './fetch_text_based';
-import { updateVolatileSearchSource } from './update_search_source';
+import { InternalState } from '../state_management/discover_internal_state_container';
 
 export interface FetchDeps {
   abortController: AbortController;

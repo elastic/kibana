@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import React, { ElementType, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { HttpStart } from '@kbn/core/public';
-import { DataViewBase } from '@kbn/es-query';
 import { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   BuilderEntry,
@@ -18,9 +20,7 @@ import {
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,
 } from '@kbn/securitysolution-list-utils';
-import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
-import React, { ElementType, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import { DataViewBase } from '@kbn/es-query';
 
 import { BuilderAndBadgeComponent } from './and_badge';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';

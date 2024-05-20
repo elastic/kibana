@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 import Util from 'util';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { Env } from '@kbn/config';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { getMigrationDocLink } from '../test_utils';
 import {
-  ANALYTICS_SAVED_OBJECT_INDEX,
-  MAIN_SAVED_OBJECT_INDEX,
-  TASK_MANAGER_SAVED_OBJECT_INDEX,
-} from '@kbn/core-saved-objects-server';
-import {
-  TestElasticsearchUtils,
   createRootWithCorePlugins,
+  TestElasticsearchUtils,
   createTestServers as createkbnServerTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { getMigrationDocLink } from '../test_utils';
+import {
+  MAIN_SAVED_OBJECT_INDEX,
+  TASK_MANAGER_SAVED_OBJECT_INDEX,
+  ANALYTICS_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, '7_13_corrupt_transform_failures.log');

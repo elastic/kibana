@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { IKibanaSearchRequest } from '@kbn/search-types';
 import { JsonObject } from '@kbn/utility-types';
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs';
+import type { IKibanaSearchRequest } from '@kbn/search-types';
 import { LogEntryAfterCursor } from '../../../../common/log_entry';
 import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
-  LOG_ENTRIES_SEARCH_STRATEGY,
+  logEntriesSearchRequestParamsRT,
   LogEntriesSearchRequestQuery,
   LogEntriesSearchResponsePayload,
-  logEntriesSearchRequestParamsRT,
   logEntriesSearchResponsePayloadRT,
+  LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../../common/search_strategies/log_entries/log_entries';
 import {
-  ParsedDataSearchRequestDescriptor,
   flattenDataSearchResponseDescriptor,
   normalizeDataSearchResponses,
+  ParsedDataSearchRequestDescriptor,
   useDataSearch,
   useDataSearchResponseState,
 } from '../../../utils/data_search';

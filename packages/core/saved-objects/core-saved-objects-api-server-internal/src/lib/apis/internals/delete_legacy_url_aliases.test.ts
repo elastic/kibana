@@ -10,8 +10,8 @@ import { mockGetEsErrorMessage } from './delete_legacy_url_aliases.test.mock'; /
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { deleteLegacyUrlAliases } from './delete_legacy_url_aliases';
 import type { DeleteLegacyUrlAliasesParams } from './delete_legacy_url_aliases';
 

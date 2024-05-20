@@ -8,8 +8,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { UtilityBarText } from '.';
 import { TestProviders } from '../../mock';
+import { UtilityBarText } from '.';
 
 describe('UtilityBarText', () => {
   test('it renders', () => {

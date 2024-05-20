@@ -6,19 +6,19 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { safeDump } from 'js-yaml';
 import { merge } from 'lodash';
+import { safeDump } from 'js-yaml';
 
-import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 import { packageToPackagePolicy } from '../../../../common/services/package_to_package_policy';
-import type {
-  FullAgentPolicyInputStream,
-  NewPackagePolicy,
-  PackageInfo,
-  PackagePolicyInput,
-} from '../../../../common/types';
+import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../package_policy';
 import { appContextService } from '../../app_context';
-import { _compilePackagePolicyInputs, getInputsWithStreamIds } from '../../package_policy';
+import type {
+  PackageInfo,
+  NewPackagePolicy,
+  PackagePolicyInput,
+  FullAgentPolicyInputStream,
+} from '../../../../common/types';
+import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 
 import { getFullInputStreams } from '../../agent_policies/package_policies_to_agent_inputs';
 
@@ -46,13 +46,10 @@ export const templatePackagePolicyToFullInputStreams = (
     // deeply merge the input.config values with the full policy input stream
     merge(
       fullInputStream,
-      Object.entries(input.config || {}).reduce(
-        (acc, [key, { value }]) => {
-          acc[key] = value;
-          return acc;
-        },
-        {} as Record<string, unknown>
-      )
+      Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, unknown>)
     );
     fullInputsStreams.push(fullInputStream);
   });

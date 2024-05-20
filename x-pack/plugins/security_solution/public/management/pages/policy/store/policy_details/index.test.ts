@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { HttpFetchOptions } from '@kbn/core/public';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { cloneDeep } from 'lodash';
+import type { PolicyDetailsState } from '../../types';
 import type { Dispatch, Store } from 'redux';
 import { applyMiddleware, createStore } from 'redux';
 import type { PolicyDetailsAction } from '.';
-import { policyDetailsMiddlewareFactory, policyDetailsReducer } from '.';
+import { policyDetailsReducer, policyDetailsMiddlewareFactory } from '.';
+import { policyConfig } from './selectors';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig, PolicyData } from '../../../../../../common/endpoint/types';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import type { MiddlewareActionSpyHelper } from '../../../../../common/store/test_utils';
 import { createSpyMiddleware } from '../../../../../common/store/test_utils';
-import type { PolicyDetailsState } from '../../types';
-import { policyConfig } from './selectors';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import type { HttpFetchOptions } from '@kbn/core/public';
+import { cloneDeep } from 'lodash';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 
 describe('policy details: ', () => {
   let store: Store;
-  let getState: (typeof store)['getState'];
+  let getState: typeof store['getState'];
   let dispatch: Dispatch<PolicyDetailsAction>;
   let policyItem: PolicyData;
 

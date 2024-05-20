@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   DragDropIdentifier,
-  DropTargetSwapDuplicateCombine,
-  DropType,
-  Droppable,
   useDragDropContext,
+  DropType,
+  DropTargetSwapDuplicateCombine,
+  Droppable,
 } from '@kbn/dom-drag-drop';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
-import React, { useMemo, useState, useEffect } from 'react';
-import { generateId } from '../../../../id_generator';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { isDraggedField } from '../../../../utils';
+import { generateId } from '../../../../id_generator';
 
 import {
   Datasource,
-  DatasourceLayers,
-  DragDropOperation,
-  IndexPatternMap,
-  Visualization,
   VisualizationDimensionGroupConfig,
+  DatasourceLayers,
   isOperation,
+  IndexPatternMap,
+  DragDropOperation,
+  Visualization,
 } from '../../../../types';
 
 interface EmptyButtonProps {

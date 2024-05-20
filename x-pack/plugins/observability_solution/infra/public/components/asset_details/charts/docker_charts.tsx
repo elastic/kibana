@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiLink, EuiText } from '@elastic/eui';
-import { css, cx } from '@emotion/css';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import React from 'react';
-import { CONTAINER_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
-import { ChartsGrid } from '../charts_grid/charts_grid';
-import { Section } from '../components/section';
-import { TitleWithTooltip } from '../components/section_title';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css, cx } from '@emotion/css';
+import { EuiText, EuiLink } from '@elastic/eui';
 import { useDockerContainerPageViewMetricsCharts } from '../hooks/use_container_metrics_charts';
-import { CONTAINER_METRIC_GROUP_TITLES } from '../translations';
+import { Section } from '../components/section';
+import { ChartsGrid } from '../charts_grid/charts_grid';
 import { Chart } from './chart';
-import { ContainerMetricTypes, MetricsChartsFields } from './types';
+import { TitleWithTooltip } from '../components/section_title';
+import { CONTAINER_METRIC_GROUP_TITLES } from '../translations';
+import { CONTAINER_METRICS_DOC_HREF } from '../../../common/visualizations/constants';
+import { MetricsChartsFields, ContainerMetricTypes } from './types';
 
 interface Props extends MetricsChartsFields {
   metric: ContainerMetricTypes;

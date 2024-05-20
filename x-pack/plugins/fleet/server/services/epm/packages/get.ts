@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
 import * as yaml from 'js-yaml';
 import pMap from 'p-map';
+import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
+import type { Logger } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
@@ -19,42 +19,42 @@ import { nodeBuilder } from '@kbn/es-query';
 import { buildNode as buildFunctionNode } from '@kbn/es-query/src/kuery/node_types/function';
 import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_types/wildcard';
 
-import { appContextService } from '../..';
 import {
   ASSETS_SAVED_OBJECT_TYPE,
+  installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  installationStatuses,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
 import type {
-  AssetsMap,
+  PackageUsageStats,
   Installable,
-  InstalledPackage,
   PackageDataStreamTypes,
   PackageList,
+  InstalledPackage,
   PackageSpecManifest,
-  PackageUsageStats,
+  AssetsMap,
 } from '../../../../common/types';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
   ArchivePackage,
+  RegistryPackage,
   EpmPackageAdditions,
   GetCategoriesRequest,
   GetPackagesRequest,
-  RegistryPackage,
 } from '../../../../common/types';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
 import {
   PackageFailedVerificationError,
-  PackageInvalidArchiveError,
   PackageNotFoundError,
   RegistryResponseError,
+  PackageInvalidArchiveError,
 } from '../../../errors';
-import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
-import { normalizeKuery } from '../../saved_object';
+import { appContextService } from '../..';
+import * as Registry from '../registry';
 import type { PackageAsset } from '../archive/storage';
 import { getEsPackage } from '../archive/storage';
-import * as Registry from '../registry';
+import { normalizeKuery } from '../../saved_object';
 
 import { auditLoggingService } from '../../audit_logging';
 

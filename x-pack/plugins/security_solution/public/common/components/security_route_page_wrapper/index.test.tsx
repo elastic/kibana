@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Router } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
 import { SecurityRoutePageWrapper } from '.';
 import { SecurityPageName } from '../../../../common';
-import type { LinkInfo } from '../../links';
 import { TestProviders } from '../../mock';
 import { generateHistoryMock } from '../../utils/route/mocks';
+import type { LinkInfo } from '../../links';
 
 const defaultLinkInfo: LinkInfo = {
   id: SecurityPageName.exploreLanding,

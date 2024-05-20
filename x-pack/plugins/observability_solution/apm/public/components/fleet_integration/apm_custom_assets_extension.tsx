@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { CustomAssetsAccordion, CustomAssetsAccordionProps } from '@kbn/fleet-plugin/public';
+import { CustomAssetsAccordionProps, CustomAssetsAccordion } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../plugin';
 

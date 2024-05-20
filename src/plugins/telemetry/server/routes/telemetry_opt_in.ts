@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom, type Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from '@kbn/core-http-server';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { RequestHandlerContext, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
 } from '@kbn/telemetry-collection-manager-plugin/server';
-import { type Observable, firstValueFrom } from 'rxjs';
+import { RequestHandler } from '@kbn/core-http-server';
 import { OptInRoute } from '../../common/routes';
 import { OptInBody, v2 } from '../../common/types';
+import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 import {
+  getTelemetrySavedObject,
   TELEMETRY_SAVED_OBJECT_TYPE,
   type TelemetrySavedObject,
-  getTelemetrySavedObject,
   updateTelemetrySavedObject,
 } from '../saved_objects';
-import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 
 import { TelemetryConfigType } from '../config';
 import { getTelemetryAllowChangingOptInStatus } from '../telemetry_config';

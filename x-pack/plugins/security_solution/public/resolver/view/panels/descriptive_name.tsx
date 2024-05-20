@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  entityIDSafeVersion,
   isLegacyEventSafeVersion,
   processNameSafeVersion,
+  entityIDSafeVersion,
 } from '../../../../common/endpoint/models/event';
 import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 

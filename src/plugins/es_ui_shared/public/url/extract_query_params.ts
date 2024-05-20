@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ParsedQuery, parse } from 'query-string';
+import { parse, ParsedQuery } from 'query-string';
 
 export function extractQueryParams(queryString: string = ''): ParsedQuery<string> {
   const hrefSplit = queryString.split('?');

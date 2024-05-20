@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import { EuiButtonIcon, EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
 import { getDocLinks } from '../../../../kibana_services';
 
 interface Props {

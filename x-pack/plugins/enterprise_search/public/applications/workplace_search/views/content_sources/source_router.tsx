@@ -11,21 +11,21 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { Route, Routes } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { AppLogic } from '../../app_logic';
-import { PersonalDashboardLayout, WorkplaceSearchPageTemplate } from '../../components/layout';
-import { CUSTOM_SERVICE_TYPE, NAV } from '../../constants';
+import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../constants';
 import {
   REINDEX_JOB_PATH,
-  SOURCE_CONTENT_PATH,
   SOURCE_DETAILS_PATH,
-  SOURCE_DISPLAY_SETTINGS_PATH,
+  SOURCE_CONTENT_PATH,
   SOURCE_SCHEMAS_PATH,
+  SOURCE_DISPLAY_SETTINGS_PATH,
   SOURCE_SETTINGS_PATH,
   SOURCE_SYNCHRONIZATION_PATH,
-  getSourcesPath,
   getContentSourcePath as sourcePath,
+  getSourcesPath,
 } from '../../routes';
 import { NotFound } from '../not_found';
 

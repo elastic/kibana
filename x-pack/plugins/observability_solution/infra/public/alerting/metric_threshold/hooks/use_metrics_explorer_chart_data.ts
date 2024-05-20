@@ -9,14 +9,14 @@ import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { MetricExpressionCustomMetric } from '../../../../common/alerting/metrics';
-import { MetricExplorerCustomMetricAggregations } from '../../../../common/http_api/metrics_explorer';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
-import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data';
+import { MetricExpression, TimeRange } from '../types';
 import {
   MetricsExplorerOptions,
   MetricsExplorerTimestamp,
 } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { MetricExpression, TimeRange } from '../types';
+import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data';
+import { MetricExplorerCustomMetricAggregations } from '../../../../common/http_api/metrics_explorer';
 
 const DEFAULT_TIME_RANGE = {};
 

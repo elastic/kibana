@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiSelectableOption } from '@elastic/eui';
-import { search } from '@kbn/data-plugin/public';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import { EuiSelectableOption } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { search } from '@kbn/data-plugin/public';
 import type { UnifiedHistogramChartContext } from '../types';
-import { SelectableEntry, ToolbarSelector, ToolbarSelectorProps } from './toolbar_selector';
+import { ToolbarSelector, ToolbarSelectorProps, SelectableEntry } from './toolbar_selector';
 
 export interface TimeIntervalSelectorProps {
   chart: UnifiedHistogramChartContext;

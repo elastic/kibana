@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { buildExpression, isExpressionAst, isExpressionAstBuilder } from './build_expression';
-import { ExpressionAstFunctionBuilder, buildExpressionFunction } from './build_function';
-import { format } from './format';
 import { ExpressionAstExpression } from './types';
+import { buildExpression, isExpressionAstBuilder, isExpressionAst } from './build_expression';
+import { buildExpressionFunction, ExpressionAstFunctionBuilder } from './build_function';
+import { format } from './format';
 
 describe('isExpressionAst()', () => {
   test('returns true when a valid AST is provided', () => {

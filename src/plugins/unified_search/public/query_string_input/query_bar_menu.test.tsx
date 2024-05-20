@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiPopover } from '@elastic/eui';
+import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { Filter } from '@kbn/es-query';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { waitFor } from '@testing-library/react';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { QueryBarMenu, QueryBarMenuProps } from './query_bar_menu';
+import { QueryBarMenuProps, QueryBarMenu } from './query_bar_menu';
+import { EuiPopover } from '@elastic/eui';
 
 describe('Querybar Menu component', () => {
   const createMockWebStorage = () => ({

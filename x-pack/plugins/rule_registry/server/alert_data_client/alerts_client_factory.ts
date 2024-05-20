@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import {
   AlertingAuthorization,
   PluginStartContract as AlertingStart,
 } from '@kbn/alerting-plugin/server';
-import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { IRuleDataService } from '../rule_data_plugin_service';
 import { AlertsClient } from './alerts_client';
 

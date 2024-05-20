@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { createHash } from 'crypto';
 import fs from 'fs';
-import { dirname, isAbsolute, resolve, sep } from 'path';
-import { inspect } from 'util';
-import { createGunzip } from 'zlib';
 import Fsp from 'fs/promises';
 import * as Rx from 'rxjs';
+import { createHash } from 'crypto';
 import { pipeline } from 'stream/promises';
+import { resolve, dirname, isAbsolute, sep } from 'path';
+import { createGunzip } from 'zlib';
+import { inspect } from 'util';
 
-import { ToolingLog } from '@kbn/tooling-log';
 import archiver from 'archiver';
+import globby from 'globby';
 import cpy from 'cpy';
 import del from 'del';
-import globby from 'globby';
 import tar, { ExtractOptions } from 'tar';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export function assertAbsolute(path: string) {
   if (!isAbsolute(path)) {

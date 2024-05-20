@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { QueryClient } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
-import Chance from 'chance';
 import React from 'react';
-import { type RouteComponentProps } from 'react-router-dom';
+import Chance from 'chance';
 import { Rules } from '.';
+import { render, screen } from '@testing-library/react';
+import { QueryClient } from '@tanstack/react-query';
+import { TestProvider } from '../../test/test_provider';
+import { type RouteComponentProps } from 'react-router-dom';
 import { PageUrlParams } from '../../../common/types/latest';
-import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
+import { coreMock } from '@kbn/core/public/mocks';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
-import { createReactQueryResponse } from '../../test/fixtures/react_query';
-import { TestProvider } from '../../test/test_provider';
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import * as TEST_SUBJECTS from './test_subjects';
 

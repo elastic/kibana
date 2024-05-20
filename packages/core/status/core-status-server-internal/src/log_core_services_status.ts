@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
-import type { Logger } from '@kbn/logging';
 import { uniq } from 'lodash';
-import { type Observable, Subject, type Subscription, merge } from 'rxjs';
-import { bufferTime, concatAll, filter, map, pairwise, startWith, takeUntil } from 'rxjs';
+import { merge, type Observable, Subject, type Subscription } from 'rxjs';
+import { pairwise, takeUntil, map, startWith, bufferTime, concatAll, filter } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import { type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import type { LoggableServiceStatus } from './types';
 
 // let services log up to 3 status changes every 30s (extra messages will be throttled / aggregated)

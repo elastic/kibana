@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 // eslint-disable-next-line no-restricted-imports
-import type { LegacyRulesNotificationParams } from '../legacy_types';
-// eslint-disable-next-line no-restricted-imports
 import { legacyInjectRuleIdReferences } from './legacy_inject_rule_id_references';
+// eslint-disable-next-line no-restricted-imports
+import type { LegacyRulesNotificationParams } from '../legacy_types';
 
 describe('legacy_inject_rule_id_references', () => {
   type FuncReturn = ReturnType<typeof legacyInjectRuleIdReferences>;

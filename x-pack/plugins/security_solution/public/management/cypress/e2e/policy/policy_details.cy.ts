@@ -8,13 +8,13 @@
 import moment from 'moment/moment';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { PolicyData } from '../../../../../common/endpoint/types';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import {
   setCustomProtectionUpdatesManifestVersion,
   setCustomProtectionUpdatesNote,
 } from '../../tasks/endpoint_policy';
-import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
-import { ROLE, login } from '../../tasks/login';
+import { login, ROLE } from '../../tasks/login';
+import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
 
 describe(
   'Policy Details',

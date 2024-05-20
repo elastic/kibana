@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getAgentTypeName } from '../../../../common/translations';
+import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
   type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { getAgentTypeName } from '../../../../common/translations';
-import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
-import { FILTER_NAMES, FILTER_TYPE_OPTIONS, UX_MESSAGES } from '../translations';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
+import { FILTER_NAMES, FILTER_TYPE_OPTIONS, UX_MESSAGES } from '../translations';
 import { ResponseActionStatusBadge } from './response_action_status_badge';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
+import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
 export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
   autoRefreshOptions: {
@@ -306,47 +306,47 @@ export const useActionsLogFilter = ({
     isTypesFilter
       ? typesFilterInitialState
       : isStatusesFilter
-        ? RESPONSE_ACTION_STATUS.map((statusName) => ({
-            key: statusName,
-            label: (
-              <ResponseActionStatusBadge
-                color={
-                  statusName === 'successful'
-                    ? 'success'
-                    : statusName === 'failed'
-                      ? 'danger'
-                      : 'warning'
-                }
-                status={getActionStatus(statusName)}
-              />
-            ) as unknown as string,
-            searchableLabel: statusName,
-            checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
-            'data-test-subj': `${filterName}-filter-option`,
-          }))
-        : isHostsFilter
-          ? []
-          : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
-              const featureFlags = ExperimentalFeaturesService.get();
-
-              // upload - v8.9
-              if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
-                return false;
+      ? RESPONSE_ACTION_STATUS.map((statusName) => ({
+          key: statusName,
+          label: (
+            <ResponseActionStatusBadge
+              color={
+                statusName === 'successful'
+                  ? 'success'
+                  : statusName === 'failed'
+                  ? 'danger'
+                  : 'warning'
               }
+              status={getActionStatus(statusName)}
+            />
+          ) as unknown as string,
+          searchableLabel: statusName,
+          checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
+          'data-test-subj': `${filterName}-filter-option`,
+        }))
+      : isHostsFilter
+      ? []
+      : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
+          const featureFlags = ExperimentalFeaturesService.get();
 
-              return true;
-            }).map((commandName) => ({
-              key: commandName,
-              label: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[commandName],
-              checked:
-                !isFlyout &&
-                commands
-                  ?.map((command) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command])
-                  .includes(commandName)
-                  ? 'on'
-                  : undefined,
-              'data-test-subj': `${filterName}-filter-option`,
-            }))
+          // upload - v8.9
+          if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
+            return false;
+          }
+
+          return true;
+        }).map((commandName) => ({
+          key: commandName,
+          label: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[commandName],
+          checked:
+            !isFlyout &&
+            commands
+              ?.map((command) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command])
+              .includes(commandName)
+              ? 'on'
+              : undefined,
+          'data-test-subj': `${filterName}-filter-option`,
+        }))
   );
 
   useEffect(() => {

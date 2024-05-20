@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import styled from 'styled-components';
 import { EuiPanel } from '@elastic/eui';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 import React, { memo } from 'react';
-import styled from 'styled-components';
 
 export const EuiPanelStyled = styled(EuiPanel)`
   &.artifactEntryCard + &.artifactEntryCard {

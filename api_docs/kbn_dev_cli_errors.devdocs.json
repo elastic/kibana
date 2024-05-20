@@ -26,7 +26,9 @@
         "tags": [],
         "label": "combineErrors",
         "description": [],
-        "signature": ["(errors: (Error | FailError)[]) => Error"],
+        "signature": [
+          "(errors: (Error | FailError)[]) => Error"
+        ],
         "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +40,9 @@
             "tags": [],
             "label": "errors",
             "description": [],
-            "signature": ["(Error | FailError)[]"],
+            "signature": [
+              "(Error | FailError)[]"
+            ],
             "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,7 +59,9 @@
         "tags": [],
         "label": "createFailError",
         "description": [],
-        "signature": ["(reason: string, options: FailErrorOptions) => FailError"],
+        "signature": [
+          "(reason: string, options: FailErrorOptions) => FailError"
+        ],
         "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -67,7 +73,9 @@
             "tags": [],
             "label": "reason",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -80,7 +88,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["FailErrorOptions"],
+            "signature": [
+              "FailErrorOptions"
+            ],
             "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -97,7 +107,9 @@
         "tags": [],
         "label": "createFlagError",
         "description": [],
-        "signature": ["(reason: string) => FailError"],
+        "signature": [
+          "(reason: string) => FailError"
+        ],
         "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -109,7 +121,9 @@
             "tags": [],
             "label": "reason",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -126,7 +140,9 @@
         "tags": [],
         "label": "isFailError",
         "description": [],
-        "signature": ["(error: any) => boolean"],
+        "signature": [
+          "(error: any) => boolean"
+        ],
         "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -138,7 +154,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-dev-cli-errors/src/dev_cli_errors.ts",
             "deprecated": false,
             "trackAdoption": false,

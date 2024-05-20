@@ -7,17 +7,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { FilesClient } from '../../../common/files_client';
 import type { FileJSON, FileKind } from '../../../common/types';
-import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import type { FilesClient } from '../../../common/files_client';
 import * as commonSchemas from '../common_schemas';
+import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import * as cs from '../common_schemas';
+import type { CreateHandler, FileKindRouter } from './types';
 import {
-  nameStringOrArrayOfNameStrings,
   stringOrArrayOfStrings,
+  nameStringOrArrayOfNameStrings,
   toArrayOrUndefined,
 } from '../find';
-import type { CreateHandler, FileKindRouter } from './types';
 
 export const method = 'post' as const;
 

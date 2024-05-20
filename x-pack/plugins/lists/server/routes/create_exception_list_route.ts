@@ -9,8 +9,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import { CreateExceptionListRequestDecoded, createExceptionListRequest } from '../../common/api';
-import { createExceptionListHandler } from '../handlers/create_exception_list_handler';
 import type { ListsPluginRouter } from '../types';
+import { createExceptionListHandler } from '../handlers/create_exception_list_handler';
 
 import { buildRouteValidation, buildSiemResponse } from './utils';
 

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
-import { isDevMode } from '@kbn/xstate-utils';
 import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { useEffect, useState } from 'react';
-import { CustomIntegrationOptions, IntegrationError } from '../../types';
-import { IntegrationsClient } from '../services/integrations_client';
-import { createCustomIntegrationsNotificationChannel } from './notifications';
+import { isDevMode } from '@kbn/xstate-utils';
 import { createCustomIntegrationsStateMachine } from './state_machine';
+import { IntegrationsClient } from '../services/integrations_client';
+import { CustomIntegrationOptions, IntegrationError } from '../../types';
 import { InitialState } from './types';
+import { createCustomIntegrationsNotificationChannel } from './notifications';
 
 interface Services {
   http: HttpSetup | undefined;

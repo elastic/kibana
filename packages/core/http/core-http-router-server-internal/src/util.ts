@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ObjectType, Type } from '@kbn/config-schema';
+import { once } from 'lodash';
 import {
+  isFullValidatorContainer,
   type RouteConfig,
   type RouteMethod,
   type RouteValidator,
-  isFullValidatorContainer,
 } from '@kbn/core-http-server';
-import { once } from 'lodash';
+import type { ObjectType, Type } from '@kbn/config-schema';
 
 function isStatusCode(key: string) {
   return !isNaN(parseInt(key, 10));

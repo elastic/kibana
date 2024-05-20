@@ -7,8 +7,8 @@
 
 import { StatsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
 import { TelemetryLocalStats, getLocalStats } from '@kbn/telemetry-plugin/server';
-import { ESLicense, getLicenseFromLocalOrMaster } from './get_license';
 import { getXPackUsage } from './get_xpack';
+import { ESLicense, getLicenseFromLocalOrMaster } from './get_license';
 import { isClusterOptedIn } from './is_cluster_opted_in';
 
 export type TelemetryAggregatedStats = TelemetryLocalStats & {

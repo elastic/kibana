@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { ShowLicenseInfo } from './license_info';
 import * as redux from 'react-redux';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { ShowLicenseInfo } from './license_info';
 
 describe('ShowLicenseInfo', () => {
   beforeEach(() => {

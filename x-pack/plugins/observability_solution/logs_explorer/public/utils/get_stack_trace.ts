@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogDocument, StackTraceFields, getFieldFromDoc } from '@kbn/discover-utils/src';
+import { getFieldFromDoc, LogDocument, StackTraceFields } from '@kbn/discover-utils/src';
 import * as constants from '../../common/constants';
 
 export const getStacktraceFields = (doc: LogDocument): StackTraceFields => {

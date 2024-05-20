@@ -1,19 +1,3 @@
-import { LEGACY_LIGHT_THEME } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { EuiPanel } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
-import { useTheme } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { useLogView } from '@kbn/logs-shared-plugin/public';
-import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import {
-  ALERT_CONTEXT,
-  ALERT_END,
-  ALERT_EVALUATION_VALUE,
-  ALERT_START,
-} from '@kbn/rule-data-utils';
-import { get, identity } from 'lodash';
-import moment from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -21,19 +5,35 @@ import moment from 'moment';
  * 2.0.
  */
 import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { LEGACY_LIGHT_THEME } from '@elastic/charts';
+import { EuiPanel } from '@elastic/eui';
+import {
+  ALERT_CONTEXT,
+  ALERT_END,
+  ALERT_EVALUATION_VALUE,
+  ALERT_START,
+} from '@kbn/rule-data-utils';
+import moment from 'moment';
+import { useTheme } from '@emotion/react';
+import { EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import { get, identity } from 'lodash';
+import { useLogView } from '@kbn/logs-shared-plugin/public';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
   Comparator,
   ComparatorToi18nMap,
   ComparatorToi18nSymbolsMap,
-  type PartialCriterion,
   isRatioRule,
+  type PartialCriterion,
 } from '../../../../../common/alerting/logs/log_threshold';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { useLicense } from '../../../../hooks/use_license';
+import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
-import { AlertDetailsAppSectionProps } from './types';
+import { useLicense } from '../../../../hooks/use_license';
 
 const formatThreshold = (threshold: number) => String(threshold);
 

@@ -6,11 +6,11 @@
  */
 
 import { useEffect, useMemo, useReducer } from 'react';
-import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import { ALERTS_QUERY_NAMES } from '../../../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
-import { getPercChange } from '../helpers';
+import type { GlobalTimeArgs } from '../../../../../common/containers/use_global_time';
 import * as i18n from '../translations';
+import { getPercChange } from '../helpers';
 import { statReducer } from './stat_reducer';
 import type { StatState } from './use_soc_trends';
 
@@ -165,8 +165,8 @@ export const useCriticalAlerts = ({
           color: isZero
             ? 'hollow'
             : isNegative
-              ? 'success' // a negative change is good
-              : 'danger',
+            ? 'success' // a negative change is good
+            : 'danger',
           note: isZero
             ? i18n.NO_CHANGE('open critical alert count')
             : i18n.STAT_DIFFERENCE({
@@ -184,8 +184,8 @@ export const useCriticalAlerts = ({
         badCurrent && badCompare
           ? i18n.NO_DATA('alerts')
           : badCurrent
-            ? i18n.NO_DATA_CURRENT('alerts')
-            : i18n.NO_DATA_COMPARE('alerts');
+          ? i18n.NO_DATA_CURRENT('alerts')
+          : i18n.NO_DATA_COMPARE('alerts');
 
       dispatch({
         type: 'setPercentage',

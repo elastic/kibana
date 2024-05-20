@@ -6,7 +6,7 @@
  */
 import datemath from '@elastic/datemath';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ScopedAnnotationsClient, rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,

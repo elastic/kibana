@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { AggParamsHistogram, AggParamsRange } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { RANGE_MODES } from '../../constants';
-import { DataType } from '../../types';
+import { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
 import { convertToRangeColumn } from './range';
 import { RangeColumn } from './types';
+import { DataType } from '../../types';
+import { RANGE_MODES } from '../../constants';
 
 describe('convertToRangeColumn', () => {
   const aggId = `some-id`;

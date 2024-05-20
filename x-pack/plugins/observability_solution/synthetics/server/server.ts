@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { registerSyntheticsStatusCheckRule } from './alert_rules/status_rule/monitor_status_rule';
 import { registerSyntheticsTLSCheckRule } from './alert_rules/tls_rule/tls_rule';
-import { syntheticsAppPublicRestApiRoutes, syntheticsAppRestApiRoutes } from './routes';
-import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
-import { syntheticsRouteWrapper } from './synthetics_route_wrapper';
-import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { registerSyntheticsStatusCheckRule } from './alert_rules/status_rule/monitor_status_rule';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from './types';
+import { createSyntheticsRouteWithAuth } from './routes/create_route_with_auth';
+import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { syntheticsRouteWrapper } from './synthetics_route_wrapper';
+import { syntheticsAppPublicRestApiRoutes, syntheticsAppRestApiRoutes } from './routes';
 
 export const initSyntheticsServer = (
   server: SyntheticsServerSetup,

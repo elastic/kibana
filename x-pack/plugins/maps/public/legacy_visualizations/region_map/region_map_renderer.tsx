@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
-import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type { RegionMapVisRenderValue } from './region_map_fn';
 import { REGION_MAP_RENDER } from './types';
 

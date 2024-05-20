@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
+import { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   isCspPackagePolicyInstalled,
   onPackagePolicyPostCreateCallback,
 } from './fleet_integration';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
+import { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 describe('is Csp package installed tests', () => {
   const logger = loggingSystemMock.createLogger();

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { UiCounterMetricType } from '@kbn/analytics';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useReducer } from 'react';
-import { GroupSelectorProps, GroupingProps, isNoneGroup } from '..';
-import { Grouping as GroupingComponent } from '../components/grouping';
-import { groupActions, groupByIdSelector } from './state';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { groupsReducerWithStorage, initialState } from './state/reducer';
-import { GroupOption, defaultGroup } from './types';
+import { GroupingProps, GroupSelectorProps, isNoneGroup } from '..';
+import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
+import { defaultGroup, GroupOption } from './types';
+import { Grouping as GroupingComponent } from '../components/grouping';
 
 /** Interface for grouping object where T is the `GroupingAggregation`
  *  @interface GroupingArgs<T>

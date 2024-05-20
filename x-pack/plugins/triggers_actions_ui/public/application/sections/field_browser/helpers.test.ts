@@ -7,16 +7,16 @@
 
 import { mockBrowserFields } from './mock';
 
-import { EcsFlat } from '@elastic/ecs';
-import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import {
   categoryHasFields,
-  filterBrowserFieldsByFieldName,
-  filterSelectedBrowserFields,
   getCategory,
   getDescription,
   getFieldCount,
+  filterBrowserFieldsByFieldName,
+  filterSelectedBrowserFields,
 } from './helpers';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { EcsFlat } from '@elastic/ecs';
 
 describe('helpers', () => {
   describe('getCategory', () => {

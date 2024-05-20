@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
-  ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
-  API_PRIVILEGES,
-  READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
-  READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
   RULES_SETTINGS_FEATURE_ID,
+  READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+  ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+  API_PRIVILEGES,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
+  ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
+  READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
 } from '../common';
 
 export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureConfig {

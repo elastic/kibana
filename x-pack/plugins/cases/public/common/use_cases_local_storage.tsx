@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useApplication } from './lib/kibana/use_application';
 

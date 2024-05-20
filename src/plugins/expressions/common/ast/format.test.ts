@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ExpressionAstExpression, ExpressionAstArgument } from './types';
 import { format } from './format';
-import { ExpressionAstArgument, ExpressionAstExpression } from './types';
 
 describe('format()', () => {
   test('formats an expression AST', () => {

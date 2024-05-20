@@ -8,24 +8,24 @@
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import {
+  getPageOfIndices,
+  getPager,
+  getFilter,
+  getSortField,
+  isSortAscending,
+  getIndicesAsArray,
+  indicesLoading,
+  indicesError,
+  getTableState,
+} from '../../../../store/selectors';
+import {
   filterChanged,
-  loadIndices,
   pageChanged,
   pageSizeChanged,
   sortChanged,
+  loadIndices,
   toggleChanged,
 } from '../../../../store/actions';
-import {
-  getFilter,
-  getIndicesAsArray,
-  getPageOfIndices,
-  getPager,
-  getSortField,
-  getTableState,
-  indicesError,
-  indicesLoading,
-  isSortAscending,
-} from '../../../../store/selectors';
 
 import { IndexTable as PresentationComponent } from './index_table';
 

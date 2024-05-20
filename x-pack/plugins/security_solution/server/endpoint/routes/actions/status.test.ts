@@ -14,19 +14,11 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import { v4 as uuidv4 } from 'uuid';
-import { ActionStatusRequestSchema } from '../../../../common/api/endpoint';
 import {
   ACTION_STATUS_ROUTE,
-  ENDPOINT_ACTIONS_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+  ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type {
-  LogsEndpointAction,
-  LogsEndpointActionResponse,
-} from '../../../../common/endpoint/types';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContext,
@@ -35,8 +27,16 @@ import {
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
-import { ACTION_RESPONSE_INDICES } from '../../services/actions/constants';
 import { registerActionStatusRoutes } from './status';
+import { v4 as uuidv4 } from 'uuid';
+import { ACTION_RESPONSE_INDICES } from '../../services/actions/constants';
+import type {
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
+} from '../../../../common/endpoint/types';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { ActionStatusRequestSchema } from '../../../../common/api/endpoint';
+import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 
 describe('Endpoint Pending Action Summary API', () => {
   let endpointAppContextService: EndpointAppContextService;

@@ -8,39 +8,39 @@
 import { getEsqlRule } from '../../../../objects/rule';
 
 import {
-  INVESTIGATION_FIELDS_VALUE_ITEM,
   RULES_MANAGEMENT_TABLE,
   RULE_NAME,
+  INVESTIGATION_FIELDS_VALUE_ITEM,
 } from '../../../../screens/alerts_detection_rules';
 import {
   RULE_NAME_HEADER,
-  RULE_NAME_OVERRIDE_DETAILS,
   RULE_TYPE_DETAILS,
+  RULE_NAME_OVERRIDE_DETAILS,
 } from '../../../../screens/rule_details';
 
 import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
 
+import { getDetails, goBackToRulesTable } from '../../../../tasks/rule_details';
 import { expectNumberOfRules } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
-  createRuleWithoutEnabling,
-  expandAdvancedSettings,
   expandEsqlQueryBar,
   fillAboutRuleAndContinue,
-  fillAboutSpecificEsqlRuleAndContinue,
-  fillCustomInvestigationFields,
   fillDefineEsqlRuleAndContinue,
-  fillDescription,
-  fillEsqlQueryBar,
-  fillRuleName,
   fillScheduleRuleAndContinue,
-  getAboutContinueButton,
-  getDefineContinueButton,
   selectEsqlRuleType,
+  getDefineContinueButton,
+  fillEsqlQueryBar,
+  fillAboutSpecificEsqlRuleAndContinue,
+  createRuleWithoutEnabling,
+  expandAdvancedSettings,
+  fillCustomInvestigationFields,
+  fillRuleName,
+  fillDescription,
+  getAboutContinueButton,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { getDetails, goBackToRulesTable } from '../../../../tasks/rule_details';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 

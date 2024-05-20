@@ -10,9 +10,9 @@ import { once } from 'lodash';
 import { OUTPUT_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { Output } from '../../../common/types';
 import {
+  getSavedObjectTypes,
   OUTPUT_ENCRYPTED_FIELDS,
   OUTPUT_INCLUDE_AAD_FIELDS,
-  getSavedObjectTypes,
 } from '../../saved_objects';
 import type { OutputSOAttributes } from '../../types';
 

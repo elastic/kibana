@@ -10,12 +10,12 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
-import { TestProviders, defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
-import { deleteItemIdx, findItem, getValues } from './helpers';
 import { plainColumnRenderer } from './plain_column_renderer';
+import { getValues, deleteItemIdx, findItem } from './helpers';
 
 jest.mock('../../../../../common/lib/kibana');
 

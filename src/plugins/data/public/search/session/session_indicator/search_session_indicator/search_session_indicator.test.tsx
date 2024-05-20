@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React, { ReactNode } from 'react';
-import { SearchSessionState } from '../../../..';
+import { screen, render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SearchSessionIndicator } from './search_session_indicator';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { SearchSessionState } from '../../../..';
 
 function Container({ children }: { children?: ReactNode }) {
   return <IntlProvider locale="en">{children}</IntlProvider>;

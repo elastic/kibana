@@ -7,13 +7,13 @@
 
 import type { Logger } from '@kbn/core/server';
 
-import { ExtensionPointStorageClient } from './extension_point_storage_client';
 import {
   ExtensionPoint,
   ExtensionPointStorageClientInterface,
   ExtensionPointStorageInterface,
   NarrowExtensionPointToType,
 } from './types';
+import { ExtensionPointStorageClient } from './extension_point_storage_client';
 
 export class ExtensionPointStorage implements ExtensionPointStorageInterface {
   private readonly store = new Map<ExtensionPoint['type'], Set<ExtensionPoint>>();

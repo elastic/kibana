@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { chunk, debounce } from 'lodash';
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { chunk, debounce } from 'lodash';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
+import { EVENT_OUTCOME } from '../../../../common/es_fields/apm';
+import { EventOutcome } from '../../../../common/event_outcome';
 import {
   DEBOUNCE_INTERVAL,
   DEFAULT_PERCENTILE_THRESHOLD,
@@ -18,19 +20,17 @@ import type {
   FailedTransactionsCorrelation,
   FailedTransactionsCorrelationsResponse,
 } from '../../../../common/correlations/failed_transactions_correlations/types';
-import { EVENT_OUTCOME } from '../../../../common/es_fields/apm';
-import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
-import { useFetchParams } from './use_fetch_params';
 import {
-  CorrelationsProgress,
-  getFailedTransactionsCorrelationsSortedByScore,
   getInitialResponse,
+  getFailedTransactionsCorrelationsSortedByScore,
   getReducer,
+  CorrelationsProgress,
 } from './utils/analysis_hook_utils';
+import { useFetchParams } from './use_fetch_params';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_OVERALL_HISTOGRAM = 0.05;

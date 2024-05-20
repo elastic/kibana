@@ -8,24 +8,24 @@
 
 import { Datum, PartitionLayer } from '@elastic/charts';
 import {
-  AVAILABLE_PALETTES,
-  NeutralPalette,
   PaletteRegistry,
   getColorFactory,
   getPalette,
+  AVAILABLE_PALETTES,
+  NeutralPalette,
 } from '@kbn/coloring';
-import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { i18n } from '@kbn/i18n';
+import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { getDistinctSeries } from '..';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
-import { getPartitionFillColor } from '../colors/color_mapping_accessors';
+import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
-import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
+import { getPartitionFillColor } from '../colors/color_mapping_accessors';
 
 // This is particularly useful in case of a text based languages where
 // it's no possible to use a missingBucketLabel

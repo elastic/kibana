@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import { i18n } from '@kbn/i18n';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 // these won't exist in on server
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
-import type { SavedSearchCrudTypes } from '../content_management';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { Reference } from '@kbn/content-management-utils';
 import type { SavedSearch, SavedSearchAttributes } from '../types';
+import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
+import type { SavedSearchCrudTypes } from '../content_management';
 
 export interface GetSavedSearchDependencies {
   searchSourceCreate: ISearchStartSearchSource['create'];

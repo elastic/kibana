@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import { DocLinksStart } from '@kbn/core/public';
 export interface Props {
   docLinks: DocLinksStart;
 }

@@ -9,8 +9,8 @@
 // for example a list of known safe URL domains.
 import { useMemo } from 'react';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
-import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
 
 import type { Filter, FilterStats } from '../../../../common/types/filters';
 

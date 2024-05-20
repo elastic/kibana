@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { Feature, Polygon } from 'geojson';
 import _ from 'lodash';
 import React, { Component } from 'react';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { i18n } from '@kbn/i18n';
+import { Filter } from '@kbn/es-query';
+import { Feature, Polygon } from 'geojson';
 import { DRAW_SHAPE } from '../../../../../common/constants';
 import { DrawState } from '../../../../../common/descriptor_types';
 import {
-  buildGeoShapeFilter,
   createDistanceFilterWithMeta,
+  buildGeoShapeFilter,
   getBoundingBoxGeometry,
   roundCoordinates,
 } from '../../../../../common/elasticsearch_util';
 import { getToasts } from '../../../../kibana_services';
-import { DrawCircleProperties } from '../draw_circle';
 import { DrawControl } from '../draw_control';
+import { DrawCircleProperties } from '../draw_circle';
 
 export interface Props {
   addFilters: (filters: Filter[], actionId: string) => Promise<void>;

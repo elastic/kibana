@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core/server';
 import type { CoverageOverviewResponse } from '../../../../../../../common/api/detection_engine';
 import {
   CoverageOverviewRequestBody,

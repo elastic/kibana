@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React from 'react';
+import styled from 'styled-components';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiAccordion,
@@ -7,27 +15,19 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React from 'react';
-import styled from 'styled-components';
 
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
-import { REFERENCE } from '../../../../../common/cti/constants';
 import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import { getFirstElement } from '../../../../../common/utils/data_retrieval';
-import { QUERY_ID } from '../../../containers/cti/event_enrichment';
-import { InspectButton } from '../../inspect';
-import { EnrichmentButtonContent } from './enrichment_button_content';
 import type { ThreatDetailsRow } from './helpers';
-import { getEnrichmentIdentifiers, getFirstSeen, isInvestigationTimeEnrichment } from './helpers';
-import { ThreatSummaryTable } from './threat_summary_table';
+import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment, getFirstSeen } from './helpers';
+import { EnrichmentButtonContent } from './enrichment_button_content';
 import { ThreatSummaryTitle } from './threat_summary_title';
+import { InspectButton } from '../../inspect';
+import { QUERY_ID } from '../../../containers/cti/event_enrichment';
 import * as i18n from './translations';
+import { ThreatSummaryTable } from './threat_summary_table';
+import { REFERENCE } from '../../../../../common/cti/constants';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__triggerWrapper {

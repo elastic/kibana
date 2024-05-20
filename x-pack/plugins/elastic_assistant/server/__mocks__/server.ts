@@ -1,10 +1,3 @@
-import { getRequestValidation } from '@kbn/core-http-server';
-import type {
-  KibanaRequest,
-  RequestHandler,
-  RequestHandlerContext,
-  RouteConfig,
-} from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,12 +5,19 @@ import type {
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
+import { getRequestValidation } from '@kbn/core-http-server';
+import type {
+  RequestHandler,
+  RouteConfig,
+  KibanaRequest,
+  RequestHandlerContext,
+} from '@kbn/core/server';
 
-import type { RegisteredVersionedRoute } from '@kbn/core-http-router-server-mocks';
 import { requestMock } from './request';
-import { requestContextMock } from './request_context';
 import { responseMock as responseFactoryMock } from './response';
+import { requestContextMock } from './request_context';
 import { responseAdapter } from './test_adapters';
+import type { RegisteredVersionedRoute } from '@kbn/core-http-router-server-mocks';
 
 interface Route {
   validate: RouteConfig<

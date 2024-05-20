@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiHealth } from '@elastic/eui';
 import React from 'react';
+import { EuiHealth } from '@elastic/eui';
 
 interface Props {
   score: number;

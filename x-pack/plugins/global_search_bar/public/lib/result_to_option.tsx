@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
 import type { SavedObjectTaggingPluginStart, Tag } from '@kbn/saved-objects-tagging-plugin/public';
-import React from 'react';
 import { ResultTagList } from '../components/result_tag_list';
 
 const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).replace(/-/g, ' ');

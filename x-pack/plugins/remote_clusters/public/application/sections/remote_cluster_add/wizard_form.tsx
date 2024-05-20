@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiPageSection, EuiSpacer, EuiStepStatus, EuiStepsHorizontal } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState, useMemo, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiStepsHorizontal, EuiStepStatus, EuiSpacer, EuiPageSection } from '@elastic/eui';
 
+import { RemoteClusterSetupTrust, RemoteClusterForm } from '../components';
 import { ClusterPayload } from '../../../../common/lib/cluster_serialization';
-import { RemoteClusterForm, RemoteClusterSetupTrust } from '../components';
 
 const CONFIGURE_CONNECTION = 1;
 const SETUP_TRUST = 2;

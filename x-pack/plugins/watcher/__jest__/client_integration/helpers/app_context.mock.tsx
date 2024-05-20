@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { LocationDescriptorObject } from 'history';
 import { of } from 'rxjs';
+import { LocationDescriptorObject } from 'history';
 
-import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
-import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import {
   coreMock,
-  httpServiceMock,
-  notificationServiceMock,
-  scopedHistoryMock,
   uiSettingsServiceMock,
+  notificationServiceMock,
+  httpServiceMock,
+  scopedHistoryMock,
 } from '@kbn/core/public/mocks';
-import { LicenseStatus } from '../../../common/types/license_status';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { AppDeps } from '../../../public/application/app';
+import { LicenseStatus } from '../../../common/types/license_status';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 class MockTimeBuckets {
   setBounds(_domain: any) {

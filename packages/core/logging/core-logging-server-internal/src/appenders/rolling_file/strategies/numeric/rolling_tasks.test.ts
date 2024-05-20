@@ -7,13 +7,13 @@
  */
 
 import { join } from 'path';
+import { accessMock, readdirMock, renameMock, clearAllMocks } from './rolling_tasks.test.mocks';
 import {
-  getOrderedRolledFiles,
+  shouldSkipRollout,
   rollCurrentFile,
   rollPreviousFilesInOrder,
-  shouldSkipRollout,
+  getOrderedRolledFiles,
 } from './rolling_tasks';
-import { accessMock, clearAllMocks, readdirMock, renameMock } from './rolling_tasks.test.mocks';
 
 describe('NumericRollingStrategy tasks', () => {
   afterEach(() => {

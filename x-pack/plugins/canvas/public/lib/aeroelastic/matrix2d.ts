@@ -32,19 +32,20 @@ export const scale = (x: number, y: number): TransformMatrix2d => [x, 0, 0, 0, y
 const mult = (
   [a, b, c, d, e, f, g, h, i]: TransformMatrix2d,
   [A, B, C, D, E, F, G, H, I]: TransformMatrix2d
-): TransformMatrix2d => [
-  a * A + d * B + g * C,
-  b * A + e * B + h * C,
-  c * A + f * B + i * C,
+): TransformMatrix2d =>
+  [
+    a * A + d * B + g * C,
+    b * A + e * B + h * C,
+    c * A + f * B + i * C,
 
-  a * D + d * E + g * F,
-  b * D + e * E + h * F,
-  c * D + f * E + i * F,
+    a * D + d * E + g * F,
+    b * D + e * E + h * F,
+    c * D + f * E + i * F,
 
-  a * G + d * H + g * I,
-  b * G + e * H + h * I,
-  c * G + f * H + i * I,
-];
+    a * G + d * H + g * I,
+    b * G + e * H + h * I,
+    c * G + f * H + i * I,
+  ];
 
 export const multiply = (
   first: TransformMatrix2d,

@@ -7,16 +7,16 @@
 
 import React from 'react';
 import 'brace';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
+import { of, Subject } from 'rxjs';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { act } from 'react-dom/test-utils';
-import { Subject, of } from 'rxjs';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 

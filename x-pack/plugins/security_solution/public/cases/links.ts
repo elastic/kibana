@@ -6,9 +6,9 @@
  */
 
 import {
-  CASES_SETTINGS_CAPABILITY,
   CREATE_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
+  CASES_SETTINGS_CAPABILITY,
 } from '@kbn/cases-plugin/common';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { CASES_FEATURE_ID, CASES_PATH, SecurityPageName } from '../../common/constants';

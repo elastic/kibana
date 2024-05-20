@@ -7,15 +7,15 @@
  */
 
 import type { PaletteOutput } from '@kbn/coloring';
-import {
-  LabelsParams,
-  PARTITION_LABELS_FUNCTION,
-  PIE_VIS_EXPRESSION_NAME,
-  PartitionVisParams,
-  PieVisExpressionFunctionDefinition,
-} from '@kbn/expression-partition-vis-plugin/common';
+import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
-import { SchemaConfig, VisToExpressionAst, getVisSchemas } from '@kbn/visualizations-plugin/public';
+import {
+  PIE_VIS_EXPRESSION_NAME,
+  PARTITION_LABELS_FUNCTION,
+  PieVisExpressionFunctionDefinition,
+  PartitionVisParams,
+  LabelsParams,
+} from '@kbn/expression-partition-vis-plugin/common';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });

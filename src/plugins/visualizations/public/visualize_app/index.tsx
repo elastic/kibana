@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Router } from '@kbn/shared-ux-router';
 
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { AppMountParameters } from '@kbn/core/public';
-import { FormattedRelative } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { VisualizeApp } from './app';
 import { VisualizeServices } from './types';
-import { addBadgeToAppChrome, addHelpMenuToAppChrome } from './utils';
+import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
 
 export const renderApp = (
   { element, onAppLeave }: AppMountParameters,

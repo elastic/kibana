@@ -7,45 +7,45 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import expect from 'expect';
+import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_URL } from '@kbn/securitysolution-list-constants';
 import type {
+  RuleCreateProps,
   EqlRuleCreateProps,
   QueryRuleCreateProps,
-  RuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { LIST_URL } from '@kbn/securitysolution-list-constants';
-import expect from 'expect';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import {
+  getSimpleRule,
+  createExceptionList,
+  createExceptionListItem,
+  getThresholdRuleForAlertTesting,
+  getOpenAlerts,
+  createRuleWithExceptionEntries,
+  getEqlRuleForAlertTesting,
+} from '../../../../utils';
 import {
   createAlertsIndex,
   createRule,
-  deleteAllAlerts,
   deleteAllRules,
-  getAlertsByIds,
-  waitForAlertsToBePresent,
   waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
+  deleteAllAlerts,
 } from '../../../../../../../common/utils/security_solution';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createListsIndex,
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
 } from '../../../../../lists_and_exception_lists/utils';
-import {
-  createExceptionList,
-  createExceptionListItem,
-  createRuleWithExceptionEntries,
-  getEqlRuleForAlertTesting,
-  getOpenAlerts,
-  getSimpleRule,
-  getThresholdRuleForAlertTesting,
-} from '../../../../utils';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

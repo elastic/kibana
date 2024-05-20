@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import fs from 'fs';
 import { Client } from '@elastic/elasticsearch';
-import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import type { StatusResponse } from '@kbn/core-status-common-internal';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
-import type { ReqOptions } from '@kbn/test/src/kbn_client/kbn_client_requester';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { type AxiosResponse } from 'axios';
-import { omit } from 'lodash';
+import type { StatusResponse } from '@kbn/core-status-common-internal';
 import pRetry from 'p-retry';
+import type { ReqOptions } from '@kbn/test/src/kbn_client/kbn_client_requester';
+import { type AxiosResponse } from 'axios';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
+import fs from 'fs';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { omit } from 'lodash';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { isLocalhost } from './is_localhost';

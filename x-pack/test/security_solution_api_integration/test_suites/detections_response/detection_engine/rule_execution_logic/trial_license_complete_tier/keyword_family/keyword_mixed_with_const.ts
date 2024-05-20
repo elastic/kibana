@@ -12,18 +12,18 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
+import { getEqlRuleForAlertTesting } from '../../../../utils';
 import {
-  createAlertsIndex,
   createRule,
-  deleteAllAlerts,
+  createAlertsIndex,
   deleteAllRules,
-  getAlertsById,
+  deleteAllAlerts,
   getRuleForAlertTesting,
-  waitForAlertsToBePresent,
+  getAlertsById,
   waitForRuleSuccess,
+  waitForAlertsToBePresent,
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { getEqlRuleForAlertTesting } from '../../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

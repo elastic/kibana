@@ -10,7 +10,11 @@
         "tags": [],
         "label": "AssistantAvatar",
         "description": [],
-        "signature": ["({ size = 's', css }: ", "AssistantAvatarProps", ") => JSX.Element"],
+        "signature": [
+          "({ size = 's', css }: ",
+          "AssistantAvatarProps",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -22,7 +26,9 @@
             "tags": [],
             "label": "{ size = 's', css }",
             "description": [],
-            "signature": ["AssistantAvatarProps"],
+            "signature": [
+              "AssistantAvatarProps"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/assistant_avatar.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -72,7 +78,9 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -163,7 +171,9 @@
                 "tags": [],
                 "label": "onRegenerateClick",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -177,7 +187,9 @@
                 "tags": [],
                 "label": "onStopGeneratingClick",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/chat_item_controls.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -197,7 +209,11 @@
         "tags": [],
         "label": "ConnectorSelectorBase",
         "description": [],
-        "signature": ["(props: ", "UseGenAIConnectorsResult", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "UseGenAIConnectorsResult",
+          ") => JSX.Element"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/connector_selector/connector_selector_base.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -209,7 +225,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["UseGenAIConnectorsResult"],
+            "signature": [
+              "UseGenAIConnectorsResult"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/connector_selector/connector_selector_base.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -269,7 +287,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["Record<string, any> | undefined"],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/create_function_request_message.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -330,7 +350,9 @@
                 "tags": [],
                 "label": "content",
                 "description": [],
-                "signature": ["unknown"],
+                "signature": [
+                  "unknown"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/create_function_response_message.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -342,7 +364,9 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": ["unknown"],
+                "signature": [
+                  "unknown"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/utils/create_function_response_message.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -378,7 +402,9 @@
             "tags": [],
             "label": "definition",
             "description": [],
-            "signature": ["TActionDefinition"],
+            "signature": [
+              "TActionDefinition"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -391,7 +417,10 @@
             "tags": [],
             "label": "respond",
             "description": [],
-            "signature": ["ScreenContextActionRespondFunction", "<TResponse>"],
+            "signature": [
+              "ScreenContextActionRespondFunction",
+              "<TResponse>"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -456,7 +485,9 @@
         "tags": [],
         "label": "FailedToLoadResponse",
         "description": [],
-        "signature": ["() => JSX.Element"],
+        "signature": [
+          "() => JSX.Element"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/message_panel/failed_to_load_response.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -471,7 +502,9 @@
         "tags": [],
         "label": "FeedbackButtons",
         "description": [],
-        "signature": ["({ onClickFeedback }: FeedbackButtonsProps) => JSX.Element"],
+        "signature": [
+          "({ onClickFeedback }: FeedbackButtonsProps) => JSX.Element"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -483,7 +516,9 @@
             "tags": [],
             "label": "{ onClickFeedback }",
             "description": [],
-            "signature": ["FeedbackButtonsProps"],
+            "signature": [
+              "FeedbackButtonsProps"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -500,7 +535,9 @@
         "tags": [],
         "label": "isSupportedConnectorType",
         "description": [],
-        "signature": ["(type: string) => boolean"],
+        "signature": [
+          "(type: string) => boolean"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -512,7 +549,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/connectors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -529,7 +568,9 @@
         "tags": [],
         "label": "MessageText",
         "description": [],
-        "signature": ["({ loading, content, onActionClick }: Props) => JSX.Element"],
+        "signature": [
+          "({ loading, content, onActionClick }: Props) => JSX.Element"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/message_panel/message_text.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -541,7 +582,9 @@
             "tags": [],
             "label": "{ loading, content, onActionClick }",
             "description": [],
-            "signature": ["Props"],
+            "signature": [
+              "Props"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/message_panel/message_text.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -580,7 +623,9 @@
             "tags": [],
             "label": "fn",
             "description": [],
-            "signature": ["({}: { signal: AbortSignal; }) => T | Promise<T>"],
+            "signature": [
+              "({}: { signal: AbortSignal; }) => T | Promise<T>"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -593,7 +638,9 @@
             "tags": [],
             "label": "deps",
             "description": [],
-            "signature": ["any[]"],
+            "signature": [
+              "any[]"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -617,7 +664,9 @@
                 "tags": [],
                 "label": "clearValueOnNext",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -629,7 +678,9 @@
                 "tags": [],
                 "label": "defaultValue",
                 "description": [],
-                "signature": ["(() => T) | undefined"],
+                "signature": [
+                  "(() => T) | undefined"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_abortable_async.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -721,7 +772,9 @@
             "tags": [],
             "label": "user",
             "description": [],
-            "signature": ["{ id?: string | undefined; name: string; } | undefined"],
+            "signature": [
+              "{ id?: string | undefined; name: string; } | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -770,7 +823,9 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -782,7 +837,9 @@
             "tags": [],
             "label": "numeric_labels",
             "description": [],
-            "signature": ["{ [x: string]: number; }"],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -874,7 +931,9 @@
             "tags": [],
             "label": "confidence",
             "description": [],
-            "signature": ["\"medium\" | \"high\" | \"low\""],
+            "signature": [
+              "\"medium\" | \"high\" | \"low\""
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -908,7 +967,9 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": ["Record<string, string> | undefined"],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1103,7 +1164,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1159,7 +1222,9 @@
                     "tags": [],
                     "label": "function",
                     "description": [],
-                    "signature": ["\"none\" | \"auto\" | undefined"],
+                    "signature": [
+                      "\"none\" | \"auto\" | undefined"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1171,7 +1236,9 @@
                     "tags": [],
                     "label": "signal",
                     "description": [],
-                    "signature": ["AbortSignal"],
+                    "signature": [
+                      "AbortSignal"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1233,7 +1300,11 @@
                     "tags": [],
                     "label": "getScreenContexts",
                     "description": [],
-                    "signature": ["() => ", "ObservabilityAIAssistantScreenContext", "[]"],
+                    "signature": [
+                      "() => ",
+                      "ObservabilityAIAssistantScreenContext",
+                      "[]"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1247,7 +1318,9 @@
                     "tags": [],
                     "label": "conversationId",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1313,7 +1386,9 @@
                     "tags": [],
                     "label": "signal",
                     "description": [],
-                    "signature": ["AbortSignal"],
+                    "signature": [
+                      "AbortSignal"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1374,7 +1449,9 @@
                     "tags": [],
                     "label": "contexts",
                     "description": [],
-                    "signature": ["string[] | undefined"],
+                    "signature": [
+                      "string[] | undefined"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1386,7 +1463,9 @@
                     "tags": [],
                     "label": "filter",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1403,7 +1482,9 @@
             "tags": [],
             "label": "hasFunction",
             "description": [],
-            "signature": ["(name: string) => boolean"],
+            "signature": [
+              "(name: string) => boolean"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1415,7 +1496,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1454,7 +1537,9 @@
             "tags": [],
             "label": "hasRenderFunction",
             "description": [],
-            "signature": ["(name: string) => boolean"],
+            "signature": [
+              "(name: string) => boolean"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1466,7 +1551,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1504,7 +1591,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1517,7 +1606,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1541,7 +1632,9 @@
                     "tags": [],
                     "label": "data",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1553,7 +1646,9 @@
                     "tags": [],
                     "label": "content",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2876,7 +2971,9 @@
                 "tags": [],
                 "label": "endpoint",
                 "description": [],
-                "signature": ["TEndpoint"],
+                "signature": [
+                  "TEndpoint"
+                ],
                 "path": "packages/kbn-server-route-repository/src/typings.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2929,7 +3026,9 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -2976,7 +3075,9 @@
                     "tags": [],
                     "label": "signal",
                     "description": [],
-                    "signature": ["AbortSignal"],
+                    "signature": [
+                      "AbortSignal"
+                    ],
                     "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2993,7 +3094,11 @@
             "tags": [],
             "label": "register",
             "description": [],
-            "signature": ["(fn: ", "ChatRegistrationRenderFunction", ") => void"],
+            "signature": [
+              "(fn: ",
+              "ChatRegistrationRenderFunction",
+              ") => void"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3005,7 +3110,9 @@
                 "tags": [],
                 "label": "fn",
                 "description": [],
-                "signature": ["ChatRegistrationRenderFunction"],
+                "signature": [
+                  "ChatRegistrationRenderFunction"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3037,7 +3144,9 @@
                 "tags": [],
                 "label": "screenContext",
                 "description": [],
-                "signature": ["ObservabilityAIAssistantScreenContext"],
+                "signature": [
+                  "ObservabilityAIAssistantScreenContext"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3053,7 +3162,11 @@
             "tags": [],
             "label": "getScreenContexts",
             "description": [],
-            "signature": ["() => ", "ObservabilityAIAssistantScreenContext", "[]"],
+            "signature": [
+              "() => ",
+              "ObservabilityAIAssistantScreenContext",
+              "[]"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3067,7 +3180,9 @@
             "tags": [],
             "label": "conversations",
             "description": [],
-            "signature": ["ObservabilityAIAssistantConversationService"],
+            "signature": [
+              "ObservabilityAIAssistantConversationService"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3103,7 +3218,9 @@
                 "tags": [],
                 "label": "callback",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3268,7 +3385,9 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/hooks/use_chat.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3388,7 +3507,9 @@
         "tags": [],
         "label": "aiAssistantLogsIndexPattern",
         "description": [],
-        "signature": ["\"observability:aiAssistantLogsIndexPattern\""],
+        "signature": [
+          "\"observability:aiAssistantLogsIndexPattern\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3401,7 +3522,9 @@
         "tags": [],
         "label": "aiAssistantResponseLanguage",
         "description": [],
-        "signature": ["\"observability:aiAssistantResponseLanguage\""],
+        "signature": [
+          "\"observability:aiAssistantResponseLanguage\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3414,7 +3537,9 @@
         "tags": [],
         "label": "aiAssistantSimulatedFunctionCalling",
         "description": [],
-        "signature": ["\"observability:aiAssistantSimulatedFunctionCalling\""],
+        "signature": [
+          "\"observability:aiAssistantSimulatedFunctionCalling\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4082,7 +4207,9 @@
         "tags": [],
         "label": "ChatActionClickHandler",
         "description": [],
-        "signature": ["(payload: ChatActionClickPayloadExecuteEsql) => void"],
+        "signature": [
+          "(payload: ChatActionClickPayloadExecuteEsql) => void"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/chat/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4143,7 +4270,9 @@
         "tags": [],
         "label": "Feedback",
         "description": [],
-        "signature": ["\"negative\" | \"positive\""],
+        "signature": [
+          "\"negative\" | \"positive\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/components/buttons/feedback_buttons.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -4156,7 +4285,9 @@
         "tags": [],
         "label": "LANGUAGE_OPTIONS",
         "description": [],
-        "signature": ["{ value: string; label: string; }[]"],
+        "signature": [
+          "{ value: string; label: string; }[]"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5044,7 +5175,9 @@
         "tags": [],
         "label": "DEFAULT_LANGUAGE_OPTION",
         "description": [],
-        "signature": ["{ value: string; label: string; }"],
+        "signature": [
+          "{ value: string; label: string; }"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5103,7 +5236,11 @@
           "tags": [],
           "label": "ObservabilityAIAssistantContextualInsight",
           "description": [],
-          "signature": ["React.ForwardRefExoticComponent<", "InsightProps", "> | null"],
+          "signature": [
+            "React.ForwardRefExoticComponent<",
+            "InsightProps",
+            "> | null"
+          ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -5115,7 +5252,11 @@
           "tags": [],
           "label": "ObservabilityAIAssistantMultipaneFlyoutContext",
           "description": [],
-          "signature": ["React.Context<", "ChatFlyoutSecondSlotHandler", " | undefined>"],
+          "signature": [
+            "React.Context<",
+            "ChatFlyoutSecondSlotHandler",
+            " | undefined>"
+          ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -5172,7 +5313,10 @@
           "tags": [],
           "label": "useGenAIConnectors",
           "description": [],
-          "signature": ["() => ", "UseGenAIConnectorsResult"],
+          "signature": [
+            "() => ",
+            "UseGenAIConnectorsResult"
+          ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -5274,7 +5418,9 @@
           "tags": [],
           "label": "useUserPreferredLanguage",
           "description": [],
-          "signature": ["() => { selectedLanguage: string; getPreferredLanguage: () => string; }"],
+          "signature": [
+            "() => { selectedLanguage: string; getPreferredLanguage: () => string; }"
+          ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -5369,7 +5515,9 @@
               "tags": [],
               "label": "definition",
               "description": [],
-              "signature": ["TActionDefinition"],
+              "signature": [
+                "TActionDefinition"
+              ],
               "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/utils/create_screen_context_action.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -5456,7 +5604,13 @@
         "tags": [],
         "label": "streamIntoObservable",
         "description": [],
-        "signature": ["(readable: ", "Readable", ") => ", "Observable", "<any>"],
+        "signature": [
+          "(readable: ",
+          "Readable",
+          ") => ",
+          "Observable",
+          "<any>"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/util/stream_into_observable.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5468,7 +5622,9 @@
             "tags": [],
             "label": "readable",
             "description": [],
-            "signature": ["Readable"],
+            "signature": [
+              "Readable"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/util/stream_into_observable.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -5489,7 +5645,9 @@
         "tags": [],
         "label": "aiAssistantLogsIndexPattern",
         "description": [],
-        "signature": ["\"observability:aiAssistantLogsIndexPattern\""],
+        "signature": [
+          "\"observability:aiAssistantLogsIndexPattern\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5502,7 +5660,9 @@
         "tags": [],
         "label": "aiAssistantResponseLanguage",
         "description": [],
-        "signature": ["\"observability:aiAssistantResponseLanguage\""],
+        "signature": [
+          "\"observability:aiAssistantResponseLanguage\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5515,7 +5675,9 @@
         "tags": [],
         "label": "aiAssistantSimulatedFunctionCalling",
         "description": [],
-        "signature": ["\"observability:aiAssistantSimulatedFunctionCalling\""],
+        "signature": [
+          "\"observability:aiAssistantSimulatedFunctionCalling\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6219,8 +6381,12 @@
           "type": "Object",
           "tags": [],
           "label": "service",
-          "description": ["\nReturns a Observability AI Assistant service instance"],
-          "signature": ["ObservabilityAIAssistantService"],
+          "description": [
+            "\nReturns a Observability AI Assistant service instance"
+          ],
+          "signature": [
+            "ObservabilityAIAssistantService"
+          ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -6246,8 +6412,12 @@
           "type": "Object",
           "tags": [],
           "label": "service",
-          "description": ["\nReturns a Observability AI Assistant service instance"],
-          "signature": ["ObservabilityAIAssistantService"],
+          "description": [
+            "\nReturns a Observability AI Assistant service instance"
+          ],
+          "signature": [
+            "ObservabilityAIAssistantService"
+          ],
           "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -6287,7 +6457,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6299,7 +6471,9 @@
                 "tags": [],
                 "label": "code",
                 "description": [],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6312,7 +6486,9 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6325,7 +6501,9 @@
                 "tags": [],
                 "label": "meta",
                 "description": [],
-                "signature": ["ErrorMetaAttributes[T]"],
+                "signature": [
+                  "ErrorMetaAttributes[T]"
+                ],
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6440,7 +6618,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6487,7 +6667,9 @@
             "tags": [],
             "label": "originalErrorMessage",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6534,7 +6716,9 @@
             "tags": [],
             "label": "tokenLimit",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6547,7 +6731,9 @@
             "tags": [],
             "label": "tokenCount",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6564,7 +6750,9 @@
         "tags": [],
         "label": "isChatCompletionError",
         "description": [],
-        "signature": ["(error: Error) => boolean"],
+        "signature": [
+          "(error: Error) => boolean"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6576,7 +6764,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["Error"],
+            "signature": [
+              "Error"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6593,7 +6783,9 @@
         "tags": [],
         "label": "isSupportedConnectorType",
         "description": [],
-        "signature": ["(type: string) => boolean"],
+        "signature": [
+          "(type: string) => boolean"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6605,7 +6797,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/connectors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6622,7 +6816,9 @@
         "tags": [],
         "label": "isTokenLimitReachedError",
         "description": [],
-        "signature": ["(error: Error) => boolean"],
+        "signature": [
+          "(error: Error) => boolean"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6634,7 +6830,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["Error"],
+            "signature": [
+              "Error"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/conversation_complete.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -6675,7 +6873,9 @@
             "tags": [],
             "label": "user",
             "description": [],
-            "signature": ["{ id?: string | undefined; name: string; } | undefined"],
+            "signature": [
+              "{ id?: string | undefined; name: string; } | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6724,7 +6924,9 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": ["{ [x: string]: string; }"],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6736,7 +6938,9 @@
             "tags": [],
             "label": "numeric_labels",
             "description": [],
-            "signature": ["{ [x: string]: number; }"],
+            "signature": [
+              "{ [x: string]: number; }"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6837,7 +7041,9 @@
             "tags": [],
             "label": "descriptionForUser",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6849,7 +7055,9 @@
             "tags": [],
             "label": "parameters",
             "description": [],
-            "signature": ["TParameters | undefined"],
+            "signature": [
+              "TParameters | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/functions/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6919,7 +7127,9 @@
             "tags": [],
             "label": "confidence",
             "description": [],
-            "signature": ["\"medium\" | \"high\" | \"low\""],
+            "signature": [
+              "\"medium\" | \"high\" | \"low\""
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6953,7 +7163,9 @@
             "tags": [],
             "label": "labels",
             "description": [],
-            "signature": ["Record<string, string> | undefined"],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
             "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7135,7 +7347,9 @@
         "tags": [],
         "label": "aiAssistantLogsIndexPattern",
         "description": [],
-        "signature": ["\"observability:aiAssistantLogsIndexPattern\""],
+        "signature": [
+          "\"observability:aiAssistantLogsIndexPattern\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7148,7 +7362,9 @@
         "tags": [],
         "label": "aiAssistantResponseLanguage",
         "description": [],
-        "signature": ["\"observability:aiAssistantResponseLanguage\""],
+        "signature": [
+          "\"observability:aiAssistantResponseLanguage\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7161,7 +7377,9 @@
         "tags": [],
         "label": "aiAssistantSimulatedFunctionCalling",
         "description": [],
-        "signature": ["\"observability:aiAssistantSimulatedFunctionCalling\""],
+        "signature": [
+          "\"observability:aiAssistantSimulatedFunctionCalling\""
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7326,7 +7544,9 @@
         "tags": [],
         "label": "LANGUAGE_OPTIONS",
         "description": [],
-        "signature": ["{ value: string; label: string; }[]"],
+        "signature": [
+          "{ value: string; label: string; }[]"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -7496,7 +7716,9 @@
         "tags": [],
         "label": "DEFAULT_LANGUAGE_OPTION",
         "description": [],
-        "signature": ["{ value: string; label: string; }"],
+        "signature": [
+          "{ value: string; label: string; }"
+        ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/language_options.ts",
         "deprecated": false,
         "trackAdoption": false,

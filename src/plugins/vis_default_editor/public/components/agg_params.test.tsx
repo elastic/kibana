@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 
-import { AggGroupNames, IAggConfig } from '@kbn/data-plugin/public';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
-  DefaultEditorAggParamsProps,
   DefaultEditorAggParams as PureDefaultEditorAggParams,
+  DefaultEditorAggParamsProps,
 } from './agg_params';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { EditorVisState } from './sidebar/state/reducers';
 
 const mockEditorConfig = {

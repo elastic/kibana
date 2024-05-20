@@ -8,11 +8,11 @@
 import React from 'react';
 import { Router, useParams } from 'react-router-dom';
 
-import { NetworkDetails } from '.';
-import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { TestProviders } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { NetworkDetails } from '.';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn().mockReturnValue({

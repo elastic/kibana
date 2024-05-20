@@ -7,30 +7,30 @@
 
 import { Readable } from 'stream';
 
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import {
+  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+} from '@kbn/securitysolution-list-constants';
 import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/types';
-import {
-  EXCEPTION_LIST_NAMESPACE,
-  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
-} from '@kbn/securitysolution-list-constants';
-import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
-import { DATE_NOW, ID, _VERSION } from '../../../common/constants.mock';
+import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
 import {
   getDetectionsExceptionListSchemaMock,
   getExceptionListSchemaMock,
   getTrustedAppsListSchemaMock,
 } from '../../../common/schemas/response/exception_list_schema.mock';
-import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
-import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
-import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 import { ExtensionPointStorage, ExtensionPointStorageClientInterface } from '../extension_points';
+import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
+import { DATE_NOW, ID, _VERSION } from '../../../common/constants.mock';
 
 import { ExceptionListClient } from './exception_list_client';
 import type {

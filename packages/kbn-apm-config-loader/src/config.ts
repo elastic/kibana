@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { execSync } from 'child_process';
-import { readFileSync } from 'fs';
 import { join } from 'path';
-import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
+import { merge, isEmpty } from 'lodash';
+import { execSync } from 'child_process';
 import { getDataPath } from '@kbn/utils';
+import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';
-import { isEmpty, merge } from 'lodash';
+import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
 import type { ApmConfigSchema } from './apm_config';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html

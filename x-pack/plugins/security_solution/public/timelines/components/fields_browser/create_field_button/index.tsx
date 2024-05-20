@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { CreateFieldComponent } from '@kbn/triggers-actions-ui-plugin/public/types';

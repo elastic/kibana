@@ -6,17 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import {
   SyntheticsParamRequest,
-  SyntheticsParamSOAttributes,
   SyntheticsParams,
+  SyntheticsParamSOAttributes,
 } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 
 const ParamsObjectSchema = schema.object({
   key: schema.string(),
@@ -48,10 +48,9 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         request.body as SyntheticsParamRequest[] | SyntheticsParamRequest
       );
 
-      const result =
-        await savedObjectsClient.bulkCreate<Omit<SyntheticsParamSOAttributes, 'id'>>(
-          savedObjectsData
-        );
+      const result = await savedObjectsClient.bulkCreate<Omit<SyntheticsParamSOAttributes, 'id'>>(
+        savedObjectsData
+      );
 
       if (savedObjectsData.length > 1) {
         return result.saved_objects.map((savedObject) => {

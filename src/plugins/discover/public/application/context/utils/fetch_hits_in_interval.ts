@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 import { estypes } from '@elastic/elasticsearch';
-import { EsQuerySortValue, ISearchSource, SortDirection } from '@kbn/data-plugin/public';
+import { lastValueFrom } from 'rxjs';
+import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import { lastValueFrom } from 'rxjs';
-import type { DiscoverServices } from '../../../build_services';
-import type { SurrDocType } from '../services/context';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
+import type { SurrDocType } from '../services/context';
+import type { DiscoverServices } from '../../../build_services';
 
 interface RangeQuery {
   format: string;

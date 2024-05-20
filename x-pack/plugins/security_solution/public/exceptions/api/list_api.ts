@@ -8,18 +8,18 @@
 import { fetchExceptionLists, updateExceptionList } from '@kbn/securitysolution-list-api';
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { List, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { getFilters } from '@kbn/securitysolution-list-utils';
+import type { List, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { asyncForEach } from '@kbn/std';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
-import { fetchRules, patchRule } from '../../detection_engine/rule_management/api/api';
-import type { Rule } from '../../detection_engine/rule_management/logic';
 import type {
   FetchListById,
   LinkListToRules,
   UnlinkListFromRules,
   UpdateExceptionList,
 } from './types';
+import { fetchRules, patchRule } from '../../detection_engine/rule_management/api/api';
+import type { Rule } from '../../detection_engine/rule_management/logic';
 
 export const getListById = async ({ id, http }: FetchListById) => {
   try {

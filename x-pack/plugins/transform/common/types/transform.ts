@@ -8,9 +8,9 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { LatestFunctionConfig, PutTransformsRequestSchema } from '../api_schemas/transforms';
-import type { TransformHealthAlertRule } from './alerting';
-import type { PivotAggDict } from './pivot_aggs';
 import type { PivotGroupByDict } from './pivot_group_by';
+import type { PivotAggDict } from './pivot_aggs';
+import type { TransformHealthAlertRule } from './alerting';
 
 export type IndexName = string;
 export type DataView = string;

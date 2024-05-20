@@ -23,8 +23,13 @@
             "type": "Array",
             "tags": [],
             "label": "results",
-            "description": ["\nResults for this batch"],
-            "signature": ["GlobalSearchResult", "[]"],
+            "description": [
+              "\nResults for this batch"
+            ],
+            "signature": [
+              "GlobalSearchResult",
+              "[]"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -54,7 +59,9 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster.\n\nIf not specified, a random token will be generated and used. The token is stored in the sessionStorage and is guaranteed\nto be consistent during a given http 'session'"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/global_search/public/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -68,7 +75,10 @@
             "description": [
               "\nOptional observable to notify that the associated `find` call should be canceled.\nIf/when provided and emitting, the result observable will be completed and no further result emission will be performed."
             ],
-            "signature": ["Observable", "<void> | undefined"],
+            "signature": [
+              "Observable",
+              "<void> | undefined"
+            ],
             "path": "x-pack/plugins/global_search/public/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -118,8 +128,12 @@
             "type": "string",
             "tags": [],
             "label": "term",
-            "description": ["\nThe term to search for. Can be undefined if searching by filters."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe term to search for. Can be undefined if searching by filters."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -130,8 +144,12 @@
             "type": "Array",
             "tags": [],
             "label": "types",
-            "description": ["\nThe types of results to search for."],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "\nThe types of results to search for."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -142,8 +160,12 @@
             "type": "Array",
             "tags": [],
             "label": "tags",
-            "description": ["\nThe tag ids to filter search by."],
-            "signature": ["string[] | undefined"],
+            "description": [
+              "\nThe tag ids to filter search by."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -186,7 +208,10 @@
             "description": [
               "\nObservable that emits once if and when the `find` call has been aborted, either manually by the consumer,\nor when the internal timeout period as been reached.\n\nWhen a `find` request is effectively aborted, the service will stop emitting any new result to the consumer anyway, but\nthis can (and should) be used to cancel any pending asynchronous task and complete the result observable from within the provider."
             ],
-            "signature": ["Observable", "<void>"],
+            "signature": [
+              "Observable",
+              "<void>"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -249,7 +274,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["an id that should be unique for an individual provider's results"],
+            "description": [
+              "an id that should be unique for an individual provider's results"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -260,7 +287,9 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["the title/label of the result"],
+            "description": [
+              "the title/label of the result"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -271,7 +300,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["the type of result"],
+            "description": [
+              "the type of result"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -282,8 +313,12 @@
             "type": "string",
             "tags": [],
             "label": "icon",
-            "description": ["an optional EUI icon name to associate with the search result"],
-            "signature": ["string | undefined"],
+            "description": [
+              "an optional EUI icon name to associate with the search result"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -297,7 +332,9 @@
             "description": [
               "\nThe url associated with this result.\nThis can be either an absolute url, a path relative to the incoming request's basePath, or a structure specifying if the basePath should be prepended.\n"
             ],
-            "signature": ["string | { path: string; prependBasePath: boolean; }"],
+            "signature": [
+              "string | { path: string; prependBasePath: boolean; }"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -308,7 +345,9 @@
             "type": "number",
             "tags": [],
             "label": "score",
-            "description": ["the score of the result, from 1 (lowest) to 100 (highest)"],
+            "description": [
+              "the score of the result, from 1 (lowest) to 100 (highest)"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -319,7 +358,9 @@
             "type": "Object",
             "tags": [],
             "label": "meta",
-            "description": ["an optional record of metadata for this result"],
+            "description": [
+              "an optional record of metadata for this result"
+            ],
             "signature": [
               "Record<string, ",
               {
@@ -357,7 +398,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nid of the provider"],
+            "description": [
+              "\nid of the provider"
+            ],
             "path": "x-pack/plugins/global_search/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -393,7 +436,9 @@
                 "tags": [],
                 "label": "search",
                 "description": [],
-                "signature": ["GlobalSearchFindParams"],
+                "signature": [
+                  "GlobalSearchFindParams"
+                ],
                 "path": "x-pack/plugins/global_search/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -406,7 +451,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["GlobalSearchProviderFindOptions"],
+                "signature": [
+                  "GlobalSearchProviderFindOptions"
+                ],
                 "path": "x-pack/plugins/global_search/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -424,7 +471,9 @@
             "description": [
               "\nMethod that should return all the possible {@link GlobalSearchProviderResult.type | type} of results that\nthis provider can return."
             ],
-            "signature": ["() => string[] | Promise<string[]>"],
+            "signature": [
+              "() => string[] | Promise<string[]>"
+            ],
             "path": "x-pack/plugins/global_search/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -444,7 +493,9 @@
         "tags": [],
         "label": "GlobalSearchProviderFindParams",
         "description": [],
-        "signature": ["GlobalSearchFindParams"],
+        "signature": [
+          "GlobalSearchFindParams"
+        ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -459,7 +510,9 @@
         "description": [
           "\nStructured type for the {@link GlobalSearchProviderResult.url | provider result's url property}"
         ],
-        "signature": ["string | { path: string; prependBasePath: boolean; }"],
+        "signature": [
+          "string | { path: string; prependBasePath: boolean; }"
+        ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -474,7 +527,11 @@
         "description": [
           "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
         ],
-        "signature": ["Omit<", "GlobalSearchProviderResult", ", \"url\"> & { url: string; }"],
+        "signature": [
+          "Omit<",
+          "GlobalSearchProviderResult",
+          ", \"url\"> & { url: string; }"
+        ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -560,8 +617,13 @@
             "type": "Array",
             "tags": [],
             "label": "results",
-            "description": ["\nResults for this batch"],
-            "signature": ["GlobalSearchResult", "[]"],
+            "description": [
+              "\nResults for this batch"
+            ],
+            "signature": [
+              "GlobalSearchResult",
+              "[]"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -591,7 +653,9 @@
             "description": [
               "\nA custom preference token associated with a search 'session' that should be used to get consistent scoring\nwhen performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere\nthan an elasticsearch cluster.\nIf not specified, a random token will be generated and used."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -605,7 +669,10 @@
             "description": [
               "\nOptional observable to notify that the associated `find` call should be canceled.\nIf/when provided and emitting, no further result emission will be performed and the result observable will be completed."
             ],
-            "signature": ["Observable", "<void> | undefined"],
+            "signature": [
+              "Observable",
+              "<void> | undefined"
+            ],
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -735,7 +802,10 @@
             "description": [
               "\nObservable that emits once if and when the `find` call has been aborted, either manually by the consumer,\nor when the internal timeout period as been reached.\n\nWhen a `find` request is effectively aborted, the service will stop emitting any new result to the consumer anyway, but\nthis can (and should) be used to cancel any pending asynchronous task and complete the result observable from within the provider."
             ],
-            "signature": ["Observable", "<void>"],
+            "signature": [
+              "Observable",
+              "<void>"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -798,7 +868,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["an id that should be unique for an individual provider's results"],
+            "description": [
+              "an id that should be unique for an individual provider's results"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -809,7 +881,9 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["the title/label of the result"],
+            "description": [
+              "the title/label of the result"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -820,7 +894,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": ["the type of result"],
+            "description": [
+              "the type of result"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -831,8 +907,12 @@
             "type": "string",
             "tags": [],
             "label": "icon",
-            "description": ["an optional EUI icon name to associate with the search result"],
-            "signature": ["string | undefined"],
+            "description": [
+              "an optional EUI icon name to associate with the search result"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -846,7 +926,9 @@
             "description": [
               "\nThe url associated with this result.\nThis can be either an absolute url, a path relative to the incoming request's basePath, or a structure specifying if the basePath should be prepended.\n"
             ],
-            "signature": ["string | { path: string; prependBasePath: boolean; }"],
+            "signature": [
+              "string | { path: string; prependBasePath: boolean; }"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -857,7 +939,9 @@
             "type": "number",
             "tags": [],
             "label": "score",
-            "description": ["the score of the result, from 1 (lowest) to 100 (highest)"],
+            "description": [
+              "the score of the result, from 1 (lowest) to 100 (highest)"
+            ],
             "path": "x-pack/plugins/global_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -868,7 +952,9 @@
             "type": "Object",
             "tags": [],
             "label": "meta",
-            "description": ["an optional record of metadata for this result"],
+            "description": [
+              "an optional record of metadata for this result"
+            ],
             "signature": [
               "Record<string, ",
               {
@@ -906,7 +992,9 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": ["\nid of the provider"],
+            "description": [
+              "\nid of the provider"
+            ],
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -950,7 +1038,9 @@
                 "tags": [],
                 "label": "search",
                 "description": [],
-                "signature": ["GlobalSearchFindParams"],
+                "signature": [
+                  "GlobalSearchFindParams"
+                ],
                 "path": "x-pack/plugins/global_search/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -963,7 +1053,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["GlobalSearchProviderFindOptions"],
+                "signature": [
+                  "GlobalSearchProviderFindOptions"
+                ],
                 "path": "x-pack/plugins/global_search/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1050,7 +1142,9 @@
         "type": "Interface",
         "tags": [],
         "label": "RouteHandlerGlobalSearchContext",
-        "description": ["\nglobalSearch route handler context.\n"],
+        "description": [
+          "\nglobalSearch route handler context.\n"
+        ],
         "path": "x-pack/plugins/global_search/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1061,7 +1155,9 @@
             "type": "Function",
             "tags": [],
             "label": "find",
-            "description": ["\nSee {@link SearchServiceStart.find | the find API}"],
+            "description": [
+              "\nSee {@link SearchServiceStart.find | the find API}"
+            ],
             "signature": [
               "(params: ",
               "GlobalSearchFindParams",
@@ -1090,7 +1186,9 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "signature": ["GlobalSearchFindParams"],
+                "signature": [
+                  "GlobalSearchFindParams"
+                ],
                 "path": "x-pack/plugins/global_search/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1129,7 +1227,9 @@
             "description": [
               "\nSee {@link SearchServiceStart.getSearchableTypes | the getSearchableTypes API}"
             ],
-            "signature": ["() => Promise<string[]>"],
+            "signature": [
+              "() => Promise<string[]>"
+            ],
             "path": "x-pack/plugins/global_search/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1151,7 +1251,9 @@
         "description": [
           "\nStructured type for the {@link GlobalSearchProviderResult.url | provider result's url property}"
         ],
-        "signature": ["string | { path: string; prependBasePath: boolean; }"],
+        "signature": [
+          "string | { path: string; prependBasePath: boolean; }"
+        ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1166,7 +1268,11 @@
         "description": [
           "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
         ],
-        "signature": ["Omit<", "GlobalSearchProviderResult", ", \"url\"> & { url: string; }"],
+        "signature": [
+          "Omit<",
+          "GlobalSearchProviderResult",
+          ", \"url\"> & { url: string; }"
+        ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,

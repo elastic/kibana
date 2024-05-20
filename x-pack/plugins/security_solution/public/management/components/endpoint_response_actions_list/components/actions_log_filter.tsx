@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { orderBy } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  type ResponseActionsApiCommandNames,
-} from '../../../../../common/endpoint/service/response_actions/constants';
+import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import {
   isActionType,
   isAgentType,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { UX_MESSAGES } from '../translations';
+import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  type ResponseActionsApiCommandNames,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
-import { ClearAllButton } from './clear_all_button';
 import {
   type ActionsLogPopupFilters,
   type FilterItems,
   type TypesFilters,
   useActionsLogFilter,
 } from './hooks';
+import { ClearAllButton } from './clear_all_button';
+import { UX_MESSAGES } from '../translations';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const ActionsLogFilter = memo(
   ({

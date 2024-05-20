@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Capabilities } from '@kbn/core/public';
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import type { Capabilities } from '@kbn/core/public';
 import { CASES_FEATURE_ID, CASES_PATH, LANDING_PATH, SERVER_APP_ID } from '../../common/constants';
-import type { StartServices } from '../types';
 import { NotFoundPage } from './404';
+import type { StartServices } from '../types';
 
 export interface AppRoutesProps {
   services: StartServices;

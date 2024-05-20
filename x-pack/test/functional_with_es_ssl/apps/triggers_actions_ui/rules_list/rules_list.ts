@@ -15,9 +15,9 @@ import {
   disableAlert,
   snoozeAlert,
 } from '../../../lib/alert_api_actions';
+import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import { getTestAlertData } from '../../../lib/get_test_data';
-import { ObjectRemover } from '../../../lib/object_remover';
 
 export default ({ getPageObjects, getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');

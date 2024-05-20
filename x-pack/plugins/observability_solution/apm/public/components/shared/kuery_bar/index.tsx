@@ -6,21 +6,21 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useProcessorEvent } from '../../../hooks/use_processor_event';
-import { getBoolFilter } from '../get_bool_filter';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { fromQuery, toQuery } from '../links/url_helpers';
+import { getBoolFilter } from '../get_bool_filter';
 import { Typeahead } from './typeahead';
+import { useProcessorEvent } from '../../../hooks/use_processor_event';
 
 interface State {
   suggestions: QuerySuggestion[];
